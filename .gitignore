@@ -1,0 +1,8 @@
+# Dev
+.vscode
+
+# Dependencies
+deps/
+
+# Artifacts
+build/
