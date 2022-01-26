@@ -41,9 +41,9 @@ namespace hemlock {
     };
 
     template <typename ...Parameters>
-    using Subscriber  = std::function<void(Sender, Parameters...)>*;
+    using Subscriber  = std::function<void(Sender, Parameters...)>;
     template <typename ...Parameters>
-    using Subscribers = std::vector<Subscriber<Parameters...>>;
+    using Subscribers = std::vector<Subscriber<Parameters...>*>;
 
     template <typename Functor, typename ...Parameters>
     concept CanSubscribe = requires(Functor f) {
@@ -135,8 +135,8 @@ namespace hemlock {
         *
         * @param subscriber The subscriber to add to the event.
         */
-        void add(_Subscriber&& subscriber) {
-            m_subscribers.emplace_back(std::forward<_Subscriber>(subscriber));
+        void add(_Subscriber* subscriber) {
+            m_subscribers.emplace_back(subscriber);
         }
 
         /**
@@ -146,8 +146,8 @@ namespace hemlock {
         *
         * @param subscriber The subscriber to add to the event.
         */
-        void operator+=(_Subscriber&& subscriber) {
-            add(std::forward<_Subscriber>(subscriber));
+        void operator+=(_Subscriber* subscriber) {
+            add(subscriber);
         }
 
         /**
@@ -164,11 +164,11 @@ namespace hemlock {
         template <typename Functor>
             requires CanSubscribe<Functor, Parameters...>
         _Subscriber* add_functor(Functor&& functor) {
-            _Subscriber sub = new _Subscriber(std::forward<Functor>(functor));
+            _Subscriber* sub = new _Subscriber(std::forward<Functor>(functor));
 
-            add(&sub);
+            add(sub);
 
-            return &sub;
+            return sub;
         }
 
         /**
@@ -176,7 +176,7 @@ namespace hemlock {
         *
         * @param subscriber The subscriber to remove from the event.
         */
-        void remove(_Subscriber subscriber) {
+        void remove(_Subscriber* subscriber) {
             // We don't want to be invalidating iterators by removing subscribers mid-trigger.
             if (m_triggering) {
                 m_removalQueue.emplace_back(subscriber);
@@ -194,7 +194,7 @@ namespace hemlock {
         *
         * @param subscriber The subscriber to remove from the event.
         */
-        void operator-=(const _Subscriber& subscriber) {
+        void operator-=(_Subscriber* subscriber) {
             remove(subscriber);
         }
 
