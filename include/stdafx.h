@@ -27,8 +27,16 @@
 #include <fstream>
 #include <sstream>
 
-/*********************************\
- * Consistent Scalar Type Labels *
-\*********************************/
+/**********************\
+ * Std Generic Typing *
+\**********************/
 
+#include <functional>
+#include <type_traits>
+
+/*********************\
+ * Consistent Labels *
+\*********************/
+
+#include "decorators.h"
 #include "types.h"
