@@ -1,13 +1,21 @@
-#include "stdafx.h"
+import <iostream>;
 
-#include <iostream>
+import hemlock.event;
+import hemlock.types;
 
-ui32 add(ui32 a, ui16 b) {
-    return a + static_cast<ui32>(b);
-}
+void add(hemlock::Sender, ui32 a, ui32 b) { std::cout << a << " + " << b << " = " << a + b << std::endl; }
 
 i32 main() {
-    std::cout << "1 + 5 = " << add(1, 5) << std::endl;
+    hemlock::Event<ui32, ui32> on_calc;
+
+    auto listener = on_calc.add_functor(add);
+
+    on_calc(1, 4);
+
+    on_calc.remove(listener);
+    delete listener;
+
+    on_calc(1, 4);
 
     std::cout << "Hello, world!" << std::endl;
 }
