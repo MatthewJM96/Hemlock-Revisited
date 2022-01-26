@@ -1,4 +1,4 @@
-export module hemlock.types
+export module hemlock.types;
 
 import <cstdint>;
 
