@@ -14,7 +14,8 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 set(CMAKE_CXX_FLAGS_DEBUG "-g")
 
 add_executable(Hemlock_Revisited
-    "${PROJECT_SOURCE_DIR}/src/stdafx.cpp"
+    "${PROJECT_SOURCE_DIR}/src/event.cpp"
+    "${PROJECT_SOURCE_DIR}/src/types.cpp"
     "${PROJECT_SOURCE_DIR}/tests/main.cpp"
 )
 
