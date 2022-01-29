@@ -90,7 +90,7 @@ bool hg::Font::generate( FontSize size,
     font_instance.owner = this;
 
     // Open the font and check we didn't fail.
-    TTF_Font* font = TTF_OpenFont(m_filepath, size);
+    TTF_Font* font = TTF_OpenFont(m_filepath.data(), size);
     if (font == nullptr) return false;
 
     // Set the font style.
