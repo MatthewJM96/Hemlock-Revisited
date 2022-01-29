@@ -247,7 +247,7 @@ namespace hemlock {
             }
 
             namespace png {
-                bool load(const char* filepath, void*& data, ui32v2& dimensions, PixelFormat& format) {
+                bool load(const char* filepath [[maybe_unused]], void*& data [[maybe_unused]], ui32v2& dimensions [[maybe_unused]], PixelFormat& format [[maybe_unused]]) {
                     // TODO(Matthew): Implement.
                     return false;
                 }
