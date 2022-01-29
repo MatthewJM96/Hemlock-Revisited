@@ -22,6 +22,7 @@ set(CMAKE_CXX_FLAGS_DEBUG "-g")
 add_executable(Hemlock_Revisited
     "${PROJECT_SOURCE_DIR}/src/stdafx.cpp"
     "${PROJECT_SOURCE_DIR}/src/graphics/font.cpp"
+    "${PROJECT_SOURCE_DIR}/src/graphics/window.cpp"
     "${PROJECT_SOURCE_DIR}/src/io/image.cpp"
     "${PROJECT_SOURCE_DIR}/tests/main.cpp"
 )
