@@ -1,16 +1,18 @@
 module;
 
-#include <SDL_ttf/SDL_ttf.h>
+#include <GL/gl.h>
+#include <SDL2/SDL_ttf.h>
 
 export module hemlock.graphics.font;
 
 import <functional>;
 import <limits>;
+import <stdexcept>;
 import <type_traits>;
 import <unordered_map>;
 
 import hemlock.types;
-import hemlock.graphics.image;
+import hemlock.io.image;
 
 /**
  * @brief Determines the next power of 2 after the given value and returns it.
