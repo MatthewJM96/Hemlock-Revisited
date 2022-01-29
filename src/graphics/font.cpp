@@ -53,7 +53,7 @@ bool hg::FontInstance::save(const char* filepath, hio::image::Saver save) {
 hg::Font::Font() :
     m_filepath(nullptr),
     m_start(0), m_end(0),
-    m_defaultSize(0)
+    m_default_size(0)
 { /* Empty. */ }
 
 void hg::Font::init(const char* filepath, char start, char end) {
@@ -63,7 +63,7 @@ void hg::Font::init(const char* filepath, char start, char end) {
 }
 
 void hg::Font::dispose() {
-    for (auto& fontInstance : m_fontInstances) {
+    for (auto& fontInstance : m_font_instances) {
         if (fontInstance.second.texture != 0) {
             glDeleteTextures(1, &fontInstance.second.texture);
         }
@@ -72,7 +72,7 @@ void hg::Font::dispose() {
         }
     }
 
-    FontInstanceMap().swap(m_fontInstances);
+    FontInstanceMap().swap(m_font_instances);
 }
 
 bool hg::Font::generate( FontSize size,
@@ -267,7 +267,7 @@ bool hg::Font::generate( FontSize size,
     TTF_CloseFont(font);
 
     // Insert our font instance.
-    m_fontInstances.emplace(std::make_pair(hash(size, style, renderStyle), fontInstance));
+    m_font_instances.emplace(std::make_pair(hash(size, style, renderStyle), fontInstance));
 
     return true;
 }
@@ -276,7 +276,7 @@ hg::FontInstance hg::Font::get_instance( FontSize size,
                                         FontStyle style       /*= FontStyle::NORMAL*/,
                                   FontRenderStyle renderStyle /*= FontRenderStyle::BLENDED*/ ) {
     try {
-        return m_fontInstances.at(hash(size, style, renderStyle));
+        return m_font_instances.at(hash(size, style, renderStyle));
     } catch (std::out_of_range& e) {
         return NIL_FONT_INSTANCE;
     }

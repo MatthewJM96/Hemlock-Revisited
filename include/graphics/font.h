@@ -144,8 +144,8 @@ namespace hemlock {
             char get_start() { return m_start; }
             char get_end()   { return m_end;   }
 
-            FontSize get_default_size()              { return m_defaultSize; }
-            void     set_default_size(FontSize size) { m_defaultSize = size; }
+            FontSize get_default_size()              { return m_default_size; }
+            void     set_default_size(FontSize size) { m_default_size = size; }
 
             /**
              * @brief Generates a texture atlas of glyphs with the given render style, font style and font size.
@@ -197,7 +197,7 @@ namespace hemlock {
              */
             bool generate(      FontStyle style       = FontStyle::NORMAL,
                           FontRenderStyle renderStyle = FontRenderStyle::BLENDED ) {
-                return generate(m_defaultSize, style, renderStyle);
+                return generate(m_default_size, style, renderStyle);
             }
 
             /**
@@ -228,7 +228,7 @@ namespace hemlock {
              */
             FontInstance get_instance(    FontStyle style       = FontStyle::NORMAL,
                                     FontRenderStyle renderStyle = FontRenderStyle::BLENDED ) {
-                return get_instance(m_defaultSize, style, renderStyle);
+                return get_instance(m_default_size, style, renderStyle);
             }
         protected:
             /**
@@ -245,8 +245,8 @@ namespace hemlock {
 
             const char*     m_filepath;
             char            m_start, m_end;
-            FontSize        m_defaultSize;
-            FontInstanceMap m_fontInstances;
+            FontSize        m_default_size;
+            FontInstanceMap m_font_instances;
         };
 
         // TODO(Matthew): Implement font instance disposal.

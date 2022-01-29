@@ -79,9 +79,9 @@ namespace hemlock {
         */
         Event(const Event& event) :
             EventBase(event.m_sender) {
-            m_subscribers  = event.m_subscribers;
-            m_removalQueue = event.m_removalQueue;
-            m_triggering   = false;
+            m_subscribers   = event.m_subscribers;
+            m_removal_queue = event.m_removal_queue;
+            m_triggering    = false;
         }
         /**
         * @brief Moves the event. Ownership is guaranteed to be transferred.
@@ -90,9 +90,9 @@ namespace hemlock {
         */
         Event(Event&& event) :
             EventBase(event.m_sender) {
-            m_subscribers  = std::move(event.m_subscribers);
-            m_removalQueue = std::move(event.m_removalQueue);
-            m_triggering   = false;
+            m_subscribers   = std::move(event.m_subscribers);
+            m_removal_queue = std::move(event.m_removal_queue);
+            m_triggering    = false;
         }
 
         /**
@@ -103,10 +103,10 @@ namespace hemlock {
         * @return The event that has been copied to.
         */
         Event& operator=(const Event& event) {
-            m_sender       = event.m_sender;
-            m_subscribers  = event.m_subscribers;
-            m_removalQueue = event.m_removalQueue;
-            m_triggering   = false;
+            m_sender        = event.m_sender;
+            m_subscribers   = event.m_subscribers;
+            m_removal_queue = event.m_removal_queue;
+            m_triggering    = false;
 
             return *this;
         }
@@ -118,10 +118,10 @@ namespace hemlock {
         * @return The event that has been copied to.
         */
         Event& operator=(Event&& event) {
-            m_sender       = event.m_sender;
-            m_subscribers  = std::move(event.m_subscribers);
-            m_removalQueue = std::move(event.m_removalQueue);
-            m_triggering   = false;
+            m_sender        = event.m_sender;
+            m_subscribers   = std::move(event.m_subscribers);
+            m_removal_queue = std::move(event.m_removal_queue);
+            m_triggering    = false;
 
             return *this;
         }
@@ -175,7 +175,7 @@ namespace hemlock {
         void remove(_Subscriber* subscriber) {
             // We don't want to be invalidating iterators by removing subscribers mid-trigger.
             if (m_triggering) {
-                m_removalQueue.emplace_back(subscriber);
+                m_removal_queue.emplace_back(subscriber);
             } else {
                 const auto& it = std::find(m_subscribers.begin(), m_subscribers.end(), subscriber);
                 if (it != m_subscribers.end()) {
@@ -210,7 +210,7 @@ namespace hemlock {
             m_triggering = false;
 
             // Remove any subscribers that requested to be unsubscribed during triggering.
-            for (auto& unsubscriber : m_removalQueue) {
+            for (auto& unsubscriber : m_removal_queue) {
                 const auto& it = std::find(m_subscribers.begin(), m_subscribers.end(), unsubscriber);
                 if (it != m_subscribers.end()) {
                     m_subscribers.erase(it);
@@ -229,8 +229,8 @@ namespace hemlock {
         }
     protected:
         _Subscribers m_subscribers;
-        _Subscribers m_removalQueue;
-        bool        m_triggering;
+        _Subscribers m_removal_queue;
+        bool         m_triggering;
     };
 }
 
