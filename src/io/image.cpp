@@ -2,7 +2,7 @@
 
 #include "io/image.h"
 
-hio_img_bin::InternalPixelFormat hio_img_bin::convertPixelFormat(PixelFormat format) {
+hio_img_bin::InternalPixelFormat hio_img_bin::convert_pixel_format(PixelFormat format) {
     switch (format) {
         case PixelFormat::RGB_UI8:
             return { 3, 1 };
@@ -72,7 +72,7 @@ bool hio_img_bin::load(const char* filepath, void*& data, ui32v2& dimensions, Pi
     dimensions.y = imgHeader.height;
 
     // Extract pixel information from format.
-    auto [channels, bytesPerChannel] = convertPixelFormat(format);
+    auto [channels, bytesPerChannel] = convert_pixel_format(format);
 
     // Check the pixel information is valid, if not fail.
     if (channels == 0 || bytesPerChannel == 0) return false;
@@ -95,7 +95,7 @@ bool hio_img_bin::load(const char* filepath, void*& data, ui32v2& dimensions, Pi
 
 bool hio_img_bin::save(const char* filepath, const void* data, ui32v2 dimensions, PixelFormat format) {
     // Extract pixel information from format.
-    auto [channels, bytesPerChannel] = convertPixelFormat(format);
+    auto [channels, bytesPerChannel] = convert_pixel_format(format);
 
     // Determine image size in bytes.
     ui32 imageSize = channels * bytesPerChannel * dimensions.x * dimensions.y;
@@ -143,7 +143,7 @@ bool hio_img_bin::save(const char* filepath, const void* data, ui32v2 dimensions
     return true;
 }
 
-hio_img_png::InternalPixelFormat hio_img_png::convertPixelFormat(PixelFormat format) {
+hio_img_png::InternalPixelFormat hio_img_png::convert_pixel_format(PixelFormat format) {
     switch (format) {
         case PixelFormat::RGB_UI8:
             return { PNG_COLOR_TYPE_RGB, 8 };
@@ -198,7 +198,7 @@ bool hio_img_png::save(const char* filepath, const void* data, ui32v2 dimensions
     png_init_io(png, file);
 
     // Get the PNG properties of the chosen pixel format.
-    auto [colourType, bitDepth] = convertPixelFormat(format);
+    auto [colourType, bitDepth] = convert_pixel_format(format);
 
     // Set the PNG properties we want.
     png_set_IHDR(

@@ -141,11 +141,11 @@ namespace hemlock {
              */
             void dispose();
 
-            char getStart() { return m_start; }
-            char getEnd()   { return m_end;   }
+            char get_start() { return m_start; }
+            char get_end()   { return m_end;   }
 
-            FontSize getDefaultSize()              { return m_defaultSize; }
-            void     setDefaultSize(FontSize size) { m_defaultSize = size; }
+            FontSize get_default_size()              { return m_defaultSize; }
+            void     set_default_size(FontSize size) { m_defaultSize = size; }
 
             /**
              * @brief Generates a texture atlas of glyphs with the given render style, font style and font size.
@@ -211,9 +211,9 @@ namespace hemlock {
              * @return The font instance corresponding to the given size, style and render style,
              * or NIL_FONT_INSTANCE if no font instance exists with the given
              */
-            FontInstance getFontInstance(       FontSize size,
-                                               FontStyle style       = FontStyle::NORMAL,
-                                         FontRenderStyle renderStyle = FontRenderStyle::BLENDED );
+            FontInstance get_instance(     FontSize size,
+                                          FontStyle style       = FontStyle::NORMAL,
+                                    FontRenderStyle renderStyle = FontRenderStyle::BLENDED );
             /**
              * @brief Returns the font instance corresponding to the given size, style and render
              * style.
@@ -226,9 +226,9 @@ namespace hemlock {
              * @return The font instance corresponding to the given size, style and render style,
              * or NIL_FONT_INSTANCE if no font instance exists with the given
              */
-            FontInstance getFontInstance(      FontStyle style       = FontStyle::NORMAL,
-                                         FontRenderStyle renderStyle = FontRenderStyle::BLENDED ) {
-                return getFontInstance(m_defaultSize, style, renderStyle);
+            FontInstance get_instance(    FontStyle style       = FontStyle::NORMAL,
+                                    FontRenderStyle renderStyle = FontRenderStyle::BLENDED ) {
+                return get_instance(m_defaultSize, style, renderStyle);
             }
         protected:
             /**
@@ -241,7 +241,7 @@ namespace hemlock {
              * @param width This is set to the width of the longest row generated.
              * @param height This is set to the sum of the max height of each glyph in each row.
              */
-            Row* generateRows(Glyph* glyphs, ui32 rowCount, FontSize padding, ui32& width, ui32& height);
+            Row* generate_rows(Glyph* glyphs, ui32 rowCount, FontSize padding, ui32& width, ui32& height);
 
             const char*     m_filepath;
             char            m_start, m_end;
@@ -276,7 +276,7 @@ namespace hemlock {
              *
              * @return True if the font was newly registered, false if a font with the same name already exists.
              */
-            bool registerFont(const char* name, const char* filepath, char start, char end);
+            bool register_font(const char* name, const char* filepath, char start, char end);
             /**
              * @brief Register a font with the given name and filepath.
              *
@@ -285,7 +285,7 @@ namespace hemlock {
              *
              * @return True if the font was newly registered, false if a font with the same name already exists.
              */
-            bool registerFont(const char* name, const char* filepath);
+            bool register_font(const char* name, const char* filepath);
 
             /**
              * @brief Fetches an instance of the named font with the given size and style. If the instance does not
@@ -298,7 +298,7 @@ namespace hemlock {
              *
              * @return The font instance requested, or NIL_FONT_INSTANCE if it couldn't be obtained.
              */
-            FontInstance fetchFontInstance(const char* name, FontSize size, FontStyle style = FontStyle::NORMAL, FontRenderStyle renderStyle = FontRenderStyle::BLENDED);
+            FontInstance fetch(const char* name, FontSize size, FontStyle style = FontStyle::NORMAL, FontRenderStyle renderStyle = FontRenderStyle::BLENDED);
             /**
              * @brief Fetches an instance of the named font with the given size and style. If the instance does not
              * yet exist, it is first created.
@@ -311,7 +311,7 @@ namespace hemlock {
              *
              * @return The font instance requested, or NIL_FONT_INSTANCE if it couldn't be obtained.
              */
-            FontInstance fetchFontInstance(const char* name, const char* filepath, FontSize size, FontStyle style = FontStyle::NORMAL, FontRenderStyle renderStyle = FontRenderStyle::BLENDED);
+            FontInstance fetch(const char* name, const char* filepath, FontSize size, FontStyle style = FontStyle::NORMAL, FontRenderStyle renderStyle = FontRenderStyle::BLENDED);
             /**
              * @brief Fetches an instance of the named font with the given size and style. If the instance does not
              * yet exist, it is first created.
@@ -323,7 +323,7 @@ namespace hemlock {
              *
              * @return The font instance requested, or NIL_FONT_INSTANCE if it couldn't be obtained.
              */
-            FontInstance fetchFontInstance(const char* name, FontStyle style = FontStyle::NORMAL, FontRenderStyle renderStyle = FontRenderStyle::BLENDED);
+            FontInstance fetch(const char* name, FontStyle style = FontStyle::NORMAL, FontRenderStyle renderStyle = FontRenderStyle::BLENDED);
             /**
              * @brief Fetches an instance of the named font with the given size and style. If the instance does not
              * yet exist, it is first created.
@@ -336,7 +336,7 @@ namespace hemlock {
              *
              * @return The font instance requested, or NIL_FONT_INSTANCE if it couldn't be obtained.
              */
-            FontInstance fetchFontInstance(const char* name, const char* filepath, FontStyle style = FontStyle::NORMAL, FontRenderStyle renderStyle = FontRenderStyle::BLENDED);
+            FontInstance fetch(const char* name, const char* filepath, FontStyle style = FontStyle::NORMAL, FontRenderStyle renderStyle = FontRenderStyle::BLENDED);
         protected:
             Fonts m_fonts;
         };

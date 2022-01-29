@@ -57,7 +57,7 @@ namespace hemlock {
                  *
                  * @return The determined binary properties.
                  */
-                InternalPixelFormat convertPixelFormat(PixelFormat format);
+                InternalPixelFormat convert_pixel_format(PixelFormat format);
 
                 /**
                  * @brief Loads an image from the named binary file.
@@ -93,7 +93,7 @@ namespace hemlock {
                  *
                  * @return The determined PNG properties.
                  */
-                InternalPixelFormat convertPixelFormat(PixelFormat format);
+                InternalPixelFormat convert_pixel_format(PixelFormat format);
 
                 /**
                  * @brief Loads an image from the named PNG file.

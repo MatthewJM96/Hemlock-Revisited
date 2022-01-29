@@ -9,7 +9,7 @@
  *
  * @return The power of 2 determined.
  */
-static ui32 nextPower2(ui32 value) {
+static ui32 next_power_2(ui32 value) {
     // This is a rather lovely bit manipulation function.
     // Essentially, all we're doing in this is up until the return
     // statement we take a value like 0110110000110101101 and change 
@@ -80,7 +80,7 @@ bool hg::Font::generate( FontSize size,
                         FontStyle style       /*= FontStyle::NORMAL*/,
                   FontRenderStyle renderStyle /*= FontRenderStyle::BLENDED*/ ) {
     // Make sure this is a new instance we are generating.
-    if (getFontInstance(size, style, renderStyle) != NIL_FONT_INSTANCE) return false;
+    if (get_instance(size, style, renderStyle) != NIL_FONT_INSTANCE) return false;
 
     // This is the font instance we will build up as we generate the texture atlas.
     FontInstance fontInstance{};
@@ -153,12 +153,12 @@ bool hg::Font::generate( FontSize size,
         // Generate rows for the current row count, getting the width and height of the rectangle
         // they form.
         ui32 currentWidth, currentHeight;
-        Row* currentRows = generateRows(fontInstance.glyphs, rowCount, padding, currentWidth, currentHeight);
+        Row* currentRows = generate_rows(fontInstance.glyphs, rowCount, padding, currentWidth, currentHeight);
 
         // There are benefits of making the texture larger to match power of 2 boundaries on
         // width and height.
-        currentWidth  = nextPower2(currentWidth);
-        currentHeight = nextPower2(currentHeight);
+        currentWidth  = next_power_2(currentWidth);
+        currentHeight = next_power_2(currentHeight);
 
         // If the area of the rectangle drawn out by the rows generated is less than the previous
         // best area, then we have a new candidate!
@@ -272,9 +272,9 @@ bool hg::Font::generate( FontSize size,
     return true;
 }
 
-hg::FontInstance hg::Font::getFontInstance( FontSize size,
-                                           FontStyle style       /*= FontStyle::NORMAL*/,
-                                     FontRenderStyle renderStyle /*= FontRenderStyle::BLENDED*/ ) {
+hg::FontInstance hg::Font::get_instance( FontSize size,
+                                        FontStyle style       /*= FontStyle::NORMAL*/,
+                                  FontRenderStyle renderStyle /*= FontRenderStyle::BLENDED*/ ) {
     try {
         return m_fontInstances.at(hash(size, style, renderStyle));
     } catch (std::out_of_range& e) {
@@ -282,7 +282,7 @@ hg::FontInstance hg::Font::getFontInstance( FontSize size,
     }
 }
 
-hg::Font::Row* hg::Font::generateRows(Glyph* glyphs, ui32 rowCount, FontSize padding, ui32& width, ui32& height) {
+hg::Font::Row* hg::Font::generate_rows(Glyph* glyphs, ui32 rowCount, FontSize padding, ui32& width, ui32& height) {
     // Create some arrays for the rows, their widths and max height of a glyph within each of them.
     //    Max heights are stored inside Row - it is a pair of max height and a vector of glyph indices.
     Row*  rows          = new Row[rowCount]();
@@ -346,7 +346,7 @@ void hg::FontCache::dispose() {
     Fonts().swap(m_fonts);
 }
 
-bool hg::FontCache::registerFont(const char* name, const char* filepath, char start, char end) {
+bool hg::FontCache::register_font(const char* name, const char* filepath, char start, char end) {
     auto it = m_fonts.find(name);
     if (it != m_fonts.end()) {
         return false;
@@ -357,7 +357,7 @@ bool hg::FontCache::registerFont(const char* name, const char* filepath, char st
 
     return true;
 }
-bool hg::FontCache::registerFont(const char* name, const char* filepath) {
+bool hg::FontCache::register_font(const char* name, const char* filepath) {
     // Try to emplace a new Font object with the given name.
     auto [_, added] = m_fonts.try_emplace(name, Font());
     // If we added it, then initialise the Font object.
@@ -368,10 +368,10 @@ bool hg::FontCache::registerFont(const char* name, const char* filepath) {
     return false;
 }
 
-hg::FontInstance hg::FontCache::fetchFontInstance( const char* name,
-                                                      FontSize size,
-                                                     FontStyle style     /*= FontStyle::NORMAL*/,
-                                               FontRenderStyle renderStyle /*= FontRenderStyle::BLENDED*/) {
+hg::FontInstance hg::FontCache::fetch( const char* name,
+                                          FontSize size,
+                                         FontStyle style     /*= FontStyle::NORMAL*/,
+                                   FontRenderStyle renderStyle /*= FontRenderStyle::BLENDED*/) {
     // Make sure a font exists with the given name.
     auto font = m_fonts.find(name);
     if (font == m_fonts.end()) return NIL_FONT_INSTANCE;
@@ -380,22 +380,22 @@ hg::FontInstance hg::FontCache::fetchFontInstance( const char* name,
     font->second.generate(size, style, renderStyle);
 
     // Return the font instance.
-    return font->second.getFontInstance(size, style, renderStyle);
+    return font->second.get_instance(size, style, renderStyle);
 }
 
-hg::FontInstance hg::FontCache::fetchFontInstance( const char* name,
-                                                   const char* filepath,
-                                                      FontSize size,
-                                                     FontStyle style     /*= FontStyle::NORMAL*/,
-                                               FontRenderStyle renderStyle /*= FontRenderStyle::BLENDED*/) {
-    registerFont(name, filepath);
+hg::FontInstance hg::FontCache::fetch( const char* name,
+                                       const char* filepath,
+                                          FontSize size,
+                                         FontStyle style     /*= FontStyle::NORMAL*/,
+                                   FontRenderStyle renderStyle /*= FontRenderStyle::BLENDED*/) {
+    register_font(name, filepath);
 
-    return fetchFontInstance(name, size, style, renderStyle);
+    return fetch(name, size, style, renderStyle);
 }
 
-hg::FontInstance hg::FontCache::fetchFontInstance( const char* name,
-                                                     FontStyle style     /*= FontStyle::NORMAL*/,
-                                               FontRenderStyle renderStyle /*= FontRenderStyle::BLENDED*/) {
+hg::FontInstance hg::FontCache::fetch( const char* name,
+                                         FontStyle style     /*= FontStyle::NORMAL*/,
+                                   FontRenderStyle renderStyle /*= FontRenderStyle::BLENDED*/) {
     // Make sure a font exists with the given name.
     auto font = m_fonts.find(name);
     if (font == m_fonts.end()) return NIL_FONT_INSTANCE;
@@ -404,16 +404,16 @@ hg::FontInstance hg::FontCache::fetchFontInstance( const char* name,
     font->second.generate(style, renderStyle);
 
     // Return the font instance.
-    return font->second.getFontInstance(style, renderStyle);
+    return font->second.get_instance(style, renderStyle);
 }
 
-hg::FontInstance hg::FontCache::fetchFontInstance( const char* name,
-                                                   const char* filepath,
-                                                     FontStyle style       /*= FontStyle::NORMAL*/,
-                                               FontRenderStyle renderStyle /*= FontRenderStyle::BLENDED*/) {
-    registerFont(name, filepath);
+hg::FontInstance hg::FontCache::fetch( const char* name,
+                                       const char* filepath,
+                                         FontStyle style       /*= FontStyle::NORMAL*/,
+                                   FontRenderStyle renderStyle /*= FontRenderStyle::BLENDED*/) {
+    register_font(name, filepath);
 
-    return fetchFontInstance(name, style, renderStyle);
+    return fetch(name, style, renderStyle);
 }
 
 bool operator==(const hg::FontInstance& lhs, const hg::FontInstance& rhs) {
