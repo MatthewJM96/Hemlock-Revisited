@@ -57,6 +57,8 @@ namespace hemlock {
                     ui16 reserved;
                 };
 
+                using InternalPixelFormat = std::pair<ui32, ui32>;
+
                 /**
                  * @brief Converts an spio::Image::PixelFormat value to the corresponding binary properties.
                  *
@@ -64,7 +66,7 @@ namespace hemlock {
                  *
                  * @return The determined PNG properties.
                  */
-                std::pair<ui32, ui32> convertPixelFormat(PixelFormat format) {
+                InternalPixelFormat convertPixelFormat(PixelFormat format) {
                     switch (format) {
                         case PixelFormat::RGB_UI8:
                             return { 3, 1 };
@@ -81,7 +83,9 @@ namespace hemlock {
                 }
             }
 
-            namespace image {
+            namespace png {
+                using InternalPixelFormat = std::pair<png_byte, png_byte>;
+
                 /**
                  * @brief Converts an spio::Image::PixelFormat value to the corresponding PNG properties.
                  *
@@ -89,7 +93,7 @@ namespace hemlock {
                  *
                  * @return The determined PNG properties.
                  */
-                std::pair<png_byte, png_byte> convertPixelFormat(PixelFormat format) {
+                InternalPixelFormat convertPixelFormat(PixelFormat format) {
                     switch (format) {
                         case PixelFormat::RGB_UI8:
                             return { PNG_COLOR_TYPE_RGB, 8 };
