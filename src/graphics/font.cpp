@@ -40,14 +40,14 @@ hg::FontInstanceHash hg::hash(FontSize size, FontStyle style, FontRenderStyle re
 
 bool hg::FontInstance::save(const char* filepath, hio::image::Saver save) {
         // Prepare the pixel buffer.
-        ui8* pixels = new ui8[textureSize.x * textureSize.y * 4];
+        ui8* pixels = new ui8[texture_size.x * texture_size.y * 4];
 
         // Bind the texture, load it into our buffer, and then unbind it.
         glBindTexture(GL_TEXTURE_2D, texture);
         glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
         glBindTexture(GL_TEXTURE_2D, 0);
 
-        return save(filepath, static_cast<void*>(pixels), textureSize, hio::image::PixelFormat::RGBA_UI8);
+        return save(filepath, static_cast<void*>(pixels), texture_size, hio::image::PixelFormat::RGBA_UI8);
 }
 
 hg::Font::Font() :
@@ -63,12 +63,12 @@ void hg::Font::init(const char* filepath, char start, char end) {
 }
 
 void hg::Font::dispose() {
-    for (auto& fontInstance : m_font_instances) {
-        if (fontInstance.second.texture != 0) {
-            glDeleteTextures(1, &fontInstance.second.texture);
+    for (auto& instance : m_font_instances) {
+        if (instance.second.texture != 0) {
+            glDeleteTextures(1, &instance.second.texture);
         }
-        if (fontInstance.second.glyphs != nullptr) {
-            delete[] fontInstance.second.glyphs;
+        if (instance.second.glyphs != nullptr) {
+            delete[] instance.second.glyphs;
         }
     }
 
@@ -83,11 +83,11 @@ bool hg::Font::generate( FontSize size,
     if (get_instance(size, style, renderStyle) != NIL_FONT_INSTANCE) return false;
 
     // This is the font instance we will build up as we generate the texture atlas.
-    FontInstance fontInstance{};
+    FontInstance font_instance{};
     // Create the glyphs array for this font instance.
-    fontInstance.glyphs = new Glyph[m_end - m_start + 1];
+    font_instance.glyphs = new Glyph[m_end - m_start + 1];
     // Set this as the font instance's owner.
-    fontInstance.owner = this;
+    font_instance.owner = this;
 
     // Open the font and check we didn't fail.
     TTF_Font* font = TTF_OpenFont(m_filepath, size);
@@ -97,7 +97,7 @@ bool hg::Font::generate( FontSize size,
     TTF_SetFontStyle(font, static_cast<int>(style));
 
     // Store the height of the tallest glyph for the given font size.
-    fontInstance.height = TTF_FontHeight(font);
+    font_instance.height = TTF_FontHeight(font);
 
     // For each character, we are going to get the glyph metrics - that is the set of
     // properties that constitute begin and end positions of the glyph - and calculate
@@ -105,12 +105,12 @@ bool hg::Font::generate( FontSize size,
     {
         size_t i = 0;
         for (char c = m_start; c <= m_end; ++c) {
-            fontInstance.glyphs[i].character = c;
+            font_instance.glyphs[i].character = c;
 
             // Check that the glyph we are currently seeking actually gets provided
             // by the font in question.
             if (TTF_GlyphIsProvided(font, c) == 0) {
-                fontInstance.glyphs[i].supported = false;
+                font_instance.glyphs[i].supported = false;
 
                 ++i;
                 continue;
@@ -126,11 +126,11 @@ bool hg::Font::generate( FontSize size,
                                     &metrics.z, &metrics.w, nullptr);
 
             // Calculate the glyph's sizes from the metric.
-            fontInstance.glyphs[i].size.x = metrics.y - metrics.x;
-            fontInstance.glyphs[i].size.y = metrics.w - metrics.z;
+            font_instance.glyphs[i].size.x = metrics.y - metrics.x;
+            font_instance.glyphs[i].size.y = metrics.w - metrics.z;
 
             // Given we got here, the glyph is supported.
-            fontInstance.glyphs[i].supported = true;
+            font_instance.glyphs[i].supported = true;
 
             ++i;
         }
@@ -140,66 +140,66 @@ bool hg::Font::generate( FontSize size,
     // We want to make this texture as small as possible in memory, so we now do some
     // preprocessing in order to find the number of rows that minimises the area of
     // the atlas (equivalent to the amount of data that will be used up by it).
-    ui32 rowCount     = 1;
-    ui32 bestWidth    = 0;
-    ui32 bestHeight   = 0;
-    ui32 bestArea     = std::numeric_limits<ui32>::max();
-    ui32 bestRowCount = 0;
-    Row* bestRows = nullptr;
-    while (rowCount <= static_cast<ui32>(m_end - m_start)) {
+    ui32 row_count      = 1;
+    ui32 best_width     = 0;
+    ui32 best_height    = 0;
+    ui32 best_area      = std::numeric_limits<ui32>::max();
+    ui32 best_row_count = 0;
+    Row* best_rows = nullptr;
+    while (row_count <= static_cast<ui32>(m_end - m_start)) {
         // WARNING: We may be packing too tightly here. The reported height of glyphs from TTF_GlyphMetrics
         //          is not always accurate to the rendered dimensions.
 
         // Generate rows for the current row count, getting the width and height of the rectangle
         // they form.
-        ui32 currentWidth, currentHeight;
-        Row* currentRows = generate_rows(fontInstance.glyphs, rowCount, padding, currentWidth, currentHeight);
+        ui32 current_width, current_height;
+        Row* current_rows = generate_rows(font_instance.glyphs, row_count, padding, current_width, current_height);
 
         // There are benefits of making the texture larger to match power of 2 boundaries on
         // width and height.
-        currentWidth  = next_power_2(currentWidth);
-        currentHeight = next_power_2(currentHeight);
+        current_width  = next_power_2(current_width);
+        current_height = next_power_2(current_height);
 
         // If the area of the rectangle drawn out by the rows generated is less than the previous
         // best area, then we have a new candidate!
-        if (currentWidth * currentHeight < bestArea) {
-            if (bestRows) delete[] bestRows;
-            bestRows     = currentRows;
-            bestWidth    = currentWidth;
-            bestHeight   = currentHeight;
-            bestRowCount = rowCount;
-            bestArea     = bestWidth * bestHeight;
-            ++rowCount;
+        if (current_width * current_height < best_area) {
+            if (best_rows) delete[] best_rows;
+            best_rows     = current_rows;
+            best_width    = current_width;
+            best_height   = current_height;
+            best_row_count = row_count;
+            best_area     = best_width * best_height;
+            ++row_count;
         } else {
             // Area has increased, break out as going forwards it's likely area will only continue
             // to increase.
-            delete[] currentRows;
+            delete[] current_rows;
             break;
         }
     }
 
     // Make sure we actually have rows to use.
-    if (bestRows == nullptr) return false;
+    if (best_rows == nullptr) return false;
 
     // TODO(Matthew): Don't wanna be calling glGet every font gen... determine and store somewhere at initialisation.
     // Get maximum texture size allowed by implementation.
-    GLint maxTextureSize;
-    glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize);
+    GLint max_texture_size;
+    glGetIntegerv(GL_MAX_TEXTURE_SIZE, &max_texture_size);
 
     // If the best size texture we could get exceeds the largest texture area permitted by the GPU... fail.
-    if (bestWidth * bestHeight > static_cast<ui32>(maxTextureSize * maxTextureSize)) {
-        delete[] bestRows;
+    if (best_width * best_height > static_cast<ui32>(max_texture_size * max_texture_size)) {
+        delete[] best_rows;
         return false;
     }
 
     // Set texture size in font instance.
-    fontInstance.textureSize = ui32v2(bestWidth, bestHeight);
+    font_instance.texture_size = ui32v2(best_width, best_height);
 
     // Generate & bind the texture we will put each glyph into.
-    glGenTextures(1, &fontInstance.texture);
-    glBindTexture(GL_TEXTURE_2D, fontInstance.texture);
+    glGenTextures(1, &font_instance.texture);
+    glBindTexture(GL_TEXTURE_2D, font_instance.texture);
     // Set the texture's size and pixel format.
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, bestWidth, bestHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, best_width, best_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
 
     // Set some needed parameters for the texture.
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -210,64 +210,64 @@ bool hg::Font::generate( FontSize size,
 
     // This represents the current V-coordinate we are into the texture.
     //    UV are the coordinates we use for textures (i.e. the X & Y coords of the pixels).
-    ui32 currentV = padding;
+    ui32 current_v = padding;
     // Loop over all of the rows, for each going through and drawing each glyph,
     // adding it to our texture.
-    for (size_t rowIndex = 0; rowIndex < bestRowCount; ++rowIndex) {
+    for (size_t row_index = 0; row_index < best_row_count; ++row_index) {
         // This represents the current U-coordinate we are into the texture.
-        ui32 currentU = padding;
-        for (size_t glyphIndex = 0; glyphIndex < bestRows[rowIndex].second.size(); ++glyphIndex) {
-            ui32 charIndex = bestRows[rowIndex].second[glyphIndex];
+        ui32 current_u = padding;
+        for (size_t glyph_index = 0; glyph_index < best_rows[row_index].second.size(); ++glyph_index) {
+            ui32 charIndex = best_rows[row_index].second[glyph_index];
 
             // If the glyph is unsupported, skip it!
-            if (!fontInstance.glyphs[charIndex].supported) continue;
+            if (!font_instance.glyphs[charIndex].supported) continue;
 
             // Determine which render style we are to use and draw the glyph.
-            SDL_Surface* glyphSurface = nullptr;
+            SDL_Surface* glyph_surface = nullptr;
             switch(renderStyle) {
                 case FontRenderStyle::SOLID:
-                    glyphSurface = TTF_RenderGlyph_Solid(font, static_cast<ui16>(m_start + charIndex), { 255, 255, 255, 255 });
+                    glyph_surface = TTF_RenderGlyph_Solid(font, static_cast<ui16>(m_start + charIndex), { 255, 255, 255, 255 });
                     break;
                 case FontRenderStyle::BLENDED:
-                    glyphSurface = TTF_RenderGlyph_Blended(font, static_cast<ui16>(m_start + charIndex), { 255, 255, 255, 255 });
+                    glyph_surface = TTF_RenderGlyph_Blended(font, static_cast<ui16>(m_start + charIndex), { 255, 255, 255, 255 });
                     break;
             }
 
             // Stitch the glyph we just generated into our texture.
-            glTexSubImage2D(GL_TEXTURE_2D, 0, currentU, currentV, glyphSurface->w, glyphSurface->h, GL_BGRA, GL_UNSIGNED_BYTE, glyphSurface->pixels);
+            glTexSubImage2D(GL_TEXTURE_2D, 0, current_u, current_v, glyph_surface->w, glyph_surface->h, GL_BGRA, GL_UNSIGNED_BYTE, glyph_surface->pixels);
 
             // Update the size of the glyph with what we rendered - there can be variance between this and what we obtained
             // in the glyph metric stage!
-            fontInstance.glyphs[charIndex].size.x = static_cast<f32>(glyphSurface->w);
-            fontInstance.glyphs[charIndex].size.y = static_cast<f32>(glyphSurface->h);
+            font_instance.glyphs[charIndex].size.x = static_cast<f32>(glyph_surface->w);
+            font_instance.glyphs[charIndex].size.y = static_cast<f32>(glyph_surface->h);
 
             // Build the UV dimensions for the glyph.
-            fontInstance.glyphs[charIndex].uvDimensions.x =        (static_cast<f32>(currentU) / static_cast<f32>(bestWidth));
-            fontInstance.glyphs[charIndex].uvDimensions.y =        (static_cast<f32>(currentV) / static_cast<f32>(bestHeight));
-            fontInstance.glyphs[charIndex].uvDimensions.z = (static_cast<f32>(glyphSurface->w) / static_cast<f32>(bestWidth));
-            fontInstance.glyphs[charIndex].uvDimensions.w = (static_cast<f32>(glyphSurface->h) / static_cast<f32>(bestHeight));
+            font_instance.glyphs[charIndex].uvDimensions.x =        (static_cast<f32>(current_u) / static_cast<f32>(best_width));
+            font_instance.glyphs[charIndex].uvDimensions.y =        (static_cast<f32>(current_v) / static_cast<f32>(best_height));
+            font_instance.glyphs[charIndex].uvDimensions.z = (static_cast<f32>(glyph_surface->w) / static_cast<f32>(best_width));
+            font_instance.glyphs[charIndex].uvDimensions.w = (static_cast<f32>(glyph_surface->h) / static_cast<f32>(best_height));
 
-            // Update currentU.
-            currentU += glyphSurface->w + padding;
+            // Update current_u.
+            current_u += glyph_surface->w + padding;
 
             // Free the glyph "surface".
-            SDL_FreeSurface(glyphSurface);
-            glyphSurface = nullptr;
+            SDL_FreeSurface(glyph_surface);
+            glyph_surface = nullptr;
         }
-        // Update currentV.
-        currentV += bestRows[rowIndex].first + padding;
+        // Update current_v.
+        current_v += best_rows[row_index].first + padding;
     }
 
     // Clean up.
     glBindTexture(GL_TEXTURE_2D, 0);
-    delete[] bestRows;
+    delete[] best_rows;
 
     // Note that this can fail for seemingly little reason.
     //     For example, if one tries to get glyph metrics for a character not provided.
     TTF_CloseFont(font);
 
     // Insert our font instance.
-    m_font_instances.emplace(std::make_pair(hash(size, style, renderStyle), fontInstance));
+    m_font_instances.emplace(std::make_pair(hash(size, style, renderStyle), font_instance));
 
     return true;
 }
@@ -282,17 +282,17 @@ hg::FontInstance hg::Font::get_instance( FontSize size,
     }
 }
 
-hg::Font::Row* hg::Font::generate_rows(Glyph* glyphs, ui32 rowCount, FontSize padding, ui32& width, ui32& height) {
+hg::Font::Row* hg::Font::generate_rows(Glyph* glyphs, ui32 row_count, FontSize padding, ui32& width, ui32& height) {
     // Create some arrays for the rows, their widths and max height of a glyph within each of them.
     //    Max heights are stored inside Row - it is a pair of max height and a vector of glyph indices.
-    Row*  rows          = new Row[rowCount]();
-    ui32* currentWidths = new ui32[rowCount]();
+    Row*  rows          = new Row[row_count]();
+    ui32* current_widths = new ui32[row_count]();
 
     width  = padding;
-    height = padding * rowCount + padding;
+    height = padding * row_count + padding;
     // Initialise our arrays of widths and max heights.
-    for (size_t i = 0; i < rowCount; ++i) {
-        currentWidths[i] = padding;
+    for (size_t i = 0; i < row_count; ++i) {
+        current_widths[i] = padding;
         rows[i].first    = 0;
     }
 
@@ -305,18 +305,18 @@ hg::Font::Row* hg::Font::generate_rows(Glyph* glyphs, ui32 rowCount, FontSize pa
         // Determine which row currently has the least width: this is the row we will add
         // the currently considered glyph to.
         size_t bestRow = 0;
-        for (size_t j = 1; j < rowCount; ++j) {
+        for (size_t j = 1; j < row_count; ++j) {
             // If row with index j is not as wide as the current least-wide row then it becomes
             // the new least-wide row!
-            if (currentWidths[bestRow] > currentWidths[j]) bestRow = j;
+            if (current_widths[bestRow] > current_widths[j]) bestRow = j;
         }
 
         // Update the width of the row we have chosen to add the glyph to.
-        currentWidths[bestRow] += glyphs[i].size.x + padding;
+        current_widths[bestRow] += glyphs[i].size.x + padding;
 
         // Update the overall width of the rectangle the rows form,
         // if our newly enlarged row exceeds it.
-        if (width < currentWidths[bestRow]) width = currentWidths[bestRow];
+        if (width < current_widths[bestRow]) width = current_widths[bestRow];
 
         // Update the max height of our row if the new glyph exceeds it, and update
         // the height of the rectange the rows form.
@@ -330,7 +330,7 @@ hg::Font::Row* hg::Font::generate_rows(Glyph* glyphs, ui32 rowCount, FontSize pa
     }
 
     // Clear up memory.
-    delete[] currentWidths;
+    delete[] current_widths;
 
     // Return the rows we've built up!
     return rows;

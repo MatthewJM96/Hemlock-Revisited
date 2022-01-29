@@ -67,7 +67,7 @@ namespace hemlock {
             ui32   height;
             Glyph* glyphs;
             Font*  owner;
-            ui32v2 textureSize;
+            ui32v2 texture_size;
 
             bool save(const char* filepath, hio::image::Saver save);
         };
@@ -90,7 +90,7 @@ namespace hemlock {
                 f32v2 scaling;
                 struct {
                     f32 scaleX;
-                    f32 targetHeight;
+                    f32 target_height;
                 };
             };
         };
@@ -99,7 +99,7 @@ namespace hemlock {
          * @brief Properties needed to draw a string.
          */
         struct StringDrawProperties {
-            FontInstance fontInstance;
+            FontInstance font_instance;
             StringSizing sizing;
             colour4      tint;
         };
