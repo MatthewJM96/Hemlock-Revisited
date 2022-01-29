@@ -126,11 +126,80 @@ namespace hemlock {
                 glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
                 glBindTexture(GL_TEXTURE_2D, 0);
 
-                save(filepath, static_cast<void*>(pixels), textureSize, PixelFormat::RGBA_UI8);
+                return save(filepath, static_cast<void*>(pixels), textureSize, PixelFormat::RGBA_UI8);
             }
         };
         const FontInstance NIL_FONT_INSTANCE = { 0, 0, nullptr, nullptr, ui32v2(0) };
+    }
+}
+namespace hg = hemlock::graphics;
 
+export {
+    bool operator==(const hg::FontInstance& lhs, const hg::FontInstance& rhs) {
+        return (lhs.texture == rhs.texture &&
+                lhs.height  == rhs.height  &&
+                lhs.glyphs  == rhs.glyphs);
+    }
+    bool operator!=(const hg::FontInstance& lhs, const hg::FontInstance& rhs) {
+        return !(lhs == rhs);
+    }
+
+    // These are just a set of functions to let us use bit-masking for FontStyle.
+    //     That is to say, we can do things like:
+    //         FontStyle::BOLD | FontStyle::ITALIC
+    //     in order to specify we want a font instance that is bold AND italic!
+    hg::FontStyle operator~ (hg::FontStyle rhs) {
+        return static_cast<hg::FontStyle>(
+            ~static_cast<std::underlying_type<hg::FontStyle>::type>(rhs)
+        );
+    }
+    hg::FontStyle operator| (hg::FontStyle lhs, hg::FontStyle rhs) {
+        return static_cast<hg::FontStyle>(
+            static_cast<std::underlying_type<hg::FontStyle>::type>(lhs) |
+            static_cast<std::underlying_type<hg::FontStyle>::type>(rhs)
+        );
+    }
+    hg::FontStyle operator& (hg::FontStyle lhs, hg::FontStyle rhs) {
+        return static_cast<hg::FontStyle>(
+            static_cast<std::underlying_type<hg::FontStyle>::type>(lhs) &
+            static_cast<std::underlying_type<hg::FontStyle>::type>(rhs)
+        );
+    }
+    hg::FontStyle operator^ (hg::FontStyle lhs, hg::FontStyle rhs) {
+        return static_cast<hg::FontStyle>(
+            static_cast<std::underlying_type<hg::FontStyle>::type>(lhs) ^
+            static_cast<std::underlying_type<hg::FontStyle>::type>(rhs)
+        );
+    }
+    hg::FontStyle& operator|= (hg::FontStyle& lhs, hg::FontStyle rhs) {
+        lhs = static_cast<hg::FontStyle>(
+            static_cast<std::underlying_type<hg::FontStyle>::type>(lhs) |
+            static_cast<std::underlying_type<hg::FontStyle>::type>(rhs)
+        );
+
+        return lhs;
+    }
+    hg::FontStyle& operator&= (hg::FontStyle& lhs, hg::FontStyle rhs) {
+        lhs = static_cast<hg::FontStyle>(
+            static_cast<std::underlying_type<hg::FontStyle>::type>(lhs) &
+            static_cast<std::underlying_type<hg::FontStyle>::type>(rhs)
+        );
+
+        return lhs;
+    }
+    hg::FontStyle& operator^= (hg::FontStyle& lhs, hg::FontStyle rhs) {
+        lhs = static_cast<hg::FontStyle>(
+            static_cast<std::underlying_type<hg::FontStyle>::type>(lhs) ^
+            static_cast<std::underlying_type<hg::FontStyle>::type>(rhs)
+        );
+
+        return lhs;
+    }
+}
+
+export
+namespace hemlock {
+    namespace graphics {
         /**
          * @brief Whether the string should be sized (vertically) by a scale factor or target a fixed pixel height.
          */
@@ -721,70 +790,5 @@ namespace hemlock {
         protected:
             Fonts m_fonts;
         };
-    }
-}
-
-using hg = hemlock::graphics;
-
-export {
-    bool operator==(const hg::FontInstance& lhs, const hg::FontInstance& rhs) {
-        return (lhs.texture == rhs.texture &&
-                lhs.height  == rhs.height  &&
-                lhs.glyphs  == rhs.glyphs);
-    }
-    bool operator!=(const hg::FontInstance& lhs, const hg::FontInstance& rhs) {
-        return !(lhs == rhs);
-    }
-
-    // These are just a set of functions to let us use bit-masking for FontStyle.
-    //     That is to say, we can do things like:
-    //         FontStyle::BOLD | FontStyle::ITALIC
-    //     in order to specify we want a font instance that is bold AND italic!
-    hg::FontStyle operator~ (hg::FontStyle rhs) {
-        return static_cast<hg::FontStyle>(
-            ~static_cast<std::underlying_type<hg::FontStyle>::type>(rhs)
-        );
-    }
-    hg::FontStyle operator| (hg::FontStyle lhs, hg::FontStyle rhs) {
-        return static_cast<hg::FontStyle>(
-            static_cast<std::underlying_type<hg::FontStyle>::type>(lhs) |
-            static_cast<std::underlying_type<hg::FontStyle>::type>(rhs)
-        );
-    }
-    hg::FontStyle operator& (hg::FontStyle lhs, hg::FontStyle rhs) {
-        return static_cast<hg::FontStyle>(
-            static_cast<std::underlying_type<hg::FontStyle>::type>(lhs) &
-            static_cast<std::underlying_type<hg::FontStyle>::type>(rhs)
-        );
-    }
-    hg::FontStyle operator^ (hg::FontStyle lhs, hg::FontStyle rhs) {
-        return static_cast<hg::FontStyle>(
-            static_cast<std::underlying_type<hg::FontStyle>::type>(lhs) ^
-            static_cast<std::underlying_type<hg::FontStyle>::type>(rhs)
-        );
-    }
-    hg::FontStyle& operator|= (hg::FontStyle& lhs, hg::FontStyle rhs) {
-        lhs = static_cast<hg::FontStyle>(
-            static_cast<std::underlying_type<hg::FontStyle>::type>(lhs) |
-            static_cast<std::underlying_type<hg::FontStyle>::type>(rhs)
-        );
-
-        return lhs;
-    }
-    hg::FontStyle& operator&= (hg::FontStyle& lhs, hg::FontStyle rhs) {
-        lhs = static_cast<hg::FontStyle>(
-            static_cast<std::underlying_type<hg::FontStyle>::type>(lhs) &
-            static_cast<std::underlying_type<hg::FontStyle>::type>(rhs)
-        );
-
-        return lhs;
-    }
-    hg::FontStyle& operator^= (hg::FontStyle& lhs, hg::FontStyle rhs) {
-        lhs = static_cast<hg::FontStyle>(
-            static_cast<std::underlying_type<hg::FontStyle>::type>(lhs) ^
-            static_cast<std::underlying_type<hg::FontStyle>::type>(rhs)
-        );
-
-        return lhs;
     }
 }
