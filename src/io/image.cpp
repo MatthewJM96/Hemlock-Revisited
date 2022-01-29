@@ -1,4 +1,14 @@
+module;
+
+#include <png.h>
+
 export module hemlock.io.image;
+
+import <cstdio>;
+import <functional>;
+import <utility>;
+
+import hemlock.types;
 
 export
 namespace hemlock {
