@@ -585,7 +585,7 @@ namespace hemlock {
              * @param width This is set to the width of the longest row generated.
              * @param height This is set to the sum of the max height of each glyph in each row.
              */
-            Row* generateRows(Glyph* glyphs, ui32 rowCount, FontSize padding, ui32& maxWidth, ui32& maxHeight) {
+            Row* generateRows(Glyph* glyphs, ui32 rowCount, FontSize padding, ui32& width, ui32& height) {
                 // Create some arrays for the rows, their widths and max height of a glyph within each of them.
                 //    Max heights are stored inside Row - it is a pair of max height and a vector of glyph indices.
                 Row*  rows          = new Row[rowCount]();
