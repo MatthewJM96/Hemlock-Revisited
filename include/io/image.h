@@ -120,6 +120,9 @@ namespace hemlock {
         }
     }
 }
-namespace hio = hemlock::io;
+namespace hio         = hemlock::io;
+namespace hio_img     = hio::image;
+namespace hio_img_bin = hio_img::binary;
+namespace hio_img_png = hio_img::png;
 
 #endif // __hemlock_io_image_h
