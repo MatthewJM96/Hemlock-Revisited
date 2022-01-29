@@ -22,10 +22,16 @@ add_executable(Hemlock_Revisited
 target_include_directories(Hemlock_Revisited
     SYSTEM
     PUBLIC
-    "${PROJECT_SOURCE_DIR}/deps"
+    "${PROJECT_SOURCE_DIR}/deps/include"
     "${PROJECT_SOURCE_DIR}/include"
 )
 
-# target_link_libraries(Hemlock_Revisited
-# 
-# )
+target_link_directories(Hemlock_Revisited
+    PUBLIC
+    "${PROJECT_SOURCE_DIR}/deps/lib"
+)
+
+target_link_libraries(Hemlock_Revisited
+    SDL2main
+    SDL2
+)
