@@ -124,7 +124,7 @@ namespace hemlock {
              * @param start The first character to generate a glyph for.
              * @param end The final character to generate a glyph for.
              */
-            void init(const char* filepath, char start, char end);
+            void init(std::string filepath, char start, char end);
             /**
              * @brief Initialises the font, after which it is ready to generate glyphs of specified sizes and styles.
              *
@@ -133,7 +133,7 @@ namespace hemlock {
              *
              * @param filepath The path to the font's TTF file.
              */
-            void init(const char* filepath) {
+            void init(std::string filepath) {
                 init(filepath, FIRST_PRINTABLE_CHAR, LAST_PRINTABLE_CHAR);
             }
             /**
@@ -259,7 +259,7 @@ namespace hemlock {
          * @brief Provides a cache for fonts, each identified by a name.
          */
         class FontCache {
-            using Fonts = std::unordered_map<const char*, Font>;
+            using Fonts = std::unordered_map<std::string, Font>;
         public:
             FontCache()  { /* Empty. */ }
             ~FontCache() { /* Empty. */ }
@@ -276,7 +276,7 @@ namespace hemlock {
              *
              * @return True if the font was newly registered, false if a font with the same name already exists.
              */
-            bool register_font(const char* name, const char* filepath, char start, char end);
+            bool register_font(std::string name, std::string filepath, char start, char end);
             /**
              * @brief Register a font with the given name and filepath.
              *
@@ -285,7 +285,7 @@ namespace hemlock {
              *
              * @return True if the font was newly registered, false if a font with the same name already exists.
              */
-            bool register_font(const char* name, const char* filepath);
+            bool register_font(std::string name, std::string filepath);
 
             /**
              * @brief Fetches an instance of the named font with the given size and style. If the instance does not
@@ -298,7 +298,7 @@ namespace hemlock {
              *
              * @return The font instance requested, or NIL_FONT_INSTANCE if it couldn't be obtained.
              */
-            FontInstance fetch(const char* name, FontSize size, FontStyle style = FontStyle::NORMAL, FontRenderStyle renderStyle = FontRenderStyle::BLENDED);
+            FontInstance fetch(std::string name, FontSize size, FontStyle style = FontStyle::NORMAL, FontRenderStyle renderStyle = FontRenderStyle::BLENDED);
             /**
              * @brief Fetches an instance of the named font with the given size and style. If the instance does not
              * yet exist, it is first created.
@@ -311,7 +311,7 @@ namespace hemlock {
              *
              * @return The font instance requested, or NIL_FONT_INSTANCE if it couldn't be obtained.
              */
-            FontInstance fetch(const char* name, const char* filepath, FontSize size, FontStyle style = FontStyle::NORMAL, FontRenderStyle renderStyle = FontRenderStyle::BLENDED);
+            FontInstance fetch(std::string name, std::string filepath, FontSize size, FontStyle style = FontStyle::NORMAL, FontRenderStyle renderStyle = FontRenderStyle::BLENDED);
             /**
              * @brief Fetches an instance of the named font with the given size and style. If the instance does not
              * yet exist, it is first created.
@@ -323,7 +323,7 @@ namespace hemlock {
              *
              * @return The font instance requested, or NIL_FONT_INSTANCE if it couldn't be obtained.
              */
-            FontInstance fetch(const char* name, FontStyle style = FontStyle::NORMAL, FontRenderStyle renderStyle = FontRenderStyle::BLENDED);
+            FontInstance fetch(std::string name, FontStyle style = FontStyle::NORMAL, FontRenderStyle renderStyle = FontRenderStyle::BLENDED);
             /**
              * @brief Fetches an instance of the named font with the given size and style. If the instance does not
              * yet exist, it is first created.
@@ -336,7 +336,7 @@ namespace hemlock {
              *
              * @return The font instance requested, or NIL_FONT_INSTANCE if it couldn't be obtained.
              */
-            FontInstance fetch(const char* name, const char* filepath, FontStyle style = FontStyle::NORMAL, FontRenderStyle renderStyle = FontRenderStyle::BLENDED);
+            FontInstance fetch(std::string name, std::string filepath, FontStyle style = FontStyle::NORMAL, FontRenderStyle renderStyle = FontRenderStyle::BLENDED);
         protected:
             Fonts m_fonts;
         };

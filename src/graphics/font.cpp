@@ -38,7 +38,7 @@ hg::FontInstanceHash hg::hash(FontSize size, FontStyle style, FontRenderStyle re
     return hash;
 }
 
-bool hg::FontInstance::save(const char* filepath, hio::image::Saver save) {
+bool hg::FontInstance::save(std::string filepath, hio::image::Saver save) {
         // Prepare the pixel buffer.
         ui8* pixels = new ui8[texture_size.x * texture_size.y * 4];
 
@@ -56,7 +56,7 @@ hg::Font::Font() :
     m_default_size(0)
 { /* Empty. */ }
 
-void hg::Font::init(const char* filepath, char start, char end) {
+void hg::Font::init(std::string filepath, char start, char end) {
     m_filepath = filepath;
     m_start    = start;
     m_end      = end;
@@ -346,7 +346,7 @@ void hg::FontCache::dispose() {
     Fonts().swap(m_fonts);
 }
 
-bool hg::FontCache::register_font(const char* name, const char* filepath, char start, char end) {
+bool hg::FontCache::register_font(std::string name, std::string filepath, char start, char end) {
     auto it = m_fonts.find(name);
     if (it != m_fonts.end()) {
         return false;
@@ -357,7 +357,7 @@ bool hg::FontCache::register_font(const char* name, const char* filepath, char s
 
     return true;
 }
-bool hg::FontCache::register_font(const char* name, const char* filepath) {
+bool hg::FontCache::register_font(std::string name, std::string filepath) {
     // Try to emplace a new Font object with the given name.
     auto [_, added] = m_fonts.try_emplace(name, Font());
     // If we added it, then initialise the Font object.
@@ -368,7 +368,7 @@ bool hg::FontCache::register_font(const char* name, const char* filepath) {
     return false;
 }
 
-hg::FontInstance hg::FontCache::fetch( const char* name,
+hg::FontInstance hg::FontCache::fetch( std::string name,
                                           FontSize size,
                                          FontStyle style     /*= FontStyle::NORMAL*/,
                                    FontRenderStyle renderStyle /*= FontRenderStyle::BLENDED*/) {
@@ -383,8 +383,8 @@ hg::FontInstance hg::FontCache::fetch( const char* name,
     return font->second.get_instance(size, style, renderStyle);
 }
 
-hg::FontInstance hg::FontCache::fetch( const char* name,
-                                       const char* filepath,
+hg::FontInstance hg::FontCache::fetch( std::string name,
+                                       std::string filepath,
                                           FontSize size,
                                          FontStyle style     /*= FontStyle::NORMAL*/,
                                    FontRenderStyle renderStyle /*= FontRenderStyle::BLENDED*/) {
@@ -393,7 +393,7 @@ hg::FontInstance hg::FontCache::fetch( const char* name,
     return fetch(name, size, style, renderStyle);
 }
 
-hg::FontInstance hg::FontCache::fetch( const char* name,
+hg::FontInstance hg::FontCache::fetch( std::string name,
                                          FontStyle style     /*= FontStyle::NORMAL*/,
                                    FontRenderStyle renderStyle /*= FontRenderStyle::BLENDED*/) {
     // Make sure a font exists with the given name.
@@ -407,8 +407,8 @@ hg::FontInstance hg::FontCache::fetch( const char* name,
     return font->second.get_instance(style, renderStyle);
 }
 
-hg::FontInstance hg::FontCache::fetch( const char* name,
-                                       const char* filepath,
+hg::FontInstance hg::FontCache::fetch( std::string name,
+                                       std::string filepath,
                                          FontStyle style       /*= FontStyle::NORMAL*/,
                                    FontRenderStyle renderStyle /*= FontRenderStyle::BLENDED*/) {
     register_font(name, filepath);

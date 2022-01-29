@@ -15,8 +15,8 @@ namespace hemlock {
                 SENTINEL
             };
 
-            using Loader = std::function<bool(const char*, void*&, ui32v2&, PixelFormat&)>;
-            using Saver  = std::function<bool(const char*, const void*, ui32v2, PixelFormat)>;
+            using Loader = std::function<bool(std::string, void*&, ui32v2&, PixelFormat&)>;
+            using Saver  = std::function<bool(std::string, const void*, ui32v2, PixelFormat)>;
 
             namespace binary {
                 const ui8  BIN_TYPE_1  = 'S';
@@ -68,7 +68,7 @@ namespace hemlock {
                  * @param format The discovered pixel format of the image.
                  * @return true when the image is successfully loaded, false otherwise.
                  */
-                bool load(const char* filepath, CALLER_DELETE OUT void*& data, OUT ui32v2& dimensions, OUT PixelFormat& format);
+                bool load(std::string filepath, CALLER_DELETE OUT void*& data, OUT ui32v2& dimensions, OUT PixelFormat& format);
 
                 /**
                  * @brief Saves an image as a binary.file.
@@ -79,7 +79,7 @@ namespace hemlock {
                  * @param format The pixel format of the image to save.
                  * @return true when the image is successfully saved, false otherwise.
                  */
-                bool save(const char* filepath, IN const void* data, ui32v2 dimensions, PixelFormat format);
+                bool save(std::string filepath, IN const void* data, ui32v2 dimensions, PixelFormat format);
             }
 
             namespace png {
@@ -104,7 +104,7 @@ namespace hemlock {
                  * @param format The discovered pixel format of the image.
                  * @return true when the image is successfully loaded, false otherwise.
                  */
-                bool load(const char* filepath, CALLER_DELETE OUT  void*& data, ui32v2& dimensions, PixelFormat& format);
+                bool load(std::string filepath, CALLER_DELETE OUT  void*& data, ui32v2& dimensions, PixelFormat& format);
 
                 /**
                  * @brief Saves an image as a PNG.file.
@@ -115,7 +115,7 @@ namespace hemlock {
                  * @param format The pixel format of the image to save.
                  * @return true when the image is successfully saved, false otherwise.
                  */
-                bool save(const char* filepath, IN const void* data, ui32v2 dimensions, PixelFormat format);
+                bool save(std::string filepath, IN const void* data, ui32v2 dimensions, PixelFormat format);
             }
         }
     }

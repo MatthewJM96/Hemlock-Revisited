@@ -18,9 +18,9 @@ hio_img_bin::InternalPixelFormat hio_img_bin::convert_pixel_format(PixelFormat f
     }
 }
 
-bool hio_img_bin::load(const char* filepath, void*& data, ui32v2& dimensions, PixelFormat& format) {
+bool hio_img_bin::load(std::string filepath, void*& data, ui32v2& dimensions, PixelFormat& format) {
     // Open file, if we can't then fail.
-    FILE* file = fopen(filepath, "rb");
+    FILE* file = fopen(filepath.data(), "rb");
     if (file == nullptr) return false;
 
     /**************************************************\
@@ -93,7 +93,7 @@ bool hio_img_bin::load(const char* filepath, void*& data, ui32v2& dimensions, Pi
     return true;
 }
 
-bool hio_img_bin::save(const char* filepath, const void* data, ui32v2 dimensions, PixelFormat format) {
+bool hio_img_bin::save(std::string filepath, const void* data, ui32v2 dimensions, PixelFormat format) {
     // Extract pixel information from format.
     auto [channels, bytesPerChannel] = convert_pixel_format(format);
 
@@ -122,7 +122,7 @@ bool hio_img_bin::save(const char* filepath, const void* data, ui32v2 dimensions
     fileHeader.reserved = 0;
 
     // Open the file desired, and if we couldn't, fail.
-    FILE* file = fopen(filepath, "wb");
+    FILE* file = fopen(filepath.data(), "wb");
     if (file == nullptr) return false;
 
     // Write the file header, if we couldn't, fail.
@@ -158,14 +158,14 @@ hio_img_png::InternalPixelFormat hio_img_png::convert_pixel_format(PixelFormat f
     }
 }
 
-bool hio_img_png::load(const char* filepath [[maybe_unused]], void*& data [[maybe_unused]], ui32v2& dimensions [[maybe_unused]], PixelFormat& format [[maybe_unused]]) {
+bool hio_img_png::load(std::string filepath [[maybe_unused]], void*& data [[maybe_unused]], ui32v2& dimensions [[maybe_unused]], PixelFormat& format [[maybe_unused]]) {
     // TODO(Matthew): Implement.
     return false;
 }
 
-bool hio_img_png::save(const char* filepath, const void* data, ui32v2 dimensions, PixelFormat format) {
+bool hio_img_png::save(std::string filepath, const void* data, ui32v2 dimensions, PixelFormat format) {
     // Open the image file we will save to.
-    FILE* file = fopen(filepath, "wb");
+    FILE* file = fopen(filepath.data(), "wb");
     // Check we successfully opened the file.
     if (!file) return false;
 
