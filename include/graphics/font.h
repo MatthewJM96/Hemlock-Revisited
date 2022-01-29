@@ -69,7 +69,7 @@ namespace hemlock {
             Font*  owner;
             ui32v2 texture_size;
 
-            bool save(const char* filepath, hio::image::Saver save);
+            bool save(std::string filepath, hio::image::Saver save);
         };
         const FontInstance NIL_FONT_INSTANCE = { 0, 0, nullptr, nullptr, ui32v2(0) };
 
@@ -243,7 +243,7 @@ namespace hemlock {
              */
             Row* generate_rows(Glyph* glyphs, ui32 rowCount, FontSize padding, ui32& width, ui32& height);
 
-            const char*     m_filepath;
+            std::string     m_filepath;
             char            m_start, m_end;
             FontSize        m_default_size;
             FontInstanceMap m_font_instances;
