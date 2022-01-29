@@ -40,7 +40,7 @@ static ui32 nextPower2(ui32 value) {
 export
 namespace hemlock {
     namespace graphics {
-        using hemlock::io::image;
+        using namespace hemlock::io::image;
 
         const char FIRST_PRINTABLE_CHAR = 32;
         const char LAST_PRINTABLE_CHAR  = 126;
@@ -117,7 +117,7 @@ namespace hemlock {
             Font*  owner;
             ui32v2 textureSize;
 
-            bool save(const char* name, Saver save) {
+            bool save(const char* filepath, Saver save) {
                 // Prepare the pixel buffer.
                 ui8* pixels = new ui8[textureSize.x * textureSize.y * 4];
 
