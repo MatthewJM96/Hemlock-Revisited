@@ -21,6 +21,9 @@ set(CMAKE_CXX_FLAGS_DEBUG "-g")
 
 add_executable(Hemlock_Revisited
     "${PROJECT_SOURCE_DIR}/src/stdafx.cpp"
+    "${PROJECT_SOURCE_DIR}/src/timing.cpp"
+    "${PROJECT_SOURCE_DIR}/src/app/app.cpp"
+    "${PROJECT_SOURCE_DIR}/src/app/screen.cpp"
     "${PROJECT_SOURCE_DIR}/src/graphics/font.cpp"
     "${PROJECT_SOURCE_DIR}/src/graphics/window.cpp"
     "${PROJECT_SOURCE_DIR}/src/io/image.cpp"
