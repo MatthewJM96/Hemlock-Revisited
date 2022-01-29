@@ -1,10 +1,6 @@
-export module hemlock.event;
+#ifndef __hemlock_event_h
+#define __hemlock_event_h
 
-import <functional>;
-import <type_traits>;
-import <vector>;
-
-export
 namespace hemlock {
     // Sender is the object responsible for handling the event, and is stored
     // simply as a void pointer; making things easier for us and harder for
@@ -237,3 +233,5 @@ namespace hemlock {
         bool        m_triggering;
     };
 }
+
+#endif // __hemlock_event_h

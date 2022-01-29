@@ -1,16 +1,4 @@
-namespace std {
-    constexpr bool is_constant_evaluated() noexcept {
-        return __builtin_is_constant_evaluated();
-    }
-}
-
-#include <SDL2/SDL.h>
-
-import <iostream>;
-import <type_traits>;
-
-import hemlock.event;
-import hemlock.types;
+#include "stdafx.h"
 
 void add(hemlock::Sender, ui32 a, ui32 b) { std::cout << a << " + " << b << " = " << a + b << std::endl; }
 
