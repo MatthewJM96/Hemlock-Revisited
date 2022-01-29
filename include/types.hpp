@@ -138,4 +138,9 @@ struct colour4 {
     }
 };
 
+struct TimeData {
+    f64 total;
+    f64 frame;
+};
+
 #endif // __hemlock_types_h
