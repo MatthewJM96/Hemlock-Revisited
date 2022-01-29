@@ -191,7 +191,7 @@ void happ::BasicApp::run() {
             m_current_screen->draw(m_current_times);
         }
 
-        // m_window->sync();
+        m_window->sync();
         
 #if defined(OUTPUT_FPS)
         static i32 i = 0;

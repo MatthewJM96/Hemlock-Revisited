@@ -382,3 +382,7 @@ void hg::Window::validate_fullscreen_mode() {
         }
     }
 }
+
+void hg::Window::sync() {
+    SDL_GL_SwapWindow(m_window);
+}
