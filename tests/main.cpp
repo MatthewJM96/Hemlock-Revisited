@@ -1,3 +1,9 @@
+namespace std {
+    constexpr bool is_constant_evaluated() noexcept {
+        return __builtin_is_constant_evaluated();
+    }
+}
+
 import <iostream>;
 
 import hemlock.event;
