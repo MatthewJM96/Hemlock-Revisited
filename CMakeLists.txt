@@ -16,6 +16,8 @@ set(CMAKE_CXX_FLAGS_DEBUG "-g")
 add_executable(Hemlock_Revisited
     "${PROJECT_SOURCE_DIR}/src/event.cpp"
     "${PROJECT_SOURCE_DIR}/src/types.cpp"
+    "${PROJECT_SOURCE_DIR}/src/graphics/font.cpp"
+    "${PROJECT_SOURCE_DIR}/src/io/image.cpp"
     "${PROJECT_SOURCE_DIR}/tests/main.cpp"
 )
 
@@ -32,6 +34,8 @@ target_link_directories(Hemlock_Revisited
 )
 
 target_link_libraries(Hemlock_Revisited
+    png
     SDL2main
     SDL2
+    SDL2_ttf
 )
