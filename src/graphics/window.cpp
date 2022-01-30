@@ -22,16 +22,11 @@ bool hg::FullscreenMode::operator!=(const FullscreenMode& rhs) {
                 && this->pixel_format == rhs.pixel_format);
 }
 
-hg::Window::Window(WindowSettings settings) :
-    m_initialised(false),
-    m_window(nullptr),
-    m_settings(settings),
-    m_aspect_ratio({})
-{ /* Empty. */ }
-
-hg::WindowError hg::Window::init() {
+hg::WindowError hg::Window::init(WindowSettings settings /*= {}*/) {
     if (m_initialised) return WindowError::NONE;
     m_initialised = true;
+
+    m_settings = settings;
 
     determine_modes();
     calculate_aspect_ratio();

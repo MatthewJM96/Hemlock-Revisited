@@ -76,11 +76,14 @@ namespace hemlock {
             using WindowDimensionMap = std::map<ui8, std::vector<WindowDimensions>>;
             using FullscreenModeMap  = std::map<ui8, std::vector<FullscreenMode>>;
         public:
-            Window() : Window(WindowSettings{}) {}
-            Window(WindowSettings settings);
+            Window() :
+                m_window(nullptr),
+                m_context(nullptr),
+                m_initialised(false)
+            { /* Empty. */ }
             ~Window() { /* Empty. */ }
 
-            WindowError init();
+            WindowError init(WindowSettings settings = {});
             void        dispose();
 
                    const char* name()                { return m_settings.name;                               }
