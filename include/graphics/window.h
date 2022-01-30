@@ -87,6 +87,7 @@ namespace hemlock {
             void        dispose();
 
                    const char* name()                { return m_settings.name;                               }
+                          ui32 window_id()           { return m_window_id;                                   }
               WindowDimensions dimensions()          { return m_settings.dimensions;                         }
                           ui32 width()               { return m_settings.dimensions.width;                   }
                           ui32 height()              { return m_settings.dimensions.height;                  }
@@ -138,6 +139,8 @@ namespace hemlock {
             void validate_fullscreen_mode();
 
             bool               m_initialised;
+
+            ui32 m_window_id;
 
             SDL_Window*        m_window;
             SDL_GLContext      m_context;

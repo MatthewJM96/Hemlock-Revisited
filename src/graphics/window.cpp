@@ -75,6 +75,8 @@ hg::WindowError hg::Window::init(WindowSettings settings /*= {}*/) {
         SDL_GL_SetSwapInterval(0);
     }
 
+    m_window_id = SDL_GetWindowID(m_window);
+
     return WindowError::NONE;
 }
 
