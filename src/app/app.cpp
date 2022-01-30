@@ -57,7 +57,12 @@ bool happ::IApp::add_screen(Screen screen) {
     return true;
 }
 
-bool happ::IApp::handle_requests() {
+bool happ::IApp::handle_screen_requests() {
+    if (m_current_screen == nullptr) {
+        set_should_quit();
+        return false;
+    }
+
     switch (m_current_screen->state()) {
         case ScreenState::CHANGE_NEXT:
             m_current_screen->end(m_current_times);
@@ -66,8 +71,11 @@ bool happ::IApp::handle_requests() {
 
             if (m_current_screen != nullptr) {
                 m_current_screen->start(m_current_times);
+            } else {
+                set_should_quit();
+                return false;
             }
-            break;
+            return true;
 
         case ScreenState::CHANGE_PREV:
             m_current_screen->end(m_current_times);
@@ -76,18 +84,29 @@ bool happ::IApp::handle_requests() {
 
             if (m_current_screen != nullptr) {
                 m_current_screen->start(m_current_times);
+            } else {
+                set_should_quit();
+                return false;
             }
-            break;
+            return true;
 
-        case ScreenState::EXIT_APPLICATION:
-            m_should_quit = true;
-            break;
+        case ScreenState::QUIT_APPLICATION:
+            set_should_quit();
+            return false;
+
+        case ScreenState::NONE:
+            // Screen is doing nothing, but we shouldn't quit either.
+            return false;
+
+        case ScreenState::RUNNING:
+            // Screen is running as usual.
+            return true;
 
         default:
-            // TODO(Matthew): Do we not just always return false? This is bad.
-            return false;
+            quit();
     }
-    return true;
+    // We should never get here...
+    return false;
 }
 
 void happ::IApp::goto_next_screen() {
@@ -203,12 +222,13 @@ void happ::BasicApp::run() {
 
         SDL_PumpEvents();
 
-        handle_requests();
-
-        if (m_current_screen) {
+        // Update screen if it is in a state ready to act.
+        if (handle_screen_requests()) {
             m_current_screen->update(m_current_times);
 
-            if (!handle_requests()) {
+            // Draw screen if it is still in a state ready to
+            // act after the update phase.
+            if (handle_screen_requests()) {
                 m_current_screen->draw(m_current_times);
             }
         }

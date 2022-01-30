@@ -48,7 +48,13 @@ namespace hemlock {
 
             virtual void quit();
 
-            bool handle_requests();
+            /**
+             * @brief Handles requests for screen changes based on
+             * current screen state.
+             *
+             * @return true if the screen is ready to be acted on, false otherwise.
+             */
+            bool handle_screen_requests();
 
             void goto_next_screen();
             void goto_prev_screen();
