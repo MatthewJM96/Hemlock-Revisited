@@ -4,7 +4,7 @@
 namespace hemlock {
     class FpsLimiter;
     namespace graphics {
-        class Window;
+        class WindowManager;
     }
     namespace ui {
         class InputManager;
@@ -64,13 +64,14 @@ namespace hemlock {
         public:
             BasicApp() :
                 IApp(),
-                m_window(nullptr),
+                m_window_manager(nullptr),
                 m_input_manager(nullptr),
                 m_fps_limiter(nullptr)
             { /* Empty */ };
             virtual ~BasicApp() { /* Empty */ };
 
-            hemlock::graphics::Window* window() const { return m_window; }
+            hemlock::graphics::WindowManager* window_manager() const { return m_window_manager; }
+                   hemlock::ui::InputManager* input_manager()  const { return m_input_manager;  }
 
             virtual void init()    override;
             virtual void dispose() override;
@@ -79,9 +80,9 @@ namespace hemlock {
         protected:
             void calculate_times();
 
-            hemlock::graphics::Window* m_window;
-            hemlock::ui::InputManager* m_input_manager;
-            hemlock::FpsLimiter*       m_fps_limiter;
+            hemlock::graphics::WindowManager* m_window_manager;
+            hemlock::ui::InputManager*        m_input_manager;
+            hemlock::FpsLimiter*              m_fps_limiter;
         };
     }
 }

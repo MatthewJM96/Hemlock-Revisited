@@ -2,7 +2,7 @@
 
 #include "timing.h"
 #include "app/screen.h"
-#include "graphics/window.h"
+#include "graphics/window_manager.h"
 
 #include "app/app.h"
 
@@ -132,15 +132,14 @@ void happ::BasicApp::init() {
     SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 
-    m_window = new hg::Window();
-    if (m_window->init() != hg::WindowError::NONE) {
+    m_window_manager = new hg::WindowManager();
+    if (m_window_manager->init() != hg::WindowError::NONE) {
         puts("Window could not be initialised...\n");
         exit(1);
     }
 
-    // TODO(Matthew): Implement
-    // m_input_manager = new hui::InputManager();
-    // hui::InputDispatcher::instance()->init(m_window, m_input_manager);
+    m_input_manager = new hui::InputManager();
+    hui::InputDispatcher::instance()->init(m_window, m_input_manager);
 
     #ifdef HEMLOCK_USE_DEVIL
     ilutRenderer(ILUT_OPENGL);
@@ -163,14 +162,13 @@ void happ::BasicApp::dispose() {
     dispose_screens();
     m_current_screen = nullptr;
 
-    m_window->dispose();
-    delete m_window;
-    m_window = nullptr;
+    m_window_manager->dispose();
+    delete m_window_manager;
+    m_window_manager = nullptr;
 
-    // TODO(Matthew): Implement
-    // m_input_manager->dispose();
-    // delete m_input_manager;
-    // m_input_manager = nullptr;
+    m_input_manager->dispose();
+    delete m_input_manager;
+    m_input_manager = nullptr;
 }
 
 void happ::BasicApp::run() {
@@ -191,7 +189,7 @@ void happ::BasicApp::run() {
             m_current_screen->draw(m_current_times);
         }
 
-        m_window->sync();
+        m_window_manager->sync_windows();
         
 #if defined(OUTPUT_FPS)
         static i32 i = 0;
