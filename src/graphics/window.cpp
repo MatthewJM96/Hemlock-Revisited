@@ -42,7 +42,7 @@ hg::WindowError hg::Window::init(WindowSettings settings /*= {}*/) {
         flags |= SDL_WINDOW_RESIZABLE;
     }
 
-    m_window = SDL_CreateWindow(name(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width(), height(), flags);
+    m_window = SDL_CreateWindow(name().data(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width(), height(), flags);
     if (m_window == nullptr) {
         debug_printf("Couldn't create SDL Window.");
         return WindowError::SDL_WINDOW;
@@ -90,15 +90,12 @@ void hg::Window::dispose() {
     SDL_DestroyWindow(m_window);
     m_window = nullptr;
 
-    delete m_settings.name;
-    m_settings.name = nullptr;
-
     WindowDimensionMap().swap(m_allowed_resolutions);
 }
 
-void hg::Window::set_name(char* name) {
+void hg::Window::set_name(const std::string& name) {
     m_settings.name = name;
-    SDL_SetWindowTitle(m_window, name);
+    SDL_SetWindowTitle(m_window, name.data());
 }
 
 void hg::Window::set_dimensions(WindowDimensions dimensions) {

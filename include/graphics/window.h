@@ -47,8 +47,7 @@ namespace hemlock {
         };
 
         struct WindowSettings {
-            CALLEE_DELETE
-            const char*      name            = "Hemlock Window";
+            std::string      name            = "Hemlock Window";
             WindowDimensions dimensions      = {800, 600};
             ui32             display_idx     = 0;
             FullscreenMode   fullscreen_mode = {};
@@ -86,7 +85,7 @@ namespace hemlock {
             WindowError init(WindowSettings settings = {});
             void        dispose();
 
-                   const char* name()                { return m_settings.name;                               }
+            const std::string& name()                { return m_settings.name;                               }
                           ui32 window_id()           { return m_window_id;                                   }
               WindowDimensions dimensions()          { return m_settings.dimensions;                         }
                           ui32 width()               { return m_settings.dimensions.width;                   }
@@ -104,7 +103,7 @@ namespace hemlock {
             WindowDimensionMap allowed_resolutions() { return m_allowed_resolutions;                         }
              FullscreenModeMap fullscreen_modes()    { return m_fullscreen_modes;                            }
 
-            void set_name(CALLEE_DELETE char* name);
+            void set_name(const std::string& name);
             void set_dimensions(WindowDimensions dimensions);
             void set_width(ui32 width);
             void set_height(ui32 height);
