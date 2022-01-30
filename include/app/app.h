@@ -22,7 +22,7 @@ namespace hemlock {
             using ScreenList = std::unordered_map<std::string, IScreen*>;
             using Screen     = std::pair<std::string, IScreen*>;
         public:
-            IApp() : m_current_screen(nullptr) { /* Empty */ };
+            IApp();
             virtual ~IApp() { /* Empty */ };
 
             virtual void init()    = 0;
@@ -31,12 +31,15 @@ namespace hemlock {
             virtual void run() = 0;
 
             bool should_quit() { return m_should_quit; }
-            void set_should_quit(bool should_quit = true) { m_should_quit = should_quit; }
+            void set_should_quit(bool should_quit = true);
 
             bool change_screen(std::string name);
 
+            Event<>                  on_quit;
             Event<ScreenChangeEvent> on_screen_change;
-        protected:      
+        protected:
+            Subscriber<> handle_external_quit;
+
             virtual void prepare_screens() = 0;
 
             bool add_screen(Screen screen);

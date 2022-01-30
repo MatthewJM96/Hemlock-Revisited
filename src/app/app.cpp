@@ -8,6 +8,20 @@
 
 #include "app/app.h"
 
+happ::IApp::IApp()  :
+    handle_external_quit([&](Sender) {
+        set_should_quit();
+    }),
+    m_current_screen(nullptr),
+    m_window_manager(nullptr),
+    m_input_manager(nullptr)
+{ /* Empty */ }
+
+void happ::IApp::set_should_quit(bool should_quit /*= true*/) {
+    m_should_quit = should_quit;
+    if (should_quit) on_quit();
+}
+
 bool happ::IApp::change_screen(std::string name) {
     auto it = m_screens.find(name);
     if (it == m_screens.end()) return false;
@@ -27,7 +41,11 @@ bool happ::IApp::change_screen(std::string name) {
 
 void happ::IApp::quit() {
     m_current_screen->end(m_previous_times);
+
     dispose();
+
+    SDL_Quit();
+    exit(0);
 }
 
 bool happ::IApp::add_screen(Screen screen) {
@@ -142,7 +160,8 @@ void happ::BasicApp::init() {
     }
 
     m_input_manager = new hui::InputManager();
-    hui::InputDispatcher::instance()->init(this, m_input_manager);
+    hui::InputDispatcher::instance()->init(m_input_manager);
+    hui::InputDispatcher::instance()->on_quit += &handle_external_quit;
 
     #ifdef HEMLOCK_USE_DEVIL
     ilutRenderer(ILUT_OPENGL);

@@ -5,10 +5,6 @@
 #include "ui/input/events.hpp"
 
 namespace hemlock {
-    namespace app {
-        class IApp;
-    }
-
     namespace ui {
         class InputManager;
 
@@ -24,7 +20,7 @@ namespace hemlock {
             void operator=(const InputDispatcher&)  = delete;
             ~InputDispatcher() { /* Empty. */ };
 
-            void init(hemlock::app::IApp* app, InputManager* manager);
+            void init(InputManager* manager);
             void dispose();
 
             void set_text_mode(bool on);
@@ -39,15 +35,14 @@ namespace hemlock {
             Event<>        on_quit;
         private:
             InputDispatcher() :
-                m_initialised(false), m_app(nullptr), m_manager(nullptr)
+                m_initialised(false), m_manager(nullptr)
             { /* Empty. */ };
 
             static InputDispatcher* m_instance;
 
             bool m_initialised;
 
-            hemlock::app::IApp* m_app;
-                  InputManager* m_manager;
+            InputManager* m_manager;
         };
     }
 }

@@ -1,6 +1,5 @@
 #include "stdafx.h"
 
-#include "app/app.h"
 #include "ui/input/manager.h"
 
 #include "ui/input/dispatcher.h"
@@ -23,11 +22,10 @@ static hui::MouseButton convert_mouse_button(ui8 sdl_button) {
 
 hui::InputDispatcher* hui::InputDispatcher::m_instance = nullptr;
 
-void hui::InputDispatcher::init(happ::IApp* app, hui::InputManager* manager) {
+void hui::InputDispatcher::init(hui::InputManager* manager) {
     if (m_initialised) return;
     m_initialised = true;
 
-    m_app     = app;
     m_manager = manager;
 
     SDL_SetEventFilter(hui::InputDispatcher::handle_event, (void*)this);
@@ -43,7 +41,6 @@ void hui::InputDispatcher::dispose() {
 
     SDL_SetEventFilter(nullptr, nullptr);
 
-    m_app     = nullptr;
     m_manager = nullptr;
 }
 
@@ -118,14 +115,7 @@ i32 hui::InputDispatcher::handle_event(void* data, SDL_Event* event) {
             }
             break;
         case SDL_QUIT:
-            dispatcher->m_app->set_should_quit(true);
-
             dispatcher->on_quit();
-
-            if (dispatcher->m_app->should_quit()) {
-                SDL_Quit();
-                exit(0);
-            }
             break;
         case SDL_WINDOWEVENT:
             switch (event->window.event) {
