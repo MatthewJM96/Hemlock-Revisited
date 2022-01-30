@@ -168,7 +168,7 @@ namespace hemlock {
         }
 
         /**
-        * @brief Removes a subscriber from the event (only the first instance found is removed).
+        * @brief Removes a subscriber from the event (all instances are removed).
         *
         * @param subscriber The subscriber to remove from the event.
         */
@@ -177,14 +177,13 @@ namespace hemlock {
             if (m_triggering) {
                 m_removal_queue.emplace_back(subscriber);
             } else {
-                const auto& it = std::find(m_subscribers.begin(), m_subscribers.end(), subscriber);
-                if (it != m_subscribers.end()) {
-                    m_subscribers.erase(it);
-                }
+                std::erase_if(m_subscribers.begin(), m_subscribers.end(), [subscriber](_Subscriber* rhs) {
+                    return rhs == subscriber;
+                });
             }
         }
         /**
-        * @brief Removes a subscriber from the event (only the first instance found is removed).
+        * @brief Removes a subscriber from the event (all instances are removed).
         *
         * operator-= is an alias of remove
         *
@@ -211,10 +210,9 @@ namespace hemlock {
 
             // Remove any subscribers that requested to be unsubscribed during triggering.
             for (auto& unsubscriber : m_removal_queue) {
-                const auto& it = std::find(m_subscribers.begin(), m_subscribers.end(), unsubscriber);
-                if (it != m_subscribers.end()) {
-                    m_subscribers.erase(it);
-                }
+                std::erase_if(m_subscribers.begin(), m_subscribers.end(), [unsubscriber](_Subscriber* rhs) {
+                    return rhs == unsubscriber;
+                });
             }
         }
         /**
