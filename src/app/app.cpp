@@ -12,9 +12,7 @@ happ::IApp::IApp()  :
     handle_external_quit([&](Sender) {
         set_should_quit();
     }),
-    m_current_screen(nullptr),
-    m_window_manager(nullptr),
-    m_input_manager(nullptr)
+    m_current_screen(nullptr)
 { /* Empty */ }
 
 void happ::IApp::set_should_quit(bool should_quit /*= true*/) {
