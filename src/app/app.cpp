@@ -66,6 +66,7 @@ bool happ::IApp::handle_requests() {
             break;
 
         default:
+            // TODO(Matthew): Do we not just always return false? This is bad.
             return false;
     }
     return true;
@@ -185,10 +186,12 @@ void happ::BasicApp::run() {
 
         handle_requests();
 
-        m_current_screen->update(m_current_times);
+        if (m_current_screen) {
+            m_current_screen->update(m_current_times);
 
-        if (!handle_requests()) {
-            m_current_screen->draw(m_current_times);
+            if (!handle_requests()) {
+                m_current_screen->draw(m_current_times);
+            }
         }
 
         m_window_manager->sync_windows();
