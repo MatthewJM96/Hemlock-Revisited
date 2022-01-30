@@ -3,6 +3,8 @@
 #include "timing.h"
 #include "app/screen.h"
 #include "graphics/window_manager.h"
+#include "ui/input/dispatcher.h"
+#include "ui/input/manager.h"
 
 #include "app/app.h"
 
@@ -133,13 +135,13 @@ void happ::BasicApp::init() {
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 
     m_window_manager = new hg::WindowManager();
-    if (m_window_manager->init() != hg::WindowError::NONE) {
+    if (m_window_manager->init(this) != hg::WindowError::NONE) {
         puts("Window could not be initialised...\n");
         exit(1);
     }
 
     m_input_manager = new hui::InputManager();
-    hui::InputDispatcher::instance()->init(m_window, m_input_manager);
+    hui::InputDispatcher::instance()->init(this, m_input_manager);
 
     #ifdef HEMLOCK_USE_DEVIL
     ilutRenderer(ILUT_OPENGL);
