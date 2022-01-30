@@ -30,9 +30,10 @@ namespace hemlock {
 
             virtual void run() = 0;
 
-            bool change_screen(std::string name);
+            bool should_quit() { return m_should_quit; }
+            void set_should_quit(bool should_quit = true) { m_should_quit = should_quit; }
 
-            virtual void quit();
+            bool change_screen(std::string name);
 
             Event<ScreenChangeEvent> on_screen_change;
         protected:      
@@ -41,6 +42,8 @@ namespace hemlock {
             bool add_screen(Screen screen);
 
             IScreen* current_screen() { return m_current_screen; }
+
+            virtual void quit();
 
             bool handle_requests();
 
