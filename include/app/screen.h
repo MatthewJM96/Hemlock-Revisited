@@ -9,7 +9,7 @@ namespace hemlock {
             RUNNING,         // Screen is running and being drawn.
             CHANGE_NEXT,     // Screen wants application to move onto next screen.
             CHANGE_PREV,     // Screen wants application to move back to last screen.
-            EXIT_APPLICATION // Screen wants application to quit.
+            QUIT_APPLICATION // Screen wants application to quit.
         };
 
         // Not just for game screens, can also be used for UI screens with navigation back and forth.
