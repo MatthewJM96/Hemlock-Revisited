@@ -23,7 +23,7 @@ namespace hemlock {
             { /* Empty. */ }
             ~WindowManager() { /* Empty. */ }
 
-            void init(hemlock::app::IApp* app);
+            WindowError init(hemlock::app::IApp* app);
             void dispose();
 
             void set_quit_on_main_window_close(bool should = true) { m_quit_on_main_window_close = should; }
@@ -31,8 +31,10 @@ namespace hemlock {
             bool set_main_window(Window* window);
             bool set_main_window(ui32 window_id);
 
-            Window* add_window(WindowSettings settings = {});
-            bool    add_window(CALLEE_DELETE Window* window);
+            std::pair<Window*, WindowError>
+                add_window(WindowSettings settings = {});
+
+            bool add_window(CALLEE_DELETE Window* window);
 
             bool dispose_window(Window* window);
 

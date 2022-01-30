@@ -2,13 +2,18 @@
 
 #include "graphics/window_manager.h"
 
-void hg::WindowManager::init(hemlock::app::IApp* app) {
-    if (m_main_window != nullptr) return;
+hg::WindowError hg::WindowManager::init(hemlock::app::IApp* app) {
+    if (m_main_window != nullptr) return WindowError::NONE;
 
     m_app = app;
 
-    m_main_window = add_window();
+    auto [ window, err ] = add_window();
+    if (err != WindowError::NONE) return err;
+
+    m_main_window = window;
     m_windows.insert({m_main_window->window_id(), m_main_window});
+
+    return WindowError::NONE;
 }
 
 void hg::WindowManager::dispose() {
@@ -42,13 +47,14 @@ bool hg::WindowManager::set_main_window(ui32 window_id) {
     return true;
 }
 
-hg::Window* hg::WindowManager::add_window(WindowSettings settings /*= {}*/) {
+std::pair<hg::Window*, hg::WindowError>
+hg::WindowManager::add_window(WindowSettings settings /*= {}*/) {
     hg::Window* new_window = new hg::Window();
-    new_window->init(settings);
+    WindowError err = new_window->init(settings);
 
     m_windows.insert({new_window->window_id(), new_window});
 
-    return new_window;
+    return { new_window, err };
 }
 
 bool hg::WindowManager::add_window(CALLEE_DELETE Window* window) {
