@@ -177,7 +177,7 @@ namespace hemlock {
             if (m_triggering) {
                 m_removal_queue.emplace_back(subscriber);
             } else {
-                std::erase_if(m_subscribers.begin(), m_subscribers.end(), [subscriber](_Subscriber* rhs) {
+                std::erase_if(m_subscribers, [subscriber](_Subscriber* rhs) {
                     return rhs == subscriber;
                 });
             }
@@ -210,7 +210,7 @@ namespace hemlock {
 
             // Remove any subscribers that requested to be unsubscribed during triggering.
             for (auto& unsubscriber : m_removal_queue) {
-                std::erase_if(m_subscribers.begin(), m_subscribers.end(), [unsubscriber](_Subscriber* rhs) {
+                std::erase_if(m_subscribers, [unsubscriber](_Subscriber* rhs) {
                     return rhs == unsubscriber;
                 });
             }
