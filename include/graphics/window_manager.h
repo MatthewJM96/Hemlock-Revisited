@@ -2,6 +2,7 @@
 #define __hemlock_graphics_window_manager_h
 
 #include "graphics/window.h"
+#include "ui/input/dispatcher.h"
 
 namespace hemlock {
     namespace app {
@@ -16,11 +17,7 @@ namespace hemlock {
 
         class WindowManager {
         public:
-            WindowManager() :
-                m_main_window(nullptr),
-                m_app(nullptr),
-                m_quit_on_main_window_close(true)
-            { /* Empty. */ }
+            WindowManager();
             ~WindowManager() { /* Empty. */ }
 
             WindowError init(hemlock::app::IApp* app);
@@ -37,9 +34,12 @@ namespace hemlock {
             bool add_window(CALLEE_DELETE Window* window);
 
             bool dispose_window(Window* window);
+            bool dispose_window(ui32 window_id);
 
             void sync_windows();
         private:
+            Subscriber<hui::WindowEvent> handle_window_close;
+
             Windows m_windows;
             Window* m_main_window;
 

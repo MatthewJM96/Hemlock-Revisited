@@ -1,11 +1,24 @@
 #include "stdafx.h"
 
+#include "app/app.h"
+
 #include "graphics/window_manager.h"
+
+hg::WindowManager::WindowManager() :
+    handle_window_close([&](Sender, hui::WindowEvent event) {
+        dispose_window(event.window_id);
+    }),
+    m_main_window(nullptr),
+    m_app(nullptr),
+    m_quit_on_main_window_close(true)
+{ /* Empty. */ }
 
 hg::WindowError hg::WindowManager::init(hemlock::app::IApp* app) {
     if (m_main_window != nullptr) return WindowError::NONE;
 
     m_app = app;
+
+    hui::InputDispatcher::instance()->on_window.close += &handle_window_close;
 
     auto [ window, err ] = add_window();
     if (err != WindowError::NONE) return err;
@@ -67,6 +80,33 @@ bool hg::WindowManager::dispose_window(Window* window) {
     });
 
     if (erased == 0) return false;
+
+    if ((m_main_window == window
+            && m_quit_on_main_window_close)
+        || m_windows.size() <= 0) {
+        m_app->set_should_quit();
+    }
+
+    window->dispose();
+    delete window;
+
+    return true;
+}
+
+bool hg::WindowManager::dispose_window(ui32 window_id) {
+    auto it =  m_windows.find(window_id);
+
+    if (it == m_windows.end()) return false;
+
+    Window* window = (*it).second;
+
+    m_windows.erase(it);
+
+    if ((m_main_window == window
+            && m_quit_on_main_window_close)
+        || m_windows.size() <= 0) {
+        m_app->set_should_quit();
+    }
 
     window->dispose();
     delete window;
