@@ -17,7 +17,7 @@ namespace hemlock {
         public:
             IScreen() :
                 m_initialised(false),
-                m_name(nullptr),
+                m_name(""),
                 m_next_screen(nullptr),
                 m_prev_screen(nullptr)
             { /* Empty. */ };
