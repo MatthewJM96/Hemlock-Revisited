@@ -2,6 +2,7 @@
 
 #include "app/app.h"
 #include "app/screen.h"
+#include "graphics/window_manager.h"
 
 void add(hemlock::Sender, ui32 a, ui32 b) { std::cout << a << " + " << b << " = " << a + b << std::endl; }
 
@@ -46,6 +47,12 @@ i32 main() {
 
     MyApp app;
     app.init();
+
+    auto [ my_second_window, err ] = app.window_manager()->add_window();
+
+    if (err != hg::WindowError::NONE) {
+        std::cout << "Failed to make a second window." << std::endl;
+    }
 
     std::cout << "Hello, world!" << std::endl;
 
