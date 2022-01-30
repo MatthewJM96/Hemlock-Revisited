@@ -31,6 +31,7 @@ hg::Window::Window(WindowSettings settings) :
 
 hg::WindowError hg::Window::init() {
     if (m_initialised) return WindowError::NONE;
+    m_initialised = true;
 
     determine_modes();
     calculate_aspect_ratio();
@@ -79,7 +80,6 @@ hg::WindowError hg::Window::init() {
         SDL_GL_SetSwapInterval(0);
     }
 
-    m_initialised = true;
     return WindowError::NONE;
 }
 
