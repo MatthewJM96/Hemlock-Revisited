@@ -53,6 +53,7 @@ target_link_directories(Hemlock_Revisited
 target_link_libraries(Hemlock_Revisited
     GL
     GLEW
+    glob
     png
     SDL2main
     SDL2
