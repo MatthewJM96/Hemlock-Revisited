@@ -20,6 +20,11 @@ public:
     }
 };
 
+template <hemlock::ResizableContiguousContainer c>
+c give_me_container() {
+    return c();
+}
+
 class MyApp : public happ::BasicApp {
 public:
     virtual ~MyApp() { /* Empty */ };
@@ -44,6 +49,11 @@ i32 main() {
     delete listener;
 
     on_calc(1, 4);
+
+    auto my_cont = give_me_container<std::vector<bool>>();
+    my_cont.push_back(true);
+
+    std::cout << "My container has " << my_cont.size() << " elements." << std::endl;
 
     MyApp app;
     app.init();
