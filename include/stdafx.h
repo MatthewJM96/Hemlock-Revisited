@@ -12,6 +12,10 @@
 #include <unordered_map>
 #include <vector>
 
+// Views
+#include <ranges>
+#include <iterator>
+
 // Strings
 #include <cstring>
 #include <string>
