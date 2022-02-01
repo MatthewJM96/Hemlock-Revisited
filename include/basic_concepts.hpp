@@ -218,6 +218,42 @@ namespace hemlock {
     template <typename ContainerType>
     concept FixedSizeContiguousContainer = ContiguousContainer<ContainerType>
         && FixedSizeContainer<ContainerType>;
+
+    /**
+     * @brief Defines a container that stores key-value pairs.
+     *
+     * Std Lib Map Containers:
+     *   * map
+     *   * multimap
+     *   * unordered_map
+     *   * unordered_multimap
+     *
+     * @tparam ContainerType The tested container type.
+     */
+    template <typename ContainerType>
+    concept MapContainer = Container<ContainerType>
+        && requires(ContainerType c)
+    {
+        typename ContainerType::key_type;
+        typename ContainerType::hasher;
+        typename ContainerType::key_equal;
+    }
+        && requires(
+            ContainerType                     c,
+            ContainerType::key_type         key,
+            ContainerType::mapped_type    value,
+            ContainerType::iterator          it,
+            ContainerType::mapped_type const_it
+        )
+    {
+        { c()[key]    } -> std::same_as<ContainerType::mapped_type&>;
+        { c().at(key) } -> std::same_as<ContainerType::mapped_type&>;
+        { c().insert({key, value}) } -> std::same_as<std::pair<ContainerType::iterator, bool>>;
+        { c().erase(it)                 } -> std::same_as<ContainerType::iterator>;
+        { c().erase(const_it)           } -> std::same_as<ContainerType::iterator>;
+        { c().erase(const_it, const_it) } -> std::same_as<ContainerType::iterator>;
+        { c().swap(c()) }
+    };
 }
 
 #endif // __hemlock_basic_concepts_hpp
