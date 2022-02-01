@@ -50,6 +50,7 @@
 #include <png.h>
 
 // Our Types and Other Hints
+#include "basic_concepts.hpp"
 #include "decorators.hpp"
 #include "types.hpp"
 
