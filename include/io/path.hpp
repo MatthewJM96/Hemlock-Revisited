@@ -3,7 +3,7 @@
 
 namespace hemlock {
     namespace io {
-        using Path = std::filesystem::path;
+        using Path = fs::path;
 
         using PathBuilder = std::vector<Path>;
     }

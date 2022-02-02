@@ -61,6 +61,7 @@
 #include "types.hpp"
 
 // Our File Handling Interface
+#include "io/filesystem.hpp"
 #include "io/path.hpp"
 
 // Our Cache
