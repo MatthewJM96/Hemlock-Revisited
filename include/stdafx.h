@@ -20,6 +20,7 @@
 // Strings
 #include <cstring>
 #include <string>
+#include <regex>
 
 // Generics
 #include <algorithm>
