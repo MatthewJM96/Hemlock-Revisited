@@ -60,6 +60,9 @@
 #include "decorators.hpp"
 #include "types.hpp"
 
+// Our File Handling Interface
+#include "io/path.hpp"
+
 // Our Cache
 #include "cache.hpp"
 
