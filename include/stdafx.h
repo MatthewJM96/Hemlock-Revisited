@@ -8,6 +8,7 @@
 #include <map>
 #include <queue>
 #include <set>
+#include <span>
 #include <tuple>
 #include <unordered_map>
 #include <vector>
