@@ -47,6 +47,15 @@ namespace hemlock {
                 void handle_partial_glob(const fs::path& part, PathBuilder& builder);
             }
 
+            /**
+             * @brief Takes a filepath which may or may not contain
+             * glob patterns and returns the set of actual paths
+             * that matches to that filepath.
+             * 
+             * @param globpath The filepath to process.
+             * @param recursive Whether to allow the "**" pattern.
+             * @return The collection of matched paths.
+             */
             PathBuilder glob(const fs::path& globpath, bool recursive = false);
         }
     }
