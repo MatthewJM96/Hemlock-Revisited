@@ -255,6 +255,12 @@ namespace hemlock {
         { c().erase(const_it, const_it) } -> std::same_as<typename ContainerType::iterator>;
         { c().swap(c()) };
     };
+
+    template <typename Type>
+    concept Disposable = requires(Type c)
+    {
+        { c.dispose() };
+    };
 }
 
 #endif // __hemlock_basic_concepts_hpp
