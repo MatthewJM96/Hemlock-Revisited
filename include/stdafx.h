@@ -35,7 +35,6 @@
 // File Handling
 #include <cstdio>
 #include <filesystem>
-#include <glob/glob.h>
 
 // Streams
 #include <iostream>
