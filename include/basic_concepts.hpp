@@ -246,13 +246,14 @@ namespace hemlock {
             ContainerType::mapped_type const_it
         )
     {
-        { c()[key]    } -> std::same_as<ContainerType::mapped_type&>;
-        { c().at(key) } -> std::same_as<ContainerType::mapped_type&>;
-        { c().insert({key, value}) } -> std::same_as<std::pair<ContainerType::iterator, bool>>;
-        { c().erase(it)                 } -> std::same_as<ContainerType::iterator>;
-        { c().erase(const_it)           } -> std::same_as<ContainerType::iterator>;
-        { c().erase(const_it, const_it) } -> std::same_as<ContainerType::iterator>;
-        { c().swap(c()) }
+        { c()[key]    } -> std::same_as<typename ContainerType::mapped_type&>;
+        { c().at(key) } -> std::same_as<typename ContainerType::mapped_type&>;
+        { c().insert({key, value}) } -> std::same_as<std::pair<typename ContainerType::iterator, bool>>;
+        { c().emplace()            } -> std::same_as<std::pair<typename ContainerType::iterator, bool>>;
+        { c().erase(it)                 } -> std::same_as<typename ContainerType::iterator>;
+        { c().erase(const_it)           } -> std::same_as<typename ContainerType::iterator>;
+        { c().erase(const_it, const_it) } -> std::same_as<typename ContainerType::iterator>;
+        { c().swap(c()) };
     };
 }
 
