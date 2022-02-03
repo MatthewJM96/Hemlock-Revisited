@@ -3,7 +3,7 @@
 
 namespace hemlock {
     namespace io {
-        class IOManager;
+        class IOManagerBase;
     }
 
     template <typename CacheCandidateType>
@@ -18,7 +18,7 @@ namespace hemlock {
             Cache()  { /* Empty. */ }
             ~Cache() { /* Empty. */ }
 
-            void init(io::IOManager* iomanager, Parser parser) {
+            void init(io::IOManagerBase* iomanager, Parser parser) {
                 if (m_initialised) return;
                 m_initialised = true;
 
@@ -130,8 +130,8 @@ namespace hemlock {
     protected:
         bool m_initialised;
 
-        io::IOManager* m_iomanager;
-        Parser         m_parser;
+        io::IOManagerBase* m_iomanager;
+        Parser             m_parser;
 
         ContainerType m_assets;
     };
