@@ -300,7 +300,7 @@ void hg::Window::determine_modes() {
 }
 
 void hg::Window::calculate_aspect_ratio() {
-    std::function<ui32(ui32, ui32)> calculateGCD = [&calculateGCD](ui32 x, ui32 y) {
+    Delegate<ui32(ui32, ui32)> calculateGCD = [&calculateGCD](ui32 x, ui32 y) {
         if (y > x) return calculateGCD(y, x);
         if (y == 0) return x;
 

@@ -13,7 +13,7 @@ namespace hemlock {
         requires std::is_same_v<ContainerType::mapped_type, CachedType>
     class Cache {
     public:
-            using Parser = std::function<CachedType(const hio::fs::path&)>;
+            using Parser = Delegate<CachedType(const hio::fs::path&)>;
 
             Cache()  { /* Empty. */ }
             ~Cache() { /* Empty. */ }

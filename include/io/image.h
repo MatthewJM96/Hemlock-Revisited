@@ -15,8 +15,8 @@ namespace hemlock {
                 SENTINEL
             };
 
-            using Loader = std::function<bool(std::string, void*&, ui32v2&, PixelFormat&)>;
-            using Saver  = std::function<bool(std::string, const void*, ui32v2, PixelFormat)>;
+            using Loader = Delegate<bool(std::string, void*&, ui32v2&, PixelFormat&)>;
+            using Saver  = Delegate<bool(std::string, const void*, ui32v2, PixelFormat)>;
 
             namespace binary {
                 const ui8  BIN_TYPE_1  = 'S';

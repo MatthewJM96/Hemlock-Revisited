@@ -143,4 +143,9 @@ struct TimeData {
     f64 frame;
 };
 
+namespace hemlock {
+    template<typename ReturnType, typename... Args>
+    using Delegate = std::function<ReturnType(Args...)>;
+}
+
 #endif // __hemlock_types_h

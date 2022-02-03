@@ -37,7 +37,7 @@ namespace hemlock {
     };
 
     template <typename ...Parameters>
-    using Subscriber  = std::function<void(Sender, Parameters...)>;
+    using Subscriber  = Delegate<void(Sender, Parameters...)>;
     template <typename ...Parameters>
     using Subscribers = std::vector<Subscriber<Parameters...>*>;
 
