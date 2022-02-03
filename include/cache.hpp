@@ -13,7 +13,7 @@ namespace hemlock {
         requires std::is_same_v<ContainerType::mapped_type, CachedType>
     class Cache {
     public:
-            using Parser = std::function<CachedType(const std::filesystem::path&)>;
+            using Parser = std::function<CachedType(const hio::fs::path&)>;
 
             Cache()  { /* Empty. */ }
             ~Cache() { /* Empty. */ }
@@ -47,7 +47,7 @@ namespace hemlock {
              *
              * @return True if the asset was loaded, false if not.
              */
-            bool preload(const std::filesystem::path& filepath) {
+            bool preload(const hio::fs::path& filepath) {
                 auto& it = std::find(m_assets.begin(), m_assets.end(), filepath.string());
                 if (it != m_assets.end()) return false;
 
@@ -63,7 +63,7 @@ namespace hemlock {
              *
              * @return The number of assets preloaded.
              */
-            ui32 preload(std::span<std::filesystem::path> filepaths) {
+            ui32 preload(std::span<hio::fs::path> filepaths) {
                 ui32 count = 0;
                 for (auto& filepath : filepaths) {
                     if (preload(filepath)) ++count;
@@ -80,10 +80,10 @@ namespace hemlock {
              *
              * @return The number of assets preloaded.
              */
-            ui32 preload_glob(const std::filesystem::path& globpath) {
+            ui32 preload_glob(const hio::fs::path& globpath) {
                 return m_iomanager->apply_to_globpath(
                     globpath,
-                    [&](const std::filesystem::path& filepath) {
+                    [&](const hio::fs::path& filepath) {
                         return this->preload(filepath);
                     }
                 );
@@ -98,7 +98,7 @@ namespace hemlock {
              *
              * @return The number of assets preloaded.
              */
-            ui32 preload_glob(std::span<std::filesystem::path> globpaths) {
+            ui32 preload_glob(std::span<hio::fs::path> globpaths) {
                 ui32 count = 0;
                 for (auto& globpath : globpaths) {
                     count += preload_glob(globpath);
@@ -115,7 +115,7 @@ namespace hemlock {
              *
              * @return The asset fetched.
              */
-            CachedType& fetch(const std::filesystem::path& filepath) {
+            CachedType& fetch(const hio::fs::path& filepath) {
                 auto& it = std::find(m_assets.begin(), m_assets.end(), filepath.string());
                 if (it != m_assets.end()) return (*it).second;
 
