@@ -145,7 +145,10 @@ struct TimeData {
 
 namespace hemlock {
     template<typename ReturnType, typename... Args>
-    using Delegate = std::function<ReturnType(Args...)>;
+    struct Delegate;
+
+    template<typename ReturnType, typename... Args>
+    struct Delegate<ReturnType(Args...)> : public std::function<ReturnType(Args...)> { /* Empty. */ };
 }
 
 #endif // __hemlock_types_h
