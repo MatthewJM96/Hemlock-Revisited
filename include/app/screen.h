@@ -13,15 +13,15 @@ namespace hemlock {
         };
 
         // Not just for game screens, can also be used for UI screens with navigation back and forth.
-        class IScreen {
+        class ScreenBase {
         public:
-            IScreen() :
+            ScreenBase() :
                 m_initialised(false),
                 m_name(""),
                 m_next_screen(nullptr),
                 m_prev_screen(nullptr)
             { /* Empty. */ };
-            virtual ~IScreen() { /* Empty */};
+            virtual ~ScreenBase() { /* Empty */};
 
             virtual void init(std::string name);
             virtual void dispose(); 
@@ -39,18 +39,18 @@ namespace hemlock {
 
             ScreenState state() const { return m_state; }
 
-            IScreen* next_screen() const { return m_next_screen; }
-            IScreen* prev_screen() const { return m_prev_screen; }
+            ScreenBase* next_screen() const { return m_next_screen; }
+            ScreenBase* prev_screen() const { return m_prev_screen; }
 
-            void set_next_screen(IScreen* screen) { m_next_screen = screen; }
-            void set_prev_screen(IScreen* screen) { m_prev_screen = screen; }
+            void set_next_screen(ScreenBase* screen) { m_next_screen = screen; }
+            void set_prev_screen(ScreenBase* screen) { m_prev_screen = screen; }
         protected:
             bool        m_initialised;
             ScreenState m_state;
             std::string m_name;
 
-            IScreen* m_next_screen;
-            IScreen* m_prev_screen;
+            ScreenBase* m_next_screen;
+            ScreenBase* m_prev_screen;
         };
     }
 }

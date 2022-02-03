@@ -8,19 +8,19 @@
 
 #include "app/app.h"
 
-happ::IApp::IApp()  :
+happ::AppBase::AppBase()  :
     handle_external_quit([&](Sender) {
         set_should_quit();
     }),
     m_current_screen(nullptr)
 { /* Empty */ }
 
-void happ::IApp::set_should_quit(bool should_quit /*= true*/) {
+void happ::AppBase::set_should_quit(bool should_quit /*= true*/) {
     m_should_quit = should_quit;
     if (should_quit) on_quit();
 }
 
-bool happ::IApp::change_screen(std::string name) {
+bool happ::AppBase::change_screen(std::string name) {
     auto it = m_screens.find(name);
     if (it == m_screens.end()) return false;
 
@@ -37,7 +37,7 @@ bool happ::IApp::change_screen(std::string name) {
     return true;
 }
 
-void happ::IApp::quit() {
+void happ::AppBase::quit() {
     m_current_screen->end(m_previous_times);
 
     dispose();
@@ -46,7 +46,7 @@ void happ::IApp::quit() {
     exit(0);
 }
 
-bool happ::IApp::add_screen(Screen screen) {
+bool happ::AppBase::add_screen(Screen screen) {
     auto [_, added] = m_screens.insert(screen);
     if (!added) return false;
 
@@ -55,7 +55,7 @@ bool happ::IApp::add_screen(Screen screen) {
     return true;
 }
 
-bool happ::IApp::handle_screen_requests() {
+bool happ::AppBase::handle_screen_requests() {
     if (m_current_screen == nullptr) {
         set_should_quit();
         return false;
@@ -107,12 +107,12 @@ bool happ::IApp::handle_screen_requests() {
     return false;
 }
 
-void happ::IApp::goto_next_screen() {
+void happ::AppBase::goto_next_screen() {
     if (m_current_screen == nullptr) return;
 
-    IScreen* next_screen = m_current_screen->next_screen();
+    ScreenBase* next_screen = m_current_screen->next_screen();
 
-    IScreen* tmp = m_current_screen;
+    ScreenBase* tmp = m_current_screen;
 
     if (next_screen == nullptr) {
         m_current_screen = nullptr;
@@ -131,12 +131,12 @@ void happ::IApp::goto_next_screen() {
     on_screen_change({ tmp, m_current_screen });
 }
 
-void happ::IApp::goto_prev_screen() {
+void happ::AppBase::goto_prev_screen() {
     if (m_current_screen == nullptr) return;
 
-    IScreen* prev_screen = m_current_screen->prev_screen();
+    ScreenBase* prev_screen = m_current_screen->prev_screen();
 
-    IScreen* tmp = m_current_screen;
+    ScreenBase* tmp = m_current_screen;
 
     if (prev_screen == nullptr) {
         m_current_screen = nullptr;
@@ -155,7 +155,7 @@ void happ::IApp::goto_prev_screen() {
     on_screen_change({ tmp, m_current_screen });
 }
 
-void happ::IApp::dispose_screens() {
+void happ::AppBase::dispose_screens() {
     for (auto& screen : m_screens) {
         screen.second->dispose();
     }

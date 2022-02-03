@@ -6,7 +6,7 @@
 
 void add(hemlock::Sender, ui32 a, ui32 b) { std::cout << a << " + " << b << " = " << a + b << std::endl; }
 
-class MyScreen : public happ::IScreen {
+class MyScreen : public happ::ScreenBase {
 public:
     virtual ~MyScreen() { /* Empty */ };
 
@@ -14,7 +14,7 @@ public:
     virtual void draw(TimeData time [[maybe_unused]])   override { /* Empty. */ }
 
     virtual void init(std::string name) override {
-        happ::IScreen::init(name);
+        happ::ScreenBase::init(name);
 
         m_state = happ::ScreenState::RUNNING;
     }
@@ -30,7 +30,7 @@ public:
     virtual ~MyApp() { /* Empty */ };
 protected:      
     virtual void prepare_screens() override {
-        happ::IScreen* my_screen = new MyScreen();
+        happ::ScreenBase* my_screen = new MyScreen();
 
         m_screens.insert({ "my_screen", my_screen });
 

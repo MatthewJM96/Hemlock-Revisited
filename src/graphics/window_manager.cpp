@@ -13,7 +13,7 @@ hg::WindowManager::WindowManager() :
     m_quit_on_main_window_close(true)
 { /* Empty. */ }
 
-hg::WindowError hg::WindowManager::init(hemlock::app::IApp* app) {
+hg::WindowError hg::WindowManager::init(hemlock::app::AppBase* app) {
     if (m_main_window != nullptr) return WindowError::NONE;
 
     m_app = app;

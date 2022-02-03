@@ -11,19 +11,19 @@ namespace hemlock {
     }
 
     namespace app {
-        class IScreen;
+        class ScreenBase;
 
         struct ScreenChangeEvent {
-            IScreen *before, *now;
+            ScreenBase *before, *now;
         };
 
-        class IApp {
+        class AppBase {
         protected:
-            using ScreenList = std::unordered_map<std::string, IScreen*>;
-            using Screen     = std::pair<std::string, IScreen*>;
+            using ScreenList = std::unordered_map<std::string, ScreenBase*>;
+            using Screen     = std::pair<std::string, ScreenBase*>;
         public:
-            IApp();
-            virtual ~IApp() { /* Empty */ };
+            AppBase();
+            virtual ~AppBase() { /* Empty */ };
 
             virtual void init()    = 0;
             virtual void dispose() = 0;
@@ -44,7 +44,7 @@ namespace hemlock {
 
             bool add_screen(Screen screen);
 
-            IScreen* current_screen() { return m_current_screen; }
+            ScreenBase* current_screen() { return m_current_screen; }
 
             virtual void quit();
 
@@ -69,13 +69,13 @@ namespace hemlock {
             bool m_should_quit = false;
 
             ScreenList m_screens;
-            IScreen*   m_current_screen;
+            ScreenBase*   m_current_screen;
         };
 
-        class BasicApp : public IApp {
+        class BasicApp : public AppBase {
         public:
             BasicApp() :
-                IApp(),
+                AppBase(),
                 m_window_manager(nullptr),
                 m_input_manager(nullptr),
                 m_fps_limiter(nullptr)

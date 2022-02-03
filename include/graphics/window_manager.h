@@ -6,7 +6,7 @@
 
 namespace hemlock {
     namespace app {
-        class IApp;
+        class AppBase;
     }
     namespace ui {
         class InputDispatcher;
@@ -20,7 +20,7 @@ namespace hemlock {
             WindowManager();
             ~WindowManager() { /* Empty. */ }
 
-            WindowError init(hemlock::app::IApp* app);
+            WindowError init(hemlock::app::AppBase* app);
             void dispose();
 
             void set_quit_on_main_window_close(bool should = true) { m_quit_on_main_window_close = should; }
@@ -43,7 +43,7 @@ namespace hemlock {
             Windows m_windows;
             Window* m_main_window;
 
-            hemlock::app::IApp* m_app;
+            hemlock::app::AppBase* m_app;
 
             bool m_quit_on_main_window_close;
         };
