@@ -105,6 +105,12 @@ namespace hemlock {
         };
         using StringComponents = std::vector<std::pair<const char*, StringDrawProperties>>;
 
+        // TODO(Matthew): Implement font instance disposal.
+        //                    We wanna release memory we are using as soon as we don't need it!
+        // TODO(Matthew): Implement packing of font textures?
+        //                    At one level this can be done inside Font by generating multiple font instances simultaneously in a pack,
+        //                    at a second, we could let the cacher request all the font instances it has cached be packed together?
+        //                        Packing the fonts will reduce the number of drawcalls needed in text using multiple font instances (e.g. bold and non-bold text)
         /**
          * @brief Handles a single font (defined by a single TTF file), for which textures
          *        may be generated for variations of font size and style.
@@ -249,97 +255,7 @@ namespace hemlock {
             FontInstanceMap m_font_instances;
         };
 
-        // TODO(Matthew): Implement font instance disposal.
-        //                    We wanna release memory we are using as soon as we don't need it!
-        // TODO(Matthew): Implement packing of font textures?
-        //                    At one level this can be done inside Font by generating multiple font instances simultaneously in a pack,
-        //                    at a second, we could let the cacher request all the font instances it has cached be packed together?
-        //                        Packing the fonts will reduce the number of drawcalls needed in text using multiple font instances (e.g. bold and non-bold text).
-        /**
-         * @brief Provides a cache for fonts, each identified by a name.
-         */
-        class FontCache {
-            using Fonts = std::unordered_map<std::string, Font>;
-        public:
-            FontCache()  { /* Empty. */ }
-            ~FontCache() { /* Empty. */ }
-
-            void dispose();
-
-            /**
-             * @brief Register a font with the given name and filepath.
-             *
-             * @param name The name to give the font.
-             * @param filepath The filepath to the font's TTF file.
-             * @param start The first character to generate a glyph for.
-             * @param end The final character to generate a glyph for.
-             *
-             * @return True if the font was newly registered, false if a font with the same name already exists.
-             */
-            bool register_font(std::string name, std::string filepath, char start, char end);
-            /**
-             * @brief Register a font with the given name and filepath.
-             *
-             * @param name The name to give the font.
-             * @param filepath The filepath to the font's TTF file.
-             *
-             * @return True if the font was newly registered, false if a font with the same name already exists.
-             */
-            bool register_font(std::string name, std::string filepath);
-
-            /**
-             * @brief Fetches an instance of the named font with the given size and style. If the instance does not
-             * yet exist, it is first created.
-             *
-             * @param name The name of the font to get an instance of.
-             * @param size The size of the instance to get.
-             * @param style The font style of the instance to get.
-             * @param renderStyle The render style of the instance to get.
-             *
-             * @return The font instance requested, or NIL_FONT_INSTANCE if it couldn't be obtained.
-             */
-            FontInstance fetch(std::string name, FontSize size, FontStyle style = FontStyle::NORMAL, FontRenderStyle renderStyle = FontRenderStyle::BLENDED);
-            /**
-             * @brief Fetches an instance of the named font with the given size and style. If the instance does not
-             * yet exist, it is first created.
-             *
-             * @param name The name of the font to get an instance of.
-             * @param filepath The filepath of the font to get an instance of.
-             * @param size The size of the instance to get.
-             * @param style The font style of the instance to get.
-             * @param renderStyle The render style of the instance to get.
-             *
-             * @return The font instance requested, or NIL_FONT_INSTANCE if it couldn't be obtained.
-             */
-            FontInstance fetch(std::string name, std::string filepath, FontSize size, FontStyle style = FontStyle::NORMAL, FontRenderStyle renderStyle = FontRenderStyle::BLENDED);
-            /**
-             * @brief Fetches an instance of the named font with the given size and style. If the instance does not
-             * yet exist, it is first created.
-             *
-             * @param name The name of the font to get an instance of.
-             * @param size The size of the instance to get.
-             * @param style The font style of the instance to get.
-             * @param renderStyle The render style of the instance to get.
-             *
-             * @return The font instance requested, or NIL_FONT_INSTANCE if it couldn't be obtained.
-             */
-            FontInstance fetch(std::string name, FontStyle style = FontStyle::NORMAL, FontRenderStyle renderStyle = FontRenderStyle::BLENDED);
-            /**
-             * @brief Fetches an instance of the named font with the given size and style. If the instance does not
-             * yet exist, it is first created.
-             *
-             * @param name The name of the font to get an instance of.
-             * @param filepath The filepath of the font to get an instance of.
-             * @param size The size of the instance to get.
-             * @param style The font style of the instance to get.
-             * @param renderStyle The render style of the instance to get.
-             *
-             * @return The font instance requested, or NIL_FONT_INSTANCE if it couldn't be obtained.
-             */
-            FontInstance fetch(std::string name, std::string filepath, FontStyle style = FontStyle::NORMAL, FontRenderStyle renderStyle = FontRenderStyle::BLENDED);
-        protected:
-            Fonts m_fonts;
-        };
+        class FontCache : public Cache<Font, std::unordered_map<std::string, Font>> {};
     }
 }
 namespace hg = hemlock::graphics;
