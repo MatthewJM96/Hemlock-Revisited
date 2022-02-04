@@ -27,7 +27,7 @@ namespace hemlock {
             template <typename ReturnType, typename = void>
             ReturnType apply_to_path(const fs::path& path, Delegate<ReturnType(const fs::path&)> func) const;
             template <typename ReturnType>
-            ReturnType apply_to_path(const fs::path& path, Delegate<ReturnType(const fs::path&)> func, ReturnType default_value) const;
+            ReturnType apply_to_path(const fs::path& path, Delegate<ReturnType(const fs::path&)> func, ReturnType&& default_value) const;
 
             void apply_to_paths(std::vector<fs::path>&& paths, Delegate<void(const fs::path&)> func) const;
             ui32 apply_to_paths(std::vector<fs::path>&& paths, Delegate<bool(const fs::path&)> func) const;
@@ -93,10 +93,10 @@ template <typename ReturnType>
 ReturnType hio::IOManagerBase::apply_to_path(
                         const fs::path&   path,
     Delegate<ReturnType(const fs::path&)> func,
-                               ReturnType default_value
+                             ReturnType&& default_value
 ) const {
     fs::path abs_path{};
-    if (!resolve_path(path, abs_path)) return default_value;
+    if (!resolve_path(path, abs_path)) return std::forward<ReturnType>(default_value);
 
     return func(abs_path);
 }
