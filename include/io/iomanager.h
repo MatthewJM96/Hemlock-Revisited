@@ -24,8 +24,10 @@ namespace hemlock {
 
             bool rename(const fs::path& src, const fs::path& dest, bool force = false) const;
 
-            template <typename ReturnType>
+            template <typename ReturnType, typename = void>
             ReturnType apply_to_path(const fs::path& path, Delegate<ReturnType(const fs::path&)> func) const;
+            template <typename ReturnType>
+            ReturnType apply_to_path(const fs::path& path, Delegate<ReturnType(const fs::path&)> func, ReturnType default_value) const;
 
             void apply_to_paths(std::vector<fs::path>&& paths, Delegate<void(const fs::path&)> func) const;
             ui32 apply_to_paths(std::vector<fs::path>&& paths, Delegate<bool(const fs::path&)> func) const;
@@ -57,7 +59,7 @@ void hio::IOManagerBase::apply_to_path<void>(
 
 template <>
 bool hio::IOManagerBase::apply_to_path<bool>(
-                        const fs::path&   path,
+                  const fs::path&   path,
     Delegate<bool(const fs::path&)> func
 ) const {
     fs::path abs_path{};
@@ -66,29 +68,35 @@ bool hio::IOManagerBase::apply_to_path<bool>(
     return func(abs_path);
 }
 
-template <typename ReturnType, typename = typename std::enable_if_t<std::is_pointer_v<ReturnType>>>
+template <typename ReturnType, typename = typename std::enable_if_t<
+                                                        std::is_pointer_v<ReturnType>
+                                                        || std::is_default_constructible_v<ReturnType>
+                                                   >>
 ReturnType hio::IOManagerBase::apply_to_path(
                         const fs::path&   path,
     Delegate<ReturnType(const fs::path&)> func
 ) const {
     fs::path abs_path{};
-    if (!resolve_path(path, abs_path)) return nullptr;
+
+    if (!resolve_path(path, abs_path)) {
+        if constexpr (std::is_pointer_v<ReturnType>) {
+            return nullptr;
+        } else {
+            return ReturnType{};
+        }
+    }
 
     return func(abs_path);
 }
 
-template <typename ReturnType, typename = typename std::enable_if_t<( 
-                                                    !std::is_pointer_v<ReturnType>
-                                                    && !std::is_same_v<ReturnType, bool>
-                                                    && !std::is_same_v<ReturnType, void>
-                                                    && std::is_default_constructible_v<ReturnType>
-                                        )>>
+template <typename ReturnType>
 ReturnType hio::IOManagerBase::apply_to_path(
                         const fs::path&   path,
-    Delegate<ReturnType(const fs::path&)> func
+    Delegate<ReturnType(const fs::path&)> func,
+                               ReturnType default_value
 ) const {
     fs::path abs_path{};
-    if (!resolve_path(path, abs_path)) return ReturnType{};
+    if (!resolve_path(path, abs_path)) return default_value;
 
     return func(abs_path);
 }
