@@ -9,8 +9,17 @@ namespace hemlock {
     template <typename CacheCandidateType>
     concept Cacheable = std::move_constructible<CacheCandidateType>;
 
-    template <Cacheable CachedType, MapContainer ContainerType>
-        requires std::is_same_v<ContainerType::mapped_type, CachedType>
+    template <typename ContainerCandidateType, typename CachedType>
+    concept CacheContainer = std::same_as<
+            typename ContainerCandidateType::mapped_type,
+            CachedType
+        >
+        && requires (std::string key)
+        {
+            { typename ContainerCandidateType::key_type{key} };
+        };
+
+    template <Cacheable CachedType, CacheContainer<CachedType> ContainerType>
     class Cache {
     public:
             using Parser = Delegate<CachedType(const hio::fs::path&)>;
