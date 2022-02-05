@@ -5,7 +5,7 @@ void hemlock::basic_thread_main( typename Thread<ThreadState>::State* state,
 
     IThreadTask<ThreadState>* task;
     while (!state->context.stop) {
-        task_queue.wait_dequeue(state->consumer_token, task);
+        task_queue->wait_dequeue(state->consumer_token, task);
 
         task->execute(state, task_queue);
         task->is_finished = true;
@@ -30,7 +30,7 @@ void hemlock::ThreadPool<ThreadState>::init(           ui32 thread_count,
             .thread = std::thread(
                 m_thread_main_func,
                 reinterpret_cast<Thread<ThreadState>::State*>(
-                    reinterpre_cast<ui8*>(&m_threads[i]) + offsetof(Thread<ThreadState>, state)
+                    reinterpret_cast<ui8*>(&m_threads[i]) + offsetof(Thread<ThreadState>, state)
                 ),
                 &m_tasks
             ),
