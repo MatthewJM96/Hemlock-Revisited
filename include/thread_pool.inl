@@ -64,6 +64,6 @@ void hemlock::ThreadPool<ThreadState>::add_task(IThreadTask<ThreadState>* task) 
 }
 
 template <hemlock::InterruptibleState ThreadState>
-void hemlock::ThreadPool<ThreadState>::add_tasks(IThreadTask<ThreadState>* tasks, size_t task_count) {
+void hemlock::ThreadPool<ThreadState>::add_tasks(IThreadTask<ThreadState>* tasks[], size_t task_count) {
     m_tasks.enqueue_bulk(m_producer_token, tasks, task_count);
 }
