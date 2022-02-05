@@ -48,7 +48,7 @@ namespace hemlock {
          * @param task_queue The task queue, can be interacted with
          * for example if a task needs to chain a follow-up task.
          */
-        void execute(Thread<ThreadState>::State* state, TaskQueue<ThreadState>* task_queue) = 0;
+        virtual void execute(Thread<ThreadState>::State* state, TaskQueue<ThreadState>* task_queue) = 0;
 
         /**
          * @brief Tracks completion state of the task.
