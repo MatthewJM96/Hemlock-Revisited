@@ -5,7 +5,7 @@ namespace hemlock {
     template <typename ThreadState>
     concept InterruptibleState = requires(ThreadState state)
     {
-        { state.stop } -> std::same_as<bool>;
+        std::is_same_v<decltype(state.stop), bool>;
     };
 
     template <InterruptibleState ThreadState>
