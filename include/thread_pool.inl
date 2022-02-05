@@ -48,12 +48,12 @@ void hemlock::ThreadPool<ThreadState>::dispose() {
     m_is_initialised = false;
 
     for (auto& thread : m_threads)
-        thread.context.stop = true;
-
-    TaskQueue<ThreadState>().swap(m_tasks);
+        thread.state.context.stop = true;
 
     for (auto& thread : m_threads)
         thread.thread.join();
+
+    TaskQueue<ThreadState>().swap(m_tasks);
 
     Threads<ThreadState>().swap(m_threads);
 }
