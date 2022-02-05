@@ -29,10 +29,10 @@ void hemlock::ThreadPool<ThreadState>::init(           ui32 thread_count,
         m_threads.emplace_back(Thread<ThreadState>{
             .thread = std::thread(
                 m_thread_main_func,
-                this,
-                reinterpret_cast<ThreadState*>(
-                    reinterpre_cast<ui8*>(&m_threads[i]) + offsetof(ThreadState, state.context)
-                )
+                reinterpret_cast<Thread<ThreadState>::State*>(
+                    reinterpre_cast<ui8*>(&m_threads[i]) + offsetof(Thread<ThreadState>, state)
+                ),
+                &m_tasks
             ),
             .state {
                 .consumer_token = moodycamel::ConsumerToken(m_tasks),
