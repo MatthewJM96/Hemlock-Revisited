@@ -60,7 +60,7 @@ namespace hemlock {
     class ThreadPool;
 
     template <InterruptibleState ThreadState>
-    using ThreadMainFunc = Delegate<void(TaskQueue<ThreadState>*, typename Thread<ThreadState>::State*)>;
+    using ThreadMainFunc = Delegate<void(typename Thread<ThreadState>::State*, TaskQueue<ThreadState>*)>;
 
     /**
      * @brief A basic main function of threads.
