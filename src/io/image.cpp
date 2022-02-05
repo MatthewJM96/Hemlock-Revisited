@@ -2,7 +2,7 @@
 
 #include "io/image.h"
 
-hio_img_bin::InternalPixelFormat hio_img_bin::convert_pixel_format(PixelFormat format) {
+hio::img::bin::InternalPixelFormat hio::img::bin::convert_pixel_format(PixelFormat format) {
     switch (format) {
         case PixelFormat::RGB_UI8:
             return { 3, 1 };
@@ -18,7 +18,7 @@ hio_img_bin::InternalPixelFormat hio_img_bin::convert_pixel_format(PixelFormat f
     }
 }
 
-bool hio_img_bin::load(std::string filepath, void*& data, ui32v2& dimensions, PixelFormat& format) {
+bool hio::img::bin::load(std::string filepath, void*& data, ui32v2& dimensions, PixelFormat& format) {
     // Open file, if we can't then fail.
     FILE* file = fopen(filepath.data(), "rb");
     if (file == nullptr) return false;
@@ -93,7 +93,7 @@ bool hio_img_bin::load(std::string filepath, void*& data, ui32v2& dimensions, Pi
     return true;
 }
 
-bool hio_img_bin::save(std::string filepath, const void* data, ui32v2 dimensions, PixelFormat format) {
+bool hio::img::bin::save(std::string filepath, const void* data, ui32v2 dimensions, PixelFormat format) {
     // Extract pixel information from format.
     auto [channels, bytesPerChannel] = convert_pixel_format(format);
 
@@ -143,7 +143,7 @@ bool hio_img_bin::save(std::string filepath, const void* data, ui32v2 dimensions
     return true;
 }
 
-hio_img_png::InternalPixelFormat hio_img_png::convert_pixel_format(PixelFormat format) {
+hio::img::png::InternalPixelFormat hio::img::png::convert_pixel_format(PixelFormat format) {
     switch (format) {
         case PixelFormat::RGB_UI8:
             return { PNG_COLOR_TYPE_RGB, 8 };
@@ -158,12 +158,12 @@ hio_img_png::InternalPixelFormat hio_img_png::convert_pixel_format(PixelFormat f
     }
 }
 
-bool hio_img_png::load(std::string filepath [[maybe_unused]], void*& data [[maybe_unused]], ui32v2& dimensions [[maybe_unused]], PixelFormat& format [[maybe_unused]]) {
+bool hio::img::png::load(std::string filepath [[maybe_unused]], void*& data [[maybe_unused]], ui32v2& dimensions [[maybe_unused]], PixelFormat& format [[maybe_unused]]) {
     // TODO(Matthew): Implement.
     return false;
 }
 
-bool hio_img_png::save(std::string filepath, const void* data, ui32v2 dimensions, PixelFormat format) {
+bool hio::img::png::save(std::string filepath, const void* data, ui32v2 dimensions, PixelFormat format) {
     // Open the image file we will save to.
     FILE* file = fopen(filepath.data(), "wb");
     // Check we successfully opened the file.

@@ -81,6 +81,7 @@ namespace hemlock {
                  */
                 bool save(std::string filepath, IN const void* data, ui32v2 dimensions, PixelFormat format);
             }
+            namespace bin = binary;
 
             namespace png {
                 using InternalPixelFormat = std::pair<png_byte, png_byte>;
@@ -118,11 +119,9 @@ namespace hemlock {
                 bool save(std::string filepath, IN const void* data, ui32v2 dimensions, PixelFormat format);
             }
         }
+        namespace img = image;
     }
 }
-namespace hio         = hemlock::io;
-namespace hio_img     = hio::image;
-namespace hio_img_bin = hio_img::binary;
-namespace hio_img_png = hio_img::png;
+namespace hio = hemlock::io;
 
 #endif // __hemlock_io_image_h
