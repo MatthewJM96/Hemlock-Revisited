@@ -77,7 +77,9 @@ namespace hemlock {
     template <InterruptibleState ThreadState>
     class ThreadPool {
     public:
-         ThreadPool() { /* Empty. */ }
+        ThreadPool() :
+            m_producer_token(moodycamel::ProducerToken(m_tasks))
+        { /* Empty. */ }
         ~ThreadPool() { /* Empty. */ }
 
         /**
@@ -87,7 +89,7 @@ namespace hemlock {
          * @param thread_count The number of threads the pool shall
          * possess.
          */
-        void init(ui32 thread_count, ThreadMainFunc<ThreadState> thread_main_func = {basic_thread_main});
+        void init(ui32 thread_count, ThreadMainFunc<ThreadState> thread_main_func = ThreadMainFunc<ThreadState>{basic_thread_main<ThreadState>});
         /**
          * @brief Cleans up the thread pool, bringing all threads
          * to a stop.
