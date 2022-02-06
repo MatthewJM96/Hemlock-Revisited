@@ -47,6 +47,27 @@ namespace hemlock {
             using DrawableStringComponents = std::vector<DrawableStringComponent>;
 
             /**
+             * @brief The data needed to draw a glyph.
+             */
+            struct DrawableGlyph {
+                Glyph*  glyph;
+                f32     x_pos;
+                f32v2   scaling;
+                colour4 tint;
+                GLuint  texture;
+            };
+
+            /**
+             * @brief The data needed to draw a line.
+             */
+            struct DrawableLine {
+                f32 length;
+                f32 height;
+                std::vector<DrawableGlyph> drawables;
+            };
+            using DrawableLines = std::vector<DrawableLine>;
+
+            /**
              * @brief This enum is of the various ways in which text may be wrapped.
              *
              * QUICK is the quickest of the wrap modes, where it breaks immediately before the first character to exceed the rectangle.
