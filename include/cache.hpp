@@ -22,9 +22,13 @@ namespace hemlock {
     template <Cacheable CachedType, CacheContainer<CachedType> ContainerType>
     class Cache {
     public:
-            using Parser = Delegate<CachedType(const hio::fs::path&)>;
+            using Parser = Delegate<CachedType(const hio::fs::path&, io::IOManagerBase*)>;
 
-            Cache()  { /* Empty. */ }
+            Cache() :
+                m_initialised(false),
+                m_iomanager(nullptr),
+                m_parser(nullptr)
+            { /* Empty. */ }
             ~Cache() { /* Empty. */ }
 
             void init(io::IOManagerBase* iomanager, Parser parser) {
@@ -60,7 +64,7 @@ namespace hemlock {
                 auto& it = std::find(m_assets.begin(), m_assets.end(), filepath.string());
                 if (it != m_assets.end()) return false;
 
-                m_assets.emplace(m_parser(filepath));
+                m_assets.emplace(m_parser(filepath, m_iomanager));
 
                 return true;
             }
@@ -131,7 +135,7 @@ namespace hemlock {
                 });
                 if (it != m_assets.end()) return &(*it).second;
 
-                auto [asset, fetched] = m_assets.emplace(filepath.string(), m_parser(filepath));
+                auto [asset, fetched] = m_assets.emplace(filepath.string(), m_parser(filepath, m_iomanager));
 
 #ifdef DEBUG
                 assert(fetched);
