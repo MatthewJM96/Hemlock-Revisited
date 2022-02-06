@@ -122,6 +122,7 @@ public:
 protected:      
     virtual void prepare_screens() override {
         happ::ScreenBase* my_screen = new MyScreen();
+        my_screen->init("my_screen");
 
         m_screens.insert({ "my_screen", my_screen });
 
