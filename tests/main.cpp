@@ -70,14 +70,45 @@ class MyScreen : public happ::ScreenBase {
 public:
     virtual ~MyScreen() { /* Empty */ };
 
-    virtual void update(TimeData time [[maybe_unused]]) override { /* Empty. */ }
-    virtual void draw(TimeData time [[maybe_unused]])   override { /* Empty. */ }
+    virtual void update(TimeData time) override {
+        m_sprite_batcher.begin();
+        m_sprite_batcher.add_sprite(
+            f32v2{
+                60.0f + 30.0f * sin(time.total / 10000.0f),
+                60.0f + 30.0f * cos(time.total / 10000.0f)
+            },
+            f32v2{200.0f, 200.0f},
+            colour4{255,   0, 0, 255},
+            colour4{  0, 255, 0, 255},
+            hg::Gradient::LEFT_TO_RIGHT
+        );
+        m_sprite_batcher.end();
+    }
+    virtual void draw(TimeData time [[maybe_unused]]) override {
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        m_sprite_batcher.render(f32v2{800, 600});
+    }
 
     virtual void init(std::string name) override {
         happ::ScreenBase::init(name);
 
         m_state = happ::ScreenState::RUNNING;
+
+        // std::cout << std::endl << my_shader_parser("shaders/default_sprite.frag", &my_iom) << std::endl << std::endl;
+        m_shader_cache.init(&m_iom, hg::ShaderCache::Parser([](const hio::fs::path& path, hio::IOManagerBase* iom) -> std::string {
+            std::string buffer;
+            if (!iom->read_file_to_string(path, buffer)) return "";
+
+            return buffer;
+        }));
+         ;
+        m_sprite_batcher.init(&m_shader_cache, nullptr);
     }
+protected:
+    MyIOManager          m_iom;
+    hg::ShaderCache      m_shader_cache;
+    hg::s::SpriteBatcher m_sprite_batcher;
 };
 
 template <hemlock::ResizableContiguousContainer c>
@@ -140,24 +171,10 @@ i32 main() {
     });
     app.on_quit += &quit_handler;
 
-    MyIOManager my_iom;
-    hg::ShaderCache my_shader_cache;
-    auto my_shader_parser = hg::ShaderCache::Parser([](const hio::fs::path& path, hio::IOManagerBase* iom) -> std::string {
-        std::string buffer;
-        if (!iom->read_file_to_string(path, buffer)) return "";
-
-        return buffer;
-    });
-    // std::cout << std::endl << my_shader_parser("shaders/default_sprite.frag", &my_iom) << std::endl << std::endl;
-    my_shader_cache.init(&my_iom, my_shader_parser);
-    hg::s::SpriteBatcher my_sprite_batcher;
-    my_sprite_batcher.init(&my_shader_cache);
-
-    auto [ my_second_window, err ] = app.window_manager()->add_window();
-
-    if (err != hg::WindowError::NONE) {
-        std::cout << "Failed to make a second window." << std::endl;
-    }
+    // auto [ my_second_window, err ] = app.window_manager()->add_window();
+    // if (err != hg::WindowError::NONE) {
+    //     std::cout << "Failed to make a second window." << std::endl;
+    // }
 
     std::cout << "Hello, world!" << std::endl;
 
