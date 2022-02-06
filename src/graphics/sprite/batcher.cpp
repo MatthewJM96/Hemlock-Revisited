@@ -46,7 +46,7 @@ void hg::s::SpriteBatcher::init(ShaderCache* shader_cache, FontCache* font_cache
 
     // TODO(Matthew): Handle errors.
     // Add the shaders to the program.
-    m_default_shader.add_shaders("shaders/DefaultSprite.vert", "shaders/DefaultSprite.frag");
+    m_default_shader.add_shaders("shaders/default_sprite.vert", "shaders/default_sprite.frag");
 
     // Link program (i.e. send to GPU).
     m_default_shader.link();
