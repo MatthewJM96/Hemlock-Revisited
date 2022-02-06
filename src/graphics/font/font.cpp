@@ -25,7 +25,7 @@ static ui32 next_power_2(ui32 value) {
     return ++value;
 }
 
-hg::f::FontInstanceHash hg::f::hash(FontSize size, FontStyle style, FontRenderStyle renderStyle) {
+hg::f::FontInstanceHash hg::f::hash(FontSize size, FontStyle style, FontRenderStyle render_style) {
     FontInstanceHash hash = 0;
 
     // By ensuring FontInstanceHash has more bits that the sum of all three of the
@@ -33,7 +33,7 @@ hg::f::FontInstanceHash hg::f::hash(FontSize size, FontStyle style, FontRenderSt
     // and render style such that none of the three overlap.
     hash += static_cast<FontInstanceHash>(size);
     hash += static_cast<FontInstanceHash>(style)       << (sizeof(FontSize) * 8);
-    hash += static_cast<FontInstanceHash>(renderStyle) << ((sizeof(FontSize) + sizeof(FontStyle)) * 8);
+    hash += static_cast<FontInstanceHash>(render_style) << ((sizeof(FontSize) + sizeof(FontStyle)) * 8);
 
     return hash;
 }
@@ -78,9 +78,9 @@ void hg::f::Font::dispose() {
 bool hg::f::Font::generate( FontSize size,
                             FontSize padding,
                            FontStyle style       /*= FontStyle::NORMAL*/,
-                     FontRenderStyle renderStyle /*= FontRenderStyle::BLENDED*/ ) {
+                     FontRenderStyle render_style /*= FontRenderStyle::BLENDED*/ ) {
     // Make sure this is a new instance we are generating.
-    if (get_instance(size, style, renderStyle) != NIL_FONT_INSTANCE) return false;
+    if (get_instance(size, style, render_style) != NIL_FONT_INSTANCE) return false;
 
     // This is the font instance we will build up as we generate the texture atlas.
     FontInstance font_instance{};
@@ -224,7 +224,7 @@ bool hg::f::Font::generate( FontSize size,
 
             // Determine which render style we are to use and draw the glyph.
             SDL_Surface* glyph_surface = nullptr;
-            switch(renderStyle) {
+            switch(render_style) {
                 case FontRenderStyle::SOLID:
                     glyph_surface = TTF_RenderGlyph_Solid(font, static_cast<ui16>(m_start + char_index), { 255, 255, 255, 255 });
                     break;
@@ -267,19 +267,35 @@ bool hg::f::Font::generate( FontSize size,
     TTF_CloseFont(font);
 
     // Insert our font instance.
-    m_font_instances.emplace(std::make_pair(hash(size, style, renderStyle), font_instance));
+    m_font_instances.emplace(std::make_pair(hash(size, style, render_style), font_instance));
 
     return true;
 }
 
 hg::f::FontInstance hg::f::Font::get_instance( FontSize size,
                                               FontStyle style       /*= FontStyle::NORMAL*/,
-                                        FontRenderStyle renderStyle /*= FontRenderStyle::BLENDED*/ ) {
+                                        FontRenderStyle render_style /*= FontRenderStyle::BLENDED*/ ) {
     try {
-        return m_font_instances.at(hash(size, style, renderStyle));
+        return m_font_instances.at(hash(size, style, render_style));
     } catch (std::out_of_range& e) {
         return NIL_FONT_INSTANCE;
     }
+}
+
+bool hg::f::Font::dispose_instance(FontInstance font_instance) {
+    auto erased = std::erase_if(m_font_instances, [font_instance](auto& lhs) {
+        return lhs.second == font_instance;
+    });
+    if (erased == 0) return false;
+
+    glDeleteTextures(1, &font_instance.texture);
+    delete[] font_instance.glyphs;
+
+    return true;
+}
+
+bool hg::f::Font::dispose_instance(FontInstanceHash font_instance_hash) {
+    return (bool)m_font_instances.erase(font_instance_hash);
 }
 
 hg::f::Font::Row* hg::f::Font::generate_rows(Glyph* glyphs, ui32 row_count, FontSize padding, ui32& width, ui32& height) {

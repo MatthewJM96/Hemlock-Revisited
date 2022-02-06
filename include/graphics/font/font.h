@@ -6,8 +6,6 @@
 namespace hemlock {
     namespace graphics {
         namespace font {
-            // TODO(Matthew): Implement font instance disposal.
-            //                    We wanna release memory we are using as soon as we don't need it!
             // TODO(Matthew): Implement packing of font textures?
             //                    At one level this can be done inside Font by generating multiple font instances simultaneously in a pack,
             //                    at a second, we could let the cacher request all the font instances it has cached be packed together?
@@ -62,15 +60,15 @@ namespace hemlock {
                  * @param size The size of the glyphs to be drawn.
                  * @param size The padding to use to space out the glyphs to be drawn.
                  * @param style The style of the font itself.
-                 * @param renderStyle The style with which the font should be rendered.
+                 * @param render_style The style with which the font should be rendered.
                  *
                  * @return True if a font instance was created, false indicates the font instance with the given
                  * properties already existed.
                  */
-                bool generate(       FontSize size,
-                                    FontSize padding,
-                                    FontStyle style       = FontStyle::NORMAL,
-                            FontRenderStyle renderStyle = FontRenderStyle::BLENDED );
+                bool generate(     FontSize size,
+                                   FontSize padding,
+                                  FontStyle style       = FontStyle::NORMAL,
+                            FontRenderStyle render_style = FontRenderStyle::BLENDED );
                 /**
                  * @brief Generates a texture atlas of glyphs with the given render style, font style and font size.
                  *
@@ -81,15 +79,15 @@ namespace hemlock {
                  *
                  * @param size The size of the glyphs to be drawn.
                  * @param style The style of the font itself.
-                 * @param renderStyle The style with which the font should be rendered.
+                 * @param render_style The style with which the font should be rendered.
                  *
                  * @return True if a font instance was created, false indicates the font instance with the given
                  * properties already existed.
                  */
-                bool generate(       FontSize size,
-                                    FontStyle style       = FontStyle::NORMAL,
-                            FontRenderStyle renderStyle = FontRenderStyle::BLENDED ) {
-                    return generate(size, (size / 8) + 5, style, renderStyle);
+                bool generate(     FontSize size,
+                                  FontStyle style       = FontStyle::NORMAL,
+                            FontRenderStyle render_style = FontRenderStyle::BLENDED ) {
+                    return generate(size, (size / 8) + 5, style, render_style);
                 }
                 /**
                  * @brief Generates a texture atlas of glyphs with the default render style, font style and font size.
@@ -97,14 +95,14 @@ namespace hemlock {
                  * Note that all textures are of white glyphs, use shaders to tint them!
                  *
                  * @param style The style of the font itself.
-                 * @param renderStyle The style with which the font should be rendered.
+                 * @param render_style The style with which the font should be rendered.
                  *
                  * @return True if a font instance was created, false indicates the font instance with the given
                  * properties already existed.
                  */
-                bool generate(      FontStyle style       = FontStyle::NORMAL,
-                            FontRenderStyle renderStyle = FontRenderStyle::BLENDED ) {
-                    return generate(m_default_size, style, renderStyle);
+                bool generate(    FontStyle style       = FontStyle::NORMAL,
+                            FontRenderStyle render_style = FontRenderStyle::BLENDED ) {
+                    return generate(m_default_size, style, render_style);
                 }
 
                 /**
@@ -113,14 +111,14 @@ namespace hemlock {
                  *
                  * @param size The font size.
                  * @param style The font style.
-                 * @param renderStyle The font render style.
+                 * @param render_style The font render style.
                  *
                  * @return The font instance corresponding to the given size, style and render style,
                  * or NIL_FONT_INSTANCE if no font instance exists with the given
                  */
-                FontInstance get_instance(     FontSize size,
+                FontInstance get_instance(   FontSize size,
                                             FontStyle style       = FontStyle::NORMAL,
-                                        FontRenderStyle renderStyle = FontRenderStyle::BLENDED );
+                                      FontRenderStyle render_style = FontRenderStyle::BLENDED );
                 /**
                  * @brief Returns the font instance corresponding to the given size, style and render
                  * style.
@@ -128,14 +126,61 @@ namespace hemlock {
                  * This version uses the default size of this font.
                  *
                  * @param style The font style.
-                 * @param renderStyle The font render style.
+                 * @param render_style The font render style.
                  *
                  * @return The font instance corresponding to the given size, style and render style,
                  * or NIL_FONT_INSTANCE if no font instance exists with the given
                  */
                 FontInstance get_instance(    FontStyle style       = FontStyle::NORMAL,
-                                        FontRenderStyle renderStyle = FontRenderStyle::BLENDED ) {
-                    return get_instance(m_default_size, style, renderStyle);
+                                        FontRenderStyle render_style = FontRenderStyle::BLENDED ) {
+                    return get_instance(m_default_size, style, render_style);
+                }
+
+                /**
+                 * @brief Disposes the font instance.
+                 *
+                 * @param font_instance The font instance to dispose.
+                 *
+                 * @return True if a font instance was found and disposed, false otherwise.
+                 */
+                bool dispose_instance(FontInstance font_instance);
+                /**
+                 * @brief Disposes the font instance.
+                 *
+                 * @param font_instance_hash The hash of the font instance to dispose.
+                 *
+                 * @return True if a font instance was found and disposed, false otherwise.
+                 */
+                bool dispose_instance(FontInstanceHash font_instance_hash);
+                /**
+                 * @brief Disposes the font instance corresponding to the given size, style and render
+                 * style.
+                 *
+                 * @param size The font size.
+                 * @param style The font style.
+                 * @param render_style The font render style.
+                 *
+                 * @return True if a font instance was found and disposed, false otherwise.
+                 */
+                bool dispose_instance( FontSize size,
+                                      FontStyle style       = FontStyle::NORMAL,
+                                FontRenderStyle render_style = FontRenderStyle::BLENDED ) {
+                    dispose_instance(hash(size, style, render_style));
+                }
+                /**
+                 * @brief Disposes the font instance corresponding to the given size, style and render
+                 * style.
+                 *
+                 * This version uses the default size of this font.
+                 *
+                 * @param style The font style.
+                 * @param render_style The font render style.
+                 *
+                 * @return True if a font instance was found and disposed, false otherwise.
+                 */
+                bool dispose_instance( FontStyle style       = FontStyle::NORMAL,
+                                 FontRenderStyle render_style = FontRenderStyle::BLENDED ) {
+                    return dispose_instance(m_default_size, style, render_style);
                 }
             protected:
                 /**
