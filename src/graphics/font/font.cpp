@@ -1,6 +1,8 @@
 #include "stdafx.h"
 
-#include "graphics/font.h"
+#include "io/image.h"
+
+#include "graphics/font/font.h"
 
 /**
  * @brief Determines the next power of 2 after the given value and returns it.

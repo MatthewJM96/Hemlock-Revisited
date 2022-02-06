@@ -36,7 +36,7 @@ add_executable(Hemlock_Revisited
     "${PROJECT_SOURCE_DIR}/src/timing.cpp"
     "${PROJECT_SOURCE_DIR}/src/app/app.cpp"
     "${PROJECT_SOURCE_DIR}/src/app/screen.cpp"
-    "${PROJECT_SOURCE_DIR}/src/graphics/font.cpp"
+    "${PROJECT_SOURCE_DIR}/src/graphics/font/font.cpp"
     "${PROJECT_SOURCE_DIR}/src/graphics/window.cpp"
     "${PROJECT_SOURCE_DIR}/src/graphics/window_manager.cpp"
     "${PROJECT_SOURCE_DIR}/src/io/glob.cpp"
