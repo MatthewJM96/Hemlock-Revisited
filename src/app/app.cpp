@@ -171,6 +171,8 @@ void happ::BasicApp::init() {
     SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 
+    TTF_Init();
+
     m_window_manager = new hg::WindowManager();
     if (m_window_manager->init(this) != hg::WindowError::NONE) {
         puts("Window could not be initialised...\n");
@@ -209,6 +211,8 @@ void happ::BasicApp::dispose() {
     m_input_manager->dispose();
     delete m_input_manager;
     m_input_manager = nullptr;
+
+    TTF_Quit();
 }
 
 void happ::BasicApp::run() {
