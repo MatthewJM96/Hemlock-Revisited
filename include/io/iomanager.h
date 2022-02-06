@@ -47,7 +47,7 @@ namespace hemlock {
 namespace hio = hemlock::io;
 
 template <>
-void hio::IOManagerBase::apply_to_path<void>(
+inline void hio::IOManagerBase::apply_to_path<void>(
                   const fs::path&   path,
     Delegate<void(const fs::path&)> func
 ) const {
@@ -58,7 +58,7 @@ void hio::IOManagerBase::apply_to_path<void>(
 }
 
 template <>
-bool hio::IOManagerBase::apply_to_path<bool>(
+inline bool hio::IOManagerBase::apply_to_path<bool>(
                   const fs::path&   path,
     Delegate<bool(const fs::path&)> func
 ) const {
@@ -72,7 +72,7 @@ template <typename ReturnType, typename = typename std::enable_if_t<
                                                         std::is_pointer_v<ReturnType>
                                                         || std::is_default_constructible_v<ReturnType>
                                                    >>
-ReturnType hio::IOManagerBase::apply_to_path(
+inline ReturnType hio::IOManagerBase::apply_to_path(
                         const fs::path&   path,
     Delegate<ReturnType(const fs::path&)> func
 ) const {
@@ -90,7 +90,7 @@ ReturnType hio::IOManagerBase::apply_to_path(
 }
 
 template <typename ReturnType>
-ReturnType hio::IOManagerBase::apply_to_path(
+inline ReturnType hio::IOManagerBase::apply_to_path(
                         const fs::path&   path,
     Delegate<ReturnType(const fs::path&)> func,
                              ReturnType&& default_value
