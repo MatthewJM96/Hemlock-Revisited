@@ -46,7 +46,6 @@ namespace hemlock {
         { new Subscriber<Parameters...>(std::forward<Functor>(f)) } -> std::same_as<Subscriber<Parameters...>*>;
     };
 
-    // TODO(Matthew): Simplified 
     /**
      * @brief The standard event class, provides the most trivial event system in
      * which subscribers are invoked in order of subscription and all subscribers
