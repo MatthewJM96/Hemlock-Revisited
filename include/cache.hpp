@@ -122,9 +122,10 @@ namespace hemlock {
              *
              * @param filepath The filepath to the asset.
              *
-             * @return The asset fetched.
+             * @return The asset fetched, or nullptr if it could not
+             * .be obtained.
              */
-            CachedType& fetch(const hio::fs::path& filepath) {
+            CachedType* fetch(const hio::fs::path& filepath) {
                 auto& it = std::find(m_assets.begin(), m_assets.end(), filepath.string());
                 if (it != m_assets.end()) return (*it).second;
 
@@ -132,6 +133,8 @@ namespace hemlock {
 
 #ifdef DEBUG
                 assert(fetched);
+#else
+                if (!fetched) return nullptr;
 #endif
 
                 return (*asset).second;
