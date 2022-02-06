@@ -25,6 +25,8 @@ namespace hemlock {
 
             void set_quit_on_main_window_close(bool should = true) { m_quit_on_main_window_close = should; }
 
+            Window* main_window() { return m_main_window; }
+
             bool set_main_window(Window* window);
             bool set_main_window(ui32 window_id);
 
