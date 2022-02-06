@@ -67,7 +67,7 @@ hg::WindowError hg::Window::init(WindowSettings settings /*= {}*/) {
     glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &nr_attributes);
     debug_printf("Maximum # of vertex attributes supported: %d.\n", nr_attributes);
 
-    glClearColor(0.0f, 1.0f, 0.0f, 1.0f);
+    glClearColor(0.0f, 0.2f, 0.0f, 1.0f);
 
     if (m_settings.swap_interval == SwapInterval::V_SYNC) {
         SDL_GL_SetSwapInterval(1);
