@@ -5,11 +5,10 @@
 #include "graphics/window_manager.h"
 
 hg::WindowManager::WindowManager() :
+    WindowManagerBase(),
     handle_window_close([&](Sender, hui::WindowEvent event) {
         dispose_window(event.window_id);
     }),
-    m_main_window(nullptr),
-    m_app(nullptr),
     m_quit_on_main_window_close(true)
 { /* Empty. */ }
 
@@ -36,6 +35,7 @@ void hg::WindowManager::dispose() {
     }
     Windows().swap(m_windows);
     m_main_window = nullptr;
+    m_app         = nullptr;
 }
 
 bool hg::WindowManager::set_main_window(Window* window) {

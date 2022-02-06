@@ -1,6 +1,7 @@
 #ifndef __hemlock_ui_input_state_window_state_hpp
 #define __hemlock_ui_input_state_window_state_hpp
 
+#include "ui/input/keys.hpp"
 #include "ui/input/state.hpp"
 
 namespace hemlock {

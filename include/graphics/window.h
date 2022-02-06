@@ -1,6 +1,8 @@
 #ifndef __hemlock_graphics_window_h
 #define __hemlock_graphics_window_h
 
+#include "ui/input/events.hpp"
+
 namespace hemlock {
     namespace ui {
         class InputDispatcher;
@@ -75,11 +77,7 @@ namespace hemlock {
             using WindowDimensionMap = std::map<ui8, std::vector<WindowDimensions>>;
             using FullscreenModeMap  = std::map<ui8, std::vector<FullscreenMode>>;
         public:
-            Window() :
-                m_window(nullptr),
-                m_context(nullptr),
-                m_initialised(false)
-            { /* Empty. */ }
+            Window();
             ~Window() { /* Empty. */ }
 
             WindowError init(WindowSettings settings = {});
@@ -132,6 +130,8 @@ namespace hemlock {
             Event<ResizeEvent>               on_window_resize;
             Event<FullscreenModeChangeEvent> on_fullscreen_mode_change;
         private:
+            Delegate<void(Sender, hui::WindowResizeEvent)> handle_external_window_resize;
+
             void determine_modes();
             void calculate_aspect_ratio();
             void validate_dimensions();

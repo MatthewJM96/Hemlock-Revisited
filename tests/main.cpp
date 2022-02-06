@@ -87,11 +87,12 @@ public:
     virtual void draw(TimeData time [[maybe_unused]]) override {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        m_sprite_batcher.render(f32v2{800, 600});
+        hg::WindowDimensions dims = m_app->window_manager()->main_window()->dimensions();
+        m_sprite_batcher.render(f32v2{dims.width, dims.height});
     }
 
-    virtual void init(std::string name) override {
-        happ::ScreenBase::init(name);
+    virtual void init(std::string name, happ::AppBase* app) override {
+        happ::ScreenBase::init(name, app);
 
         m_state = happ::ScreenState::RUNNING;
 
@@ -122,7 +123,7 @@ public:
 protected:      
     virtual void prepare_screens() override {
         happ::ScreenBase* my_screen = new MyScreen();
-        my_screen->init("my_screen");
+        my_screen->init("my_screen", this);
 
         m_screens.insert({ "my_screen", my_screen });
 

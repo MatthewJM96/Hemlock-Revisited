@@ -1,5 +1,7 @@
 #include "stdafx.h"
 
+#include "ui/input/dispatcher.h"
+
 #include "graphics/window.h"
 
 bool hg::WindowDimensions::operator==(const WindowDimensions& rhs) {
@@ -21,6 +23,17 @@ bool hg::FullscreenMode::operator!=(const FullscreenMode& rhs) {
                 && this->refresh_rate == rhs.refresh_rate
                 && this->pixel_format == rhs.pixel_format);
 }
+
+
+hg::Window::Window() :
+    handle_external_window_resize(Delegate<void(Sender, hui::WindowResizeEvent)>([&](Sender, hui::WindowResizeEvent ev) {
+        if (ev.window_id != m_window_id) return;
+        set_dimensions({(ui32)ev.width, (ui32)ev.height});
+    })),
+    m_initialised(false),
+    m_window(nullptr),
+    m_context(nullptr)
+{ /* Empty. */ }
 
 hg::WindowError hg::Window::init(WindowSettings settings /*= {}*/) {
     if (m_initialised) return WindowError::NONE;
@@ -77,12 +90,16 @@ hg::WindowError hg::Window::init(WindowSettings settings /*= {}*/) {
 
     m_window_id = SDL_GetWindowID(m_window);
 
+    hui::InputDispatcher::instance()->on_window.resize += &handle_external_window_resize;
+
     return WindowError::NONE;
 }
 
 void hg::Window::dispose() {
     if (!m_initialised) return;
     m_initialised = false;
+
+    hui::InputDispatcher::instance()->on_window.resize -= &handle_external_window_resize;
 
     SDL_GL_DeleteContext(m_context);
     m_context = nullptr;

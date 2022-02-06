@@ -12,7 +12,8 @@ happ::AppBase::AppBase()  :
     handle_external_quit([&](Sender) {
         set_should_quit();
     }),
-    m_current_screen(nullptr)
+    m_current_screen(nullptr),
+    m_window_manager(nullptr)
 { /* Empty */ }
 
 void happ::AppBase::set_should_quit(bool should_quit /*= true*/) {
@@ -50,7 +51,7 @@ bool happ::AppBase::add_screen(Screen screen) {
     auto [_, added] = m_screens.insert(screen);
     if (!added) return false;
 
-    screen.second->init(screen.first);
+    screen.second->init(screen.first, this);
 
     return true;
 }

@@ -3,6 +3,8 @@
 
 namespace hemlock {
     namespace app {
+        class AppBase;
+
         // TODO(Matthew): Allow screen to pass some amount of information to next/previous screen.
         enum class ScreenState {
             NONE,            // Screen is doing nothing.
@@ -18,12 +20,13 @@ namespace hemlock {
             ScreenBase() :
                 m_initialised(false),
                 m_name(""),
+                m_app(nullptr),
                 m_next_screen(nullptr),
                 m_prev_screen(nullptr)
             { /* Empty. */ };
             virtual ~ScreenBase() { /* Empty */};
 
-            virtual void init(std::string name);
+            virtual void init(std::string name, AppBase* app);
             virtual void dispose(); 
 
             virtual void start(TimeData time);
@@ -48,6 +51,8 @@ namespace hemlock {
             bool        m_initialised;
             ScreenState m_state;
             std::string m_name;
+
+            AppBase* m_app;
 
             ScreenBase* m_next_screen;
             ScreenBase* m_prev_screen;

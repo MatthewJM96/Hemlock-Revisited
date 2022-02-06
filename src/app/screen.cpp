@@ -2,11 +2,12 @@
 
 #include "app/screen.h"
 
-void happ::ScreenBase::init(std::string name) {
+void happ::ScreenBase::init(std::string name, AppBase* app) {
     if (m_initialised) return;
     m_initialised = true;
 
     m_name = name;
+    m_app  = app;
 }
 
 void happ::ScreenBase::dispose() {

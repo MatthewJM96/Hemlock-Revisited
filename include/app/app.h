@@ -4,7 +4,7 @@
 namespace hemlock {
     class FpsLimiter;
     namespace graphics {
-        class WindowManager;
+        class WindowManagerBase;
     }
     namespace ui {
         class InputManager;
@@ -34,6 +34,8 @@ namespace hemlock {
             void set_should_quit(bool should_quit = true);
 
             bool change_screen(std::string name);
+
+            hemlock::graphics::WindowManagerBase* window_manager() const { return m_window_manager; }
 
             Event<>                  on_quit;
             Event<ScreenChangeEvent> on_screen_change;
@@ -68,22 +70,22 @@ namespace hemlock {
 
             bool m_should_quit = false;
 
-            ScreenList m_screens;
-            ScreenBase*   m_current_screen;
+            ScreenList  m_screens;
+            ScreenBase* m_current_screen;
+
+            hemlock::graphics::WindowManagerBase* m_window_manager;
         };
 
         class BasicApp : public AppBase {
         public:
             BasicApp() :
                 AppBase(),
-                m_window_manager(nullptr),
                 m_input_manager(nullptr),
                 m_fps_limiter(nullptr)
             { /* Empty */ };
             virtual ~BasicApp() { /* Empty */ };
 
-            hemlock::graphics::WindowManager* window_manager() const { return m_window_manager; }
-                   hemlock::ui::InputManager* input_manager()  const { return m_input_manager;  }
+            hemlock::ui::InputManager* input_manager()  const { return m_input_manager;  }
 
             virtual void init()    override;
             virtual void dispose() override;
@@ -92,7 +94,6 @@ namespace hemlock {
         protected:
             void calculate_times();
 
-            hemlock::graphics::WindowManager* m_window_manager;
             hemlock::ui::InputManager*        m_input_manager;
             hemlock::FpsLimiter*              m_fps_limiter;
         };
