@@ -134,6 +134,10 @@ namespace hemlock {
             static void unuse();
 
             static GLuint current;
+
+            Event<ShaderCreationResult> on_shader_add_fail;
+            Event<const char*>          on_shader_compilation_fail;
+            Event<const char*>          on_shader_link_fail;
         protected:
             GLuint m_id;
             GLuint m_vertex_id, m_frag_id;

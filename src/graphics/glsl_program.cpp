@@ -46,28 +46,40 @@ void hg::GLSLProgram::dispose() {
 hg::ShaderCreationResult hg::GLSLProgram::add_shader(const ShaderInfo& shader) {
     // If the program is in an uneditable state, fail.
     if (!editable()) {
+        on_shader_add_fail(ShaderCreationResult::NON_EDITABLE);
         return ShaderCreationResult::NON_EDITABLE;
     }
 
     // Ensure we are targetting a valid shader type, that is not yet built.
     switch (shader.type) {
         case ShaderType::VERTEX:
-            if (m_vertex_id != 0) return ShaderCreationResult::VERTEX_EXISTS;
+            if (m_vertex_id != 0) {
+                on_shader_add_fail(ShaderCreationResult::VERTEX_EXISTS);
+                return ShaderCreationResult::VERTEX_EXISTS;
+            }
             break;
         case ShaderType::FRAGMENT:
-            if (m_frag_id != 0) return ShaderCreationResult::FRAG_EXISTS;
+            if (m_frag_id != 0) {
+                on_shader_add_fail(ShaderCreationResult::FRAG_EXISTS);
+                return ShaderCreationResult::FRAG_EXISTS;
+            }
             break;
         default:
+            on_shader_add_fail(ShaderCreationResult::INVALID_STAGE);
             return ShaderCreationResult::INVALID_STAGE;
     }
 
     // Create the shader, ready for compilation.
     GLuint shader_id = glCreateShader(static_cast<GLenum>(shader.type));
-    if (shader_id == 0) return ShaderCreationResult::CREATE_FAIL;
+    if (shader_id == 0) {
+        on_shader_add_fail(ShaderCreationResult::CREATE_FAIL);
+        return ShaderCreationResult::CREATE_FAIL;
+    }
 
     // Read in the shader code.
     std::string* shader_code = m_shader_cache->fetch(shader.filepath);
     if (!shader_code) {
+        on_shader_add_fail(ShaderCreationResult::READ_FAIL);
         return ShaderCreationResult::READ_FAIL;
     }
     char* buffer = (*shader_code).data();
@@ -87,7 +99,8 @@ hg::ShaderCreationResult hg::GLSLProgram::add_shader(const ShaderInfo& shader) {
         glGetShaderInfoLog(shader_id, max_length, nullptr, log);
         log[max_length] = '\0';
 
-        // TODO(Matthew): Send out log somehow (event?).
+        on_shader_add_fail(ShaderCreationResult::COMPILE_FAIL);
+        on_shader_compilation_fail(log);
 
         glDeleteShader(shader_id);
         return ShaderCreationResult::COMPILE_FAIL;
@@ -150,7 +163,7 @@ hg::ShaderLinkResult hg::GLSLProgram::link() {
         glGetProgramInfoLog(m_id, max_length, nullptr, log);
         log[max_length] = '\0';
 
-        // TODO(Matthew): Send out log somehow (event?).
+        on_shader_link_fail(log);
 
         return ShaderLinkResult::LINK_FAIL;
     }
