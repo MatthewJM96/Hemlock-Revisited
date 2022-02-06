@@ -5,11 +5,18 @@ void hemlock::basic_thread_main( typename Thread<ThreadState>::State* state,
 
     IThreadTask<ThreadState>* task;
     while (!state->context.stop) {
-        task_queue->wait_dequeue(state->consumer_token, task);
+        task_queue->wait_dequeue_timed(
+            state->consumer_token,
+            task,
+            std::chrono::seconds(1)
+        );
+
+        if (!task) break;
 
         task->execute(state, task_queue);
         task->is_finished = true;
         task->dispose();
+        task = nullptr;
     }
 }
 
