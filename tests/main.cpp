@@ -2,6 +2,7 @@
 
 #include "app/app.h"
 #include "app/screen.h"
+#include "graphics/font/font.h"
 #include "graphics/glsl_program.h"
 #include "graphics/sprite/batcher.h"
 #include "graphics/window_manager.h"
@@ -74,13 +75,20 @@ public:
         m_sprite_batcher.begin();
         m_sprite_batcher.add_sprite(
             f32v2{
-                60.0f + 30.0f * sin(time.total / 10000.0f),
-                60.0f + 30.0f * cos(time.total / 10000.0f)
+                60.0f + 30.0f * sin(time.total / 5000.0f),
+                60.0f + 30.0f * cos(time.total / 5000.0f)
             },
             f32v2{200.0f, 200.0f},
             colour4{255,   0, 0, 255},
             colour4{  0, 255, 0, 255},
             hg::Gradient::LEFT_TO_RIGHT
+        );
+        m_sprite_batcher.add_string(
+            "Hello, world!",
+            f32v4{100.0f, 100.0f, 1000.0f, 1000.0f},
+            hg::f::StringSizing{hg::f::StringSizingKind::SCALED, f32v2{1.0f}},
+            colour4{255, 0, 0, 255},
+            "fonts/Orbitron-Regular.ttf"
         );
         m_sprite_batcher.end();
     }
@@ -97,18 +105,39 @@ public:
         m_state = happ::ScreenState::RUNNING;
 
         // std::cout << std::endl << my_shader_parser("shaders/default_sprite.frag", &my_iom) << std::endl << std::endl;
-        m_shader_cache.init(&m_iom, hg::ShaderCache::Parser([](const hio::fs::path& path, hio::IOManagerBase* iom) -> std::string {
-            std::string buffer;
-            if (!iom->read_file_to_string(path, buffer)) return "";
+        m_shader_cache.init(&m_iom, hg::ShaderCache::Parser(
+            [](const hio::fs::path& path, hio::IOManagerBase* iom) -> std::string {
+                std::string buffer;
+                if (!iom->read_file_to_string(path, buffer)) return "";
 
-            return buffer;
-        }));
-         ;
-        m_sprite_batcher.init(&m_shader_cache, nullptr);
+                return buffer;
+            }
+        ));
+
+        m_font_cache.init(&m_iom, hg::f::FontCache::Parser(
+            [](const hio::fs::path& path, hio::IOManagerBase* iom) -> hg::f::Font {
+                hio::fs::path actual_path;
+                if (!iom->resolve_path(path, actual_path)) return hg::f::Font{};
+
+                hg::f::Font font;
+                font.init(actual_path.string());
+
+                return font;
+            }
+        ));
+
+
+        auto font = m_font_cache.fetch("fonts/Orbitron-Regular.ttf");
+        font->set_default_size(20);
+        font->generate();
+
+
+        m_sprite_batcher.init(&m_shader_cache, &m_font_cache);
     }
 protected:
     MyIOManager          m_iom;
     hg::ShaderCache      m_shader_cache;
+    hg::f::FontCache     m_font_cache;
     hg::s::SpriteBatcher m_sprite_batcher;
 };
 
