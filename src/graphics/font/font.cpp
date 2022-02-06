@@ -1,7 +1,5 @@
 #include "stdafx.h"
 
-#include "io/image.h"
-
 #include "graphics/font/font.h"
 
 /**
@@ -27,7 +25,7 @@ static ui32 next_power_2(ui32 value) {
     return ++value;
 }
 
-hg::FontInstanceHash hg::hash(FontSize size, FontStyle style, FontRenderStyle renderStyle) {
+hg::f::FontInstanceHash hg::f::hash(FontSize size, FontStyle style, FontRenderStyle renderStyle) {
     FontInstanceHash hash = 0;
 
     // By ensuring FontInstanceHash has more bits that the sum of all three of the
@@ -40,7 +38,7 @@ hg::FontInstanceHash hg::hash(FontSize size, FontStyle style, FontRenderStyle re
     return hash;
 }
 
-bool hg::FontInstance::save(std::string filepath, hio::image::Saver save) {
+bool hg::f::FontInstance::save(std::string filepath, hio::image::Saver save) {
         // Prepare the pixel buffer.
         ui8* pixels = new ui8[texture_size.x * texture_size.y * 4];
 
@@ -52,19 +50,19 @@ bool hg::FontInstance::save(std::string filepath, hio::image::Saver save) {
         return save(filepath, static_cast<void*>(pixels), texture_size, hio::image::PixelFormat::RGBA_UI8);
 }
 
-hg::Font::Font() :
+hg::f::Font::Font() :
     m_filepath(nullptr),
     m_start(0), m_end(0),
     m_default_size(0)
 { /* Empty. */ }
 
-void hg::Font::init(std::string filepath, char start, char end) {
+void hg::f::Font::init(std::string filepath, char start, char end) {
     m_filepath = filepath;
     m_start    = start;
     m_end      = end;
 }
 
-void hg::Font::dispose() {
+void hg::f::Font::dispose() {
     for (auto& instance : m_font_instances) {
         if (instance.second.texture != 0) {
             glDeleteTextures(1, &instance.second.texture);
@@ -77,10 +75,10 @@ void hg::Font::dispose() {
     FontInstanceMap().swap(m_font_instances);
 }
 
-bool hg::Font::generate( FontSize size,
-                         FontSize padding,
-                        FontStyle style       /*= FontStyle::NORMAL*/,
-                  FontRenderStyle renderStyle /*= FontRenderStyle::BLENDED*/ ) {
+bool hg::f::Font::generate( FontSize size,
+                            FontSize padding,
+                           FontStyle style       /*= FontStyle::NORMAL*/,
+                     FontRenderStyle renderStyle /*= FontRenderStyle::BLENDED*/ ) {
     // Make sure this is a new instance we are generating.
     if (get_instance(size, style, renderStyle) != NIL_FONT_INSTANCE) return false;
 
@@ -274,9 +272,9 @@ bool hg::Font::generate( FontSize size,
     return true;
 }
 
-hg::FontInstance hg::Font::get_instance( FontSize size,
-                                        FontStyle style       /*= FontStyle::NORMAL*/,
-                                  FontRenderStyle renderStyle /*= FontRenderStyle::BLENDED*/ ) {
+hg::f::FontInstance hg::f::Font::get_instance( FontSize size,
+                                              FontStyle style       /*= FontStyle::NORMAL*/,
+                                        FontRenderStyle renderStyle /*= FontRenderStyle::BLENDED*/ ) {
     try {
         return m_font_instances.at(hash(size, style, renderStyle));
     } catch (std::out_of_range& e) {
@@ -284,7 +282,7 @@ hg::FontInstance hg::Font::get_instance( FontSize size,
     }
 }
 
-hg::Font::Row* hg::Font::generate_rows(Glyph* glyphs, ui32 row_count, FontSize padding, ui32& width, ui32& height) {
+hg::f::Font::Row* hg::f::Font::generate_rows(Glyph* glyphs, ui32 row_count, FontSize padding, ui32& width, ui32& height) {
     // Create some arrays for the rows, their widths and max height of a glyph within each of them.
     //    Max heights are stored inside Row - it is a pair of max height and a vector of glyph indices.
     Row*  rows          = new Row[row_count]();
@@ -338,12 +336,12 @@ hg::Font::Row* hg::Font::generate_rows(Glyph* glyphs, ui32 row_count, FontSize p
     return rows;
 }
 
-bool operator==(const hg::FontInstance& lhs, const hg::FontInstance& rhs) {
+bool operator==(const hg::f::FontInstance& lhs, const hg::f::FontInstance& rhs) {
     return (lhs.texture == rhs.texture &&
             lhs.height  == rhs.height  &&
             lhs.glyphs  == rhs.glyphs);
 }
-bool operator!=(const hg::FontInstance& lhs, const hg::FontInstance& rhs) {
+bool operator!=(const hg::f::FontInstance& lhs, const hg::f::FontInstance& rhs) {
     return !(lhs == rhs);
 }
 
@@ -351,49 +349,49 @@ bool operator!=(const hg::FontInstance& lhs, const hg::FontInstance& rhs) {
 //     That is to say, we can do things like:
 //         FontStyle::BOLD | FontStyle::ITALIC
 //     in order to specify we want a font instance that is bold AND italic!
-hg::FontStyle operator~ (hg::FontStyle rhs) {
-    return static_cast<hg::FontStyle>(
-        ~static_cast<std::underlying_type<hg::FontStyle>::type>(rhs)
+hg::f::FontStyle operator~ (hg::f::FontStyle rhs) {
+    return static_cast<hg::f::FontStyle>(
+        ~static_cast<std::underlying_type<hg::f::FontStyle>::type>(rhs)
     );
 }
-hg::FontStyle operator| (hg::FontStyle lhs, hg::FontStyle rhs) {
-    return static_cast<hg::FontStyle>(
-        static_cast<std::underlying_type<hg::FontStyle>::type>(lhs) |
-        static_cast<std::underlying_type<hg::FontStyle>::type>(rhs)
+hg::f::FontStyle operator| (hg::f::FontStyle lhs, hg::f::FontStyle rhs) {
+    return static_cast<hg::f::FontStyle>(
+        static_cast<std::underlying_type<hg::f::FontStyle>::type>(lhs) |
+        static_cast<std::underlying_type<hg::f::FontStyle>::type>(rhs)
     );
 }
-hg::FontStyle operator& (hg::FontStyle lhs, hg::FontStyle rhs) {
-    return static_cast<hg::FontStyle>(
-        static_cast<std::underlying_type<hg::FontStyle>::type>(lhs) &
-        static_cast<std::underlying_type<hg::FontStyle>::type>(rhs)
+hg::f::FontStyle operator& (hg::f::FontStyle lhs, hg::f::FontStyle rhs) {
+    return static_cast<hg::f::FontStyle>(
+        static_cast<std::underlying_type<hg::f::FontStyle>::type>(lhs) &
+        static_cast<std::underlying_type<hg::f::FontStyle>::type>(rhs)
     );
 }
-hg::FontStyle operator^ (hg::FontStyle lhs, hg::FontStyle rhs) {
-    return static_cast<hg::FontStyle>(
-        static_cast<std::underlying_type<hg::FontStyle>::type>(lhs) ^
-        static_cast<std::underlying_type<hg::FontStyle>::type>(rhs)
+hg::f::FontStyle operator^ (hg::f::FontStyle lhs, hg::f::FontStyle rhs) {
+    return static_cast<hg::f::FontStyle>(
+        static_cast<std::underlying_type<hg::f::FontStyle>::type>(lhs) ^
+        static_cast<std::underlying_type<hg::f::FontStyle>::type>(rhs)
     );
 }
-hg::FontStyle& operator|= (hg::FontStyle& lhs, hg::FontStyle rhs) {
-    lhs = static_cast<hg::FontStyle>(
-        static_cast<std::underlying_type<hg::FontStyle>::type>(lhs) |
-        static_cast<std::underlying_type<hg::FontStyle>::type>(rhs)
-    );
-
-    return lhs;
-}
-hg::FontStyle& operator&= (hg::FontStyle& lhs, hg::FontStyle rhs) {
-    lhs = static_cast<hg::FontStyle>(
-        static_cast<std::underlying_type<hg::FontStyle>::type>(lhs) &
-        static_cast<std::underlying_type<hg::FontStyle>::type>(rhs)
+hg::f::FontStyle& operator|= (hg::f::FontStyle& lhs, hg::f::FontStyle rhs) {
+    lhs = static_cast<hg::f::FontStyle>(
+        static_cast<std::underlying_type<hg::f::FontStyle>::type>(lhs) |
+        static_cast<std::underlying_type<hg::f::FontStyle>::type>(rhs)
     );
 
     return lhs;
 }
-hg::FontStyle& operator^= (hg::FontStyle& lhs, hg::FontStyle rhs) {
-    lhs = static_cast<hg::FontStyle>(
-        static_cast<std::underlying_type<hg::FontStyle>::type>(lhs) ^
-        static_cast<std::underlying_type<hg::FontStyle>::type>(rhs)
+hg::f::FontStyle& operator&= (hg::f::FontStyle& lhs, hg::f::FontStyle rhs) {
+    lhs = static_cast<hg::f::FontStyle>(
+        static_cast<std::underlying_type<hg::f::FontStyle>::type>(lhs) &
+        static_cast<std::underlying_type<hg::f::FontStyle>::type>(rhs)
+    );
+
+    return lhs;
+}
+hg::f::FontStyle& operator^= (hg::f::FontStyle& lhs, hg::f::FontStyle rhs) {
+    lhs = static_cast<hg::f::FontStyle>(
+        static_cast<std::underlying_type<hg::f::FontStyle>::type>(lhs) ^
+        static_cast<std::underlying_type<hg::f::FontStyle>::type>(rhs)
     );
 
     return lhs;

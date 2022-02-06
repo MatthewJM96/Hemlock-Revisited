@@ -1,6 +1,8 @@
 #ifndef __hemlock_graphics_font_instance_hpp
 #define __hemlock_graphics_font_instance_hpp
 
+#include "io/image.h"
+
 namespace hemlock {
     namespace graphics {
         namespace font {
