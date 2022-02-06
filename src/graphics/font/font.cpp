@@ -217,19 +217,19 @@ bool hg::f::Font::generate( FontSize size,
         // This represents the current U-coordinate we are into the texture.
         ui32 current_u = padding;
         for (size_t glyph_index = 0; glyph_index < best_rows[row_index].second.size(); ++glyph_index) {
-            ui32 charIndex = best_rows[row_index].second[glyph_index];
+            ui32 char_index = best_rows[row_index].second[glyph_index];
 
             // If the glyph is unsupported, skip it!
-            if (!font_instance.glyphs[charIndex].supported) continue;
+            if (!font_instance.glyphs[char_index].supported) continue;
 
             // Determine which render style we are to use and draw the glyph.
             SDL_Surface* glyph_surface = nullptr;
             switch(renderStyle) {
                 case FontRenderStyle::SOLID:
-                    glyph_surface = TTF_RenderGlyph_Solid(font, static_cast<ui16>(m_start + charIndex), { 255, 255, 255, 255 });
+                    glyph_surface = TTF_RenderGlyph_Solid(font, static_cast<ui16>(m_start + char_index), { 255, 255, 255, 255 });
                     break;
                 case FontRenderStyle::BLENDED:
-                    glyph_surface = TTF_RenderGlyph_Blended(font, static_cast<ui16>(m_start + charIndex), { 255, 255, 255, 255 });
+                    glyph_surface = TTF_RenderGlyph_Blended(font, static_cast<ui16>(m_start + char_index), { 255, 255, 255, 255 });
                     break;
             }
 
@@ -238,14 +238,14 @@ bool hg::f::Font::generate( FontSize size,
 
             // Update the size of the glyph with what we rendered - there can be variance between this and what we obtained
             // in the glyph metric stage!
-            font_instance.glyphs[charIndex].size.x = static_cast<f32>(glyph_surface->w);
-            font_instance.glyphs[charIndex].size.y = static_cast<f32>(glyph_surface->h);
+            font_instance.glyphs[char_index].size.x = static_cast<f32>(glyph_surface->w);
+            font_instance.glyphs[char_index].size.y = static_cast<f32>(glyph_surface->h);
 
             // Build the UV dimensions for the glyph.
-            font_instance.glyphs[charIndex].uvDimensions.x =        (static_cast<f32>(current_u) / static_cast<f32>(best_width));
-            font_instance.glyphs[charIndex].uvDimensions.y =        (static_cast<f32>(current_v) / static_cast<f32>(best_height));
-            font_instance.glyphs[charIndex].uvDimensions.z = (static_cast<f32>(glyph_surface->w) / static_cast<f32>(best_width));
-            font_instance.glyphs[charIndex].uvDimensions.w = (static_cast<f32>(glyph_surface->h) / static_cast<f32>(best_height));
+            font_instance.glyphs[char_index].uv_rect.x =        (static_cast<f32>(current_u) / static_cast<f32>(best_width));
+            font_instance.glyphs[char_index].uv_rect.y =        (static_cast<f32>(current_v) / static_cast<f32>(best_height));
+            font_instance.glyphs[char_index].uv_rect.z = (static_cast<f32>(glyph_surface->w) / static_cast<f32>(best_width));
+            font_instance.glyphs[char_index].uv_rect.w = (static_cast<f32>(glyph_surface->h) / static_cast<f32>(best_height));
 
             // Update current_u.
             current_u += glyph_surface->w + padding;

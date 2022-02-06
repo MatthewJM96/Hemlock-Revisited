@@ -22,7 +22,7 @@ namespace hemlock {
                 union {
                     f32v2 scaling;
                     struct {
-                        f32 scaleX;
+                        f32 scale_x;
                         f32 target_height;
                     };
                 };

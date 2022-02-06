@@ -44,9 +44,9 @@ namespace hemlock {
              */
             struct Glyph {
                 char  character;
-                f32v4 uvDimensions;
+                f32v4 uv_rect;
                 f32v2 size;
-                bool supported;
+                bool  supported;
             };
 
             // Forward declare Font.
