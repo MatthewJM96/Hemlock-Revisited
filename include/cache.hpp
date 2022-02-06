@@ -126,10 +126,12 @@ namespace hemlock {
              * .be obtained.
              */
             CachedType* fetch(const hio::fs::path& filepath) {
-                auto& it = std::find(m_assets.begin(), m_assets.end(), filepath.string());
-                if (it != m_assets.end()) return (*it).second;
+                auto it = std::find_if(m_assets.begin(), m_assets.end(), [&filepath](auto& lhs) {
+                    return lhs.first == filepath.string();
+                });
+                if (it != m_assets.end()) return &(*it).second;
 
-                auto& [asset, fetched] = m_assets.emplace(filepath.string(), m_parser(filepath));
+                auto [asset, fetched] = m_assets.emplace(filepath.string(), m_parser(filepath));
 
 #ifdef DEBUG
                 assert(fetched);
@@ -137,7 +139,7 @@ namespace hemlock {
                 if (!fetched) return nullptr;
 #endif
 
-                return (*asset).second;
+                return &(*asset).second;
             }
     protected:
         bool m_initialised;
