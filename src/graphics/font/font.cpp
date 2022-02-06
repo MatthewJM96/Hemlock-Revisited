@@ -51,7 +51,7 @@ bool hg::f::FontInstance::save(std::string filepath, hio::image::Saver save) {
 }
 
 hg::f::Font::Font() :
-    m_filepath(nullptr),
+    m_filepath(""),
     m_start(0), m_end(0),
     m_default_size(0)
 { /* Empty. */ }
