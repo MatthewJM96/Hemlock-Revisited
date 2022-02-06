@@ -44,7 +44,7 @@ namespace hemlock {
                 const char*          str;
                 StringDrawProperties props;
             };
-            using DrawableStringComponents = std::vector<DrawableStringComponent>;
+            using DrawableStringComponents = DrawableStringComponent*;
 
             /**
              * @brief The data needed to draw a glyph.
