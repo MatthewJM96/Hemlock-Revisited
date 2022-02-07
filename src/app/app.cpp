@@ -171,12 +171,15 @@ void happ::BasicApp::init() {
     SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 
-    TTF_Init();
+    if (TTF_Init() < 0) {
+        puts("TTF font library could not be initialised...\n");
+        exit(1);
+    }
 
     m_window_manager = new hg::WindowManager();
     if (m_window_manager->init(this) != hg::WindowError::NONE) {
         puts("Window could not be initialised...\n");
-        exit(1);
+        exit(2);
     }
 
     m_input_manager = new hui::InputManager();
