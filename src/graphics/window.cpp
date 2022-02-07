@@ -80,7 +80,13 @@ hg::WindowError hg::Window::init(WindowSettings settings /*= {}*/) {
     glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &nr_attributes);
     debug_printf("Maximum # of vertex attributes supported: %d.\n", nr_attributes);
 
-    glClearColor(0.0f, 0.2f, 0.0f, 1.0f);
+    // Enable depth testing, set the clear colour and depth.
+    glClearColor(0.2f, 0.7f, 0.3f, 1.0f);
+    glClearDepth(1.0);
+
+    // Enable blending.
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); 
 
     if (m_settings.swap_interval == SwapInterval::V_SYNC) {
         SDL_GL_SetSwapInterval(1);
