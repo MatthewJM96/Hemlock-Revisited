@@ -27,9 +27,9 @@ void hui::InputManager::dispose() {
 hui::CommonMouseState hui::InputManager::common_mouse_state() {
     CommonMouseState cms;
 
-    cms.left   = m_mouse_button_state[(ui8)MouseButton::LEFT].is_pressed;
-    cms.right  = m_mouse_button_state[(ui8)MouseButton::RIGHT].is_pressed;
-    cms.middle = m_mouse_button_state[(ui8)MouseButton::MIDDLE].is_pressed;
+    cms.left   = m_mouse_button_state[static_cast<ui8>(MouseButton::LEFT)].is_pressed;
+    cms.right  = m_mouse_button_state[static_cast<ui8>(MouseButton::RIGHT)].is_pressed;
+    cms.middle = m_mouse_button_state[static_cast<ui8>(MouseButton::MIDDLE)].is_pressed;
 
     return cms;
 }

@@ -295,7 +295,7 @@ bool hg::f::Font::dispose_instance(FontInstance font_instance) {
 }
 
 bool hg::f::Font::dispose_instance(FontInstanceHash font_instance_hash) {
-    return (bool)m_font_instances.erase(font_instance_hash);
+    return static_cast<bool>(m_font_instances.erase(font_instance_hash));
 }
 
 hg::f::Font::Row* hg::f::Font::generate_rows(Glyph* glyphs, ui32 row_count, FontSize padding, ui32& width, ui32& height) {

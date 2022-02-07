@@ -18,14 +18,14 @@ f64 hemlock::FpsTimer::end() {
 void hemlock::FpsTimer::calculate_fps() {
     static const f64 smoothing_factor = 0.9;
 
-    f64 time_this_frame = (f64)(SDL_GetTicks() - m_start_time);
+    f64 time_this_frame = static_cast<f64>(SDL_GetTicks() - m_start_time);
 
     m_frame_time = (m_frame_time * smoothing_factor) + time_this_frame * (1.0 - smoothing_factor);
     
     if (m_frame_time == 0.0) {
         m_fps = 0.0;
     } else {
-        m_fps = (f64)(MILLISECONDS / m_frame_time);
+        m_fps = static_cast<f64>(MILLISECONDS / m_frame_time);
     }
 }
 
@@ -34,11 +34,11 @@ void hemlock::FpsTimer::calculate_fps() {
 f64 hemlock::FpsLimiter::end() {
     calculate_fps();
 
-    f64 time_this_frame = (f64)(SDL_GetTicks() - m_start_time);
+    f64 time_this_frame = static_cast<f64>(SDL_GetTicks() - m_start_time);
     if (MILLISECONDS / m_max_fps > time_this_frame) {
         // TODO(Matthew): This won't actually achieve anything like what we want unless we're targetting <30 FPS.
         //                  we need to use a higher resolution mechanism.
-        SDL_Delay((ui32)((MILLISECONDS / m_max_fps) - time_this_frame));
+        SDL_Delay(static_cast<ui32>((MILLISECONDS / m_max_fps) - time_this_frame));
     }
 
     return m_fps;

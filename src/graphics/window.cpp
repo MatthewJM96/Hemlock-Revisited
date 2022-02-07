@@ -28,7 +28,7 @@ bool hg::FullscreenMode::operator!=(const FullscreenMode& rhs) {
 hg::Window::Window() :
     handle_external_window_resize(Delegate<void(Sender, hui::WindowResizeEvent)>([&](Sender, hui::WindowResizeEvent ev) {
         if (ev.window_id != m_window_id) return;
-        set_dimensions({(ui32)ev.width, (ui32)ev.height});
+        set_dimensions({static_cast<ui32>(ev.width), static_cast<ui32>(ev.height)});
     })),
     m_initialised(false),
     m_window(nullptr),
@@ -227,7 +227,7 @@ void hg::Window::set_is_resizable(bool resizable) {
 
     m_settings.is_resizable = resizable;
 
-    SDL_SetWindowResizable(m_window, (SDL_bool)resizable);
+    SDL_SetWindowResizable(m_window, static_cast<SDL_bool>(resizable));
 }
 
 void hg::Window::set_is_borderless(bool borderless) {
@@ -239,7 +239,7 @@ void hg::Window::set_is_borderless(bool borderless) {
 
     m_settings.is_borderless = borderless;
 
-    SDL_SetWindowBordered(m_window, (SDL_bool)!borderless);
+    SDL_SetWindowBordered(m_window, static_cast<SDL_bool>(!borderless));
 }
 
 void hg::Window::set_is_maximised(bool maximised) {
@@ -273,7 +273,7 @@ void hg::Window::set_allowed_resolutions(WindowDimensionMap allowed_resolutions)
 }
 
 void hg::Window::check_display_occupied() {
-    ui32 current_display_idx = (ui32)SDL_GetWindowDisplayIndex(m_window);
+    ui32 current_display_idx = static_cast<ui32>(SDL_GetWindowDisplayIndex(m_window));
     if (m_settings.display_idx == current_display_idx) return;
 
     m_settings.display_idx = current_display_idx;
@@ -298,10 +298,10 @@ void hg::Window::determine_modes() {
             SDL_DisplayMode mode;
             SDL_GetDisplayMode(display_idx, mode_idx, &mode);
 
-            WindowDimensions resolution{ (ui32)mode.w, (ui32)mode.h };
+            WindowDimensions resolution{ static_cast<ui32>(mode.w), static_cast<ui32>(mode.h) };
 
             m_fullscreen_modes[display_idx][mode_idx] = FullscreenMode{
-                resolution, (ui32)mode.refresh_rate, (ui32)mode.format
+                resolution, static_cast<ui32>(mode.refresh_rate), static_cast<ui32>(mode.format)
             };
 
             // Can just check last allowed resolution as SDL orders modes
@@ -362,26 +362,26 @@ void hg::Window::validate_dimensions() {
 void hg::Window::validate_fullscreen_mode() {
     // Check the current fullscreen mode is allowed on the new display.
     // If not change the mode to a reasonable alternative.
-    auto it = std::find(
+    auto old_setting_it = std::find(
         m_fullscreen_modes[m_settings.display_idx].begin(),
         m_fullscreen_modes[m_settings.display_idx].end(),
         m_settings.fullscreen_mode
     );
-    if (it == m_fullscreen_modes[m_settings.display_idx].end()) {
+    if (old_setting_it == m_fullscreen_modes[m_settings.display_idx].end()) {
         /***********************************************************\
          * Test for a fullscreen mode with given resolution width. *
          * If found, set that as the new fullscreen mode.          *
         \***********************************************************/
         auto try_res_width = [&](ui32 width) -> bool {
-            auto it = std::find_if(
+            auto target_width_setting_it = std::find_if(
                 m_fullscreen_modes[m_settings.display_idx].begin(),
                 m_fullscreen_modes[m_settings.display_idx].end(),
                 [width](const FullscreenMode& mode) {
                     return mode.resolution.width == width;
                 }
             );
-            if (it != m_fullscreen_modes[m_settings.display_idx].end()) {
-                m_settings.fullscreen_mode = *it;
+            if (target_width_setting_it != m_fullscreen_modes[m_settings.display_idx].end()) {
+                m_settings.fullscreen_mode = *target_width_setting_it;
                 return true;
             }
             return false;

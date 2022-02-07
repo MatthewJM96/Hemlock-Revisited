@@ -28,7 +28,7 @@ void hui::InputDispatcher::init(hui::InputManager* manager) {
 
     m_manager = manager;
 
-    SDL_SetEventFilter(hui::InputDispatcher::handle_event, (void*)this);
+    SDL_SetEventFilter(hui::InputDispatcher::handle_event, reinterpret_cast<void*>(this));
     SDL_EventState(SDL_DROPFILE,     SDL_ENABLE);
     SDL_EventState(SDL_DROPBEGIN,    SDL_ENABLE);
     SDL_EventState(SDL_DROPCOMPLETE, SDL_ENABLE);
@@ -99,8 +99,8 @@ i32 hui::InputDispatcher::handle_event(void* data, SDL_Event* event) {
         case SDL_KEYDOWN:
         case SDL_KEYUP:
             KeyboardButtonEvent kbe;
-            kbe.physical_key = (PhysicalKey)event->key.keysym.scancode;
-            kbe.virtual_key  = (VirtualKey)event->key.keysym.sym;
+            kbe.physical_key = static_cast<PhysicalKey>(event->key.keysym.scancode);
+            kbe.virtual_key  = static_cast<VirtualKey>(event->key.keysym.sym);
             kbe.presses      = event->key.repeat;
             kbe.mouse        = dispatcher->m_manager->common_mouse_state();
             kbe.modifiers    = dispatcher->m_manager->key_modifier_state();

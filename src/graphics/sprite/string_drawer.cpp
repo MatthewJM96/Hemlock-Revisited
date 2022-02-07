@@ -27,8 +27,8 @@ void hg::add_string_no_wrap(SpriteBatcher* batcher, DrawableStringComponents com
 
     // TODO(Matthew): Can we make guesses as to the amount of drawables to reserve for a line? For amount of lines?
 
-    for (ui32 i = 0; i < num_components; ++i) {
-        auto& component = components[i];
+    for (ui32 component_idx = 0; component_idx < num_components; ++component_idx) {
+        auto& component = components[component_idx];
 
         // Simplify property names.
         const char*  str    = component.str;
@@ -140,8 +140,8 @@ void hg::add_string_quick_wrap(SpriteBatcher* batcher, DrawableStringComponents 
 
     // TODO(Matthew): Can we make guesses as to the amount of drawables to reserve for a line? For amount of lines?
 
-    for (ui32 i = 0; i < num_components; ++i) {
-        auto& component = components[i];
+    for (ui32 component_idx = 0; component_idx < num_components; ++component_idx) {
+        auto& component = components[component_idx];
 
         // Simplify property names.
         const char*  str    = component.str;
@@ -177,9 +177,9 @@ void hg::add_string_quick_wrap(SpriteBatcher* batcher, DrawableStringComponents 
         // Gets set to true if we go out of the height of the rect.
         bool vertical_overflow = false;
         // Iterate over this component's string.
-        for (size_t i = 0; str[i] != '\0'; ++i) {
+        for (ui32 i = 0; str[i] != '\0'; ++i) {
             char   character       = str[i];
-            size_t character_index = static_cast<size_t>(character) - static_cast<size_t>(start);
+            ui32 character_index = static_cast<ui32>(character) - static_cast<ui32>(start);
 
             // If character is a new line character, add a new line and go to next character.
             if (character == '\n') {

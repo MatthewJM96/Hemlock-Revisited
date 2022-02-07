@@ -75,8 +75,8 @@ public:
         m_sprite_batcher.begin();
         m_sprite_batcher.add_sprite(
             f32v2{
-                60.0f + 30.0f * sin(time.total / 5000.0f),
-                60.0f + 30.0f * cos(time.total / 5000.0f)
+                60.0f + 30.0f * sin(time.total / 1000.0f),
+                60.0f + 30.0f * cos(time.total / 1000.0f)
             },
             f32v2{200.0f, 200.0f},
             colour4{255,   0, 0, 255},
@@ -85,9 +85,9 @@ public:
         );
         m_sprite_batcher.add_string(
             "Hello, world!",
-            f32v4{100.0f, 100.0f, 1000.0f, 1000.0f},
+            f32v4{300.0f, 300.0f, 1000.0f, 1000.0f},
             hg::f::StringSizing{hg::f::StringSizingKind::SCALED, f32v2{1.0f}},
-            colour4{255, 0, 0, 255},
+            colour4{255, 0, 0, 120},
             "fonts/Orbitron-Regular.ttf"
         );
         m_sprite_batcher.end();
@@ -130,7 +130,8 @@ public:
         auto font = m_font_cache.fetch("fonts/Orbitron-Regular.ttf");
         font->set_default_size(20);
         font->generate();
-
+        auto font_instance = font->get_instance();
+        font_instance.save("test.png", {hio::img::png::save});
 
         m_sprite_batcher.init(&m_shader_cache, &m_font_cache);
     }
@@ -176,7 +177,7 @@ i32 main() {
         &my_tasks[2]
     };
 
-    pool.add_tasks((hemlock::IThreadTask<ThreadContext>**)my_task_ptrs, 3);
+    pool.add_tasks(reinterpret_cast<hemlock::IThreadTask<ThreadContext>**>(my_task_ptrs), 3);
 
     hemlock::Event<ui32, ui32> on_calc;
 
