@@ -301,7 +301,7 @@ void hg::Window::determine_modes() {
             WindowDimensions resolution{ static_cast<ui32>(mode.w), static_cast<ui32>(mode.h) };
 
             m_fullscreen_modes[display_idx][mode_idx] = FullscreenMode{
-                resolution, static_cast<ui32>(mode.refresh_rate), static_cast<ui32>(mode.format)
+                resolution, static_cast<ui32>(mode.refresh_rate), mode.format
             };
 
             // Can just check last allowed resolution as SDL orders modes

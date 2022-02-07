@@ -25,7 +25,7 @@ void hemlock::FpsTimer::calculate_fps() {
     if (m_frame_time == 0.0) {
         m_fps = 0.0;
     } else {
-        m_fps = static_cast<f64>(MILLISECONDS / m_frame_time);
+        m_fps = MILLISECONDS / m_frame_time;
     }
 }
 
