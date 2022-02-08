@@ -236,8 +236,65 @@ bool hg::f::Font::generate( FontSize size,
                     break;
             }
 
+            /*
+             * SDL_ttf produces SDL_Surfaces with indexing into a colour palette for solid case,
+             * and.ARGB8888 for blended case now. Let's handle both indexed colour palette and
+             * general 4-byte cases and hope that covers us.
+             */
+            ui8* actual_pixels = new ui8[4 * glyph_surface->w * glyph_surface->h];
+            switch (glyph_surface->format->BytesPerPixel) {
+                case 1:
+                    for (ui32 i = 0; i < static_cast<ui32>(glyph_surface->h); ++i) {
+                        for (ui32 j = 0; j < static_cast<ui32>(glyph_surface->w); ++j) {
+                            ui32 actual_pix_idx = (i * glyph_surface->w) + j;
+                            ui32 sdl_internal_pix_idx = (i * glyph_surface->pitch) + j;
+
+                            ui8 colour_idx = reinterpret_cast<ui8*>(glyph_surface->pixels)[sdl_internal_pix_idx];
+                            SDL_Color* pix_colour = &glyph_surface->format->palette->colors[colour_idx];
+
+                            actual_pixels[ actual_pix_idx * 4     ] = pix_colour->r;
+                            actual_pixels[(actual_pix_idx * 4) + 1] = pix_colour->g;
+                            actual_pixels[(actual_pix_idx * 4) + 2] = pix_colour->b;
+                            actual_pixels[(actual_pix_idx * 4) + 3] = pix_colour->a;
+                        }
+                    }
+                    break;
+                case 4:
+                    for (ui32 i = 0; i < static_cast<ui32>(glyph_surface->h); ++i) {
+                        for (ui32 j = 0; j < static_cast<ui32>(glyph_surface->w); ++j) {
+                            ui32 actual_pix_idx = (i * glyph_surface->w) + j;
+                            ui32 sdl_internal_pix_idx = (i * glyph_surface->pitch) + (j * 4);
+
+                            ui32 pixel = *reinterpret_cast<ui32*>(
+                                &reinterpret_cast<ui8*>(glyph_surface->pixels)[sdl_internal_pix_idx]
+                            );
+
+                            ui32 red = pixel & glyph_surface->format->Rmask;
+                                 red = red  >> glyph_surface->format->Rshift;
+                                 red = red  << glyph_surface->format->Rloss;
+                            actual_pixels[ actual_pix_idx * 4     ] = red;
+
+                            ui32 green = pixel  & glyph_surface->format->Gmask;
+                                 green = green >> glyph_surface->format->Gshift;
+                                 green = green << glyph_surface->format->Gloss;
+                            actual_pixels[(actual_pix_idx * 4) + 1] = green;
+
+                            ui32 blue = pixel & glyph_surface->format->Bmask;
+                                 blue = blue >> glyph_surface->format->Bshift;
+                                 blue = blue << glyph_surface->format->Bloss;
+                            actual_pixels[(actual_pix_idx * 4) + 2] = blue;
+
+                            ui32 alpha = pixel  & glyph_surface->format->Amask;
+                                 alpha = alpha >> glyph_surface->format->Ashift;
+                                 alpha = alpha << glyph_surface->format->Aloss;
+                            actual_pixels[(actual_pix_idx * 4) + 3] = alpha;
+                        }
+                    }
+                    break;
+            }
+
             // Stitch the glyph we just generated into our texture.
-            glTexSubImage2D(GL_TEXTURE_2D, 0, current_u, current_v, glyph_surface->w, glyph_surface->h, GL_BGRA, GL_UNSIGNED_BYTE, glyph_surface->pixels);
+            glTexSubImage2D(GL_TEXTURE_2D, 0, current_u, current_v, glyph_surface->w, glyph_surface->h, GL_RGBA, GL_UNSIGNED_BYTE, actual_pixels);
 
             // Update the size of the glyph with what we rendered - there can be variance between this and what we obtained
             // in the glyph metric stage!
@@ -256,6 +313,7 @@ bool hg::f::Font::generate( FontSize size,
             // Free the glyph "surface".
             SDL_FreeSurface(glyph_surface);
             glyph_surface = nullptr;
+            delete[] actual_pixels;
         }
         // Update current_v.
         current_v += best_rows[row_index].first + padding;
