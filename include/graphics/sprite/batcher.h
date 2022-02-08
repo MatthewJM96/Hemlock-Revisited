@@ -192,7 +192,8 @@ namespace hemlock {
                  * @brief Draw a string with the given properties.
                  *
                  * @param str The string to draw.
-                 * @param rect The rectangle in which to draw the string.
+                 * @param target_rect The bounding rectangle the string is aimed to be kept within.
+                 * @param clip_rect The bounding rectangle the string must be kept within.
                  * @param sizing The sizing of the font.
                  * @param tint The colour to give the string.
                  * @param font_name The name of the font to use.
@@ -204,7 +205,8 @@ namespace hemlock {
                  * @param render_style The rendering style to use for the font.
                  */
                 void add_string( CALLER_DELETE const char* str,
-                                                     f32v4 rect,
+                                                     f32v4 target_rect,
+                                                     f32v4 clip_rect,
                                            f::StringSizing sizing,
                                                    colour4 tint,
                                         const std::string& font_name,
@@ -219,7 +221,8 @@ namespace hemlock {
                  * size is taken to be the default for the font specified.
                  *
                  * @param str The string to draw.
-                 * @param rect The rectangle in which to draw the string.
+                 * @param target_rect The bounding rectangle the string is aimed to be kept within.
+                 * @param clip_rect The bounding rectangle the string must be kept within.
                  * @param sizing The sizing of the font.
                  * @param tint The colour to give the string.
                  * @param font_name The name of the font to use.
@@ -230,7 +233,8 @@ namespace hemlock {
                  * @param render_style The rendering style to use for the font.
                  */
                 void add_string( CALLER_DELETE const char* str,
-                                                     f32v4 rect,
+                                                     f32v4 target_rect,
+                                                     f32v4 clip_rect,
                                            f::StringSizing sizing,
                                                    colour4 tint,
                                         const std::string& font_name,
@@ -244,7 +248,8 @@ namespace hemlock {
                  * instance is explicitly specified in this version.
                  *
                  * @param str The string to draw.
-                 * @param rect The rectangle in which to draw the string.
+                 * @param target_rect The bounding rectangle the string is aimed to be kept within.
+                 * @param clip_rect The bounding rectangle the string must be kept within.
                  * @param sizing The sizing of the font.
                  * @param tint The colour to give the string.
                  * @param font_instance The instance of the font to use.
@@ -253,7 +258,8 @@ namespace hemlock {
                  * @param depth The depth of the string for rendering.
                  */
                 void add_string( CALLER_DELETE const char* str,
-                                                     f32v4 rect,
+                                                     f32v4 target_rect,
+                                                     f32v4 clip_rect,
                                            f::StringSizing sizing,
                                                    colour4 tint,
                                            f::FontInstance font_instance,
@@ -265,13 +271,15 @@ namespace hemlock {
                  * instance is explicitly specified in this version.
                  *
                  * @param str_component The string to draw with drawable properties.
-                 * @param rect The rectangle in which to draw the string.
+                 * @param target_rect The bounding rectangle the string is aimed to be kept within.
+                 * @param clip_rect The bounding rectangle the string must be kept within.
                  * @param align The alignment to use for the string.
                  * @param wrap The wrapping mode to use for the string.
                  * @param depth The depth of the string for rendering.
                  */
                 void add_string( CALLER_DELETE f::DrawableStringComponent str_component,
-                                                                    f32v4 rect,
+                                                                    f32v4 target_rect,
+                                                                    f32v4 clip_rect,
                                                              f::TextAlign align = f::TextAlign::TOP_LEFT,
                                                               f::WordWrap wrap  = f::WordWrap::NONE,
                                                                       f32 depth = 0.0f );
@@ -283,14 +291,16 @@ namespace hemlock {
                  * @param str_components The components of the string, consisting of
                  * sub-strings and their properties.
                  * @param num_components The number of components to be added.
-                 * @param rect The rectangle in which to draw the string.
+                 * @param target_rect The bounding rectangle the string is aimed to be kept within.
+                 * @param clip_rect The bounding rectangle the string must be kept within.
                  * @param align The alignment to use for the string.
                  * @param wrap The wrapping mode to use for the string.
                  * @param depth The depth of the string for rendering.
                  */
                 void add_string( CALLER_DELETE f::DrawableStringComponents str_components,
                                                                       ui32 num_components,
-                                                                     f32v4 rect,
+                                                                     f32v4 target_rect,
+                                                                     f32v4 clip_rect,
                                                               f::TextAlign align = f::TextAlign::TOP_LEFT,
                                                                f::WordWrap wrap  = f::WordWrap::NONE,
                                                                        f32 depth = 0.0f );

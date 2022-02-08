@@ -290,7 +290,8 @@ void hg::s::SpriteBatcher::add_sprite(
 
 void hg::s::SpriteBatcher::add_string(
                  CALLER_DELETE const char* str,
-                                     f32v4 rect,
+                                     f32v4 target_rect,
+                                     f32v4 clip_rect,
                               StringSizing sizing,
                                    colour4 tint,
                         const std::string& font_name,
@@ -302,7 +303,7 @@ void hg::s::SpriteBatcher::add_string(
                            FontRenderStyle render_style /*= FontRenderStyle::BLENDED*/
 ) {
     add_string(
-        str, rect, sizing, tint,
+        str, target_rect, clip_rect, sizing, tint,
         m_font_cache->fetch(font_name)
                     ->get_instance(font_size, style, render_style),
         align, wrap, depth
@@ -311,7 +312,8 @@ void hg::s::SpriteBatcher::add_string(
 
 void hg::s::SpriteBatcher::add_string(
                  CALLER_DELETE const char* str,
-                                     f32v4 rect,
+                                     f32v4 target_rect,
+                                     f32v4 clip_rect,
                               StringSizing sizing,
                                    colour4 tint,
                         const std::string& font_name,
@@ -322,7 +324,7 @@ void hg::s::SpriteBatcher::add_string(
                            FontRenderStyle render_style /*= FontRenderStyle::BLENDED*/
 ) {
     add_string(
-        str, rect, sizing, tint,
+        str, target_rect, clip_rect, sizing, tint,
         m_font_cache->fetch(font_name)
                     ->get_instance(style, render_style),
         align, wrap, depth
@@ -331,7 +333,8 @@ void hg::s::SpriteBatcher::add_string(
 
 void hg::s::SpriteBatcher::add_string(
                  CALLER_DELETE const char* str,
-                                     f32v4 rect,
+                                     f32v4 target_rect,
+                                     f32v4 clip_rect,
                               StringSizing sizing,
                                    colour4 tint,
                               FontInstance font_instance,
@@ -347,29 +350,30 @@ void hg::s::SpriteBatcher::add_string(
                 tint
             }
         },
-        rect, align, wrap, depth
+        target_rect, clip_rect, align, wrap, depth
     );
 }
 
 void hg::s::SpriteBatcher::add_string(
                  CALLER_DELETE DrawableStringComponent str_component,
-                                                 f32v4 rect,
+                                                 f32v4 target_rect,
+                                                 f32v4 clip_rect,
                                              TextAlign align /*= TextAlign::TOP_LEFT*/,
                                               WordWrap wrap  /*= WordWrap::NONE*/,
                                                    f32 depth /*= 0.0f*/
 ) {
     switch(wrap) {
         case WordWrap::NONE:
-            add_string_no_wrap(this, str_component, rect, align, depth);
+            add_string_no_wrap(this, str_component, target_rect, clip_rect, align, depth);
             break;
         case WordWrap::QUICK:
-            add_string_quick_wrap(this, str_component, rect, align, depth);
+            add_string_quick_wrap(this, str_component, target_rect, clip_rect, align, depth);
             break;
         case WordWrap::GREEDY:
-            add_string_greedy_wrap(this, str_component, rect, align, depth);
+            add_string_greedy_wrap(this, str_component, target_rect, clip_rect, align, depth);
             break;
         case WordWrap::MINIMUM_RAGGEDNESS:
-            // add_string_minimum_raggedness_wrap(this, str_component, rect, align, depth);
+            // add_string_minimum_raggedness_wrap(this, str_component, target_rect, clip_rect, align, depth);
             break;
     }
 }
@@ -377,23 +381,24 @@ void hg::s::SpriteBatcher::add_string(
 void hg::s::SpriteBatcher::add_string(
                  CALLER_DELETE DrawableStringComponents str_components,
                                                    ui32 num_components,
-                                                  f32v4 rect,
+                                                  f32v4 target_rect,
+                                                  f32v4 clip_rect,
                                               TextAlign align /*= TextAlign::TOP_LEFT*/,
                                                WordWrap wrap  /*= WordWrap::NONE*/,
                                                     f32 depth /*= 0.0f*/
 ) {
     switch(wrap) {
         case WordWrap::NONE:
-            add_string_no_wrap(this, str_components, num_components, rect, align, depth);
+            add_string_no_wrap(this, str_components, num_components, target_rect, clip_rect, align, depth);
             break;
         case WordWrap::QUICK:
-            add_string_quick_wrap(this, str_components, num_components, rect, align, depth);
+            add_string_quick_wrap(this, str_components, num_components, target_rect, clip_rect, align, depth);
             break;
         case WordWrap::GREEDY:
-            add_string_greedy_wrap(this, str_components, num_components, rect, align, depth);
+            add_string_greedy_wrap(this, str_components, num_components, target_rect, clip_rect, align, depth);
             break;
         case WordWrap::MINIMUM_RAGGEDNESS:
-            // add_string_minimum_raggedness_wrap(this, str_components, num_components, rect, align, depth);
+            // add_string_minimum_raggedness_wrap(this, str_components, num_components, target_rect, clip_rect, align, depth);
             break;
     }
 }
