@@ -201,7 +201,10 @@ bool hg::f::Font::generate( FontSize size,
     // Set the texture's size and pixel format.
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, best_width, best_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
 
-    // Set some needed parameters for the texture.
+    // Note that by default MAG_FILTER, WRAP_* are as we are setting them,
+    // the crucial parameter to set is MIN_FILTER that defaults to a
+    // mip mapping setting that won't work for these textures, causing
+    // OpenGL to treat pixels all as RGBA{0,0,0,255}.
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S,     GL_REPEAT);
