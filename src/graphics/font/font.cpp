@@ -47,7 +47,7 @@ bool hg::f::FontInstance::save(std::string filepath, hio::image::Saver save) {
         glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
         glBindTexture(GL_TEXTURE_2D, 0);
 
-        return save(filepath, static_cast<void*>(pixels), texture_size, hio::image::PixelFormat::RGBA_UI8);
+        return save(filepath, reinterpret_cast<void*>(pixels), texture_size, hio::image::PixelFormat::RGBA_UI8);
 }
 
 hg::f::Font::Font() :
