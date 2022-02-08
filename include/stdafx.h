@@ -5,8 +5,8 @@
 #include <cstdlib>
 
 // Containers
-#include "blockingconcurrentqueue.h"
-#include "concurrentqueue.h"
+#include <moodycamel/blockingconcurrentqueue.h>
+#include <moodycamel/concurrentqueue.h>
 #include <map>
 #include <queue>
 #include <set>

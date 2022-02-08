@@ -1,5 +1,15 @@
 cmake_minimum_required(VERSION 3.22)
 
+if(NOT EXISTS "${CMAKE_BINARY_DIR}/cmake/conan.cmake")
+  message(STATUS "Downloading conan.cmake from https://github.com/conan-io/cmake-conan")
+  file(DOWNLOAD "https://raw.githubusercontent.com/conan-io/cmake-conan/v0.16.1/conan.cmake"
+                "${CMAKE_BINARY_DIR}/cmake/conan.cmake"
+                EXPECTED_HASH SHA256=396e16d0f5eabdc6a14afddbcfff62a54a7ee75c6da23f32f7a31bc85db23484
+                TLS_VERIFY ON)
+endif()
+
+include(${CMAKE_BINARY_DIR}/cmake/conan.cmake)
+
 project(Hemlock_Revisited)
 
 if(NOT CMAKE_BUILD_TYPE)
@@ -33,6 +43,30 @@ endif()
 #     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fmodules -fprebuilt-module-path=${PROJECT_BINARY_DIR}/clm/${CMAKE_BUILD_TYPE}/")
 # endif()
 
+conan_cmake_configure(REQUIRES glew/2.2.0
+                               glm/0.9.9.8
+                               sdl/2.0.18
+                               sdl_ttf/2.0.18
+                               libpng/1.6.37
+                               concurrentqueue/1.0.3
+                      GENERATORS cmake_find_package)
+
+conan_cmake_autodetect(settings)
+
+conan_cmake_install(PATH_OR_REFERENCE .
+                    BUILD missing
+                    REMOTE conancenter
+                    SETTINGS ${settings})
+
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_BINARY_DIR}")
+
+find_package(glew REQUIRED)
+find_package(glm REQUIRED)
+find_package(SDL2 REQUIRED)
+find_package(SDL2_ttf REQUIRED)
+find_package(PNG REQUIRED)
+find_package(concurrentqueue REQUIRED)
+
 add_executable(Hemlock_Revisited
     "${PROJECT_SOURCE_DIR}/src/stdafx.cpp"
     "${PROJECT_SOURCE_DIR}/src/timing.cpp"
@@ -61,20 +95,25 @@ target_precompile_headers(Hemlock_Revisited
 target_include_directories(Hemlock_Revisited
     SYSTEM
     PUBLIC
-    "${PROJECT_SOURCE_DIR}/deps/include"
+    ${glew_INCLUDE_DIRS}
+    ${glm_INCLUDE_DIRS}
+    ${SDL2_INCLUDE_DIRS}
+    ${SDL2_ttf_INCLUDE_DIRS}
+    ${PNG_INCLUDE_DIRS}
+    ${concurrentqueue_INCLUDE_DIRS}
     "${PROJECT_SOURCE_DIR}/include"
 )
 
-target_link_directories(Hemlock_Revisited
-    PUBLIC
-    "${PROJECT_SOURCE_DIR}/deps/lib"
-)
+# target_link_directories(Hemlock_Revisited
+#     PUBLIC
+#     "${PROJECT_SOURCE_DIR}/deps/lib"
+# )
 
 target_link_libraries(Hemlock_Revisited
-    GL
-    GLEW
-    png
-    SDL2main
-    SDL2
-    SDL2_ttf
+    # GL
+    glew::glew
+    PNG::PNG
+    SDL2::SDL2main
+    SDL2::SDL2
+    SDL2_ttf::SDL2_ttf
 )
