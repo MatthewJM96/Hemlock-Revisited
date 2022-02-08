@@ -86,9 +86,15 @@ public:
         m_sprite_batcher.add_string(
             "Hello, world!",
             f32v4{300.0f, 300.0f, 1000.0f, 1000.0f},
+            f32v4{295.0f, 295.0f, 1010.0f, 1010.0f},
             hg::f::StringSizing{hg::f::StringSizingKind::SCALED, f32v2{1.0f}},
-            colour4{255, 0, 0, 120},
-            "fonts/Orbitron-Regular.ttf"
+            colour4{0, 0, 0, 255},
+            "fonts/Orbitron-Regular.ttf",
+            hg::f::TextAlign::TOP_LEFT,
+            hg::f::WordWrap::NONE//,
+            // 0.0f,
+            // hg::f::FontStyle::NORMAL,
+            // hg::f::FontRenderStyle::SOLID
         );
         m_sprite_batcher.end();
     }
@@ -128,9 +134,9 @@ public:
 
 
         auto font = m_font_cache.fetch("fonts/Orbitron-Regular.ttf");
-        font->set_default_size(20);
-        font->generate();
-        auto font_instance = font->get_instance();
+        font->set_default_size(50);
+        font->generate(/*hg::f::FontStyle::NORMAL, hg::f::FontRenderStyle::SOLID*/);
+        auto font_instance = font->get_instance(/*hg::f::FontStyle::NORMAL, hg::f::FontRenderStyle::SOLID*/);
         font_instance.save("test.png", {hio::img::png::save});
 
         m_sprite_batcher.init(&m_shader_cache, &m_font_cache);
