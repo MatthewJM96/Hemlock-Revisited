@@ -3,6 +3,7 @@
 
 # Dependencies
 deps/
+tests/artifacts
 tests/fonts
 
 # Artifacts
