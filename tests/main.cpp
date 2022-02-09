@@ -2,10 +2,10 @@
 
 #include "app/app.h"
 #include "app/screen.h"
+#include "app/window/manager.h"
 #include "graphics/font/font.h"
 #include "graphics/glsl_program.h"
 #include "graphics/sprite/batcher.h"
-#include "graphics/window/manager.h"
 #include "io/iomanager.h"
 
 class MyIOManager : public hio::IOManagerBase {
@@ -101,7 +101,7 @@ public:
     virtual void draw(TimeData time [[maybe_unused]]) override {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        hg::WindowDimensions dims = m_app->window_manager()->main_window()->dimensions();
+        happ::WindowDimensions dims = m_app->window_manager()->main_window()->dimensions();
         m_sprite_batcher.render(f32v2{dims.width, dims.height});
     }
 
@@ -137,7 +137,7 @@ public:
         font->set_default_size(50);
         font->generate(/*hg::f::FontStyle::NORMAL, hg::f::FontRenderStyle::SOLID*/);
         auto font_instance = font->get_instance(/*hg::f::FontStyle::NORMAL, hg::f::FontRenderStyle::SOLID*/);
-        font_instance.save("test.png", {hio::img::png::save});
+        // font_instance.save("test.png", {hio::img::png::save});
 
         m_sprite_batcher.init(&m_shader_cache, &m_font_cache);
     }

@@ -1,10 +1,9 @@
 #include "stdafx.h"
 
 #include "app/app.h"
+#include "app/window/manager.h"
 
-#include "graphics/window/manager.h"
-
-hg::WindowManager::WindowManager() :
+happ::WindowManager::WindowManager() :
     WindowManagerBase(),
     handle_window_close([&](Sender, hui::WindowEvent event) {
         dispose_window(event.window_id);
@@ -12,7 +11,7 @@ hg::WindowManager::WindowManager() :
     m_quit_on_main_window_close(true)
 { /* Empty. */ }
 
-hg::WindowError hg::WindowManager::init(hemlock::app::AppBase* app) {
+happ::WindowError happ::WindowManager::init(hemlock::app::AppBase* app) {
     if (m_main_window != nullptr) return WindowError::NONE;
 
     m_app = app;
@@ -28,7 +27,7 @@ hg::WindowError hg::WindowManager::init(hemlock::app::AppBase* app) {
     return WindowError::NONE;
 }
 
-void hg::WindowManager::dispose() {
+void happ::WindowManager::dispose() {
     for (auto& window : m_windows) {
         window.second->dispose();
         delete window.second;
@@ -38,7 +37,7 @@ void hg::WindowManager::dispose() {
     m_app         = nullptr;
 }
 
-bool hg::WindowManager::set_main_window(Window* window) {
+bool happ::WindowManager::set_main_window(Window* window) {
     auto it = std::find_if(m_windows.begin(), m_windows.end(), [window](const auto& rhs) {
         return rhs.second == window;
     });
@@ -50,7 +49,7 @@ bool hg::WindowManager::set_main_window(Window* window) {
     return true;
 }
 
-bool hg::WindowManager::set_main_window(ui32 window_id) {
+bool happ::WindowManager::set_main_window(ui32 window_id) {
     auto it =  m_windows.find(window_id);
 
     if (it == m_windows.end()) return false;
@@ -60,9 +59,9 @@ bool hg::WindowManager::set_main_window(ui32 window_id) {
     return true;
 }
 
-std::pair<hg::Window*, hg::WindowError>
-hg::WindowManager::add_window(WindowSettings settings /*= {}*/) {
-    hg::Window* new_window = new hg::Window();
+std::pair<happ::Window*, happ::WindowError>
+happ::WindowManager::add_window(WindowSettings settings /*= {}*/) {
+    happ::Window* new_window = new happ::Window();
     WindowError err = new_window->init(settings);
 
     m_windows.insert({new_window->window_id(), new_window});
@@ -70,11 +69,11 @@ hg::WindowManager::add_window(WindowSettings settings /*= {}*/) {
     return { new_window, err };
 }
 
-bool hg::WindowManager::add_window(CALLEE_DELETE Window* window) {
+bool happ::WindowManager::add_window(CALLEE_DELETE Window* window) {
     return m_windows.try_emplace(window->window_id(), window).second;
 }
 
-bool hg::WindowManager::dispose_window(Window* window) {
+bool happ::WindowManager::dispose_window(Window* window) {
     ui64 erased = std::erase_if(m_windows, [window](const auto& rhs) {
         return rhs.second == window;
     });
@@ -93,7 +92,7 @@ bool hg::WindowManager::dispose_window(Window* window) {
     return true;
 }
 
-bool hg::WindowManager::dispose_window(ui32 window_id) {
+bool happ::WindowManager::dispose_window(ui32 window_id) {
     auto it =  m_windows.find(window_id);
 
     if (it == m_windows.end()) return false;
@@ -114,6 +113,6 @@ bool hg::WindowManager::dispose_window(ui32 window_id) {
     return true;
 }
 
-void hg::WindowManager::sync_windows() {
+void happ::WindowManager::sync_windows() {
     for (auto& window : m_windows) window.second->sync();
 }

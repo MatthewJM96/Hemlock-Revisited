@@ -2,7 +2,7 @@
 
 #include "timing.h"
 #include "app/screen.h"
-#include "graphics/window/manager.h"
+#include "app/window/manager.h"
 #include "ui/input/dispatcher.h"
 #include "ui/input/manager.h"
 
@@ -183,8 +183,8 @@ void happ::BasicApp::init() {
     glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &nr_attributes);
     debug_printf("Maximum # of vertex attributes supported: %d.\n", nr_attributes);
 
-    m_window_manager = new hg::WindowManager();
-    if (m_window_manager->init(this) != hg::WindowError::NONE) {
+    m_window_manager = new happ::WindowManager();
+    if (m_window_manager->init(this) != happ::WindowError::NONE) {
         debug_printf("Window could not be initialised...\n");
         exit(2);
     }

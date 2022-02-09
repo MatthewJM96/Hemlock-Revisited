@@ -3,7 +3,7 @@
 
 namespace hemlock {
     class FpsLimiter;
-    namespace graphics {
+    namespace app {
         class WindowManagerBase;
     }
     namespace ui {
@@ -35,7 +35,7 @@ namespace hemlock {
 
             bool change_screen(std::string name);
 
-            hemlock::graphics::WindowManagerBase* window_manager() const { return m_window_manager; }
+            hemlock::app::WindowManagerBase* window_manager() const { return m_window_manager; }
 
             Event<>                  on_quit;
             Event<ScreenChangeEvent> on_screen_change;
@@ -73,7 +73,7 @@ namespace hemlock {
             ScreenList  m_screens;
             ScreenBase* m_current_screen;
 
-            hemlock::graphics::WindowManagerBase* m_window_manager;
+            hemlock::app::WindowManagerBase* m_window_manager;
         };
 
         class BasicApp : public AppBase {

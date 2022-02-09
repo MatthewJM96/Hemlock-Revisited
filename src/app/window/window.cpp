@@ -2,15 +2,15 @@
 
 #include "ui/input/dispatcher.h"
 
-#include "graphics/window/window.h"
+#include "app/window/window.h"
 
-hg::Window::Window() :
+happ::Window::Window() :
     WindowBase(),
     m_window(nullptr),
     m_context(nullptr)
 { /* Empty. */ }
 
-hg::WindowError hg::Window::init(WindowSettings settings /*= {}*/) {
+happ::WindowError happ::Window::init(WindowSettings settings /*= {}*/) {
     if (m_initialised) return WindowError::NONE;
     m_initialised = true;
 
@@ -82,7 +82,7 @@ hg::WindowError hg::Window::init(WindowSettings settings /*= {}*/) {
     return WindowError::NONE;
 }
 
-void hg::Window::dispose() {
+void happ::Window::dispose() {
     if (!m_initialised) return;
     m_initialised = false;
 
@@ -99,13 +99,13 @@ void hg::Window::dispose() {
     FullscreenModeMap().swap(m_fullscreen_modes);
 }
 
-void hg::Window::set_name(const std::string& name) {
+void happ::Window::set_name(const std::string& name) {
     m_settings.name = name;
 
     SDL_SetWindowTitle(m_window, name.data());
 }
 
-void hg::Window::set_dimensions(WindowDimensions dimensions) {
+void happ::Window::set_dimensions(WindowDimensions dimensions) {
     if (m_settings.dimensions == dimensions) return;
 
     SDL_SetWindowSize(m_window, dimensions.width, dimensions.height);
@@ -123,15 +123,15 @@ void hg::Window::set_dimensions(WindowDimensions dimensions) {
     on_window_resize(ResizeEvent{ temp, m_settings.dimensions });
 }
 
-void hg::Window::set_width(ui32 width) {
+void happ::Window::set_width(ui32 width) {
     set_dimensions({{ width, height() }});
 }
 
-void hg::Window::set_height(ui32 height) {
+void happ::Window::set_height(ui32 height) {
     set_dimensions({{ width(), height }});
 }
 
-void hg::Window::set_display(ui32 display_idx) {
+void happ::Window::set_display(ui32 display_idx) {
     if (m_settings.display_idx == display_idx) return;
 
     m_settings.display_idx = display_idx;
@@ -165,7 +165,7 @@ void hg::Window::set_display(ui32 display_idx) {
     on_display_change();
 }
 
-void hg::Window::set_fullscreen_mode(FullscreenMode fullscreen_mode) {
+void happ::Window::set_fullscreen_mode(FullscreenMode fullscreen_mode) {
     if (m_settings.fullscreen_mode == fullscreen_mode) return;
 
     FullscreenMode tmp = m_settings.fullscreen_mode;
@@ -195,7 +195,7 @@ void hg::Window::set_fullscreen_mode(FullscreenMode fullscreen_mode) {
     }
 }
 
-void hg::Window::set_fake_fullscreen(bool fake_fullscreen) {
+void happ::Window::set_fake_fullscreen(bool fake_fullscreen) {
     if (m_settings.fake_fullscreen == fake_fullscreen) return;
 
     m_settings.fake_fullscreen = fake_fullscreen;
@@ -209,7 +209,7 @@ void hg::Window::set_fake_fullscreen(bool fake_fullscreen) {
     }
 }
 
-void hg::Window::set_is_fullscreen(bool fullscreen) {
+void happ::Window::set_is_fullscreen(bool fullscreen) {
     if (m_settings.is_fullscreen == fullscreen) return;
 
     m_settings.is_fullscreen = fullscreen;
@@ -227,7 +227,7 @@ void hg::Window::set_is_fullscreen(bool fullscreen) {
     }
 }
 
-void hg::Window::set_is_resizable(bool resizable) {
+void happ::Window::set_is_resizable(bool resizable) {
     if (m_settings.is_resizable == resizable) return;
 
     m_settings.is_resizable = resizable;
@@ -235,7 +235,7 @@ void hg::Window::set_is_resizable(bool resizable) {
     SDL_SetWindowResizable(m_window, static_cast<SDL_bool>(resizable));
 }
 
-void hg::Window::set_is_borderless(bool borderless) {
+void happ::Window::set_is_borderless(bool borderless) {
     if (m_settings.is_borderless == borderless) return;
 
     if (m_settings.is_fullscreen && borderless) {
@@ -247,7 +247,7 @@ void hg::Window::set_is_borderless(bool borderless) {
     SDL_SetWindowBordered(m_window, static_cast<SDL_bool>(!borderless));
 }
 
-void hg::Window::set_is_maximised(bool maximised) {
+void happ::Window::set_is_maximised(bool maximised) {
     if (m_settings.is_maximised == maximised) return;
     m_settings.is_maximised = maximised;
     if (maximised) {
@@ -259,7 +259,7 @@ void hg::Window::set_is_maximised(bool maximised) {
     }
 }
 
-void hg::Window::set_swap_interval(SwapInterval swap_interval) {
+void happ::Window::set_swap_interval(SwapInterval swap_interval) {
     if (m_settings.swap_interval == swap_interval) return;
 
     m_settings.swap_interval = swap_interval;
@@ -268,7 +268,7 @@ void hg::Window::set_swap_interval(SwapInterval swap_interval) {
     SDL_GL_SetSwapInterval(vsync);
 }
 
-void hg::Window::set_allowed_resolutions(WindowDimensionMap allowed_resolutions) {
+void happ::Window::set_allowed_resolutions(WindowDimensionMap allowed_resolutions) {
     m_allowed_resolutions = allowed_resolutions;
 
     // If we're windowed and not resizable, we must keep window to one of the allowed resolutions.
@@ -277,11 +277,11 @@ void hg::Window::set_allowed_resolutions(WindowDimensionMap allowed_resolutions)
     }
 }
 
-void hg::Window::sync() {
+void happ::Window::sync() {
     SDL_GL_SwapWindow(m_window);
 }
 
-void hg::Window::check_display_occupied() {
+void happ::Window::check_display_occupied() {
     ui32 current_display_idx = static_cast<ui32>(SDL_GetWindowDisplayIndex(m_window));
     if (m_settings.display_idx == current_display_idx) return;
 
@@ -290,7 +290,7 @@ void hg::Window::check_display_occupied() {
     on_display_change();
 }
 
-void hg::Window::determine_modes() {
+void happ::Window::determine_modes() {
     // First get number of displays attached to the machine.
     ui32 display_count = SDL_GetNumVideoDisplays();
     for (ui32 display_idx = 0; display_idx < display_count; ++display_idx) {

@@ -1,8 +1,8 @@
-#ifndef __hemlock_graphics_window_state_hpp
-#define __hemlock_graphics_window_state_hpp
+#ifndef __hemlock_app_window_state_hpp
+#define __hemlock_app_window_state_hpp
 
 namespace hemlock {
-    namespace graphics {
+    namespace app {
         /**
          * @brief Enumerates errors that may
          * occur while initialising a window.
@@ -69,12 +69,12 @@ namespace hemlock {
         };
     }
 }
-namespace hg = hemlock::graphics;
+namespace happ = hemlock::app;
 
-bool operator==(const hg::WindowDimensions& lhs, const hg::WindowDimensions& rhs);
-bool operator!=(const hg::WindowDimensions& lhs, const hg::WindowDimensions& rhs);
+bool operator==(const happ::WindowDimensions& lhs, const happ::WindowDimensions& rhs);
+bool operator!=(const happ::WindowDimensions& lhs, const happ::WindowDimensions& rhs);
 
-bool operator==(const hg::FullscreenMode& lhs, const hg::FullscreenMode& rhs);
-bool operator!=(const hg::FullscreenMode& lhs, const hg::FullscreenMode& rhs);
+bool operator==(const happ::FullscreenMode& lhs, const happ::FullscreenMode& rhs);
+bool operator!=(const happ::FullscreenMode& lhs, const happ::FullscreenMode& rhs);
 
-#endif // __hemlock_graphics_window_state_hpp
+#endif // __hemlock_app_window_state_hpp

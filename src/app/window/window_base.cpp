@@ -1,9 +1,9 @@
 #include "stdafx.h"
 
-#include "graphics/window/base.h"
+#include "app/window/window_base.h"
 
 
-hg::WindowBase::WindowBase() :
+happ::WindowBase::WindowBase() :
     handle_external_window_move(Delegate<void(Sender, hui::WindowMoveEvent)>([&](Sender, hui::WindowMoveEvent ev) {
         if (ev.window_id != m_window_id) return;
         check_display_occupied();
@@ -15,7 +15,7 @@ hg::WindowBase::WindowBase() :
     m_initialised(false)
 { /* Empty. */ }
 
-void hg::WindowBase::calculate_aspect_ratio() {
+void happ::WindowBase::calculate_aspect_ratio() {
     Delegate<ui32(ui32, ui32)> calculateGCD = Delegate<ui32(ui32, ui32)>{[&calculateGCD](ui32 x, ui32 y) {
         if (y  > x) return calculateGCD(y, x);
         if (y == 0) return x;
@@ -29,7 +29,7 @@ void hg::WindowBase::calculate_aspect_ratio() {
     m_aspect_ratio = { width/gcd, height/gcd };
 }
 
-void hg::WindowBase::validate_dimensions() {
+void happ::WindowBase::validate_dimensions() {
     // Track closest allowed dimension.
     WindowDimensions closest_dimensions{m_settings.dimensions};
     ui32 distance2 = std::numeric_limits<ui32>::max();
@@ -58,7 +58,7 @@ void hg::WindowBase::validate_dimensions() {
     }
 }
 
-void hg::WindowBase::validate_fullscreen_mode() {
+void happ::WindowBase::validate_fullscreen_mode() {
     // Check the current fullscreen mode is allowed on the new display.
     // If not change the mode to a reasonable alternative.
     auto old_setting_it = std::find_if(
@@ -95,20 +95,20 @@ void hg::WindowBase::validate_fullscreen_mode() {
     }
 }
 
-bool operator==(const hg::WindowDimensions& lhs, const hg::WindowDimensions& rhs) {
+bool operator==(const happ::WindowDimensions& lhs, const happ::WindowDimensions& rhs) {
     return lhs.width == rhs.width && lhs.height == rhs.height;
 }
 
-bool operator!=(const hg::WindowDimensions& lhs, const hg::WindowDimensions& rhs) {
+bool operator!=(const happ::WindowDimensions& lhs, const happ::WindowDimensions& rhs) {
     return !(lhs == rhs);
 }
 
-bool operator==(const hg::FullscreenMode& lhs, const hg::FullscreenMode& rhs) {
+bool operator==(const happ::FullscreenMode& lhs, const happ::FullscreenMode& rhs) {
     return lhs.resolution == rhs.resolution
                 && lhs.refresh_rate == rhs.refresh_rate
                 && lhs.pixel_format == rhs.pixel_format;
 }
 
-bool operator!=(const hg::FullscreenMode& lhs, const hg::FullscreenMode& rhs) {
+bool operator!=(const happ::FullscreenMode& lhs, const happ::FullscreenMode& rhs) {
     return !(lhs == rhs);
 }

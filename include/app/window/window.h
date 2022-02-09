@@ -1,11 +1,11 @@
-#ifndef __hemlock_graphics_window_window_h
-#define __hemlock_graphics_window_window_h
+#ifndef __hemlock_app_window_window_h
+#define __hemlock_app_window_window_h
 
-#include "graphics/window/base.h"
+#include "app/window/window_base.h"
 #include "ui/input/events.hpp"
 
 namespace hemlock {
-    namespace graphics {
+    namespace app {
         class Window : public WindowBase {
         public:
             Window();
@@ -39,6 +39,6 @@ namespace hemlock {
         };
     }
 }
-namespace hg = hemlock::graphics;
+namespace happ = hemlock::app;
 
-#endif // __hemlock_graphics_window_window_h
+#endif // __hemlock_app_window_window_h

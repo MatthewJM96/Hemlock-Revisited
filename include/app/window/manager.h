@@ -1,19 +1,17 @@
-#ifndef __hemlock_graphics_window_manager_h
-#define __hemlock_graphics_window_manager_h
+#ifndef __hemlock_app_window_manager_h
+#define __hemlock_app_window_manager_h
 
-#include "graphics/window/state.hpp"
-#include "graphics/window/window.h"
+#include "app/window/state.hpp"
+#include "app/window/window.h"
 #include "ui/input/dispatcher.h"
 
 namespace hemlock {
-    namespace app {
-        class AppBase;
-    }
     namespace ui {
         class InputDispatcher;
     }
+    namespace app {
+        class AppBase;
 
-    namespace graphics {
         using Windows = std::unordered_map<ui32, Window*>;
 
         class WindowManagerBase {
@@ -24,7 +22,7 @@ namespace hemlock {
             { /* Empty. */ };
             virtual ~WindowManagerBase() { /* Empty. */ }
 
-            virtual WindowError init(hemlock::app::AppBase* app) = 0;
+            virtual WindowError init(AppBase* app) = 0;
             virtual void dispose() = 0;
 
             virtual void sync_windows() = 0;
@@ -33,7 +31,7 @@ namespace hemlock {
         protected:
             Window* m_main_window;
 
-            hemlock::app::AppBase* m_app;
+            AppBase* m_app;
         };
 
         class WindowManager : public WindowManagerBase {
@@ -41,7 +39,7 @@ namespace hemlock {
             WindowManager();
             virtual ~WindowManager() { /* Empty. */ }
 
-            virtual WindowError init(hemlock::app::AppBase* app) override;
+            virtual WindowError init(AppBase* app) override;
             virtual void dispose() override;
 
             void set_quit_on_main_window_close(bool should = true) { m_quit_on_main_window_close = should; }
@@ -67,6 +65,6 @@ namespace hemlock {
         };
     }
 }
-namespace hg = hemlock::graphics;
+namespace happ = hemlock::app;
 
-#endif // __hemlock_graphics_window_manager_h
+#endif // __hemlock_app_window_manager_h
