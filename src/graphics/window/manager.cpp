@@ -2,7 +2,7 @@
 
 #include "app/app.h"
 
-#include "graphics/window_manager.h"
+#include "graphics/window/manager.h"
 
 hg::WindowManager::WindowManager() :
     WindowManagerBase(),

@@ -2,7 +2,7 @@
 
 #include "timing.h"
 #include "app/screen.h"
-#include "graphics/window_manager.h"
+#include "graphics/window/manager.h"
 #include "ui/input/dispatcher.h"
 #include "ui/input/manager.h"
 
@@ -172,13 +172,20 @@ void happ::BasicApp::init() {
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 
     if (TTF_Init() < 0) {
-        puts("TTF font library could not be initialised...\n");
+        debug_printf("TTF font library could not be initialised...\n");
         exit(1);
     }
 
+    debug_printf("*** OpenGL Version:  %s ***\n", glGetString(GL_VERSION));
+    debug_printf("*** OpenGL Renderer: %s ***\n", glGetString(GL_RENDERER));
+
+    GLint nr_attributes;
+    glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &nr_attributes);
+    debug_printf("Maximum # of vertex attributes supported: %d.\n", nr_attributes);
+
     m_window_manager = new hg::WindowManager();
     if (m_window_manager->init(this) != hg::WindowError::NONE) {
-        puts("Window could not be initialised...\n");
+        debug_printf("Window could not be initialised...\n");
         exit(2);
     }
 

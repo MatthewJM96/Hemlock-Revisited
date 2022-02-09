@@ -2,35 +2,10 @@
 
 #include "ui/input/dispatcher.h"
 
-#include "graphics/window.h"
-
-bool hg::WindowDimensions::operator==(const WindowDimensions& rhs) {
-    return this->width == rhs.width && this->height == rhs.height;
-}
-
-bool hg::WindowDimensions::operator!=(const WindowDimensions& rhs) {
-    return !(this->width == rhs.width && this->height == rhs.height);
-}
-
-bool hg::FullscreenMode::operator==(const FullscreenMode& rhs) {
-    return this->resolution == rhs.resolution
-                && this->refresh_rate == rhs.refresh_rate
-                && this->pixel_format == rhs.pixel_format;
-}
-
-bool hg::FullscreenMode::operator!=(const FullscreenMode& rhs) {
-    return !(this->resolution == rhs.resolution
-                && this->refresh_rate == rhs.refresh_rate
-                && this->pixel_format == rhs.pixel_format);
-}
-
+#include "graphics/window/window.h"
 
 hg::Window::Window() :
-    handle_external_window_resize(Delegate<void(Sender, hui::WindowResizeEvent)>([&](Sender, hui::WindowResizeEvent ev) {
-        if (ev.window_id != m_window_id) return;
-        set_dimensions({static_cast<ui32>(ev.width), static_cast<ui32>(ev.height)});
-    })),
-    m_initialised(false),
+    WindowBase(),
     m_window(nullptr),
     m_context(nullptr)
 { /* Empty. */ }
@@ -42,7 +17,6 @@ hg::WindowError hg::Window::init(WindowSettings settings /*= {}*/) {
     m_settings = settings;
 
     determine_modes();
-    calculate_aspect_ratio();
 
     ui32 flags = SDL_WINDOW_OPENGL;
     if (m_settings.is_fullscreen) {
@@ -57,45 +31,52 @@ hg::WindowError hg::Window::init(WindowSettings settings /*= {}*/) {
 
     m_window = SDL_CreateWindow(name().data(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width(), height(), flags);
     if (m_window == nullptr) {
-        debug_printf("Couldn't create SDL Window.");
+        debug_printf("Couldn't create SDL Window.\n");
+
+        debug_printf(SDL_GetError());
+
         return WindowError::SDL_WINDOW;
     }
 
     m_context = SDL_GL_CreateContext(m_window);
-    if (m_context == NULL) {
-        debug_printf("Couldn't create OpenGL context for SDL Window.");
+    if (m_context == nullptr) {
+        debug_printf("Couldn't create OpenGL context for SDL Window.\n");
+
+        debug_printf(SDL_GetError());
+
         return WindowError::SDL_GL_CONTEXT;
     }
 
     GLenum error = glewInit();
     if (error != GLEW_OK) {
-        debug_printf("Couldn't initialise Glew.");
-        return WindowError::GLEW_INITIALISATION;
+        debug_printf("Couldn't initialise Glew.\n");
+
+        debug_printf(glewGetErrorString(error));
+
+        return WindowError::GLEW_INIT;
     }
 
-    printf("*** OpenGL Version:  %s ***\n", glGetString(GL_VERSION));
-    printf("*** OpenGL Renderer: %s ***\n", glGetString(GL_RENDERER));
+    // TODO(Matthew): Do we do this here? For multiple windows do these need resetting
+    //                each time we change which window we are working on?
+    {
+        // Enable depth testing, set the clear colour and depth.
+        glClearColor(0.2f, 0.7f, 0.3f, 1.0f);
+        glClearDepth(1.0);
 
-    GLint nr_attributes;
-    glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &nr_attributes);
-    debug_printf("Maximum # of vertex attributes supported: %d.\n", nr_attributes);
+        // Enable blending.
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); 
 
-    // Enable depth testing, set the clear colour and depth.
-    glClearColor(0.2f, 0.7f, 0.3f, 1.0f);
-    glClearDepth(1.0);
-
-    // Enable blending.
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); 
-
-    if (m_settings.swap_interval == SwapInterval::V_SYNC) {
-        SDL_GL_SetSwapInterval(1);
-    } else {
-        SDL_GL_SetSwapInterval(0);
+        if (m_settings.swap_interval == SwapInterval::V_SYNC) {
+            SDL_GL_SetSwapInterval(1);
+        } else {
+            SDL_GL_SetSwapInterval(0);
+        }
     }
 
     m_window_id = SDL_GetWindowID(m_window);
 
+    hui::InputDispatcher::instance()->on_window.move   += &handle_external_window_move;
     hui::InputDispatcher::instance()->on_window.resize += &handle_external_window_resize;
 
     return WindowError::NONE;
@@ -105,6 +86,7 @@ void hg::Window::dispose() {
     if (!m_initialised) return;
     m_initialised = false;
 
+    hui::InputDispatcher::instance()->on_window.move   -= &handle_external_window_move;
     hui::InputDispatcher::instance()->on_window.resize -= &handle_external_window_resize;
 
     SDL_GL_DeleteContext(m_context);
@@ -114,10 +96,12 @@ void hg::Window::dispose() {
     m_window = nullptr;
 
     WindowDimensionMap().swap(m_allowed_resolutions);
+    FullscreenModeMap().swap(m_fullscreen_modes);
 }
 
 void hg::Window::set_name(const std::string& name) {
     m_settings.name = name;
+
     SDL_SetWindowTitle(m_window, name.data());
 }
 
@@ -127,6 +111,8 @@ void hg::Window::set_dimensions(WindowDimensions dimensions) {
     SDL_SetWindowSize(m_window, dimensions.width, dimensions.height);
 
     // TODO(Matthew): do we need to call this for fullscreen too?
+    // TODO(Matthew): do we need to call this each time we change which
+    //                window we are handling?
     glViewport(0, 0, dimensions.width, dimensions.height);
 
     WindowDimensions temp = m_settings.dimensions;
@@ -138,11 +124,11 @@ void hg::Window::set_dimensions(WindowDimensions dimensions) {
 }
 
 void hg::Window::set_width(ui32 width) {
-    set_dimensions({ width, height() });
+    set_dimensions({{ width, height() }});
 }
 
 void hg::Window::set_height(ui32 height) {
-    set_dimensions({ width(), height });
+    set_dimensions({{ width(), height }});
 }
 
 void hg::Window::set_display(ui32 display_idx) {
@@ -184,6 +170,19 @@ void hg::Window::set_fullscreen_mode(FullscreenMode fullscreen_mode) {
 
     FullscreenMode tmp = m_settings.fullscreen_mode;
     m_settings.fullscreen_mode = fullscreen_mode;
+
+    SDL_DisplayMode mode = {
+        fullscreen_mode.pixel_format,
+        static_cast<int>(fullscreen_mode.resolution.width),
+        static_cast<int>(fullscreen_mode.resolution.height),
+        static_cast<int>(fullscreen_mode.refresh_rate),
+        nullptr
+    };
+    if (!SDL_SetWindowDisplayMode(m_window, &mode)) {
+        debug_printf("Could not set window display mode for %u.\n", m_window_id);
+
+        debug_printf(SDL_GetError());
+    }
 
     if (m_settings.is_fullscreen) {
         FullscreenModeChangeEvent fmce{ tmp, fullscreen_mode };
@@ -273,9 +272,13 @@ void hg::Window::set_allowed_resolutions(WindowDimensionMap allowed_resolutions)
     m_allowed_resolutions = allowed_resolutions;
 
     // If we're windowed and not resizable, we must keep window to one of the allowed resolutions.
-    if (!m_settings.is_resizable&& !m_settings.is_maximised && !m_settings.is_fullscreen) {
+    if (!m_settings.is_resizable && !m_settings.is_maximised && !m_settings.is_fullscreen) {
         validate_dimensions();
     }
+}
+
+void hg::Window::sync() {
+    SDL_GL_SwapWindow(m_window);
 }
 
 void hg::Window::check_display_occupied() {
@@ -304,7 +307,7 @@ void hg::Window::determine_modes() {
             SDL_DisplayMode mode;
             SDL_GetDisplayMode(display_idx, mode_idx, &mode);
 
-            WindowDimensions resolution{ static_cast<ui32>(mode.w), static_cast<ui32>(mode.h) };
+            WindowDimensions resolution{{ static_cast<ui32>(mode.w), static_cast<ui32>(mode.h) }};
 
             m_fullscreen_modes[display_idx][mode_idx] = FullscreenMode{
                 resolution, static_cast<ui32>(mode.refresh_rate), mode.format
@@ -320,86 +323,4 @@ void hg::Window::determine_modes() {
         // Finally set the allowed resolutions.
         m_allowed_resolutions[display_idx] = allowed_resolutions;
     }
-}
-
-void hg::Window::calculate_aspect_ratio() {
-    Delegate<ui32(ui32, ui32)> calculateGCD = Delegate<ui32(ui32, ui32)>{[&calculateGCD](ui32 x, ui32 y) {
-        if (y > x) return calculateGCD(y, x);
-        if (y == 0) return x;
-
-        return calculateGCD(y, x % y);
-    }};
-
-    ui32 width = this->width(), height = this->height();
-    ui32 gcd = calculateGCD(width, height);
-
-    m_aspect_ratio = { width/gcd, height/gcd };
-}
-
-void hg::Window::validate_dimensions() {
-    // Track closest allowed dimension.
-    WindowDimensions closest_dimensions{m_settings.dimensions};
-    ui32 distance2 = std::numeric_limits<ui32>::max();
-
-    // Check each allowed resolution on the display currently occupied by the window.
-    bool current_dimensions_allowed = false;
-    for (auto& resolution : m_allowed_resolutions[m_settings.display_idx]) {
-        if (m_settings.dimensions == resolution) {
-            current_dimensions_allowed = true;
-            break;
-        }
-
-        // Is this resolution "closer" to the current dimensions of the window?
-        ui32 new_distance2 = std::pow(closest_dimensions.width - resolution.width, 2)
-                                + std::pow(closest_dimensions.height - resolution.height, 2);
-        if (new_distance2 < distance2) {
-            closest_dimensions = resolution;
-            distance2 = new_distance2;
-        }
-    }
-
-    // If the current dimensions aren't allowed, change to
-    // the dimensions we found to be the closest allowed.
-    if (!current_dimensions_allowed) {
-        set_dimensions(closest_dimensions);
-    }
-}
-
-void hg::Window::validate_fullscreen_mode() {
-    // Check the current fullscreen mode is allowed on the new display.
-    // If not change the mode to a reasonable alternative.
-    auto old_setting_it = std::find(
-        m_fullscreen_modes[m_settings.display_idx].begin(),
-        m_fullscreen_modes[m_settings.display_idx].end(),
-        m_settings.fullscreen_mode
-    );
-    if (old_setting_it == m_fullscreen_modes[m_settings.display_idx].end()) {
-        /***********************************************************\
-         * Test for a fullscreen mode with given resolution width. *
-         * If found, set that as the new fullscreen mode.          *
-        \***********************************************************/
-        auto try_res_width = [&](ui32 width) -> bool {
-            auto target_width_setting_it = std::find_if(
-                m_fullscreen_modes[m_settings.display_idx].begin(),
-                m_fullscreen_modes[m_settings.display_idx].end(),
-                [width](const FullscreenMode& mode) {
-                    return mode.resolution.width == width;
-                }
-            );
-            if (target_width_setting_it != m_fullscreen_modes[m_settings.display_idx].end()) {
-                m_settings.fullscreen_mode = *target_width_setting_it;
-                return true;
-            }
-            return false;
-        };
-
-        // Do the tests and worst case fallback to the first mode SDL supports.
-        if (!try_res_width(1920) && !try_res_width(1280) && !try_res_width(800)) {
-            m_settings.fullscreen_mode = m_fullscreen_modes[m_settings.display_idx][0];
-        }
-    }
-}
-
-void hg::Window::sync() {
-    SDL_GL_SwapWindow(m_window);
 }

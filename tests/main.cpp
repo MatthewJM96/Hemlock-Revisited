@@ -5,7 +5,7 @@
 #include "graphics/font/font.h"
 #include "graphics/glsl_program.h"
 #include "graphics/sprite/batcher.h"
-#include "graphics/window_manager.h"
+#include "graphics/window/manager.h"
 #include "io/iomanager.h"
 
 class MyIOManager : public hio::IOManagerBase {

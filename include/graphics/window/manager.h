@@ -1,7 +1,8 @@
 #ifndef __hemlock_graphics_window_manager_h
 #define __hemlock_graphics_window_manager_h
 
-#include "graphics/window.h"
+#include "graphics/window/state.hpp"
+#include "graphics/window/window.h"
 #include "ui/input/dispatcher.h"
 
 namespace hemlock {
