@@ -1,5 +1,5 @@
-#ifndef __hemlock_app_window_manager_h
-#define __hemlock_app_window_manager_h
+#ifndef __hemlock_app_process_process_h
+#define __hemlock_app_process_process_h
 
 #include "app/window/state.hpp"
 #include "app/window/window.h"
@@ -67,4 +67,4 @@ namespace hemlock {
 }
 namespace happ = hemlock::app;
 
-#endif // __hemlock_app_window_manager_h
+#endif // __hemlock_app_process_process_h

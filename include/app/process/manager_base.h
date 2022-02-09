@@ -1,5 +1,5 @@
-#ifndef __hemlock_app_window_manager_base_h
-#define __hemlock_app_window_manager_base_h
+#ifndef __hemlock_app_process_manager_base_h
+#define __hemlock_app_process_manager_base_h
 
 namespace hemlock {
     namespace app {
@@ -8,13 +8,13 @@ namespace hemlock {
         class WindowBase;
         using Windows = std::unordered_map<ui32, WindowBase*>;
 
-        class WindowManagerBase {
+        class ProcessManagerBase {
         public:
-            WindowManagerBase() :
+            ProcessManagerBase() :
                 m_main_window(nullptr),
                 m_app(nullptr)
             { /* Empty. */ };
-            virtual ~WindowManagerBase() { /* Empty. */ }
+            virtual ~ProcessManagerBase() { /* Empty. */ }
 
             virtual WindowError init(AppBase* app) = 0;
             virtual void dispose() = 0;
@@ -31,4 +31,4 @@ namespace hemlock {
 }
 namespace hg = hemlock::graphics;
 
-#endif // __hemlock_app_window_manager_base_h
+#endif // __hemlock_app_process_manager_base_h

@@ -14,6 +14,10 @@ namespace hemlock {
             QUIT_APPLICATION // Screen wants application to quit.
         };
 
+        struct ScreenChangeEvent {
+            ScreenBase *before, *now;
+        };
+
         // Not just for game screens, can also be used for UI screens with navigation back and forth.
         class ScreenBase {
         public:
