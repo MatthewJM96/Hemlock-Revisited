@@ -4,7 +4,7 @@
 
 #ifdef HEMLOCK_USING_OPENGL
 template <bool indexed, ui32 vertex_size, ui32 precision>
-static bool create_vao_for_basic_mesh(auto mesh_data, hg::MeshDataVolatility volatility, IN OUT GLuint* vao, IN OUT GLuint* vbo, IN OUT GLuint* ebo) {
+static bool upload_basic_mesh(auto mesh_data, hg::MeshDataVolatility volatility, IN OUT GLuint* vao, IN OUT GLuint* vbo, IN OUT GLuint* ebo) {
     if (!mesh_data.vertices) return 0;
 
     glGenVertexArrays(1, vao);
@@ -38,66 +38,66 @@ static bool create_vao_for_basic_mesh(auto mesh_data, hg::MeshDataVolatility vol
 #endif // HEMLOCK_USING_OPENGL
 
 
-bool hg::create_vao(
+bool hg::upload_mesh(
     const MeshData2D_32& mesh_data,
             MeshHandles& handles,
       MeshDataVolatility volatility /*= MeshDataVolatility::DYNAMIC*/
 ) {
-    return create_vao_for_basic_mesh<false, sizeof(decltype(mesh_data.vertices[0])), 4>(mesh_data, volatility, &handles.vao, &handles.vbo, nullptr);
+    return upload_basic_mesh<false, sizeof(decltype(mesh_data.vertices[0])), 4>(mesh_data, volatility, &handles.vao, &handles.vbo, nullptr);
 }
 
-bool hg::create_vao(
+bool hg::upload_mesh(
     const MeshData2D_64& mesh_data,
             MeshHandles& handles,
       MeshDataVolatility volatility /*= MeshDataVolatility::DYNAMIC*/
 ) {
-    return create_vao_for_basic_mesh<false, sizeof(decltype(mesh_data.vertices[0])), 8>(mesh_data, volatility, &handles.vao, &handles.vao, nullptr);
+    return upload_basic_mesh<false, sizeof(decltype(mesh_data.vertices[0])), 8>(mesh_data, volatility, &handles.vao, &handles.vao, nullptr);
 }
 
-bool hg::create_vao(
+bool hg::upload_mesh(
     const MeshData3D_32& mesh_data,
             MeshHandles& handles,
       MeshDataVolatility volatility /*= MeshDataVolatility::DYNAMIC*/
 ) {
-    return create_vao_for_basic_mesh<false, sizeof(decltype(mesh_data.vertices[0])), 4>(mesh_data, volatility, &handles.vao, &handles.vao, nullptr);
+    return upload_basic_mesh<false, sizeof(decltype(mesh_data.vertices[0])), 4>(mesh_data, volatility, &handles.vao, &handles.vao, nullptr);
 }
 
-bool hg::create_vao(
+bool hg::upload_mesh(
     const MeshData3D_64& mesh_data,
             MeshHandles& handles,
       MeshDataVolatility volatility /*= MeshDataVolatility::DYNAMIC*/
 ) {
-    return create_vao_for_basic_mesh<false, sizeof(decltype(mesh_data.vertices[0])), 8>(mesh_data, volatility, &handles.vao, &handles.vao, nullptr);
+    return upload_basic_mesh<false, sizeof(decltype(mesh_data.vertices[0])), 8>(mesh_data, volatility, &handles.vao, &handles.vao, nullptr);
 }
 
-bool hg::create_vao(
+bool hg::upload_mesh(
     const IndexedMeshData2D_32& mesh_data,
             IndexedMeshHandles& handles,
              MeshDataVolatility volatility /*= MeshDataVolatility::DYNAMIC*/
 ) {
-    return create_vao_for_basic_mesh<true, sizeof(decltype(mesh_data.vertices[0])), 4>(mesh_data, volatility, &handles.vao, &handles.vao, &handles.ebo);
+    return upload_basic_mesh<true, sizeof(decltype(mesh_data.vertices[0])), 4>(mesh_data, volatility, &handles.vao, &handles.vao, &handles.ebo);
 }
 
-bool hg::create_vao(
+bool hg::upload_mesh(
     const IndexedMeshData2D_64& mesh_data,
             IndexedMeshHandles& handles,
              MeshDataVolatility volatility /*= MeshDataVolatility::DYNAMIC*/
 ) {
-    return create_vao_for_basic_mesh<true, sizeof(decltype(mesh_data.vertices[0])), 8>(mesh_data, volatility, &handles.vao, &handles.vao, &handles.ebo);
+    return upload_basic_mesh<true, sizeof(decltype(mesh_data.vertices[0])), 8>(mesh_data, volatility, &handles.vao, &handles.vao, &handles.ebo);
 }
 
-bool hg::create_vao(
+bool hg::upload_mesh(
     const IndexedMeshData3D_32& mesh_data,
             IndexedMeshHandles& handles,
              MeshDataVolatility volatility /*= MeshDataVolatility::DYNAMIC*/
 ) {
-    return create_vao_for_basic_mesh<true, sizeof(decltype(mesh_data.vertices[0])), 4>(mesh_data, volatility, &handles.vao, &handles.vao, &handles.ebo);
+    return upload_basic_mesh<true, sizeof(decltype(mesh_data.vertices[0])), 4>(mesh_data, volatility, &handles.vao, &handles.vao, &handles.ebo);
 }
 
-bool hg::create_vao(
+bool hg::upload_mesh(
     const IndexedMeshData3D_64& mesh_data,
             IndexedMeshHandles& handles,
              MeshDataVolatility volatility /*= MeshDataVolatility::DYNAMIC*/
 ) {
-    return create_vao_for_basic_mesh<true, sizeof(decltype(mesh_data.vertices[0])), 8>(mesh_data, volatility, &handles.vao, &handles.vao, &handles.ebo);
+    return upload_basic_mesh<true, sizeof(decltype(mesh_data.vertices[0])), 8>(mesh_data, volatility, &handles.vao, &handles.vao, &handles.ebo);
 }
