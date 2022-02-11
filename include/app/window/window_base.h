@@ -57,8 +57,8 @@ namespace hemlock {
             Event<ResizeEvent>               on_window_resize;
             Event<FullscreenModeChangeEvent> on_fullscreen_mode_change;
         protected:
-            Delegate<void(Sender, hui::WindowMoveEvent)>   handle_external_window_move;
-            Delegate<void(Sender, hui::WindowResizeEvent)> handle_external_window_resize;
+            Subscriber<hui::WindowMoveEvent>   handle_external_window_move;
+            Subscriber<hui::WindowResizeEvent> handle_external_window_resize;
 
             virtual void check_display_occupied() = 0;
 

@@ -4,11 +4,11 @@
 
 
 happ::WindowBase::WindowBase() :
-    handle_external_window_move(Delegate<void(Sender, hui::WindowMoveEvent)>([&](Sender, hui::WindowMoveEvent ev) {
+    handle_external_window_move(Subscriber<hui::WindowMoveEvent>([&](Sender, hui::WindowMoveEvent ev) {
         if (ev.window_id != m_window_id) return;
         check_display_occupied();
     })),
-    handle_external_window_resize(Delegate<void(Sender, hui::WindowResizeEvent)>([&](Sender, hui::WindowResizeEvent ev) {
+    handle_external_window_resize(Subscriber<hui::WindowResizeEvent>([&](Sender, hui::WindowResizeEvent ev) {
         if (ev.window_id != m_window_id) return;
         set_dimensions({{static_cast<ui32>(ev.width), static_cast<ui32>(ev.height)}});
     })),

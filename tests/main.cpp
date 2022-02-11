@@ -206,7 +206,7 @@ i32 main() {
     MyApp app;
     app.init();
 
-    auto quit_handler = hemlock::Delegate<void(hemlock::Sender)>([&pool](hemlock::Sender) {
+    auto quit_handler = hemlock::Subscriber<>([&pool](hemlock::Sender) {
         pool.dispose();
     });
     app.on_quit += &quit_handler;
