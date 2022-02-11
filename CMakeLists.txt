@@ -98,4 +98,5 @@ target_link_libraries(Hemlock_Revisited
     SDL2main
     SDL2
     SDL2_ttf
+    FastNoise
 )
