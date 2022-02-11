@@ -1,8 +1,10 @@
 #include "stdafx.h"
 
-#include "app/app.h"
-#include "app/screen.h"
-#include "app/window/manager.h"
+#include "app/single_window_app.h"
+#include "app/screen_base.h"
+#include "app/process/process_base.h"
+#include "app/window/state.hpp"
+#include "app/window/window_base.h"
 #include "graphics/font/font.h"
 #include "graphics/glsl_program.h"
 #include "graphics/sprite/batcher.h"
@@ -101,12 +103,12 @@ public:
     virtual void draw(TimeData time [[maybe_unused]]) override {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        happ::WindowDimensions dims = m_app->window_manager()->main_window()->dimensions();
+        happ::WindowDimensions dims = m_process->window()->dimensions();
         m_sprite_batcher.render(f32v2{dims.width, dims.height});
     }
 
-    virtual void init(std::string name, happ::AppBase* app) override {
-        happ::ScreenBase::init(name, app);
+    virtual void init(const std::string& name, happ::ProcessBase* process) override {
+        happ::ScreenBase::init(name, process);
 
         m_state = happ::ScreenState::RUNNING;
 
@@ -136,7 +138,7 @@ public:
         auto font = m_font_cache.fetch("fonts/Orbitron-Regular.ttf");
         font->set_default_size(50);
         font->generate(/*hg::f::FontStyle::NORMAL, hg::f::FontRenderStyle::SOLID*/);
-        auto font_instance = font->get_instance(/*hg::f::FontStyle::NORMAL, hg::f::FontRenderStyle::SOLID*/);
+        // auto font_instance = font->get_instance(/*hg::f::FontStyle::NORMAL, hg::f::FontRenderStyle::SOLID*/);
         // font_instance.save("test.png", {hio::img::png::save});
 
         m_sprite_batcher.init(&m_shader_cache, &m_font_cache);
@@ -153,7 +155,7 @@ c give_me_container() {
     return c();
 }
 
-class MyApp : public happ::BasicApp {
+class MyApp : public happ::SingleWindowApp {
 public:
     virtual ~MyApp() { /* Empty */ };
 protected:      

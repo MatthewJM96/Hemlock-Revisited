@@ -9,6 +9,10 @@ endif()
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
+option(HEMLOCK_USING_SDL "Whether Hemlock uses the SDL library." ON)
+option(HEMLOCK_USING_SDL_TTF "Whether Hemlock uses the SDL TTF library." ON)
+option(HEMLOCK_USING_OPENGL "Whether Hemlock uses OpenGL." ON)
+
 if (UNIX OR MINGW)
     set(CMAKE_CXX_FLAGS "-pthread -Wall -Wextra -Wold-style-cast -Wshadow -Wformat=2 -Werror")
     set(CMAKE_CXX_FLAGS_RELEASE "-O3")
@@ -33,13 +37,27 @@ endif()
 #     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fmodules -fprebuilt-module-path=${PROJECT_BINARY_DIR}/clm/${CMAKE_BUILD_TYPE}/")
 # endif()
 
+if (HEMLOCK_USING_SDL)
+    add_compile_definitions(HEMLOCK_USING_SDL=1)
+endif()
+
+if (HEMLOCK_USING_SDL_TTF)
+    add_compile_definitions(HEMLOCK_USING_SDL_TTF=1)
+endif()
+
+if (HEMLOCK_USING_OPENGL)
+    add_compile_definitions(HEMLOCK_USING_OPENGL=1)
+endif()
+
 add_executable(Hemlock_Revisited
     "${PROJECT_SOURCE_DIR}/src/stdafx.cpp"
     "${PROJECT_SOURCE_DIR}/src/timing.cpp"
-    "${PROJECT_SOURCE_DIR}/src/app/app.cpp"
-    "${PROJECT_SOURCE_DIR}/src/app/screen.cpp"
+    "${PROJECT_SOURCE_DIR}/src/app/app_base.cpp"
+    "${PROJECT_SOURCE_DIR}/src/app/screen_base.cpp"
+    "${PROJECT_SOURCE_DIR}/src/app/single_window_app.cpp"
+    "${PROJECT_SOURCE_DIR}/src/app/process/manager_base.cpp"
+    "${PROJECT_SOURCE_DIR}/src/app/process/process_base.cpp"
     "${PROJECT_SOURCE_DIR}/src/app/window/window_base.cpp"
-    "${PROJECT_SOURCE_DIR}/src/app/window/manager.cpp"
     "${PROJECT_SOURCE_DIR}/src/app/window/window.cpp"
     "${PROJECT_SOURCE_DIR}/src/graphics/font/font.cpp"
     "${PROJECT_SOURCE_DIR}/src/graphics/font/text_align.cpp"

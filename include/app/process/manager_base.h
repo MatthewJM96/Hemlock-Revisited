@@ -4,31 +4,42 @@
 namespace hemlock {
     namespace app {
         class AppBase;
+        class ProcessBase;
 
-        class WindowBase;
-        using Windows = std::unordered_map<ui32, WindowBase*>;
+        using Processes = std::unordered_map<ui32, ProcessBase*>;
 
         class ProcessManagerBase {
         public:
-            ProcessManagerBase() :
-                m_main_window(nullptr),
-                m_app(nullptr)
-            { /* Empty. */ };
+            ProcessManagerBase();
             virtual ~ProcessManagerBase() { /* Empty. */ }
 
-            virtual WindowError init(AppBase* app) = 0;
-            virtual void dispose() = 0;
+            virtual void init(AppBase* app);
+            virtual void dispose();
 
-            virtual void sync_windows() = 0;
+            void set_quit_on_main_process_end(bool should = true) { m_quit_on_main_process_end = should; }
 
-            Window* main_window() { return m_main_window; }
+            ProcessBase* main_process() { return m_main_process; }
+            ProcessBase* process(ui32 id);
+
+            virtual void end_process(ui32 id);
         protected:
-            Window* m_main_window;
+            /**
+             * @brief Allows easy injection of extra logic in
+             * situations such as multi-threaded processes.
+             */
+            virtual void end_processes() { /* Empty. */ }
+
+            bool m_initialised;
+
+            bool m_quit_on_main_process_end;
+
+            Processes    m_processes;
+            ProcessBase* m_main_process;
 
             AppBase* m_app;
         };
     }
 }
-namespace hg = hemlock::graphics;
+namespace happ = hemlock::app;
 
 #endif // __hemlock_app_process_manager_base_h
