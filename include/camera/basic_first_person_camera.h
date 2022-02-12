@@ -12,6 +12,7 @@ namespace hemlock {
 
     namespace camera {
         class BasicFirstPersonCamera : public BaseCamera<PerspectiveCameraState> {
+        public:
             BasicFirstPersonCamera();
             virtual ~BasicFirstPersonCamera() { /* Empty. */ }
 
