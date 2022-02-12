@@ -19,12 +19,12 @@ hcam::BasicOrthographicCamera::BasicOrthographicCamera() :
         }
 
         if (dy != 1.0f) {
-            f32 ud_com   = (m_state.down_clipping + m_state.up_clipping) / 2.0f;
-            f32 ud_range = m_state.up_clipping - m_state.down_clipping;
+            f32 du_com   = (m_state.down_clipping + m_state.up_clipping) / 2.0f;
+            f32 du_range = m_state.up_clipping - m_state.down_clipping;
 
-            f32 new_ud_range_2 = (ud_range * dy) / 2.0f;
+            f32 new_du_range_2 = (du_range * dy) / 2.0f;
 
-            set_ud_clipping(ud_com - new_ud_range_2, ud_com + new_ud_range_2);
+            set_du_clipping(du_com - new_du_range_2, du_com + new_du_range_2);
         }
     }))
 { /* Empty. */ }
@@ -40,12 +40,12 @@ void hcam::BasicOrthographicCamera::update() {
         f32 nf_scale_component = 2.0f / (m_state.far_clipping   - m_state.near_clipping);
 
         f32 lr_translation_component = -1.0f * (m_state.right_clipping + m_state.left_clipping) / (m_state.right_clipping - m_state.left_clipping);
-        f32 ud_translation_component = -1.0f * (m_state.up_clipping    + m_state.down_clipping) / (m_state.up_clipping    - m_state.down_clipping);
+        f32 du_translation_component = -1.0f * (m_state.up_clipping    + m_state.down_clipping) / (m_state.up_clipping    - m_state.down_clipping);
         f32 nf_translation_component = -1.0f * (m_state.far_clipping   + m_state.near_clipping) / (m_state.far_clipping   - m_state.near_clipping);
 
         m_state.projection_matrix = f32m4{
             lr_scale_component,       0.0f,               0.0f,         lr_translation_component,
-                  0.0f,         ud_scale_component,       0.0f,         ud_translation_component,
+                  0.0f,         du_scale_component,       0.0f,         du_translation_component,
                   0.0f,               0.0f,         nf_scale_component, nf_translation_component,
                   0.0f,               0.0f,               0.0f,                 1.0f
         };
@@ -74,19 +74,19 @@ void hcam::BasicOrthographicCamera::set_lr_clipping(f32 left_clipping, f32 right
     m_projection_changed   = true;
 }
 
-void hcam::BasicOrthographicCamera::set_up_clipping(f32 up_clipping) {
-    m_state.up_clipping  = up_clipping;
-    m_projection_changed = true;
-}
-
 void hcam::BasicOrthographicCamera::set_down_clipping(f32 down_clipping) {
     m_state.down_clipping = down_clipping;
     m_projection_changed  = true;
 }
 
-void hcam::BasicOrthographicCamera::set_ud_clipping(f32 up_clipping, f32 down_clipping) {
-    m_state.up_clipping   = up_clipping;
+void hcam::BasicOrthographicCamera::set_up_clipping(f32 up_clipping) {
+    m_state.up_clipping  = up_clipping;
+    m_projection_changed = true;
+}
+
+void hcam::BasicOrthographicCamera::set_du_clipping(f32 down_clipping, f32 up_clipping) {
     m_state.down_clipping = down_clipping;
+    m_state.up_clipping   = up_clipping;
     m_projection_changed  = true;
 }
 

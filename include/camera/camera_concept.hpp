@@ -46,16 +46,18 @@ namespace hemlock {
             { c.left_clipping()             } -> f32
             { c.right_clipping()            } -> f32
             { c.lr_clipping()               } -> f32v2
-            { c.up_clipping()               } -> f32
             { c.down_clipping()             } -> f32
-            { c.ud_clipping()               } -> f32v2
+            { c.up_clipping()               } -> f32
+            { c.du_clipping()               } -> f32v2
 
             { c.set_left_clipping(f)        } -> void
             { c.set_right_clipping(f)       } -> void
             { c.set_lr_clipping(f, f)       } -> void
-            { c.set_up_clipping(f)          } -> void
             { c.set_down_clipping(f)        } -> void
-            { c.set_ud_clipping(f, f)       } -> void
+            { c.set_up_clipping(f)          } -> void
+            { c.set_du_clipping(f, f)       } -> void
+
+            { c.set_all_clipping(f, f, f, f, f, f) } -> void
         }
 
         concept PerspectiveCamera = Camera && requires(

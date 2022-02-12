@@ -22,16 +22,16 @@ namespace hemlock {
             f32   left_clipping()  { return m_state.left_clipping;                             }
             f32   right_clipping() { return m_state.right_clipping;                            }
             f32v2 lr_clipping()    { return { m_state.left_clipping, m_state.right_clipping }; }
-            f32   up_clipping()    { return m_state.up_clipping;                               }
             f32   down_clipping()  { return m_state.down_clipping;                             }
-            f32v2 ud_clipping()    { return { m_state.up_clipping, m_state.down_clipping };    }
+            f32   up_clipping()    { return m_state.up_clipping;                               }
+            f32v2 du_clipping()    { return { m_state.down_clipping, m_state.up_clipping };    }
 
             void set_left_clipping(f32 left_clipping);
             void set_right_clipping(f32 right_clipping);
             void set_lr_clipping(f32 left_clipping, f32 right_clipping);
-            void set_up_clipping(f32 up_clipping);
             void set_down_clipping(f32 down_clipping);
-            void set_ud_clipping(f32 up_clipping, f32 down_clipping);
+            void set_up_clipping(f32 up_clipping);
+            void set_du_clipping(f32 down_clipping, f32 up_clipping);
 
             // TODO(Matthew): How do we actually want to do this? We might want to, e.g. lock to
             //                an axis, or wholly prevent free rotations in any axis.
