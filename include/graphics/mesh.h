@@ -91,6 +91,9 @@ namespace hemlock {
         bool upload_mesh(const IndexedMeshData2D_64& mesh_data, OUT IndexedMeshHandles& handles, MeshDataVolatility volatility = MeshDataVolatility::DYNAMIC);
         bool upload_mesh(const IndexedMeshData3D_32& mesh_data, OUT IndexedMeshHandles& handles, MeshDataVolatility volatility = MeshDataVolatility::DYNAMIC);
         bool upload_mesh(const IndexedMeshData3D_64& mesh_data, OUT IndexedMeshHandles& handles, MeshDataVolatility volatility = MeshDataVolatility::DYNAMIC);
+
+        void dispose_mesh(const        MeshHandles& handles);
+        void dispose_mesh(const IndexedMeshHandles& handles);
     }
 }
 namespace hg  = hemlock::graphics;
