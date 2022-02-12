@@ -141,10 +141,10 @@ public:
 
         m_shader.use();
 
-        glUniformMatrix4fv(m_shader.uniform_location("ViewProjection"),  1, GL_FALSE, &m_camera.view_projection_matrix()[0][0]);
+        glUniformMatrix4fv(m_shader.uniform_location("view_proj"),  1, GL_FALSE, &m_camera.view_projection_matrix()[0][0]);
 
         glActiveTexture(GL_TEXTURE0);
-        glUniform1i(m_shader.uniform_location("SpriteTexture"), 0);
+        glUniform1i(m_shader.uniform_location("tex"), 0);
         glBindTexture(GL_TEXTURE_2D, m_default_texture);
 
         for (auto& chunk : m_chunk_grid.chunks()) {
@@ -154,7 +154,7 @@ public:
 
             auto chunk_position = hvox::block_world_position(chunk.second->position, 0);
             auto translation_matrix = glm::translate(f32m4{1.0f}, f32v3{chunk_position});
-            glUniformMatrix4fv(m_shader.uniform_location("WorldProjection"),  1, GL_FALSE, &translation_matrix[0][0]);
+            glUniformMatrix4fv(m_shader.uniform_location("model"),  1, GL_FALSE, &translation_matrix[0][0]);
 
             glDrawArrays(GL_TRIANGLES, 0, chunk.second->mesh.vertex_count);
         }
@@ -193,12 +193,11 @@ public:
 
         m_shader.init(&m_shader_cache);
 
-        m_shader.set_attribute("vPosition",         hg::sprite::SpriteShaderAttribID::POSITION);
-        m_shader.set_attribute("vRelativePosition", hg::sprite::SpriteShaderAttribID::RELATIVE_POSITION);
-        m_shader.set_attribute("vUVDimensions",     hg::sprite::SpriteShaderAttribID::UV_DIMENSIONS);
-        m_shader.set_attribute("vColour",           hg::sprite::SpriteShaderAttribID::COLOUR);
+        m_shader.set_attribute("v_position",      0);
+        m_shader.set_attribute("v_colour",        1);
+        m_shader.set_attribute("v_texture_coord", 2);
 
-        m_shader.add_shaders("shaders/default_sprite.vert", "shaders/default_sprite.frag");
+        m_shader.add_shaders("shaders/test_vox.vert", "shaders/test_vox.frag");
 
         m_shader.link();
 
