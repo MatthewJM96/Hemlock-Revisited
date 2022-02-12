@@ -4,8 +4,6 @@
 namespace hemlock {
     namespace camera {
         struct CommonCameraState {
-            f32 aspect_ratio;
-            f32 fov;
             f32 near_clipping;
             f32 far_clipping;
 
@@ -17,6 +15,18 @@ namespace hemlock {
             f32m4 view_matrix;
             f32m4 projection_matrix;
             f32m4 view_projection_matrix;
+        };
+
+        struct OrthographicCameraState : public CommonCameraState {
+            f32 left_clipping;
+            f32 right_clipping;
+            f32 up_clipping;
+            f32 down_clipping;
+        };
+
+        struct PerspectiveCameraState : public CommonCameraState {
+            f32 aspect_ratio;
+            f32 fov;
         };
     }
 }

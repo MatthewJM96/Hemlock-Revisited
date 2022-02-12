@@ -22,7 +22,7 @@ namespace hemlock {
                   f32    fov()                      { return m_state.fov;                                       }
                   f32    near_clipping()            { return m_state.near_clipping;                             }
                   f32    far_clipping()             { return m_state.far_clipping;                              }
-                  f32v2  clipping()                 { return { m_state.near_clipping, m_state.far_clipping };   }
+                  f32v2  nf_clipping()              { return { m_state.near_clipping, m_state.far_clipping };   }
             const f32v3& position()                 { return m_state.position;                                  }
             const f32v3& direction()                { return m_state.direction;                                 }
             const f32v3& right()                    { return m_state.right;                                     }
@@ -35,17 +35,20 @@ namespace hemlock {
             void set_fov(f32 fov);
             void set_near_clipping(f32 near_clipping);
             void set_far_clipping(f32 far_clipping);
-            void set_clipping(f32 near_clipping, f32 far_clipping);
+            void set_nf_clipping(f32 near_clipping, f32 far_clipping);
             void set_position(f32v3 position);
             void offset_position(f32v3 delta_position);
 
+            // TODO(Matthew): Would like to hook these up internally, but we don't want to fix
+            //                this kind of thing to mouse gestures, but optionally connect camera
+            //                to controller inputs.
             void apply_rotation(f32q rotation);
             void rotate_from_mouse(f32 dx, f32 dy, f32 speed);
             void roll_from_mouse(f32 dx, f32 speed);
         protected:
             Subscriber<happ::ResizeEvent> handle_window_resize;
 
-            CommonCameraState m_state;
+            PerspectiveCameraState m_state;
             
             bool m_view_changed;
             bool m_projection_changed;

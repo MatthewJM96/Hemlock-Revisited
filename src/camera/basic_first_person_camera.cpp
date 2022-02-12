@@ -53,7 +53,7 @@ void hcam::BasicFirstPersonCamera::set_far_clipping(f32 far_clipping) {
     m_projection_changed = true;
 }
 
-void hcam::BasicFirstPersonCamera::set_clipping(f32 near_clipping, f32 far_clipping) {
+void hcam::BasicFirstPersonCamera::set_nf_clipping(f32 near_clipping, f32 far_clipping) {
     m_state.near_clipping = near_clipping;
     m_state.far_clipping  = far_clipping;
     m_projection_changed  = true;
