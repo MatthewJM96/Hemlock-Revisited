@@ -2,7 +2,7 @@
 
 #include "graphics/mesh.h"
 #include "voxel/block.hpp"
-#include "voxel/chunk.hpp"
+#include "voxel/chunk.h"
 
 #include "voxel/mesher.h"
 

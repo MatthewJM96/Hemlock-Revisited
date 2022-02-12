@@ -1,6 +1,6 @@
 #include "stdafx.h"
 
-#include "voxel/chunk.hpp"
+#include "voxel/chunk.h"
 
 #include "voxel/coordinate_system.h"
 
