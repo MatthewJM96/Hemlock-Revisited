@@ -221,12 +221,17 @@ public:
 
         m_chunk_grid.init(5);
 
-#define NUM 20
+#define NUM 8
+        m_chunk_grid.suspend_chunk_tasks();
         for (auto x = -NUM; x < NUM; ++x) {
             for (auto z = -NUM; z < NUM; ++z) {
-                m_chunk_grid.load_chunk_at({ x, -1, z });
+                for (auto y = -2 * NUM; y < 0; ++ y) {
+                    m_chunk_grid.load_chunk_at({ x, y, z });
+                }
             }
         }
+        m_chunk_grid.resume_chunk_tasks();
+#undef NUM
 
         handle_mouse_move = hemlock::Subscriber<hui::MouseMoveEvent>(
             [&](hemlock::Sender, hui::MouseMoveEvent ev) {
