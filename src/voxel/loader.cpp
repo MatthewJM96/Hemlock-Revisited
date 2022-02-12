@@ -13,9 +13,11 @@ void hvox::ChunkLoadTask::execute(ChunkGenThreadState* state, ChunkGenTaskQueue*
         set_blocks(m_chunk, BlockChunkPosition{0}, BlockChunkPosition{CHUNK_SIZE}, Block{1});
     }
 
-    ChunkMeshTask* mesh_task = new ChunkMeshTask();
-    mesh_task->init(m_chunk);
-    task_queue->enqueue(state->producer_token, { mesh_task, true });
+    // if (task_queue) {
+        ChunkMeshTask* mesh_task = new ChunkMeshTask();
+        mesh_task->init(m_chunk);
+        task_queue->enqueue(state->producer_token, { mesh_task, true });
+    // }
 
     // for (auto x = 0; x < CHUNK_SIZE; ++x) {
     //     for (auto z = 0; z < CHUNK_SIZE; ++z) {

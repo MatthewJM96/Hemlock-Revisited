@@ -65,14 +65,14 @@ bool hvox::set_blocks( Chunk* chunk,
                         Block block )
 {
     if (!chunk->gen_task_active) {
-        bool should_cancel = chunk->on_bulk_block_change({
-            chunk,
-            &block,
-            true,
-            start_block_position,
-            end_block_position
-        });
-        if (should_cancel) return false;
+        // bool should_cancel = chunk->on_bulk_block_change({
+        //     chunk,
+        //     &block,
+        //     true,
+        //     start_block_position,
+        //     end_block_position
+        // });
+        // if (should_cancel) return false;
     }
 
     /*

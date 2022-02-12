@@ -1,6 +1,7 @@
 #include "stdafx.h"
 
 #include "voxel/loader.h"
+#include "voxel/mesher.h"
 
 #include "voxel/grid.h"
 
@@ -31,6 +32,16 @@ bool hvox::ChunkGrid::load_chunk_at(ChunkGridPosition chunk_position) {
     auto task = new ChunkLoadTask();
     task->init(chunk);
     m_gen_threads.add_task({ task, true });
+
+    // ChunkGenThreadState gen_state {
+    //     { false }, moodycamel::ConsumerToken(m_gen_threads.m_tasks), moodycamel::ProducerToken(m_gen_threads.m_tasks)
+    // };
+    // gen_state.context.stop = false;
+    // task->execute(&gen_state, nullptr);
+
+    // auto task_2 = new ChunkMeshTask();
+    // task_2->init(chunk);
+    // task_2->execute(&gen_state, nullptr);
 
     return true;
 }
