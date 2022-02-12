@@ -148,7 +148,7 @@ public:
         handle_mouse_move = hemlock::Subscriber<hui::MouseMoveEvent>(
             [&](hemlock::Sender, hui::MouseMoveEvent ev) {
                 if (m_input_manager->is_pressed(static_cast<ui8>(hui::MouseButton::LEFT))) {
-                    m_camera.rotate_from_mouse_absolute_up(
+                    m_camera.rotate_from_mouse_with_absolute_up(
                         -1.0f * static_cast<f32>(ev.dx),
                         -1.0f * static_cast<f32>(ev.dy),
                         0.005f
