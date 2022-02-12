@@ -7,6 +7,7 @@
 hvox::Chunk::Chunk() :
     neighbours(NULL_NEIGHBOURS),
     blocks(nullptr),
+    state(ChunkState::NONE),
     m_owns_blocks(true)
 { /* Empty. */ }
 
