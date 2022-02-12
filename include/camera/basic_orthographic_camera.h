@@ -17,8 +17,6 @@ namespace hemlock {
 
             void update();
 
-            void attach_to_window(app::WindowBase* window);
-
             f32   left_clipping()  { return m_state.left_clipping;                             }
             f32   right_clipping() { return m_state.right_clipping;                            }
             f32v2 lr_clipping()    { return { m_state.left_clipping, m_state.right_clipping }; }
