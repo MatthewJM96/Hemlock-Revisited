@@ -29,6 +29,7 @@ namespace hemlock {
             //                to controller inputs.
             void apply_rotation(f32q rotation);
             void rotate_from_mouse(f32 dx, f32 dy, f32 speed);
+            void rotate_from_mouse_absolute_up(f32 dx, f32 dy, f32 speed, bool do_clamp = true, f32 clamp = 60.0f / 360.0f * 2.0f * M_PI);
             void roll_from_mouse(f32 dx, f32 speed);
         };
     }

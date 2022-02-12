@@ -46,10 +46,33 @@ void hcam::BasicFirstPersonCamera::apply_rotation(f32q rotation) {
 
 void hcam::BasicFirstPersonCamera::rotate_from_mouse(f32 dx, f32 dy, f32 speed) {
     f32q up    = glm::angleAxis(dy * speed, m_state.right);
-    f32q right = glm::angleAxis(dx * speed, m_state.up);
+    f32q right = glm::angleAxis(dx * speed, ABSOLUTE_UP);
 
     apply_rotation(up * right);
 }
+
+void hcam::BasicFirstPersonCamera::rotate_from_mouse_absolute_up(f32 dx, f32 dy, f32 speed, bool do_clamp /*= true*/, f32 clamp /*= 60.0f / 360.0f * 2.0f * M_PI*/) {
+    f32q up    = glm::angleAxis(dy * speed, m_state.right);
+    f32q right = glm::angleAxis(dx * speed, m_state.up);
+
+    struct {
+        f32v3 direction, up, right;
+    } previous = {
+        m_state.direction, m_state.up, m_state.right
+    };
+
+    apply_rotation(up * right);
+
+    f32 up_angle = glm::acos(glm::dot(m_state.up, ABSOLUTE_UP));
+    if (do_clamp && (-1.0f * clamp > up_angle || clamp < up_angle)) {
+        m_state.direction = previous.direction;
+        m_state.up        = previous.up;
+        m_state.right     = previous.right;
+
+        rotate_from_mouse_absolute_up(dx, 0.0f, speed, false);
+    }
+}
+
 void hcam::BasicFirstPersonCamera::roll_from_mouse(f32 dx, f32 speed) {
     f32q forward = glm::angleAxis(dx * speed, m_state.direction);
 
