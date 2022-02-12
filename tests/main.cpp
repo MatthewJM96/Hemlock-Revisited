@@ -5,10 +5,14 @@
 #include "app/process/process_base.h"
 #include "app/window/state.hpp"
 #include "app/window/window_base.h"
+#include "camera/basic_first_person_camera.h"
 #include "graphics/font/font.h"
 #include "graphics/glsl_program.h"
 #include "graphics/sprite/batcher.h"
 #include "io/iomanager.h"
+#include "ui/input/dispatcher.h"
+#include "ui/input/keys.hpp"
+#include "ui/input/manager.h"
 
 class MyIOManager : public hio::IOManagerBase {
 public:
@@ -99,18 +103,61 @@ public:
             // hg::f::FontRenderStyle::SOLID
         );
         m_sprite_batcher.end();
+
+        f32v3 delta_pos{0.0f};
+        if (m_input_manager->is_pressed(hui::PhysicalKey::H_W)) {
+            delta_pos += glm::normalize(m_camera.direction()) * static_cast<f32>(time.frame) * 0.2f;
+        }
+        if (m_input_manager->is_pressed(hui::PhysicalKey::H_A)) {
+            delta_pos -= glm::normalize(m_camera.right()) * static_cast<f32>(time.frame) * 0.2f;
+        }
+        if (m_input_manager->is_pressed(hui::PhysicalKey::H_S)) {
+            delta_pos -= glm::normalize(m_camera.direction()) * static_cast<f32>(time.frame) * 0.2f;
+        }
+        if (m_input_manager->is_pressed(hui::PhysicalKey::H_D)) {
+            delta_pos += glm::normalize(m_camera.right()) * static_cast<f32>(time.frame) * 0.2f;
+        }
+        if (m_input_manager->is_pressed(hui::PhysicalKey::H_Q)) {
+            delta_pos += glm::normalize(m_camera.up()) * static_cast<f32>(time.frame) * 0.2f;
+        }
+        if (m_input_manager->is_pressed(hui::PhysicalKey::H_E)) {
+            delta_pos -= glm::normalize(m_camera.up()) * static_cast<f32>(time.frame) * 0.2f;
+        }
+        m_camera.offset_position(delta_pos);
+        m_camera.update();
     }
     virtual void draw(TimeData time [[maybe_unused]]) override {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        happ::WindowDimensions dims = m_process->window()->dimensions();
-        m_sprite_batcher.render(f32v2{dims.width, dims.height});
+        // happ::WindowDimensions dims = m_process->window()->dimensions();
+        // m_sprite_batcher.render(f32v2{dims.width, dims.height});
+        m_sprite_batcher.render(f32m4{1.0f}, m_camera.view_projection_matrix());
     }
 
     virtual void init(const std::string& name, happ::ProcessBase* process) override {
         happ::ScreenBase::init(name, process);
 
         m_state = happ::ScreenState::RUNNING;
+
+        m_input_manager = static_cast<happ::SingleWindowApp*>(m_process)->input_manager();
+
+        m_camera.set_position(f32v3{400.0f, 200.0f, -130.0f});
+        m_camera.set_fov(90.0f);
+        m_camera.update();
+
+        handle_mouse_move = hemlock::Subscriber<hui::MouseMoveEvent>(
+            [&](hemlock::Sender, hui::MouseMoveEvent ev) {
+                if (m_input_manager->is_pressed(static_cast<ui8>(hui::MouseButton::LEFT))) {
+                    m_camera.rotate_from_mouse_absolute_up(
+                        -1.0f * static_cast<f32>(ev.dx),
+                        -1.0f * static_cast<f32>(ev.dy),
+                        0.005f
+                    );
+                }
+            }
+        );
+
+        hui::InputDispatcher::instance()->on_mouse.move += &handle_mouse_move;
 
         // std::cout << std::endl << my_shader_parser("shaders/default_sprite.frag", &my_iom) << std::endl << std::endl;
         m_shader_cache.init(&m_iom, hg::ShaderCache::Parser(
@@ -144,10 +191,14 @@ public:
         m_sprite_batcher.init(&m_shader_cache, &m_font_cache);
     }
 protected:
-    MyIOManager          m_iom;
-    hg::ShaderCache      m_shader_cache;
-    hg::f::FontCache     m_font_cache;
-    hg::s::SpriteBatcher m_sprite_batcher;
+    hemlock::Subscriber<hui::MouseMoveEvent>      handle_mouse_move;
+
+    MyIOManager                  m_iom;
+    hg::ShaderCache              m_shader_cache;
+    hg::f::FontCache             m_font_cache;
+    hg::s::SpriteBatcher         m_sprite_batcher;
+    hcam::BasicFirstPersonCamera m_camera;
+    hui::InputManager*           m_input_manager;
 };
 
 template <hemlock::ResizableContiguousContainer c>
@@ -158,7 +209,7 @@ c give_me_container() {
 class MyApp : public happ::SingleWindowApp {
 public:
     virtual ~MyApp() { /* Empty */ };
-protected:      
+protected:
     virtual void prepare_screens() override {
         happ::ScreenBase* my_screen = new MyScreen();
         my_screen->init("my_screen", this);
