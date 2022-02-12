@@ -13,6 +13,7 @@
 #include "ui/input/dispatcher.h"
 #include "ui/input/keys.hpp"
 #include "ui/input/manager.h"
+#include "voxel/grid.h"
 
 class MyIOManager : public hio::IOManagerBase {
 public:
@@ -104,6 +105,8 @@ public:
         );
         m_sprite_batcher.end();
 
+        m_chunk_grid.update(time);
+
         f32v3 delta_pos{0.0f};
         if (m_input_manager->is_pressed(hui::PhysicalKey::H_W)) {
             delta_pos += glm::normalize(m_camera.direction()) * static_cast<f32>(time.frame) * 0.2f;
@@ -124,16 +127,40 @@ public:
             delta_pos -= glm::normalize(m_camera.up()) * static_cast<f32>(time.frame) * 0.2f;
         }
 
-        const f32 turn_clamp_on_at = 60.0f / 360.0f * 2.0f * M_PI;
-        f32 up_angle = glm::acos(glm::dot(m_camera.up(), hcam::ABSOLUTE_UP));
-        if (up_angle < -1.0f * turn_clamp_on_at || up_angle > turn_clamp_on_at)
-            m_camera.set_clamp_enabled(true);
+        // const f32 turn_clamp_on_at = 60.0f / 360.0f * 2.0f * M_PI;
+        // f32 up_angle = glm::acos(glm::dot(m_camera.up(), hcam::ABSOLUTE_UP));
+        // if (up_angle < -1.0f * turn_clamp_on_at || up_angle > turn_clamp_on_at)
+        //     m_camera.set_clamp_enabled(true);
 
         m_camera.offset_position(delta_pos);
         m_camera.update();
     }
     virtual void draw(TimeData time [[maybe_unused]]) override {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        m_shader.use();
+
+        glUniformMatrix4fv(m_shader.uniform_location("ViewProjection"),  1, GL_FALSE, &m_camera.view_projection_matrix()[0][0]);
+
+        glActiveTexture(GL_TEXTURE0);
+        glUniform1i(m_shader.uniform_location("SpriteTexture"), 0);
+        glBindTexture(GL_TEXTURE_2D, m_default_texture);
+
+        for (auto& chunk : m_chunk_grid.chunks()) {
+            if (chunk.second->state != hvox::ChunkState::MESH_UPLOADED) continue;
+
+            glBindVertexArray(chunk.second->mesh_handles.vao);
+
+            auto chunk_position = hvox::block_world_position(chunk.second->position, 0);
+            auto translation_matrix = glm::translate(f32m4{1.0f}, f32v3{chunk_position});
+            glUniformMatrix4fv(m_shader.uniform_location("WorldProjection"),  1, GL_FALSE, &translation_matrix[0][0]);
+
+            glDrawArrays(GL_TRIANGLES, 0, chunk.second->mesh.vertex_count);
+        }
+        glBindVertexArray(0);
+
+        // Deactivate our shader.
+        m_shader.unuse();
 
         // happ::WindowDimensions dims = m_process->window()->dimensions();
         // m_sprite_batcher.render(f32v2{dims.width, dims.height});
@@ -150,8 +177,56 @@ public:
         m_camera.attach_to_window(m_process->window());
         m_camera.set_position(f32v3{400.0f, 200.0f, -130.0f});
         m_camera.set_fov(90.0f);
-        m_camera.set_clamp({false, 30.0f / 360.0f * 2.0f * M_PI});
+        // m_camera.set_clamp({false, 30.0f / 360.0f * 2.0f * M_PI});
         m_camera.update();
+
+        // std::cout << std::endl << my_shader_parser("shaders/default_sprite.frag", &my_iom) << std::endl << std::endl;
+        m_shader_cache.init(&m_iom, hg::ShaderCache::Parser(
+            [](const hio::fs::path& path, hio::IOManagerBase* iom) -> std::string {
+                std::string buffer;
+                if (!iom->read_file_to_string(path, buffer)) return "";
+
+                return buffer;
+            }
+        ));
+
+        m_shader.init(&m_shader_cache);
+
+        m_shader.set_attribute("vPosition",         hg::sprite::SpriteShaderAttribID::POSITION);
+        m_shader.set_attribute("vRelativePosition", hg::sprite::SpriteShaderAttribID::RELATIVE_POSITION);
+        m_shader.set_attribute("vUVDimensions",     hg::sprite::SpriteShaderAttribID::UV_DIMENSIONS);
+        m_shader.set_attribute("vColour",           hg::sprite::SpriteShaderAttribID::COLOUR);
+
+        m_shader.add_shaders("shaders/default_sprite.vert", "shaders/default_sprite.frag");
+
+        m_shader.link();
+
+        // Generate and bind texture.
+        glGenTextures(1, &m_default_texture);
+        glBindTexture(GL_TEXTURE_2D, m_default_texture);
+
+        // Set texture to be just a 1x1 image of a pure white pixel.
+        ui32 pix = 0xffffffff;
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, &pix);
+
+        // Set texture parameters to repeat our pixel as needed and to not do any averaging of pixels.
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S,     GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T,     GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R,     GL_REPEAT);
+
+        // Unbind our complete texture.
+        glBindTexture(GL_TEXTURE_2D, 0);
+
+        m_chunk_grid.init(5);
+
+#define NUM 20
+        for (auto x = -NUM; x < NUM; ++x) {
+            for (auto z = -NUM; z < NUM; ++z) {
+                m_chunk_grid.load_chunk_at({ x, -1, z });
+            }
+        }
 
         handle_mouse_move = hemlock::Subscriber<hui::MouseMoveEvent>(
             [&](hemlock::Sender, hui::MouseMoveEvent ev) {
@@ -166,16 +241,6 @@ public:
         );
 
         hui::InputDispatcher::instance()->on_mouse.move += &handle_mouse_move;
-
-        // std::cout << std::endl << my_shader_parser("shaders/default_sprite.frag", &my_iom) << std::endl << std::endl;
-        m_shader_cache.init(&m_iom, hg::ShaderCache::Parser(
-            [](const hio::fs::path& path, hio::IOManagerBase* iom) -> std::string {
-                std::string buffer;
-                if (!iom->read_file_to_string(path, buffer)) return "";
-
-                return buffer;
-            }
-        ));
 
         m_font_cache.init(&m_iom, hg::f::FontCache::Parser(
             [](const hio::fs::path& path, hio::IOManagerBase* iom) -> hg::f::Font {
@@ -201,12 +266,16 @@ public:
 protected:
     hemlock::Subscriber<hui::MouseMoveEvent>      handle_mouse_move;
 
+    ui32 m_default_texture;
+
     MyIOManager                  m_iom;
     hg::ShaderCache              m_shader_cache;
     hg::f::FontCache             m_font_cache;
     hg::s::SpriteBatcher         m_sprite_batcher;
     hcam::BasicFirstPersonCamera m_camera;
     hui::InputManager*           m_input_manager;
+    hvox::ChunkGrid              m_chunk_grid;
+    hg::GLSLProgram              m_shader;
 };
 
 template <hemlock::ResizableContiguousContainer c>
