@@ -29,6 +29,7 @@ namespace hemlock {
 
         struct ChunkGenTaskContext {
             volatile bool stop;
+            volatile bool suspend;
         };
         using ChunkGenThreadState = Thread<ChunkGenTaskContext>::State;
         using ChunkGenTaskQueue   = TaskQueue<ChunkGenTaskContext>;

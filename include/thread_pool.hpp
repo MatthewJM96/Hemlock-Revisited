@@ -5,7 +5,8 @@ namespace hemlock {
     template <typename ThreadState>
     concept InterruptibleState = requires(ThreadState state)
     {
-        std::is_same_v<decltype(state.stop), bool>;
+        std::is_same_v<decltype(state.stop),    bool>;
+        std::is_same_v<decltype(state.suspend), bool>;
     };
 
     template <InterruptibleState ThreadState>
@@ -101,6 +102,19 @@ namespace hemlock {
          * to a stop.
          */
         void dispose();
+
+        /**
+         * @brief Suspends activity in the thread pool. Ongoing
+         * tasks are allowed to complete, but any remaining in the
+         * queue or added while the thread pool is suspended will
+         * not be processed until the thread pool is resumed.
+         */
+        void suspend();
+        /**
+         * @brief Resumes activity in the thread pool. The queue
+         * will once more be processed.
+         */
+        void resume();
 
         /**
          * @brief Adds a task to the task queue.

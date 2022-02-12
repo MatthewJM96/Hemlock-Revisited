@@ -1,7 +1,8 @@
 template <hemlock::InterruptibleState ThreadState>
 void hemlock::basic_thread_main( typename Thread<ThreadState>::State* state,
                                               TaskQueue<ThreadState>* task_queue  ) {
-    state->context.stop = false;
+    state->context.stop    = false;
+    state->context.suspend = false;
 
     HeldTask<ThreadState> held;
     while (!state->context.stop) {
@@ -10,6 +11,10 @@ void hemlock::basic_thread_main( typename Thread<ThreadState>::State* state,
             held,
             std::chrono::seconds(1)
         );
+
+        // TODO(Matthew): This is bad, but it'll work for now.
+        while (state->context.suspend)
+            continue;
 
         if (!held.task) break;
 
@@ -55,8 +60,12 @@ void hemlock::ThreadPool<ThreadState>::dispose() {
     if (!m_is_initialised) return;
     m_is_initialised = false;
 
-    for (auto& thread : m_threads)
-        thread.state.context.stop = true;
+    for (auto& thread : m_threads) {
+        thread.state.context.stop    = true;
+        // Necessary to let threads come to an end of
+        // execution.
+        thread.state.context.suspend = false;
+    }
 
     for (auto& thread : m_threads)
         thread.thread.join();
@@ -64,6 +73,18 @@ void hemlock::ThreadPool<ThreadState>::dispose() {
     TaskQueue<ThreadState>().swap(m_tasks);
 
     Threads<ThreadState>().swap(m_threads);
+}
+
+template <hemlock::InterruptibleState ThreadState>
+void hemlock::ThreadPool<ThreadState>::suspend() {
+    for (auto& thread : m_threads)
+        thread.state.context.suspend = true;
+}
+
+template <hemlock::InterruptibleState ThreadState>
+void hemlock::ThreadPool<ThreadState>::resume() {
+    for (auto& thread : m_threads)
+        thread.state.context.suspend = false;
 }
 
 template <hemlock::InterruptibleState ThreadState>

@@ -56,6 +56,7 @@ public:
 
 struct ThreadContext {
     bool stop = false;
+    bool suspend = false;
     std::string message = "";
 };
 

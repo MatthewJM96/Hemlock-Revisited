@@ -21,6 +21,9 @@ namespace hemlock {
 
             void update(TimeData time);
 
+            void suspend_chunk_tasks() { m_gen_threads.suspend(); }
+            void resume_chunk_tasks()  { m_gen_threads.resume();  }
+
             bool load_chunk_at(ChunkGridPosition chunk_position);
             bool unload_chunk_at(ChunkGridPosition chunk_position);
 
