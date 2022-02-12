@@ -9,7 +9,8 @@ hcam::BasicFirstPersonCamera::BasicFirstPersonCamera() :
         f32 new_aspect_ratio = static_cast<f32>(ev.now.width) / static_cast<f32>(ev.now.height);
         if (m_state.aspect_ratio != new_aspect_ratio)
             set_aspect_ratio(new_aspect_ratio);
-    }))
+    })),
+    m_clamp_up({true, 60.0f / 360.0f * 2.0f * M_PI})
 { /* Empty. */ }
 
 void hcam::BasicFirstPersonCamera::update() {
@@ -34,6 +35,21 @@ void hcam::BasicFirstPersonCamera::set_aspect_ratio(f32 aspect_ratio) {
 void hcam::BasicFirstPersonCamera::set_fov(f32 fov) {
     m_state.fov          = fov;
     m_projection_changed = true;
+}
+
+void hcam::BasicFirstPersonCamera::set_clamp_enabled(bool enabled) {
+    m_clamp_up.enabled = enabled;
+    if (enabled) assure_clamp_up();
+}
+
+void hcam::BasicFirstPersonCamera::set_clamp_angle(f32 angle) {
+    m_clamp_up.angle = angle;
+    if (m_clamp_up.enabled) assure_clamp_up();
+}
+
+void hcam::BasicFirstPersonCamera::set_clamp(ClampAxis clamp) {
+    m_clamp_up = clamp;
+    if (m_clamp_up.enabled) assure_clamp_up();
 }
 
 void hcam::BasicFirstPersonCamera::apply_rotation_in_local_axes(f32q rotation) {
@@ -72,12 +88,14 @@ void hcam::BasicFirstPersonCamera::rotate_from_mouse_with_absolute_up(f32 dx, f3
     apply_rotation_with_absolute_up(up * right);
 
     f32 up_angle = glm::acos(glm::dot(m_state.up, ABSOLUTE_UP));
-    if (do_clamp && (-1.0f * clamp > up_angle || clamp < up_angle)) {
+    if (m_clamp_up.enabled && (-1.0f * m_clamp_up.angle > up_angle || m_clamp_up.angle < up_angle)) {
         m_state.direction = previous.direction;
         m_state.up        = previous.up;
         m_state.right     = previous.right;
 
+        m_clamp_up.enabled = false;
         rotate_from_mouse_with_absolute_up(dx, 0.0f, speed);
+        m_clamp_up.enabled = true;
     }
 }
 
@@ -86,4 +104,16 @@ void hcam::BasicFirstPersonCamera::roll_from_mouse(f32 dx, f32 speed) {
 
     apply_rotation_in_local_axes(forward);
 }
+
+void hcam::BasicFirstPersonCamera::assure_clamp_up() {
+    f32 up_angle = glm::acos(glm::dot(m_state.up, ABSOLUTE_UP));
+
+    f32 correction_angle;
+    if (up_angle < -1.0f * m_clamp_up.angle) {
+        correction_angle = -1.0f * m_clamp_up.angle - up_angle;
+    } else if (up_angle > m_clamp_up.angle) {
+        correction_angle = m_clamp_up.angle - up_angle;
+    }
+    f32q correction = glm::angleAxis(correction_angle, m_state.right);
+    apply_rotation_with_absolute_up(correction);
 }

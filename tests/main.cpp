@@ -123,6 +123,12 @@ public:
         if (m_input_manager->is_pressed(hui::PhysicalKey::H_E)) {
             delta_pos -= glm::normalize(m_camera.up()) * static_cast<f32>(time.frame) * 0.2f;
         }
+
+        const f32 turn_clamp_on_at = 60.0f / 360.0f * 2.0f * M_PI;
+        f32 up_angle = glm::acos(glm::dot(m_camera.up(), hcam::ABSOLUTE_UP));
+        if (up_angle < -1.0f * turn_clamp_on_at || up_angle > turn_clamp_on_at)
+            m_camera.set_clamp_enabled(true);
+
         m_camera.offset_position(delta_pos);
         m_camera.update();
     }
@@ -143,6 +149,7 @@ public:
 
         m_camera.set_position(f32v3{400.0f, 200.0f, -130.0f});
         m_camera.set_fov(90.0f);
+        m_camera.set_clamp({false, 30.0f / 360.0f * 2.0f * M_PI});
         m_camera.update();
 
         handle_mouse_move = hemlock::Subscriber<hui::MouseMoveEvent>(

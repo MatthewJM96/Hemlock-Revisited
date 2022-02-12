@@ -5,6 +5,11 @@ namespace hemlock {
     namespace camera {
         const f32v3 ABSOLUTE_UP = f32v3{0.0f, -1.0f, 0.0f};
 
+        struct ClampAxis {
+            bool enabled;
+            f32  angle;
+        };
+
         struct CommonCameraState {
             f32 near_clipping = 0.1f;
             f32 far_clipping  = 10000.0f;
