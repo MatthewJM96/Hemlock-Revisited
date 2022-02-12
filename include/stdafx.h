@@ -55,6 +55,7 @@
 #include <GL/glew.h>
 
 // GL Maths
+#define GLM_FORCE_SWIZZLE
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
