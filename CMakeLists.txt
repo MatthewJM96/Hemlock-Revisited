@@ -59,6 +59,7 @@ add_executable(Hemlock_Revisited
     "${PROJECT_SOURCE_DIR}/src/app/process/process_base.cpp"
     "${PROJECT_SOURCE_DIR}/src/app/window/window_base.cpp"
     "${PROJECT_SOURCE_DIR}/src/app/window/window.cpp"
+    "${PROJECT_SOURCE_DIR}/src/camera/basic_first_person_camera.cpp"
     "${PROJECT_SOURCE_DIR}/src/graphics/font/font.cpp"
     "${PROJECT_SOURCE_DIR}/src/graphics/font/text_align.cpp"
     "${PROJECT_SOURCE_DIR}/src/graphics/glsl_program.cpp"
