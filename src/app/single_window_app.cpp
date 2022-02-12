@@ -9,19 +9,19 @@
 #include "app/single_window_app.h"
 
 void happ::SingleWindowApp::init() {
-    ProcessBase::init();
-
     m_input_manager = new hui::InputManager();
     hui::InputDispatcher::instance()->init(m_input_manager);
     hui::InputDispatcher::instance()->on_quit += &handle_external_quit;
+
+    m_fps_limiter = new FpsLimiter();
+    m_fps_limiter->init(60.0); // TODO(Matthew): Get max FPS from user preferences.
 
 #ifdef HEMLOCK_USING_DEVIL
     ilutRenderer(ILUT_OPENGL);
     ilutEnable(ILUT_OPENGL_CONV); // TODO(Matthew): Make this optional, some projects may consider on-board texture conversions fine.
 #endif
 
-    m_fps_limiter = new FpsLimiter();
-    m_fps_limiter->init(60.0); // TODO(Matthew): Get max FPS from user preferences.
+    ProcessBase::init();
 }
 
 void happ::SingleWindowApp::dispose() {
