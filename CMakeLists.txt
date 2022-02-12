@@ -77,6 +77,8 @@ add_executable(Hemlock_Revisited
     "${PROJECT_SOURCE_DIR}/src/io/iomanager.cpp"
     "${PROJECT_SOURCE_DIR}/src/ui/input/dispatcher.cpp"
     "${PROJECT_SOURCE_DIR}/src/ui/input/manager.cpp"
+    "${PROJECT_SOURCE_DIR}/src/voxel/coordinate_system.cpp"
+    "${PROJECT_SOURCE_DIR}/src/voxel/mesher.cpp"
     "${PROJECT_SOURCE_DIR}/tests/main.cpp"
 )
 
