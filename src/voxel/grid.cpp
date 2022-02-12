@@ -26,6 +26,8 @@ bool hvox::ChunkGrid::load_chunk_at(ChunkGridPosition chunk_position) {
     chunk->position = chunk_position;
     chunk->init();
 
+    establish_chunk_neighbours(chunk);
+
     m_chunks[chunk_position.id] = chunk;
 
     auto task = new ChunkLoadTask();
@@ -45,4 +47,75 @@ bool hvox::ChunkGrid::unload_chunk_at(ChunkGridPosition chunk_position) {
     m_chunks.erase(it);
 
     return true;
+}
+
+void hvox::ChunkGrid::establish_chunk_neighbours(Chunk* chunk) {
+    ChunkGridPosition neighbour_position;
+
+    // Update neighbours with info of new chunk.
+    // LEFT
+    neighbour_position = chunk->position;
+    neighbour_position.x -= 1;
+    auto it = m_chunks.find(neighbour_position.id);
+    if (it != m_chunks.end()) {
+        chunk->neighbours.left = (*it).second;
+        (*it).second->neighbours.right = chunk;
+    } else {
+        chunk->neighbours.left = nullptr;
+    }
+
+    // RIGHT
+    neighbour_position = chunk->position;
+    neighbour_position.x += 1;
+    it = m_chunks.find(neighbour_position.id);
+    if (it != m_chunks.end()) {
+        chunk->neighbours.right = (*it).second;
+        (*it).second->neighbours.left = chunk;
+    } else {
+        chunk->neighbours.right = nullptr;
+    }
+
+    // TOP
+    neighbour_position = chunk->position;
+    neighbour_position.y += 1;
+    it = m_chunks.find(neighbour_position.id);
+    if (it != m_chunks.end()) {
+        chunk->neighbours.top = (*it).second;
+        (*it).second->neighbours.bottom = chunk;
+    } else {
+        chunk->neighbours.top = nullptr;
+    }
+
+    // BOTTOM
+    neighbour_position = chunk->position;
+    neighbour_position.y -= 1;
+    it = m_chunks.find(neighbour_position.id);
+    if (it != m_chunks.end()) {
+        chunk->neighbours.bottom = (*it).second;
+        (*it).second->neighbours.top = chunk;
+    } else {
+        chunk->neighbours.bottom = nullptr;
+    }
+
+    // FRONT
+    neighbour_position = chunk->position;
+    neighbour_position.z -= 1;
+    it = m_chunks.find(neighbour_position.id);
+    if (it != m_chunks.end()) {
+        chunk->neighbours.front = (*it).second;
+        (*it).second->neighbours.back = chunk;
+    } else {
+        chunk->neighbours.front = nullptr;
+    }
+
+    // BACK
+    neighbour_position = chunk->position;
+    neighbour_position.z += 1;
+    it = m_chunks.find(neighbour_position.id);
+    if (it != m_chunks.end()) {
+        chunk->neighbours.back = (*it).second;
+        (*it).second->neighbours.front = chunk;
+    } else {
+        chunk->neighbours.back = nullptr;
+    }
 }

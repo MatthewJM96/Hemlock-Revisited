@@ -29,6 +29,8 @@ namespace hemlock {
 
             const Chunks& chunks() { return m_chunks; }
         protected:
+            void establish_chunk_neighbours(Chunk* chunk);
+
             ThreadPool<ChunkGenTaskContext> m_gen_threads;
 
             Chunks m_chunks;
