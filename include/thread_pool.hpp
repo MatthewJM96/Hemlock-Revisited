@@ -123,8 +123,6 @@ namespace hemlock {
          * @brief The approximate number of tasks held by the thread pool.
          */
         void approx_num_tasks() { return m_tasks.size_approx(); }
-
-        // TaskQueue<ThreadState>      m_tasks;
     protected:
 
         bool m_is_initialised;
