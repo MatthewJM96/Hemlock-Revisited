@@ -49,6 +49,10 @@ if (HEMLOCK_USING_OPENGL)
     add_compile_definitions(HEMLOCK_USING_OPENGL=1)
 endif()
 
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+    add_compile_definitions(DEBUG=1)
+endif()
+
 add_executable(Hemlock_Revisited
     "${PROJECT_SOURCE_DIR}/src/stdafx.cpp"
     "${PROJECT_SOURCE_DIR}/src/timing.cpp"
