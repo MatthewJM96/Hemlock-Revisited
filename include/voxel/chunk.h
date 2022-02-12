@@ -28,11 +28,15 @@ namespace hemlock {
 
         struct ChunkGenTaskContext {
             volatile bool stop;
-            Chunk*        chunk;
-            ChunkGenKind  purpose;
         };
         using ChunkGenThreadState = Thread<ChunkGenTaskContext>::State;
         using ChunkGenTaskQueue   = TaskQueue<ChunkGenTaskContext>;
+        class ChunkGenTask : public IThreadTask<ChunkGenTaskContext> {
+        public:
+            void init(Chunk* chunk) { m_chunk = chunk; }
+        protected:
+            Chunk* m_chunk;
+        };
 
         struct BlockChangeEvent {
             Chunk*              chunk;

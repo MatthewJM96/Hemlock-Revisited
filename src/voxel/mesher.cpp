@@ -93,9 +93,7 @@ static inline hvox::BlockIndex index_at_back_face(hvox::BlockIndex index) {
     return index + (CHUNK_SIZE * CHUNK_SIZE * (CHUNK_SIZE - 1));
 }
 
-void hvox::ChunkMeshTask::execute(ChunkGenThreadState* state, ChunkGenTaskQueue*) {
-    Chunk& chunk = *(state->context.chunk);
-
+void hvox::ChunkMeshTask::execute(ChunkGenThreadState*, ChunkGenTaskQueue*) {
     // TODO(Matthew): Make this indexed at least, and apply some smarter meshing generally.
     hg::MeshData3D_32 chunk_mesh;
 
@@ -104,7 +102,7 @@ void hvox::ChunkMeshTask::execute(ChunkGenThreadState* state, ChunkGenTaskQueue*
     // TODO(Matthew): Checking block is NULL_BLOCK is wrong check really, we will have transparent blocks
     //                e.g. air, to account for too.
     for (BlockIndex i = 0; i < CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE; ++i) {
-        Block& voxel = chunk.blocks[i];
+        Block& voxel = m_chunk->blocks[i];
         if (voxel != NULL_BLOCK) {
             BlockChunkPosition block_position = block_chunk_position(i);
 
@@ -113,12 +111,12 @@ void hvox::ChunkMeshTask::execute(ChunkGenThreadState* state, ChunkGenTaskQueue*
             if (is_at_left_face(i)) {
                 // Get corresponding neighbour index in neighbour chunk and check.
                 BlockIndex j = index_at_right_face(i);
-                if (chunk.neighbours.left == nullptr || chunk.neighbours.left->blocks[j] == NULL_BLOCK) {
+                if (m_chunk->neighbours.left == nullptr || m_chunk->neighbours.left->blocks[j] == NULL_BLOCK) {
                     add_left_quad(block_position, chunk_mesh);
                 }
             } else {
                 // Get corresponding neighbour index in this chunk and check.
-                if (chunk.blocks[i - 1]  == NULL_BLOCK) {
+                if (m_chunk->blocks[i - 1]  == NULL_BLOCK) {
                     add_left_quad(block_position, chunk_mesh);
                 }
             }
@@ -127,12 +125,12 @@ void hvox::ChunkMeshTask::execute(ChunkGenThreadState* state, ChunkGenTaskQueue*
             if (is_at_right_face(i)) {
                 // Get corresponding neighbour index in neighbour chunk and check.
                 BlockIndex j = index_at_left_face(i);
-                if (chunk.neighbours.right == nullptr || chunk.neighbours.right->blocks[j] == NULL_BLOCK) {
+                if (m_chunk->neighbours.right == nullptr || m_chunk->neighbours.right->blocks[j] == NULL_BLOCK) {
                     add_right_quad(block_position, chunk_mesh);
                 }
             } else {
                 // Get corresponding neighbour index in this chunk and check.
-                if (chunk.blocks[i + 1] == NULL_BLOCK) {
+                if (m_chunk->blocks[i + 1] == NULL_BLOCK) {
                     add_right_quad(block_position, chunk_mesh);
                 }
             }
@@ -141,12 +139,12 @@ void hvox::ChunkMeshTask::execute(ChunkGenThreadState* state, ChunkGenTaskQueue*
             if (is_at_bottom_face(i)) {
                 // Get corresponding neighbour index in neighbour chunk and check.
                 BlockIndex j = index_at_top_face(i);
-                if (chunk.neighbours.bottom == nullptr || chunk.neighbours.bottom->blocks[j] == NULL_BLOCK) {
+                if (m_chunk->neighbours.bottom == nullptr || m_chunk->neighbours.bottom->blocks[j] == NULL_BLOCK) {
                     add_bottom_quad(block_position, chunk_mesh);
                 }
             } else {
                 // Get corresponding neighbour index in this chunk and check.
-                if (chunk.blocks[i - CHUNK_SIZE] == NULL_BLOCK) {
+                if (m_chunk->blocks[i - CHUNK_SIZE] == NULL_BLOCK) {
                     add_bottom_quad(block_position, chunk_mesh);
                 }
             }
@@ -155,12 +153,12 @@ void hvox::ChunkMeshTask::execute(ChunkGenThreadState* state, ChunkGenTaskQueue*
             if (is_at_top_face(i)) {
                 // Get corresponding neighbour index in neighbour chunk and check.
                 BlockIndex j = index_at_bottom_face(i);
-                if (chunk.neighbours.top == nullptr || chunk.neighbours.top->blocks[j] == NULL_BLOCK) {
+                if (m_chunk->neighbours.top == nullptr || m_chunk->neighbours.top->blocks[j] == NULL_BLOCK) {
                     add_top_quad(block_position, chunk_mesh);
                 }
             } else {
                 // Get corresponding neighbour index in this chunk and check.
-                if (chunk.blocks[i + CHUNK_SIZE] == NULL_BLOCK) {
+                if (m_chunk->blocks[i + CHUNK_SIZE] == NULL_BLOCK) {
                     add_top_quad(block_position, chunk_mesh);
                 }
             }
@@ -169,12 +167,12 @@ void hvox::ChunkMeshTask::execute(ChunkGenThreadState* state, ChunkGenTaskQueue*
             if (is_at_front_face(i)) {
                 // Get corresponding neighbour index in neighbour chunk and check.
                 BlockIndex j = index_at_back_face(i);
-                if (chunk.neighbours.front == nullptr || chunk.neighbours.front->blocks[j] == NULL_BLOCK) {
+                if (m_chunk->neighbours.front == nullptr || m_chunk->neighbours.front->blocks[j] == NULL_BLOCK) {
                     add_front_quad(block_position, chunk_mesh);
                 }
             } else {
                 // Get corresponding neighbour index in this chunk and check.
-                if (chunk.blocks[i - (CHUNK_SIZE * CHUNK_SIZE)] == NULL_BLOCK) {
+                if (m_chunk->blocks[i - (CHUNK_SIZE * CHUNK_SIZE)] == NULL_BLOCK) {
                     add_front_quad(block_position, chunk_mesh);
                 }
             }
@@ -183,12 +181,12 @@ void hvox::ChunkMeshTask::execute(ChunkGenThreadState* state, ChunkGenTaskQueue*
             if (is_at_back_face(i)) {
                 // Get corresponding neighbour index in neighbour chunk and check.
                 BlockIndex j = index_at_front_face(i);
-                if (chunk.neighbours.back == nullptr || chunk.neighbours.back->blocks[j] == NULL_BLOCK) {
+                if (m_chunk->neighbours.back == nullptr || m_chunk->neighbours.back->blocks[j] == NULL_BLOCK) {
                     add_back_quad(block_position, chunk_mesh);
                 }
             } else {
                 // Get corresponding neighbour index in this chunk and check.
-                if (chunk.blocks[i + (CHUNK_SIZE * CHUNK_SIZE)] == NULL_BLOCK) {
+                if (m_chunk->blocks[i + (CHUNK_SIZE * CHUNK_SIZE)] == NULL_BLOCK) {
                     add_back_quad(block_position, chunk_mesh);
                 }
             }
@@ -198,8 +196,8 @@ void hvox::ChunkMeshTask::execute(ChunkGenThreadState* state, ChunkGenTaskQueue*
     hg::MeshHandles mesh_handles;
     hg::upload_mesh(chunk_mesh, mesh_handles, hg::MeshDataVolatility::STATIC);
 
-    chunk.mesh_handles = mesh_handles;
-    chunk.state        = ChunkState::MESHED;
+    m_chunk->mesh_handles = mesh_handles;
+    m_chunk->state        = ChunkState::MESHED;
 
     delete[] chunk_mesh.vertices;
 }

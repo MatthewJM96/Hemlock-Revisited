@@ -79,6 +79,7 @@ add_executable(Hemlock_Revisited
     "${PROJECT_SOURCE_DIR}/src/ui/input/manager.cpp"
     "${PROJECT_SOURCE_DIR}/src/voxel/chunk.cpp"
     "${PROJECT_SOURCE_DIR}/src/voxel/coordinate_system.cpp"
+    "${PROJECT_SOURCE_DIR}/src/voxel/grid.cpp"
     "${PROJECT_SOURCE_DIR}/src/voxel/loader.cpp"
     "${PROJECT_SOURCE_DIR}/src/voxel/mesher.cpp"
     "${PROJECT_SOURCE_DIR}/tests/main.cpp"
