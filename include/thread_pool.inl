@@ -3,20 +3,21 @@ void hemlock::basic_thread_main( typename Thread<ThreadState>::State* state,
                                               TaskQueue<ThreadState>* task_queue  ) {
     state->context.stop = false;
 
-    IThreadTask<ThreadState>* task;
+    HeldTask<ThreadState> held;
     while (!state->context.stop) {
         task_queue->wait_dequeue_timed(
             state->consumer_token,
-            task,
+            held,
             std::chrono::seconds(1)
         );
 
-        if (!task) break;
+        if (!held.task) break;
 
-        task->execute(state, task_queue);
-        task->is_finished = true;
-        task->dispose();
-        task = nullptr;
+        held.task->execute(state, task_queue);
+        held.task->is_finished = true;
+        held.task->dispose();
+        if (held.should_delete) delete held.task;
+        held.task = nullptr;
     }
 }
 

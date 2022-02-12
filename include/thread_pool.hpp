@@ -12,7 +12,13 @@ namespace hemlock {
     class IThreadTask;
 
     template <InterruptibleState ThreadState>
-    using TaskQueue = moodycamel::BlockingConcurrentQueue<IThreadTask<ThreadState>*>;
+    struct HeldTask {
+        IThreadTask<ThreadState>* task;
+        bool should_delete;
+    };
+
+    template <InterruptibleState ThreadState>
+    using TaskQueue = moodycamel::BlockingConcurrentQueue<HeldTask<ThreadState>>;
 
     template <InterruptibleState ThreadState>
     struct Thread {

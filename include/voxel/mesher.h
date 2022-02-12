@@ -5,7 +5,7 @@ namespace hemlock {
     namespace voxel {
         struct Chunk;
 
-        struct ChunkMeshTaskContext {
+        struct ChunkGenTaskContext {
             volatile bool stop;
             Chunk*        chunk;
         };
