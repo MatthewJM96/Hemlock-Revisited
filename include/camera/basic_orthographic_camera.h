@@ -32,6 +32,7 @@ namespace hemlock {
             void set_down_clipping(f32 down_clipping);
             void set_up_clipping(f32 up_clipping);
             void set_du_clipping(f32 down_clipping, f32 up_clipping);
+            void set_all_clipping(f32 left_clipping, f32 right_clipping, f32 down_clipping, f32 up_clipping, f32 near_clipping, f32 far_clipping);
 
             // TODO(Matthew): How do we actually want to do this? We might want to, e.g. lock to
             //                an axis, or wholly prevent free rotations in any axis.

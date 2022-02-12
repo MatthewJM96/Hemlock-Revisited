@@ -90,6 +90,23 @@ void hcam::BasicOrthographicCamera::set_du_clipping(f32 down_clipping, f32 up_cl
     m_projection_changed  = true;
 }
 
+void hcam::BasicOrthographicCamera::set_all_clipping(
+    f32 left_clipping,
+    f32 right_clipping,
+    f32 down_clipping,
+    f32 up_clipping,
+    f32 near_clipping,
+    f32 far_clipping
+) {
+    m_state.left_clipping  = left_clipping;
+    m_state.right_clipping = right_clipping;
+    m_state.down_clipping  = down_clipping;
+    m_state.up_clipping    = up_clipping;
+    m_state.near_clipping  = near_clipping;
+    m_state.far_clipping   = far_clipping;
+    m_projection_changed   = true;
+}
+
 void hcam::BasicOrthographicCamera::apply_rotation(f32q rotation) {
     m_state.direction = glm::normalize(rotation * m_state.direction);
     m_state.right     = glm::normalize(rotation * m_state.right);
