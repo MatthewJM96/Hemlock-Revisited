@@ -42,6 +42,8 @@ namespace hemlock {
 
         struct BulkBlockChangeEvent {
             Chunk*              chunk;
+            Block*              new_blocks;
+            bool                single_block;
             BlockChunkPosition  start_position;
             BlockChunkPosition  end_position;
         };
@@ -77,8 +79,8 @@ namespace hemlock {
             };
 
             // TODO(Matthew): Store these here? Somehow feels dodgy.
-            Event<BlockChangeEvent>     on_block_change;
-            Event<BulkBlockChangeEvent> on_bulk_block_change;
+            CancellableEvent<BlockChangeEvent>     on_block_change;
+            CancellableEvent<BulkBlockChangeEvent> on_bulk_block_change;
         protected:
             bool m_owns_blocks;
         };
@@ -90,8 +92,10 @@ namespace hemlock {
          * @param chunk The chunk in which to set the block.
          * @param block_position The position at which to set the block.
          * @param block The block to set.
+         *
+         * @return True if the block was set, false otherwise.
          */
-        void set_block( Chunk* chunk,
+        bool set_block( Chunk* chunk,
             BlockChunkPosition block_position,
                          Block block );
         /**
@@ -104,8 +108,10 @@ namespace hemlock {
          * @param block_position The position marking the end of
          * the rectangular cuboid to set blocks in.
          * @param block The block to set.
+         *
+         * @return True if the blocks were set, false otherwise.
          */
-        void set_blocks( Chunk* chunk,
+        bool set_blocks( Chunk* chunk,
              BlockChunkPosition start_block_position,
              BlockChunkPosition end_block_position,
                           Block block );
@@ -118,8 +124,10 @@ namespace hemlock {
          * @param chunk The chunk in which to set the block.
          * @param block_position The position at which to set the block.
          * @param block The blocks to set.
+         *
+         * @return True if the blocks were set, false otherwise.
          */
-        void set_blocks( Chunk* chunk,
+        bool set_blocks( Chunk* chunk,
              BlockChunkPosition start_block_position,
              BlockChunkPosition end_block_position,
                          Block* blocks );

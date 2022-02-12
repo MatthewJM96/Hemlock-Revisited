@@ -31,30 +31,43 @@ void hvox::Chunk::dispose() {
     neighbours = NULL_NEIGHBOURS;
 }
 
-void hvox::set_block( Chunk* chunk,
+bool hvox::set_block( Chunk* chunk,
           BlockChunkPosition block_position,
                        Block block )
 {
     auto block_idx = block_index(block_position);
 
-    Block old_block = chunk->blocks[block_idx];
-    chunk->blocks[block_idx] = block;
-
     if (!chunk->gen_task_active) {
-        chunk->on_block_change({
+        bool should_cancel = chunk->on_block_change({
             chunk,
-            old_block,
+            chunk->blocks[block_idx],
             block,
             block_position
         });
+        if (should_cancel) return false;
     }
+
+    chunk->blocks[block_idx] = block;
+
+    return true;
 }
 
-void hvox::set_blocks( Chunk* chunk,
+bool hvox::set_blocks( Chunk* chunk,
            BlockChunkPosition start_block_position,
            BlockChunkPosition end_block_position,
                         Block block )
 {
+    if (!chunk->gen_task_active) {
+        bool should_cancel = chunk->on_bulk_block_change({
+            chunk,
+            &block,
+            true,
+            start_block_position,
+            end_block_position
+        });
+        if (should_cancel) return false;
+    }
+
     /*
      * If we span the whole chunk, we just fill the whole buffer.
      */
@@ -97,20 +110,25 @@ void hvox::set_blocks( Chunk* chunk,
         }
     }
 
-    if (!chunk->gen_task_active) {
-        chunk->on_bulk_block_change({
-            chunk,
-            start_block_position,
-            end_block_position
-        });
-    }
+    return true;
 }
 
-void hvox::set_blocks( Chunk* chunk,
+bool hvox::set_blocks( Chunk* chunk,
            BlockChunkPosition start_block_position,
            BlockChunkPosition end_block_position,
                        Block* blocks )
 {
+    if (!chunk->gen_task_active) {
+        bool should_cancel = chunk->on_bulk_block_change({
+            chunk,
+            blocks,
+            false,
+            start_block_position,
+            end_block_position
+        });
+        if (should_cancel) return false;
+    }
+
     /*
      * If we span the whole chunk, we just copy in the whole buffer.
      */
@@ -165,11 +183,5 @@ void hvox::set_blocks( Chunk* chunk,
         }
     }
 
-    if (!chunk->gen_task_active) {
-        chunk->on_bulk_block_change({
-            chunk,
-            start_block_position,
-            end_block_position
-        });
-    }
+    return true;
 }
