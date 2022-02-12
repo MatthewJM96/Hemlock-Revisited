@@ -36,7 +36,7 @@ void hcam::BasicOrthographicCamera::update() {
 
     if (m_projection_changed) {
         f32 lr_scale_component = 2.0f / (m_state.right_clipping - m_state.left_clipping);
-        f32 ud_scale_component = 2.0f / (m_state.up_clipping    - m_state.down_clipping);
+        f32 du_scale_component = 2.0f / (m_state.up_clipping    - m_state.down_clipping);
         f32 nf_scale_component = 2.0f / (m_state.far_clipping   - m_state.near_clipping);
 
         f32 lr_translation_component = -1.0f * (m_state.right_clipping + m_state.left_clipping) / (m_state.right_clipping - m_state.left_clipping);
