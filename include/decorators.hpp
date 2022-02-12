@@ -10,4 +10,7 @@
     #define debug_printf(...) printf(__VA_ARGS__)
 #else
     #define debug_printf(...)
+    #ifndef NDEBUG
+        #define NDEBUG
+    #endif //NDEBUG
 #endif
