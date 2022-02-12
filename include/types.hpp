@@ -70,6 +70,39 @@ using f64v4 = glm::f64vec4;
 using f32q = glm::quat;
 using f64q = glm::dquat;
 
+// Integral matrix types.
+using i8m2 = glm::i8mat2x2;
+using i8m3 = glm::i8mat3x3;
+using i8m4 = glm::i8mat4x4;
+
+using i16m2 = glm::i16mat2x2;
+using i16m3 = glm::i16mat3x3;
+using i16m4 = glm::i16mat4x4;
+
+using i32m2 = glm::i32mat2x2;
+using i32m3 = glm::i32mat3x3;
+using i32m4 = glm::i32mat4x4;
+
+using i64m2 = glm::i64mat2x2;
+using i64m3 = glm::i64mat3x3;
+using i64m4 = glm::i64mat4x4;
+
+using ui8m2 = glm::u8mat2x2;
+using ui8m3 = glm::u8mat3x3;
+using ui8m4 = glm::u8mat4x4;
+
+using ui16m2 = glm::u16mat2x2;
+using ui16m3 = glm::u16mat3x3;
+using ui16m4 = glm::u16mat4x4;
+
+using ui32m2 = glm::u32mat2x2;
+using ui32m3 = glm::u32mat3x3;
+using ui32m4 = glm::u32mat4x4;
+
+using ui64m2 = glm::u64mat2x2;
+using ui64m3 = glm::u64mat3x3;
+using ui64m4 = glm::u64mat4x4;
+
 // Floating-point matrix types.
 using f32m2 = glm::f32mat2;
 using f32m3 = glm::f32mat3;
