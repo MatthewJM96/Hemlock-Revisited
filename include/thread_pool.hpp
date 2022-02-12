@@ -107,13 +107,13 @@ namespace hemlock {
          * 
          * @param task The task to add.
          */
-        void add_task (IThreadTask<ThreadState>* task);
+        void add_task (HeldTask<ThreadState> task);
         /**
          * @brief Adds a set of tasks to the task queue.
          * 
          * @param task The tasks to add.
          */
-        void add_tasks(IThreadTask<ThreadState>* tasks[], size_t task_count);
+        void add_tasks(HeldTask<ThreadState> tasks[], size_t task_count);
 
         /**
          * @brief The number of threads held by the thread pool.

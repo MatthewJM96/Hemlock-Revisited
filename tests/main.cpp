@@ -238,13 +238,13 @@ i32 main() {
         MyPrinterTask()
     };
 
-    MyPrinterTask* my_task_ptrs[3] = {
-        &my_tasks[0],
-        &my_tasks[1],
-        &my_tasks[2]
+    hemlock::HeldTask<ThreadContext> held_tasks[3] = {
+        {static_cast<hemlock::IThreadTask<ThreadContext>*>(&my_tasks[0]), false},
+        {static_cast<hemlock::IThreadTask<ThreadContext>*>(&my_tasks[1]), false},
+        {static_cast<hemlock::IThreadTask<ThreadContext>*>(&my_tasks[2]), false}
     };
 
-    pool.add_tasks(reinterpret_cast<hemlock::IThreadTask<ThreadContext>**>(my_task_ptrs), 3);
+    pool.add_tasks(held_tasks, 3);
 
     hemlock::Event<ui32, ui32> on_calc;
 
