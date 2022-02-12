@@ -22,17 +22,18 @@ namespace hemlock {
 #endif // HEMLOCK_USING_OPENGL
         };
 
-        struct Vertex_Pos2D_32  : public f32v2 { /* Empty. */ };
-        struct Vertex_Pos2D_64  : public f64v2 { /* Empty. */ };
-        struct Vertex_Pos3D_32  : public f32v3 { /* Empty. */ };
-        struct Vertex_Pos3D_64  : public f32v3 { /* Empty. */ };
-        struct Vertex_RGB_32    : public f32v3 { /* Empty. */ };
-        struct Vertex_RGB_64    : public f64v3 { /* Empty. */ };
-        struct Vertex_RGBA_64   : public f64v4 { /* Empty. */ };
-        struct Vertex_RGBA_32   : public f32v4 { /* Empty. */ };
-        struct Vertex_UV_32     : public f32v2 { /* Empty. */ };
-        struct Vertex_UV_64     : public f64v2 { /* Empty. */ };
+        using Vertex_Pos2D_32 = f32v2;
+        using Vertex_Pos2D_64 = f64v2;
+        using Vertex_Pos3D_32 = f32v3;
+        using Vertex_Pos3D_64 = f32v3;
+        using Vertex_RGB_32   = f32v3;
+        using Vertex_RGB_64   = f64v3;
+        using Vertex_RGBA_64  = f64v4;
+        using Vertex_RGBA_32  = f32v4;
+        using Vertex_UV_32    = f32v2;
+        using Vertex_UV_64    = f64v2;
 
+        // TODO(Matthew): RGBA versions.
         struct Vertex2D_32 {
             Vertex_Pos2D_32 position;
             Vertex_RGB_32   colour;
