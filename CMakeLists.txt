@@ -16,7 +16,7 @@ option(HEMLOCK_USING_OPENGL "Whether Hemlock uses OpenGL." ON)
 if (UNIX OR MINGW)
     set(CMAKE_CXX_FLAGS "-pthread -Wall -Wextra -Wold-style-cast -Wshadow -Wformat=2 -Werror")
     set(CMAKE_CXX_FLAGS_RELEASE "-O3")
-    set(CMAKE_CXX_FLAGS_DEBUG "-Og -g")
+    set(CMAKE_CXX_FLAGS_DEBUG "-g")
 
     if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wduplicated-cond -Wuseless-cast")
