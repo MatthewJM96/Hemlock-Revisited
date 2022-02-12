@@ -20,12 +20,14 @@ namespace hemlock {
          * @brief Position of block withing chunk-space.
          */
         using BlockChunkPositionCoord = ui8;
-        using BlockChunkPosition = ui8v3;
+        using BlockChunkPosition2D    = ui8v2;
+        using BlockChunkPosition      = ui8v3;
         /**
          * @brief Position of block withing world-space.
          */
         using BlockWorldPositionCoord = i32;
-        using BlockWorldPosition = i32v3;
+        using BlockWorldPosition2D    = i32v2;
+        using BlockWorldPosition      = i32v3;
 
         /**
          * @brief Unique ID of a column.
