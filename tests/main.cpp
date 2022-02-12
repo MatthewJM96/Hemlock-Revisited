@@ -147,6 +147,7 @@ public:
 
         m_input_manager = static_cast<happ::SingleWindowApp*>(m_process)->input_manager();
 
+        m_camera.attach_to_window(m_process->window());
         m_camera.set_position(f32v3{400.0f, 200.0f, -130.0f});
         m_camera.set_fov(90.0f);
         m_camera.set_clamp({false, 30.0f / 360.0f * 2.0f * M_PI});
