@@ -7,6 +7,8 @@
 #include "voxel/loader.h"
 
 void hvox::ChunkLoadTask::execute(ChunkGenThreadState* state, ChunkGenTaskQueue* task_queue) {
+    m_chunk->gen_task_active = true;
+
     BlockWorldPosition chunk_position = block_world_position(m_chunk->position, 0);
 
     if (chunk_position.y < 0) {
@@ -22,4 +24,6 @@ void hvox::ChunkLoadTask::execute(ChunkGenThreadState* state, ChunkGenTaskQueue*
     //         // Do stuff...
     //     }
     // }
+
+    m_chunk->gen_task_active = false;
 }
