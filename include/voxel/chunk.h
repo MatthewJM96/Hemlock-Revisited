@@ -5,6 +5,7 @@
 #define CHUNK_SIZE 32
 #endif
 
+#include "timing.h"
 #include "graphics/mesh.h"
 #include "voxel/block.hpp"
 #include "voxel/coordinate_system.h"
@@ -62,6 +63,8 @@ namespace hemlock {
             void init();
             void init(Block* _blocks);
             void dispose();
+
+            void update(TimeData) { /* Empty. */ }
 
             Neighbours neighbours;
 
