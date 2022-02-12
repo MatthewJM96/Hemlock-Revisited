@@ -6,7 +6,7 @@
 
 #include "voxel/loader.h"
 
-void hvox::ChunkLoadTask::execute(ChunkGenThreadState*, ChunkGenTaskQueue* task_queue) {
+void hvox::ChunkLoadTask::execute(ChunkGenThreadState* state, ChunkGenTaskQueue* task_queue) {
     BlockWorldPosition chunk_position = block_world_position(m_chunk->position, 0);
 
     if (chunk_position.y < 0) {
@@ -15,7 +15,7 @@ void hvox::ChunkLoadTask::execute(ChunkGenThreadState*, ChunkGenTaskQueue* task_
 
     ChunkMeshTask* mesh_task = new ChunkMeshTask();
     mesh_task->init(m_chunk);
-    task_queue->enqueue({ mesh_task, true });
+    task_queue->enqueue(state->producer_token, { mesh_task, true });
 
     // for (auto x = 0; x < CHUNK_SIZE; ++x) {
     //     for (auto z = 0; z < CHUNK_SIZE; ++z) {
