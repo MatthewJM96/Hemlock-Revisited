@@ -271,7 +271,11 @@ namespace hemlock {
         * @param parameters The parameters to pass to subscribers.
         */
         ReturnType operator()(Parameters... parameters) {
-            trigger(std::forward<Parameters>(parameters)...);
+            if constexpr (std::same_as<ReturnType, void>) {
+                trigger(std::forward<Parameters>(parameters)...);
+            } else {
+                return trigger(std::forward<Parameters>(parameters)...);
+            }
         }
     protected:
         void clear_removal_queue() {
