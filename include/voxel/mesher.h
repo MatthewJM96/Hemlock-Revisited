@@ -1,20 +1,13 @@
 #ifndef __hemlock_voxel_chunk_mesher_h
 #define __hemlock_voxel_chunk_mesher_h
 
+#include "voxel/chunk.hpp"
+
 namespace hemlock {
     namespace voxel {
-        struct Chunk;
-
-        struct ChunkGenTaskContext {
-            volatile bool stop;
-            Chunk*        chunk;
-        };
-        using ChunkMeshThreadState = Thread<ChunkMeshTaskContext>::State;
-        using ChunkMeshTaskQueue   = TaskQueue<ChunkMeshTaskContext>;
-
-        class ChunkMeshTask : IThreadTask<ChunkMeshTaskContext> {
+        class ChunkMeshTask : IThreadTask<ChunkGenTaskContext> {
         public:
-            virtual void execute(ChunkMeshThreadState* state, ChunkMeshTaskQueue* task_queue) override;
+            virtual void execute(ChunkGenThreadState* state, ChunkGenTaskQueue* task_queue) override;
         };
     }
 }

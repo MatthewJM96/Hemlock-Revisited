@@ -93,7 +93,7 @@ static inline hvox::BlockIndex index_at_back_face(hvox::BlockIndex index) {
     return index + (CHUNK_SIZE * CHUNK_SIZE * (CHUNK_SIZE - 1));
 }
 
-void hvox::ChunkMeshTask::execute(ChunkMeshThreadState* state, ChunkMeshTaskQueue*) {
+void hvox::ChunkMeshTask::execute(ChunkGenThreadState* state, ChunkGenTaskQueue*) {
     Chunk& chunk = *(state->context.chunk);
 
     // TODO(Matthew): Make this indexed at least, and apply some smarter meshing generally.

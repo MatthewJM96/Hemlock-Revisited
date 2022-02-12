@@ -19,6 +19,20 @@ namespace hemlock {
             MESHED
         };
 
+        enum class ChunkGenKind {
+            NONE,
+            GENERATE,
+            MESH
+        };
+
+        struct ChunkGenTaskContext {
+            volatile bool stop;
+            Chunk*        chunk;
+            ChunkGenKind  purpose;
+        };
+        using ChunkGenThreadState = Thread<ChunkGenTaskContext>::State;
+        using ChunkGenTaskQueue   = TaskQueue<ChunkGenTaskContext>;
+
         enum class BlockChange {
             PLACE,
             DESTROY
