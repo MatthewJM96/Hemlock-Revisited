@@ -5,15 +5,12 @@
 #include "camera/basic_first_person_camera.h"
 
 hcam::BasicFirstPersonCamera::BasicFirstPersonCamera() :
-    handle_window_resize(Subscriber<happ::ResizeEvent>([&](Sender, happ::ResizeEvent ev) {
+    BaseCamera<PerspectiveCameraState>(Subscriber<happ::ResizeEvent>([&](Sender, happ::ResizeEvent ev) {
         f32 new_aspect_ratio = static_cast<f32>(ev.now.width) / static_cast<f32>(ev.now.height);
         if (m_state.aspect_ratio != new_aspect_ratio)
             set_aspect_ratio(new_aspect_ratio);
-    })),
-    m_view_changed(false),
-    m_projection_changed(false)
+    }))
 { /* Empty. */ }
-
 
 void hcam::BasicFirstPersonCamera::update() {
     if (m_view_changed)
@@ -29,10 +26,6 @@ void hcam::BasicFirstPersonCamera::update() {
     m_projection_changed = false;
 }
 
-void hcam::BasicFirstPersonCamera::attach_to_window(app::WindowBase* window) {
-    window->on_window_resize += &handle_window_resize;
-}
-
 void hcam::BasicFirstPersonCamera::set_aspect_ratio(f32 aspect_ratio) {
     m_state.aspect_ratio = aspect_ratio;
     m_projection_changed = true;
@@ -41,32 +34,6 @@ void hcam::BasicFirstPersonCamera::set_aspect_ratio(f32 aspect_ratio) {
 void hcam::BasicFirstPersonCamera::set_fov(f32 fov) {
     m_state.fov          = fov;
     m_projection_changed = true;
-}
-
-void hcam::BasicFirstPersonCamera::set_near_clipping(f32 near_clipping) {
-    m_state.near_clipping = near_clipping;
-    m_projection_changed  = true;
-}
-
-void hcam::BasicFirstPersonCamera::set_far_clipping(f32 far_clipping) {
-    m_state.far_clipping = far_clipping;
-    m_projection_changed = true;
-}
-
-void hcam::BasicFirstPersonCamera::set_nf_clipping(f32 near_clipping, f32 far_clipping) {
-    m_state.near_clipping = near_clipping;
-    m_state.far_clipping  = far_clipping;
-    m_projection_changed  = true;
-}
-
-void hcam::BasicFirstPersonCamera::set_position(f32v3 position) {
-    m_state.position = position;
-    m_view_changed   = true;
-}
-
-void hcam::BasicFirstPersonCamera::offset_position(f32v3 delta_position) {
-    m_state.position += delta_position;
-    m_view_changed    = true;
 }
 
 void hcam::BasicFirstPersonCamera::apply_rotation(f32q rotation) {
