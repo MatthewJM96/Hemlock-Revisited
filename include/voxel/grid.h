@@ -23,6 +23,8 @@ namespace hemlock {
 
             bool load_chunk_at(ChunkGridPosition chunk_position);
             bool unload_chunk_at(ChunkGridPosition chunk_position);
+
+            const Chunks& chunks() { return m_chunks; }
         protected:
             ThreadPool<ChunkGenTaskContext> m_gen_threads;
 
