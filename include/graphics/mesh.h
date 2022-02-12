@@ -18,7 +18,7 @@ namespace hemlock {
         };
         struct IndexedMeshHandles : public MeshHandles {
 #ifdef HEMLOCK_USING_OPENGL
-            GLuint ebo;
+            GLuint ibo;
 #endif // HEMLOCK_USING_OPENGL
         };
 
