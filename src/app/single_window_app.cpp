@@ -84,6 +84,12 @@ void happ::SingleWindowApp::prepare_window() {
     }
 #endif // HEMLOCK_USING_SDL_TTF
 
+    m_window = new happ::Window();
+    if (m_window->init() != happ::WindowError::NONE) {
+        debug_printf("Window could not be initialised...\n");
+        exit(2);
+    }
+
 #ifdef HEMLOCK_USING_OPENGL
     debug_printf("*** OpenGL Version:  %s ***\n", glGetString(GL_VERSION));
     debug_printf("*** OpenGL Renderer: %s ***\n", glGetString(GL_RENDERER));
@@ -92,12 +98,6 @@ void happ::SingleWindowApp::prepare_window() {
     glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &nr_attributes);
     debug_printf("Maximum # of vertex attributes supported: %d.\n", nr_attributes);
 #endif // HEMLOCK_USING_OPENGL
-
-    m_window = new happ::Window();
-    if (m_window->init() != happ::WindowError::NONE) {
-        debug_printf("Window could not be initialised...\n");
-        exit(2);
-    }
 }
 
 void happ::SingleWindowApp::calculate_times() {
