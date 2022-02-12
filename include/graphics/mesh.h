@@ -83,14 +83,14 @@ namespace hemlock {
         struct IndexedMeshData3D_32 : public MeshData3D_32, public IndexData { /* Empty. */ };
         struct IndexedMeshData3D_64 : public MeshData3D_64, public IndexData { /* Empty. */ };
 
-        bool upload_mesh(const        MeshData2D_32& mesh_data,        MeshHandles& handles, MeshDataVolatility volatility = MeshDataVolatility::DYNAMIC);
-        bool upload_mesh(const        MeshData2D_64& mesh_data,        MeshHandles& handles, MeshDataVolatility volatility = MeshDataVolatility::DYNAMIC);
-        bool upload_mesh(const        MeshData3D_32& mesh_data,        MeshHandles& handles, MeshDataVolatility volatility = MeshDataVolatility::DYNAMIC);
-        bool upload_mesh(const        MeshData3D_64& mesh_data,        MeshHandles& handles, MeshDataVolatility volatility = MeshDataVolatility::DYNAMIC);
-        bool upload_mesh(const IndexedMeshData2D_32& mesh_data, IndexedMeshHandles& handles, MeshDataVolatility volatility = MeshDataVolatility::DYNAMIC);
-        bool upload_mesh(const IndexedMeshData2D_64& mesh_data, IndexedMeshHandles& handles, MeshDataVolatility volatility = MeshDataVolatility::DYNAMIC);
-        bool upload_mesh(const IndexedMeshData3D_32& mesh_data, IndexedMeshHandles& handles, MeshDataVolatility volatility = MeshDataVolatility::DYNAMIC);
-        bool upload_mesh(const IndexedMeshData3D_64& mesh_data, IndexedMeshHandles& handles, MeshDataVolatility volatility = MeshDataVolatility::DYNAMIC);
+        bool upload_mesh(const        MeshData2D_32& mesh_data, OUT        MeshHandles& handles, MeshDataVolatility volatility = MeshDataVolatility::DYNAMIC);
+        bool upload_mesh(const        MeshData2D_64& mesh_data, OUT        MeshHandles& handles, MeshDataVolatility volatility = MeshDataVolatility::DYNAMIC);
+        bool upload_mesh(const        MeshData3D_32& mesh_data, OUT        MeshHandles& handles, MeshDataVolatility volatility = MeshDataVolatility::DYNAMIC);
+        bool upload_mesh(const        MeshData3D_64& mesh_data, OUT        MeshHandles& handles, MeshDataVolatility volatility = MeshDataVolatility::DYNAMIC);
+        bool upload_mesh(const IndexedMeshData2D_32& mesh_data, OUT IndexedMeshHandles& handles, MeshDataVolatility volatility = MeshDataVolatility::DYNAMIC);
+        bool upload_mesh(const IndexedMeshData2D_64& mesh_data, OUT IndexedMeshHandles& handles, MeshDataVolatility volatility = MeshDataVolatility::DYNAMIC);
+        bool upload_mesh(const IndexedMeshData3D_32& mesh_data, OUT IndexedMeshHandles& handles, MeshDataVolatility volatility = MeshDataVolatility::DYNAMIC);
+        bool upload_mesh(const IndexedMeshData3D_64& mesh_data, OUT IndexedMeshHandles& handles, MeshDataVolatility volatility = MeshDataVolatility::DYNAMIC);
     }
 }
 namespace hg  = hemlock::graphics;
