@@ -12,10 +12,10 @@ namespace hemlock {
 }
 namespace hvox = hemlock::voxel;
 
-bool operator==(hvox::Block lhs, hvox::Block rhs) {
+inline bool operator==(hvox::Block lhs, hvox::Block rhs) {
     return lhs.id == rhs.id;
 }
-bool operator!=(hvox::Block lhs, hvox::Block rhs) {
+inline bool operator!=(hvox::Block lhs, hvox::Block rhs) {
     return !(lhs == rhs);
 }
 
