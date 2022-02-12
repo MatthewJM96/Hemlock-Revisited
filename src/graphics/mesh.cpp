@@ -5,7 +5,14 @@
 #ifdef HEMLOCK_USING_OPENGL
 template <bool indexed, ui32 vertex_size, ui32 precision>
 static bool upload_basic_mesh(auto mesh_data, hg::MeshDataVolatility volatility, IN OUT GLuint* vao, IN OUT GLuint* vbo, IN OUT GLuint* ibo) {
-    if (!mesh_data.vertices) return 0;
+    assert(mesh_data.vertices != nullptr);
+    assert(vao != nullptr);
+    assert(vbo != nullptr);
+
+    if constexpr (indexed) {
+        assert(mesh_data.indices != nullptr);
+        assert(ibo != nullptr);
+    }
 
     glGenVertexArrays(1, vao);
     glBindVertexArray(*vao);
@@ -33,7 +40,7 @@ static bool upload_basic_mesh(auto mesh_data, hg::MeshDataVolatility volatility,
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 
-    return true;
+    return static_cast<bool>(mesh_data.vertex_count);
 }
 #endif // HEMLOCK_USING_OPENGL
 
