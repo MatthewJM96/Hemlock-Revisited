@@ -17,7 +17,8 @@ namespace hemlock {
         enum class ChunkState {
             NONE,
             GENERATED,
-            MESHED
+            MESHED,
+            MESH_UPLOADED
         };
 
         enum class ChunkGenKind {
@@ -68,7 +69,7 @@ namespace hemlock {
             void init(Block* _blocks);
             void dispose();
 
-            void update(TimeData) { /* Empty. */ }
+            void update(TimeData);
 
             Neighbours neighbours;
 
@@ -78,6 +79,7 @@ namespace hemlock {
 
             ChunkState state;
 
+            hg::MeshData3D_32 mesh;
             hg::MeshHandles mesh_handles;
 
             struct {

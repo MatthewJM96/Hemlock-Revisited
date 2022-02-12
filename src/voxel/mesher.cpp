@@ -6,7 +6,7 @@
 
 #include "voxel/mesher.h"
 
-static inline void add_front_quad(hvox::BlockChunkPosition pos, hg::MeshData3D_32 mesh) {
+static inline void add_front_quad(hvox::BlockChunkPosition pos, OUT hg::MeshData3D_32& mesh) {
     mesh.vertices[mesh.vertex_count++] = { { -0.5f + pos.x, -0.5f + pos.y, -0.5f + pos.z }, { 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f } };
     mesh.vertices[mesh.vertex_count++] = { {  0.5f + pos.x, -0.5f + pos.y, -0.5f + pos.z }, { 1.0f, 1.0f, 1.0f }, { 1.0f, 0.0f } };
     mesh.vertices[mesh.vertex_count++] = { {  0.5f + pos.x,  0.5f + pos.y, -0.5f + pos.z }, { 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f } };
@@ -14,7 +14,7 @@ static inline void add_front_quad(hvox::BlockChunkPosition pos, hg::MeshData3D_3
     mesh.vertices[mesh.vertex_count++] = { { -0.5f + pos.x,  0.5f + pos.y, -0.5f + pos.z }, { 1.0f, 1.0f, 1.0f }, { 0.0f, 1.0f } };
     mesh.vertices[mesh.vertex_count++] = { { -0.5f + pos.x, -0.5f + pos.y, -0.5f + pos.z }, { 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f } };
 };
-static inline void add_back_quad(hvox::BlockChunkPosition pos, hg::MeshData3D_32 mesh) {
+static inline void add_back_quad(hvox::BlockChunkPosition pos, OUT hg::MeshData3D_32& mesh) {
     mesh.vertices[mesh.vertex_count++] = { { -0.5f + pos.x, -0.5f + pos.y,  0.5f + pos.z }, { 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f } };
     mesh.vertices[mesh.vertex_count++] = { {  0.5f + pos.x, -0.5f + pos.y,  0.5f + pos.z }, { 1.0f, 1.0f, 1.0f }, { 1.0f, 0.0f } };
     mesh.vertices[mesh.vertex_count++] = { {  0.5f + pos.x,  0.5f + pos.y,  0.5f + pos.z }, { 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f } };
@@ -22,7 +22,7 @@ static inline void add_back_quad(hvox::BlockChunkPosition pos, hg::MeshData3D_32
     mesh.vertices[mesh.vertex_count++] = { { -0.5f + pos.x,  0.5f + pos.y,  0.5f + pos.z }, { 1.0f, 1.0f, 1.0f }, { 0.0f, 1.0f } };
     mesh.vertices[mesh.vertex_count++] = { { -0.5f + pos.x, -0.5f + pos.y,  0.5f + pos.z }, { 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f } };
 };
-static inline void add_left_quad(hvox::BlockChunkPosition pos, hg::MeshData3D_32 mesh) {
+static inline void add_left_quad(hvox::BlockChunkPosition pos, OUT hg::MeshData3D_32& mesh) {
     mesh.vertices[mesh.vertex_count++] = { { -0.5f + pos.x,  0.5f + pos.y,  0.5f + pos.z }, { 1.0f, 1.0f, 1.0f }, { 1.0f, 0.0f } };
     mesh.vertices[mesh.vertex_count++] = { { -0.5f + pos.x,  0.5f + pos.y, -0.5f + pos.z }, { 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f } };
     mesh.vertices[mesh.vertex_count++] = { { -0.5f + pos.x, -0.5f + pos.y, -0.5f + pos.z }, { 1.0f, 1.0f, 1.0f }, { 0.0f, 1.0f } };
@@ -30,7 +30,7 @@ static inline void add_left_quad(hvox::BlockChunkPosition pos, hg::MeshData3D_32
     mesh.vertices[mesh.vertex_count++] = { { -0.5f + pos.x, -0.5f + pos.y,  0.5f + pos.z }, { 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f } };
     mesh.vertices[mesh.vertex_count++] = { { -0.5f + pos.x,  0.5f + pos.y,  0.5f + pos.z }, { 1.0f, 1.0f, 1.0f }, { 1.0f, 0.0f } };
 };
-static inline void add_right_quad(hvox::BlockChunkPosition pos, hg::MeshData3D_32 mesh) {
+static inline void add_right_quad(hvox::BlockChunkPosition pos, OUT hg::MeshData3D_32& mesh) {
     mesh.vertices[mesh.vertex_count++] = { {  0.5f + pos.x,  0.5f + pos.y,  0.5f + pos.z }, { 1.0f, 1.0f, 1.0f }, { 1.0f, 0.0f } };
     mesh.vertices[mesh.vertex_count++] = { {  0.5f + pos.x,  0.5f + pos.y, -0.5f + pos.z }, { 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f } };
     mesh.vertices[mesh.vertex_count++] = { {  0.5f + pos.x, -0.5f + pos.y, -0.5f + pos.z }, { 1.0f, 1.0f, 1.0f }, { 0.0f, 1.0f } };
@@ -38,7 +38,7 @@ static inline void add_right_quad(hvox::BlockChunkPosition pos, hg::MeshData3D_3
     mesh.vertices[mesh.vertex_count++] = { {  0.5f + pos.x, -0.5f + pos.y,  0.5f + pos.z }, { 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f } };
     mesh.vertices[mesh.vertex_count++] = { {  0.5f + pos.x,  0.5f + pos.y,  0.5f + pos.z }, { 1.0f, 1.0f, 1.0f }, { 1.0f, 0.0f } };
 };
-static inline void add_bottom_quad(hvox::BlockChunkPosition pos, hg::MeshData3D_32 mesh) {
+static inline void add_bottom_quad(hvox::BlockChunkPosition pos, OUT hg::MeshData3D_32& mesh) {
     mesh.vertices[mesh.vertex_count++] = { { -0.5f + pos.x, -0.5f + pos.y, -0.5f + pos.z }, { 1.0f, 1.0f, 1.0f }, { 0.0f, 1.0f } };
     mesh.vertices[mesh.vertex_count++] = { {  0.5f + pos.x, -0.5f + pos.y, -0.5f + pos.z }, { 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f } };
     mesh.vertices[mesh.vertex_count++] = { {  0.5f + pos.x, -0.5f + pos.y,  0.5f + pos.z }, { 1.0f, 1.0f, 1.0f }, { 1.0f, 0.0f } };
@@ -46,7 +46,7 @@ static inline void add_bottom_quad(hvox::BlockChunkPosition pos, hg::MeshData3D_
     mesh.vertices[mesh.vertex_count++] = { { -0.5f + pos.x, -0.5f + pos.y,  0.5f + pos.z }, { 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f } };
     mesh.vertices[mesh.vertex_count++] = { { -0.5f + pos.x, -0.5f + pos.y, -0.5f + pos.z }, { 1.0f, 1.0f, 1.0f }, { 0.0f, 1.0f } };
 };
-static inline void add_top_quad(hvox::BlockChunkPosition pos, hg::MeshData3D_32 mesh) {
+static inline void add_top_quad(hvox::BlockChunkPosition pos, OUT hg::MeshData3D_32& mesh) {
     mesh.vertices[mesh.vertex_count++] = { { -0.5f + pos.x,  0.5f + pos.y, -0.5f + pos.z }, { 1.0f, 1.0f, 1.0f }, { 0.0f, 1.0f } };
     mesh.vertices[mesh.vertex_count++] = { {  0.5f + pos.x,  0.5f + pos.y, -0.5f + pos.z }, { 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f } };
     mesh.vertices[mesh.vertex_count++] = { {  0.5f + pos.x,  0.5f + pos.y,  0.5f + pos.z }, { 1.0f, 1.0f, 1.0f }, { 1.0f, 0.0f } };
@@ -95,9 +95,9 @@ static inline hvox::BlockIndex index_at_back_face(hvox::BlockIndex index) {
 
 void hvox::ChunkMeshTask::execute(ChunkGenThreadState*, ChunkGenTaskQueue*) {
     // TODO(Matthew): Make this indexed at least, and apply some smarter meshing generally.
-    hg::MeshData3D_32 chunk_mesh;
+    m_chunk->mesh = { nullptr, 0 };
 
-    chunk_mesh.vertices = new hg::Vertex3D_32[CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE * 6];
+    m_chunk->mesh.vertices = new hg::Vertex3D_32[CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE * 6];
 
     // TODO(Matthew): Checking block is NULL_BLOCK is wrong check really, we will have transparent blocks
     //                e.g. air, to account for too.
@@ -112,12 +112,12 @@ void hvox::ChunkMeshTask::execute(ChunkGenThreadState*, ChunkGenTaskQueue*) {
                 // Get corresponding neighbour index in neighbour chunk and check.
                 BlockIndex j = index_at_right_face(i);
                 if (m_chunk->neighbours.left == nullptr || m_chunk->neighbours.left->blocks[j] == NULL_BLOCK) {
-                    add_left_quad(block_position, chunk_mesh);
+                    add_left_quad(block_position, m_chunk->mesh);
                 }
             } else {
                 // Get corresponding neighbour index in this chunk and check.
                 if (m_chunk->blocks[i - 1]  == NULL_BLOCK) {
-                    add_left_quad(block_position, chunk_mesh);
+                    add_left_quad(block_position, m_chunk->mesh);
                 }
             }
 
@@ -126,12 +126,12 @@ void hvox::ChunkMeshTask::execute(ChunkGenThreadState*, ChunkGenTaskQueue*) {
                 // Get corresponding neighbour index in neighbour chunk and check.
                 BlockIndex j = index_at_left_face(i);
                 if (m_chunk->neighbours.right == nullptr || m_chunk->neighbours.right->blocks[j] == NULL_BLOCK) {
-                    add_right_quad(block_position, chunk_mesh);
+                    add_right_quad(block_position, m_chunk->mesh);
                 }
             } else {
                 // Get corresponding neighbour index in this chunk and check.
                 if (m_chunk->blocks[i + 1] == NULL_BLOCK) {
-                    add_right_quad(block_position, chunk_mesh);
+                    add_right_quad(block_position, m_chunk->mesh);
                 }
             }
 
@@ -140,12 +140,12 @@ void hvox::ChunkMeshTask::execute(ChunkGenThreadState*, ChunkGenTaskQueue*) {
                 // Get corresponding neighbour index in neighbour chunk and check.
                 BlockIndex j = index_at_top_face(i);
                 if (m_chunk->neighbours.bottom == nullptr || m_chunk->neighbours.bottom->blocks[j] == NULL_BLOCK) {
-                    add_bottom_quad(block_position, chunk_mesh);
+                    add_bottom_quad(block_position, m_chunk->mesh);
                 }
             } else {
                 // Get corresponding neighbour index in this chunk and check.
                 if (m_chunk->blocks[i - CHUNK_SIZE] == NULL_BLOCK) {
-                    add_bottom_quad(block_position, chunk_mesh);
+                    add_bottom_quad(block_position, m_chunk->mesh);
                 }
             }
 
@@ -154,12 +154,12 @@ void hvox::ChunkMeshTask::execute(ChunkGenThreadState*, ChunkGenTaskQueue*) {
                 // Get corresponding neighbour index in neighbour chunk and check.
                 BlockIndex j = index_at_bottom_face(i);
                 if (m_chunk->neighbours.top == nullptr || m_chunk->neighbours.top->blocks[j] == NULL_BLOCK) {
-                    add_top_quad(block_position, chunk_mesh);
+                    add_top_quad(block_position, m_chunk->mesh);
                 }
             } else {
                 // Get corresponding neighbour index in this chunk and check.
                 if (m_chunk->blocks[i + CHUNK_SIZE] == NULL_BLOCK) {
-                    add_top_quad(block_position, chunk_mesh);
+                    add_top_quad(block_position, m_chunk->mesh);
                 }
             }
 
@@ -168,12 +168,12 @@ void hvox::ChunkMeshTask::execute(ChunkGenThreadState*, ChunkGenTaskQueue*) {
                 // Get corresponding neighbour index in neighbour chunk and check.
                 BlockIndex j = index_at_back_face(i);
                 if (m_chunk->neighbours.front == nullptr || m_chunk->neighbours.front->blocks[j] == NULL_BLOCK) {
-                    add_front_quad(block_position, chunk_mesh);
+                    add_front_quad(block_position, m_chunk->mesh);
                 }
             } else {
                 // Get corresponding neighbour index in this chunk and check.
                 if (m_chunk->blocks[i - (CHUNK_SIZE * CHUNK_SIZE)] == NULL_BLOCK) {
-                    add_front_quad(block_position, chunk_mesh);
+                    add_front_quad(block_position, m_chunk->mesh);
                 }
             }
 
@@ -182,22 +182,16 @@ void hvox::ChunkMeshTask::execute(ChunkGenThreadState*, ChunkGenTaskQueue*) {
                 // Get corresponding neighbour index in neighbour chunk and check.
                 BlockIndex j = index_at_front_face(i);
                 if (m_chunk->neighbours.back == nullptr || m_chunk->neighbours.back->blocks[j] == NULL_BLOCK) {
-                    add_back_quad(block_position, chunk_mesh);
+                    add_back_quad(block_position, m_chunk->mesh);
                 }
             } else {
                 // Get corresponding neighbour index in this chunk and check.
                 if (m_chunk->blocks[i + (CHUNK_SIZE * CHUNK_SIZE)] == NULL_BLOCK) {
-                    add_back_quad(block_position, chunk_mesh);
+                    add_back_quad(block_position, m_chunk->mesh);
                 }
             }
         }
     }
 
-    hg::MeshHandles mesh_handles;
-    hg::upload_mesh(chunk_mesh, mesh_handles, hg::MeshDataVolatility::STATIC);
-
-    m_chunk->mesh_handles = mesh_handles;
-    m_chunk->state        = ChunkState::MESHED;
-
-    delete[] chunk_mesh.vertices;
+    m_chunk->state = ChunkState::MESHED;
 }

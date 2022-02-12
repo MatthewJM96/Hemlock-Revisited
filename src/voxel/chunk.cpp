@@ -31,6 +31,13 @@ void hvox::Chunk::dispose() {
     neighbours = NULL_NEIGHBOURS;
 }
 
+void hvox::Chunk::update(TimeData) {
+    if (state == ChunkState::MESHED) {
+        if (hg::upload_mesh(mesh, mesh_handles, hg::MeshDataVolatility::STATIC))
+            state = ChunkState::MESH_UPLOADED;
+    }
+}
+
 bool hvox::set_block( Chunk* chunk,
           BlockChunkPosition block_position,
                        Block block )
