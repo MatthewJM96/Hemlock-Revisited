@@ -18,6 +18,8 @@ void hvox::Chunk::init() {
     std::fill_n(blocks, CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE, Block{ false });
 
     neighbours = NULL_NEIGHBOURS;
+
+    state.store(ChunkState::PRELOADED, std::memory_order_release);
 }
 
 void hvox::Chunk::init(Block* _blocks) {
@@ -25,6 +27,8 @@ void hvox::Chunk::init(Block* _blocks) {
     m_owns_blocks = false;
 
     neighbours = NULL_NEIGHBOURS;
+
+    state.store(ChunkState::PRELOADED, std::memory_order_release);
 }
 
 void hvox::Chunk::dispose() {
