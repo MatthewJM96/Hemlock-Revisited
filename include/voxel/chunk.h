@@ -87,7 +87,8 @@ namespace hemlock {
 
             ChunkGridPosition position;
 
-            ChunkState state;
+            std::atomic<ChunkState>        state;
+            std::atomic<ChunkLoadTaskKind> pending_task;
 
             hg::MeshData3D_32 mesh;
             hg::MeshHandles mesh_handles;
