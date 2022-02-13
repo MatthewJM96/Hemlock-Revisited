@@ -69,7 +69,7 @@ bool hg::upload_mesh(
             MeshHandles& handles,
       MeshDataVolatility volatility /*= MeshDataVolatility::DYNAMIC*/
 ) {
-    return __upload_basic_mesh<false, sizeof(decltype(mesh_data.vertices[0])), 3, 8>(mesh_data, volatility, &handles.vao, &handles.vao, nullptr);
+    return __upload_basic_mesh<false, sizeof(decltype(mesh_data.vertices[0])), 3, 8>(mesh_data, volatility, &handles.vao, &handles.vbo, nullptr);
 }
 
 bool hg::upload_mesh(
@@ -77,7 +77,7 @@ bool hg::upload_mesh(
             MeshHandles& handles,
       MeshDataVolatility volatility /*= MeshDataVolatility::DYNAMIC*/
 ) {
-    return __upload_basic_mesh<false, sizeof(decltype(mesh_data.vertices[0])), 3, 4>(mesh_data, volatility, &handles.vao, &handles.vao, nullptr);
+    return __upload_basic_mesh<false, sizeof(decltype(mesh_data.vertices[0])), 3, 4>(mesh_data, volatility, &handles.vao, &handles.vbo, nullptr);
 }
 
 bool hg::upload_mesh(
@@ -85,7 +85,7 @@ bool hg::upload_mesh(
             MeshHandles& handles,
       MeshDataVolatility volatility /*= MeshDataVolatility::DYNAMIC*/
 ) {
-    return __upload_basic_mesh<false, sizeof(decltype(mesh_data.vertices[0])), 3, 8>(mesh_data, volatility, &handles.vao, &handles.vao, nullptr);
+    return __upload_basic_mesh<false, sizeof(decltype(mesh_data.vertices[0])), 3, 8>(mesh_data, volatility, &handles.vao, &handles.vbo, nullptr);
 }
 
 bool hg::upload_mesh(
@@ -93,7 +93,7 @@ bool hg::upload_mesh(
             IndexedMeshHandles& handles,
              MeshDataVolatility volatility /*= MeshDataVolatility::DYNAMIC*/
 ) {
-    return __upload_basic_mesh<true, sizeof(decltype(mesh_data.vertices[0])), 3, 4>(mesh_data, volatility, &handles.vao, &handles.vao, &handles.ibo);
+    return __upload_basic_mesh<true, sizeof(decltype(mesh_data.vertices[0])), 3, 4>(mesh_data, volatility, &handles.vao, &handles.vbo, &handles.ibo);
 }
 
 bool hg::upload_mesh(
@@ -101,7 +101,7 @@ bool hg::upload_mesh(
             IndexedMeshHandles& handles,
              MeshDataVolatility volatility /*= MeshDataVolatility::DYNAMIC*/
 ) {
-    return __upload_basic_mesh<true, sizeof(decltype(mesh_data.vertices[0])), 3, 8>(mesh_data, volatility, &handles.vao, &handles.vao, &handles.ibo);
+    return __upload_basic_mesh<true, sizeof(decltype(mesh_data.vertices[0])), 3, 8>(mesh_data, volatility, &handles.vao, &handles.vbo, &handles.ibo);
 }
 
 bool hg::upload_mesh(
@@ -109,7 +109,7 @@ bool hg::upload_mesh(
             IndexedMeshHandles& handles,
              MeshDataVolatility volatility /*= MeshDataVolatility::DYNAMIC*/
 ) {
-    return __upload_basic_mesh<true, sizeof(decltype(mesh_data.vertices[0])), 3, 4>(mesh_data, volatility, &handles.vao, &handles.vao, &handles.ibo);
+    return __upload_basic_mesh<true, sizeof(decltype(mesh_data.vertices[0])), 3, 4>(mesh_data, volatility, &handles.vao, &handles.vbo, &handles.ibo);
 }
 
 bool hg::upload_mesh(
@@ -117,7 +117,7 @@ bool hg::upload_mesh(
             IndexedMeshHandles& handles,
              MeshDataVolatility volatility /*= MeshDataVolatility::DYNAMIC*/
 ) {
-    return __upload_basic_mesh<true, sizeof(decltype(mesh_data.vertices[0])), 3, 8>(mesh_data, volatility, &handles.vao, &handles.vao, &handles.ibo);
+    return __upload_basic_mesh<true, sizeof(decltype(mesh_data.vertices[0])), 3, 8>(mesh_data, volatility, &handles.vao, &handles.vbo, &handles.ibo);
 }
 
 void hg::dispose_mesh(const MeshHandles& handles) {
