@@ -3,6 +3,7 @@
 #include "graphics/mesh.h"
 #include "voxel/block.hpp"
 #include "voxel/chunk.h"
+#include "voxel/grid.h"
 
 #include "voxel/mesher.h"
 
@@ -93,7 +94,20 @@ static inline hvox::BlockIndex index_at_back_face(hvox::BlockIndex index) {
     return index + (CHUNK_SIZE * CHUNK_SIZE * (CHUNK_SIZE - 1));
 }
 
-void hvox::ChunkMeshTask::execute(ChunkGenThreadState*, ChunkGenTaskQueue*) {
+void hvox::ChunkMeshTask::execute(ChunkLoadThreadState* state, ChunkLoadTaskQueue* task_queue) {
+    // Only execute if all preloaded neighbouring chunks have at least been generated.
+    auto [ _, neighbours_in_required_state ] =
+            m_chunk_grid->query_all_neighbour_states(m_chunk, ChunkState::GENERATED);
+
+    if (!neighbours_in_required_state) {
+        // Put this mesh task back onto the load queue.
+        ChunkMeshTask* mesh_task = new ChunkMeshTask();
+        mesh_task->init(m_chunk, m_chunk_grid);
+        task_queue->enqueue(state->producer_token, { mesh_task, true });
+        m_chunk->pending_task.store(ChunkLoadTaskKind::MESH, std::memory_order_release);
+        return;
+    }
+
     // TODO(Matthew): Make this indexed at least, and apply some smarter meshing generally.
     m_chunk->mesh = { nullptr, 0 };
 
