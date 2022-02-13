@@ -8,6 +8,7 @@ hvox::Chunk::Chunk() :
     neighbours(NULL_NEIGHBOURS),
     blocks(nullptr),
     state(ChunkState::NONE),
+    pending_task(ChunkLoadTaskKind::NONE),
     mesh_handles({ 0, 0 }),
     m_owns_blocks(true)
 { /* Empty. */ }
