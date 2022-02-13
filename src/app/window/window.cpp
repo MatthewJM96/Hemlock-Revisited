@@ -12,7 +12,7 @@ happ::Window::Window() :
 #elif defined(HEMLOCK_USING_VULKAN) // HEMLOCK_USING_OPENGL
     m_evalutor(DeviceEvaluator{
         [&](VkPhyiscalDevice device) {
-            
+            // TODO(Matthew): Implement.
         };
     });
     m_instance(nullptr),
