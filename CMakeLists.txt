@@ -11,7 +11,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 option(HEMLOCK_USING_SDL "Whether Hemlock uses the SDL library." ON)
 option(HEMLOCK_USING_SDL_TTF "Whether Hemlock uses the SDL TTF library." ON)
-option(HEMLOCK_USING_OPENGL "Whether Hemlock uses OpenGL." ON)
+option(HEMLOCK_USING_OPENGL "Whether Hemlock uses OpenGL." OFF)
+option(HEMLOCK_USING_VULKAN "Whether Hemlock uses Vulkan." ON)
 
 if (UNIX OR MINGW)
     set(CMAKE_CXX_FLAGS "-pthread -Wall -Wextra -Wold-style-cast -Wshadow -Wformat=2 -Werror")
@@ -47,6 +48,10 @@ endif()
 
 if (HEMLOCK_USING_OPENGL)
     add_compile_definitions(HEMLOCK_USING_OPENGL=1)
+endif()
+
+if (HEMLOCK_USING_VULKAN)
+    add_compile_definitions(HEMLOCK_USING_VULKAN=1)
 endif()
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")

@@ -50,6 +50,9 @@
 // SDL2
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
+#if defined(HEMLOCK_USING_VULKAN)
+#include <SDL2/SDL_vulkan.h>
+#endif
 
 // OpenGL
 #include <GL/glew.h>
