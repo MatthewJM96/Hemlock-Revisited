@@ -44,6 +44,7 @@ happ::WindowError happ::Window::init(WindowSettings settings /*= {}*/) {
     }
 
 #ifdef HEMLOCK_USING_OPENGL
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
     m_context = SDL_GL_CreateContext(m_window);
     if (m_context == nullptr) {
         debug_printf("Couldn't create OpenGL context for SDL Window.\n");
