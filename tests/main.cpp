@@ -221,7 +221,7 @@ public:
 
         m_chunk_grid.init(5);
 
-#define NUM 8
+#define NUM 6
         m_chunk_grid.suspend_chunk_tasks();
         for (auto x = -NUM; x < NUM; ++x) {
             for (auto z = -NUM; z < NUM; ++z) {
