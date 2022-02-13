@@ -158,9 +158,117 @@ hio::img::png::InternalPixelFormat hio::img::png::convert_pixel_format(PixelForm
     }
 }
 
-bool hio::img::png::load(std::string filepath [[maybe_unused]], void*& data [[maybe_unused]], ui32v2& dimensions [[maybe_unused]], PixelFormat& format [[maybe_unused]]) {
-    // TODO(Matthew): Implement.
-    return false;
+hio::img::PixelFormat hio::img::png::convert_internal_pixel_format(InternalPixelFormat format) {
+    switch (format.first) {
+        case PNG_COLOR_TYPE_RGB:
+            switch (format.second) {
+                case 8:
+                    return PixelFormat::RGB_UI8;
+                case 16:
+                    return PixelFormat::RGB_UI16;
+            }
+            break;
+        case PNG_COLOR_TYPE_RGB_ALPHA:
+            switch (format.second) {
+                case 8:
+                    return PixelFormat::RGBA_UI8;
+                case 16:
+                    return PixelFormat::RGBA_UI16;
+            }
+            break;
+    }
+    return PixelFormat::SENTINEL;
+}
+
+bool hio::img::png::load(std::string filepath, void*& data, ui32v2& dimensions, PixelFormat& format) {
+    // Open the image file we will save to.
+    FILE* file = fopen(filepath.data(), "rb");
+    // Check we successfully opened the file.
+    if (!file) return false;
+
+    // Read header and compare for PNG signature.
+    ui8 header[8];
+    fread(header, 1, 8, file);
+    if (png_sig_cmp(header, 0, 8)) return false;
+
+    // Set up handler that will be used to read the data.
+    png_structp png = png_create_read_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
+    // Check the handler was set up correctly, if not close file and return.
+    if (!png) {
+        fclose(file);
+        return false;
+    }
+
+    // This will contain the header information about the image (things like width, height, compression type).
+    png_infop info = png_create_info_struct(png);
+    // Check we got a valid info struct, if not close file, clean up handler and return.
+    if (!info) {
+        fclose(file);
+        // Note that png_infopp_NULL is because the info struct is null!
+        png_destroy_write_struct(&png, nullptr);
+        return false;
+    }
+
+    // Set up an error handler for PNG reading. If that fails, close file, clean up handler and return.
+    if (setjmp(png_jmpbuf(png))) {
+        fclose(file);
+        png_destroy_write_struct(&png, &info);
+        return false;
+    }
+
+    // Pass the file to the PNG handler.
+    png_init_io(png, file);
+    // Set number of signature bytes.
+    png_set_sig_bytes(png, 8);
+
+    // Read properties of the image to be loaded.
+    png_read_info(png, info);
+
+    // Write out dimensions of the image.
+    dimensions = ui32v2{
+        png_get_image_width(png, info),
+        png_get_image_height(png, info)
+    };
+
+    // Write out pixel format of the image.
+    format = convert_internal_pixel_format({
+        png_get_color_type(png, info),
+        png_get_bit_depth(png, info)
+    });
+
+    // Unsure how useful these two lines are.
+    // Presumably sets interlacing state, but given
+    // we're reading how would we know more than
+    // libpng? We're not passing anything in at any
+    // rate...
+    png_set_interlace_handling(png);
+    png_read_update_info(png, info);
+
+    // Get number of bytes per row of the image.
+    ui32 row_size = png_get_rowbytes(png, info);
+
+    // Allocate the buffer we'll be reading into.
+    data = reinterpret_cast<void*>(new ui8[dimensions.y * row_size]);
+
+    png_bytep* rows = new png_bytep[dimensions.y];
+    for (ui32 y = 0; y < dimensions.y; ++y) {
+        ui32 row_idx = y * row_size;
+        rows[y] = &reinterpret_cast<png_bytep>(data)[row_idx];
+    }
+
+    // Read the PNG.
+    png_read_image(png, rows);
+
+    // Clean up the handler.
+    png_destroy_read_struct(&png, &info, nullptr);
+
+    // Close file.
+    fclose(file);
+
+    // Clean up rows array.
+    delete[] rows;
+
+    return true;
 }
 
 bool hio::img::png::save(std::string filepath, const void* data, ui32v2 dimensions, PixelFormat format) {
@@ -198,7 +306,7 @@ bool hio::img::png::save(std::string filepath, const void* data, ui32v2 dimensio
     png_init_io(png, file);
 
     // Get the PNG properties of the chosen pixel format.
-    auto [colourType, bitDepth] = convert_pixel_format(format);
+    auto [colour_type, bit_depth] = convert_pixel_format(format);
 
     // Set the PNG properties we want.
     png_set_IHDR(
@@ -206,8 +314,8 @@ bool hio::img::png::save(std::string filepath, const void* data, ui32v2 dimensio
         info,
         dimensions.x,
         dimensions.y,
-        bitDepth,
-        colourType,
+        bit_depth,
+        colour_type,
         // Note these next three are set to the most default possible, we don't really care about them.
         PNG_INTERLACE_NONE,
         PNG_COMPRESSION_TYPE_DEFAULT,
@@ -217,11 +325,11 @@ bool hio::img::png::save(std::string filepath, const void* data, ui32v2 dimensio
     png_write_info(png, info);
 
     // Determine the depth of the image in bytes.
-    ui8 depth = bitDepth / 8;
+    ui8 depth = bit_depth / 8;
 
     // Determine the number of colour channels we have (e.g. RGB has 3, one for red, for green and for blue).
     ui8 channels = 0;
-    switch (colourType) {
+    switch (colour_type) {
         case PNG_COLOR_TYPE_GRAY:
             channels = 1;
             break;
@@ -265,6 +373,9 @@ bool hio::img::png::save(std::string filepath, const void* data, ui32v2 dimensio
 
     // Close file.
     fclose(file);
+
+    // Clean up rows array.
+    delete[] rows;
 
     return true;
 }
