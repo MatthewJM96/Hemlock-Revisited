@@ -61,10 +61,13 @@ namespace hemlock {
             BlockChunkPosition  end_position;
         };
 
-        struct Neighbours {
-            Chunk *left, *right, *top, *bottom, *front, *back;
+        union Neighbours {
+            struct {
+                Chunk *left, *right, *top, *bottom, *front, *back;
+            };
+            Chunk* neighbours[8];
         };
-        const Neighbours NULL_NEIGHBOURS = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
+        const Neighbours NULL_NEIGHBOURS = Neighbours{ nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
 
         /**
          * @brief 
