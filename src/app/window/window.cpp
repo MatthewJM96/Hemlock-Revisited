@@ -74,6 +74,8 @@ happ::WindowError happ::Window::init(WindowSettings settings /*= {}*/) {
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); 
 
+        glEnable(GL_DEPTH_TEST);
+
         if (m_settings.swap_interval == SwapInterval::V_SYNC) {
             SDL_GL_SetSwapInterval(1);
         } else {
