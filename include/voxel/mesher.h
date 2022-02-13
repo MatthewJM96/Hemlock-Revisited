@@ -5,9 +5,9 @@
 
 namespace hemlock {
     namespace voxel {
-        class ChunkMeshTask : public ChunkGenTask {
+        class ChunkMeshTask : public ChunkLoadTask {
         public:
-            virtual void execute(ChunkGenThreadState* state, ChunkGenTaskQueue* task_queue) override;
+            virtual void execute(ChunkLoadThreadState* state, ChunkLoadTaskQueue* task_queue) override;
         };
     }
 }
