@@ -8,6 +8,7 @@
 #include "camera/basic_first_person_camera.h"
 #include "graphics/font/font.h"
 #include "graphics/glsl_program.h"
+#include "graphics/texture.hpp"
 #include "graphics/sprite/batcher.h"
 #include "io/iomanager.h"
 #include "ui/input/dispatcher.h"
@@ -108,25 +109,45 @@ public:
 
         m_chunk_grid.update(time);
 
+        f32 speed_mult = 1.0f;
+        if (m_input_manager->key_modifier_state().ctrl) {
+            speed_mult = 10.0f;
+        }
+        if (m_input_manager->key_modifier_state().alt) {
+            speed_mult = 50.0f;
+        }
+
         f32v3 delta_pos{0.0f};
         if (m_input_manager->is_pressed(hui::PhysicalKey::H_W)) {
-            delta_pos += glm::normalize(m_camera.direction()) * static_cast<f32>(time.frame) * 0.2f;
+            delta_pos += glm::normalize(m_camera.direction()) * static_cast<f32>(time.frame) * 0.01f * speed_mult;
         }
         if (m_input_manager->is_pressed(hui::PhysicalKey::H_A)) {
-            delta_pos -= glm::normalize(m_camera.right()) * static_cast<f32>(time.frame) * 0.2f;
+            delta_pos -= glm::normalize(m_camera.right()) * static_cast<f32>(time.frame) * 0.01f * speed_mult;
         }
         if (m_input_manager->is_pressed(hui::PhysicalKey::H_S)) {
-            delta_pos -= glm::normalize(m_camera.direction()) * static_cast<f32>(time.frame) * 0.2f;
+            delta_pos -= glm::normalize(m_camera.direction()) * static_cast<f32>(time.frame) * 0.01f * speed_mult;
         }
         if (m_input_manager->is_pressed(hui::PhysicalKey::H_D)) {
-            delta_pos += glm::normalize(m_camera.right()) * static_cast<f32>(time.frame) * 0.2f;
+            delta_pos += glm::normalize(m_camera.right()) * static_cast<f32>(time.frame) * 0.01f * speed_mult;
         }
         if (m_input_manager->is_pressed(hui::PhysicalKey::H_Q)) {
-            delta_pos += glm::normalize(m_camera.up()) * static_cast<f32>(time.frame) * 0.2f;
+            delta_pos += glm::normalize(m_camera.up()) * static_cast<f32>(time.frame) * 0.01f * speed_mult;
         }
         if (m_input_manager->is_pressed(hui::PhysicalKey::H_E)) {
-            delta_pos -= glm::normalize(m_camera.up()) * static_cast<f32>(time.frame) * 0.2f;
+            delta_pos -= glm::normalize(m_camera.up()) * static_cast<f32>(time.frame) * 0.01f * speed_mult;
         }
+
+#ifdef DEBUG
+        static f64 last_time = 0.0;
+        if (m_input_manager->is_pressed(hui::PhysicalKey::H_T)) {
+            if (last_time + 1000.0 < time.total) {
+                last_time = time.total;
+                f32v3 pos = m_camera.position();
+                f32v3 dir = m_camera.direction();
+                debug_printf("Camera Coords: (%f, %f, %f)\nCamera Direction: (%f, %f, %f)\n", pos.x, pos.y, pos.z, dir.x, dir.y, dir.z);
+            }
+        }
+#endif
 
         // const f32 turn_clamp_on_at = 60.0f / 360.0f * 2.0f * M_PI;
         // f32 up_angle = glm::acos(glm::dot(m_camera.up(), hcam::ABSOLUTE_UP));
@@ -176,7 +197,8 @@ public:
         m_input_manager = static_cast<happ::SingleWindowApp*>(m_process)->input_manager();
 
         m_camera.attach_to_window(m_process->window());
-        m_camera.set_position(f32v3{400.0f, 200.0f, -130.0f});
+        m_camera.set_position(f32v3{270.0f, 230.0f, -470.0f});
+        m_camera.rotate_from_mouse_with_absolute_up(-110.0f, 110.0f, 0.005f);
         m_camera.set_fov(90.0f);
         // m_camera.set_clamp({false, 30.0f / 360.0f * 2.0f * M_PI});
         m_camera.update();
@@ -201,28 +223,38 @@ public:
 
         m_shader.link();
 
-        // Generate and bind texture.
-        glGenTextures(1, &m_default_texture);
-        glBindTexture(GL_TEXTURE_2D, m_default_texture);
+        m_default_texture = hg::load_texture("test_tex.png");
 
-        // Set texture to be just a 1x1 image of a pure white pixel.
-        ui32 pix = 0xffffffff;
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, &pix);
+        // // Generate and bind texture.
+        // glGenTextures(1, &m_default_texture);
+        // glBindTexture(GL_TEXTURE_2D, m_default_texture);
 
-        // Set texture parameters to repeat our pixel as needed and to not do any averaging of pixels.
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S,     GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T,     GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R,     GL_REPEAT);
+        // // Set texture to be just a 1x1 image of a pure white pixel.
+        // ui32 pix = 0xffffffff;
+        // glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, &pix);
 
-        // Unbind our complete texture.
-        glBindTexture(GL_TEXTURE_2D, 0);
+        // // Set texture parameters to repeat our pixel as needed and to not do any averaging of pixels.
+        // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S,     GL_REPEAT);
+        // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T,     GL_REPEAT);
+        // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R,     GL_REPEAT);
+
+        // // Unbind our complete texture.
+        // glBindTexture(GL_TEXTURE_2D, 0);
 
         m_chunk_grid.init(5);
 
-#define NUM 6
+#define NUM 5
         m_chunk_grid.suspend_chunk_tasks();
+        for (auto x = -NUM; x < NUM; ++x) {
+            for (auto z = -NUM; z < NUM; ++z) {
+                for (auto y = -2 * NUM; y < 0; ++ y) {
+                    m_chunk_grid.preload_chunk_at({ x, y, z });
+                }
+            }
+        }
+        m_chunk_grid.resume_chunk_tasks();
         for (auto x = -NUM; x < NUM; ++x) {
             for (auto z = -NUM; z < NUM; ++z) {
                 for (auto y = -2 * NUM; y < 0; ++ y) {
@@ -230,7 +262,6 @@ public:
                 }
             }
         }
-        m_chunk_grid.resume_chunk_tasks();
 #undef NUM
 
         handle_mouse_move = hemlock::Subscriber<hui::MouseMoveEvent>(
