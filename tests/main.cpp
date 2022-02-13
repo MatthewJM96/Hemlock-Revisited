@@ -137,7 +137,7 @@ public:
             delta_pos -= glm::normalize(m_camera.up()) * static_cast<f32>(time.frame) * 0.01f * speed_mult;
         }
 
-#ifdef DEBUG
+#if defined(DEBUG)
         static f64 last_time = 0.0;
         if (m_input_manager->is_pressed(hui::PhysicalKey::H_T)) {
             if (last_time + 1000.0 < time.total) {

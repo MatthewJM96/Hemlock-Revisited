@@ -37,12 +37,12 @@ namespace hemlock {
         private:
             void determine_modes();
 
-#ifdef HEMLOCK_USING_SDL
+#if defined(HEMLOCK_USING_SDL)
             SDL_Window*        m_window;
-#ifdef HEMLOCK_USING_OPENGL
+#if defined(HEMLOCK_USING_OPENGL)
             SDL_GLContext      m_context;
-#endif // HEMLOCK_USING_OPENGL
-#endif // HEMLOCK_USING_SDL
+#endif // defined(HEMLOCK_USING_OPENGL)
+#endif // defined(HEMLOCK_USING_SDL)
         };
     }
 }

@@ -16,7 +16,7 @@ void happ::SingleWindowApp::init() {
     m_fps_limiter = new FpsLimiter();
     m_fps_limiter->init(60.0); // TODO(Matthew): Get max FPS from user preferences.
 
-#ifdef HEMLOCK_USING_DEVIL
+#if defined(HEMLOCK_USING_DEVIL)
     ilutRenderer(ILUT_OPENGL);
     ilutEnable(ILUT_OPENGL_CONV); // TODO(Matthew): Make this optional, some projects may consider on-board texture conversions fine.
 #endif
@@ -31,9 +31,9 @@ void happ::SingleWindowApp::dispose() {
 
     ProcessBase::dispose();
 
-#ifdef HEMLOCK_USING_SDL_TTF
+#if defined(HEMLOCK_USING_SDL_TTF)
     TTF_Quit();
-#endif // HEMLOCK_USING_SDL_TTF
+#endif // defined(HEMLOCK_USING_SDL_TTF)
 }
 
 void happ::SingleWindowApp::run() {
@@ -71,18 +71,18 @@ void happ::SingleWindowApp::run() {
 }
 
 void happ::SingleWindowApp::prepare_window() {
-#ifdef HEMLOCK_USING_SDL
+#if defined(HEMLOCK_USING_SDL)
     SDL_Init(SDL_INIT_EVERYTHING);
     SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-#endif // HEMLOCK_USING_SDL
+#endif // defined(HEMLOCK_USING_SDL)
 
-#ifdef HEMLOCK_USING_SDL_TTF
+#if defined(HEMLOCK_USING_SDL_TTF)
     if (TTF_Init() < 0) {
         debug_printf("TTF font library could not be initialised...\n");
         exit(1);
     }
-#endif // HEMLOCK_USING_SDL_TTF
+#endif // defined(HEMLOCK_USING_SDL_TTF)
 
     m_window = new happ::Window();
     if (m_window->init() != happ::WindowError::NONE) {
@@ -90,14 +90,14 @@ void happ::SingleWindowApp::prepare_window() {
         exit(2);
     }
 
-#ifdef HEMLOCK_USING_OPENGL
+#if defined(HEMLOCK_USING_OPENGL)
     debug_printf("*** OpenGL Version:  %s ***\n", glGetString(GL_VERSION));
     debug_printf("*** OpenGL Renderer: %s ***\n", glGetString(GL_RENDERER));
 
     GLint nr_attributes;
     glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &nr_attributes);
     debug_printf("Maximum # of vertex attributes supported: %d.\n", nr_attributes);
-#endif // HEMLOCK_USING_OPENGL
+#endif // defined(HEMLOCK_USING_OPENGL)
 }
 
 void happ::SingleWindowApp::calculate_times() {

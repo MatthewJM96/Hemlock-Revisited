@@ -2,7 +2,7 @@
 
 #include "graphics/mesh.h"
 
-#ifdef HEMLOCK_USING_OPENGL
+#if defined(HEMLOCK_USING_OPENGL)
 template <bool indexed, ui32 vertex_size, ui32 colour_size, ui32 precision>
 static bool __upload_basic_mesh(auto mesh_data, hg::MeshDataVolatility volatility, IN OUT GLuint* vao, IN OUT GLuint* vbo, IN OUT GLuint* ibo) {
     assert(mesh_data.vertices != nullptr);
@@ -53,7 +53,7 @@ static void __dispose_mesh(GLuint vao, GLuint vbo, GLuint ibo) {
     if constexpr (indexed) glDeleteBuffers(1, &ibo);
     glDeleteBuffers(1, &vao);
 }
-#endif // HEMLOCK_USING_OPENGL
+#endif // defined(HEMLOCK_USING_OPENGL)
 
 
 bool hg::upload_mesh(

@@ -21,8 +21,8 @@ void happ::AppBase::quit() {
 
     dispose();
 
-#ifdef HEMLOCK_USING_SDL
+#if defined(HEMLOCK_USING_SDL)
     SDL_Quit();
-#endif // HEMLOCK_USING_SDL
+#endif // defined(HEMLOCK_USING_SDL)
     exit(0);
 }

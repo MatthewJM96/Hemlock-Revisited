@@ -18,12 +18,12 @@ happ::WindowError happ::Window::init(WindowSettings settings /*= {}*/) {
 
     determine_modes();
 
-#ifdef HEMLOCK_USING_SDL
-#ifdef HEMLOCK_USING_OPENGL
+#if defined(HEMLOCK_USING_SDL)
+#if defined(HEMLOCK_USING_OPENGL)
     ui32 flags = SDL_WINDOW_OPENGL;
 #else
     ui32 flags = 0;
-#endif // HEMLOCK_USING_OPENGL
+#endif // defined(HEMLOCK_USING_OPENGL)
     if (m_settings.is_fullscreen) {
         flags |= SDL_WINDOW_FULLSCREEN;
     }
@@ -43,7 +43,7 @@ happ::WindowError happ::Window::init(WindowSettings settings /*= {}*/) {
         return WindowError::SDL_WINDOW;
     }
 
-#ifdef HEMLOCK_USING_OPENGL
+#if defined(HEMLOCK_USING_OPENGL)
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
     m_context = SDL_GL_CreateContext(m_window);
     if (m_context == nullptr) {
@@ -82,10 +82,10 @@ happ::WindowError happ::Window::init(WindowSettings settings /*= {}*/) {
             SDL_GL_SetSwapInterval(0);
         }
     }
-#endif // HEMLOCK_USING_OPENGL
+#endif // defined(HEMLOCK_USING_OPENGL)
 
     m_window_id = SDL_GetWindowID(m_window);
-#endif // HEMLOCK_USING_SDL
+#endif // defined(HEMLOCK_USING_SDL)
 
     hui::InputDispatcher::instance()->on_window.move   += &handle_external_window_move;
     hui::InputDispatcher::instance()->on_window.resize += &handle_external_window_resize;
@@ -100,15 +100,15 @@ void happ::Window::dispose() {
     hui::InputDispatcher::instance()->on_window.move   -= &handle_external_window_move;
     hui::InputDispatcher::instance()->on_window.resize -= &handle_external_window_resize;
 
-#ifdef HEMLOCK_USING_SDL
-#ifdef HEMLOCK_USING_OPENGL
+#if defined(HEMLOCK_USING_SDL)
+#if defined(HEMLOCK_USING_OPENGL)
     SDL_GL_DeleteContext(m_context);
     m_context = nullptr;
-#endif // HEMLOCK_USING_OPENGL
+#endif // defined(HEMLOCK_USING_OPENGL)
 
     SDL_DestroyWindow(m_window);
     m_window = nullptr;
-#endif // HEMLOCK_USING_SDL
+#endif // defined(HEMLOCK_USING_SDL)
 
     WindowDimensionMap().swap(m_allowed_resolutions);
     FullscreenModeMap().swap(m_fullscreen_modes);
@@ -117,24 +117,24 @@ void happ::Window::dispose() {
 void happ::Window::set_name(const std::string& name) {
     m_settings.name = name;
 
-#ifdef HEMLOCK_USING_SDL
+#if defined(HEMLOCK_USING_SDL)
     SDL_SetWindowTitle(m_window, name.data());
-#endif // HEMLOCK_USING_SDL
+#endif // defined(HEMLOCK_USING_SDL)
 }
 
 void happ::Window::set_dimensions(WindowDimensions dimensions) {
     if (m_settings.dimensions == dimensions) return;
 
-#ifdef HEMLOCK_USING_SDL
+#if defined(HEMLOCK_USING_SDL)
     SDL_SetWindowSize(m_window, dimensions.width, dimensions.height);
 
-#ifdef HEMLOCK_USING_OPENGL
+#if defined(HEMLOCK_USING_OPENGL)
     // TODO(Matthew): do we need to call this for fullscreen too?
     // TODO(Matthew): do we need to call this each time we change which
     //                window we are handling?
     glViewport(0, 0, dimensions.width, dimensions.height);
-#endif // HEMLOCK_USING_OPENGL
-#endif // HEMLOCK_USING_SDL
+#endif // defined(HEMLOCK_USING_OPENGL)
+#endif // defined(HEMLOCK_USING_SDL)
 
     WindowDimensions temp = m_settings.dimensions;
     m_settings.dimensions = dimensions;
@@ -160,19 +160,19 @@ void happ::Window::set_display(ui32 display_idx) {
     // We don't want to invoke any events for leaving fullscreen
     // as we are just temporarily going windowed to change display.
     if (m_settings.is_fullscreen) {
-#ifdef HEMLOCK_USING_SDL
+#if defined(HEMLOCK_USING_SDL)
         SDL_SetWindowFullscreen(m_window, 0);
-#endif // HEMLOCK_USING_SDL
+#endif // defined(HEMLOCK_USING_SDL)
     }
 
     // Make sure the new display allows the current dimensions,
     // setting new ones if not.
     validate_dimensions();
 
-#ifdef HEMLOCK_USING_SDL
+#if defined(HEMLOCK_USING_SDL)
     // Centre window on new display.
     SDL_SetWindowPosition(m_window, SDL_WINDOWPOS_CENTERED_DISPLAY(display_idx), SDL_WINDOWPOS_CENTERED_DISPLAY(display_idx));
-#endif // HEMLOCK_USING_SDL
+#endif // defined(HEMLOCK_USING_SDL)
 
     // Make sure the new display allows the current fullscreen
     // mode, setting a new one if not.
@@ -180,13 +180,13 @@ void happ::Window::set_display(ui32 display_idx) {
 
     // And change back to how we were!
     if (m_settings.is_fullscreen) {
-#ifdef HEMLOCK_USING_SDL
+#if defined(HEMLOCK_USING_SDL)
         SDL_SetWindowFullscreen(
             m_window,
             m_settings.fake_fullscreen ?
                 SDL_WINDOW_FULLSCREEN_DESKTOP : SDL_WINDOW_FULLSCREEN
         );
-#endif // HEMLOCK_USING_SDL
+#endif // defined(HEMLOCK_USING_SDL)
     }
 
     on_display_change();
@@ -198,7 +198,7 @@ void happ::Window::set_fullscreen_mode(FullscreenMode fullscreen_mode) {
     FullscreenMode tmp = m_settings.fullscreen_mode;
     m_settings.fullscreen_mode = fullscreen_mode;
 
-#ifdef HEMLOCK_USING_SDL
+#if defined(HEMLOCK_USING_SDL)
     SDL_DisplayMode mode = {
         fullscreen_mode.pixel_format,
         static_cast<int>(fullscreen_mode.resolution.width),
@@ -211,7 +211,7 @@ void happ::Window::set_fullscreen_mode(FullscreenMode fullscreen_mode) {
 
         debug_printf(SDL_GetError());
     }
-#endif // HEMLOCK_USING_SDL
+#endif // defined(HEMLOCK_USING_SDL)
 
     if (m_settings.is_fullscreen) {
         FullscreenModeChangeEvent fmce{ tmp, fullscreen_mode };
@@ -230,13 +230,13 @@ void happ::Window::set_fake_fullscreen(bool fake_fullscreen) {
     m_settings.fake_fullscreen = fake_fullscreen;
 
     if (m_settings.is_fullscreen) {
-#ifdef HEMLOCK_USING_SDL
+#if defined(HEMLOCK_USING_SDL)
         SDL_SetWindowFullscreen(
             m_window,
             m_settings.fake_fullscreen ?
                 SDL_WINDOW_FULLSCREEN_DESKTOP : SDL_WINDOW_FULLSCREEN
         );
-#endif // HEMLOCK_USING_SDL
+#endif // defined(HEMLOCK_USING_SDL)
     }
 }
 
@@ -246,18 +246,18 @@ void happ::Window::set_is_fullscreen(bool fullscreen) {
     m_settings.is_fullscreen = fullscreen;
 
     if (fullscreen) {
-#ifdef HEMLOCK_USING_SDL
+#if defined(HEMLOCK_USING_SDL)
         SDL_SetWindowFullscreen(
             m_window,
             m_settings.fake_fullscreen ?
                 SDL_WINDOW_FULLSCREEN_DESKTOP : SDL_WINDOW_FULLSCREEN
         );
-#endif // HEMLOCK_USING_SDL
+#endif // defined(HEMLOCK_USING_SDL)
         on_window_fullscreen_enter();
     } else {
-#ifdef HEMLOCK_USING_SDL
+#if defined(HEMLOCK_USING_SDL)
         SDL_SetWindowFullscreen(m_window, 0);
-#endif // HEMLOCK_USING_SDL
+#endif // defined(HEMLOCK_USING_SDL)
         on_window_fullscreen_exit();
     }
 }
@@ -267,9 +267,9 @@ void happ::Window::set_is_resizable(bool resizable) {
 
     m_settings.is_resizable = resizable;
 
-#ifdef HEMLOCK_USING_SDL
+#if defined(HEMLOCK_USING_SDL)
     SDL_SetWindowResizable(m_window, static_cast<SDL_bool>(resizable));
-#endif // HEMLOCK_USING_SDL
+#endif // defined(HEMLOCK_USING_SDL)
 }
 
 void happ::Window::set_is_borderless(bool borderless) {
@@ -281,23 +281,23 @@ void happ::Window::set_is_borderless(bool borderless) {
 
     m_settings.is_borderless = borderless;
 
-#ifdef HEMLOCK_USING_SDL
+#if defined(HEMLOCK_USING_SDL)
     SDL_SetWindowBordered(m_window, static_cast<SDL_bool>(!borderless));
-#endif // HEMLOCK_USING_SDL
+#endif // defined(HEMLOCK_USING_SDL)
 }
 
 void happ::Window::set_is_maximised(bool maximised) {
     if (m_settings.is_maximised == maximised) return;
     m_settings.is_maximised = maximised;
     if (maximised) {
-#ifdef HEMLOCK_USING_SDL
+#if defined(HEMLOCK_USING_SDL)
         SDL_MaximizeWindow(m_window);
-#endif // HEMLOCK_USING_SDL
+#endif // defined(HEMLOCK_USING_SDL)
         on_window_maximise();
     } else {
-#ifdef HEMLOCK_USING_SDL
+#if defined(HEMLOCK_USING_SDL)
         SDL_MinimizeWindow(m_window);
-#endif // HEMLOCK_USING_SDL
+#endif // defined(HEMLOCK_USING_SDL)
         on_window_minimise();
     }
 }
@@ -308,9 +308,9 @@ void happ::Window::set_swap_interval(SwapInterval swap_interval) {
     m_settings.swap_interval = swap_interval;
 
     int vsync = (swap_interval == SwapInterval::V_SYNC ? 1 : 0);
-#ifdef HEMLOCK_USING_SDL
+#if defined(HEMLOCK_USING_SDL)
     SDL_GL_SetSwapInterval(vsync);
-#endif // HEMLOCK_USING_SDL
+#endif // defined(HEMLOCK_USING_SDL)
 }
 
 void happ::Window::set_allowed_resolutions(WindowDimensionMap allowed_resolutions) {
@@ -323,11 +323,11 @@ void happ::Window::set_allowed_resolutions(WindowDimensionMap allowed_resolution
 }
 
 void happ::Window::sync() {
-#ifdef HEMLOCK_USING_SDL
-#ifdef HEMLOCK_USING_OPENGL
+#if defined(HEMLOCK_USING_SDL)
+#if defined(HEMLOCK_USING_OPENGL)
     SDL_GL_SwapWindow(m_window);
-#endif // HEMLOCK_USING_OPENGL
-#endif // HEMLOCK_USING_SDL
+#endif // defined(HEMLOCK_USING_OPENGL)
+#endif // defined(HEMLOCK_USING_SDL)
 }
 
 void happ::Window::check_display_occupied() {
@@ -340,7 +340,7 @@ void happ::Window::check_display_occupied() {
 }
 
 void happ::Window::determine_modes() {
-#ifdef HEMLOCK_USING_SDL
+#if defined(HEMLOCK_USING_SDL)
     // First get number of displays attached to the machine.
     ui32 display_count = SDL_GetNumVideoDisplays();
     for (ui32 display_idx = 0; display_idx < display_count; ++display_idx) {
@@ -373,5 +373,5 @@ void happ::Window::determine_modes() {
         // Finally set the allowed resolutions.
         m_allowed_resolutions[display_idx] = allowed_resolutions;
     }
-#endif // HEMLOCK_USING_SDL
+#endif // defined(HEMLOCK_USING_SDL)
 }

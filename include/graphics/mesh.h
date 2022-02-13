@@ -4,22 +4,22 @@
 namespace hemlock {
     namespace graphics {
         enum class MeshDataVolatility {
-#ifdef HEMLOCK_USING_OPENGL
+#if defined(HEMLOCK_USING_OPENGL)
             STATIC  = GL_STATIC_DRAW,
             DYNAMIC = GL_DYNAMIC_DRAW,
             STREAM  = GL_STREAM_DRAW
-#endif // HEMLOCK_USING_OPENGL
+#endif // defined(HEMLOCK_USING_OPENGL)
         };
 
         struct MeshHandles {
-#ifdef HEMLOCK_USING_OPENGL
+#if defined(HEMLOCK_USING_OPENGL)
             GLuint vao, vbo;
-#endif // HEMLOCK_USING_OPENGL
+#endif // defined(HEMLOCK_USING_OPENGL)
         };
         struct IndexedMeshHandles : public MeshHandles {
-#ifdef HEMLOCK_USING_OPENGL
+#if defined(HEMLOCK_USING_OPENGL)
             GLuint ibo;
-#endif // HEMLOCK_USING_OPENGL
+#endif // defined(HEMLOCK_USING_OPENGL)
         };
 
         using Vertex_Pos2D_32 = f32v2;
