@@ -207,5 +207,5 @@ void hvox::ChunkMeshTask::execute(ChunkLoadThreadState* state, ChunkLoadTaskQueu
         }
     }
 
-    m_chunk->state = ChunkState::MESHED;
+    m_chunk->state.store(ChunkState::MESHED, std::memory_order_release);
 }
