@@ -13,31 +13,37 @@
 namespace hemlock {
     namespace voxel {
         struct Chunk;
+        struct ChunkGrid;
 
-        enum class ChunkState {
-            NONE,
-            GENERATED,
-            MESHED,
-            MESH_UPLOADED
+        // TODO(Matthew): We shoud instance block and upload scale/translation transformations only.
+        //                  Initially just translation, scale comes after we optimise.
+        enum class ChunkState : ui8 {
+            NONE            = 0,
+            PRELOADED       = 1,
+            GENERATED       = 2,
+            MESHED          = 3,
+            MESH_UPLOADED   = 4
         };
 
-        enum class ChunkGenKind {
-            NONE,
-            GENERATE,
-            MESH
+        enum class ChunkLoadTaskKind : ui8 {
+            NONE            = 0,
+            GENERATION      = 1,
+            MESH            = 2,
+            MESH_UPLOAD     = 3
         };
 
-        struct ChunkGenTaskContext {
+        struct ChunkLoadTaskContext {
             volatile bool stop;
             volatile bool suspend;
         };
-        using ChunkGenThreadState = Thread<ChunkGenTaskContext>::State;
-        using ChunkGenTaskQueue   = TaskQueue<ChunkGenTaskContext>;
-        class ChunkGenTask : public IThreadTask<ChunkGenTaskContext> {
+        using ChunkLoadThreadState = Thread<ChunkLoadTaskContext>::State;
+        using ChunkLoadTaskQueue   = TaskQueue<ChunkLoadTaskContext>;
+        class ChunkLoadTask : public IThreadTask<ChunkLoadTaskContext> {
         public:
-            void init(Chunk* chunk) { m_chunk = chunk; }
+            void init(Chunk* chunk, ChunkGrid* chunk_grid);
         protected:
-            Chunk* m_chunk;
+            Chunk*     m_chunk;
+            ChunkGrid* m_chunk_grid;
         };
 
         struct BlockChangeEvent {
