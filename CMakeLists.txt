@@ -107,9 +107,14 @@ target_link_directories(Hemlock_Revisited
     "${PROJECT_SOURCE_DIR}/deps/lib"
 )
 
+
+if (HEMLOCK_USING_OPENGL)
+    target_link_libraries(Hemlock_Revisited GL GLEW)
+elseif (HEMLOCK_USING_VULKAN)
+    target_link_libraries(Hemlock_Revisited vulkan)
+endif()
+
 target_link_libraries(Hemlock_Revisited
-    GL
-    GLEW
     png
     SDL2main
     SDL2

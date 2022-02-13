@@ -10,8 +10,14 @@ namespace hemlock {
         enum class WindowError {
             NONE                =  0,
             SDL_WINDOW          = -1,
+#if defined(HEMLOCK_USING_OPENGL)
             SDL_GL_CONTEXT      = -2,
             GLEW_INIT           = -3
+#elif defined(HEMLOCK_USING_VULKAN) // defined(HEMLOCK_USING_OPENGL)
+            VULKAN_INSTANCE     = -2,
+            VULKAN_HARDWARE     = -3,
+            SDL_VULKAN_SURFACE  = -4
+#endif // defined(HEMLOCK_USING_VULKAN)
         };
 
         /**

@@ -7,7 +7,20 @@
 happ::Window::Window() :
     WindowBase(),
     m_window(nullptr),
+#if defined(HEMLOCK_USING_OPENGL)
     m_context(nullptr)
+#elif defined(HEMLOCK_USING_VULKAN) // HEMLOCK_USING_OPENGL
+    m_evalutor(DeviceEvaluator{
+        [&](VkPhyiscalDevice device) {
+            
+        };
+    });
+    m_instance(nullptr),
+    m_device(nullptr),
+    m_surface(nullptr),
+    m_extensions({0, nullptr}),
+    m_available_devices({0, nullptr})
+#endif // HEMLOCK_USING_VULKAN
 { /* Empty. */ }
 
 happ::WindowError happ::Window::init(WindowSettings settings /*= {}*/) {
@@ -18,12 +31,17 @@ happ::WindowError happ::Window::init(WindowSettings settings /*= {}*/) {
 
     determine_modes();
 
+    ui32 flags = 0;
+
+    // TODO(Matthew): Extract SDL and none-SDL parts of below as some things
+    //                in OpenGL & Vulkan sections are generic even if we were
+    //                to support some other library like GLFW.
 #if defined(HEMLOCK_USING_SDL)
 #if defined(HEMLOCK_USING_OPENGL)
-    ui32 flags = SDL_WINDOW_OPENGL;
-#else
-    ui32 flags = 0;
-#endif // defined(HEMLOCK_USING_OPENGL)
+    flags |= SDL_WINDOW_OPENGL;
+#elif defined(HEMLOCK_USING_VULKAN) // defined(HEMLOCK_USING_OPENGL)
+    flags |= SDL_WINDOW_VULKAN;
+#endif // defined(HEMLOCK_USING_VULKAN)
     if (m_settings.is_fullscreen) {
         flags |= SDL_WINDOW_FULLSCREEN;
     }
@@ -82,7 +100,86 @@ happ::WindowError happ::Window::init(WindowSettings settings /*= {}*/) {
             SDL_GL_SetSwapInterval(0);
         }
     }
-#endif // defined(HEMLOCK_USING_OPENGL)
+#elif defined(HEMLOCK_USING_VULKAN) // defined(HEMLOCK_USING_OPENGL)
+#if defined(DEBUG)
+    {
+        ui32 total_extension_count = 0;
+        vkEnumerateInstanceExtensionProperties(nullptr, &total_extension_count, nullptr);
+        VkExtensionProperties* extensions = new VkExtensionProperties[total_extension_count];
+        vkEnumerateInstanceExtensionProperties(nullptr, &total_extension_count, extensions);
+
+        debug_printf("Available Vulkan Extensions:\n");
+        for (ui32 i = 0; i < total_extension_count; ++i) {
+            debug_printf("    -> %s - spec v%d\n", extensions[i].extensionName, extensions[i].specVersion);
+        }
+
+        ui32 total_layer_count = 0;
+        vkEnumerateInstanceLayerProperties(nullptr, &total_layer_count, nullptr);
+        VkLayerProperties* layers = new VkLayerProperties[total_layer_count];
+        vkEnumerateInstanceLayerProperties(nullptr, &total_layer_count, layers);
+
+        debug_printf("Available Vulkan Validation Layers:\n");
+        for (ui32 i = 0; i < total_layer_count; ++i) {
+            debug_printf("    -> %s - impl v%d - spec v%d\n", layers[i].layerName, layers[i].implementationVersion, layers[i].specVersion);
+            debug_printf("          - %s\n", layers[i].description);
+        }
+    }
+#endif // defined(DEBUG)
+
+    // Get number of Vulkan extensions required to create our instance
+    // and surface for rendering with Vulkan to our window.
+    if (!SDL_Vulkan_GetInstanceExtensions(m_window, &m_extensions.count, nullptr)) {
+        debug_printf("Could not get count of extensions needed to create a Vulkan instance useable with SDL.\n");
+
+        return WindowError::VULKAN_INSTANCE;
+    }
+    // Allocate that number of pointer slots for inserting names to.
+    m_extensions.names = new const char*[m_extensions.count];
+
+    // Get the names of those extensions.
+    if (!SDL_Vulkan_GetInstanceExtensions(m_window, &m_extensions.count, m_extensions.names)) {
+        debug_printf("Could not get extensions needed to create a Vulkan instance useable with SDL.\n");
+
+        return WindowError::VULKAN_INSTANCE;
+    }
+
+    // If DEBUG is set, this will create a constant list of validation layer names
+    // that vulkan should use to give us feedback on things going wrong.
+    CREATE_VK_VALIDATION_LAYERS;
+
+    VkInstanceCreateInfo instance_info = {
+        .sType                      = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
+        .pNext                      = nullptr,
+        .flags                      = 0,
+        .pApplicationInfo           = &APP_INFO,
+        .enabledLayerCount          = ENABLE_VK_VALIDATION_LAYERS,
+        .ppEnabledLayerNames        = VK_VALIDATION_LAYERS,
+        .enabledExtensionCount      = m_extensions.count,
+        .ppEnabledExtensionNames    = m_extensions.names
+    };
+
+    VkResult err = vkCreateInstance(&instance_info, nullptr, &m_instance);
+    if (err != VkResult::VK_SUCCESS) {
+        debug_printf("Could not create Vulkan istance.\n");
+
+        return WindowError::VULKAN_INSTANCE;
+    }
+
+    if (!determine_devices()) {
+        debug_printf("No physical devices availabile with support for Vulkan.\n");
+
+        return WindowError::VULKAN_HARDWARE;
+    }
+
+    SDL_Vulkan_CreateSurface(m_window, m_instance, m_surface);
+    if (m_instance == nullptr) {
+        debug_printf("Couldn't create Vulkan instance for SDL Window.\n");
+
+        debug_printf(SDL_GetError());
+
+        return WindowError::SDL_VULKAN_SURFACE;
+    }
+#endif // defined(HEMLOCK_USING_VULKAN)
 
     m_window_id = SDL_GetWindowID(m_window);
 #endif // defined(HEMLOCK_USING_SDL)
@@ -104,7 +201,10 @@ void happ::Window::dispose() {
 #if defined(HEMLOCK_USING_OPENGL)
     SDL_GL_DeleteContext(m_context);
     m_context = nullptr;
-#endif // defined(HEMLOCK_USING_OPENGL)
+#elif defined(HEMLOCK_USING_VULKAN) // defined(HEMLOCK_USING_OPENGL)
+    vkDestroyInstance(m_instance, nullptr);
+    m_instance = nullptr;
+#endif // defined(HEMLOCK_USING_VULKAN)
 
     SDL_DestroyWindow(m_window);
     m_window = nullptr;
@@ -330,6 +430,12 @@ void happ::Window::sync() {
 #endif // defined(HEMLOCK_USING_SDL)
 }
 
+#if defined(HEMLOCK_USING_VULKAN)
+void happ::Window::set_device_evaluator(DeviceEvaluator&& evaluator) {
+    m_evaluator = evaluator;
+}
+#endif // defined(HEMLOCK_USING_VULKAN)
+
 void happ::Window::check_display_occupied() {
     ui32 current_display_idx = static_cast<ui32>(SDL_GetWindowDisplayIndex(m_window));
     if (m_settings.display_idx == current_display_idx) return;
@@ -375,3 +481,38 @@ void happ::Window::determine_modes() {
     }
 #endif // defined(HEMLOCK_USING_SDL)
 }
+
+#if defined(HEMLOCK_USING_VULKAN)
+bool happ::Window::determine_devices() {
+    ui32 device_count = 0;
+    vkEnumeratePhysicalDevices(m_instance, &device_count, nullptr);
+    if (device_count == 0) return false;
+    VkPhysicalDevice* candidate_devices = new VkPhyscalDevice[device_count];
+
+    // Build up a list of the indices of the candidate devices
+    // that pass the scoring, sorted by their score such that
+    // the highest scoring device is at the end of the list.
+    std::multimap<i32, ui32> valid_devices;
+    for (ui32 i = 0; i < device_count; ++i) {
+        i32 score = m_evaluator(candidate_devices[i]);
+        if (score > 0) {
+            valid_devices.insert({score, i});
+        }
+    }
+
+    if (valid_devices.empty()) return false;
+
+    // Add valid devices to our available devices list.
+    m_available_devices.count   = valid_devices.size();
+    m_available_devices.devices = new VkPhysicalDevice[m_available_devices.count];
+    ui32 i = 0;
+    for (auto valid_device : valid_devices) {
+        m_available_devices.devices[i++] = candidate_devices[valid_device.second];
+    }
+
+    // Set top-scoring device as the device we will use by default.
+    m_device = m_available_devices.devices[m_available_devices.count - 1];
+
+    return true;
+}
+#endif // defined(HEMLOCK_USING_VULKAN)
