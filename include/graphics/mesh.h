@@ -22,6 +22,13 @@ namespace hemlock {
 #endif // defined(HEMLOCK_USING_OPENGL)
         };
 
+        // TODO(Matthew): Introduce templated version of this.
+        //                Essentially compose mesh data out of
+        //                structs(?) satisfying some concept
+        //                that requires a specification of the
+        //                data points required to validly set
+        //                the mesh up on the GPU.
+
         // TODO(Matthew): Do we want to support more?
         enum MeshAttribID : GLuint {
             POSITION    = 0,
