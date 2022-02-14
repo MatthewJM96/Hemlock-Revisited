@@ -99,18 +99,6 @@ bool hvox::ChunkGrid::preload_chunk_at(ChunkGridPosition chunk_position) {
     chunk->position = chunk_position;
     chunk->init();
 
-    // TODO(Matthew): Right now we're getting a segfult on glDrawArrays with this enabled.
-    //                Inevitably it must be something to do with the buffers being uploaded
-    //                to the GPU, but all the basics are fine: VAOs are set up, vertex
-    //                buffer looks fine on a quick eyeball, and vertex count corresponds
-    //                to expected cases of either being a corner, face, or edge chunk.
-    //                    The VAO on which the segfault occurs also seems to be random,
-    //                    it feels likely this is useful information but right now
-    //                    is just confusing. We know at least it isn't the first
-    //                    encountered by glDrawArrays as we see some chunks appear before
-    //                    the program crashes.
-    //                        Check if any of the three chunk location cases renders fine?
-    //                            Corners have so far not shown up but that could just be odds.
     establish_chunk_neighbours(chunk);
 
     m_chunks[chunk_position.id] = chunk;
