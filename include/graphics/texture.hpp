@@ -14,14 +14,18 @@ namespace hemlock {
             GLuint tex_id = 0;
             glCreateTextures(GL_TEXTURE_2D, 1, &tex_id);
 
-            glTextureStorage2D(tex_id, 1, GL_RGBA8, dims.x, dims.y);
+            GLsizei max_mipmaps = 1 + static_cast<GLsizei>(glm::floor(glm::log2(static_cast<f32>(glm::max(dims.x, dims.y)))));
+
+            glTextureStorage2D(tex_id, max_mipmaps, GL_RGBA8, dims.x, dims.y);
             glTextureSubImage2D(tex_id, 0, 0, 0, dims.x, dims.y, GL_RGBA, GL_UNSIGNED_BYTE, data);
 
-            glTextureParameteri(tex_id, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-            glTextureParameteri(tex_id, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTextureParameteri(tex_id, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            glTextureParameteri(tex_id, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
             glTextureParameteri(tex_id, GL_TEXTURE_WRAP_S,     GL_REPEAT);
             glTextureParameteri(tex_id, GL_TEXTURE_WRAP_T,     GL_REPEAT);
             glTextureParameteri(tex_id, GL_TEXTURE_WRAP_R,     GL_REPEAT);
+
+            glGenerateTextureMipmap(tex_id);
 
             delete[] data;
 
