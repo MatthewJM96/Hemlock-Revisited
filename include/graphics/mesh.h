@@ -28,12 +28,15 @@ namespace hemlock {
         //                that requires a specification of the
         //                data points required to validly set
         //                the mesh up on the GPU.
+        //                  We reeeeaaallly need this, it should
+        //                  be doable with the tuple-based index
+        //                  trick.
 
         // TODO(Matthew): Do we want to support more?
         enum MeshAttribID : GLuint {
             POSITION    = 0,
-            COLOUR      = 1,
-            UV_COORDS   = 2,
+            UV_COORDS   = 1,
+            COLOUR      = 2,
             SENTINEL
         };
 
@@ -48,45 +51,125 @@ namespace hemlock {
         using Vertex_UV_32    = f32v2;
         using Vertex_UV_64    = f64v2;
 
-        // TODO(Matthew): RGBA versions.
-        struct Vertex2D_32 {
+        struct Colourless_Vertex2D_32 {
+            Vertex_Pos2D_32 position;
+            Vertex_UV_32    uv;
+        };
+        struct Colourless_Vertex2D_64 {
+            Vertex_Pos2D_64 position;
+            Vertex_UV_64    uv;
+        };
+
+        struct Colourless_Vertex3D_32 {
+            Vertex_Pos3D_32 position;
+            Vertex_UV_32    uv;
+        };
+        struct Colourless_Vertex3D_64 {
+            Vertex_Pos3D_64 position;
+            Vertex_UV_64    uv;
+        };
+
+        struct RGB_Vertex2D_32 {
             Vertex_Pos2D_32 position;
             Vertex_RGB_32   colour;
             Vertex_UV_32    uv;
         };
-        struct Vertex2D_64 {
+        struct RGB_Vertex2D_64 {
             Vertex_Pos2D_64 position;
             Vertex_RGB_64   colour;
             Vertex_UV_64    uv;
         };
 
-        struct Vertex3D_32 {
+        struct RGB_Vertex3D_32 {
             Vertex_Pos3D_32 position;
             Vertex_RGB_32   colour;
             Vertex_UV_32    uv;
         };
-        struct Vertex3D_64 {
+        struct RGB_Vertex3D_64 {
             Vertex_Pos3D_64 position;
             Vertex_RGB_64   colour;
             Vertex_UV_64    uv;
         };
 
-        struct MeshData2D_32 {
-            Vertex2D_32* vertices;
-            ui32         vertex_count;
+        struct RGBA_Vertex2D_32 {
+            Vertex_Pos2D_32 position;
+            Vertex_RGBA_32   colour;
+            Vertex_UV_32    uv;
         };
-        struct MeshData2D_64 {
-            Vertex2D_64* vertices;
-            ui32         vertex_count;
+        struct RGBA_Vertex2D_64 {
+            Vertex_Pos2D_64 position;
+            Vertex_RGBA_64   colour;
+            Vertex_UV_64    uv;
         };
 
-        struct MeshData3D_32 {
-            Vertex3D_32* vertices;
-            ui32         vertex_count;
+        struct RGBA_Vertex3D_32 {
+            Vertex_Pos3D_32 position;
+            Vertex_RGBA_32   colour;
+            Vertex_UV_32    uv;
         };
-        struct MeshData3D_64 {
-            Vertex3D_64* vertices;
-            ui32         vertex_count;
+        struct RGBA_Vertex3D_64 {
+            Vertex_Pos3D_64 position;
+            Vertex_RGBA_64   colour;
+            Vertex_UV_64    uv;
+        };
+
+        using Vertex2D_32 = RGB_Vertex2D_32;
+        using Vertex2D_64 = RGB_Vertex2D_64;
+        using Vertex3D_32 = RGB_Vertex3D_32;
+        using Vertex3D_64 = RGB_Vertex3D_64;
+
+        struct Colourless_MeshData2D_32 {
+            Colourless_Vertex2D_32* vertices;
+            ui32                    vertex_count;
+        };
+        struct Colourless_MeshData2D_64 {
+            Colourless_Vertex2D_64* vertices;
+            ui32                    vertex_count;
+        };
+
+        struct Colourless_MeshData3D_32 {
+            Colourless_Vertex3D_32* vertices;
+            ui32                    vertex_count;
+        };
+        struct Colourless_MeshData3D_64 {
+            Colourless_Vertex3D_64* vertices;
+            ui32                    vertex_count;
+        };
+
+        struct RGB_MeshData2D_32 {
+            RGB_Vertex2D_32* vertices;
+            ui32             vertex_count;
+        };
+        struct RGB_MeshData2D_64 {
+            RGB_Vertex2D_64* vertices;
+            ui32             vertex_count;
+        };
+
+        struct RGB_MeshData3D_32 {
+            RGB_Vertex3D_32* vertices;
+            ui32             vertex_count;
+        };
+        struct RGB_MeshData3D_64 {
+            RGB_Vertex3D_64* vertices;
+            ui32             vertex_count;
+        };
+
+        struct RGBA_MeshData2D_32 {
+            RGBA_Vertex2D_32* vertices;
+            ui32              vertex_count;
+        };
+        struct RGBA_MeshData2D_64 {
+            RGBA_Vertex2D_64* vertices;
+            ui32              vertex_count;
+        };
+
+        struct RGBA_MeshData3D_32 {
+            RGBA_Vertex3D_32* vertices;
+            ui32              vertex_count;
+        };
+        struct RGBA_MeshData3D_64 {
+            RGBA_Vertex3D_64* vertices;
+            ui32              vertex_count;
         };
 
         struct IndexData {
@@ -94,19 +177,45 @@ namespace hemlock {
             ui32         index_count;
         };
 
-        struct IndexedMeshData2D_32 : public MeshData2D_32, public IndexData { /* Empty. */ };
-        struct IndexedMeshData2D_64 : public MeshData2D_64, public IndexData { /* Empty. */ };
-        struct IndexedMeshData3D_32 : public MeshData3D_32, public IndexData { /* Empty. */ };
-        struct IndexedMeshData3D_64 : public MeshData3D_64, public IndexData { /* Empty. */ };
+        struct Colourless_IndexedMeshData2D_32 : public Colourless_MeshData2D_32, public IndexData { /* Empty. */ };
+        struct Colourless_IndexedMeshData2D_64 : public Colourless_MeshData2D_64, public IndexData { /* Empty. */ };
+        struct Colourless_IndexedMeshData3D_32 : public Colourless_MeshData3D_32, public IndexData { /* Empty. */ };
+        struct Colourless_IndexedMeshData3D_64 : public Colourless_MeshData3D_64, public IndexData { /* Empty. */ };
+        struct RGB_IndexedMeshData2D_32        : public RGB_MeshData2D_32,        public IndexData { /* Empty. */ };
+        struct RGB_IndexedMeshData2D_64        : public RGB_MeshData2D_64,        public IndexData { /* Empty. */ };
+        struct RGB_IndexedMeshData3D_32        : public RGB_MeshData3D_32,        public IndexData { /* Empty. */ };
+        struct RGB_IndexedMeshData3D_64        : public RGB_MeshData3D_64,        public IndexData { /* Empty. */ };
+        struct RGBA_IndexedMeshData2D_32       : public RGBA_MeshData2D_32,       public IndexData { /* Empty. */ };
+        struct RGBA_IndexedMeshData2D_64       : public RGBA_MeshData2D_64,       public IndexData { /* Empty. */ };
+        struct RGBA_IndexedMeshData3D_32       : public RGBA_MeshData3D_32,       public IndexData { /* Empty. */ };
+        struct RGBA_IndexedMeshData3D_64       : public RGBA_MeshData3D_64,       public IndexData { /* Empty. */ };
 
-        bool upload_mesh(const        MeshData2D_32& mesh_data, OUT        MeshHandles& handles, MeshDataVolatility volatility = MeshDataVolatility::DYNAMIC);
-        bool upload_mesh(const        MeshData2D_64& mesh_data, OUT        MeshHandles& handles, MeshDataVolatility volatility = MeshDataVolatility::DYNAMIC);
-        bool upload_mesh(const        MeshData3D_32& mesh_data, OUT        MeshHandles& handles, MeshDataVolatility volatility = MeshDataVolatility::DYNAMIC);
-        bool upload_mesh(const        MeshData3D_64& mesh_data, OUT        MeshHandles& handles, MeshDataVolatility volatility = MeshDataVolatility::DYNAMIC);
-        bool upload_mesh(const IndexedMeshData2D_32& mesh_data, OUT IndexedMeshHandles& handles, MeshDataVolatility volatility = MeshDataVolatility::DYNAMIC);
-        bool upload_mesh(const IndexedMeshData2D_64& mesh_data, OUT IndexedMeshHandles& handles, MeshDataVolatility volatility = MeshDataVolatility::DYNAMIC);
-        bool upload_mesh(const IndexedMeshData3D_32& mesh_data, OUT IndexedMeshHandles& handles, MeshDataVolatility volatility = MeshDataVolatility::DYNAMIC);
-        bool upload_mesh(const IndexedMeshData3D_64& mesh_data, OUT IndexedMeshHandles& handles, MeshDataVolatility volatility = MeshDataVolatility::DYNAMIC);
+        bool upload_mesh(const        Colourless_MeshData2D_32& mesh_data, OUT        MeshHandles& handles, MeshDataVolatility volatility = MeshDataVolatility::DYNAMIC);
+        bool upload_mesh(const        Colourless_MeshData2D_64& mesh_data, OUT        MeshHandles& handles, MeshDataVolatility volatility = MeshDataVolatility::DYNAMIC);
+        bool upload_mesh(const        Colourless_MeshData3D_32& mesh_data, OUT        MeshHandles& handles, MeshDataVolatility volatility = MeshDataVolatility::DYNAMIC);
+        bool upload_mesh(const        Colourless_MeshData3D_64& mesh_data, OUT        MeshHandles& handles, MeshDataVolatility volatility = MeshDataVolatility::DYNAMIC);
+        bool upload_mesh(const Colourless_IndexedMeshData2D_32& mesh_data, OUT IndexedMeshHandles& handles, MeshDataVolatility volatility = MeshDataVolatility::DYNAMIC);
+        bool upload_mesh(const Colourless_IndexedMeshData2D_64& mesh_data, OUT IndexedMeshHandles& handles, MeshDataVolatility volatility = MeshDataVolatility::DYNAMIC);
+        bool upload_mesh(const Colourless_IndexedMeshData3D_32& mesh_data, OUT IndexedMeshHandles& handles, MeshDataVolatility volatility = MeshDataVolatility::DYNAMIC);
+        bool upload_mesh(const Colourless_IndexedMeshData3D_64& mesh_data, OUT IndexedMeshHandles& handles, MeshDataVolatility volatility = MeshDataVolatility::DYNAMIC);
+
+        bool upload_mesh(const        RGB_MeshData2D_32& mesh_data, OUT        MeshHandles& handles, MeshDataVolatility volatility = MeshDataVolatility::DYNAMIC);
+        bool upload_mesh(const        RGB_MeshData2D_64& mesh_data, OUT        MeshHandles& handles, MeshDataVolatility volatility = MeshDataVolatility::DYNAMIC);
+        bool upload_mesh(const        RGB_MeshData3D_32& mesh_data, OUT        MeshHandles& handles, MeshDataVolatility volatility = MeshDataVolatility::DYNAMIC);
+        bool upload_mesh(const        RGB_MeshData3D_64& mesh_data, OUT        MeshHandles& handles, MeshDataVolatility volatility = MeshDataVolatility::DYNAMIC);
+        bool upload_mesh(const RGB_IndexedMeshData2D_32& mesh_data, OUT IndexedMeshHandles& handles, MeshDataVolatility volatility = MeshDataVolatility::DYNAMIC);
+        bool upload_mesh(const RGB_IndexedMeshData2D_64& mesh_data, OUT IndexedMeshHandles& handles, MeshDataVolatility volatility = MeshDataVolatility::DYNAMIC);
+        bool upload_mesh(const RGB_IndexedMeshData3D_32& mesh_data, OUT IndexedMeshHandles& handles, MeshDataVolatility volatility = MeshDataVolatility::DYNAMIC);
+        bool upload_mesh(const RGB_IndexedMeshData3D_64& mesh_data, OUT IndexedMeshHandles& handles, MeshDataVolatility volatility = MeshDataVolatility::DYNAMIC);
+
+        bool upload_mesh(const        RGBA_MeshData2D_32& mesh_data, OUT        MeshHandles& handles, MeshDataVolatility volatility = MeshDataVolatility::DYNAMIC);
+        bool upload_mesh(const        RGBA_MeshData2D_64& mesh_data, OUT        MeshHandles& handles, MeshDataVolatility volatility = MeshDataVolatility::DYNAMIC);
+        bool upload_mesh(const        RGBA_MeshData3D_32& mesh_data, OUT        MeshHandles& handles, MeshDataVolatility volatility = MeshDataVolatility::DYNAMIC);
+        bool upload_mesh(const        RGBA_MeshData3D_64& mesh_data, OUT        MeshHandles& handles, MeshDataVolatility volatility = MeshDataVolatility::DYNAMIC);
+        bool upload_mesh(const RGBA_IndexedMeshData2D_32& mesh_data, OUT IndexedMeshHandles& handles, MeshDataVolatility volatility = MeshDataVolatility::DYNAMIC);
+        bool upload_mesh(const RGBA_IndexedMeshData2D_64& mesh_data, OUT IndexedMeshHandles& handles, MeshDataVolatility volatility = MeshDataVolatility::DYNAMIC);
+        bool upload_mesh(const RGBA_IndexedMeshData3D_32& mesh_data, OUT IndexedMeshHandles& handles, MeshDataVolatility volatility = MeshDataVolatility::DYNAMIC);
+        bool upload_mesh(const RGBA_IndexedMeshData3D_64& mesh_data, OUT IndexedMeshHandles& handles, MeshDataVolatility volatility = MeshDataVolatility::DYNAMIC);
 
         void dispose_mesh(const        MeshHandles& handles);
         void dispose_mesh(const IndexedMeshHandles& handles);
