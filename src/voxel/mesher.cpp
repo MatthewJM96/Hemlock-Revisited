@@ -8,12 +8,12 @@
 #include "voxel/mesher.h"
 
 static inline void add_front_quad(hvox::BlockChunkPosition pos, OUT hg::MeshData3D_32& mesh) {
-    mesh.vertices[mesh.vertex_count++] = { { -0.5f + pos.x, -0.5f + pos.y, -0.5f + pos.z }, { 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f } };
     mesh.vertices[mesh.vertex_count++] = { {  0.5f + pos.x, -0.5f + pos.y, -0.5f + pos.z }, { 1.0f, 1.0f, 1.0f }, { 1.0f, 0.0f } };
-    mesh.vertices[mesh.vertex_count++] = { {  0.5f + pos.x,  0.5f + pos.y, -0.5f + pos.z }, { 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f } };
-    mesh.vertices[mesh.vertex_count++] = { {  0.5f + pos.x,  0.5f + pos.y, -0.5f + pos.z }, { 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f } };
-    mesh.vertices[mesh.vertex_count++] = { { -0.5f + pos.x,  0.5f + pos.y, -0.5f + pos.z }, { 1.0f, 1.0f, 1.0f }, { 0.0f, 1.0f } };
     mesh.vertices[mesh.vertex_count++] = { { -0.5f + pos.x, -0.5f + pos.y, -0.5f + pos.z }, { 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f } };
+    mesh.vertices[mesh.vertex_count++] = { {  0.5f + pos.x,  0.5f + pos.y, -0.5f + pos.z }, { 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f } };
+    mesh.vertices[mesh.vertex_count++] = { {  0.5f + pos.x,  0.5f + pos.y, -0.5f + pos.z }, { 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f } };
+    mesh.vertices[mesh.vertex_count++] = { { -0.5f + pos.x, -0.5f + pos.y, -0.5f + pos.z }, { 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f } };
+    mesh.vertices[mesh.vertex_count++] = { { -0.5f + pos.x,  0.5f + pos.y, -0.5f + pos.z }, { 1.0f, 1.0f, 1.0f }, { 0.0f, 1.0f } };
 };
 static inline void add_back_quad(hvox::BlockChunkPosition pos, OUT hg::MeshData3D_32& mesh) {
     mesh.vertices[mesh.vertex_count++] = { { -0.5f + pos.x, -0.5f + pos.y,  0.5f + pos.z }, { 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f } };
@@ -32,12 +32,12 @@ static inline void add_left_quad(hvox::BlockChunkPosition pos, OUT hg::MeshData3
     mesh.vertices[mesh.vertex_count++] = { { -0.5f + pos.x,  0.5f + pos.y,  0.5f + pos.z }, { 1.0f, 1.0f, 1.0f }, { 1.0f, 0.0f } };
 };
 static inline void add_right_quad(hvox::BlockChunkPosition pos, OUT hg::MeshData3D_32& mesh) {
-    mesh.vertices[mesh.vertex_count++] = { {  0.5f + pos.x,  0.5f + pos.y,  0.5f + pos.z }, { 1.0f, 1.0f, 1.0f }, { 1.0f, 0.0f } };
     mesh.vertices[mesh.vertex_count++] = { {  0.5f + pos.x,  0.5f + pos.y, -0.5f + pos.z }, { 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f } };
-    mesh.vertices[mesh.vertex_count++] = { {  0.5f + pos.x, -0.5f + pos.y, -0.5f + pos.z }, { 1.0f, 1.0f, 1.0f }, { 0.0f, 1.0f } };
-    mesh.vertices[mesh.vertex_count++] = { {  0.5f + pos.x, -0.5f + pos.y, -0.5f + pos.z }, { 1.0f, 1.0f, 1.0f }, { 0.0f, 1.0f } };
-    mesh.vertices[mesh.vertex_count++] = { {  0.5f + pos.x, -0.5f + pos.y,  0.5f + pos.z }, { 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f } };
     mesh.vertices[mesh.vertex_count++] = { {  0.5f + pos.x,  0.5f + pos.y,  0.5f + pos.z }, { 1.0f, 1.0f, 1.0f }, { 1.0f, 0.0f } };
+    mesh.vertices[mesh.vertex_count++] = { {  0.5f + pos.x, -0.5f + pos.y, -0.5f + pos.z }, { 1.0f, 1.0f, 1.0f }, { 0.0f, 1.0f } };
+    mesh.vertices[mesh.vertex_count++] = { {  0.5f + pos.x, -0.5f + pos.y, -0.5f + pos.z }, { 1.0f, 1.0f, 1.0f }, { 0.0f, 1.0f } };
+    mesh.vertices[mesh.vertex_count++] = { {  0.5f + pos.x,  0.5f + pos.y,  0.5f + pos.z }, { 1.0f, 1.0f, 1.0f }, { 1.0f, 0.0f } };
+    mesh.vertices[mesh.vertex_count++] = { {  0.5f + pos.x, -0.5f + pos.y,  0.5f + pos.z }, { 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f } };
 };
 static inline void add_bottom_quad(hvox::BlockChunkPosition pos, OUT hg::MeshData3D_32& mesh) {
     mesh.vertices[mesh.vertex_count++] = { { -0.5f + pos.x, -0.5f + pos.y, -0.5f + pos.z }, { 1.0f, 1.0f, 1.0f }, { 0.0f, 1.0f } };
@@ -48,12 +48,12 @@ static inline void add_bottom_quad(hvox::BlockChunkPosition pos, OUT hg::MeshDat
     mesh.vertices[mesh.vertex_count++] = { { -0.5f + pos.x, -0.5f + pos.y, -0.5f + pos.z }, { 1.0f, 1.0f, 1.0f }, { 0.0f, 1.0f } };
 };
 static inline void add_top_quad(hvox::BlockChunkPosition pos, OUT hg::MeshData3D_32& mesh) {
-    mesh.vertices[mesh.vertex_count++] = { { -0.5f + pos.x,  0.5f + pos.y, -0.5f + pos.z }, { 1.0f, 1.0f, 1.0f }, { 0.0f, 1.0f } };
     mesh.vertices[mesh.vertex_count++] = { {  0.5f + pos.x,  0.5f + pos.y, -0.5f + pos.z }, { 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f } };
-    mesh.vertices[mesh.vertex_count++] = { {  0.5f + pos.x,  0.5f + pos.y,  0.5f + pos.z }, { 1.0f, 1.0f, 1.0f }, { 1.0f, 0.0f } };
-    mesh.vertices[mesh.vertex_count++] = { {  0.5f + pos.x,  0.5f + pos.y,  0.5f + pos.z }, { 1.0f, 1.0f, 1.0f }, { 1.0f, 0.0f } };
-    mesh.vertices[mesh.vertex_count++] = { { -0.5f + pos.x,  0.5f + pos.y,  0.5f + pos.z }, { 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f } };
     mesh.vertices[mesh.vertex_count++] = { { -0.5f + pos.x,  0.5f + pos.y, -0.5f + pos.z }, { 1.0f, 1.0f, 1.0f }, { 0.0f, 1.0f } };
+    mesh.vertices[mesh.vertex_count++] = { {  0.5f + pos.x,  0.5f + pos.y,  0.5f + pos.z }, { 1.0f, 1.0f, 1.0f }, { 1.0f, 0.0f } };
+    mesh.vertices[mesh.vertex_count++] = { {  0.5f + pos.x,  0.5f + pos.y,  0.5f + pos.z }, { 1.0f, 1.0f, 1.0f }, { 1.0f, 0.0f } };
+    mesh.vertices[mesh.vertex_count++] = { { -0.5f + pos.x,  0.5f + pos.y, -0.5f + pos.z }, { 1.0f, 1.0f, 1.0f }, { 0.0f, 1.0f } };
+    mesh.vertices[mesh.vertex_count++] = { { -0.5f + pos.x,  0.5f + pos.y,  0.5f + pos.z }, { 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f } };
 };
 
 static inline bool is_at_left_face(hvox::BlockIndex index) {

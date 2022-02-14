@@ -85,6 +85,8 @@ happ::WindowError happ::Window::init(WindowSettings settings /*= {}*/) {
 
     // TODO(Matthew): Do we do this here? For multiple windows do these need resetting
     //                each time we change which window we are working on?
+    //                    Definitely don't as we would like to, e.g. not necessarily
+    //                    cull free-floating UI elements that use sprite batcher.
     {
         // Enable depth testing, set the clear colour and depth.
         glClearColor(0.2f, 0.7f, 0.3f, 1.0f);
@@ -94,7 +96,12 @@ happ::WindowError happ::Window::init(WindowSettings settings /*= {}*/) {
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); 
 
+        // Enable depth testing.
         glEnable(GL_DEPTH_TEST);
+
+        // Enable face culling.
+        glEnable(GL_CULL_FACE);
+        // glFrontFace(GL_CW);
 
         if (m_settings.swap_interval == SwapInterval::V_SYNC) {
             SDL_GL_SetSwapInterval(1);
