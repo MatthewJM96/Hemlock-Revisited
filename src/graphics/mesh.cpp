@@ -14,31 +14,33 @@ static bool __upload_basic_mesh(auto mesh_data, hg::MeshDataVolatility volatilit
         assert(ibo != nullptr);
     }
 
-    glGenVertexArrays(1, vao);
-    glBindVertexArray(*vao);
+    glCreateVertexArrays(1, vao);
 
-    glGenBuffers(1, vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, *vbo);
-    glBufferData(GL_ARRAY_BUFFER, vertex_size * mesh_data.vertex_count, mesh_data.vertices, static_cast<GLenum>(volatility));
+    glCreateBuffers(1, vbo);
+    glNamedBufferData(*vbo, vertex_size * mesh_data.vertex_count, mesh_data.vertices, static_cast<GLenum>(volatility));
+
+    // Associate VBO to VAO.
+    glVertexArrayVertexBuffer(*vao, 0, *vbo, 0, vertex_size);
 
     if constexpr (indexed) {
-        glGenBuffers(1, ibo);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, *ibo);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, precision * mesh_data.index_count, mesh_data.indices, static_cast<GLenum>(volatility));
+        glCreateBuffers(1, ibo);
+        glNamedBufferData(*ibo, precision * mesh_data.index_count, mesh_data.indices, static_cast<GLenum>(volatility));
+
+        // Associate IBO to VAO.
+        glVertexArrayElementBuffer(*vao, *vbo);
     }
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, vertex_size, 0);
-    glEnableVertexAttribArray(0);
+    glEnableVertexArrayAttrib(*vao, hg::MeshAttribID::POSITION);
+    glEnableVertexArrayAttrib(*vao, hg::MeshAttribID::COLOUR);
+    glEnableVertexArrayAttrib(*vao, hg::MeshAttribID::UV_COORDS);
 
-    glVertexAttribPointer(1, colour_size, GL_FLOAT, GL_FALSE, vertex_size, reinterpret_cast<GLvoid*>(3 * precision));
-    glEnableVertexAttribArray(1);
+    glVertexArrayAttribFormat(*vao, hg::MeshAttribID::POSITION,            3, GL_FLOAT, GL_FALSE,                             0);
+    glVertexArrayAttribFormat(*vao, hg::MeshAttribID::COLOUR,    colour_size, GL_FLOAT, GL_FALSE,  3                * precision);
+    glVertexArrayAttribFormat(*vao, hg::MeshAttribID::UV_COORDS,           3, GL_FLOAT, GL_FALSE, (3 + colour_size) * precision);
 
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, vertex_size, reinterpret_cast<GLvoid*>((3 + colour_size) * precision));
-    glEnableVertexAttribArray(2);
-
-    if constexpr (indexed) glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
+    glVertexArrayAttribBinding(*vao, hg::MeshAttribID::POSITION,  0);
+    glVertexArrayAttribBinding(*vao, hg::MeshAttribID::COLOUR,    0);
+    glVertexArrayAttribBinding(*vao, hg::MeshAttribID::UV_COORDS, 0);
 
     return static_cast<bool>(mesh_data.vertex_count);
 }

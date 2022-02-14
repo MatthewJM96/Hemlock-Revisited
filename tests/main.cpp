@@ -164,9 +164,8 @@ public:
 
         glUniformMatrix4fv(m_shader.uniform_location("view_proj"),  1, GL_FALSE, &m_camera.view_projection_matrix()[0][0]);
 
-        glActiveTexture(GL_TEXTURE0);
+        glBindTextureUnit(0, m_default_texture);
         glUniform1i(m_shader.uniform_location("tex"), 0);
-        glBindTexture(GL_TEXTURE_2D, m_default_texture);
 
         for (auto& chunk : m_chunk_grid.chunks()) {
             if (chunk.second->state != hvox::ChunkState::MESH_UPLOADED) continue;
@@ -224,24 +223,6 @@ public:
         m_shader.link();
 
         m_default_texture = hg::load_texture("test_tex.png");
-
-        // // Generate and bind texture.
-        // glGenTextures(1, &m_default_texture);
-        // glBindTexture(GL_TEXTURE_2D, m_default_texture);
-
-        // // Set texture to be just a 1x1 image of a pure white pixel.
-        // ui32 pix = 0xffffffff;
-        // glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, &pix);
-
-        // // Set texture parameters to repeat our pixel as needed and to not do any averaging of pixels.
-        // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S,     GL_REPEAT);
-        // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T,     GL_REPEAT);
-        // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R,     GL_REPEAT);
-
-        // // Unbind our complete texture.
-        // glBindTexture(GL_TEXTURE_2D, 0);
 
         m_chunk_grid.init(5);
 

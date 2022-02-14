@@ -62,6 +62,8 @@ happ::WindowError happ::Window::init(WindowSettings settings /*= {}*/) {
     }
 
 #if defined(HEMLOCK_USING_OPENGL)
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 5);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
     m_context = SDL_GL_CreateContext(m_window);
     if (m_context == nullptr) {

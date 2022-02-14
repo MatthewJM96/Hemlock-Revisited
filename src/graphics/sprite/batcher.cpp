@@ -58,23 +58,19 @@ void hg::s::SpriteBatcher::init(ShaderCache* shader_cache, FontCache* font_cache
      * Create the VAO *
     \******************/
 
-    // Gen the vertex array object and bind it.
-    glGenVertexArrays(1, &m_vao);
-    glBindVertexArray(m_vao);
+    // Create the vertex array object and bind it.
+    glCreateVertexArrays(1, &m_vao);
 
-    // Generate the associated vertex & index buffers - these are the bits of memory that will be populated within the GPU storing information
-    // about the graphics we want to draw.
-    glGenBuffers(1, &m_vbo);
-    glGenBuffers(1, &m_ibo);
+    // Create vertex & index buffers.
+    glCreateBuffers(1, &m_vbo);
+    glCreateBuffers(1, &m_ibo);
 
-    // Bind those buffers
-    //    OpenGL generally follows a pattern of generate an ID corresponding to some memory on the GPU, bind said memory, link some properties to them 
-    //    (such as how the data in the memory correspond to variables inside our shader programs).
-    glBindBuffer(GL_ARRAY_BUFFER,         m_vbo);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ibo);
+    // Associate VBO & IBO with VAO.
+    glVertexArrayVertexBuffer(m_vao, 0, m_vbo, 0, sizeof(SpriteVertex));
+    glVertexArrayElementBuffer(m_vao, m_ibo);
 
     // Enable the attributes in our shader.
-    m_default_shader.enable_vertex_attrib_arrays();
+    m_default_shader.enable_vertex_attrib_arrays(m_vao);
 
     // Connect the vertex attributes in the shader (e.g. vPosition) to its corresponding chunk of memory inside the SpriteVertex struct.
     //     We first tell OpenGL the ID of the attribute within the shader (as we set earlier), then the number of values and their type.
@@ -85,37 +81,35 @@ void hg::s::SpriteBatcher::init(ShaderCache* shader_cache, FontCache* font_cache
     //
     //     We then pass the size of the data representing a vertex followed by how many bytes into that data the value is stored - we use offset rather than 
     //     manually writing this to give us flexibility in changing the order of the SpriteVertex struct.
-    glVertexAttribPointer(SpriteShaderAttribID::POSITION,          3, GL_FLOAT,         false, sizeof(SpriteVertex), reinterpret_cast<void*>(offsetof(SpriteVertex, position)));
-    glVertexAttribPointer(SpriteShaderAttribID::RELATIVE_POSITION, 2, GL_FLOAT,         false, sizeof(SpriteVertex), reinterpret_cast<void*>(offsetof(SpriteVertex, relative_position)));
-    glVertexAttribPointer(SpriteShaderAttribID::UV_DIMENSIONS,     4, GL_FLOAT,         false, sizeof(SpriteVertex), reinterpret_cast<void*>(offsetof(SpriteVertex, uv_rect)));
-    glVertexAttribPointer(SpriteShaderAttribID::COLOUR,            4, GL_UNSIGNED_BYTE, true,  sizeof(SpriteVertex), reinterpret_cast<void*>(offsetof(SpriteVertex, colour)));
+    glVertexArrayAttribFormat(m_vao, SpriteShaderAttribID::POSITION,          3, GL_FLOAT,         false, offsetof(SpriteVertex, position));
+    glVertexArrayAttribFormat(m_vao, SpriteShaderAttribID::RELATIVE_POSITION, 2, GL_FLOAT,         false, offsetof(SpriteVertex, relative_position));
+    glVertexArrayAttribFormat(m_vao, SpriteShaderAttribID::UV_DIMENSIONS,     4, GL_FLOAT,         false, offsetof(SpriteVertex, uv_rect));
+    glVertexArrayAttribFormat(m_vao, SpriteShaderAttribID::COLOUR,            4, GL_UNSIGNED_BYTE, true,  offsetof(SpriteVertex, colour));
 
-    // Clean everything up, unbinding each of our buffers and the vertex array.
-    glBindVertexArray(0);
-    glBindBuffer(GL_ARRAY_BUFFER,         0);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    // Clean up.
+    glVertexArrayAttribBinding(m_vao, SpriteShaderAttribID::POSITION,           0);
+    glVertexArrayAttribBinding(m_vao, SpriteShaderAttribID::RELATIVE_POSITION,  0);
+    glVertexArrayAttribBinding(m_vao, SpriteShaderAttribID::UV_DIMENSIONS,      0);
+    glVertexArrayAttribBinding(m_vao, SpriteShaderAttribID::COLOUR,             0);
 
     /***********************************\
      * Create a default white texture. *
     \***********************************/
 
     // Generate and bind texture.
-    glGenTextures(1, &m_default_texture);
-    glBindTexture(GL_TEXTURE_2D, m_default_texture);
+    glCreateTextures(GL_TEXTURE_2D, 1, &m_default_texture);
 
     // Set texture to be just a 1x1 image of a pure white pixel.
     ui32 pix = 0xffffffff;
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, &pix);
+    glTextureStorage2D(m_default_texture, 1, GL_RGBA8, 1, 1);
+    glTextureSubImage2D(m_default_texture, 0, 0, 0, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, &pix);
 
     // Set texture parameters to repeat our pixel as needed and to not do any averaging of pixels.
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S,     GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T,     GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R,     GL_REPEAT);
-
-    // Unbind our complete texture.
-    glBindTexture(GL_TEXTURE_2D, 0);
+    glTextureParameteri(m_default_texture, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTextureParameteri(m_default_texture, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTextureParameteri(m_default_texture, GL_TEXTURE_WRAP_S,     GL_REPEAT);
+    glTextureParameteri(m_default_texture, GL_TEXTURE_WRAP_T,     GL_REPEAT);
+    glTextureParameteri(m_default_texture, GL_TEXTURE_WRAP_R,     GL_REPEAT);
 }
 
 void hg::s::SpriteBatcher::dispose() {
@@ -435,13 +429,15 @@ void hg::s::SpriteBatcher::render(f32m4 world_projection, f32m4 view_projection)
     // Bind our vertex array.
     glBindVertexArray(m_vao);
 
-    // Activate the zeroth texture slot in OpenGL, and pass the index to the texture uniform in our shader.
+    // Set texture uniform in our shader to look at texture unit 0.
+    //   OpenGL needs to know that texture unit is active to do so,
+    //   which glActiveTexture achieves.
     glActiveTexture(GL_TEXTURE0);
     glUniform1i(m_active_shader->uniform_location("SpriteTexture"), 0);
 
     // For each batch, bind its texture, set the sampler state (have to do this each time), and draw the triangles in that batch.
     for (auto& batch : m_batches) {
-        glBindTexture(GL_TEXTURE_2D, batch.texture);
+        glBindTextureUnit(0, batch.texture);
 
         // Note that we pass an offset as the final argument despite glDrawElements expecting a pointer as we have already uploaded
         // the data to the buffer on the GPU - we only need to pass an offset in bytes from the beginning of this buffer rather than
@@ -491,10 +487,20 @@ void hg::s::SpriteBatcher::sort_sprites(SpriteSortMode sort_mode) {
 }
 
 void hg::s::SpriteBatcher::generate_batches() {
+    // TODO(Matthew): performance gains could be had with glBufferStorage.
+    //                the only cost is we would need to entirely kill the
+    //                buffer object and create a new one each time the batch
+    //                grew in size (or substantially reduced in size).
+    //                    perhaps we can make a version that guarantees
+    //                    some max capacity & usage that will invariably
+    //                    demand most of that capacity?
+    //                        the obvious case being a set of sprites that
+    //                        don't substantially change - e.g. background
+    //                        tiling.
+
     // If we have no sprites, just tell the GPU we have nothing.
     if (m_sprite_ptrs.empty()) {
-        glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
-        glBufferData(GL_ARRAY_BUFFER, 0, nullptr, m_usage_hint);
+        glNamedBufferData(m_vbo, 0, nullptr, m_usage_hint);
         return;
     }
 
@@ -545,12 +551,6 @@ void hg::s::SpriteBatcher::generate_batches() {
     if (m_index_count < index_count) {
         m_index_count = index_count;
 
-        // Bind the index buffer.
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ibo);
-        // Invalidate the old buffer data on the GPU so that when we write our new data we don't
-        // need to wait for the old data to be unused by the GPU.
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_index_count * sizeof(ui32), nullptr, m_usage_hint);
-
         // Create a local index buffer we will upload to the GPU.
         ui32* indices = new ui32[m_index_count];
         ui32 i = 0; // Index cursor.
@@ -570,20 +570,11 @@ void hg::s::SpriteBatcher::generate_batches() {
         }
 
         // Send the indices over to the GPU.
-        glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, m_index_count * sizeof(ui32), indices);
-        // Unbind our buffer object.
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+        glNamedBufferData(m_ibo, m_index_count * sizeof(ui32), indices, m_usage_hint);
     }
 
-    // Bind the vertex buffer and delete the old data from the GPU.
-    glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
-    // Invalidate the old buffer data on the GPU so that when we write our new data we don't
-    // need to wait for the old data to be unused by the GPU.
-    glBufferData(GL_ARRAY_BUFFER, vertex_count * sizeof(SpriteVertex), nullptr, m_usage_hint);
-    // Write our new data.
-    glBufferSubData(GL_ARRAY_BUFFER, 0, vertex_count * sizeof(SpriteVertex), vertices);
-    // Unbind our buffer object.
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    // Write our data to GPU.
+    glNamedBufferData(m_vbo, vertex_count * sizeof(SpriteVertex), vertices, m_usage_hint);
 
     // Clear up memory.
     delete[] vertices;
@@ -641,7 +632,7 @@ void hg::s::impl::basic_build_quad(const Sprite* sprite, SpriteVertex* vertices)
             top_left.colour = top_right.colour = bottom_left.colour = bottom_right.colour = sprite->c1;
             break;
         default:
-            puts("Invalid gradient type!");
+            debug_printf("Invalid gradient type!");
             assert(false);
     }
 }

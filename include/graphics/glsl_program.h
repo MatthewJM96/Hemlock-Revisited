@@ -119,10 +119,10 @@ namespace hemlock {
             GLuint attribute_location(const std::string& name) const { return m_attributes.at(name); }
             GLuint uniform_location(const std::string& name)   const;
 
-            void enable_vertex_attrib_arrays()  const;
-            void disable_vertex_attrib_arrays() const;
-            bool enable_vertex_attrib_array(const std::string& name)  const;
-            bool disable_vertex_attrib_array(const std::string& name) const;
+            void enable_vertex_attrib_arrays(GLuint vao)  const;
+            void disable_vertex_attrib_arrays(GLuint vao) const;
+            bool enable_vertex_attrib_array(GLuint vao, const std::string& name)  const;
+            bool disable_vertex_attrib_array(GLuint vao, const std::string& name) const;
 
             /**
              * @brief Uses this shader program.

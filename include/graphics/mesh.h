@@ -22,6 +22,14 @@ namespace hemlock {
 #endif // defined(HEMLOCK_USING_OPENGL)
         };
 
+        // TODO(Matthew): Do we want to support more?
+        enum MeshAttribID : GLuint {
+            POSITION    = 0,
+            COLOUR      = 1,
+            UV_COORDS   = 2,
+            SENTINEL
+        };
+
         using Vertex_Pos2D_32 = f32v2;
         using Vertex_Pos2D_64 = f64v2;
         using Vertex_Pos3D_32 = f32v3;
