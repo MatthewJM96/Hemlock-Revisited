@@ -16,7 +16,7 @@ void hemlock::basic_thread_main( typename Thread<ThreadState>::State* state,
         while (state->context.suspend)
             continue;
 
-        if (!held.task) break;
+        if (!held.task) continue;
 
         held.task->execute(state, task_queue);
         held.task->is_finished = true;
