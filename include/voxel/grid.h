@@ -40,6 +40,12 @@ namespace hemlock {
              * @param time The time data for the frame.
              */
             void update(TimeData time);
+            /**
+             * @brief Draw loop for chunks.
+             *
+             * @param time The time data for the frame.
+             */
+            void draw(TimeData time);
 
             /**
              * @brief Suspends chunk tasks. This is a hammer, but
@@ -233,6 +239,13 @@ namespace hemlock {
             void establish_chunk_neighbours(Chunk* chunk);
 
             ThreadPool<ChunkLoadTaskContext> m_gen_threads;
+
+            // TODO(Matthew): this probably should go elsewhere later, but
+            //                to get instancing working this will do.
+            hg::MeshHandles   m_mesh_handles;
+            GLuint            m_instance_vbo;
+            bool              m_TEMP_not_all_ready;
+            ui32              m_voxel_count;
 
             Chunks m_chunks;
         };

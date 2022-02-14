@@ -9,7 +9,6 @@ hvox::Chunk::Chunk() :
     blocks(nullptr),
     state(ChunkState::NONE),
     pending_task(ChunkLoadTaskKind::NONE),
-    mesh_handles({ 0, 0 }),
     m_owns_blocks(true)
 { /* Empty. */ }
 
@@ -39,10 +38,7 @@ void hvox::Chunk::dispose() {
 }
 
 void hvox::Chunk::update(TimeData) {
-    if (state == ChunkState::MESHED) {
-        if (hg::upload_mesh(mesh, mesh_handles, hg::MeshDataVolatility::STATIC))
-            state = ChunkState::MESH_UPLOADED;
-    }
+    // Empty for now.
 }
 
 bool hvox::set_block( Chunk* chunk,

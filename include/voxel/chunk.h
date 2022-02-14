@@ -90,8 +90,10 @@ namespace hemlock {
             std::atomic<ChunkState>        state;
             std::atomic<ChunkLoadTaskKind> pending_task;
 
-            hg::MeshData3D_32 mesh;
-            hg::MeshHandles mesh_handles;
+            struct {
+                f32v3* translations;
+                ui32   renderable_voxel_count;
+            } instance_data;
 
             struct {
                 bool  gen_task_active : 4;

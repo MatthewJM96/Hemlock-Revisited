@@ -11,6 +11,27 @@ void hvox::ChunkLoadTask::init(Chunk* chunk, ChunkGrid* chunk_grid) {
 
 void hvox::ChunkGrid::init(ui32 thread_count) {
     m_gen_threads.init(thread_count);
+
+    m_TEMP_not_all_ready = true;
+
+    glCreateVertexArrays(1, &m_mesh_handles.vao);
+
+    glCreateBuffers(1, &m_mesh_handles.vbo);
+    glNamedBufferData(m_mesh_handles.vbo, sizeof(hg::Vertex3D_32) * BLOCK_MESH.vertex_count, BLOCK_MESH.vertices, GL_STATIC_DRAW);
+
+    glVertexArrayVertexBuffer(m_mesh_handles.vao, 0, m_mesh_handles.vbo, 0, sizeof(hg::Vertex3D_32));
+
+    glEnableVertexArrayAttrib(m_mesh_handles.vao, hg::MeshAttribID::POSITION);
+    glEnableVertexArrayAttrib(m_mesh_handles.vao, hg::MeshAttribID::COLOUR);
+    glEnableVertexArrayAttrib(m_mesh_handles.vao, hg::MeshAttribID::UV_COORDS);
+
+    glVertexArrayAttribFormat(m_mesh_handles.vao, hg::MeshAttribID::POSITION,   3, GL_FLOAT, GL_FALSE,                 0);
+    glVertexArrayAttribFormat(m_mesh_handles.vao, hg::MeshAttribID::COLOUR,     3, GL_FLOAT, GL_FALSE,     sizeof(f32v3));
+    glVertexArrayAttribFormat(m_mesh_handles.vao, hg::MeshAttribID::UV_COORDS,  2, GL_FLOAT, GL_FALSE, 2 * sizeof(f32v3));
+
+    glVertexArrayAttribBinding(m_mesh_handles.vao, hg::MeshAttribID::POSITION,  0);
+    glVertexArrayAttribBinding(m_mesh_handles.vao, hg::MeshAttribID::COLOUR,    0);
+    glVertexArrayAttribBinding(m_mesh_handles.vao, hg::MeshAttribID::UV_COORDS, 0);
 }
 
 void hvox::ChunkGrid::dispose() {
@@ -21,6 +42,55 @@ void hvox::ChunkGrid::update(TimeData time) {
     for (auto& chunk : m_chunks) {
         chunk.second->update(time);
     }
+}
+
+void hvox::ChunkGrid::draw(TimeData time [[maybe_unused]]) {
+    // TODO(Matthew): Set up instancing data somewhere else.
+    //                   We'll need to be somewhat smart as we can only really
+    //                   do this with every chunk's instance data combined.
+    //                      Can probably manage buffer in GPU with some smart
+    //                      lazy shuffling, maybe we use a vertex attribute
+    //                      to mark instances dead? This sounds dodgy as it
+    //                      means branching in shader, but worth considering.
+    if (m_TEMP_not_all_ready) {
+        ui32 voxel_count = 0;
+        bool all_chunks_meshed = true;
+        for (auto chunk : m_chunks) {
+            all_chunks_meshed = all_chunks_meshed
+                                    && query_chunk_state(chunk.second, ChunkState::MESHED).second;
+            voxel_count += chunk.second->instance_data.renderable_voxel_count;
+        }
+        if (!all_chunks_meshed) return;
+
+        m_voxel_count = voxel_count;
+
+        glCreateBuffers(1, &m_instance_vbo);
+        glVertexArrayVertexBuffer(m_mesh_handles.vao, 1, m_instance_vbo, 0, sizeof(f32v3));
+
+        glNamedBufferData(m_instance_vbo, voxel_count * sizeof(f32v3), nullptr, GL_STATIC_DRAW);
+
+        ui32 cursor = 0;
+        for (auto chunk : m_chunks) {
+            auto data = chunk.second->instance_data;
+            glNamedBufferSubData(
+                m_instance_vbo,
+                cursor * sizeof(f32v3),
+                data.renderable_voxel_count * sizeof(f32v3),
+                reinterpret_cast<void*>(data.translations)
+            );
+            cursor += data.renderable_voxel_count;
+        }
+
+        glEnableVertexArrayAttrib(m_mesh_handles.vao,  3);
+        glVertexArrayAttribFormat(m_mesh_handles.vao,  3, 3, GL_FLOAT, GL_FALSE, 0);
+        glVertexArrayAttribBinding(m_mesh_handles.vao, 3, 1);
+        glVertexArrayBindingDivisor(m_mesh_handles.vao, 1, 1);
+
+        m_TEMP_not_all_ready = false;
+    }
+
+    glBindVertexArray(m_mesh_handles.vao);
+    glDrawArraysInstanced(GL_TRIANGLES, 0, 36, m_voxel_count);
 }
 
 bool hvox::ChunkGrid::load_from_scratch_chunks(ChunkGridPosition* chunk_positions, ui32 chunk_count) {

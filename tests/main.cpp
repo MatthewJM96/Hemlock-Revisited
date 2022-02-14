@@ -161,7 +161,7 @@ public:
         m_camera.offset_position(delta_pos);
         m_camera.update();
     }
-    virtual void draw(TimeData time [[maybe_unused]]) override {
+    virtual void draw(TimeData time) override {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         m_shader.use();
@@ -171,18 +171,19 @@ public:
         glBindTextureUnit(0, m_default_texture);
         glUniform1i(m_shader.uniform_location("tex"), 0);
 
-        for (auto& chunk : m_chunk_grid.chunks()) {
-            if (chunk.second->state != hvox::ChunkState::MESH_UPLOADED) continue;
+        m_chunk_grid.draw(time);
+        // for (auto& chunk : m_chunk_grid.chunks()) {
+        //     if (chunk.second->state != hvox::ChunkState::MESH_UPLOADED) continue;
 
-            glBindVertexArray(chunk.second->mesh_handles.vao);
+        //     glBindVertexArray(chunk.second->mesh_handles.vao);
 
-            auto chunk_position = hvox::block_world_position(chunk.second->position, 0);
-            auto translation_matrix = glm::translate(f32m4{1.0f}, f32v3{chunk_position});
-            glUniformMatrix4fv(m_shader.uniform_location("model"),  1, GL_FALSE, &translation_matrix[0][0]);
+        //     auto chunk_position = hvox::block_world_position(chunk.second->position, 0);
+        //     auto translation_matrix = glm::translate(f32m4{1.0f}, f32v3{chunk_position});
+        //     glUniformMatrix4fv(m_shader.uniform_location("model"),  1, GL_FALSE, &translation_matrix[0][0]);
 
-            glDrawArrays(GL_TRIANGLES, 0, chunk.second->mesh.vertex_count);
-        }
-        glBindVertexArray(0);
+        //     glDrawArrays(GL_TRIANGLES, 0, chunk.second->mesh.vertex_count);
+        // }
+        // glBindVertexArray(0);
 
         // Deactivate our shader.
         m_shader.unuse();
@@ -230,8 +231,7 @@ public:
 
         m_chunk_grid.init(5);
 
-#define NUM 5
-        m_chunk_grid.suspend_chunk_tasks();
+#define NUM 10
         for (auto x = -NUM; x < NUM; ++x) {
             for (auto z = -NUM; z < NUM; ++z) {
                 for (auto y = -2 * NUM; y < 0; ++ y) {
@@ -239,7 +239,6 @@ public:
                 }
             }
         }
-        m_chunk_grid.resume_chunk_tasks();
         for (auto x = -NUM; x < NUM; ++x) {
             for (auto z = -NUM; z < NUM; ++z) {
                 for (auto y = -2 * NUM; y < 0; ++ y) {
