@@ -85,6 +85,7 @@ namespace hemlock {
     class ThreadPool {
     public:
         ThreadPool() :
+            m_is_initialised(false),
             m_producer_token(moodycamel::ProducerToken(m_tasks))
         { /* Empty. */ }
         ~ThreadPool() { /* Empty. */ }

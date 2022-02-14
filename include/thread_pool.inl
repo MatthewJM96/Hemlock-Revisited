@@ -4,7 +4,7 @@ void hemlock::basic_thread_main( typename Thread<ThreadState>::State* state,
     state->context.stop    = false;
     state->context.suspend = false;
 
-    HeldTask<ThreadState> held;
+    HeldTask<ThreadState> held = {nullptr, false};
     while (!state->context.stop) {
         task_queue->wait_dequeue_timed(
             state->consumer_token,

@@ -78,6 +78,10 @@ void add(hemlock::Sender, ui32 a, ui32 b) { std::cout << a << " + " << b << " = 
 
 class MyScreen : public happ::ScreenBase {
 public:
+    MyScreen() :
+        happ::ScreenBase(),
+        m_input_manager(nullptr)
+    { /* Empty. */ }
     virtual ~MyScreen() { /* Empty */ };
 
     virtual void update(TimeData time) override {

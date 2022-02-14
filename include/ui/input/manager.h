@@ -10,7 +10,9 @@ namespace hemlock {
 
         class InputManager {
         public:
-            InputManager()  { /* Empty. */ }
+            InputManager() :
+                m_mouse_button_state({})
+            { /* Empty. */ }
             ~InputManager() { /* Empty. */ }
 
             void init();
