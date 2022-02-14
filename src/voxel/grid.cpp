@@ -1,5 +1,6 @@
 #include "stdafx.h"
 
+#include "graphics/mesh.h"
 #include "voxel/generator.h"
 
 #include "voxel/grid.h"
@@ -14,24 +15,7 @@ void hvox::ChunkGrid::init(ui32 thread_count) {
 
     m_TEMP_not_all_ready = true;
 
-    glCreateVertexArrays(1, &m_mesh_handles.vao);
-
-    glCreateBuffers(1, &m_mesh_handles.vbo);
-    glNamedBufferData(m_mesh_handles.vbo, sizeof(hg::Vertex3D_32) * BLOCK_MESH.vertex_count, BLOCK_MESH.vertices, GL_STATIC_DRAW);
-
-    glVertexArrayVertexBuffer(m_mesh_handles.vao, 0, m_mesh_handles.vbo, 0, sizeof(hg::Vertex3D_32));
-
-    glEnableVertexArrayAttrib(m_mesh_handles.vao, hg::MeshAttribID::POSITION);
-    glEnableVertexArrayAttrib(m_mesh_handles.vao, hg::MeshAttribID::COLOUR);
-    glEnableVertexArrayAttrib(m_mesh_handles.vao, hg::MeshAttribID::UV_COORDS);
-
-    glVertexArrayAttribFormat(m_mesh_handles.vao, hg::MeshAttribID::POSITION,   3, GL_FLOAT, GL_FALSE,                 0);
-    glVertexArrayAttribFormat(m_mesh_handles.vao, hg::MeshAttribID::COLOUR,     3, GL_FLOAT, GL_FALSE,     sizeof(f32v3));
-    glVertexArrayAttribFormat(m_mesh_handles.vao, hg::MeshAttribID::UV_COORDS,  2, GL_FLOAT, GL_FALSE, 2 * sizeof(f32v3));
-
-    glVertexArrayAttribBinding(m_mesh_handles.vao, hg::MeshAttribID::POSITION,  0);
-    glVertexArrayAttribBinding(m_mesh_handles.vao, hg::MeshAttribID::COLOUR,    0);
-    glVertexArrayAttribBinding(m_mesh_handles.vao, hg::MeshAttribID::UV_COORDS, 0);
+    hg::upload_mesh(BLOCK_MESH, m_mesh_handles, hg::MeshDataVolatility::STATIC);
 }
 
 void hvox::ChunkGrid::dispose() {
@@ -90,7 +74,7 @@ void hvox::ChunkGrid::draw(TimeData time [[maybe_unused]]) {
     }
 
     glBindVertexArray(m_mesh_handles.vao);
-    glDrawArraysInstanced(GL_TRIANGLES, 0, 36, m_voxel_count);
+    glDrawArraysInstanced(GL_TRIANGLES, 0, BLOCK_VERTEX_COUNT, m_voxel_count);
 }
 
 bool hvox::ChunkGrid::load_from_scratch_chunks(ChunkGridPosition* chunk_positions, ui32 chunk_count) {
