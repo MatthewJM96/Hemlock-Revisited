@@ -2,6 +2,7 @@
 
 #include "graphics/mesh.h"
 #include "voxel/generator.h"
+#include "voxel/mesher.h"
 
 #include "voxel/grid.h"
 
@@ -42,32 +43,37 @@ void hvox::ChunkGrid::draw(TimeData time [[maybe_unused]]) {
         for (auto chunk : m_chunks) {
             all_chunks_meshed = all_chunks_meshed
                                     && query_chunk_state(chunk.second, ChunkState::MESHED).second;
-            voxel_count += chunk.second->instance_data.renderable_voxel_count;
+            voxel_count += chunk.second->instance.count;
         }
         if (!all_chunks_meshed) return;
 
         m_voxel_count = voxel_count;
 
         glCreateBuffers(1, &m_instance_vbo);
-        glVertexArrayVertexBuffer(m_mesh_handles.vao, 1, m_instance_vbo, 0, sizeof(f32v3));
+        glVertexArrayVertexBuffer(m_mesh_handles.vao, 1, m_instance_vbo, 0, sizeof(f32v3) * 2);
 
-        glNamedBufferData(m_instance_vbo, voxel_count * sizeof(f32v3), nullptr, GL_STATIC_DRAW);
+        glNamedBufferData(m_instance_vbo, voxel_count * sizeof(f32v3) * 2, nullptr, GL_STATIC_DRAW);
 
         ui32 cursor = 0;
         for (auto chunk : m_chunks) {
-            auto data = chunk.second->instance_data;
+            auto data = chunk.second->instance;
             glNamedBufferSubData(
                 m_instance_vbo,
-                cursor * sizeof(f32v3),
-                data.renderable_voxel_count * sizeof(f32v3),
-                reinterpret_cast<void*>(data.translations)
+                cursor * sizeof(f32v3) * 2,
+                data.count * sizeof(f32v3) * 2,
+                reinterpret_cast<void*>(data.data)
             );
-            cursor += data.renderable_voxel_count;
+            cursor += data.count;
         }
 
         glEnableVertexArrayAttrib(m_mesh_handles.vao,  3);
         glVertexArrayAttribFormat(m_mesh_handles.vao,  3, 3, GL_FLOAT, GL_FALSE, 0);
         glVertexArrayAttribBinding(m_mesh_handles.vao, 3, 1);
+        glVertexArrayBindingDivisor(m_mesh_handles.vao, 1, 1);
+
+        glEnableVertexArrayAttrib(m_mesh_handles.vao,  4);
+        glVertexArrayAttribFormat(m_mesh_handles.vao,  4, 3, GL_FLOAT, GL_FALSE, sizeof(f32v3));
+        glVertexArrayAttribBinding(m_mesh_handles.vao, 4, 1);
         glVertexArrayBindingDivisor(m_mesh_handles.vao, 1, 1);
 
         m_TEMP_not_all_ready = false;

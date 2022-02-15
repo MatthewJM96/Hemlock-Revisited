@@ -5,8 +5,9 @@
 
 namespace hemlock {
     namespace voxel {
+        using BlockID = ui64;
         struct Block {
-            ui64 id;
+            BlockID id;
             // more stuff
         };
         const Block NULL_BLOCK = Block{0};
@@ -52,7 +53,7 @@ namespace hemlock {
             { { -0.5f,  0.5f,  0.5f }, { 0.0f, 0.0f } }
         };
 
-        const hg::MeshData3D_32 BLOCK_MESH = { BLOCK_VERTICES, BLOCK_VERTEX_COUNT };
+        const hg::Colourless_MeshData3D_32 BLOCK_MESH = { BLOCK_VERTICES, BLOCK_VERTEX_COUNT };
     }
 }
 namespace hvox = hemlock::voxel;

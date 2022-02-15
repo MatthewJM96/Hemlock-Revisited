@@ -45,143 +45,183 @@ static inline hvox::BlockIndex index_at_back_face(hvox::BlockIndex index) {
     return index + (CHUNK_SIZE * CHUNK_SIZE * (CHUNK_SIZE - 1));
 }
 
-void hvox::ChunkMeshTask::execute(ChunkLoadThreadState* state, ChunkLoadTaskQueue* task_queue) {
-    // Only execute if all preloaded neighbouring chunks have at least been generated.
-    auto [ _, neighbours_in_required_state ] =
-            m_chunk_grid->query_all_neighbour_states(m_chunk, ChunkState::GENERATED);
+void hvox::ChunkMeshTask::execute(ChunkLoadThreadState*, ChunkLoadTaskQueue*) {
+    // TODO(Matthew): Cross-chunk greedy instancing?
+    // Note that this code would probably need to be reenabled if we were to do
+    // greedy instancing across chunk boundaries, which for now we do not do.
+    //   Admittedly such a change would require more substantial changes anyway.
+    // // Only execute if all preloaded neighbouring chunks have at least been generated.
+    // auto [ _, neighbours_in_required_state ] =
+    //         m_chunk_grid->query_all_neighbour_states(m_chunk, ChunkState::GENERATED);
 
-    if (!neighbours_in_required_state) {
-        // Put this mesh task back onto the load queue.
-        ChunkMeshTask* mesh_task = new ChunkMeshTask();
-        mesh_task->init(m_chunk, m_chunk_grid);
-        task_queue->enqueue(state->producer_token, { mesh_task, true });
-        m_chunk->pending_task.store(ChunkLoadTaskKind::MESH, std::memory_order_release);
-        return;
-    }
+    // if (!neighbours_in_required_state) {
+    //     // Put this mesh task back onto the load queue.
+    //     ChunkMeshTask* mesh_task = new ChunkMeshTask();
+    //     mesh_task->init(m_chunk, m_chunk_grid);
+    //     task_queue->enqueue(state->producer_token, { mesh_task, true });
+    //     m_chunk->pending_task.store(ChunkLoadTaskKind::MESH, std::memory_order_release);
+    //     return;
+    // }
 
-    m_chunk->instance_data = { nullptr, 0 };
+    m_chunk->instance = { nullptr, 0 };
 
-    // TODO(Matthew): Better guess work should be possible and expand only when needed.
-    //                  Maybe in addition to managing how all chunk's transformations are
-    //                  stored on GPU, ChunkGrid-level should also manage this data?
-    //                    This could get hard with scalings as well (as will come from
-    //                    something like a greedy "meshing" algorithm).
-    // TODO(Matthew):       For greedy meshing, while translations will by definition be
-    //                      unique, scalings will not be, and so an index buffer could
-    //                      further improve performance and also remove the difficulty
-    //                      of the above TODO.
-    m_chunk->instance_data.translations = new f32v3[CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE * 6];
+    Block* blocks = m_chunk->blocks;
 
-    auto add_block = [&](BlockWorldPosition pos) {
-        m_chunk->instance_data.translations[m_chunk->instance_data.renderable_voxel_count++]
-                                        = f32v3(pos);
-    };
+    std::queue<BlockChunkPosition> queued_for_visit;
 
-    // TODO(Matthew): Checking block is NULL_BLOCK is wrong check really, we will have transparent blocks
-    //                e.g. air, to account for too.
-    for (BlockIndex i = 0; i < CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE; ++i) {
-        Block& voxel = m_chunk->blocks[i];
-        if (voxel != NULL_BLOCK) {
-            BlockWorldPosition block_position = block_world_position(m_chunk->position, i);
+    bool* visited = new bool[CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE]{false};
 
-            // Check its neighbours, to decide whether to add its quads.
-            // LEFT
-            if (is_at_left_face(i)) {
-                // Get corresponding neighbour index in neighbour chunk and check.
-                BlockIndex j = index_at_right_face(i);
-                if (m_chunk->neighbours.left == nullptr || m_chunk->neighbours.left->blocks[j] == NULL_BLOCK) {
-                    add_block(block_position);
-                    continue;
-                }
-            } else {
-                // Get corresponding neighbour index in this chunk and check.
-                if (m_chunk->blocks[i - 1]  == NULL_BLOCK) {
-                    add_block(block_position);
+    // TODO(Matthew): In empty block check, do we want to break out of a given
+    //                set of loops entirely if we encounter a visited block?
+    //                  Unsure if this could actually happen in practice.
+    // TODO(Matthew): Assuming block ID is sufficient to differentiate blocks.
+    //                  We can't generally expect that.
+    BlockID             kind   = blocks[0].id;
+    BlockChunkPosition  start  = BlockChunkPosition{0};
+    BlockChunkPosition  end    = BlockChunkPosition{0};
+    do {
+start_loop:
+        BlockChunkPosition candidate = start;
+        for (; candidate.x < CHUNK_SIZE; ++candidate.x) {
+            if (kind == 0) {
+                if (blocks[block_index(candidate)].id != 0
+                        && !visited[block_index(candidate)]) {
+                    start = candidate;
+                    end   = start;
+                    kind  = blocks[block_index(candidate)].id;
+
+                    goto start_loop;
+                } else {
+                    visited[block_index(candidate)] = true;
                     continue;
                 }
             }
 
-            // RIGHT
-            if (is_at_right_face(i)) {
-                // Get corresponding neighbour index in neighbour chunk and check.
-                BlockIndex j = index_at_left_face(i);
-                if (m_chunk->neighbours.right == nullptr || m_chunk->neighbours.right->blocks[j] == NULL_BLOCK) {
-                    add_block(block_position);
-                    continue;
-                }
-            } else {
-                // Get corresponding neighbour index in this chunk and check.
-                if (m_chunk->blocks[i + 1] == NULL_BLOCK) {
-                    add_block(block_position);
-                    continue;
-                }
+            if (kind != blocks[block_index(candidate)].id) {
+                end = { candidate.x - 1, 0, 0 };
+
+                queued_for_visit.push({candidate.x, start.y, start.z});
+
+                break;
             }
 
-            // BOTTOM
-            if (is_at_bottom_face(i)) {
-                // Get corresponding neighbour index in neighbour chunk and check.
-                BlockIndex j = index_at_top_face(i);
-                if (m_chunk->neighbours.bottom == nullptr || m_chunk->neighbours.bottom->blocks[j] == NULL_BLOCK) {
-                    add_block(block_position);
-                    continue;
-                }
-            } else {
-                // Get corresponding neighbour index in this chunk and check.
-                if (m_chunk->blocks[i - CHUNK_SIZE] == NULL_BLOCK) {
-                    add_block(block_position);
-                    continue;
-                }
-            }
-
-            // TOP
-            if (is_at_top_face(i)) {
-                // Get corresponding neighbour index in neighbour chunk and check.
-                BlockIndex j = index_at_bottom_face(i);
-                if (m_chunk->neighbours.top == nullptr || m_chunk->neighbours.top->blocks[j] == NULL_BLOCK) {
-                    add_block(block_position);
-                    continue;
-                }
-            } else {
-                // Get corresponding neighbour index in this chunk and check.
-                if (m_chunk->blocks[i + CHUNK_SIZE] == NULL_BLOCK) {
-                    add_block(block_position);
-                    continue;
-                }
-            }
-
-            // FRONT
-            if (is_at_front_face(i)) {
-                // Get corresponding neighbour index in neighbour chunk and check.
-                BlockIndex j = index_at_back_face(i);
-                if (m_chunk->neighbours.front == nullptr || m_chunk->neighbours.front->blocks[j] == NULL_BLOCK) {
-                    add_block(block_position);
-                    continue;
-                }
-            } else {
-                // Get corresponding neighbour index in this chunk and check.
-                if (m_chunk->blocks[i - (CHUNK_SIZE * CHUNK_SIZE)] == NULL_BLOCK) {
-                    add_block(block_position);
-                    continue;
-                }
-            }
-
-            // BACK
-            if (is_at_back_face(i)) {
-                // Get corresponding neighbour index in neighbour chunk and check.
-                BlockIndex j = index_at_front_face(i);
-                if (m_chunk->neighbours.back == nullptr || m_chunk->neighbours.back->blocks[j] == NULL_BLOCK) {
-                    add_block(block_position);
-                    continue;
-                }
-            } else {
-                // Get corresponding neighbour index in this chunk and check.
-                if (m_chunk->blocks[i + (CHUNK_SIZE * CHUNK_SIZE)] == NULL_BLOCK) {
-                    add_block(block_position);
-                    continue;
-                }
-            }
+            visited[block_index(candidate)] = true;
         }
-    }
+
+        if (candidate.x == CHUNK_SIZE)
+            end = { candidate.x - 1, 0, 0 };
+
+        candidate = start + BlockChunkPosition{0, 0, 1};
+        for (; candidate.z < CHUNK_SIZE; ++candidate.z) {
+            bool done = false;
+
+            for (; candidate.x < end.x; ++candidate.x) {
+                if (kind == 0) {
+                    if (blocks[block_index(candidate)].id != 0
+                            && !visited[block_index(candidate)]) {
+                        start = candidate;
+                        end   = start;
+                        kind  = blocks[block_index(candidate)].id;
+
+                        goto start_loop;
+                    } else {
+                        visited[block_index(candidate)] = true;
+                        continue;
+                    }
+                }
+
+                if (kind != blocks[block_index(candidate)].id) {
+                    end = { end.x, 0, candidate.z - 1};
+
+                    queued_for_visit.push({start.x, start.y, candidate.z});
+
+                    done = true;
+                    break;
+                }
+
+                visited[block_index(candidate)] = true;
+            }
+
+            if (done) break;
+        }
+
+        if (candidate.z == CHUNK_SIZE)
+            end = { end.x, 0, candidate.z - 1};
+
+        candidate = start + BlockChunkPosition{0, 1, 0};
+        for (; candidate.y < CHUNK_SIZE; ++candidate.y) {
+            bool done = false;
+
+            for (; candidate.z < end.z; ++candidate.z) {
+                for (; candidate.x < end.x; ++candidate.x) {
+                    if (kind == 0) {
+                        if (blocks[block_index(candidate)].id != 0
+                                && !visited[block_index(candidate)]) {
+                            start = candidate;
+                            end   = start;
+                            kind  = blocks[block_index(candidate)].id;
+
+                            goto start_loop;
+                        } else {
+                            visited[block_index(candidate)] = true;
+                            continue;
+                        }
+                    }
+
+                    if (kind != blocks[block_index(candidate)].id) {
+                        end = { end.x, candidate.y - 1, end.z};
+
+                        queued_for_visit.push({start.x, candidate.y, start.z});
+
+                        done = true;
+                        break;
+                    }
+
+                    visited[block_index(candidate)] = true;
+                }
+            }
+
+            if (done) break;
+        }
+
+        if (candidate.y == CHUNK_SIZE)
+            end = { end.x, candidate.y - 1, end.z};
+
+        // TODO(Matthew): Better guess work should be possible and expand only when needed.
+        //                  Maybe in addition to managing how all chunk's transformations are
+        //                  stored on GPU, ChunkGrid-level should also manage this data?
+        //                    This could get hard with scalings as well.
+        // TODO(Matthew):       For greedy meshing, while translations will by definition be
+        //                      unique, scalings will not be, and so an index buffer could
+        //                      further improve performance and also remove the difficulty
+        //                      of the above TODO.
+        m_chunk->instance.data = new ChunkInstanceData[CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE * 2];
+
+        auto  data        = m_chunk->instance.data;
+        auto& voxel_count = m_chunk->instance.count;
+
+        BlockWorldPosition start_world = block_world_position(m_chunk->position, start);
+        BlockWorldPosition end_world   = block_world_position(m_chunk->position, end);
+
+        f32v3 centre_of_cuboid = (f32v3{end_world} - f32v3{start_world}) / 2.0f;
+        f32v3 centre_of_cuboid_in_world = centre_of_cuboid + f32v3{start_world};
+        f32v3 scale_of_cuboid  =  f32v3{end_world} - f32v3{start_world} + f32v3{1.0f};
+
+        data[voxel_count++] = ChunkInstanceData{ centre_of_cuboid_in_world, scale_of_cuboid };
+
+pump_queue:
+        if (queued_for_visit.empty())
+            break;
+
+        start  = queued_for_visit.front();
+        end    = start;
+        kind   = blocks[block_index(start)].id;
+
+        queued_for_visit.pop();
+
+        if (visited[block_index(start)])
+            goto pump_queue;
+    } while (!queued_for_visit.empty());
 
     m_chunk->state.store(ChunkState::MESHED, std::memory_order_release);
 }

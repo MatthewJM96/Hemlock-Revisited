@@ -69,6 +69,10 @@ namespace hemlock {
         };
         const Neighbours NULL_NEIGHBOURS = Neighbours{ nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
 
+        struct ChunkInstanceData {
+            f32v3 translation, scaling;
+        };
+
         /**
          * @brief 
          */
@@ -91,9 +95,9 @@ namespace hemlock {
             std::atomic<ChunkLoadTaskKind> pending_task;
 
             struct {
-                f32v3* translations;
-                ui32   renderable_voxel_count;
-            } instance_data;
+                ChunkInstanceData*  data;
+                ui32                count;
+            } instance;
 
             struct {
                 bool  gen_task_active : 4;

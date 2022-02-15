@@ -229,9 +229,9 @@ public:
 
         m_default_texture = hg::load_texture("test_tex.png");
 
-        m_chunk_grid.init(5);
+        m_chunk_grid.init(10);
 
-#define NUM 10
+#define NUM 1
         for (auto x = -NUM; x < NUM; ++x) {
             for (auto z = -NUM; z < NUM; ++z) {
                 for (auto y = -2 * NUM; y < 0; ++ y) {
