@@ -93,6 +93,9 @@ void hvox::ChunkMeshTask::execute(ChunkLoadThreadState*, ChunkLoadTaskQueue*) {
     BlockChunkPosition  start  = BlockChunkPosition{0};
     BlockChunkPosition  end    = BlockChunkPosition{0};
     do {
+        if (!queued_for_visit.empty()) {
+            queued_for_visit.pop();
+        }
 start_loop:
         BlockChunkPosition candidate = start;
         for (; candidate.x < CHUNK_SIZE; ++candidate.x) {
@@ -217,10 +220,10 @@ pump_queue:
         end    = start;
         kind   = blocks[block_index(start)].id;
 
-        queued_for_visit.pop();
-
-        if (visited[block_index(start)])
+        if (visited[block_index(start)]) {
+            queued_for_visit.pop();
             goto pump_queue;
+        }
     } while (!queued_for_visit.empty());
 
     m_chunk->state.store(ChunkState::MESHED, std::memory_order_release);
