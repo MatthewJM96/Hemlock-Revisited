@@ -205,6 +205,8 @@ start_loop:
 
                     visited[block_index(candidate)] = true;
                 }
+
+                if (done) break;
             }
 
             if (done) break;
