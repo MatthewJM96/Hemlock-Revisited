@@ -239,5 +239,7 @@ pump_queue:
         }
     } while (!queued_for_visit.empty());
 
+    delete[] visited;
+
     m_chunk->state.store(ChunkState::MESHED, std::memory_order_release);
 }
