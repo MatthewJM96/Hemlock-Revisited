@@ -98,6 +98,7 @@ void hvox::ChunkMeshTask::execute(ChunkLoadThreadState*, ChunkLoadTaskQueue*) {
         }
 start_loop:
         BlockChunkPosition candidate = start;
+        bool have_found_instanceable = true;
         for (; candidate.x < CHUNK_SIZE; ++candidate.x) {
             if (kind == 0) {
                 if (blocks[block_index(candidate)].id != 0
@@ -106,8 +107,10 @@ start_loop:
                     end   = start;
                     kind  = blocks[block_index(candidate)].id;
 
+                    have_found_instanceable = true;
                     goto start_loop;
                 } else {
+                    have_found_instanceable = false;
                     visited[block_index(candidate)] = true;
                     continue;
                 }
@@ -140,8 +143,10 @@ start_loop:
                         end   = start;
                         kind  = blocks[block_index(candidate)].id;
 
+                        have_found_instanceable = true;
                         goto start_loop;
                     } else {
+                        have_found_instanceable = false;
                         visited[block_index(candidate)] = true;
                         continue;
                     }
@@ -179,8 +184,10 @@ start_loop:
                             end   = start;
                             kind  = blocks[block_index(candidate)].id;
 
+                            have_found_instanceable = true;
                             goto start_loop;
                         } else {
+                            have_found_instanceable = false;
                             visited[block_index(candidate)] = true;
                             continue;
                         }
@@ -206,15 +213,16 @@ start_loop:
         if (candidate.y == CHUNK_SIZE)
             end = { end.x, candidate.y - 1, end.z};
 
-        BlockWorldPosition start_world = block_world_position(m_chunk->position, start);
-        BlockWorldPosition end_world   = block_world_position(m_chunk->position, end);
+        if (have_found_instanceable) {
+            BlockWorldPosition start_world = block_world_position(m_chunk->position, start);
+            BlockWorldPosition end_world   = block_world_position(m_chunk->position, end);
 
-        f32v3 centre_of_cuboid = (f32v3{end_world} - f32v3{start_world}) / 2.0f;
-        f32v3 centre_of_cuboid_in_world = centre_of_cuboid + f32v3{start_world};
-        f32v3 scale_of_cuboid  =  f32v3{end_world} - f32v3{start_world} + f32v3{1.0f};
+            f32v3 centre_of_cuboid = (f32v3{end_world} - f32v3{start_world}) / 2.0f;
+            f32v3 centre_of_cuboid_in_world = centre_of_cuboid + f32v3{start_world};
+            f32v3 scale_of_cuboid  =  f32v3{end_world} - f32v3{start_world} + f32v3{1.0f};
 
-        data[voxel_count++] = ChunkInstanceData{ centre_of_cuboid_in_world, scale_of_cuboid };
-
+            data[voxel_count++] = ChunkInstanceData{ centre_of_cuboid_in_world, scale_of_cuboid };
+        }
 pump_queue:
         if (queued_for_visit.empty())
             break;
