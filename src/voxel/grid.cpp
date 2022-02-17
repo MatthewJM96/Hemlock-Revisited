@@ -69,11 +69,11 @@ void hvox::ChunkGrid::draw(TimeData time [[maybe_unused]]) {
         glEnableVertexArrayAttrib(m_mesh_handles.vao,  3);
         glVertexArrayAttribFormat(m_mesh_handles.vao,  3, 3, GL_FLOAT, GL_FALSE, 0);
         glVertexArrayAttribBinding(m_mesh_handles.vao, 3, 1);
-        glVertexArrayBindingDivisor(m_mesh_handles.vao, 1, 1);
 
         glEnableVertexArrayAttrib(m_mesh_handles.vao,  4);
         glVertexArrayAttribFormat(m_mesh_handles.vao,  4, 3, GL_FLOAT, GL_FALSE, sizeof(f32v3));
         glVertexArrayAttribBinding(m_mesh_handles.vao, 4, 1);
+
         glVertexArrayBindingDivisor(m_mesh_handles.vao, 1, 1);
 
         m_TEMP_not_all_ready = false;
