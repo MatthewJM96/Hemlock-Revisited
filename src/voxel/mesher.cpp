@@ -135,7 +135,7 @@ start_loop:
         for (; candidate.z < CHUNK_SIZE; ++candidate.z) {
             bool done = false;
 
-            for (; candidate.x < end.x; ++candidate.x) {
+            for (candidate.x = 0; candidate.x <= end.x; ++candidate.x) {
                 if (kind == 0) {
                     if (blocks[block_index(candidate)].id != 0
                             && !visited[block_index(candidate)]) {
@@ -175,8 +175,8 @@ start_loop:
         for (; candidate.y < CHUNK_SIZE; ++candidate.y) {
             bool done = false;
 
-            for (; candidate.z < end.z; ++candidate.z) {
-                for (; candidate.x < end.x; ++candidate.x) {
+            for (candidate.z = 0; candidate.z <= end.z; ++candidate.z) {
+                for (candidate.x = 0; candidate.x <= end.x; ++candidate.x) {
                     if (kind == 0) {
                         if (blocks[block_index(candidate)].id != 0
                                 && !visited[block_index(candidate)]) {
