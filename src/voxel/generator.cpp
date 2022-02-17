@@ -11,10 +11,17 @@ void hvox::ChunkGenerationTask::execute(ChunkLoadThreadState* state, ChunkLoadTa
     //                be atomic to assure what we want it to be achieving?
     m_chunk->gen_task_active = true;
 
-    BlockWorldPosition chunk_position = block_world_position(m_chunk->position, 0);
+    // BlockWorldPosition chunk_position = block_world_position(m_chunk->position, 0);
 
-    if (chunk_position.y < 0) {
-        set_blocks(m_chunk, BlockChunkPosition{0}, BlockChunkPosition{CHUNK_SIZE}, Block{1});
+    // if (chunk_position.y < 0) {
+    //     set_blocks(m_chunk, BlockChunkPosition{0}, BlockChunkPosition{CHUNK_SIZE - 1}, Block{1});
+    // }
+
+    for (auto y = 0; y < CHUNK_SIZE; y += 2) {
+        const ui8 LEFT  = 14;
+        const ui8 RIGHT = 16;
+        set_blocks(m_chunk, BlockChunkPosition{0, y, 0}, BlockChunkPosition{LEFT, y, LEFT}, Block{1});
+        set_blocks(m_chunk, BlockChunkPosition{RIGHT, y, RIGHT}, BlockChunkPosition{CHUNK_SIZE - 1, y, CHUNK_SIZE - 1}, Block{1});
     }
 
     // for (auto x = 0; x < CHUNK_SIZE; ++x) {
