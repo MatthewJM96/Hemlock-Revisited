@@ -71,6 +71,19 @@ void hvox::ChunkMeshTask::execute(ChunkLoadThreadState*, ChunkLoadTaskQueue*) {
 
     bool* visited = new bool[CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE]{false};
 
+    // TODO(Matthew): Better guess work should be possible and expand only when needed.
+    //                  Maybe in addition to managing how all chunk's transformations are
+    //                  stored on GPU, ChunkGrid-level should also manage this data?
+    //                    This could get hard with scalings as well.
+    // TODO(Matthew):       For greedy meshing, while translations will by definition be
+    //                      unique, scalings will not be, and so an index buffer could
+    //                      further improve performance and also remove the difficulty
+    //                      of the above TODO.
+    m_chunk->instance.data = new ChunkInstanceData[CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE * 2];
+
+    auto  data        = m_chunk->instance.data;
+    auto& voxel_count = m_chunk->instance.count;
+
     // TODO(Matthew): In empty block check, do we want to break out of a given
     //                set of loops entirely if we encounter a visited block?
     //                  Unsure if this could actually happen in practice.
@@ -186,19 +199,6 @@ start_loop:
 
         if (candidate.y == CHUNK_SIZE)
             end = { end.x, candidate.y - 1, end.z};
-
-        // TODO(Matthew): Better guess work should be possible and expand only when needed.
-        //                  Maybe in addition to managing how all chunk's transformations are
-        //                  stored on GPU, ChunkGrid-level should also manage this data?
-        //                    This could get hard with scalings as well.
-        // TODO(Matthew):       For greedy meshing, while translations will by definition be
-        //                      unique, scalings will not be, and so an index buffer could
-        //                      further improve performance and also remove the difficulty
-        //                      of the above TODO.
-        m_chunk->instance.data = new ChunkInstanceData[CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE * 2];
-
-        auto  data        = m_chunk->instance.data;
-        auto& voxel_count = m_chunk->instance.count;
 
         BlockWorldPosition start_world = block_world_position(m_chunk->position, start);
         BlockWorldPosition end_world   = block_world_position(m_chunk->position, end);
