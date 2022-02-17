@@ -113,7 +113,8 @@ start_loop:
                 }
             }
 
-            if (kind != blocks[block_index(candidate)].id) {
+            if (kind != blocks[block_index(candidate)].id
+                    || visited[block_index(candidate)]) {
                 end = { candidate.x - 1, 0, 0 };
 
                 queued_for_visit.push({candidate.x, start.y, start.z});
@@ -146,7 +147,8 @@ start_loop:
                     }
                 }
 
-                if (kind != blocks[block_index(candidate)].id) {
+                if (kind != blocks[block_index(candidate)].id
+                        || visited[block_index(candidate)]) {
                     end = { end.x, 0, candidate.z - 1};
 
                     queued_for_visit.push({start.x, start.y, candidate.z});
@@ -184,7 +186,8 @@ start_loop:
                         }
                     }
 
-                    if (kind != blocks[block_index(candidate)].id) {
+                    if (kind != blocks[block_index(candidate)].id
+                            || visited[block_index(candidate)]) {
                         end = { end.x, candidate.y - 1, end.z};
 
                         queued_for_visit.push({start.x, candidate.y, start.z});
