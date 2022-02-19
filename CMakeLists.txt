@@ -86,7 +86,8 @@ add_executable(Hemlock_Revisited
     "${PROJECT_SOURCE_DIR}/src/voxel/coordinate_system.cpp"
     "${PROJECT_SOURCE_DIR}/src/voxel/generator.cpp"
     "${PROJECT_SOURCE_DIR}/src/voxel/grid.cpp"
-    "${PROJECT_SOURCE_DIR}/src/voxel/mesher.cpp"
+    "${PROJECT_SOURCE_DIR}/src/voxel/mesh/naive.cpp"
+    "${PROJECT_SOURCE_DIR}/src/voxel/mesh/greedy.cpp"
     "${PROJECT_SOURCE_DIR}/tests/main.cpp"
 )
 

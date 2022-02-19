@@ -2,10 +2,9 @@
 
 #include "graphics/mesh.h"
 #include "voxel/block.hpp"
-#include "voxel/chunk.h"
 #include "voxel/grid.h"
 
-#include "voxel/mesher.h"
+#include "voxel/mesh/greedy.h"
 
 static inline bool is_at_left_face(hvox::BlockIndex index) {
     return (index % CHUNK_SIZE) == 0;
@@ -45,18 +44,21 @@ static inline hvox::BlockIndex index_at_back_face(hvox::BlockIndex index) {
     return index + (CHUNK_SIZE * CHUNK_SIZE * (CHUNK_SIZE - 1));
 }
 
-void hvox::ChunkMeshTask::execute(ChunkLoadThreadState*, ChunkLoadTaskQueue*) {
+void hvox::ChunkGreedyMeshTask::execute(ChunkLoadThreadState*, ChunkLoadTaskQueue*) {
     // TODO(Matthew): Cross-chunk greedy instancing?
-    // Note that this code would probably need to be reenabled if we were to do
+    // Note that this code would probably need to be enabled if we were to do
     // greedy instancing across chunk boundaries, which for now we do not do.
-    //   Admittedly such a change would require more substantial changes anyway.
+    //   Admittedly such a strategy would require more substantial changes anyway,
+    //   in particular instructing neighbouring chunks that they will also be
+    //   due a remeshing.
+    //     The benefits in reduced instances would likely be outweighed by this cost.
     // // Only execute if all preloaded neighbouring chunks have at least been generated.
     // auto [ _, neighbours_in_required_state ] =
     //         m_chunk_grid->query_all_neighbour_states(m_chunk, ChunkState::GENERATED);
 
     // if (!neighbours_in_required_state) {
     //     // Put this mesh task back onto the load queue.
-    //     ChunkMeshTask* mesh_task = new ChunkMeshTask();
+    //     ChunkGreedyMeshTask* mesh_task = new ChunkGreedyMeshTask();
     //     mesh_task->init(m_chunk, m_chunk_grid);
     //     task_queue->enqueue(state->producer_token, { mesh_task, true });
     //     m_chunk->pending_task.store(ChunkLoadTaskKind::MESH, std::memory_order_release);
@@ -79,7 +81,7 @@ void hvox::ChunkMeshTask::execute(ChunkLoadThreadState*, ChunkLoadTaskQueue*) {
     //                      unique, scalings will not be, and so an index buffer could
     //                      further improve performance and also remove the difficulty
     //                      of the above TODO.
-    m_chunk->instance.data = new ChunkInstanceData[CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE * 2];
+    m_chunk->instance.data = new ChunkInstanceData[CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE];
 
     auto  data        = m_chunk->instance.data;
     auto& voxel_count = m_chunk->instance.count;

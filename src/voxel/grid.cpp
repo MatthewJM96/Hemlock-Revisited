@@ -2,7 +2,6 @@
 
 #include "graphics/mesh.h"
 #include "voxel/generator.h"
-#include "voxel/mesher.h"
 
 #include "voxel/grid.h"
 

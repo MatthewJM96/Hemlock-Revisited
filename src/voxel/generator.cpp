@@ -2,7 +2,7 @@
 
 #include "voxel/block.hpp"
 #include "voxel/chunk.h"
-#include "voxel/mesher.h"
+#include "voxel/mesh/greedy.h"
 
 #include "voxel/generator.h"
 
@@ -33,7 +33,7 @@ void hvox::ChunkGenerationTask::execute(ChunkLoadThreadState* state, ChunkLoadTa
     m_chunk->state.store(ChunkState::GENERATED, std::memory_order_release);
 
     // if (task_queue) {
-    ChunkMeshTask* mesh_task = new ChunkMeshTask();
+    ChunkGreedyMeshTask* mesh_task = new ChunkGreedyMeshTask();
     mesh_task->init(m_chunk, m_chunk_grid);
     m_chunk->pending_task.store(ChunkLoadTaskKind::MESH, std::memory_order_release);
     task_queue->enqueue(state->producer_token, { mesh_task, true });
