@@ -72,6 +72,9 @@
 // Image Libs
 #include <png.h>
 
+// Our generic preprocessor macros.
+#include "preprocessor.hpp"
+
 // Our constants.
 #include "constants.hpp"
 #include "decorators.hpp"
