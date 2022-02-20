@@ -2,11 +2,11 @@
 
 #include "graphics/mesh.h"
 
-#define MAKE_POS2D(PRECISION)   (Vertex_Pos2D_##PRECISION,  position,   POSITION,   2,  PRECISION,  0)
-#define MAKE_POS3D(PRECISION)   (Vertex_Pos3D_##PRECISION,  position,   POSITION,   3,  PRECISION,  0)
-#define MAKE_UV(PRECISION)      (Vertex_UV_##PRECISION,     uv,         UV,         2,  PRECISION,  0)
-#define MAKE_RGB(PRECISION)     (Vertex_RGB_##PRECISION,    rgb,        RGB,        3,  PRECISION,  1)
-#define MAKE_RGBA(PRECISION)    (Vertex_RGBA_##PRECISION,   rgba,       RGBA,       4,  PRECISION,  1)
+#include "graphics/mesh/common_vertices_def.hpp"
+
+#if defined(HEMLOCK_USING_OPENGL)
+#   include "graphics/mesh/gl.hpp"
+#endif // defined(HEMLOCK_USING_OPENGL)
 
 GEN_MESH_UPLOADER_DEFS(
     Colourless_2D_32,
@@ -88,11 +88,7 @@ GEN_MESH_UPLOADER_DEFS(
     MAKE_RGBA(64)
 )
 
-#undef MAKE_RGBA
-#undef MAKE_RGB
-#undef MAKE_UV
-#undef MAKE_POS3D
-#undef MAKE_POS2D
+#include "graphics/mesh/common_vertices_undef.hpp"
 
 #if defined(HEMLOCK_USING_OPENGL)
 template <bool indexed>

@@ -127,11 +127,7 @@ GEN_MESH_DATA_STRUCT_DEFS(PREFIX)
 GEN_MESH_CASE_STRUCT_DEFS(PREFIX, __VA_ARGS__)                      \
 GEN_MESH_UPLOADER_DECLS(PREFIX)
 
-#define MAKE_POS2D(PRECISION)   (Vertex_Pos2D_##PRECISION,  position,   POSITION,   2,  PRECISION,  0)
-#define MAKE_POS3D(PRECISION)   (Vertex_Pos3D_##PRECISION,  position,   POSITION,   3,  PRECISION,  0)
-#define MAKE_UV(PRECISION)      (Vertex_UV_##PRECISION,     uv,         UV,         2,  PRECISION,  0)
-#define MAKE_RGB(PRECISION)     (Vertex_RGB_##PRECISION,    rgb,        RGB,        3,  PRECISION,  1)
-#define MAKE_RGBA(PRECISION)    (Vertex_RGBA_##PRECISION,   rgba,       RGBA,       4,  PRECISION,  1)
+#include "graphics/mesh/common_vertices_def.hpp"
 
         GEN_MESH_CASE_STRUCT_DEFS_AND_FUNC_DECLS(
             Colourless_2D_32,
@@ -213,104 +209,12 @@ GEN_MESH_UPLOADER_DECLS(PREFIX)
             MAKE_RGBA(64)
         )
 
-#undef MAKE_RGBA
-#undef MAKE_RGB
-#undef MAKE_UV
-#undef MAKE_POS3D
-#undef MAKE_POS2D
+#include "graphics/mesh/common_vertices_undef.hpp"
 
         void dispose_mesh(const        MeshHandles& handles);
         void dispose_mesh(const IndexedMeshHandles& handles);
     }
 }
 namespace hg  = hemlock::graphics;
-
-#define SCOPE() ::
-
-#define ACCUMULATE_VERTEX_ATTRIB_OFFSET(VERTEX_INFO, CURR_OFFSET)   \
-CURR_OFFSET + ( VERTEX_ELEM_COUNT VERTEX_INFO                       \
-                    * VERTEX_PRECISION VERTEX_INFO / 8 )
-
-#define GEN_VERTEX_ATTRIB(PREFIX, VERTEX_INFO, OFFSET)              \
-glEnableVertexArrayAttrib(                                          \
-    handles.vao,                                                    \
-    static_cast<GLuint>(                                            \
-        PREFIX##_MeshAttribID::VERTEX_ENUM_NAME VERTEX_INFO         \
-    )                                                               \
-);                                                                  \
-glVertexArrayAttribFormat(                                          \
-    handles.vao,                                                    \
-    static_cast<GLuint>(                                            \
-        PREFIX##_MeshAttribID::VERTEX_ENUM_NAME VERTEX_INFO         \
-    ),                                                              \
-    VERTEX_ELEM_COUNT VERTEX_INFO,                                  \
-    VERTEX_PRECISION VERTEX_INFO == 32 ? GL_FLOAT : GL_DOUBLE,      \
-    VERTEX_NORMALISED VERTEX_INFO == 1 ? GL_TRUE : GL_FALSE,        \
-    OFFSET                                                          \
-);                                                                  \
-glVertexArrayAttribBinding(                                         \
-    handles.vao,                                                    \
-    static_cast<GLuint>(                                            \
-        PREFIX##_MeshAttribID::VERTEX_ENUM_NAME VERTEX_INFO         \
-    ),                                                              \
-    0                                                               \
-);
-
-#define GEN_MESH_UPLOADER_DEF(PREFIX, INDEXED, ...)                 \
-bool hg::upload_mesh(                                               \
-    IF_ELSE(NOT(INDEXED))(                                          \
-        const PREFIX##_MeshData & mesh_data,                        \
-        const PREFIX##_IndexedMeshData & mesh_data                  \
-    ),                                                              \
-    IF_ELSE(NOT(INDEXED))(                                          \
-        OUT MeshHandles& handles,                                   \
-        OUT IndexedMeshHandles& handles                             \
-    ),                                                              \
-    MeshDataVolatility volatility /*= MeshDataVolatility::DYNAMIC*/ \
-) {                                                                 \
-    assert(mesh_data.vertices != nullptr);                          \
-                                                                    \
-    IF(INDEXED)(                                                    \
-        assert(mesh_data.indices != nullptr);                       \
-    )                                                               \
-                                                                    \
-    glCreateVertexArrays(1, &handles.vao);                          \
-                                                                    \
-    glCreateBuffers(1, &handles.vbo);                               \
-    glNamedBufferData(                                              \
-        handles.vbo,                                                \
-        sizeof(PREFIX##_Vertex) * mesh_data.vertex_count,           \
-        mesh_data.vertices,                                         \
-        static_cast<GLenum>(volatility)                             \
-    );                                                              \
-                                                                    \
-    glVertexArrayVertexBuffer(                                      \
-        handles.vao,                                                \
-        0, handles.vbo,                                             \
-        0, sizeof(PREFIX##_Vertex)                                  \
-    );                                                              \
-                                                                    \
-    IF(INDEXED)(                                                    \
-        glCreateBuffers(1, &handles.ibo);                           \
-        glNamedBufferData(                                          \
-            handles.ibo,                                            \
-            sizeof(mesh_data.indices[0]) * mesh_data.index_count,   \
-            mesh_data.indices,                                      \
-            static_cast<GLenum>(volatility)                         \
-        );                                                          \
-                                                                    \
-        glVertexArrayElementBuffer(handles.vao, handles.ibo);       \
-    )                                                               \
-                                                                    \
-    BIND_MAP_WITH_ACCUMULATE(                                       \
-        GEN_VERTEX_ATTRIB,                                          \
-        PREFIX,                                                     \
-        EMPTY,                                                      \
-        0, ACCUMULATE_VERTEX_ATTRIB_OFFSET,                         \
-        __VA_ARGS__                                                 \
-    )                                                               \
-                                                                    \
-    return static_cast<bool>(mesh_data.vertex_count);               \
-}
 
 #endif // __hemlock_graphics_mesh_h
