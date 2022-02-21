@@ -1,5 +1,5 @@
-#ifndef __hemlock_voxel_grid_h
-#define __hemlock_voxel_grid_h
+#ifndef __hemlock_voxel_chunk_grid_h
+#define __hemlock_voxel_chunk_grid_h
 
 #include "timing.h"
 #include "voxel/chunk.h"
@@ -253,4 +253,4 @@ namespace hemlock {
 }
 namespace hvox = hemlock::voxel;
 
-#endif // __hemlock_voxel_grid_h
+#endif // __hemlock_voxel_chunk_grid_h

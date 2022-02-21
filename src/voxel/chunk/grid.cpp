@@ -3,7 +3,7 @@
 #include "graphics/mesh.h"
 #include "voxel/chunk/generator_task.h"
 
-#include "voxel/grid.h"
+#include "voxel/chunk/grid.h"
 
 void hvox::ChunkLoadTask::init(Chunk* chunk, ChunkGrid* chunk_grid) {
     m_chunk      = chunk;

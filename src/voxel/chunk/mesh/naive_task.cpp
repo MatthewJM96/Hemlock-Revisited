@@ -2,7 +2,7 @@
 
 #include "graphics/mesh.h"
 #include "voxel/block.hpp"
-#include "voxel/grid.h"
+#include "voxel/chunk/grid.h"
 
 #include "voxel/chunk/mesh/naive_task.h"
 
