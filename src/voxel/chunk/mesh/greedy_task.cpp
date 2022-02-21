@@ -4,7 +4,7 @@
 #include "voxel/block.hpp"
 #include "voxel/grid.h"
 
-#include "voxel/mesh/greedy.h"
+#include "voxel/chunk/mesh/greedy_task.h"
 
 static inline bool is_at_left_face(hvox::BlockIndex index) {
     return (index % CHUNK_SIZE) == 0;

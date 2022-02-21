@@ -1,7 +1,7 @@
 #include "stdafx.h"
 
 #include "graphics/mesh.h"
-#include "voxel/generator.h"
+#include "voxel/chunk/generator_task.h"
 
 #include "voxel/grid.h"
 

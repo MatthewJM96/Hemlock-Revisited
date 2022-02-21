@@ -8,6 +8,7 @@
 #include "timing.h"
 #include "graphics/mesh.h"
 #include "voxel/block.hpp"
+#include "voxel/chunk/load_task.hpp"
 #include "voxel/coordinate_system.h"
 
 namespace hemlock {
@@ -23,27 +24,6 @@ namespace hemlock {
             GENERATED       = 2,
             MESHED          = 3,
             MESH_UPLOADED   = 4
-        };
-
-        enum class ChunkLoadTaskKind : ui8 {
-            NONE            = 0,
-            GENERATION      = 1,
-            MESH            = 2,
-            MESH_UPLOAD     = 3
-        };
-
-        struct ChunkLoadTaskContext {
-            volatile bool stop;
-            volatile bool suspend;
-        };
-        using ChunkLoadThreadState = Thread<ChunkLoadTaskContext>::State;
-        using ChunkLoadTaskQueue   = TaskQueue<ChunkLoadTaskContext>;
-        class ChunkLoadTask : public IThreadTask<ChunkLoadTaskContext> {
-        public:
-            void init(Chunk* chunk, ChunkGrid* chunk_grid);
-        protected:
-            Chunk*     m_chunk;
-            ChunkGrid* m_chunk_grid;
         };
 
         struct BlockChangeEvent {

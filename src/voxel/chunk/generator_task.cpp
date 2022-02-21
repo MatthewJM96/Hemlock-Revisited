@@ -2,9 +2,9 @@
 
 #include "voxel/block.hpp"
 #include "voxel/chunk.h"
-#include "voxel/mesh/greedy.h"
+#include "voxel/chunk/mesh/greedy_task.h"
 
-#include "voxel/generator.h"
+#include "voxel/chunk/generator_task.h"
 
 void hvox::ChunkGenerationTask::execute(ChunkLoadThreadState* state, ChunkLoadTaskQueue* task_queue) {
     m_chunk->gen_task_active.store(true, std::memory_order_release);
