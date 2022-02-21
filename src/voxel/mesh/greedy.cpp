@@ -45,6 +45,8 @@ static inline hvox::BlockIndex index_at_back_face(hvox::BlockIndex index) {
 }
 
 void hvox::ChunkGreedyMeshTask::execute(ChunkLoadThreadState*, ChunkLoadTaskQueue*) {
+    m_chunk->mesh_task_active.store(true, std::memory_order_release);
+
     // TODO(Matthew): Cross-chunk greedy instancing?
     // Note that this code would probably need to be enabled if we were to do
     // greedy instancing across chunk boundaries, which for now we do not do.
@@ -57,7 +59,9 @@ void hvox::ChunkGreedyMeshTask::execute(ChunkLoadThreadState*, ChunkLoadTaskQueu
     //         m_chunk_grid->query_all_neighbour_states(m_chunk, ChunkState::GENERATED);
 
     // if (!neighbours_in_required_state) {
-    //     // Put this mesh task back onto the load queue.
+    //     // Mark as no longer engaging in this meshing task.
+    //     m_chunk->mesh_task_active.store(false, std::memory_order_release);
+    //     // Put copy of this mesh task back onto the load task queue.
     //     ChunkGreedyMeshTask* mesh_task = new ChunkGreedyMeshTask();
     //     mesh_task->init(m_chunk, m_chunk_grid);
     //     task_queue->enqueue(state->producer_token, { mesh_task, true });
@@ -242,6 +246,8 @@ pump_queue:
     } while (!queued_for_visit.empty());
 
     delete[] visited;
+
+    m_chunk->mesh_task_active.store(false, std::memory_order_release);
 
     m_chunk->state.store(ChunkState::MESHED, std::memory_order_release);
 }

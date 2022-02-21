@@ -45,12 +45,16 @@ static inline hvox::BlockIndex index_at_back_face(hvox::BlockIndex index) {
 }
 
 void hvox::ChunkNaiveMeshTask::execute(ChunkLoadThreadState* state, ChunkLoadTaskQueue* task_queue) {
+    m_chunk->mesh_task_active.store(true, std::memory_order_release);
+
     // Only execute if all preloaded neighbouring chunks have at least been generated.
     auto [ _, neighbours_in_required_state ] =
             m_chunk_grid->query_all_neighbour_states(m_chunk, ChunkState::GENERATED);
 
     if (!neighbours_in_required_state) {
-        // Put this mesh task back onto the load queue.
+        // Mark as no longer engaging in this meshing task.
+        m_chunk->mesh_task_active.store(false, std::memory_order_release);
+        // Put copy of this mesh task back onto the load task queue.
         ChunkNaiveMeshTask* mesh_task = new ChunkNaiveMeshTask();
         mesh_task->init(m_chunk, m_chunk_grid);
         task_queue->enqueue(state->producer_token, { mesh_task, true });
@@ -181,6 +185,8 @@ void hvox::ChunkNaiveMeshTask::execute(ChunkLoadThreadState* state, ChunkLoadTas
             }
         }
     }
+
+    m_chunk->mesh_task_active.store(false, std::memory_order_release);
 
     m_chunk->state.store(ChunkState::MESHED, std::memory_order_release);
 }

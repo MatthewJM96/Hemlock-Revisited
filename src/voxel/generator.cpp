@@ -7,9 +7,7 @@
 #include "voxel/generator.h"
 
 void hvox::ChunkGenerationTask::execute(ChunkLoadThreadState* state, ChunkLoadTaskQueue* task_queue) {
-    // TODO(Matthew): Will we use gen_task_active anywhere? And if we do, does that need to
-    //                be atomic to assure what we want it to be achieving?
-    m_chunk->gen_task_active = true;
+    m_chunk->gen_task_active.store(true, std::memory_order_release);
 
     // BlockWorldPosition chunk_position = block_world_position(m_chunk->position, 0);
 
@@ -39,5 +37,5 @@ void hvox::ChunkGenerationTask::execute(ChunkLoadThreadState* state, ChunkLoadTa
     task_queue->enqueue(state->producer_token, { mesh_task, true });
     // }
 
-    m_chunk->gen_task_active = false;
+    m_chunk->gen_task_active.store(false, std::memory_order_release);
 }

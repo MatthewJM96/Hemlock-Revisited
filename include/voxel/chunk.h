@@ -85,24 +85,18 @@ namespace hemlock {
 
             void update(TimeData);
 
-            Neighbours neighbours;
-
-            Block* blocks;
-
             ChunkGridPosition position;
-
-            std::atomic<ChunkState>        state;
-            std::atomic<ChunkLoadTaskKind> pending_task;
+            Neighbours        neighbours;
+            Block*            blocks;
 
             struct {
                 ChunkInstanceData*  data;
                 ui32                count;
             } instance;
 
-            struct {
-                bool  gen_task_active : 4;
-                bool mesh_task_active : 4;
-            };
+            std::atomic<ChunkState>        state;
+            std::atomic<ChunkLoadTaskKind> pending_task;
+            std::atomic<bool>               gen_task_active, mesh_task_active;
 
             // TODO(Matthew): Store these here? Somehow feels dodgy.
             CancellableEvent<BlockChangeEvent>     on_block_change;
