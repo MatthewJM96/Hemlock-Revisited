@@ -3,7 +3,9 @@
 
 # Dependencies
 deps/
-tests/fonts
+
+# Working directory.
+data/
 
 # Artifacts
 build/

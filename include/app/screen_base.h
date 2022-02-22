@@ -3,9 +3,9 @@
 
 namespace hemlock {
     namespace app {
-        class AppBase;
+        class ProcessBase;
+        class ScreenBase;
 
-        // TODO(Matthew): Allow screen to pass some amount of information to next/previous screen.
         enum class ScreenState {
             NONE,            // Screen is doing nothing.
             RUNNING,         // Screen is running and being drawn.
@@ -14,33 +14,35 @@ namespace hemlock {
             QUIT_APPLICATION // Screen wants application to quit.
         };
 
-        // Not just for game screens, can also be used for UI screens with navigation back and forth.
+        /**
+         * @brief A screen provides an interface for a set of update and rendering logic.
+         */
         class ScreenBase {
         public:
             ScreenBase() :
                 m_initialised(false),
                 m_name(""),
-                m_app(nullptr),
+                m_state(ScreenState::NONE),
+                m_process(nullptr),
                 m_next_screen(nullptr),
                 m_prev_screen(nullptr)
             { /* Empty. */ };
             virtual ~ScreenBase() { /* Empty */};
 
-            virtual void init(std::string name, AppBase* app);
+            virtual void init(const std::string& name, ProcessBase* process);
             virtual void dispose(); 
 
-            virtual void start(TimeData time);
-            virtual void end(TimeData time);
+            virtual void start (TimeData time);
+            virtual void end   (TimeData time);
 
-            virtual void update(TimeData time) = 0;
-            virtual void draw(TimeData time)   = 0;
+            virtual void update (TimeData time) = 0;
+            virtual void draw   (TimeData time) = 0;
 
             bool is_initialised() const { return m_initialised; }
             bool is_running()     const { return m_state == ScreenState::RUNNING; }
 
-            const std::string& name() const { return m_name;  }
-
-            ScreenState state() const { return m_state; }
+            const std::string& name()  const { return m_name;  }
+                   ScreenState state() const { return m_state; }
 
             ScreenBase* next_screen() const { return m_next_screen; }
             ScreenBase* prev_screen() const { return m_prev_screen; }
@@ -48,11 +50,12 @@ namespace hemlock {
             void set_next_screen(ScreenBase* screen) { m_next_screen = screen; }
             void set_prev_screen(ScreenBase* screen) { m_prev_screen = screen; }
         protected:
-            bool        m_initialised;
-            ScreenState m_state;
-            std::string m_name;
+            bool m_initialised;
 
-            AppBase* m_app;
+            std::string m_name;
+            ScreenState m_state;
+
+            ProcessBase* m_process;
 
             ScreenBase* m_next_screen;
             ScreenBase* m_prev_screen;

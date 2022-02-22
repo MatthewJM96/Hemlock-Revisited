@@ -1,5 +1,7 @@
 #include "stdafx.h"
 
+#include "graphics/pixel.h"
+
 #include "graphics/font/font.h"
 
 /**
@@ -43,11 +45,9 @@ bool hg::f::FontInstance::save(std::string filepath, hio::image::Saver save) {
         ui8* pixels = new ui8[texture_size.x * texture_size.y * 4];
 
         // Bind the texture, load it into our buffer, and then unbind it.
-        glBindTexture(GL_TEXTURE_2D, texture);
-        glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
-        glBindTexture(GL_TEXTURE_2D, 0);
+        glGetTextureImage(texture, 0, GL_RGBA, GL_UNSIGNED_BYTE, texture_size.x * texture_size.y * 4, pixels);
 
-        return save(filepath, static_cast<void*>(pixels), texture_size, hio::image::PixelFormat::RGBA_UI8);
+        return save(filepath, reinterpret_cast<void*>(pixels), texture_size, hio::image::PixelFormat::RGBA_UI8);
 }
 
 hg::f::Font::Font() :
@@ -195,18 +195,20 @@ bool hg::f::Font::generate( FontSize size,
     // Set texture size in font instance.
     font_instance.texture_size = ui32v2(best_width, best_height);
 
-    // Generate & bind the texture we will put each glyph into.
-    glGenTextures(1, &font_instance.texture);
-    glBindTexture(GL_TEXTURE_2D, font_instance.texture);
+    // Create the texture we will put each glyph into.
+    glCreateTextures(GL_TEXTURE_2D, 1, &font_instance.texture);
     // Set the texture's size and pixel format.
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, best_width, best_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+    glTextureStorage2D(font_instance.texture, 1, GL_RGBA8, best_width, best_height);
 
-    // Set some needed parameters for the texture.
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S,     GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T,     GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R,     GL_REPEAT);
+    // Note that by default MAG_FILTER, WRAP_* are as we are setting them,
+    // the crucial parameter to set is MIN_FILTER that defaults to a
+    // mip mapping setting that won't work for these textures, causing
+    // OpenGL to treat pixels all as RGBA{0,0,0,255}.
+    glTextureParameteri(font_instance.texture, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTextureParameteri(font_instance.texture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTextureParameteri(font_instance.texture, GL_TEXTURE_WRAP_S,     GL_REPEAT);
+    glTextureParameteri(font_instance.texture, GL_TEXTURE_WRAP_T,     GL_REPEAT);
+    glTextureParameteri(font_instance.texture, GL_TEXTURE_WRAP_R,     GL_REPEAT);
 
     // This represents the current V-coordinate we are into the texture.
     //    UV are the coordinates we use for textures (i.e. the X & Y coords of the pixels).
@@ -233,8 +235,24 @@ bool hg::f::Font::generate( FontSize size,
                     break;
             }
 
+            /*
+             * SDL_ttf produces SDL_Surfaces with indexing into a colour palette for solid case,
+             * and.ARGB8888 for blended case now. Let's handle both indexed colour palette and
+             * general 4-byte cases and hope that covers us.
+             */
+            ui8* actual_pixels = nullptr;
+            switch (glyph_surface->format->BytesPerPixel) {
+                case 1:
+                    p::convert_sdl_indexed_to_rgba_8888(glyph_surface, actual_pixels);
+                    break;
+                case 4:
+                    p::convert_sdl_xxxx_8888_to_rgba_8888(glyph_surface, actual_pixels);
+                    break;
+            }
+            if (actual_pixels == nullptr) return false;
+
             // Stitch the glyph we just generated into our texture.
-            glTexSubImage2D(GL_TEXTURE_2D, 0, current_u, current_v, glyph_surface->w, glyph_surface->h, GL_BGRA, GL_UNSIGNED_BYTE, glyph_surface->pixels);
+            glTextureSubImage2D(font_instance.texture, 0, current_u, current_v, glyph_surface->w, glyph_surface->h, GL_RGBA, GL_UNSIGNED_BYTE, actual_pixels);
 
             // Update the size of the glyph with what we rendered - there can be variance between this and what we obtained
             // in the glyph metric stage!
@@ -253,13 +271,13 @@ bool hg::f::Font::generate( FontSize size,
             // Free the glyph "surface".
             SDL_FreeSurface(glyph_surface);
             glyph_surface = nullptr;
+            delete[] actual_pixels;
         }
         // Update current_v.
         current_v += best_rows[row_index].first + padding;
     }
 
     // Clean up.
-    glBindTexture(GL_TEXTURE_2D, 0);
     delete[] best_rows;
 
     // Note that this can fail for seemingly little reason.

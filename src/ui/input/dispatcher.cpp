@@ -138,6 +138,13 @@ i32 hui::InputDispatcher::handle_event(void* data, SDL_Event* event) {
                     dispatcher->on_window.focus_lost({event->window.windowID});
                     dispatcher->m_manager->set_keyboard_focus(-1);
                     break;
+                case SDL_WINDOWEVENT_MOVED:
+                    WindowMoveEvent mve;
+                    mve.window_id = event->window.windowID;
+                    mve.dx     = event->window.data1;
+                    mve.dy    = event->window.data2;
+                    dispatcher->on_window.move(mve);
+                    break;
                 case SDL_WINDOWEVENT_RESIZED:
                     WindowResizeEvent mre;
                     mre.window_id = event->window.windowID;

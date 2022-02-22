@@ -50,20 +50,38 @@
 // SDL2
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
+#if defined(HEMLOCK_USING_VULKAN)
+#include <SDL2/SDL_vulkan.h>
+#endif // defined(HEMLOCK_USING_VULKAN)
 
-// OpenGL
+#if defined(HEMLOCK_USING_OPENGL)
+// OpenGL SDK
 #include <GL/glew.h>
+#endif // defined(HEMLOCK_USING_OPENGL)
+
+#if defined(HEMLOCK_USING_VULKAN)
+// Vulkan SDK
+#include <vulkan/vulkan.h>
+#endif // defined(HEMLOCK_USING_VULKAN)
 
 // GL Maths
+#define GLM_FORCE_SWIZZLE
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
 // Image Libs
 #include <png.h>
 
+// Our generic preprocessor macros.
+#include "preprocessor.hpp"
+
+// Our constants.
+#include "constants.hpp"
+#include "decorators.hpp"
+#include "debug.hpp"
+
 // Our Types and Other Hints
 #include "basic_concepts.hpp"
-#include "decorators.hpp"
 #include "types.hpp"
 
 // Our Thread Handling

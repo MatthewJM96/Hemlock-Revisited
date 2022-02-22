@@ -137,7 +137,7 @@ namespace hemlock {
 
                 auto [asset, fetched] = m_assets.emplace(filepath.string(), m_parser(filepath, m_iomanager));
 
-#ifdef DEBUG
+#if defined(DEBUG)
                 assert(fetched);
 #else
                 if (!fetched) return nullptr;

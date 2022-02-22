@@ -87,7 +87,7 @@ namespace hemlock {
                 using InternalPixelFormat = std::pair<png_byte, png_byte>;
 
                 /**
-                 * @brief Converts an general PixelFormat value to the
+                 * @brief Converts a general PixelFormat value to the
                  * corresponding PNG properties.
                  *
                  * @param format The pixel format to convert.
@@ -95,6 +95,16 @@ namespace hemlock {
                  * @return The determined PNG properties.
                  */
                 InternalPixelFormat convert_pixel_format(PixelFormat format);
+
+                /**
+                 * @brief Converts internal PNG properties to the
+                 * corresponding PixelFormat.
+                 *
+                 * @param format The internal pixel format to convert.
+                 *
+                 * @return The determined PixelFormat.
+                 */
+                PixelFormat convert_internal_pixel_format(InternalPixelFormat format);
 
                 /**
                  * @brief Loads an image from the named PNG file.

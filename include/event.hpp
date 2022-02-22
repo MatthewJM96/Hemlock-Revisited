@@ -17,7 +17,7 @@ namespace hemlock {
         * @brief Default constructor
         *
         * @param sender Optional owner of the event. The owner is passed to
-        * any listeners on the event being triggered along with any other
+        * any subscribers on the event being triggered along with any other
         * specified data.
         */
         EventBase(Sender sender = nullptr) :
@@ -36,38 +36,58 @@ namespace hemlock {
         Sender m_sender;
     };
 
+    template <typename ReturnType>
+    concept OrReturnable = requires(ReturnType r) {
+        { r |= r };
+    };
+    template <typename ReturnType>
+    concept AccumulateReturnable = requires (ReturnType r) {
+        { r.insert(r.end(), std::make_move_iterator(r.begin()), std::make_move_iterator(r.end())) };
+    };
+    template <typename ReturnType>
+    concept Returnable = std::same_as<ReturnType, void> || OrReturnable<ReturnType> || AccumulateReturnable<ReturnType>;
+
+    template <Returnable ReturnType, typename ...Parameters>
+    using RSubscriber  = Delegate<ReturnType(Sender, Parameters...)>;
+    template <Returnable ReturnType, typename ...Parameters>
+    using RSubscribers = std::vector<RSubscriber<ReturnType, Parameters...>*>;
+
     template <typename ...Parameters>
-    using Subscriber  = Delegate<void(Sender, Parameters...)>;
+    using Subscriber  = RSubscriber<void, Parameters...>;
     template <typename ...Parameters>
-    using Subscribers = std::vector<Subscriber<Parameters...>*>;
+    using Subscribers = RSubscribers<void, Parameters...>;
+
+    template <typename Functor, typename ReturnType, typename ...Parameters>
+    concept CanRSubscribe = Returnable<ReturnType> && requires(Functor f) {
+        { new RSubscriber<ReturnType, Parameters...>(std::forward<Functor>(f)) } -> std::same_as<RSubscriber<ReturnType, Parameters...>*>;
+    };
 
     template <typename Functor, typename ...Parameters>
-    concept CanSubscribe = requires(Functor f) {
-        { new Subscriber<Parameters...>(std::forward<Functor>(f)) } -> std::same_as<Subscriber<Parameters...>*>;
-    };
+    concept CanSubscribe = CanRSubscribe<Functor, void, Parameters...>;
 
     /**
      * @brief The standard event class, provides the most trivial event system in
      * which subscribers are invoked in order of subscription and all subscribers
      * get processed.
-     * 
-     * @tparam Parameters Additional data passed to listeners when the event is
+     *
+     * @tparam ReturnType The return type of subscriebrs of the event..
+     * @tparam Parameters Additional data passed to subscribers when the event is
      * triggered.
      */
-    template <typename ...Parameters>
-    class Event : public EventBase {
+    template <Returnable ReturnType, typename ...Parameters>
+    class REvent : public EventBase {
     public:
-        using _Subscriber = Subscriber<Parameters...>;
-        using _Subscribers = Subscribers<Parameters...>;
+        using _RSubscriber  = RSubscriber<ReturnType, Parameters...>;
+        using _RSubscribers = RSubscribers<ReturnType, Parameters...>;
 
         /**
         * @brief Default constructor
         *
         * @param sender Optional owner of the event. The owner is passed to
-        * any listeners on the event being triggered along with any other
+        * any subscribers on the event being triggered along with any other
         * specified data.
         */
-        Event(Sender sender = nullptr) :
+        REvent(Sender sender = nullptr) :
             EventBase(sender),
             m_triggering(false)
         { /* Empty */ }
@@ -76,7 +96,7 @@ namespace hemlock {
         *
         * @param event The event to copy.
         */
-        Event(const Event& event) :
+        REvent(const REvent& event) :
             EventBase(event.m_sender) {
             m_subscribers   = event.m_subscribers;
             m_removal_queue = event.m_removal_queue;
@@ -87,7 +107,7 @@ namespace hemlock {
         *
         * @param event The event object to move from.
         */
-        Event(Event&& event) :
+        REvent(REvent&& event) :
             EventBase(event.m_sender) {
             m_subscribers   = std::move(event.m_subscribers);
             m_removal_queue = std::move(event.m_removal_queue);
@@ -101,7 +121,7 @@ namespace hemlock {
         *
         * @return The event that has been copied to.
         */
-        Event& operator=(const Event& event) {
+        REvent& operator=(const REvent& event) {
             m_sender        = event.m_sender;
             m_subscribers   = event.m_subscribers;
             m_removal_queue = event.m_removal_queue;
@@ -116,7 +136,7 @@ namespace hemlock {
         *
         * @return The event that has been copied to.
         */
-        Event& operator=(Event&& event) {
+        REvent& operator=(REvent&& event) {
             m_sender        = event.m_sender;
             m_subscribers   = std::move(event.m_subscribers);
             m_removal_queue = std::move(event.m_removal_queue);
@@ -130,7 +150,7 @@ namespace hemlock {
         *
         * @param subscriber The subscriber to add to the event.
         */
-        void add(_Subscriber* subscriber) {
+        void add(_RSubscriber* subscriber) {
             m_subscribers.emplace_back(subscriber);
         }
 
@@ -141,7 +161,7 @@ namespace hemlock {
         *
         * @param subscriber The subscriber to add to the event.
         */
-        void operator+=(_Subscriber* subscriber) {
+        void operator+=(_RSubscriber* subscriber) {
             add(subscriber);
         }
 
@@ -158,8 +178,8 @@ namespace hemlock {
         */
         template <typename Functor>
             requires CanSubscribe<Functor, Parameters...>
-        _Subscriber* add_functor(Functor&& functor) {
-            _Subscriber* sub = new _Subscriber(std::forward<Functor>(functor));
+        _RSubscriber* add_functor(Functor&& functor) {
+            _RSubscriber* sub = new _RSubscriber(std::forward<Functor>(functor));
 
             add(sub);
 
@@ -171,12 +191,12 @@ namespace hemlock {
         *
         * @param subscriber The subscriber to remove from the event.
         */
-        void remove(_Subscriber* subscriber) {
+        void remove(_RSubscriber* subscriber) {
             // We don't want to be invalidating iterators by removing subscribers mid-trigger.
             if (m_triggering) {
                 m_removal_queue.emplace_back(subscriber);
             } else {
-                std::erase_if(m_subscribers, [subscriber](_Subscriber* rhs) {
+                std::erase_if(m_subscribers, [subscriber](_RSubscriber* rhs) {
                     return rhs == subscriber;
                 });
             }
@@ -188,7 +208,7 @@ namespace hemlock {
         *
         * @param subscriber The subscriber to remove from the event.
         */
-        void operator-=(_Subscriber* subscriber) {
+        void operator-=(_RSubscriber* subscriber) {
             remove(subscriber);
         }
 
@@ -197,21 +217,50 @@ namespace hemlock {
         *
         * @param parameters The parameters to pass to subscribers.
         */
-        void trigger(Parameters... parameters) {
-            // We don't want to be invalidating iterators by removing subscribers mid-trigger.
-            m_triggering = true;
+        ReturnType trigger(Parameters... parameters) {
+            if constexpr (OrReturnable<ReturnType>) {
+                ReturnType result{};
 
-            for (auto& subscriber : m_subscribers) {
-                (*subscriber)(m_sender, parameters...);
-            }
+                // We don't want to be invalidating iterators by removing subscribers mid-trigger.
+                m_triggering = true;
+                for (auto& subscriber : m_subscribers) {
+                    result |= (*subscriber)(m_sender, parameters...);
+                }
+                m_triggering = false;
 
-            m_triggering = false;
+                // Remove any subscribers that requested to be unsubscribed during triggering.
+                clear_removal_queue();
 
-            // Remove any subscribers that requested to be unsubscribed during triggering.
-            for (auto& unsubscriber : m_removal_queue) {
-                std::erase_if(m_subscribers, [unsubscriber](_Subscriber* rhs) {
-                    return rhs == unsubscriber;
-                });
+                return result;
+            } else if constexpr (AccumulateReturnable<ReturnType>) {
+                ReturnType result{};
+
+                // We don't want to be invalidating iterators by removing subscribers mid-trigger.
+                m_triggering = true;
+                for (auto& subscriber : m_subscribers) {
+                    ReturnType partial_result = (*subscriber)(m_sender, parameters...);
+                    result.insert(
+                        result.end(),
+                        std::make_move_iterator(partial_result.begin()),
+                        std::make_move_iterator(partial_result.end())
+                    );
+                }
+                m_triggering = false;
+
+                // Remove any subscribers that requested to be unsubscribed during triggering.
+                clear_removal_queue();
+
+                return result;
+            } else {
+                // We don't want to be invalidating iterators by removing subscribers mid-trigger.
+                m_triggering = true;
+                for (auto& subscriber : m_subscribers) {
+                    (*subscriber)(m_sender, parameters...);
+                }
+                m_triggering = false;
+
+                // Remove any subscribers that requested to be unsubscribed during triggering.
+                clear_removal_queue();
             }
         }
         /**
@@ -221,14 +270,32 @@ namespace hemlock {
         *
         * @param parameters The parameters to pass to subscribers.
         */
-        void operator()(Parameters... parameters) {
-            trigger(std::forward<Parameters>(parameters)...);
+        ReturnType operator()(Parameters... parameters) {
+            if constexpr (std::same_as<ReturnType, void>) {
+                trigger(std::forward<Parameters>(parameters)...);
+            } else {
+                return trigger(std::forward<Parameters>(parameters)...);
+            }
         }
     protected:
-        _Subscribers m_subscribers;
-        _Subscribers m_removal_queue;
+        void clear_removal_queue() {
+            for (auto& unsubscriber : m_removal_queue) {
+                std::erase_if(m_subscribers, [unsubscriber](_RSubscriber* rhs) {
+                    return rhs == unsubscriber;
+                });
+            }
+        }
+
+        _RSubscribers m_subscribers;
+        _RSubscribers m_removal_queue;
         bool         m_triggering;
     };
+
+    template <typename ...Parameters>
+    using Event = REvent<void, Parameters...>;
+
+    template <typename ...Parameters>
+    using CancellableEvent = REvent<bool, Parameters...>;
 }
 
 #endif // __hemlock_event_h

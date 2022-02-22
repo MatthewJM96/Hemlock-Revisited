@@ -5,14 +5,21 @@ namespace hemlock {
     template <typename ThreadState>
     concept InterruptibleState = requires(ThreadState state)
     {
-        std::is_same_v<decltype(state.stop), bool>;
+        std::is_same_v<decltype(state.stop),    bool>;
+        std::is_same_v<decltype(state.suspend), bool>;
     };
 
     template <InterruptibleState ThreadState>
     class IThreadTask;
 
     template <InterruptibleState ThreadState>
-    using TaskQueue = moodycamel::BlockingConcurrentQueue<IThreadTask<ThreadState>*>;
+    struct HeldTask {
+        IThreadTask<ThreadState>* task;
+        bool should_delete;
+    };
+
+    template <InterruptibleState ThreadState>
+    using TaskQueue = moodycamel::BlockingConcurrentQueue<HeldTask<ThreadState>>;
 
     template <InterruptibleState ThreadState>
     struct Thread {
@@ -78,6 +85,7 @@ namespace hemlock {
     class ThreadPool {
     public:
         ThreadPool() :
+            m_is_initialised(false),
             m_producer_token(moodycamel::ProducerToken(m_tasks))
         { /* Empty. */ }
         ~ThreadPool() { /* Empty. */ }
@@ -97,17 +105,30 @@ namespace hemlock {
         void dispose();
 
         /**
+         * @brief Suspends activity in the thread pool. Ongoing
+         * tasks are allowed to complete, but any remaining in the
+         * queue or added while the thread pool is suspended will
+         * not be processed until the thread pool is resumed.
+         */
+        void suspend();
+        /**
+         * @brief Resumes activity in the thread pool. The queue
+         * will once more be processed.
+         */
+        void resume();
+
+        /**
          * @brief Adds a task to the task queue.
          * 
          * @param task The task to add.
          */
-        void add_task (IThreadTask<ThreadState>* task);
+        void add_task (HeldTask<ThreadState> task);
         /**
          * @brief Adds a set of tasks to the task queue.
          * 
          * @param task The tasks to add.
          */
-        void add_tasks(IThreadTask<ThreadState>* tasks[], size_t task_count);
+        void add_tasks(HeldTask<ThreadState> tasks[], size_t task_count);
 
         /**
          * @brief The number of threads held by the thread pool.

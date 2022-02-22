@@ -55,6 +55,10 @@ namespace hemlock {
             ui32 window_id;
         };
 
+        struct WindowMoveEvent : WindowEvent {
+            i32 dx, dy;
+        };
+
         struct WindowResizeEvent : WindowEvent {
             i32 width, height;
         };
@@ -77,6 +81,7 @@ namespace hemlock {
             Event<WindowEvent>       focus_gained;
             Event<WindowEvent>       focus_lost;
             Event<WindowEvent>       close;
+            Event<WindowMoveEvent>   move;
             Event<WindowResizeEvent> resize;
         };
 

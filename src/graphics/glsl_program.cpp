@@ -202,30 +202,30 @@ GLuint hg::GLSLProgram::uniform_location(const std::string& name) const {
     return glGetUniformLocation(m_id, name.data());
 }
 
-void hg::GLSLProgram::enable_vertex_attrib_arrays() const {
+void hg::GLSLProgram::enable_vertex_attrib_arrays(GLuint vao) const {
     for (auto& attribute : m_attributes) {
-        glEnableVertexAttribArray(attribute.second);
+        glEnableVertexArrayAttrib(vao, attribute.second);
     }
 }
 
-void hg::GLSLProgram::disable_vertex_attrib_arrays() const {
+void hg::GLSLProgram::disable_vertex_attrib_arrays(GLuint vao) const {
     for (auto& attribute : m_attributes) {
-        glDisableVertexAttribArray(attribute.second);
+        glDisableVertexArrayAttrib(vao, attribute.second);
     }
 }
 
-bool hg::GLSLProgram::enable_vertex_attrib_array(const std::string& name) const {
+bool hg::GLSLProgram::enable_vertex_attrib_array(GLuint vao, const std::string& name) const {
     try {
-        glEnableVertexAttribArray(m_attributes.at(name));
+        glEnableVertexArrayAttrib(vao, m_attributes.at(name));
     } catch (std::out_of_range& e) {
         return false;
     }
     return true;
 }
 
-bool hg::GLSLProgram::disable_vertex_attrib_array(const std::string& name) const {
+bool hg::GLSLProgram::disable_vertex_attrib_array(GLuint vao, const std::string& name) const {
     try {
-        glDisableVertexAttribArray(m_attributes.at(name));
+        glDisableVertexArrayAttrib(vao, m_attributes.at(name));
     } catch (std::out_of_range& e) {
         return false;
     }

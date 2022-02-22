@@ -13,11 +13,11 @@ using namespace hg::s;
  * No Wrap Draw                                       *
 \******************************************************/
 
-void hg::add_string_no_wrap(SpriteBatcher* batcher, DrawableStringComponent component, f32v4 rect, TextAlign align, f32 depth) {
-    add_string_no_wrap(batcher, &component, 1, rect, align, depth);
+void hg::add_string_no_wrap(SpriteBatcher* batcher, DrawableStringComponent component, f32v4 target_rect, f32v4 clip_rect, TextAlign align, f32 depth) {
+    add_string_no_wrap(batcher, &component, 1, target_rect, clip_rect, align, depth);
 }
 
-void hg::add_string_no_wrap(SpriteBatcher* batcher, DrawableStringComponents components, ui32 num_components, f32v4 rect, TextAlign align, f32 depth) {
+void hg::add_string_no_wrap(SpriteBatcher* batcher, DrawableStringComponents components, ui32 num_components, f32v4 target_rect, f32v4 clip_rect, TextAlign align, f32 depth) {
     // We will populate these data points for drawing later.
     DrawableLines lines;
     f32 total_height = 0.0f;
@@ -75,7 +75,7 @@ void hg::add_string_no_wrap(SpriteBatcher* batcher, DrawableStringComponents com
             // glyph from this font instance, then the line's height needs setting to the font instances's.
             if (lines.back().height < height) {
                 // If we have overflowed the rectangle with the new line height, break out instead.
-                if (total_height + height > rect.w) {
+                if (total_height + height > target_rect.w) {
                     vertical_overflow = true;
                     break;
                 }
@@ -98,24 +98,17 @@ void hg::add_string_no_wrap(SpriteBatcher* batcher, DrawableStringComponents com
 
     f32 current_y = 0.0f;
     for (auto& line : lines) {
-        f32v2 offsets = calculate_align_offset(align, rect, total_height, line.length);
+        f32v2 offsets = calculate_align_offset(align, target_rect, total_height, line.length);
 
         for (auto& drawable : line.drawables) {
             f32v2 size     = drawable.glyph->size * drawable.scaling;
-            f32v2 position = f32v2(drawable.x_pos, current_y) + offsets + f32v2(rect.x, rect.y) + f32v2(0.0f, line.height - size.y);
+            f32v2 position = f32v2(drawable.x_pos, current_y) + offsets + f32v2(target_rect.x, target_rect.y) + f32v2(0.0f, line.height - size.y);
             f32v4 uv_rect  = drawable.glyph->uv_rect;
 
-            f32v2 old_size = size;
+            clip(clip_rect, position, size, uv_rect);
 
-            clip(rect, position, size, uv_rect);
-
-            // Reject any character that even slightly clips with the bounding rectangle.
-            if (old_size == size) {
-                batcher->add_sprite(drawable.texture, position, size, drawable.tint,
-                                        { 255, 255, 255, 255 }, Gradient::NONE, depth, uv_rect);
-            } else {
-                continue;
-            }
+            batcher->add_sprite(drawable.texture, position, size, drawable.tint,
+                                    { 255, 255, 255, 255 }, Gradient::NONE, depth, uv_rect);
         }
 
         current_y += line.height;
@@ -126,11 +119,11 @@ void hg::add_string_no_wrap(SpriteBatcher* batcher, DrawableStringComponents com
  * Quick Wrap Draw                                    *
 \******************************************************/
 
-void hg::add_string_quick_wrap(SpriteBatcher* batcher, DrawableStringComponent component, f32v4 rect, TextAlign align, f32 depth) {
-    add_string_quick_wrap(batcher, &component, 1, rect, align, depth);
+void hg::add_string_quick_wrap(SpriteBatcher* batcher, DrawableStringComponent component, f32v4 target_rect, f32v4 clip_rect, TextAlign align, f32 depth) {
+    add_string_quick_wrap(batcher, &component, 1, target_rect, clip_rect, align, depth);
 }
 
-void hg::add_string_quick_wrap(SpriteBatcher* batcher, DrawableStringComponents components, ui32 num_components, f32v4 rect, TextAlign align, f32 depth) {
+void hg::add_string_quick_wrap(SpriteBatcher* batcher, DrawableStringComponents components, ui32 num_components, f32v4 target_rect, f32v4 clip_rect, TextAlign align, f32 depth) {
     // We will populate these data points for drawing later.
     DrawableLines lines;
     f32 total_height = 0.0f;
@@ -198,7 +191,7 @@ void hg::add_string_quick_wrap(SpriteBatcher* batcher, DrawableStringComponents 
 
             // Given we are about to add a character, make sure it fits on the line, if not, make
             // a new line and if the about-to-be-added character isn't a whitespace revisit it.
-            if (lines.back().length + character_width > rect.z) {
+            if (lines.back().length + character_width > target_rect.z) {
                 total_height += lines.back().height;
                 lines.emplace_back(DrawableLine{ 0.0f, height, std::vector<DrawableGlyph>() });
 
@@ -214,7 +207,7 @@ void hg::add_string_quick_wrap(SpriteBatcher* batcher, DrawableStringComponents 
             // glyph from this font instance, then the line's height needs setting to the font instances's.
             if (lines.back().height < height) {
                 // If we have overflowed the rectangle with the new line height, break out instead.
-                if (total_height + height > rect.w) {
+                if (total_height + height > target_rect.w) {
                     vertical_overflow = true;
                     break;
                 }
@@ -234,24 +227,17 @@ void hg::add_string_quick_wrap(SpriteBatcher* batcher, DrawableStringComponents 
 
     f32 current_y = 0.0f;
     for (auto& line : lines) {
-        f32v2 offsets = calculate_align_offset(align, rect, total_height, line.length);
+        f32v2 offsets = calculate_align_offset(align, target_rect, total_height, line.length);
 
         for (auto& drawable : line.drawables) {
             f32v2 size     = drawable.glyph->size * drawable.scaling;
-            f32v2 position = f32v2(drawable.x_pos, current_y) + offsets + f32v2(rect.x, rect.y) + f32v2(0.0f, line.height - size.y);
+            f32v2 position = f32v2(drawable.x_pos, current_y) + offsets + f32v2(target_rect.x, target_rect.y) + f32v2(0.0f, line.height - size.y);
             f32v4 uv_rect  = drawable.glyph->uv_rect;
 
-            f32v2 old_size = size;
+            clip(clip_rect, position, size, uv_rect);
 
-            clip(rect, position, size, uv_rect);
-
-            // Reject any character that even slightly clips with the bounding rectangle.
-            if (old_size == size) {
-                batcher->add_sprite(drawable.texture, position, size, drawable.tint,
-                                        { 255, 255, 255, 255 }, Gradient::NONE, depth, uv_rect);
-            } else {
-                continue;
-            }
+            batcher->add_sprite(drawable.texture, position, size, drawable.tint,
+                                    { 255, 255, 255, 255 }, Gradient::NONE, depth, uv_rect);
         }
 
         current_y += line.height;
@@ -262,11 +248,11 @@ void hg::add_string_quick_wrap(SpriteBatcher* batcher, DrawableStringComponents 
  * Greedy Wrap Draw                                   *
 \******************************************************/
 
-void hg::add_string_greedy_wrap(SpriteBatcher* batcher, DrawableStringComponent component, f32v4 rect, TextAlign align, f32 depth) {
-    add_string_greedy_wrap(batcher, &component, 1, rect, align, depth);
+void hg::add_string_greedy_wrap(SpriteBatcher* batcher, DrawableStringComponent component, f32v4 target_rect, f32v4 clip_rect, TextAlign align, f32 depth) {
+    add_string_greedy_wrap(batcher, &component, 1, target_rect, clip_rect, align, depth);
 }
 
-void hg::add_string_greedy_wrap(SpriteBatcher* batcher, DrawableStringComponents components, ui32 num_components, f32v4 rect, TextAlign align, f32 depth) {
+void hg::add_string_greedy_wrap(SpriteBatcher* batcher, DrawableStringComponents components, ui32 num_components, f32v4 target_rect, f32v4 clip_rect, TextAlign align, f32 depth) {
     // We will populate these data points for drawing later.
     DrawableLines lines;
     f32 total_height = 0.0f;
@@ -360,7 +346,7 @@ void hg::add_string_greedy_wrap(SpriteBatcher* batcher, DrawableStringComponents
 
             // Given we are about to add a character, make sure it fits on the line, if not, make
             // a new line and if the about-to-be-added character isn't a whitespace revisit it.
-            if (lines.back().length + wordLength + character_width > rect.z) {
+            if (lines.back().length + wordLength + character_width > target_rect.z) {
                 total_height += lines.back().height;
                 lines.emplace_back(DrawableLine{ 0.0f, height, std::vector<DrawableGlyph>() });
 
@@ -375,7 +361,7 @@ void hg::add_string_greedy_wrap(SpriteBatcher* batcher, DrawableStringComponents
             // glyph from this font instance, then the line's height needs setting to the font instances's.
             if (lines.back().height < height) {
                 // If we have overflowed the rectangle with the new line height, break out instead.
-                if (total_height + height > rect.w) {
+                if (total_height + height > target_rect.w) {
                     vertical_overflow = true;
                     break;
                 }
@@ -396,24 +382,17 @@ void hg::add_string_greedy_wrap(SpriteBatcher* batcher, DrawableStringComponents
 
     f32 current_y = 0.0f;
     for (auto& line : lines) {
-        f32v2 offsets = calculate_align_offset(align, rect, total_height, line.length);
+        f32v2 offsets = calculate_align_offset(align, target_rect, total_height, line.length);
 
         for (auto& drawable : line.drawables) {
             f32v2 size         = drawable.glyph->size * drawable.scaling;
-            f32v2 position     = f32v2(drawable.x_pos, current_y) + offsets + f32v2(rect.x, rect.y) + f32v2(0.0f, line.height - size.y);
+            f32v2 position     = f32v2(drawable.x_pos, current_y) + offsets + f32v2(target_rect.x, target_rect.y) + f32v2(0.0f, line.height - size.y);
             f32v4 uv_rect = drawable.glyph->uv_rect;
 
-            f32v2 old_size = size;
+            clip(clip_rect, position, size, uv_rect);
 
-            clip(rect, position, size, uv_rect);
-
-            // Reject any character that even slightly clips with the bounding rectangle.
-            if (old_size == size) {
-                batcher->add_sprite(drawable.texture, position, size, drawable.tint,
-                                        { 255, 255, 255, 255 }, Gradient::NONE, depth, uv_rect);
-            } else {
-                continue;
-            }
+            batcher->add_sprite(drawable.texture, position, size, drawable.tint,
+                                    { 255, 255, 255, 255 }, Gradient::NONE, depth, uv_rect);
         }
 
         current_y += line.height;
@@ -437,11 +416,11 @@ struct Word {
     f32  length;
 };
 
-// void hg::add_string_minimum_raggedness_wrap(SpriteBatcher* batcher, DrawableStringComponent component, f32v4 rect, TextAlign align, f32 depth) {
-//     add_string_minimum_raggedness_wrap(batcher, &component, 1, rect, align, depth);
+// void hg::add_string_minimum_raggedness_wrap(SpriteBatcher* batcher, DrawableStringComponent component, f32v4 target_rect, f32v4 clip_rect, TextAlign align, f32 depth) {
+//     add_string_minimum_raggedness_wrap(batcher, &component, 1, target_rect, clip_rect, align, depth);
 // }
 
-// void hg::add_string_minimum_raggedness_wrap(SpriteBatcher* batcher, DrawableStringComponents components, ui32 num_components, f32v4 rect, TextAlign align, f32 depth) {
+// void hg::add_string_minimum_raggedness_wrap(SpriteBatcher* batcher, DrawableStringComponents components, ui32 num_components, f32v4 target_rect, f32v4 clip_rect, TextAlign align, f32 depth) {
 //     std::vector<std::vector<Word>> words;
 //     words.resize(components.size());
 
@@ -643,7 +622,7 @@ struct Word {
 
 //             // Given we are about to add a character, make sure it fits on the line, if not, make
 //             // a new line and if the about-to-be-added character isn't a whitespace revisit it.
-//             if (lines.back().length + wordLength + character_width > rect.z) {
+//             if (lines.back().length + wordLength + character_width > target_rect.z) {
 //                 total_height += lines.back().height;
 //                 lines.emplace_back(DrawableLine{ 0.0f, height, std::vector<DrawableGlyph>() });
 
@@ -658,7 +637,7 @@ struct Word {
 //             // glyph from this font instance, then the line's height needs setting to the font instances's.
 //             if (lines.back().height < height) {
 //                 // If we have overflowed the rectangle with the new line height, break out instead.
-//                 if (total_height + height > rect.w) {
+//                 if (total_height + height > target_rect.w) {
 //                     vertical_overflow = true;
 //                     break;
 //                 }
@@ -679,24 +658,17 @@ struct Word {
 
 //     f32 current_y = 0.0f;
 //     for (auto& line : lines) {
-//         f32v2 offsets = calculate_align_offset(align, rect, total_height, line.length);
+//         f32v2 offsets = calculate_align_offset(align, target_rect, total_height, line.length);
 
 //         for (auto& drawable : line.drawables) {
 //             f32v2 size         = drawable.glyph->size * drawable.scaling;
-//             f32v2 position     = f32v2(drawable.x_pos, current_y) + offsets + f32v2(rect.x, rect.y) + f32v2(0.0f, line.height - size.y);
+//             f32v2 position     = f32v2(drawable.x_pos, current_y) + offsets + f32v2(target_rect.x, target_rect.y) + f32v2(0.0f, line.height - size.y);
 //             f32v4 uv_rect = drawable.glyph->uv_rect;
 
-//             f32v2 old_size = size;
+//             clip(clip_rect, position, size, uv_rect);
 
-//             clip(rect, position, size, uv_rect);
-
-//             // Reject any character that even slightly clips with the bounding rectangle.
-//             if (old_size == size) {
-//                 batcher->add_sprite(drawable.texture, position, size, drawable.tint,
-//                                          { 255, 255, 255, 255 }, Gradient::NONE, depth, uv_rect);
-//             } else {
-//                 continue;
-//             }
+//             batcher->add_sprite(drawable.texture, position, size, drawable.tint,
+//                                      { 255, 255, 255, 255 }, Gradient::NONE, depth, uv_rect);
 //         }
 
 //         current_y += line.height;
