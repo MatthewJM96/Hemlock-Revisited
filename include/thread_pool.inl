@@ -42,7 +42,7 @@ void hemlock::ThreadPool<ThreadState>::init(           ui32 thread_count,
         m_threads.emplace_back(Thread<ThreadState>{
             .thread = std::thread(
                 m_thread_main_func,
-                reinterpret_cast<Thread<ThreadState>::State*>(
+                reinterpret_cast<typename Thread<ThreadState>::State*>(
                     reinterpret_cast<ui8*>(&m_threads[i]) + offsetof(Thread<ThreadState>, state)
                 ),
                 &m_tasks
