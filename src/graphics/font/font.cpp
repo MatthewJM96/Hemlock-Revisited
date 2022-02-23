@@ -295,7 +295,7 @@ hg::f::FontInstance hg::f::Font::get_instance( FontSize size,
                                         FontRenderStyle render_style /*= FontRenderStyle::BLENDED*/ ) {
     try {
         return m_font_instances.at(hash(size, style, render_style));
-    } catch (std::out_of_range& e) {
+    } catch (std::out_of_range&) {
         return NIL_FONT_INSTANCE;
     }
 }

@@ -217,7 +217,7 @@ void hg::GLSLProgram::disable_vertex_attrib_arrays(GLuint vao) const {
 bool hg::GLSLProgram::enable_vertex_attrib_array(GLuint vao, const std::string& name) const {
     try {
         glEnableVertexArrayAttrib(vao, m_attributes.at(name));
-    } catch (std::out_of_range& e) {
+    } catch (std::out_of_range&) {
         return false;
     }
     return true;
@@ -226,7 +226,7 @@ bool hg::GLSLProgram::enable_vertex_attrib_array(GLuint vao, const std::string& 
 bool hg::GLSLProgram::disable_vertex_attrib_array(GLuint vao, const std::string& name) const {
     try {
         glDisableVertexArrayAttrib(vao, m_attributes.at(name));
-    } catch (std::out_of_range& e) {
+    } catch (std::out_of_range&) {
         return false;
     }
     return true;
