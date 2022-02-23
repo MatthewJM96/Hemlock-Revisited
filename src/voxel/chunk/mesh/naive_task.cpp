@@ -56,7 +56,7 @@ void hvox::ChunkNaiveMeshTask::execute(ChunkLoadThreadState* state, ChunkLoadTas
         m_chunk->mesh_task_active.store(false, std::memory_order_release);
         // Put copy of this mesh task back onto the load task queue.
         ChunkNaiveMeshTask* mesh_task = new ChunkNaiveMeshTask();
-        mesh_task->init(m_chunk, m_chunk_grid);
+        mesh_task->init(m_chunk, m_chunk_grid, nullptr);
         task_queue->enqueue(state->producer_token, { mesh_task, true });
         m_chunk->pending_task.store(ChunkLoadTaskKind::MESH, std::memory_order_release);
         return;

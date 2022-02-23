@@ -3,6 +3,7 @@
 
 #include "timing.h"
 #include "voxel/chunk.h"
+#include "voxel/chunk/generator_task.h"
 
 namespace hemlock {
     namespace voxel {
@@ -69,11 +70,15 @@ namespace hemlock {
              * @param chunk_positions The array of chunk coords for which
              * to load chunks.
              * @param chunk_count The number of chunks to load.
+             * @param gen_strategy The strategy to use in generating
+             * chunks.
              * @return True if all chunks have got to the point of their
              * load tasks being queued in a valid state, false if any single
              * chunk did not.
              */
-            bool load_from_scratch_chunks(ChunkGridPosition* chunk_positions, ui32 chunk_count);
+            bool load_from_scratch_chunks( ChunkGridPosition* chunk_positions,
+                                                         ui32 chunk_count,
+                                     ChunkGenerationStrategy* gen_strategy );
 
             /**
              * @brief Preloads a chunk, this entails saying it exists
@@ -92,12 +97,15 @@ namespace hemlock {
              * follow up.
              *
              * @param chunk_position The coords of the chunk to load.
+             * @param gen_strategy The strategy to use in generating
+             * chunks.
              * @return True if the chunk's load task was queued, false
              * otherwise. False usually will mean that the chunk was
              * either not yet preloaded, or at least already in a loaded
              * state.
              */
-            bool load_chunk_at(ChunkGridPosition chunk_position);
+            bool load_chunk_at( ChunkGridPosition chunk_position,
+                         ChunkGenerationStrategy* gen_strategy );
             /**
              * @brief Unloads a chunk, this entails ending all
              * pending tasks for this chunk and releasing memory

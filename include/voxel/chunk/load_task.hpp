@@ -21,10 +21,11 @@ namespace hemlock {
         using ChunkLoadTaskQueue   = TaskQueue<ChunkLoadTaskContext>;
         class ChunkLoadTask : public IThreadTask<ChunkLoadTaskContext> {
         public:
-            void init(Chunk* chunk, ChunkGrid* chunk_grid);
+            void init(Chunk* chunk, ChunkGrid* chunk_grid, void* strategy);
         protected:
             Chunk*     m_chunk;
             ChunkGrid* m_chunk_grid;
+            void*      m_strategy;
         };
     }
 }
