@@ -24,8 +24,8 @@ namespace hemlock {
 
             void set_mouse_coords(MouseCoords coords) { m_mouse_coords = coords; }
 
-            void set_mouse_focus(bool focus)    { m_mouse_focus = focus;    }
-            void set_keyboard_focus(bool focus) { m_keyboard_focus = focus; }
+            void set_mouse_focus(i32 focus)    { m_mouse_focus = focus;    }
+            void set_keyboard_focus(i32 focus) { m_keyboard_focus = focus; }
 
             bool is_mouse_focused()    { return m_mouse_focus;    }
             bool is_keyboard_focused() { return m_keyboard_focus; }
