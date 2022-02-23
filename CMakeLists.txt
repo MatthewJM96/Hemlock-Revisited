@@ -51,12 +51,22 @@ endif()
 #     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fmodules -fprebuilt-module-path=${PROJECT_BINARY_DIR}/clm/${CMAKE_BUILD_TYPE}/")
 # endif()
 
-conan_cmake_configure(REQUIRES glew/2.2.0
-                               glm/0.9.9.8
-                               sdl/2.0.18
-                               sdl_ttf/2.0.18
-                               libpng/1.6.37
-                               concurrentqueue/1.0.3
+set(Hemlock_Requirements
+    glm/0.9.9.8
+    sdl/2.0.18
+    sdl_ttf/2.0.18
+    libpng/1.6.37
+    concurrentqueue/1.0.3
+)
+
+if (HEMLOCK_USING_OPENGL)
+    set(Hemlock_Requirements
+        ${Hemlock_Requirements}
+        glew/2.2.0
+    )
+endif()
+
+conan_cmake_configure(REQUIRES ${Hemlock_Requirements}
                       GENERATORS cmake_find_package)
 
 conan_cmake_autodetect(settings)
@@ -68,8 +78,10 @@ conan_cmake_install(PATH_OR_REFERENCE .
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_BINARY_DIR}")
 
-find_package(opengl REQUIRED)
-find_package(glew REQUIRED)
+if (HEMLOCK_USING_OPENGL)
+    find_package(opengl REQUIRED)
+    find_package(glew REQUIRED)
+endif()
 find_package(glm REQUIRED)
 find_package(SDL2 REQUIRED)
 find_package(SDL2_ttf REQUIRED)
@@ -134,15 +146,26 @@ target_precompile_headers(Hemlock_Revisited
         include/stdafx.h
 )
 
-target_include_directories(Hemlock_Revisited
-    SYSTEM
-    PUBLIC
-    ${glew_INCLUDE_DIRS}
+
+set(Hemlock_Include_Dirs
     ${glm_INCLUDE_DIRS}
     ${SDL2_INCLUDE_DIRS}
     ${SDL2_ttf_INCLUDE_DIRS}
     ${PNG_INCLUDE_DIRS}
     ${concurrentqueue_INCLUDE_DIRS}
+)
+
+if (HEMLOCK_USING_OPENGL)
+    set(Hemlock_Include_Dirs
+        ${Hemlock_Include_Dirs}
+        ${glew_INCLUDE_DIRS}
+    )
+endif()
+
+target_include_directories(Hemlock_Revisited
+    SYSTEM
+    PUBLIC
+    ${Hemlock_Include_Dirs}
     "${PROJECT_SOURCE_DIR}/include"
 )
 
