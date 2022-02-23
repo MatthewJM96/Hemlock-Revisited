@@ -37,7 +37,7 @@ if (UNIX OR MINGW)
         # set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fmodules -fprebuilt-module-path=${PROJECT_BINARY_DIR}/clm/${CMAKE_BUILD_TYPE}/")
     endif()
 elseif (MSVC)
-    set(CMAKE_CXX_FLAGS "/W3 /WX /EHsc")
+    set(CMAKE_CXX_FLAGS "/W3 /WX /EHsc /Zc:preprocessor")
     set(CMAKE_CXX_FLAGS_RELEASE "/O3")
     set(CMAKE_CXX_FLAGS_DEBUG "/Od /Zi")
 
