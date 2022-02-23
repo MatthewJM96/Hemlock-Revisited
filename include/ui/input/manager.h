@@ -10,9 +10,7 @@ namespace hemlock {
 
         class InputManager {
         public:
-            InputManager() :
-                m_mouse_button_state({})
-            { /* Empty. */ }
+            InputManager()  { /* Empty. */ }
             ~InputManager() { /* Empty. */ }
 
             void init();
@@ -45,7 +43,7 @@ namespace hemlock {
             i32 m_keyboard_focus;
 
             MouseCoords       m_mouse_coords;
-            ButtonState       m_mouse_button_state[255];
+            ButtonState       m_mouse_button_state[255] = {};
             KeyboardKeyStates m_keyboard_key_state;
             KeyModifiers      m_key_modifier_state;
         };
