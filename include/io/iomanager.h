@@ -24,7 +24,7 @@ namespace hemlock {
 
             bool rename(const fs::path& src, const fs::path& dest, bool force = false) const;
 
-            template <typename ReturnType, typename = void>
+            template <typename ReturnType>
             ReturnType apply_to_path(const fs::path& path, Delegate<ReturnType(const fs::path&)> func) const;
             template <typename ReturnType>
             ReturnType apply_to_path(const fs::path& path, Delegate<ReturnType(const fs::path&)> func, ReturnType&& default_value) const;
@@ -46,48 +46,39 @@ namespace hemlock {
 }
 namespace hio = hemlock::io;
 
-template <>
-inline void hio::IOManagerBase::apply_to_path<void>(
-                  const fs::path&   path,
-    Delegate<void(const fs::path&)> func
-) const {
-    fs::path abs_path{};
-    if (!resolve_path(path, abs_path)) return;
-
-    func(abs_path);
-}
-
-template <>
-inline bool hio::IOManagerBase::apply_to_path<bool>(
-                  const fs::path&   path,
-    Delegate<bool(const fs::path&)> func
-) const {
-    fs::path abs_path{};
-    if (!resolve_path(path, abs_path)) return false;
-
-    return func(abs_path);
-}
-
-template <typename ReturnType, typename = typename std::enable_if_t<
-                                                        std::is_pointer_v<ReturnType>
-                                                        || std::is_default_constructible_v<ReturnType>
-                                                   >>
+template <typename ReturnType>
 inline ReturnType hio::IOManagerBase::apply_to_path(
                         const fs::path&   path,
     Delegate<ReturnType(const fs::path&)> func
 ) const {
     fs::path abs_path{};
-
     if (!resolve_path(path, abs_path)) {
-        if constexpr (std::is_pointer_v<ReturnType>) {
-            return nullptr;
-        } else {
+        if constexpr (std::same_as<ReturnType, void>) {
+            return;
+        } else if constexpr (
+            std::is_pointer_v<ReturnType>
+                || std::is_default_constructible_v<ReturnType>
+        ) {
             return ReturnType{};
+        } else {
+            debug_printf("Cannot call apply_to_path with non-defaultable and non-void return type.\n");
+            assert(false);
         }
     }
 
-    return func(abs_path);
+    if constexpr (std::same_as<ReturnType, void>) {
+        func(abs_path);
+    } else if constexpr (
+        std::is_pointer_v<ReturnType>
+            || std::is_default_constructible_v<ReturnType>
+    ) {
+        return func(abs_path);
+    } else {
+        debug_printf("Cannot call apply_to_path with non-defaultable and non-void return type.\n");
+        assert(false);
+    }
 }
+
 
 template <typename ReturnType>
 inline ReturnType hio::IOManagerBase::apply_to_path(
