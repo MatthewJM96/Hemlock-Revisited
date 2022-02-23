@@ -166,13 +166,14 @@ target_include_directories(Hemlock_Revisited
     SYSTEM
     PUBLIC
     ${Hemlock_Include_Dirs}
+    "${PROJECT_SOURCE_DIR}/deps/include"
     "${PROJECT_SOURCE_DIR}/include"
 )
 
-# target_link_directories(Hemlock_Revisited
-#     PUBLIC
-#     "${PROJECT_SOURCE_DIR}/deps/lib"
-# )
+target_link_directories(Hemlock_Revisited
+    PUBLIC
+    "${PROJECT_SOURCE_DIR}/deps/lib"
+)
 
 
 if (HEMLOCK_USING_OPENGL)
@@ -191,4 +192,5 @@ target_link_libraries(Hemlock_Revisited
     SDL2::SDL2main
     SDL2::SDL2
     SDL2_ttf::SDL2_ttf
+    FastNoise
 )
