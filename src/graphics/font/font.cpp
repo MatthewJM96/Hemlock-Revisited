@@ -126,8 +126,8 @@ bool hg::f::Font::generate( FontSize size,
                                     &metrics.z, &metrics.w, nullptr);
 
             // Calculate the glyph's sizes from the metric.
-            font_instance.glyphs[i].size.x = metrics.y - metrics.x;
-            font_instance.glyphs[i].size.y = metrics.w - metrics.z;
+            font_instance.glyphs[i].size.x = static_cast<f32>(metrics.y - metrics.x);
+            font_instance.glyphs[i].size.y = static_cast<f32>(metrics.w - metrics.z);
 
             // Given we got here, the glyph is supported.
             font_instance.glyphs[i].supported = true;
@@ -346,7 +346,7 @@ hg::f::Font::Row* hg::f::Font::generate_rows(Glyph* glyphs, ui32 row_count, Font
         }
 
         // Update the width of the row we have chosen to add the glyph to.
-        current_widths[bestRow] += glyphs[i].size.x + padding;
+        current_widths[bestRow] += static_cast<ui32>(glyphs[i].size.x) + padding;
 
         // Update the overall width of the rectangle the rows form,
         // if our newly enlarged row exceeds it.
@@ -356,8 +356,8 @@ hg::f::Font::Row* hg::f::Font::generate_rows(Glyph* glyphs, ui32 row_count, Font
         // the height of the rectange the rows form.
         if (rows[bestRow].first < glyphs[i].size.y) {
             height -= rows[bestRow].first;
-            height += glyphs[i].size.y;
-            rows[bestRow].first = glyphs[i].size.y;
+            height += static_cast<ui32>(glyphs[i].size.y);
+            rows[bestRow].first = static_cast<ui32>(glyphs[i].size.y);
         }
 
         rows[bestRow].second.push_back(i);

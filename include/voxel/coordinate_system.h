@@ -92,7 +92,7 @@ namespace hemlock {
          * @return BlockWorldPosition The position of the block within world space.
          */
         BlockWorldPosition block_world_position( ChunkGridPosition chunk_grid_position,
-                                                BlockChunkPosition block_chunk_position = BlockChunkPosition{0.0f} );
+                                                BlockChunkPosition block_chunk_position = BlockChunkPosition{0} );
 
         /**
          * @brief Converts a chunk grid position and block index into a corresponding

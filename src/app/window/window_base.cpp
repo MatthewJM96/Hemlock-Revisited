@@ -43,8 +43,10 @@ void happ::WindowBase::validate_dimensions() {
         }
 
         // Is this resolution "closer" to the current dimensions of the window?
-        ui32 new_distance2 = std::pow(closest_dimensions.width - resolution.width, 2)
-                                + std::pow(closest_dimensions.height - resolution.height, 2);
+        ui32 new_distance2 = static_cast<ui32>(
+            std::pow(closest_dimensions.width - resolution.width, 2)
+                + std::pow(closest_dimensions.height - resolution.height, 2)
+        );
         if (new_distance2 < distance2) {
             closest_dimensions = resolution;
             distance2 = new_distance2;
