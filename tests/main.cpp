@@ -6,4 +6,6 @@ i32 main() {
     MyApp app;
     app.init();
     app.run();
+
+    return 0;
 }
