@@ -14,7 +14,7 @@
 namespace hemlock {
     namespace voxel {
         struct Chunk;
-        struct ChunkGrid;
+        class ChunkGrid;
 
         // TODO(Matthew): We shoud instance block and upload scale/translation transformations only.
         //                  Initially just translation, scale comes after we optimise.

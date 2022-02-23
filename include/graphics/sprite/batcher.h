@@ -10,7 +10,7 @@ namespace hemlock {
     namespace graphics {
         // Forward declarations
         namespace font {
-            struct FontCache;
+            class FontCache;
         }
 
         namespace sprite {

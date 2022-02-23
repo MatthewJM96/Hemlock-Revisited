@@ -3,7 +3,7 @@
 
 namespace hemlock {
     namespace voxel {
-        class Chunk;
+        struct Chunk;
         class ChunkGrid;
 
         enum class ChunkLoadTaskKind : ui8 {
