@@ -47,17 +47,21 @@ bool happ::ProcessBase::add_screen(Screen&& screen) {
     return true;
 }
 
-bool happ::ProcessBase::go_to_screen(const std::string& name) {
+bool happ::ProcessBase::go_to_screen(const std::string& name, TimeData time) {
     auto it = m_screens.find(name);
     if (it == m_screens.end()) return false;
 
     if (m_current_screen != nullptr) {
         m_current_screen->set_next_screen((*it).second);
         ((*it).second)->set_prev_screen(m_current_screen);
+
+        m_current_screen->end(time);
     }
 
     auto tmp = m_current_screen;
     m_current_screen = (*it).second;
+
+    m_current_screen->start(time);
 
     on_screen_change({ tmp, m_current_screen });
 

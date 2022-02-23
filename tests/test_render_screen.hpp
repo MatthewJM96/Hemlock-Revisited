@@ -22,6 +22,27 @@ public:
     { /* Empty. */ }
     virtual ~TestRenderScreen() { /* Empty */ };
 
+    virtual void start(TimeData time) override {
+        happ::ScreenBase::start(time);
+
+#define NUM 6
+        for (auto x = -NUM; x < NUM; ++x) {
+            for (auto z = -NUM; z < NUM; ++z) {
+                for (auto y = -2 * NUM; y < 0; ++ y) {
+                    m_chunk_grid.preload_chunk_at({ x, y, z });
+                }
+            }
+        }
+        for (auto x = -NUM; x < NUM; ++x) {
+            for (auto z = -NUM; z < NUM; ++z) {
+                for (auto y = -2 * NUM; y < 0; ++ y) {
+                    m_chunk_grid.load_chunk_at({ x, y, z }, &chunk_generator);
+                }
+            }
+        }
+#undef NUM
+    }
+
     virtual void update(TimeData time) override {
         m_sprite_batcher.begin();
         m_sprite_batcher.add_sprite(
@@ -169,23 +190,6 @@ public:
                 }
             }
         );
-
-#define NUM 5
-        for (auto x = -NUM; x < NUM; ++x) {
-            for (auto z = -NUM; z < NUM; ++z) {
-                for (auto y = -2 * NUM; y < 0; ++ y) {
-                    m_chunk_grid.preload_chunk_at({ x, y, z });
-                }
-            }
-        }
-        for (auto x = -NUM; x < NUM; ++x) {
-            for (auto z = -NUM; z < NUM; ++z) {
-                for (auto y = -2 * NUM; y < 0; ++ y) {
-                    m_chunk_grid.load_chunk_at({ x, y, z }, &chunk_generator);
-                }
-            }
-        }
-#undef NUM
 
         handle_mouse_move = hemlock::Subscriber<hui::MouseMoveEvent>(
             [&](hemlock::Sender, hui::MouseMoveEvent ev) {

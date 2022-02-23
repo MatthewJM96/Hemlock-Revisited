@@ -35,10 +35,10 @@ public:
             [&](hemlock::Sender, hui::KeyboardButtonEvent ev) {
                 switch (ev.physical_key) {
                 case hui::PhysicalKey::H_R:
-                    m_process->go_to_screen("test_render_screen");
+                    m_process->go_to_screen("test_render_screen", m_process->current_times());
                     return;
                 case hui::PhysicalKey::H_V:
-                    m_process->go_to_screen("test_voxel_screen");
+                    m_process->go_to_screen("test_voxel_screen", m_process->current_times());
                     return;
                 default:
                     break;

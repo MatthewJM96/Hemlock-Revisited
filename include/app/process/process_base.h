@@ -30,10 +30,13 @@ namespace hemlock {
 
             bool add_screen(Screen&& screen);
 
-            bool go_to_screen(const std::string& name);
+            bool go_to_screen(const std::string& name, TimeData time);
 
             WindowBase* window()         { return m_window;         }
             ScreenBase* current_screen() { return m_current_screen; }
+
+            TimeData current_times()  { return m_current_times;  }
+            TimeData previous_times() { return m_previous_times; }
 
             bool should_end_process() { return m_should_end_process; }
             void set_should_end_process(bool should_end_process = true);
