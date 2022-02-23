@@ -79,8 +79,8 @@ conan_cmake_install(PATH_OR_REFERENCE .
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_BINARY_DIR}")
 
 if (HEMLOCK_USING_OPENGL)
-    find_package(opengl REQUIRED)
-    find_package(glew REQUIRED)
+    find_package(OpenGL REQUIRED)
+    find_package(GLEW REQUIRED)
 endif()
 find_package(glm REQUIRED)
 find_package(SDL2 REQUIRED)
@@ -176,7 +176,12 @@ target_include_directories(Hemlock_Revisited
 
 
 if (HEMLOCK_USING_OPENGL)
-    target_link_libraries(Hemlock_Revisited OpenGL32 GLEW::GLEW)
+    target_link_libraries(Hemlock_Revisited GLEW::GLEW)
+    if (UNIX OR MINGW)
+        target_link_libraries(Hemlock_Revisited GL)
+    elseif (MSVC)
+        target_link_libraries(Hemlock_Revisited OpenGL32)
+    endif()
 elseif (HEMLOCK_USING_VULKAN)
     target_link_libraries(Hemlock_Revisited vulkan)
 endif()
