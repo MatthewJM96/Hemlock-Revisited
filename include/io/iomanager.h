@@ -36,11 +36,11 @@ namespace hemlock {
             ui32 apply_to_globpath(const fs::path& globpath, Delegate<bool(const fs::path&)> func) const;
 
                            bool read_file_to_string(const fs::path& path, OUT std::string& buffer) const;
-            CALLER_DELETE char* read_file_to_string(const fs::path& path, OUT ui64* length = nullptr) const;
+            CALLER_DELETE char* read_file_to_string(const fs::path& path, OUT ui32* length = nullptr) const;
 
 
                           bool read_file_to_binary(const fs::path& path, OUT std::vector<ui8>& buffer) const;
-            CALLER_DELETE ui8* read_file_to_binary(const fs::path& path, OUT ui64& length) const;
+            CALLER_DELETE ui8* read_file_to_binary(const fs::path& path, OUT ui32& length) const;
         };
     }
 }

@@ -68,12 +68,15 @@ bool hio::IOManagerBase::read_file_to_string(const fs::path& path, std::string& 
     if (!resolve_path(path, abs_path)) return false;
 
     // Open file, if we can't then fail.
-    FILE* file = fopen(abs_path.c_str(), "rb");
+    FILE* file = fopen(abs_path.string().data(), "rb");
     if (file == nullptr) return false;
+
+    // TODO(Matthew): Only support files up to 4GB in size. Need some paging approach
+    //                for larger files.
 
     // Get length of file contents in bytes.
     fseek(file, 0, SEEK_END);
-    ui64 length = ftell(file);
+    ui32 length = static_cast<ui32>(ftell(file));
     fseek(file, 0, SEEK_SET);
 
     // Reserve memory in buffer.
@@ -89,17 +92,20 @@ bool hio::IOManagerBase::read_file_to_string(const fs::path& path, std::string& 
     return true;
 }
 
-char* hio::IOManagerBase::read_file_to_string(const fs::path& path, ui64* length /*= nullptr*/) const {
+char* hio::IOManagerBase::read_file_to_string(const fs::path& path, ui32* length /*= nullptr*/) const {
     fs::path abs_path{};
     if (!resolve_path(path, abs_path)) return nullptr;
 
     // Open file, if we can't then fail.
-    FILE* file = fopen(abs_path.c_str(), "rb");
+    FILE* file = fopen(abs_path.string().data(), "rb");
     if (file == nullptr) return nullptr;
+
+    // TODO(Matthew): Only support files up to 4GB in size. Need some paging approach
+    //                for larger files.
 
     // Get length of file contents in bytes.
     fseek(file, 0, SEEK_END);
-    ui64 _length = ftell(file);
+    ui32 _length = static_cast<ui32>(ftell(file));
     fseek(file, 0, SEEK_SET);
 
     // Pass back length if requested.
@@ -125,12 +131,15 @@ bool hio::IOManagerBase::read_file_to_binary(const fs::path& path, std::vector<u
     if (!resolve_path(path, abs_path)) return false;
 
     // Open file, if we can't then fail.
-    FILE* file = fopen(abs_path.c_str(), "rb");
+    FILE* file = fopen(abs_path.string().data(), "rb");
     if (file == nullptr) return false;
+
+    // TODO(Matthew): Only support files up to 4GB in size. Need some paging approach
+    //                for larger files.
 
     // Get length of file contents in bytes.
     fseek(file, 0, SEEK_END);
-    ui64 length = ftell(file);
+    ui32 length = static_cast<ui32>(ftell(file));
     fseek(file, 0, SEEK_SET);
 
     // Reserve memory in buffer.
@@ -146,17 +155,20 @@ bool hio::IOManagerBase::read_file_to_binary(const fs::path& path, std::vector<u
     return true;
 }
 
-ui8* hio::IOManagerBase::read_file_to_binary(const fs::path& path, ui64& length) const {
+ui8* hio::IOManagerBase::read_file_to_binary(const fs::path& path, ui32& length) const {
     fs::path abs_path{};
     if (!resolve_path(path, abs_path)) return nullptr;
 
     // Open file, if we can't then fail.
-    FILE* file = fopen(abs_path.c_str(), "rb");
+    FILE* file = fopen(abs_path.string().data(), "rb");
     if (file == nullptr) return nullptr;
+
+    // TODO(Matthew): Only support files up to 4GB in size. Need some paging approach
+    //                for larger files.
 
     // Get length of file contents in bytes.
     fseek(file, 0, SEEK_END);
-    length = ftell(file);
+    length = static_cast<ui32>(ftell(file));
     fseek(file, 0, SEEK_SET);
 
     // Reserve memory in buffer.
