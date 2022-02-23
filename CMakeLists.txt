@@ -40,6 +40,9 @@ elseif (MSVC)
     set(CMAKE_CXX_FLAGS "/W3 /WX /EHsc")
     set(CMAKE_CXX_FLAGS_RELEASE "/O3")
     set(CMAKE_CXX_FLAGS_DEBUG "/Od /Zi")
+
+    # Don't error on secure warnings.
+    add_compile_definitions(_CRT_SECURE_NO_WARNINGS=1)
 endif()
 
 # if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
