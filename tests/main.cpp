@@ -2,7 +2,7 @@
 
 #include "app.hpp"
 
-i32 main() {
+int main(int argc, char *argv[]) {
     MyApp app;
     app.init();
     app.run();
