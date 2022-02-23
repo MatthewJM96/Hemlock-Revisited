@@ -47,7 +47,8 @@ bool hvox::set_block( Chunk* chunk,
 {
     auto block_idx = block_index(block_position);
 
-    if (!chunk->gen_task_active) {
+    bool gen_task_active = chunk->gen_task_active.load(std::memory_order_acquire);
+    if (!gen_task_active) {
         bool should_cancel = chunk->on_block_change({
             chunk,
             chunk->blocks[block_idx],
@@ -67,7 +68,8 @@ bool hvox::set_blocks( Chunk* chunk,
            BlockChunkPosition end_block_position,
                         Block block )
 {
-    if (!chunk->gen_task_active) {
+    bool gen_task_active = chunk->gen_task_active.load(std::memory_order_acquire);
+    if (!gen_task_active) {
         bool should_cancel = chunk->on_bulk_block_change({
             chunk,
             &block,
@@ -128,7 +130,8 @@ bool hvox::set_blocks( Chunk* chunk,
            BlockChunkPosition end_block_position,
                        Block* blocks )
 {
-    if (!chunk->gen_task_active) {
+    bool gen_task_active = chunk->gen_task_active.load(std::memory_order_acquire);
+    if (!gen_task_active) {
         bool should_cancel = chunk->on_bulk_block_change({
             chunk,
             blocks,
