@@ -55,4 +55,6 @@ f32v2 hg::f::calculate_align_offset(TextAlign align, f32v4 rect, f32 height, f32
             // Should never get here.
             assert(false);
     }
+    // Really should never get here.
+    return {};
 }
