@@ -18,17 +18,17 @@ public:
     virtual void start(TimeData time) override {
         happ::ScreenBase::start(time);
 
-#define NUM 1
+#define NUM 5
         for (auto x = -NUM; x < NUM; ++x) {
             for (auto z = -NUM; z < NUM; ++z) {
-                for (auto y = -2 * NUM; y < 0; ++ y) {
+                for (auto y = -1; y < 2 * NUM; ++ y) {
                     m_chunk_grid.preload_chunk_at({ x, y, z });
                 }
             }
         }
         for (auto x = -NUM; x < NUM; ++x) {
             for (auto z = -NUM; z < NUM; ++z) {
-                for (auto y = -2 * NUM; y < 0; ++ y) {
+                for (auto y = -1; y < 2 * NUM; ++ y) {
                     m_chunk_grid.load_chunk_at({ x, y, z }, &chunk_generator);
                 }
             }
@@ -135,14 +135,51 @@ public:
 
         chunk_generator = hvox::ChunkGenerationStrategy(
             [&](hvox::Block* blocks, hvox::ChunkGridPosition chunk_position) {
-                auto fnSimplex = FastNoise::New<FastNoise::Simplex>();
-                auto fnFractal = FastNoise::New<FastNoise::FractalFBm>();
+                auto simplex_1              = FastNoise::New<FastNoise::Simplex>();
+                auto fractal_1              = FastNoise::New<FastNoise::FractalFBm>();
+                auto domain_scale_1         = FastNoise::New<FastNoise::DomainScale>();
+                auto position_output_1          = FastNoise::New<FastNoise::PositionOutput>();
+                auto add_1                      = FastNoise::New<FastNoise::Add>();
+                auto domain_warp_grad_1         = FastNoise::New<FastNoise::DomainWarpGradient>();
+                auto domain_warp_fract_prog_1   = FastNoise::New<FastNoise::DomainWarpFractalProgressive>();
 
-                fnFractal->SetSource( fnSimplex );
-                fnFractal->SetOctaveCount( 5 );
+                fractal_1->SetSource(simplex_1);
+                fractal_1->SetOctaveCount(4);
+                fractal_1->SetGain(0.5f);
+                fractal_1->SetLacunarity(2.5f);
+
+                domain_scale_1->SetSource(fractal_1);
+                domain_scale_1->SetScale(0.66f);
+
+                position_output_1->Set<FastNoise::Dim::X>(0.0f);
+                position_output_1->Set<FastNoise::Dim::Y>(3.0f);
+                position_output_1->Set<FastNoise::Dim::Z>(0.0f);
+                position_output_1->Set<FastNoise::Dim::W>(0.0f);
+
+                add_1->SetLHS(domain_scale_1);
+                add_1->SetRHS(position_output_1);
+
+                domain_warp_grad_1->SetSource(add_1);
+                domain_warp_grad_1->SetWarpAmplitude(0.2f);
+                domain_warp_grad_1->SetWarpFrequency(2.0f);
+
+                domain_warp_fract_prog_1->SetSource(domain_warp_grad_1);
+                domain_warp_fract_prog_1->SetGain(0.6f);
+                domain_warp_fract_prog_1->SetOctaveCount(2);
+                domain_warp_fract_prog_1->SetLacunarity(2.5f);
 
                 f32* data = new f32[CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE];
-                fnFractal->GenUniformGrid3D(data, chunk_position.x, chunk_position.y, chunk_position.z, CHUNK_SIZE, CHUNK_SIZE, CHUNK_SIZE, 0.2f, 1337);
+                domain_warp_fract_prog_1->GenUniformGrid3D(
+                    data,
+                    chunk_position.x * CHUNK_SIZE,
+                    chunk_position.y * CHUNK_SIZE,
+                    chunk_position.z * CHUNK_SIZE,
+                    CHUNK_SIZE,
+                    CHUNK_SIZE,
+                    CHUNK_SIZE,
+                    0.005f,
+                    1337
+                );
 
                 for (ui64 i = 0; i < CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE; ++i) {
                     blocks[i] = data[i] > 0 ? hvox::Block{1} : hvox::Block{0};
