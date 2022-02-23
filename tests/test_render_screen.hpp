@@ -110,18 +110,6 @@ public:
         glUniform1i(m_shader.uniform_location("tex"), 0);
 
         m_chunk_grid.draw(time);
-        // for (auto& chunk : m_chunk_grid.chunks()) {
-        //     if (chunk.second->state != hvox::ChunkState::MESH_UPLOADED) continue;
-
-        //     glBindVertexArray(chunk.second->mesh_handles.vao);
-
-        //     auto chunk_position = hvox::block_world_position(chunk.second->position, 0);
-        //     auto translation_matrix = glm::translate(f32m4{1.0f}, f32v3{chunk_position});
-        //     glUniformMatrix4fv(m_shader.uniform_location("model"),  1, GL_FALSE, &translation_matrix[0][0]);
-
-        //     glDrawArrays(GL_TRIANGLES, 0, chunk.second->mesh.vertex_count);
-        // }
-        // glBindVertexArray(0);
 
         // Deactivate our shader.
         m_shader.unuse();
