@@ -72,7 +72,18 @@ void happ::SingleWindowApp::run() {
 
 void happ::SingleWindowApp::prepare_window() {
 #if defined(HEMLOCK_USING_SDL)
-    SDL_Init(SDL_INIT_EVERYTHING);
+    if (
+        SDL_Init(
+            SDL_INIT_TIMER
+          | SDL_INIT_VIDEO
+          | SDL_INIT_GAMECONTROLLER
+        ) < 0
+    ) {
+        debug_printf("Couldn't initialise SDL.\n");
+        const char* err = SDL_GetError();
+        debug_printf("%s\n", err);
+        exit(1);
+    }
     SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 #endif // defined(HEMLOCK_USING_SDL)
@@ -80,14 +91,14 @@ void happ::SingleWindowApp::prepare_window() {
 #if defined(HEMLOCK_USING_SDL_TTF)
     if (TTF_Init() < 0) {
         debug_printf("TTF font library could not be initialised...\n");
-        exit(1);
+        exit(2);
     }
 #endif // defined(HEMLOCK_USING_SDL_TTF)
 
     m_window = new happ::Window();
     if (m_window->init() != happ::WindowError::NONE) {
         debug_printf("Window could not be initialised...\n");
-        exit(2);
+        exit(3);
     }
 
 #if defined(HEMLOCK_USING_OPENGL)
