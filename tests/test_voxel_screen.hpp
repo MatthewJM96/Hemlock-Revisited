@@ -1,6 +1,10 @@
 #ifndef __hemlock_tests_test_voxel_screen_hpp
 #define __hemlock_tests_test_voxel_screen_hpp
 
+#include <FastNoise/FastNoise.h>
+
+#include "voxel/chunk/generator_task.h"
+
 #include "iomanager.hpp"
 
 class TestVoxelScreen : public happ::ScreenBase {
@@ -108,7 +112,24 @@ public:
 
         m_chunk_grid.init(10);
 
-#define NUM 5
+        chunk_generator = hvox::ChunkGenerationStrategy(
+            [&](hvox::Block* blocks, hvox::ChunkGridPosition chunk_position) {
+                auto fnSimplex = FastNoise::New<FastNoise::Simplex>();
+                auto fnFractal = FastNoise::New<FastNoise::FractalFBm>();
+
+                fnFractal->SetSource( fnSimplex );
+                fnFractal->SetOctaveCount( 5 );
+
+                f32* data = new f32[CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE];
+                fnFractal->GenUniformGrid3D(data, chunk_position.x, chunk_position.y, chunk_position.z, CHUNK_SIZE, CHUNK_SIZE, CHUNK_SIZE, 0.2f, 1337);
+
+                for (ui64 i = 0; i < CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE; ++i) {
+                    blocks[i] = data[i] > 0 ? hvox::Block{1} : hvox::Block{0};
+                }
+            }
+        );
+
+#define NUM 1
         for (auto x = -NUM; x < NUM; ++x) {
             for (auto z = -NUM; z < NUM; ++z) {
                 for (auto y = -2 * NUM; y < 0; ++ y) {
@@ -119,7 +140,7 @@ public:
         for (auto x = -NUM; x < NUM; ++x) {
             for (auto z = -NUM; z < NUM; ++z) {
                 for (auto y = -2 * NUM; y < 0; ++ y) {
-                    m_chunk_grid.load_chunk_at({ x, y, z });
+                    m_chunk_grid.load_chunk_at({ x, y, z }, &chunk_generator);
                 }
             }
         }
@@ -141,6 +162,8 @@ public:
     }
 protected:
     hemlock::Subscriber<hui::MouseMoveEvent>      handle_mouse_move;
+
+    hvox::ChunkGenerationStrategy chunk_generator;
 
     ui32 m_default_texture;
 

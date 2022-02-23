@@ -168,6 +168,20 @@ public:
 
         m_chunk_grid.init(10);
 
+        chunk_generator = hvox::ChunkGenerationStrategy(
+            [&](hvox::Block*, hvox::ChunkGridPosition chunk_position) {
+                for (auto y = 0; y < CHUNK_SIZE; y += 2) {
+                    const ui8 LEFT  = 14;
+                    const ui8 RIGHT = 16;
+
+                    hvox::Chunk* chunk = const_cast<hvox::Chunks&>(m_chunk_grid.chunks())[chunk_position.id];
+
+                    set_blocks(chunk, hvox::BlockChunkPosition{0, y, 0}, hvox::BlockChunkPosition{LEFT, y, LEFT}, hvox::Block{1});
+                    set_blocks(chunk, hvox::BlockChunkPosition{RIGHT, y, RIGHT}, hvox::BlockChunkPosition{CHUNK_SIZE - 1, y, CHUNK_SIZE - 1}, hvox::Block{1});
+                }
+            }
+        );
+
 #define NUM 5
         for (auto x = -NUM; x < NUM; ++x) {
             for (auto z = -NUM; z < NUM; ++z) {
@@ -179,7 +193,7 @@ public:
         for (auto x = -NUM; x < NUM; ++x) {
             for (auto z = -NUM; z < NUM; ++z) {
                 for (auto y = -2 * NUM; y < 0; ++ y) {
-                    m_chunk_grid.load_chunk_at({ x, y, z });
+                    m_chunk_grid.load_chunk_at({ x, y, z }, &chunk_generator);
                 }
             }
         }
@@ -222,6 +236,8 @@ public:
     }
 protected:
     hemlock::Subscriber<hui::MouseMoveEvent>      handle_mouse_move;
+
+    hvox::ChunkGenerationStrategy chunk_generator;
 
     ui32 m_default_texture;
 
