@@ -33,16 +33,20 @@ namespace hemlock {
         //   Certainly reflection should make it possible in
         //   a sensible way.
 
-        using Vertex_Pos2D_32 = f32v2;
-        using Vertex_Pos2D_64 = f64v2;
-        using Vertex_Pos3D_32 = f32v3;
-        using Vertex_Pos3D_64 = f32v3;
-        using Vertex_RGB_32   = f32v3;
-        using Vertex_RGB_64   = f64v3;
-        using Vertex_RGBA_64  = f64v4;
-        using Vertex_RGBA_32  = f32v4;
-        using Vertex_UV_32    = f32v2;
-        using Vertex_UV_64    = f64v2;
+        using Vertex_Pos2D_32    = f32v2;
+        using Vertex_Pos2D_64    = f64v2;
+        using Vertex_Pos3D_32    = f32v3;
+        using Vertex_Pos3D_64    = f32v3;
+        using Vertex_Normal2D_32 = f32v2;
+        using Vertex_Normal2D_64 = f64v2;
+        using Vertex_Normal3D_32 = f32v3;
+        using Vertex_Normal3D_64 = f32v3;
+        using Vertex_RGB_32      = f32v3;
+        using Vertex_RGB_64      = f64v3;
+        using Vertex_RGBA_64     = f64v4;
+        using Vertex_RGBA_32     = f32v4;
+        using Vertex_UV_32       = f32v2;
+        using Vertex_UV_64       = f64v2;
 
         struct IndexData {
             ui32*        indices;
@@ -207,6 +211,98 @@ GEN_MESH_UPLOADER_DECLS(PREFIX)
             MAKE_POS3D(64),
             MAKE_UV(64),
             MAKE_RGBA(64)
+        )
+
+        GEN_MESH_CASE_STRUCT_DEFS_AND_FUNC_DECLS(
+            Colourless_2D_32_Normal,
+            MAKE_POS2D(32),
+            MAKE_UV(32),
+            MAKE_NORMAL2D(32)
+        )
+
+        GEN_MESH_CASE_STRUCT_DEFS_AND_FUNC_DECLS(
+            Colourless_3D_32_Normal,
+            MAKE_POS3D(32),
+            MAKE_UV(32),
+            MAKE_NORMAL3D(32)
+        )
+
+        GEN_MESH_CASE_STRUCT_DEFS_AND_FUNC_DECLS(
+            Colourless_2D_64_Normal,
+            MAKE_POS2D(64),
+            MAKE_UV(64),
+            MAKE_NORMAL2D(64)
+        )
+
+        GEN_MESH_CASE_STRUCT_DEFS_AND_FUNC_DECLS(
+            Colourless_3D_64_Normal,
+            MAKE_POS3D(64),
+            MAKE_UV(64),
+            MAKE_NORMAL3D(64)
+        )
+
+        GEN_MESH_CASE_STRUCT_DEFS_AND_FUNC_DECLS(
+            RGB_2D_32_Normal,
+            MAKE_POS2D(32),
+            MAKE_UV(32),
+            MAKE_RGB(32),
+            MAKE_NORMAL2D(32)
+        )
+
+        GEN_MESH_CASE_STRUCT_DEFS_AND_FUNC_DECLS(
+            RGB_3D_32_Normal,
+            MAKE_POS3D(32),
+            MAKE_UV(32),
+            MAKE_RGB(32),
+            MAKE_NORMAL3D(32)
+        )
+
+        GEN_MESH_CASE_STRUCT_DEFS_AND_FUNC_DECLS(
+            RGB_2D_64_Normal,
+            MAKE_POS2D(64),
+            MAKE_UV(64),
+            MAKE_RGB(64),
+            MAKE_NORMAL2D(64)
+        )
+
+        GEN_MESH_CASE_STRUCT_DEFS_AND_FUNC_DECLS(
+            RGB_3D_64_Normal,
+            MAKE_POS3D(64),
+            MAKE_UV(64),
+            MAKE_RGB(64),
+            MAKE_NORMAL3D(64)
+        )
+
+        GEN_MESH_CASE_STRUCT_DEFS_AND_FUNC_DECLS(
+            RGBA_2D_32_Normal,
+            MAKE_POS2D(32),
+            MAKE_UV(32),
+            MAKE_RGBA(32),
+            MAKE_NORMAL2D(32)
+        )
+
+        GEN_MESH_CASE_STRUCT_DEFS_AND_FUNC_DECLS(
+            RGBA_3D_32_Normal,
+            MAKE_POS3D(32),
+            MAKE_UV(32),
+            MAKE_RGBA(32),
+            MAKE_NORMAL3D(32)
+        )
+
+        GEN_MESH_CASE_STRUCT_DEFS_AND_FUNC_DECLS(
+            RGBA_2D_64_Normal,
+            MAKE_POS2D(64),
+            MAKE_UV(64),
+            MAKE_RGBA(64),
+            MAKE_NORMAL2D(64)
+        )
+
+        GEN_MESH_CASE_STRUCT_DEFS_AND_FUNC_DECLS(
+            RGBA_3D_64_Normal,
+            MAKE_POS3D(64),
+            MAKE_UV(64),
+            MAKE_RGBA(64),
+            MAKE_NORMAL3D(64)
         )
 
 #include "graphics/mesh/common_vertices_undef.hpp"
