@@ -2,6 +2,7 @@
 #define __hemlock_voxel_chunk_mesh_greedy_h
 
 #include "voxel/chunk/load_task.hpp"
+#include "voxel/chunk/mesh/mesh_task.hpp"
 
 namespace hemlock {
     namespace voxel {

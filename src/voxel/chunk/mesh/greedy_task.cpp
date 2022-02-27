@@ -2,50 +2,26 @@
 
 #include "graphics/mesh.h"
 #include "voxel/block.hpp"
+#include "voxel/chunk.h"
 #include "voxel/chunk/grid.h"
 
 #include "voxel/chunk/mesh/greedy_task.h"
 
-static inline bool is_at_left_face(hvox::BlockIndex index) {
-    return (index % CHUNK_SIZE) == 0;
-}
-static inline bool is_at_right_face(hvox::BlockIndex index) {
-    return ((index + 1) % CHUNK_SIZE) == 0;
-}
-static inline bool is_at_bottom_face(hvox::BlockIndex index) {
-    return (index % (CHUNK_SIZE * CHUNK_SIZE)) < CHUNK_SIZE;
-}
-static inline bool is_at_top_face(hvox::BlockIndex index) {
-    return (index % (CHUNK_SIZE * CHUNK_SIZE)) >= (CHUNK_SIZE * (CHUNK_SIZE - 1));
-}
-static inline bool is_at_front_face(hvox::BlockIndex index) {
-    return index < (CHUNK_SIZE * CHUNK_SIZE);
-}
-static inline bool is_at_back_face(hvox::BlockIndex index) {
-    return index >= (CHUNK_SIZE * CHUNK_SIZE * (CHUNK_SIZE - 1));
-}
-
-static inline hvox::BlockIndex index_at_right_face(hvox::BlockIndex index) {
-    return index + CHUNK_SIZE - 1;
-}
-static inline hvox::BlockIndex index_at_left_face(hvox::BlockIndex index) {
-    return index - CHUNK_SIZE + 1;
-}
-static inline hvox::BlockIndex index_at_top_face(hvox::BlockIndex index) {
-    return index + (CHUNK_SIZE * (CHUNK_SIZE - 1));
-}
-static inline hvox::BlockIndex index_at_bottom_face(hvox::BlockIndex index) {
-    return index - (CHUNK_SIZE * (CHUNK_SIZE - 1));
-}
-static inline hvox::BlockIndex index_at_front_face(hvox::BlockIndex index) {
-    return index - (CHUNK_SIZE * CHUNK_SIZE * (CHUNK_SIZE - 1));
-}
-static inline hvox::BlockIndex index_at_back_face(hvox::BlockIndex index) {
-    return index + (CHUNK_SIZE * CHUNK_SIZE * (CHUNK_SIZE - 1));
-}
-
 void hvox::ChunkGreedyMeshTask::execute(ChunkLoadThreadState*, ChunkLoadTaskQueue*) {
     m_chunk->mesh_task_active.store(true, std::memory_order_release);
+
+    // TODO(Matthew): Remove this, but we'll remove it when we shift strategy stuff
+    //                to templated policy.
+    bool owns_strategy = !m_strategy;
+    if (!m_strategy) {
+        m_strategy = reinterpret_cast<void*>(
+            new ChunkMeshStrategy(
+                [&](const Block* source, const Block* target, BlockChunkPosition, Chunk*) {
+                    return (source->id == target->id) && (source->id != 0);
+                }
+            )
+        );
+    }
 
     // TODO(Matthew): Cross-chunk greedy instancing?
     // Note that this code would probably need to be enabled if we were to do
@@ -69,14 +45,6 @@ void hvox::ChunkGreedyMeshTask::execute(ChunkLoadThreadState*, ChunkLoadTaskQueu
     //     return;
     // }
 
-    m_chunk->instance = { nullptr, 0 };
-
-    Block* blocks = m_chunk->blocks;
-
-    std::queue<BlockChunkPosition> queued_for_visit;
-
-    bool* visited = new bool[CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE]{false};
-
     // TODO(Matthew): Better guess work should be possible and expand only when needed.
     //                  Maybe in addition to managing how all chunk's transformations are
     //                  stored on GPU, ChunkGrid-level should also manage this data?
@@ -85,131 +53,188 @@ void hvox::ChunkGreedyMeshTask::execute(ChunkLoadThreadState*, ChunkLoadTaskQueu
     //                      unique, scalings will not be, and so an index buffer could
     //                      further improve performance and also remove the difficulty
     //                      of the above TODO.
-    m_chunk->instance.data = new ChunkInstanceData[CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE];
+    m_chunk->instance = {
+        new ChunkInstanceData[CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE],
+        0
+    };
+
+    Block* blocks = m_chunk->blocks;
+
+    std::queue<BlockChunkPosition> queued_for_visit;
+
+    bool* visited = new bool[CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE]{false};
 
     auto  data        = m_chunk->instance.data;
     auto& voxel_count = m_chunk->instance.count;
 
-    // TODO(Matthew): In empty block check, do we want to break out of a given
-    //                set of loops entirely if we encounter a visited block?
-    //                  Unsure if this could actually happen in practice.
-    // TODO(Matthew): Assuming block ID is sufficient to differentiate blocks.
-    //                  We can't generally expect that.
-    BlockID             kind   = blocks[0].id;
+    const Block*        source = &blocks[0];
     BlockChunkPosition  start  = BlockChunkPosition{0};
     BlockChunkPosition  end    = BlockChunkPosition{0};
-    do {
-        if (!queued_for_visit.empty()) {
-            queued_for_visit.pop();
-        }
-start_loop:
-        BlockChunkPosition candidate = start;
-        bool have_found_instanceable = true;
-        for (; candidate.x < CHUNK_SIZE; ++candidate.x) {
-            if (kind == 0) {
-                if (blocks[block_index(candidate)].id != 0
-                        && !visited[block_index(candidate)]) {
-                    start = candidate;
-                    end   = start;
-                    kind  = blocks[block_index(candidate)].id;
+    BlockChunkPosition  target_pos;
 
-                    have_found_instanceable = true;
-                    goto start_loop;
+    // Determines if two blocks are of the same mesheable kind.
+    ChunkMeshStrategy* are_same_instanceable = reinterpret_cast<ChunkMeshStrategy*>(m_strategy);
+
+    bool blocks_to_consider = true;
+    while (blocks_to_consider) {
+process_new_source:
+        bool found_instanceable = (*are_same_instanceable)(source, source, {}, m_chunk);
+
+        /***************\
+         * Scan X - 1D *
+        \***************/
+
+        target_pos = start;
+        for (; target_pos.x < CHUNK_SIZE; ++target_pos.x) {
+            auto target_idx = block_index(target_pos);
+
+            const Block* target = &blocks[target_idx];
+            // We are scanning for a new instanceable source block.
+            if (!found_instanceable) {
+                // Found a instanceable source block that hasn't already
+                // been visited.
+                if ((*are_same_instanceable)(target, target, target_pos, m_chunk)
+                        && !visited[target_idx]) {
+                    source = target;
+                    start  = target_pos;
+                    end    = target_pos;
+
+                    goto process_new_source;
+                // Current block we're looking at is either already visited or
+                // not an instanceable source block. Set it as visited.
                 } else {
-                    have_found_instanceable = false;
-                    visited[block_index(candidate)] = true;
+                    visited[target_idx] = true;
                     continue;
                 }
+            // We are scanning for the extent of an instanceable source block.
+            } else {
+                if (!(*are_same_instanceable)(source, target, target_pos, m_chunk)
+                        || visited[target_idx]) {
+                    end.x = target_pos.x - 1;
+
+                    break;
+                }
             }
-
-            if (kind != blocks[block_index(candidate)].id
-                    || visited[block_index(candidate)]) {
-                end = { candidate.x - 1, 0, 0 };
-
-                queued_for_visit.push({candidate.x, start.y, start.z});
-
-                break;
-            }
-
-            visited[block_index(candidate)] = true;
         }
 
-        if (candidate.x == CHUNK_SIZE)
-            end = { candidate.x - 1, 0, 0 };
+        // If we scanned all the way, we won't have set end component, so set it.
+        if (target_pos.x == CHUNK_SIZE)
+            end.x = CHUNK_SIZE - 1;
 
-        candidate = start + BlockChunkPosition{0, 0, 1};
-        for (; candidate.z < CHUNK_SIZE; ++candidate.z) {
+        // If we were scanning for the extent of an instanceable source block,
+        // we now set the visited status of scanned blocks.
+        if (found_instanceable) {
+            set_per_block_data(
+                visited,
+                start,
+                end,
+                true
+            );
+        }
+
+        /***************\
+         * Scan Z - 2D *
+        \***************/
+
+        target_pos = start + BlockChunkPosition{0, 0, 1};
+        for (; target_pos.z < CHUNK_SIZE; ++target_pos.z) {
             bool done = false;
 
-            for (candidate.x = start.x; candidate.x <= end.x; ++candidate.x) {
-                if (kind == 0) {
-                    if (blocks[block_index(candidate)].id != 0
-                            && !visited[block_index(candidate)]) {
-                        start = candidate;
-                        end   = start;
-                        kind  = blocks[block_index(candidate)].id;
+            // Scan across X for each Z coord. Should any given Z's X-wise scan
+            // not permit an extent the same length in X as the first scanned,
+            // we reject that Z coord from being in the current extent and start
+            // the next scan.
+            for (target_pos.x = start.x; target_pos.x <= end.x; ++target_pos.x) {
+                auto target_idx = block_index(target_pos);
 
-                        have_found_instanceable = true;
-                        goto start_loop;
+                const Block* target = &blocks[target_idx];
+                // We are scanning for a new instanceable source block.
+                if (!found_instanceable) {
+                    // Found a instanceable source block that hasn't already
+                    // been visited.
+                    if ((*are_same_instanceable)(target, target, target_pos, m_chunk)
+                            && !visited[target_idx]) {
+                        source = target;
+                        start  = target_pos;
+                        end    = target_pos;
+
+                        goto process_new_source;
+                    // Current block we're looking at is either already visited or
+                    // not an instanceable source block. Set it as visited.
                     } else {
-                        have_found_instanceable = false;
-                        visited[block_index(candidate)] = true;
+                        visited[target_idx] = true;
                         continue;
                     }
-                }
-
-                if (kind != blocks[block_index(candidate)].id
-                        || visited[block_index(candidate)]) {
-                    end = { end.x, 0, candidate.z - 1};
-
-                    queued_for_visit.push({start.x, start.y, candidate.z});
+                // We are scanning for the extent of an instanceable source block.
+                } else if (!(*are_same_instanceable)(source, target, target_pos, m_chunk)
+                                || visited[target_idx]) {
+                    end.z = target_pos.z - 1;
 
                     done = true;
                     break;
                 }
-
-                visited[block_index(candidate)] = true;
             }
 
             if (done) break;
         }
 
-        if (candidate.z == CHUNK_SIZE)
-            end = { end.x, 0, candidate.z - 1};
+        // If we scanned all the way, we won't have set end component, so set it.
+        if (target_pos.z == CHUNK_SIZE)
+            end.z = CHUNK_SIZE - 1;
 
-        candidate = start + BlockChunkPosition{0, 1, 0};
-        for (; candidate.y < CHUNK_SIZE; ++candidate.y) {
+        // If we were scanning for the extent of an instanceable source block,
+        // we now set the visited status of scanned blocks.
+        if (found_instanceable) {
+            set_per_block_data(
+                visited,
+                start + BlockChunkPosition{0, 0, 1},
+                end,
+                true
+            );
+        }
+
+        /***************\
+         * Scan Y - 3D *
+        \***************/
+
+        target_pos = start + BlockChunkPosition{0, 1, 0};
+        for (; target_pos.y < CHUNK_SIZE; ++target_pos.y) {
             bool done = false;
 
-            for (candidate.z = start.z; candidate.z <= end.z; ++candidate.z) {
-                for (candidate.x = start.x; candidate.x <= end.x; ++candidate.x) {
-                    if (kind == 0) {
-                        if (blocks[block_index(candidate)].id != 0
-                                && !visited[block_index(candidate)]) {
-                            start = candidate;
-                            end   = start;
-                            kind  = blocks[block_index(candidate)].id;
+            // Scan across X-Z plane for each Y coord. Should any given Y's
+            // XZ-wise scan not permit an extent the same length in X as the
+            // first scanned, we reject that X-Z plane from being in the
+            // current extent and start the next scan.
+            for (target_pos.z = start.z; target_pos.z <= end.z; ++target_pos.z) {
+                for (target_pos.x = start.x; target_pos.x <= end.x; ++target_pos.x) {
+                    auto target_idx = block_index(target_pos);
 
-                            have_found_instanceable = true;
-                            goto start_loop;
+                    const Block* target = &blocks[target_idx];
+                    // We are scanning for a new instanceable source block.
+                    if (!found_instanceable) {
+                        // Found a instanceable source block that hasn't already
+                        // been visited.
+                        if ((*are_same_instanceable)(target, target, target_pos, m_chunk)
+                                && !visited[target_idx]) {
+                            source = target;
+                            start  = target_pos;
+                            end    = target_pos;
+
+                            goto process_new_source;
+                        // Current block we're looking at is either already visited or
+                        // not an instanceable source block. Set it as visited.
                         } else {
-                            have_found_instanceable = false;
-                            visited[block_index(candidate)] = true;
+                            visited[target_idx] = true;
                             continue;
                         }
-                    }
-
-                    if (kind != blocks[block_index(candidate)].id
-                            || visited[block_index(candidate)]) {
-                        end = { end.x, candidate.y - 1, end.z};
-
-                        queued_for_visit.push({start.x, candidate.y, start.z});
+                    // We are scanning for the extent of an instanceable source block.
+                    } else if (!(*are_same_instanceable)(source, target, target_pos, m_chunk)
+                                    || visited[target_idx]) {
+                        end.y = target_pos.y - 1;
 
                         done = true;
                         break;
                     }
-
-                    visited[block_index(candidate)] = true;
                 }
 
                 if (done) break;
@@ -218,10 +243,51 @@ start_loop:
             if (done) break;
         }
 
-        if (candidate.y == CHUNK_SIZE)
-            end = { end.x, candidate.y - 1, end.z};
+        // If we scanned all the way, we won't have set end component, so set it.
+        if (target_pos.y == CHUNK_SIZE)
+            end.y = CHUNK_SIZE - 1;
 
-        if (have_found_instanceable) {
+        // Add blocks adjacent to X-face to queue.
+        if (end.x != CHUNK_SIZE - 1) {
+            for (ui32 z = start.z; z <= end.z; ++z) {
+                for (ui32 y = start.y; y <= end.y; ++y) {
+                    queued_for_visit.push({end.x + 1, y, z});
+                }
+            }
+        }
+        // Add blocks adjacent to Z-face to queue.
+        if (end.z != CHUNK_SIZE - 1) {
+            for (ui32 x = start.x; x <= end.x; ++x) {
+                for (ui32 y = start.y; y <= end.y; ++y) {
+                    queued_for_visit.push({x, y, end.z + 1});
+                }
+            }
+        }
+        // Add blocks adjacent to Y-face to queue.
+        if (end.y != CHUNK_SIZE - 1) {
+            for (ui32 x = start.x; x <= end.x; ++x) {
+                for (ui32 z = start.z; z <= end.z; ++z) {
+                    queued_for_visit.push({x, end.y + 1, z});
+                }
+            }
+        }
+
+        // If we were scanning for the extent of an instanceable source block,
+        // we now set the visited status of scanned blocks.
+        if (found_instanceable) {
+            set_per_block_data(
+                visited,
+                start + BlockChunkPosition{0, 1, 0},
+                end,
+                true
+            );
+        }
+
+        /*******************\
+         * Create Instance *
+        \*******************/
+
+        if (found_instanceable) {
             BlockWorldPosition start_world = block_world_position(m_chunk->position, start);
             BlockWorldPosition end_world   = block_world_position(m_chunk->position, end);
 
@@ -231,21 +297,40 @@ start_loop:
 
             data[voxel_count++] = ChunkInstanceData{ centre_of_cuboid_in_world, scale_of_cuboid };
         }
-pump_queue:
+
+        /***************\
+         * Pump Queue  *
+        \***************/
+
+        // If we have got no more blocks to visit, then we are done.
         if (queued_for_visit.empty())
             break;
 
-        start  = queued_for_visit.front();
-        end    = start;
-        kind   = blocks[block_index(start)].id;
+        // Pump queue for first block that we have not yet visited.
+        do {
+            start  = queued_for_visit.front();
+            end    = start;
+            source = &blocks[block_index(start)];
 
-        if (visited[block_index(start)]) {
             queued_for_visit.pop();
-            goto pump_queue;
-        }
-    } while (!queued_for_visit.empty());
+
+            // If we've found a block we have yet to visit, process
+            // it next.
+            if (!visited[block_index(start)])
+                break;
+
+            // If we have emtpied the queue without finding a block
+            // we have yet to visit, then we are done.
+            if (queued_for_visit.empty()) {
+                blocks_to_consider = false;
+                break;
+            }
+        } while (true);
+    };
 
     delete[] visited;
+    if (owns_strategy)
+        delete reinterpret_cast<ChunkMeshStrategy*>(m_strategy);
 
     m_chunk->mesh_task_active.store(false, std::memory_order_release);
 
