@@ -131,8 +131,22 @@ namespace hemlock {
              BlockChunkPosition start_block_position,
              BlockChunkPosition end_block_position,
                          Block* blocks );
+
+        template <typename DataType>
+        void set_per_block_data( DataType* buffer,
+                  hvox::BlockChunkPosition start_block_position,
+                  hvox::BlockChunkPosition end_block_position,
+                                  DataType data );
+
+        template <typename DataType>
+        void set_per_block_data( DataType* buffer,
+                  hvox::BlockChunkPosition start_block_position,
+                  hvox::BlockChunkPosition end_block_position,
+                                 DataType* data );
     }
 }
 namespace hvox = hemlock::voxel;
+
+#include "voxel/chunk.inl"
 
 #endif // __hemlock_voxel_chunk_h
