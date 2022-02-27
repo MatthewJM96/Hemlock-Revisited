@@ -18,17 +18,17 @@ public:
     virtual void start(TimeData time) override {
         happ::ScreenBase::start(time);
 
-#define NUM 5
+#define NUM 4
         for (auto x = -NUM; x < NUM; ++x) {
             for (auto z = -NUM; z < NUM; ++z) {
-                for (auto y = -1; y < 2 * NUM; ++ y) {
+                for (auto y = -1; y < 2; ++ y) {
                     m_chunk_grid.preload_chunk_at({ x, y, z });
                 }
             }
         }
         for (auto x = -NUM; x < NUM; ++x) {
             for (auto z = -NUM; z < NUM; ++z) {
-                for (auto y = -1; y < 2 * NUM; ++ y) {
+                for (auto y = -1 y < 2; ++ y) {
                     m_chunk_grid.load_chunk_at({ x, y, z }, &chunk_generator);
                 }
             }
@@ -106,8 +106,8 @@ public:
         m_input_manager = static_cast<happ::SingleWindowApp*>(m_process)->input_manager();
 
         m_camera.attach_to_window(m_process->window());
-        m_camera.set_position(f32v3{270.0f, 230.0f, -470.0f});
-        m_camera.rotate_from_mouse_with_absolute_up(-110.0f, 110.0f, 0.005f);
+        m_camera.set_position(f32v3{35.0f, 9.0f, -22.0f});
+        m_camera.rotate_from_mouse_with_absolute_up(-160.0f, 160.0f, 0.005f);
         m_camera.set_fov(90.0f);
         m_camera.update();
 
@@ -172,7 +172,7 @@ public:
                 domain_warp_fract_prog_1->GenUniformGrid3D(
                     data,
                     chunk_position.x * CHUNK_SIZE,
-                    chunk_position.y * CHUNK_SIZE,
+                    -1 * chunk_position.y * CHUNK_SIZE,
                     chunk_position.z * CHUNK_SIZE,
                     CHUNK_SIZE,
                     CHUNK_SIZE,
@@ -181,8 +181,13 @@ public:
                     1337
                 );
 
-                for (ui64 i = 0; i < CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE; ++i) {
-                    blocks[i] = data[i] > 0 ? hvox::Block{1} : hvox::Block{0};
+                ui64 noise_idx = 0;
+                for (ui8 z = 0; z < CHUNK_SIZE; ++z) {
+                    for (ui8 y = 0; y < CHUNK_SIZE; ++y) {
+                        for (ui8 x = 0; x < CHUNK_SIZE; ++x) {
+                            blocks[hvox::block_index({x, CHUNK_SIZE - y - 1, z})] = data[noise_idx++] > 0 ? hvox::Block{1} : hvox::Block{0};
+                        }
+                    }
                 }
             }
         );
