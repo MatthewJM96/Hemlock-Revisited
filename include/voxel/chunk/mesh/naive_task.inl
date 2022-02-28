@@ -1,10 +1,6 @@
-#include "stdafx.h"
-
 #include "graphics/mesh.h"
 #include "voxel/block.hpp"
 #include "voxel/chunk/grid.h"
-
-#include "voxel/chunk/mesh/naive_task.h"
 
 static inline bool is_at_left_face(hvox::BlockIndex index) {
     return (index % CHUNK_SIZE) == 0;
@@ -44,7 +40,8 @@ static inline hvox::BlockIndex index_at_back_face(hvox::BlockIndex index) {
     return index + (CHUNK_SIZE * CHUNK_SIZE * (CHUNK_SIZE - 1));
 }
 
-void hvox::ChunkNaiveMeshTask::execute(ChunkLoadThreadState* state, ChunkLoadTaskQueue* task_queue) {
+template <hvox::ChunkMeshComparator MeshComparator>
+void hvox::ChunkNaiveMeshTask<MeshComparator>::execute(ChunkLoadThreadState* state, ChunkLoadTaskQueue* task_queue) {
     m_chunk->mesh_task_active.store(true, std::memory_order_release);
 
     // Only execute if all preloaded neighbouring chunks have at least been generated.
@@ -55,8 +52,8 @@ void hvox::ChunkNaiveMeshTask::execute(ChunkLoadThreadState* state, ChunkLoadTas
         // Mark as no longer engaging in this meshing task.
         m_chunk->mesh_task_active.store(false, std::memory_order_release);
         // Put copy of this mesh task back onto the load task queue.
-        ChunkNaiveMeshTask* mesh_task = new ChunkNaiveMeshTask();
-        mesh_task->init(m_chunk, m_chunk_grid, nullptr);
+        ChunkNaiveMeshTask<MeshComparator>* mesh_task = new ChunkNaiveMeshTask<MeshComparator>();
+        mesh_task->init(m_chunk, m_chunk_grid);
         task_queue->enqueue(state->producer_token, { mesh_task, true });
         m_chunk->pending_task.store(ChunkLoadTaskKind::MESH, std::memory_order_release);
         return;
@@ -74,6 +71,9 @@ void hvox::ChunkNaiveMeshTask::execute(ChunkLoadThreadState* state, ChunkLoadTas
     //                      further improve performance and also remove the difficulty
     //                      of the above TODO.
     m_chunk->instance.data = new ChunkInstanceData[CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE];
+
+    // Determines if block is meshable.
+    const MeshComparator meshable{};
 
     auto add_block = [&](BlockWorldPosition pos) {
         m_chunk->instance.data[m_chunk->instance.count++]
@@ -98,7 +98,7 @@ void hvox::ChunkNaiveMeshTask::execute(ChunkLoadThreadState* state, ChunkLoadTas
                 }
             } else {
                 // Get corresponding neighbour index in this chunk and check.
-                if (m_chunk->blocks[i - 1]  == NULL_BLOCK) {
+                if (meshable(&m_chunk->blocks[i - 1], &m_chunk->blocks[i - 1], block_chunk_position(i), m_chunk)) {
                     add_block(block_position);
                     continue;
                 }
@@ -114,7 +114,7 @@ void hvox::ChunkNaiveMeshTask::execute(ChunkLoadThreadState* state, ChunkLoadTas
                 }
             } else {
                 // Get corresponding neighbour index in this chunk and check.
-                if (m_chunk->blocks[i + 1] == NULL_BLOCK) {
+                if (meshable(&m_chunk->blocks[i + 1], &m_chunk->blocks[i + 1], block_chunk_position(i), m_chunk)) {
                     add_block(block_position);
                     continue;
                 }
@@ -130,7 +130,7 @@ void hvox::ChunkNaiveMeshTask::execute(ChunkLoadThreadState* state, ChunkLoadTas
                 }
             } else {
                 // Get corresponding neighbour index in this chunk and check.
-                if (m_chunk->blocks[i - CHUNK_SIZE] == NULL_BLOCK) {
+                if (meshable(&m_chunk->blocks[i - CHUNK_SIZE], &m_chunk->blocks[i - CHUNK_SIZE], block_chunk_position(i), m_chunk)) {
                     add_block(block_position);
                     continue;
                 }
@@ -146,7 +146,7 @@ void hvox::ChunkNaiveMeshTask::execute(ChunkLoadThreadState* state, ChunkLoadTas
                 }
             } else {
                 // Get corresponding neighbour index in this chunk and check.
-                if (m_chunk->blocks[i + CHUNK_SIZE] == NULL_BLOCK) {
+                if (meshable(&m_chunk->blocks[i + CHUNK_SIZE], &m_chunk->blocks[i + CHUNK_SIZE], block_chunk_position(i), m_chunk)) {
                     add_block(block_position);
                     continue;
                 }
@@ -162,7 +162,7 @@ void hvox::ChunkNaiveMeshTask::execute(ChunkLoadThreadState* state, ChunkLoadTas
                 }
             } else {
                 // Get corresponding neighbour index in this chunk and check.
-                if (m_chunk->blocks[i - (CHUNK_SIZE * CHUNK_SIZE)] == NULL_BLOCK) {
+                if (meshable(&m_chunk->blocks[i - (CHUNK_SIZE * CHUNK_SIZE)], &m_chunk->blocks[i - (CHUNK_SIZE * CHUNK_SIZE)], block_chunk_position(i), m_chunk)) {
                     add_block(block_position);
                     continue;
                 }
@@ -178,7 +178,7 @@ void hvox::ChunkNaiveMeshTask::execute(ChunkLoadThreadState* state, ChunkLoadTas
                 }
             } else {
                 // Get corresponding neighbour index in this chunk and check.
-                if (m_chunk->blocks[i + (CHUNK_SIZE * CHUNK_SIZE)] == NULL_BLOCK) {
+                if (meshable(&m_chunk->blocks[i + (CHUNK_SIZE * CHUNK_SIZE)], &m_chunk->blocks[i + (CHUNK_SIZE * CHUNK_SIZE)], block_chunk_position(i), m_chunk)) {
                     add_block(block_position);
                     continue;
                 }

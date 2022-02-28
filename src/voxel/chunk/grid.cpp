@@ -4,10 +4,9 @@
 
 #include "voxel/chunk/grid.h"
 
-void hvox::ChunkLoadTask::init(Chunk* chunk, ChunkGrid* chunk_grid, void* strategy) {
+void hvox::ChunkLoadTask::init(Chunk* chunk, ChunkGrid* chunk_grid) {
     m_chunk      = chunk;
     m_chunk_grid = chunk_grid;
-    m_strategy   = strategy;
 }
 
 void hvox::ChunkGrid::init(ui32 thread_count) {
@@ -82,7 +81,7 @@ void hvox::ChunkGrid::draw(TimeData time [[maybe_unused]]) {
     glDrawArraysInstanced(GL_TRIANGLES, 0, BLOCK_VERTEX_COUNT, m_voxel_count);
 }
 
-bool hvox::ChunkGrid::load_from_scratch_chunks(ChunkGridPosition* chunk_positions, ui32 chunk_count, ChunkGenerationStrategy* gen_strategy) {
+bool hvox::ChunkGrid::load_from_scratch_chunks(ChunkGridPosition* chunk_positions, ui32 chunk_count) {
     bool any_chunk_failed = false;
 
     for (ui32 i = 0; i < chunk_count; ++i) {
@@ -90,7 +89,7 @@ bool hvox::ChunkGrid::load_from_scratch_chunks(ChunkGridPosition* chunk_position
     }
 
     for (ui32 i = 0; i < chunk_count; ++i) {
-        any_chunk_failed = any_chunk_failed || load_chunk_at(chunk_positions[i], gen_strategy);
+        any_chunk_failed = any_chunk_failed || load_chunk_at(chunk_positions[i]);
     }
 
     return any_chunk_failed;
@@ -111,7 +110,7 @@ bool hvox::ChunkGrid::preload_chunk_at(ChunkGridPosition chunk_position) {
     return true;
 }
 
-bool hvox::ChunkGrid::load_chunk_at(ChunkGridPosition chunk_position, ChunkGenerationStrategy* gen_strategy) {
+bool hvox::ChunkGrid::load_chunk_at(ChunkGridPosition chunk_position) {
     auto it = m_chunks.find(chunk_position.id);
     if (it == m_chunks.end()) return false;
 
@@ -150,7 +149,7 @@ bool hvox::ChunkGrid::load_chunk_at(ChunkGridPosition chunk_position, ChunkGener
         return false;
 
     auto task = new ChunkGenerationTask();
-    task->init(chunk, this, gen_strategy);
+    task->init(chunk, this);
     m_gen_threads.add_task({ task, true });
     chunk->pending_task.store(ChunkLoadTaskKind::GENERATION, std::memory_order_release);
 

@@ -1,13 +1,10 @@
-#include "stdafx.h"
-
 #include "graphics/mesh.h"
 #include "voxel/block.hpp"
 #include "voxel/chunk.h"
 #include "voxel/chunk/grid.h"
 
-#include "voxel/chunk/mesh/greedy_task.h"
-
-void hvox::ChunkGreedyMeshTask::execute(ChunkLoadThreadState*, ChunkLoadTaskQueue*) {
+template <ChunkMeshComparator MeshComparator>
+void hvox::ChunkGreedyMeshTask<MeshComparator>::execute(ChunkLoadThreadState*, ChunkLoadTaskQueue*) {
     m_chunk->mesh_task_active.store(true, std::memory_order_release);
 
     // TODO(Matthew): Remove this, but we'll remove it when we shift strategy stuff
@@ -38,7 +35,7 @@ void hvox::ChunkGreedyMeshTask::execute(ChunkLoadThreadState*, ChunkLoadTaskQueu
     //     // Mark as no longer engaging in this meshing task.
     //     m_chunk->mesh_task_active.store(false, std::memory_order_release);
     //     // Put copy of this mesh task back onto the load task queue.
-    //     ChunkGreedyMeshTask* mesh_task = new ChunkGreedyMeshTask();
+    //     ChunkGreedyMeshTask<MeshComparator>* mesh_task = new ChunkGreedyMeshTask<MeshComparator>();
     //     mesh_task->init(m_chunk, m_chunk_grid, nullptr);
     //     task_queue->enqueue(state->producer_token, { mesh_task, true });
     //     m_chunk->pending_task.store(ChunkLoadTaskKind::MESH, std::memory_order_release);
@@ -73,12 +70,12 @@ void hvox::ChunkGreedyMeshTask::execute(ChunkLoadThreadState*, ChunkLoadTaskQueu
     BlockChunkPosition  target_pos;
 
     // Determines if two blocks are of the same mesheable kind.
-    ChunkMeshStrategy* are_same_instanceable = reinterpret_cast<ChunkMeshStrategy*>(m_strategy);
+    const MeshComparator are_same_instanceable{};
 
     bool blocks_to_consider = true;
     while (blocks_to_consider) {
 process_new_source:
-        bool found_instanceable = (*are_same_instanceable)(source, source, {}, m_chunk);
+        bool found_instanceable = are_same_instanceable(source, source, {}, m_chunk);
 
         /***************\
          * Scan X - 1D *
@@ -93,7 +90,7 @@ process_new_source:
             if (!found_instanceable) {
                 // Found a instanceable source block that hasn't already
                 // been visited.
-                if ((*are_same_instanceable)(target, target, target_pos, m_chunk)
+                if (are_same_instanceable(target, target, target_pos, m_chunk)
                         && !visited[target_idx]) {
                     source = target;
                     start  = target_pos;
@@ -108,7 +105,7 @@ process_new_source:
                 }
             // We are scanning for the extent of an instanceable source block.
             } else {
-                if (!(*are_same_instanceable)(source, target, target_pos, m_chunk)
+                if (!are_same_instanceable(source, target, target_pos, m_chunk)
                         || visited[target_idx]) {
                     end.x = target_pos.x - 1;
 
@@ -152,7 +149,7 @@ process_new_source:
                 if (!found_instanceable) {
                     // Found a instanceable source block that hasn't already
                     // been visited.
-                    if ((*are_same_instanceable)(target, target, target_pos, m_chunk)
+                    if (are_same_instanceable(target, target, target_pos, m_chunk)
                             && !visited[target_idx]) {
                         source = target;
                         start  = target_pos;
@@ -166,7 +163,7 @@ process_new_source:
                         continue;
                     }
                 // We are scanning for the extent of an instanceable source block.
-                } else if (!(*are_same_instanceable)(source, target, target_pos, m_chunk)
+                } else if (!are_same_instanceable(source, target, target_pos, m_chunk)
                                 || visited[target_idx]) {
                     end.z = target_pos.z - 1;
 
@@ -214,7 +211,7 @@ process_new_source:
                     if (!found_instanceable) {
                         // Found a instanceable source block that hasn't already
                         // been visited.
-                        if ((*are_same_instanceable)(target, target, target_pos, m_chunk)
+                        if (are_same_instanceable(target, target, target_pos, m_chunk)
                                 && !visited[target_idx]) {
                             source = target;
                             start  = target_pos;
@@ -228,7 +225,7 @@ process_new_source:
                             continue;
                         }
                     // We are scanning for the extent of an instanceable source block.
-                    } else if (!(*are_same_instanceable)(source, target, target_pos, m_chunk)
+                    } else if (!are_same_instanceable(source, target, target_pos, m_chunk)
                                     || visited[target_idx]) {
                         end.y = target_pos.y - 1;
 

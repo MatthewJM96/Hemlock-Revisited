@@ -8,8 +8,19 @@ namespace hemlock {
     namespace voxel {
         struct Block;
 
-        using ChunkGenerationStrategy = Delegate<void(Block*, ChunkGridPosition)>;
+        /**
+         * @brief Defines a struct whose opeartor() sets the blocks of a chunk.
+         */
+        template <typename StrategyCandidate>
+        concept ChunkGenerationStrategy = requires (
+             StrategyCandidate s,
+                        Block* b,
+             ChunkGridPosition p
+        ) {
+            { s.operator()(b, p) } -> std::same_as<void>;
+        };
 
+        template <ChunkGenerationStrategy GenerationStrategy>
         class ChunkGenerationTask : public ChunkLoadTask {
         public:
             virtual void execute(ChunkLoadThreadState* state, ChunkLoadTaskQueue* task_queue) override;
@@ -17,5 +28,7 @@ namespace hemlock {
     }
 }
 namespace hvox = hemlock::voxel;
+
+#include "voxel/chunk/generator_task.inl"
 
 #endif // __hemlock_voxel_chunk_generator_h

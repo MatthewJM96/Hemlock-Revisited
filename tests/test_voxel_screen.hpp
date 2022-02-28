@@ -7,6 +7,68 @@
 
 #include "iomanager.hpp"
 
+struct TVS_VoxelGenerator {
+    void operator() (hvox::Block* blocks, hvox::ChunkGridPosition chunk_position) {
+        auto simplex_1                  = FastNoise::New<FastNoise::Simplex>();
+        auto fractal_1                  = FastNoise::New<FastNoise::FractalFBm>();
+        auto domain_scale_1             = FastNoise::New<FastNoise::DomainScale>();
+        auto position_output_1          = FastNoise::New<FastNoise::PositionOutput>();
+        auto add_1                      = FastNoise::New<FastNoise::Add>();
+        auto domain_warp_grad_1         = FastNoise::New<FastNoise::DomainWarpGradient>();
+        auto domain_warp_fract_prog_1   = FastNoise::New<FastNoise::DomainWarpFractalProgressive>();
+
+        fractal_1->SetSource(simplex_1);
+        fractal_1->SetOctaveCount(4);
+        fractal_1->SetGain(0.5f);
+        fractal_1->SetLacunarity(2.5f);
+
+        domain_scale_1->SetSource(fractal_1);
+        domain_scale_1->SetScale(0.66f);
+
+        position_output_1->Set<FastNoise::Dim::X>(0.0f);
+        position_output_1->Set<FastNoise::Dim::Y>(3.0f);
+        position_output_1->Set<FastNoise::Dim::Z>(0.0f);
+        position_output_1->Set<FastNoise::Dim::W>(0.0f);
+
+        add_1->SetLHS(domain_scale_1);
+        add_1->SetRHS(position_output_1);
+
+        domain_warp_grad_1->SetSource(add_1);
+        domain_warp_grad_1->SetWarpAmplitude(0.2f);
+        domain_warp_grad_1->SetWarpFrequency(2.0f);
+
+        domain_warp_fract_prog_1->SetSource(domain_warp_grad_1);
+        domain_warp_fract_prog_1->SetGain(0.6f);
+        domain_warp_fract_prog_1->SetOctaveCount(2);
+        domain_warp_fract_prog_1->SetLacunarity(2.5f);
+
+        f32* data = new f32[CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE];
+        domain_warp_fract_prog_1->GenUniformGrid3D(
+            data,
+            chunk_position.x * CHUNK_SIZE,
+            -1 * chunk_position.y * CHUNK_SIZE,
+            chunk_position.z * CHUNK_SIZE,
+            CHUNK_SIZE,
+            CHUNK_SIZE,
+            CHUNK_SIZE,
+            0.005f,
+            1337
+        );
+
+        ui64 noise_idx = 0;
+        for (ui8 z = 0; z < CHUNK_SIZE; ++z) {
+            for (ui8 y = 0; y < CHUNK_SIZE; ++y) {
+                for (ui8 x = 0; x < CHUNK_SIZE; ++x) {
+                    blocks[hvox::block_index({x, CHUNK_SIZE - y - 1, z})] = data[noise_idx++] > 0 ? hvox::Block{1} : hvox::Block{0};
+                }
+            }
+        }
+
+        delete[] data;
+    }
+};
+
+
 class TestVoxelScreen : public happ::ScreenBase {
 public:
     TestVoxelScreen() :
@@ -28,8 +90,8 @@ public:
         }
         for (auto x = -NUM; x < NUM; ++x) {
             for (auto z = -NUM; z < NUM; ++z) {
-                for (auto y = -1 y < 2; ++ y) {
-                    m_chunk_grid.load_chunk_at({ x, y, z }, &chunk_generator);
+                for (auto y = -1; y < 2; ++ y) {
+                    m_chunk_grid.load_chunk_at({ x, y, z });
                 }
             }
         }
@@ -133,65 +195,6 @@ public:
 
         m_chunk_grid.init(10);
 
-        chunk_generator = hvox::ChunkGenerationStrategy(
-            [&](hvox::Block* blocks, hvox::ChunkGridPosition chunk_position) {
-                auto simplex_1              = FastNoise::New<FastNoise::Simplex>();
-                auto fractal_1              = FastNoise::New<FastNoise::FractalFBm>();
-                auto domain_scale_1         = FastNoise::New<FastNoise::DomainScale>();
-                auto position_output_1          = FastNoise::New<FastNoise::PositionOutput>();
-                auto add_1                      = FastNoise::New<FastNoise::Add>();
-                auto domain_warp_grad_1         = FastNoise::New<FastNoise::DomainWarpGradient>();
-                auto domain_warp_fract_prog_1   = FastNoise::New<FastNoise::DomainWarpFractalProgressive>();
-
-                fractal_1->SetSource(simplex_1);
-                fractal_1->SetOctaveCount(4);
-                fractal_1->SetGain(0.5f);
-                fractal_1->SetLacunarity(2.5f);
-
-                domain_scale_1->SetSource(fractal_1);
-                domain_scale_1->SetScale(0.66f);
-
-                position_output_1->Set<FastNoise::Dim::X>(0.0f);
-                position_output_1->Set<FastNoise::Dim::Y>(3.0f);
-                position_output_1->Set<FastNoise::Dim::Z>(0.0f);
-                position_output_1->Set<FastNoise::Dim::W>(0.0f);
-
-                add_1->SetLHS(domain_scale_1);
-                add_1->SetRHS(position_output_1);
-
-                domain_warp_grad_1->SetSource(add_1);
-                domain_warp_grad_1->SetWarpAmplitude(0.2f);
-                domain_warp_grad_1->SetWarpFrequency(2.0f);
-
-                domain_warp_fract_prog_1->SetSource(domain_warp_grad_1);
-                domain_warp_fract_prog_1->SetGain(0.6f);
-                domain_warp_fract_prog_1->SetOctaveCount(2);
-                domain_warp_fract_prog_1->SetLacunarity(2.5f);
-
-                f32* data = new f32[CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE];
-                domain_warp_fract_prog_1->GenUniformGrid3D(
-                    data,
-                    chunk_position.x * CHUNK_SIZE,
-                    -1 * chunk_position.y * CHUNK_SIZE,
-                    chunk_position.z * CHUNK_SIZE,
-                    CHUNK_SIZE,
-                    CHUNK_SIZE,
-                    CHUNK_SIZE,
-                    0.005f,
-                    1337
-                );
-
-                ui64 noise_idx = 0;
-                for (ui8 z = 0; z < CHUNK_SIZE; ++z) {
-                    for (ui8 y = 0; y < CHUNK_SIZE; ++y) {
-                        for (ui8 x = 0; x < CHUNK_SIZE; ++x) {
-                            blocks[hvox::block_index({x, CHUNK_SIZE - y - 1, z})] = data[noise_idx++] > 0 ? hvox::Block{1} : hvox::Block{0};
-                        }
-                    }
-                }
-            }
-        );
-
         handle_mouse_move = hemlock::Subscriber<hui::MouseMoveEvent>(
             [&](hemlock::Sender, hui::MouseMoveEvent ev) {
                 if (m_input_manager->is_pressed(static_cast<ui8>(hui::MouseButton::LEFT))) {
@@ -208,8 +211,6 @@ public:
     }
 protected:
     hemlock::Subscriber<hui::MouseMoveEvent>      handle_mouse_move;
-
-    hvox::ChunkGenerationStrategy chunk_generator;
 
     ui32 m_default_texture;
 
