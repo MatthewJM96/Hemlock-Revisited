@@ -57,6 +57,8 @@ namespace hemlock {
     using ThreadWorkflowTaskIndexList = std::unordered_set<ThreadWorkflowTaskID>;
     using ThreadWorkflowTaskGraph     = std::unordered_multimap<ThreadWorkflowTaskID, ThreadWorkflowTaskID>;
 
+    // TODO(Matthew): Implement reuse of the graph & entry tasks data for subsequent
+    //                instances of the workflow.
     template <hemlock::InterruptibleState ThreadState>
     class ThreadWorkflow {
     public:
