@@ -5,16 +5,42 @@
 
 namespace hemlock {
     template <hemlock::InterruptibleState ThreadState>
+    class IThreadWorkflowTask;
+
+    template <hemlock::InterruptibleState ThreadState>
+    struct HeldWorkflowTask {
+        IThreadWorkflowTask<ThreadState>* task;
+        bool should_delete;
+    };
+
+    using ThreadWorkflowTaskID = i32;
+
+    template <hemlock::InterruptibleState ThreadState>
+    using ThreadWorkflowTaskList = std::vector<HeldWorkflowTask<ThreadState>>;
+
+    using ThreadWorkflowTaskIndexList = std::unordered_set<ThreadWorkflowTaskID>;
+    using ThreadWorkflowTaskGraph     = std::unordered_multimap<ThreadWorkflowTaskID, ThreadWorkflowTaskID>;
+
+    template <hemlock::InterruptibleState ThreadState>
     class IThreadWorkflowTask : public IThreadTask<ThreadState> {
     public:
         IThreadWorkflowTask() { /* Empty. */ }
         virtual ~IThreadWorkflowTask() { /* Empty. */ }
-
         /**
          * @brief If any special handling is needed to clean
          * up task, override this.
          */
-        virtual void dispose() { /* Empty */ }
+        virtual void dispose() override;
+
+        /**
+         * @brief Set up necessary state for task to schedule
+         * subsequent tasks in workflow.
+         *
+         * @param tasks The task list for the workflow instance.
+         * @param task_idx The index of this task that is to execute.
+         * @param graph The graph of the workflow.
+         */
+        void set_workflow_metadata(ThreadWorkflowTaskList<ThreadState>* tasks, ThreadWorkflowTaskID task_idx, ThreadWorkflowTaskGraph* graph);
 
         /**
          * @brief Handles firing off the run_task function and
@@ -37,25 +63,15 @@ namespace hemlock {
          * context.
          * @param task_queue The task queue, can be interacted with
          * for example if a task needs to chain a follow-up task.
-         * @return True if the next task in the workflow should fire,
+         * @return True if the next tasks in the workflow should fire,
          * false otherwise.
          */
         virtual bool run_task(typename Thread<ThreadState>::State* state, TaskQueue<ThreadState>* task_queue) = 0;
+    protected:
+        ThreadWorkflowTaskList<ThreadState>*    m_tasks;
+        ThreadWorkflowTaskID                    m_task_idx;
+        ThreadWorkflowTaskGraph*                m_graph;
     };
-
-    template <hemlock::InterruptibleState ThreadState>
-    struct HeldWorkflowTask {
-        IThreadWorkflowTask<ThreadState>* task;
-        bool should_delete;
-    };
-
-    using ThreadWorkflowTaskID = i32;
-
-    template <hemlock::InterruptibleState ThreadState>
-    using ThreadWorkflowTaskList = std::vector<HeldWorkflowTask<ThreadState>>;
-
-    using ThreadWorkflowTaskIndexList = std::unordered_set<ThreadWorkflowTaskID>;
-    using ThreadWorkflowTaskGraph     = std::unordered_multimap<ThreadWorkflowTaskID, ThreadWorkflowTaskID>;
 
     // TODO(Matthew): Implement reuse of the graph & entry tasks data for subsequent
     //                instances of the workflow.

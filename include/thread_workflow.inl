@@ -1,6 +1,28 @@
 template <hemlock::InterruptibleState ThreadState>
+void hemlock::IThreadWorkflowTask<ThreadState>::dispose() {
+    m_tasks = nullptr;
+    m_graph = nullptr;
+}
+
+template <hemlock::InterruptibleState ThreadState>
+void hemlock::IThreadWorkflowTask<ThreadState>::set_workflow_metadata( ThreadWorkflowTaskList<ThreadState>* tasks,
+                                                                                       ThreadWorkflowTaskID task_idx,
+                                                                                   ThreadWorkflowTaskGraph* graph )
+{
+    m_tasks     = tasks;
+    m_task_idx  = task_idx;
+    m_graph     = graph;
+}
+
+template <hemlock::InterruptibleState ThreadState>
 void hemlock::IThreadWorkflowTask<ThreadState>::execute(typename Thread<ThreadState>::State* state, TaskQueue<ThreadState>* task_queue) {
-    
+    if (run_task(state, task_queue)) {
+        auto [start, last] = m_graph->equal_range(m_task_idx);
+        for (; start != last; ++start) {
+            (*m_tasks)[(*start).second].task->set_workflow_metadata(m_tasks, (*start).second, m_graph);
+            task_queue->enqueue(state->producer_token, (*m_tasks)[(*start).second]);
+        }
+    }
 }
 
 template <hemlock::InterruptibleState ThreadState>
@@ -24,7 +46,10 @@ void hemlock::ThreadWorkflow<ThreadState>::dispose() {
 
 template <hemlock::InterruptibleState ThreadState>
 void hemlock::ThreadWorkflow<ThreadState>::start() {
-    
+    for (auto entry_task : m_entry_tasks) {
+        (*m_tasks)[entry_task].task->set_workflow_metadata(m_tasks, entry_task, m_graph);
+        m_thread_pool->add_task((*m_tasks)[entry_task]);
+    }
 }
 
 template <hemlock::InterruptibleState ThreadState>
