@@ -49,12 +49,13 @@ namespace hemlock {
         bool should_delete;
     };
 
+    using ThreadWorkflowTaskID = i32;
+
     template <hemlock::InterruptibleState ThreadState>
     using ThreadWorkflowTaskList = std::vector<HeldWorkflowTask<ThreadState>>;
 
-    using ThreadWorkflowTaskGraph = std::unordered_map<i32, i32>;
-
-    using ThreadWorkflowTaskID = i32;
+    using ThreadWorkflowTaskIndexList = std::unordered_set<ThreadWorkflowTaskID>;
+    using ThreadWorkflowTaskGraph     = std::unordered_multimap<ThreadWorkflowTaskID, ThreadWorkflowTaskID>;
 
     template <hemlock::InterruptibleState ThreadState>
     class ThreadWorkflow {
@@ -67,6 +68,8 @@ namespace hemlock {
 
         void start();
 
+        void set_expected_tasks(ui32 expected_task_count);
+
         /**
          * @brief Adds a task to the workflow without linking
          * it to the workflow DAG. This means that, without a
@@ -78,7 +81,7 @@ namespace hemlock {
          * @return The ID of the task added within this
          * workflow context. 
          */
-        ThreadWorkflowTaskID add_task(HeldWorkflowTask<ThreadState>* task);
+        ThreadWorkflowTaskID add_task(HeldWorkflowTask<ThreadState> task);
         /**
          * @brief Adds the passed tasks to the workflow without
          * linking them to the workflow DAG. This means that,
@@ -92,7 +95,7 @@ namespace hemlock {
          * workflow context. Subsequent tasks added from
          * this call will have successively incremented IDs.
          */
-        ThreadWorkflowTaskID add_tasks(HeldWorkflowTask<ThreadState>** tasks, ui32 count);
+        ThreadWorkflowTaskID add_tasks(HeldWorkflowTask<ThreadState>* tasks, ui32 count);
 
         /**
          * @brief Simultaneously adds the passed task and
@@ -102,7 +105,7 @@ namespace hemlock {
          * @return The ID of the task added within this
          * workflow context.
          */
-        ThreadWorkflowTaskID chain_task(HeldWorkflowTask<ThreadState>* task);
+        ThreadWorkflowTaskID chain_task(HeldWorkflowTask<ThreadState> task);
         /**
          * @brief Adds the passed tasks and chains each to the
          * previously added task. This is done sequentially so
@@ -115,7 +118,7 @@ namespace hemlock {
          * workflow context. Subsequent tasks added from
          * this call will have successively incremented IDs.
          */
-        ThreadWorkflowTaskID chain_tasks(HeldWorkflowTask<ThreadState>** tasks, ui32 count);
+        ThreadWorkflowTaskID chain_tasks(HeldWorkflowTask<ThreadState>* tasks, ui32 count);
         /**
          * @brief Adds the passed tasks and chains each to the
          * previously added task. This is done in a parallel
@@ -130,7 +133,7 @@ namespace hemlock {
          * workflow context. Subsequent tasks added from
          * this call will have successively incremented IDs.
          */
-        ThreadWorkflowTaskID chain_tasks_parallel(HeldWorkflowTask<ThreadState>** tasks, ui32 count);
+        ThreadWorkflowTaskID chain_tasks_parallel(HeldWorkflowTask<ThreadState>* tasks, ui32 count);
 
         /**
          * @brief Chains the tasks passed by their IDs.
@@ -142,7 +145,7 @@ namespace hemlock {
          * @return True if both tasks existed and were
          * chained, false otherwise.
          */
-        bool chain_task(ui32 first_task, ui32 second_task);
+        bool chain_task(ThreadWorkflowTaskID first_task, ThreadWorkflowTaskID second_task);
         /**
          * @brief Chains the tasks passed by their IDs.
          *
@@ -154,9 +157,10 @@ namespace hemlock {
          * @return True if both tasks existed and were
          * chained, false otherwise.
          */
-        bool chain_tasks(std::pair<ui32, ui32>* task_pairs, ui32 count);
+        bool chain_tasks(std::pair<ThreadWorkflowTaskID, ThreadWorkflowTaskID>* task_pairs, ui32 count);
     protected:
         ThreadWorkflowTaskList<ThreadState>     m_tasks;
+        ThreadWorkflowTaskIndexList             m_entry_tasks;
         ThreadWorkflowTaskGraph                 m_graph;
 
         ThreadPool<ThreadState>*                m_thread_pool;
