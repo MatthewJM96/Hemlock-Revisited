@@ -19,8 +19,9 @@ void hemlock::IThreadWorkflowTask<ThreadState>::execute(typename Thread<ThreadSt
     if (run_task(state, task_queue)) {
         auto [start, last] = m_graph->equal_range(m_task_idx);
         for (; start != last; ++start) {
-            (*m_tasks)[(*start).second].task->set_workflow_metadata(m_tasks, (*start).second, m_graph);
-            task_queue->enqueue(state->producer_token, (*m_tasks)[(*start).second]);
+            auto next_task_idx = (*start).second;
+            (*m_tasks)[next_task_idx].task->set_workflow_metadata(m_tasks, next_task_idx, m_graph);
+            task_queue->enqueue(state->producer_token, (*m_tasks)[next_task_idx]);
         }
     }
 }
