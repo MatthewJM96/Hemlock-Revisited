@@ -32,11 +32,14 @@ hemlock::ThreadWorkflow<ThreadState>::ThreadWorkflow(ThreadWorkflow&& workflow) 
     m_tasks(std::move(workflow.m_tasks)),
     m_thread_pool(workflow.m_thread_pool)
 {
-    // Empty.
+    assert(m_dag != nullptr);
 }
 
 template <hemlock::InterruptibleState ThreadState>
 void hemlock::ThreadWorkflow<ThreadState>::init(ThreadWorkflowDAG* dag, ThreadPool<ThreadState>* thread_pool) {
+    assert(         dag != nullptr );
+    assert( thread_pool != nullptr );
+
     m_dag         = dag;
     m_thread_pool = thread_pool;
 }
