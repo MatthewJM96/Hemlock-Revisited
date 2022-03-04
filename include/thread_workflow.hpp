@@ -73,15 +73,20 @@ namespace hemlock {
         ThreadWorkflowTaskGraph*                m_graph;
     };
 
-    // TODO(Matthew): Implement reuse of the graph & entry tasks data for subsequent
-    //                instances of the workflow.
+    struct ThreadWorkflowDAG {
+        ThreadWorkflowTaskIndexList entry_tasks;
+        ThreadWorkflowTaskGraph     graph;
+    };
+
     template <hemlock::InterruptibleState ThreadState>
     class ThreadWorkflow {
     public:
         ThreadWorkflow()  { /* Empty. */ }
+        ThreadWorkflow(const ThreadWorkflow& workflow) = delete;
+        ThreadWorkflow(ThreadWorkflow&& workflow);
         ~ThreadWorkflow() { /* Empty. */ }
 
-        void init(ThreadPool<ThreadState>* thread_pool);
+        void init(ThreadWorkflowDAG* dag, ThreadPool<ThreadState>* thread_pool);
         void dispose();
 
         void start();
@@ -177,11 +182,10 @@ namespace hemlock {
          */
         bool chain_tasks(std::pair<ThreadWorkflowTaskID, ThreadWorkflowTaskID>* task_pairs, ui32 count);
     protected:
-        ThreadWorkflowTaskList<ThreadState>     m_tasks;
-        ThreadWorkflowTaskIndexList             m_entry_tasks;
-        ThreadWorkflowTaskGraph                 m_graph;
+        ThreadWorkflowTaskList<ThreadState> m_tasks;
+        ThreadWorkflowDAG*                  m_dag;
 
-        ThreadPool<ThreadState>*                m_thread_pool;
+        ThreadPool<ThreadState>*            m_thread_pool;
     };
 }
 

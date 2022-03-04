@@ -27,7 +27,17 @@ void hemlock::IThreadWorkflowTask<ThreadState>::execute(typename Thread<ThreadSt
 }
 
 template <hemlock::InterruptibleState ThreadState>
-void hemlock::ThreadWorkflow<ThreadState>::init(ThreadPool<ThreadState>* thread_pool) {
+hemlock::ThreadWorkflow<ThreadState>::ThreadWorkflow(ThreadWorkflow&& workflow) :
+    m_dag(workflow.m_dag),
+    m_tasks(std::move(workflow.m_tasks)),
+    m_thread_pool(workflow.m_thread_pool)
+{
+    // Empty.
+}
+
+template <hemlock::InterruptibleState ThreadState>
+void hemlock::ThreadWorkflow<ThreadState>::init(ThreadWorkflowDAG* dag, ThreadPool<ThreadState>* thread_pool) {
+    m_dag         = dag;
     m_thread_pool = thread_pool;
 }
 
@@ -41,14 +51,14 @@ void hemlock::ThreadWorkflow<ThreadState>::dispose() {
     }
 
     ThreadWorkflowTaskList<ThreadState>().swap(m_tasks);
-    ThreadWorkflowTaskIndexList().swap(m_entry_tasks);
-    ThreadWorkflowTaskGraph().swap(m_graph);
+    ThreadWorkflowTaskIndexList().swap(m_dag->entry_tasks);
+    ThreadWorkflowTaskGraph().swap(m_dag->graph);
 }
 
 template <hemlock::InterruptibleState ThreadState>
 void hemlock::ThreadWorkflow<ThreadState>::start() {
-    for (auto entry_task : m_entry_tasks) {
-        (*m_tasks)[entry_task].task->set_workflow_metadata(m_tasks, entry_task, m_graph);
+    for (auto entry_task : m_dag->entry_tasks) {
+        (*m_tasks)[entry_task].task->set_workflow_metadata(m_tasks, entry_task, m_dag->graph);
         m_thread_pool->add_task((*m_tasks)[entry_task]);
     }
 }
@@ -56,7 +66,7 @@ void hemlock::ThreadWorkflow<ThreadState>::start() {
 template <hemlock::InterruptibleState ThreadState>
 void hemlock::ThreadWorkflow<ThreadState>::set_expected_tasks(ui32 expected_task_count) {
     m_tasks.reserve(expected_task_count);
-    m_entry_tasks.reserve(expected_task_count);
+    m_dag->entry_tasks.reserve(expected_task_count);
 }
 
 template <hemlock::InterruptibleState ThreadState>
@@ -64,7 +74,7 @@ hemlock::ThreadWorkflowTaskID hemlock::ThreadWorkflow<ThreadState>::add_task(Hel
     hemlock::ThreadWorkflowTaskID new_id = m_tasks.size();
 
     m_tasks.push_back(task);
-    m_entry_tasks.insert(new_id);
+    m_dag->entry_tasks.insert(new_id);
 
     return new_id;
 }
@@ -75,7 +85,7 @@ hemlock::ThreadWorkflowTaskID hemlock::ThreadWorkflow<ThreadState>::add_tasks(He
 
     for (ui32 i = 0; i < count; ++i) {
         m_tasks.push_back(tasks[i]);
-        m_entry_tasks.insert(new_id);
+        m_dag->entry_tasks.insert(new_id);
 
         ++new_id;
     }
@@ -89,9 +99,9 @@ hemlock::ThreadWorkflowTaskID hemlock::ThreadWorkflow<ThreadState>::chain_task(H
     hemlock::ThreadWorkflowTaskID prev_id = new_id - 1;
 
     if (new_id > 0) {
-        m_graph.insert({prev_id, new_id});
+        m_dag->graph.insert({prev_id, new_id});
     } else {
-        m_entry_tasks.insert(new_id);
+        m_dag->entry_tasks.insert(new_id);
     }
 
     m_tasks.push_back(task);
@@ -108,11 +118,11 @@ hemlock::ThreadWorkflowTaskID hemlock::ThreadWorkflow<ThreadState>::chain_tasks(
 
     for (ui32 i = 0; i < count; ++i) {
         if (new_id > 0) {
-            m_graph.insert({prev_id, new_id});
+            m_dag->graph.insert({prev_id, new_id});
         } else {
             // Can only reach here if i == 0 and we had
             // not yet added any tasks to the workflow.
-            m_entry_tasks.insert(new_id);
+            m_dag->entry_tasks.insert(new_id);
         }
 
         m_tasks.push_back(tasks[i]);
@@ -132,11 +142,11 @@ hemlock::ThreadWorkflowTaskID hemlock::ThreadWorkflow<ThreadState>::chain_tasks_
 
     for (ui32 i = 0; i < count; ++i) {
         if (first_new_id > 0) {
-            m_graph.insert({prev_id, new_id});
+            m_dag->graph.insert({prev_id, new_id});
         } else {
             // Can only reach here if i == 0 and we had
             // not yet added any tasks to the workflow.
-            m_entry_tasks.insert(new_id);
+            m_dag->entry_tasks.insert(new_id);
         }
 
         m_tasks.push_back(tasks[i]);
@@ -154,10 +164,10 @@ bool hemlock::ThreadWorkflow<ThreadState>::chain_task(ThreadWorkflowTaskID first
         return false;
 
     // Second task is no longer an entry task if it was until now.
-    if (auto it = m_entry_tasks.find(second_task); it != m_entry_tasks.end())
-        m_entry_tasks.erase(it);
+    if (auto it = m_dag->entry_tasks.find(second_task); it != m_dag->entry_tasks.end())
+        m_dag->entry_tasks.erase(it);
 
-    m_graph.insert({first_task, second_task});
+    m_dag->graph.insert({first_task, second_task});
 
     return true;
 }
@@ -179,10 +189,10 @@ bool hemlock::ThreadWorkflow<ThreadState>::chain_tasks(std::pair<ThreadWorkflowT
         }
 
         // Second task is no longer an entry task if it was until now.
-        if (auto it = m_entry_tasks.find(second_task); it != m_entry_tasks.end())
-            m_entry_tasks.erase(it);
+        if (auto it = m_dag->entry_tasks.find(second_task); it != m_dag->entry_tasks.end())
+            m_dag->entry_tasks.erase(it);
 
-        m_graph.insert({first_task, second_task});
+        m_dag->graph.insert({first_task, second_task});
     }
 
     return all_valid;
