@@ -1,5 +1,5 @@
-template <hemlock::InterruptibleState ThreadState>
-void hemlock::basic_thread_main( typename Thread<ThreadState>::State* state,
+template <hthread::InterruptibleState ThreadState>
+void hthread::basic_thread_main( typename Thread<ThreadState>::State* state,
                                               TaskQueue<ThreadState>* task_queue  ) {
     state->context.stop    = false;
     state->context.suspend = false;
@@ -26,8 +26,8 @@ void hemlock::basic_thread_main( typename Thread<ThreadState>::State* state,
     }
 }
 
-template <hemlock::InterruptibleState ThreadState>
-void hemlock::ThreadPool<ThreadState>::init(           ui32 thread_count,
+template <hthread::InterruptibleState ThreadState>
+void hthread::ThreadPool<ThreadState>::init(           ui32 thread_count,
                                 ThreadMainFunc<ThreadState> thread_main_func /*= {basic_thread_main}*/  )
 {
     if (m_is_initialised) return;
@@ -55,8 +55,8 @@ void hemlock::ThreadPool<ThreadState>::init(           ui32 thread_count,
     }
 }
 
-template <hemlock::InterruptibleState ThreadState>
-void hemlock::ThreadPool<ThreadState>::dispose() {
+template <hthread::InterruptibleState ThreadState>
+void hthread::ThreadPool<ThreadState>::dispose() {
     if (!m_is_initialised) return;
     m_is_initialised = false;
 
@@ -75,24 +75,24 @@ void hemlock::ThreadPool<ThreadState>::dispose() {
     Threads<ThreadState>().swap(m_threads);
 }
 
-template <hemlock::InterruptibleState ThreadState>
-void hemlock::ThreadPool<ThreadState>::suspend() {
+template <hthread::InterruptibleState ThreadState>
+void hthread::ThreadPool<ThreadState>::suspend() {
     for (auto& thread : m_threads)
         thread.state.context.suspend = true;
 }
 
-template <hemlock::InterruptibleState ThreadState>
-void hemlock::ThreadPool<ThreadState>::resume() {
+template <hthread::InterruptibleState ThreadState>
+void hthread::ThreadPool<ThreadState>::resume() {
     for (auto& thread : m_threads)
         thread.state.context.suspend = false;
 }
 
-template <hemlock::InterruptibleState ThreadState>
-void hemlock::ThreadPool<ThreadState>::add_task(HeldTask<ThreadState> task) {
+template <hthread::InterruptibleState ThreadState>
+void hthread::ThreadPool<ThreadState>::add_task(HeldTask<ThreadState> task) {
     m_tasks.enqueue(m_producer_token, task);
 }
 
-template <hemlock::InterruptibleState ThreadState>
-void hemlock::ThreadPool<ThreadState>::add_tasks(HeldTask<ThreadState> tasks[], size_t task_count) {
+template <hthread::InterruptibleState ThreadState>
+void hthread::ThreadPool<ThreadState>::add_tasks(HeldTask<ThreadState> tasks[], size_t task_count) {
     m_tasks.enqueue_bulk(m_producer_token, tasks, task_count);
 }

@@ -86,8 +86,9 @@
 #include "types.hpp"
 
 // Our Thread Handling
-#include "thread_pool.hpp"
-#include "thread_workflow.hpp"
+#include "thread/thread_pool.hpp"
+#include "thread/thread_workflow_builder.h"
+#include "thread/thread_workflow.hpp"
 
 // Our File Handling Interface
 #include "io/filesystem.hpp"
