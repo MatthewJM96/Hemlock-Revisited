@@ -153,8 +153,8 @@ bool hthread::ThreadWorkflowBuilder::set_task_depends(
     ThreadWorkflowTaskID first_task,
     ThreadWorkflowTaskID second_task
 ) {
-    hthread::ThreadWorkflowTaskID last_id = m_tasks.size();
-    if (first_task >= last_id || second_task >= last_id)
+    hthread::ThreadWorkflowTaskID next_valid_id = m_dag->into_counts.size();
+    if (first_task >= next_valid_id || second_task >= next_valid_id)
         return false;
 
     // Second task is no longer an entry task if it was until now.
@@ -174,7 +174,7 @@ bool hthread::ThreadWorkflowBuilder::set_tasks_depend(
                           >* task_pairs,
                         ui32 count
 ) {
-    hthread::ThreadWorkflowTaskID last_id = m_tasks.size();
+    hthread::ThreadWorkflowTaskID next_valid_id = m_dag->into_counts.size();
 
     // TODO(Matthew): Do we really like this?
 
@@ -183,7 +183,7 @@ bool hthread::ThreadWorkflowBuilder::set_tasks_depend(
     for (ui32 i = 0; i < count; ++i) {
         auto [first_task, second_task] = task_pairs[i];
 
-        if (first_task >= last_id || second_task >= last_id) {
+        if (first_task >= next_valid_id || second_task >= next_valid_id) {
             all_valid = false;
             continue;
         }
