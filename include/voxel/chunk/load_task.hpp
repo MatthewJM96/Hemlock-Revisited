@@ -9,8 +9,24 @@ namespace hemlock {
         enum class ChunkLoadTaskKind : ui8 {
             NONE            = 0,
             GENERATION      = 1,
-            MESH            = 2,
-            MESH_UPLOAD     = 3
+            GENERATION_0    = 1,
+            GENERATION_1       ,
+            GENERATION_2       ,
+            GENERATION_3       ,
+            GENERATION_4       ,
+            GENERATION_5       ,
+            GENERATION_6       ,
+            GENERATION_7       ,
+            GENERATION_8       ,
+            GENERATION_9       ,
+            GENERATION_10      ,
+            GENERATION_11      ,
+            GENERATION_12      ,
+            GENERATION_13      ,
+            GENERATION_14      ,
+            GENERATION_15      ,
+            MESH               ,
+            MESH_UPLOAD        ,
         };
 
         struct ChunkLoadTaskContext {
