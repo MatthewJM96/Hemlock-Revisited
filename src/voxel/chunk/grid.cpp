@@ -155,12 +155,18 @@ bool hvox::ChunkGrid::load_chunk_at(ChunkGridPosition chunk_position) {
     if (!chunk_preloaded)
         return false;
 
-    auto task = new ChunkGenerationTask();
-    task->init(chunk, this);
-    m_gen_threads.add_task({ task, true });
+    auto tasks = build_load_tasks(chunk, this);
+
+    m_chunk_load_workflow.run(tasks);
     chunk->pending_task.store(ChunkLoadTaskKind::GENERATION, std::memory_order_release);
 
     return true;
+}
+
+bool hvox::ChunkGrid::load_from_scratch_chunk_at(ChunkGridPosition chunk_position) {
+    preload_chunk_at(chunk_position);
+
+    return load_chunk_at(chunk_position);
 }
 
 bool hvox::ChunkGrid::unload_chunk_at(ChunkGridPosition chunk_position) {

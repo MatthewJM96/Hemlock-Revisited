@@ -95,9 +95,8 @@ namespace hemlock {
              */
             bool preload_chunk_at(ChunkGridPosition chunk_position);
             /**
-             * @brief Loads a chunk, this entails queuing a generation
-             * task which will, by default, queue a meshing task to
-             * follow up.
+             * @brief Loads a chunk, this entails queueing the
+             * provided workflow to run.
              *
              * @param chunk_position The coords of the chunk to load.
              * @return True if the chunk's load task was queued, false
@@ -105,7 +104,18 @@ namespace hemlock {
              * either not yet preloaded, or at least already in a loaded
              * state.
              */
-            bool load_chunk_at( ChunkGridPosition chunk_position );
+            bool load_chunk_at(ChunkGridPosition chunk_position);
+            /**
+             * @brief Loads a chunk, preloading it if it has not yet
+             * been designated as existing.
+             *
+             * @param chunk_position The coords of the chunk to load.
+             * @return True if the chunk's load task was queued, false
+             * otherwise. False usually will mean that the chunk was
+             * either not yet preloaded, or at least already in a loaded
+             * state.
+             */
+            bool load_from_scratch_chunk_at(ChunkGridPosition chunk_position);
             /**
              * @brief Unloads a chunk, this entails ending all
              * pending tasks for this chunk and releasing memory
