@@ -6,10 +6,10 @@ void hthread::IThreadWorkflowTask<ThreadState>::dispose() {
 }
 
 template <hthread::InterruptibleState ThreadState>
-void hthread::IThreadWorkflowTask<ThreadState>::set_workflow_metadata( ThreadWorkflowTaskList<ThreadState> tasks,
-                                                                                      ThreadWorkflowTaskID task_idx,
-                                                                                        ThreadWorkflowDAG* dag,
-                                                                          ThreadWorkflowTaskCompletionView task_completion_states )
+void hthread::IThreadWorkflowTask<ThreadState>::set_workflow_metadata( ThreadWorkflowTasksView<ThreadState> tasks,
+                                                                                       ThreadWorkflowTaskID task_idx,
+                                                                                         ThreadWorkflowDAG* dag,
+                                                                           ThreadWorkflowTaskCompletionView task_completion_states )
 {
     m_tasks                  = tasks;
     m_task_idx               = task_idx;
@@ -49,7 +49,7 @@ void hthread::ThreadWorkflow<ThreadState>::dispose() {
 }
 
 template <hthread::InterruptibleState ThreadState>
-void hthread::ThreadWorkflow<ThreadState>::run(ThreadWorkflowTaskList<ThreadState> tasks) {
+void hthread::ThreadWorkflow<ThreadState>::run(ThreadWorkflowTasksView<ThreadState> tasks) {
     ThreadWorkflowTaskCompletion* task_completion_states = new ThreadWorkflowTaskCompletion[m_dag->task_count]{};
 
     for (auto entry_task : m_dag->entry_tasks) {
@@ -61,15 +61,5 @@ void hthread::ThreadWorkflow<ThreadState>::run(ThreadWorkflowTaskList<ThreadStat
                 { task_completion_states, m_dag->task_count }
         );
         m_thread_pool->add_task(tasks[entry_task]);
-    }
-
-    // cleanup_run(tasks);
-}
-
-template <hthread::InterruptibleState ThreadState>
-void hthread::ThreadWorkflow<ThreadState>::cleanup_run(ThreadWorkflowTaskList<ThreadState> tasks) {
-    for (auto task : tasks) {
-        if (task.should_delete)
-            delete task.task;
     }
 }

@@ -17,7 +17,7 @@ namespace hemlock {
         using ThreadWorkflowTaskID = i32;
 
         template <InterruptibleState ThreadState>
-        using ThreadWorkflowTaskList = std::span<HeldWorkflowTask<ThreadState>>;
+        using ThreadWorkflowTasksView = std::span<HeldWorkflowTask<ThreadState>>;
 
         using ThreadWorkflowTaskCompletion     =           std::atomic<ui32> ;
         using ThreadWorkflowTaskCompletionView = std::span<std::atomic<ui32>>;

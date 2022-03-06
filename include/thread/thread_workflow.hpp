@@ -27,10 +27,10 @@ namespace hemlock {
              * tasks feeding into each task.
              */
             void set_workflow_metadata(
-                 ThreadWorkflowTaskList<ThreadState> tasks,
-                                ThreadWorkflowTaskID task_idx,
-                                  ThreadWorkflowDAG* dag,
-                    ThreadWorkflowTaskCompletionView task_completion_states
+                 ThreadWorkflowTasksView<ThreadState> tasks,
+                                 ThreadWorkflowTaskID task_idx,
+                                   ThreadWorkflowDAG* dag,
+                     ThreadWorkflowTaskCompletionView task_completion_states
             );
 
             /**
@@ -59,7 +59,7 @@ namespace hemlock {
              */
             virtual bool run_task(typename Thread<ThreadState>::State* state, TaskQueue<ThreadState>* task_queue) = 0;
         protected:
-            ThreadWorkflowTaskList<ThreadState>     m_tasks;
+            ThreadWorkflowTasksView<ThreadState>    m_tasks;
             ThreadWorkflowTaskID                    m_task_idx;
             ThreadWorkflowDAG*                      m_dag;
             ThreadWorkflowTaskCompletionView        m_task_completion_states;
@@ -74,10 +74,8 @@ namespace hemlock {
             void init(ThreadWorkflowDAG* dag, ThreadPool<ThreadState>* thread_pool);
             void dispose();
 
-            void run(ThreadWorkflowTaskList<ThreadState> tasks);
+            void run(ThreadWorkflowTasksView<ThreadState> tasks);
         protected:
-            void cleanup_run(ThreadWorkflowTaskList<ThreadState> tasks);
-
             ThreadWorkflowDAG*          m_dag;
             ThreadPool<ThreadState>*    m_thread_pool;
         };
