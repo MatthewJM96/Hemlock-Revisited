@@ -50,7 +50,7 @@ void hthread::ThreadWorkflow<ThreadState>::dispose() {
 
 template <hthread::InterruptibleState ThreadState>
 void hthread::ThreadWorkflow<ThreadState>::run(ThreadWorkflowTaskList<ThreadState> tasks) {
-    ThreadWorkflowTaskCompletion* task_completion_states = new ThreadWorkflowTaskCompletion[m_dag->into_counts.size()]{};
+    ThreadWorkflowTaskCompletion* task_completion_states = new ThreadWorkflowTaskCompletion[m_dag->task_count]{};
 
     for (auto entry_task : m_dag->entry_tasks) {
         tasks[entry_task].task
@@ -58,7 +58,7 @@ void hthread::ThreadWorkflow<ThreadState>::run(ThreadWorkflowTaskList<ThreadStat
                 tasks,
                 entry_task,
                 m_dag,
-                { task_completion_states, m_dag->into_counts.size() }
+                { task_completion_states, m_dag->task_count }
         );
         m_thread_pool->add_task(tasks[entry_task]);
     }

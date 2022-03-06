@@ -27,6 +27,7 @@ namespace hemlock {
         using ThreadWorkflowTaskGraph     = std::unordered_multimap<ThreadWorkflowTaskID, ThreadWorkflowTaskID>;
 
         struct ThreadWorkflowDAG {
+            ui32                        task_count = 0;
             ThreadWorkflowTaskIntoCount into_counts;
             ThreadWorkflowTaskIndexList entry_tasks;
             ThreadWorkflowTaskGraph     graph;
