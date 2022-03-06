@@ -7,28 +7,6 @@ template <hvox::ChunkMeshComparator MeshComparator>
 bool hvox::ChunkGreedyMeshTask<MeshComparator>::run_task(ChunkLoadThreadState*, ChunkLoadTaskQueue*) {
     m_chunk->mesh_task_active.store(true, std::memory_order_release);
 
-    // TODO(Matthew): Cross-chunk greedy instancing?
-    // Note that this code would probably need to be enabled if we were to do
-    // greedy instancing across chunk boundaries, which for now we do not do.
-    //   Admittedly such a strategy would require more substantial changes anyway,
-    //   in particular instructing neighbouring chunks that they will also be
-    //   due a remeshing.
-    //     The benefits in reduced instances would likely be outweighed by this cost.
-    // // Only execute if all preloaded neighbouring chunks have at least been generated.
-    // auto [ _, neighbours_in_required_state ] =
-    //         m_chunk_grid->query_all_neighbour_states(m_chunk, ChunkState::GENERATED);
-
-    // if (!neighbours_in_required_state) {
-    //     // Mark as no longer engaging in this meshing task.
-    //     m_chunk->mesh_task_active.store(false, std::memory_order_release);
-    //     // Put copy of this mesh task back onto the load task queue.
-    //     ChunkGreedyMeshTask<MeshComparator>* mesh_task = new ChunkGreedyMeshTask<MeshComparator>();
-    //     mesh_task->init(m_chunk, m_chunk_grid, nullptr);
-    //     task_queue->enqueue(state->producer_token, { mesh_task, true });
-    //     m_chunk->pending_task.store(ChunkLoadTaskKind::MESH, std::memory_order_release);
-    //     return;
-    // }
-
     // TODO(Matthew): Better guess work should be possible and expand only when needed.
     //                  Maybe in addition to managing how all chunk's transformations are
     //                  stored on GPU, ChunkGrid-level should also manage this data?
