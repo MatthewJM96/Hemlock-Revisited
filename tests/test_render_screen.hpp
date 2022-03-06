@@ -15,14 +15,12 @@
 #include "iomanager.hpp"
 
 struct TRS_VoxelGenerator {
-    void operator()(hvox::Block*, hvox::ChunkGridPosition chunk_position) {
+    void operator()(hvox::Chunk* chunk) const {
         // for (auto y = 0; y < CHUNK_SIZE; y += 2) {
         // for (auto x = 0; x < CHUNK_SIZE; x += 2) {
         for (auto y = 0; y < 10; y += 1) {
             const ui8 LEFT  = 14;
             const ui8 RIGHT = 16;
-
-            hvox::Chunk* chunk = const_cast<hvox::Chunks&>(m_chunk_grid.chunks())[chunk_position.id];
 
             // set_blocks(chunk, hvox::BlockChunkPosition{0, y, 0}, hvox::BlockChunkPosition{LEFT, y, LEFT}, hvox::Block{1});
             // set_blocks(chunk, hvox::BlockChunkPosition{RIGHT, y, RIGHT}, hvox::BlockChunkPosition{CHUNK_SIZE - 1, y, CHUNK_SIZE - 1}, hvox::Block{1});

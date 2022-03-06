@@ -6,7 +6,7 @@
 
 namespace hemlock {
     namespace voxel {
-        struct Block;
+        struct Chunk;
 
         /**
          * @brief Defines a struct whose opeartor() sets the blocks of a chunk.
@@ -14,10 +14,9 @@ namespace hemlock {
         template <typename StrategyCandidate>
         concept ChunkGenerationStrategy = requires (
              StrategyCandidate s,
-                        Block* b,
-             ChunkGridPosition p
+                        Chunk* c
         ) {
-            { s.operator()(b, p) } -> std::same_as<void>;
+            { s.operator()(c) } -> std::same_as<void>;
         };
 
         template <ChunkGenerationStrategy GenerationStrategy>

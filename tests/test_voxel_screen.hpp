@@ -8,7 +8,7 @@
 #include "iomanager.hpp"
 
 struct TVS_VoxelGenerator {
-    void operator() (hvox::Block* blocks, hvox::ChunkGridPosition chunk_position) {
+    void operator() (hvox::Chunk* chunk) const {
         auto simplex_1                  = FastNoise::New<FastNoise::Simplex>();
         auto fractal_1                  = FastNoise::New<FastNoise::FractalFBm>();
         auto domain_scale_1             = FastNoise::New<FastNoise::DomainScale>();
@@ -45,9 +45,9 @@ struct TVS_VoxelGenerator {
         f32* data = new f32[CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE];
         domain_warp_fract_prog_1->GenUniformGrid3D(
             data,
-            chunk_position.x * CHUNK_SIZE,
-            -1 * chunk_position.y * CHUNK_SIZE,
-            chunk_position.z * CHUNK_SIZE,
+            chunk->position.x * CHUNK_SIZE,
+            -1 * chunk->position.y * CHUNK_SIZE,
+            chunk->position.z * CHUNK_SIZE,
             CHUNK_SIZE,
             CHUNK_SIZE,
             CHUNK_SIZE,
@@ -59,7 +59,7 @@ struct TVS_VoxelGenerator {
         for (ui8 z = 0; z < CHUNK_SIZE; ++z) {
             for (ui8 y = 0; y < CHUNK_SIZE; ++y) {
                 for (ui8 x = 0; x < CHUNK_SIZE; ++x) {
-                    blocks[hvox::block_index({x, CHUNK_SIZE - y - 1, z})] = data[noise_idx++] > 0 ? hvox::Block{1} : hvox::Block{0};
+                    chunk->blocks[hvox::block_index({x, CHUNK_SIZE - y - 1, z})] = data[noise_idx++] > 0 ? hvox::Block{1} : hvox::Block{0};
                 }
             }
         }
