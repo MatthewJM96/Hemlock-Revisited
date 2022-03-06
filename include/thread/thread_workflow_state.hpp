@@ -5,10 +5,10 @@
 
 namespace hemlock {
     namespace thread {
-        template <hthread::InterruptibleState ThreadState>
+        template <InterruptibleState ThreadState>
         class IThreadWorkflowTask;
 
-        template <hthread::InterruptibleState ThreadState>
+        template <InterruptibleState ThreadState>
         struct HeldWorkflowTask {
             IThreadWorkflowTask<ThreadState>* task;
             bool should_delete;
@@ -16,7 +16,7 @@ namespace hemlock {
 
         using ThreadWorkflowTaskID = i32;
 
-        template <hthread::InterruptibleState ThreadState>
+        template <InterruptibleState ThreadState>
         using ThreadWorkflowTaskList = std::span<HeldWorkflowTask<ThreadState>>;
 
         using ThreadWorkflowTaskCompletion     =           std::atomic<ui32> ;
