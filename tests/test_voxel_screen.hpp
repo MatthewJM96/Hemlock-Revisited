@@ -4,9 +4,15 @@
 #include <FastNoise/FastNoise.h>
 
 #include "voxel/chunk/generator_task.h"
+#include "voxel/chunk/mesh/greedy_task.h"
 
 #include "iomanager.hpp"
 
+struct TVS_BlockComparator {
+    bool operator()(const hvox::Block* source, const hvox::Block* target, hvox::BlockChunkPosition, hvox::Chunk*) const {
+        return (source->id == target->id) && (source->id != 0);
+    }
+};
 struct TVS_VoxelGenerator {
     void operator() (hvox::Chunk* chunk) const {
         auto simplex_1                  = FastNoise::New<FastNoise::Simplex>();
@@ -193,7 +199,26 @@ public:
 
         m_default_texture = hg::load_texture("test_tex.png");
 
-        m_chunk_grid.init(10);
+        {
+            hthread::ThreadWorkflowBuilder workflow_builder;
+            workflow_builder.init(&m_chunk_load_dag);
+            workflow_builder.chain_tasks(2);
+        }
+        m_chunk_grid.init(10, &m_chunk_load_dag, hvox::ChunkLoadTaskListBuilder([](hvox::Chunk* chunk, hvox::ChunkGrid* chunk_grid) {
+            // TODO(Matthew): How do we clean up this?
+            hthread::HeldWorkflowTask<hvox::ChunkLoadTaskContext>* tasks = new hthread::HeldWorkflowTask<hvox::ChunkLoadTaskContext>[2];
+
+            auto gen_task  = new hvox::ChunkGenerationTask<TVS_VoxelGenerator>();
+            auto mesh_task = new hvox::ChunkGreedyMeshTask<TRS_BlockComparator>();
+
+            gen_task->init(chunk, chunk_grid);
+            mesh_task->init(chunk, chunk_grid);
+
+            tasks[0] = { reinterpret_cast<hthread::IThreadWorkflowTask<hvox::ChunkLoadTaskContext>*>(gen_task),  true };
+            tasks[1] = { reinterpret_cast<hthread::IThreadWorkflowTask<hvox::ChunkLoadTaskContext>*>(mesh_task), true };
+
+            return hthread::ThreadWorkflowTasksView<hvox::ChunkLoadTaskContext>{ tasks, 2 };
+        }));
 
         handle_mouse_move = hemlock::Subscriber<hui::MouseMoveEvent>(
             [&](hemlock::Sender, hui::MouseMoveEvent ev) {
@@ -220,6 +245,7 @@ protected:
     hui::InputManager*           m_input_manager;
     hvox::ChunkGrid              m_chunk_grid;
     hg::GLSLProgram              m_shader;
+    hthread::ThreadWorkflowDAG   m_chunk_load_dag;
 };
 
 #endif // __hemlock_tests_test_voxel_screen_hpp
