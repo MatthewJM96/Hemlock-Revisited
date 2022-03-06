@@ -27,7 +27,7 @@ void hthread::IThreadWorkflowTask<ThreadState>::execute(typename Thread<ThreadSt
             ui32 into_completed = m_task_completion_states[next_task_idx].fetch_add(1);
             if (into_completed == m_dag->into_counts[next_task_idx]) {
                 m_tasks[next_task_idx].task->set_workflow_metadata(m_tasks, next_task_idx, m_dag, m_task_completion_states);
-                task_queue->enqueue(state->producer_token, m_tasks[next_task_idx]);
+                task_queue->enqueue(state->producer_token, {m_tasks[next_task_idx].task, m_tasks[next_task_idx].should_delete});
             }
         }
     }
@@ -60,6 +60,6 @@ void hthread::ThreadWorkflow<ThreadState>::run(ThreadWorkflowTasksView<ThreadSta
                 m_dag,
                 { task_completion_states, m_dag->task_count }
         );
-        m_thread_pool->add_task(tasks[entry_task]);
+        m_thread_pool->add_task({tasks[entry_task].task, tasks[entry_task].should_delete});
     }
 }
