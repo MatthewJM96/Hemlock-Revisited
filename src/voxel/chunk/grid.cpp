@@ -9,8 +9,14 @@ void hvox::ChunkLoadTask::init(Chunk* chunk, ChunkGrid* chunk_grid) {
     m_chunk_grid = chunk_grid;
 }
 
-void hvox::ChunkGrid::init(ui32 thread_count) {
-    m_gen_threads.init(thread_count);
+void hvox::ChunkGrid::init(                       ui32 thread_count,
+                            thread::ThreadWorkflowDAG* chunk_load_dag,
+                              ChunkLoadTaskListBuilder chunk_load_task_list_builder )
+{
+    build_load_tasks = chunk_load_task_list_builder;
+
+    m_chunk_load_thread_pool.init(thread_count);
+    m_chunk_load_workflow.init(chunk_load_dag, &m_chunk_load_thread_pool);
 
     m_TEMP_not_all_ready = true;
 
@@ -18,7 +24,8 @@ void hvox::ChunkGrid::init(ui32 thread_count) {
 }
 
 void hvox::ChunkGrid::dispose() {
-    m_gen_threads.dispose();
+    m_chunk_load_thread_pool.dispose();
+    m_chunk_load_workflow.dispose();
 }
 
 void hvox::ChunkGrid::update(TimeData time) {

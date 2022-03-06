@@ -15,6 +15,8 @@ namespace hemlock {
         using QueriedChunkState       = std::pair<bool, bool>;
         using QueriedChunkPendingTask = std::pair<bool, bool>;
 
+        using ChunkLoadTaskListBuilder = Delegate<hthread::ThreadWorkflowTasksView<ChunkLoadTaskContext>(Chunk*, ChunkGrid*)>;
+
         class ChunkGrid {
         public:
             ChunkGrid()  { /* Empty. */ }
@@ -26,8 +28,12 @@ namespace hemlock {
              *
              * @param thread_count The number of threads
              * that the grid can use for loading tasks.
+             * @param chunk_load_dag The DAG of the workflow
+             * to do chunk loading with.
              */
-            void init(ui32 thread_count);
+            void init(                       ui32 thread_count,
+                       thread::ThreadWorkflowDAG* chunk_load_dag,
+                         ChunkLoadTaskListBuilder chunk_load_task_list_builder );
             /**
              * @brief Disposes of the chunk grid, ending
              * the tasks on the thread pool and unloading
@@ -53,12 +59,12 @@ namespace hemlock {
              * for testing it can definitely be useful. Probably
              * don't ever call this in practise.
              */
-            void suspend_chunk_tasks() { m_gen_threads.suspend(); }
+            void suspend_chunk_tasks() { m_chunk_load_thread_pool.suspend(); }
             /**
              * @brief Resumes chunk tasks. No consequences for
              * calling this when not already suspended.
              */
-            void resume_chunk_tasks()  { m_gen_threads.resume();  }
+            void resume_chunk_tasks()  { m_chunk_load_thread_pool.resume();  }
 
             /**
              * @brief Loads chunks with the assumption none specified
@@ -80,7 +86,7 @@ namespace hemlock {
             /**
              * @brief Preloads a chunk, this entails saying it exists
              * and determining its neighbours - letting it and them
-             * know if each other's existence.
+             * know of each other's existence.
              *
              * @param chunk_position The coords of the chunk to preload.
              * @return True if the chunk was preloaded, false otherwise.
@@ -240,7 +246,10 @@ namespace hemlock {
         protected:
             void establish_chunk_neighbours(Chunk* chunk);
 
-            ThreadPool<ChunkLoadTaskContext> m_gen_threads;
+            ChunkLoadTaskListBuilder   build_load_tasks;
+
+            thread::ThreadPool<ChunkLoadTaskContext>        m_chunk_load_thread_pool;
+            thread::ThreadWorkflow<ChunkLoadTaskContext>    m_chunk_load_workflow;
 
             // TODO(Matthew): this probably should go elsewhere later, but
             //                to get instancing working this will do.
