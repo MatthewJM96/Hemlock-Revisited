@@ -43,10 +43,11 @@ hthread::ThreadWorkflowTaskID hthread::ThreadWorkflowBuilder::chain_task() {
     ThreadWorkflowTaskID prev_id = new_id - 1;
 
     m_dag->task_count += 1;
-    m_dag->into_counts.emplace_back(1);
     if (new_id > 0) {
+        m_dag->into_counts.emplace_back(1);
         m_dag->graph.insert({prev_id, new_id});
     } else {
+        m_dag->into_counts.emplace_back(0);
         m_dag->entry_tasks.insert(new_id);
     }
 
@@ -62,12 +63,13 @@ hthread::ThreadWorkflowTaskID hthread::ThreadWorkflowBuilder::chain_tasks(ui32 c
     m_dag->task_count += count;
     m_dag->into_counts.reserve(count);
     for (ui32 i = 0; i < count; ++i) {
-        m_dag->into_counts.emplace_back(1);
         if (new_id > 0) {
+            m_dag->into_counts.emplace_back(1);
             m_dag->graph.insert({prev_id, new_id});
         } else {
             // Can only reach here if i == 0 and we had
             // not yet added any tasks to the workflow.
+            m_dag->into_counts.emplace_back(0);
             m_dag->entry_tasks.insert(new_id);
         }
 
@@ -86,12 +88,13 @@ hthread::ThreadWorkflowTaskID hthread::ThreadWorkflowBuilder::chain_tasks_parall
     m_dag->task_count += count;
     m_dag->into_counts.reserve(count);
     for (ui32 i = 0; i < count; ++i) {
-        m_dag->into_counts.emplace_back(1);
         if (first_new_id > 0) {
+            m_dag->into_counts.emplace_back(1);
             m_dag->graph.insert({prev_id, new_id});
         } else {
             // Can only reach here if we had not yet
             // added any tasks to the workflow.
+            m_dag->into_counts.emplace_back(0);
             m_dag->entry_tasks.insert(new_id);
         }
 
