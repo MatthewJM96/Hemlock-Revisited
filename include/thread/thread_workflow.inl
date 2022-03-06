@@ -1,8 +1,8 @@
 template <hthread::InterruptibleState ThreadState>
 void hthread::IThreadWorkflowTask<ThreadState>::dispose() {
-    m_tasks                  = {nullptr, 0};
+    m_tasks                  = {};
     m_dag                    = nullptr;
-    m_task_completion_states = nullptr;
+    m_task_completion_states = {};
 }
 
 template <hthread::InterruptibleState ThreadState>
