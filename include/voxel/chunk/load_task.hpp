@@ -33,9 +33,9 @@ namespace hemlock {
             volatile bool stop;
             volatile bool suspend;
         };
-        using ChunkLoadThreadState = Thread<ChunkLoadTaskContext>::State;
-        using ChunkLoadTaskQueue   = TaskQueue<ChunkLoadTaskContext>;
-        class ChunkLoadTask : public IThreadTask<ChunkLoadTaskContext> {
+        using ChunkLoadThreadState = thread::Thread<ChunkLoadTaskContext>::State;
+        using ChunkLoadTaskQueue   = thread::TaskQueue<ChunkLoadTaskContext>;
+        class ChunkLoadTask : public thread::IThreadWorkflowTask<ChunkLoadTaskContext> {
         public:
             void init(Chunk* chunk, ChunkGrid* chunk_grid);
         protected:
