@@ -22,7 +22,7 @@ namespace hemlock {
         template <ChunkGenerationStrategy GenerationStrategy>
         class ChunkGenerationTask : public ChunkLoadTask {
         public:
-            virtual void execute(ChunkLoadThreadState* state, ChunkLoadTaskQueue* task_queue) override;
+            virtual bool run_task(ChunkLoadThreadState* state, ChunkLoadTaskQueue* task_queue) override;
         };
     }
 }

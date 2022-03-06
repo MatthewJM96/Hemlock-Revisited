@@ -9,7 +9,7 @@ namespace hemlock {
         template <ChunkMeshComparator MeshComparator>
         class ChunkNaiveMeshTask : public ChunkLoadTask {
         public:
-            virtual void execute(ChunkLoadThreadState* state, ChunkLoadTaskQueue* task_queue) override;
+            virtual bool run_task(ChunkLoadThreadState* state, ChunkLoadTaskQueue* task_queue) override;
         };
     }
 }

@@ -41,7 +41,7 @@ static inline hvox::BlockIndex index_at_back_face(hvox::BlockIndex index) {
 }
 
 template <hvox::ChunkMeshComparator MeshComparator>
-void hvox::ChunkNaiveMeshTask<MeshComparator>::execute(ChunkLoadThreadState* state, ChunkLoadTaskQueue* task_queue) {
+bool hvox::ChunkNaiveMeshTask<MeshComparator>::run_task(ChunkLoadThreadState* state, ChunkLoadTaskQueue* task_queue) {
     m_chunk->mesh_task_active.store(true, std::memory_order_release);
 
     // Only execute if all preloaded neighbouring chunks have at least been generated.
@@ -53,10 +53,11 @@ void hvox::ChunkNaiveMeshTask<MeshComparator>::execute(ChunkLoadThreadState* sta
         m_chunk->mesh_task_active.store(false, std::memory_order_release);
         // Put copy of this mesh task back onto the load task queue.
         ChunkNaiveMeshTask<MeshComparator>* mesh_task = new ChunkNaiveMeshTask<MeshComparator>();
+        mesh_task->set_workflow_metadata(m_tasks, m_task_idx, m_dag, m_task_completion_states);
         mesh_task->init(m_chunk, m_chunk_grid);
         task_queue->enqueue(state->producer_token, { mesh_task, true });
         m_chunk->pending_task.store(ChunkLoadTaskKind::MESH, std::memory_order_release);
-        return;
+        return false;
     }
 
     m_chunk->instance = { nullptr, 0 };
@@ -189,4 +190,6 @@ void hvox::ChunkNaiveMeshTask<MeshComparator>::execute(ChunkLoadThreadState* sta
     m_chunk->mesh_task_active.store(false, std::memory_order_release);
 
     m_chunk->state.store(ChunkState::MESHED, std::memory_order_release);
+
+    return true;
 }

@@ -3,22 +3,9 @@
 #include "voxel/chunk.h"
 #include "voxel/chunk/grid.h"
 
-template <ChunkMeshComparator MeshComparator>
-void hvox::ChunkGreedyMeshTask<MeshComparator>::execute(ChunkLoadThreadState*, ChunkLoadTaskQueue*) {
+template <hvox::ChunkMeshComparator MeshComparator>
+bool hvox::ChunkGreedyMeshTask<MeshComparator>::run_task(ChunkLoadThreadState*, ChunkLoadTaskQueue*) {
     m_chunk->mesh_task_active.store(true, std::memory_order_release);
-
-    // TODO(Matthew): Remove this, but we'll remove it when we shift strategy stuff
-    //                to templated policy.
-    bool owns_strategy = !m_strategy;
-    if (!m_strategy) {
-        m_strategy = reinterpret_cast<void*>(
-            new ChunkMeshStrategy(
-                [&](const Block* source, const Block* target, BlockChunkPosition, Chunk*) {
-                    return (source->id == target->id) && (source->id != 0);
-                }
-            )
-        );
-    }
 
     // TODO(Matthew): Cross-chunk greedy instancing?
     // Note that this code would probably need to be enabled if we were to do
@@ -326,10 +313,10 @@ process_new_source:
     };
 
     delete[] visited;
-    if (owns_strategy)
-        delete reinterpret_cast<ChunkMeshStrategy*>(m_strategy);
 
     m_chunk->mesh_task_active.store(false, std::memory_order_release);
 
     m_chunk->state.store(ChunkState::MESHED, std::memory_order_release);
+
+    return true;
 }
