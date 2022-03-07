@@ -10,19 +10,19 @@ namespace hemlock {
             std::is_same_v<decltype(state.suspend), bool>;
         };
 
-        template <InterruptibleState ThreadState>
+        template <hemlock::thread::InterruptibleState ThreadState>
         class IThreadTask;
 
-        template <InterruptibleState ThreadState>
+        template <hemlock::thread::InterruptibleState ThreadState>
         struct HeldTask {
             IThreadTask<ThreadState>* task;
             bool should_delete;
         };
 
-        template <InterruptibleState ThreadState>
+        template <hemlock::thread::InterruptibleState ThreadState>
         using TaskQueue = moodycamel::BlockingConcurrentQueue<HeldTask<ThreadState>>;
 
-        template <InterruptibleState ThreadState>
+        template <hemlock::thread::InterruptibleState ThreadState>
         struct Thread {
             std::thread thread;
             struct State {
@@ -31,10 +31,10 @@ namespace hemlock {
                 moodycamel::ProducerToken producer_token;
             } state;
         };
-        template <InterruptibleState ThreadState>
+        template <hemlock::thread::InterruptibleState ThreadState>
         using Threads = std::vector<Thread<ThreadState>>;
 
-        template <InterruptibleState ThreadState>
+        template <hemlock::thread::InterruptibleState ThreadState>
         class IThreadTask {
         public:
             IThreadTask() { /* Empty. */ }
@@ -64,10 +64,10 @@ namespace hemlock {
             volatile bool is_finished = false;
         };
 
-        template <InterruptibleState ThreadState>
+        template <hemlock::thread::InterruptibleState ThreadState>
         class ThreadPool;
 
-        template <InterruptibleState ThreadState>
+        template <hemlock::thread::InterruptibleState ThreadState>
         using ThreadMainFunc = Delegate<void(typename Thread<ThreadState>::State*, TaskQueue<ThreadState>*)>;
 
         /**
@@ -79,10 +79,10 @@ namespace hemlock {
          * @param task_queue The task queue, can be interacted with
          * for example if a task needs to chain a follow-up task.
          */
-        template <InterruptibleState ThreadState>
+        template <hemlock::thread::InterruptibleState ThreadState>
         void basic_thread_main(typename Thread<ThreadState>::State* state, TaskQueue<ThreadState>* task_queue);
 
-        template <InterruptibleState ThreadState>
+        template <hemlock::thread::InterruptibleState ThreadState>
         class ThreadPool {
         public:
             ThreadPool() :

@@ -1,11 +1,11 @@
-template <hthread::InterruptibleState ThreadState>
+template <hemlock::thread::InterruptibleState ThreadState>
 void hthread::IThreadWorkflowTask<ThreadState>::dispose() {
     m_tasks                  = {};
     m_dag                    = nullptr;
     m_task_completion_states = {};
 }
 
-template <hthread::InterruptibleState ThreadState>
+template <hemlock::thread::InterruptibleState ThreadState>
 void hthread::IThreadWorkflowTask<ThreadState>::set_workflow_metadata( ThreadWorkflowTasksView<ThreadState> tasks,
                                                                                        ThreadWorkflowTaskID task_idx,
                                                                                          ThreadWorkflowDAG* dag,
@@ -17,7 +17,7 @@ void hthread::IThreadWorkflowTask<ThreadState>::set_workflow_metadata( ThreadWor
     m_task_completion_states = task_completion_states;
 }
 
-template <hthread::InterruptibleState ThreadState>
+template <hemlock::thread::InterruptibleState ThreadState>
 void hthread::IThreadWorkflowTask<ThreadState>::execute(typename Thread<ThreadState>::State* state, TaskQueue<ThreadState>* task_queue) {
     if (run_task(state, task_queue)) {
         auto [start, last] = m_dag->graph.equal_range(m_task_idx);
@@ -34,7 +34,7 @@ void hthread::IThreadWorkflowTask<ThreadState>::execute(typename Thread<ThreadSt
     }
 }
 
-template <hthread::InterruptibleState ThreadState>
+template <hemlock::thread::InterruptibleState ThreadState>
 void hthread::ThreadWorkflow<ThreadState>::init(ThreadWorkflowDAG* dag, ThreadPool<ThreadState>* thread_pool) {
     assert(         dag != nullptr );
     assert( thread_pool != nullptr );
@@ -43,13 +43,13 @@ void hthread::ThreadWorkflow<ThreadState>::init(ThreadWorkflowDAG* dag, ThreadPo
     m_thread_pool = thread_pool;
 }
 
-template <hthread::InterruptibleState ThreadState>
+template <hemlock::thread::InterruptibleState ThreadState>
 void hthread::ThreadWorkflow<ThreadState>::dispose() {
     m_dag         = nullptr;
     m_thread_pool = nullptr;
 }
 
-template <hthread::InterruptibleState ThreadState>
+template <hemlock::thread::InterruptibleState ThreadState>
 void hthread::ThreadWorkflow<ThreadState>::run(ThreadWorkflowTasksView<ThreadState> tasks) {
     ThreadWorkflowTaskCompletion* task_completion_states = new ThreadWorkflowTaskCompletion[m_dag->task_count]{};
 

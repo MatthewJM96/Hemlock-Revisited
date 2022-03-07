@@ -19,7 +19,7 @@ namespace hemlock {
             { s.operator()(c) } -> std::same_as<void>;
         };
 
-        template <ChunkGenerationStrategy GenerationStrategy>
+        template <hvox::ChunkGenerationStrategy GenerationStrategy>
         class ChunkGenerationTask : public ChunkLoadTask {
         public:
             virtual bool run_task(ChunkLoadThreadState* state, ChunkLoadTaskQueue* task_queue) override;

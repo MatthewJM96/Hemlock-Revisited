@@ -6,7 +6,7 @@
 
 namespace hemlock {
     namespace voxel {
-        template <ChunkMeshComparator MeshComparator>
+        template <hvox::ChunkMeshComparator MeshComparator>
         class ChunkGreedyMeshTask : public ChunkLoadTask {
         public:
             virtual bool run_task(ChunkLoadThreadState* state, ChunkLoadTaskQueue* task_queue) override;

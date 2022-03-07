@@ -5,7 +5,7 @@
 
 namespace hemlock {
     namespace thread {
-        template <InterruptibleState ThreadState>
+        template <hemlock::thread::InterruptibleState ThreadState>
         class IThreadWorkflowTask : public IThreadTask<ThreadState> {
         public:
             IThreadWorkflowTask() { /* Empty. */ }
@@ -65,7 +65,7 @@ namespace hemlock {
             ThreadWorkflowTaskCompletionView        m_task_completion_states;
         };
 
-        template <InterruptibleState ThreadState>
+        template <hemlock::thread::InterruptibleState ThreadState>
         class ThreadWorkflow {
         public:
             ThreadWorkflow()  { /* Empty. */ }
