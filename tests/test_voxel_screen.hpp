@@ -51,9 +51,9 @@ struct TVS_VoxelGenerator {
         f32* data = new f32[CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE];
         domain_warp_fract_prog_1->GenUniformGrid3D(
             data,
-            chunk->position.x * CHUNK_SIZE,
-            -1 * chunk->position.y * CHUNK_SIZE,
-            chunk->position.z * CHUNK_SIZE,
+            static_cast<int>(chunk->position.x) * CHUNK_SIZE,
+            -1 * static_cast<int>(chunk->position.y) * CHUNK_SIZE,
+            static_cast<int>(chunk->position.z) * CHUNK_SIZE,
             CHUNK_SIZE,
             CHUNK_SIZE,
             CHUNK_SIZE,
