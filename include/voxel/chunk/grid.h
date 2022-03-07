@@ -3,7 +3,7 @@
 
 #include "timing.h"
 #include "voxel/chunk.h"
-#include "voxel/chunk/generator_task.h"
+#include "voxel/chunk/generator_task.hpp"
 
 namespace hemlock {
     namespace voxel {

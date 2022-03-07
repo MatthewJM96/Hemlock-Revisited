@@ -1,7 +1,7 @@
 #include "voxel/block.hpp"
 #include "voxel/chunk.h"
-// #include "voxel/chunk/mesh/greedy_task.h"
-#include "voxel/chunk/mesh/naive_task.h"
+// #include "voxel/chunk/mesh/greedy_task.hpp"
+#include "voxel/chunk/mesh/naive_task.hpp"
 
 template <hvox::ChunkGenerationStrategy GenerationStrategy>   
 bool hvox::ChunkGenerationTask<GenerationStrategy>::run_task(ChunkLoadThreadState* state, ChunkLoadTaskQueue* task_queue) {
