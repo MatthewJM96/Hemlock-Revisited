@@ -57,6 +57,7 @@ set(Hemlock_Requirements
     sdl_ttf/2.0.18
     libpng/1.6.37
     concurrentqueue/1.0.3
+    boost/1.78.0
 )
 
 if (HEMLOCK_USING_OPENGL)
@@ -87,6 +88,7 @@ find_package(SDL2 REQUIRED)
 find_package(SDL2_ttf REQUIRED)
 find_package(PNG REQUIRED)
 find_package(concurrentqueue REQUIRED)
+find_package(Boost COMPONENTS iostreams REQUIRED)
 
 if (HEMLOCK_USING_SDL)
     add_compile_definitions(HEMLOCK_USING_SDL=1)
@@ -151,6 +153,7 @@ set(Hemlock_Include_Dirs
     ${SDL2_ttf_INCLUDE_DIRS}
     ${PNG_INCLUDE_DIRS}
     ${concurrentqueue_INCLUDE_DIRS}
+    ${Boost_INCLUDE_DIRS}
 )
 
 if (HEMLOCK_USING_OPENGL)
@@ -190,5 +193,6 @@ target_link_libraries(Hemlock_Revisited
     SDL2::SDL2main
     SDL2::SDL2
     SDL2_ttf::SDL2_ttf
+    Boost::iostreams
     FastNoise
 )
