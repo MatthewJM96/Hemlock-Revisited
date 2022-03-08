@@ -10,6 +10,11 @@ namespace hemlock {
             std::is_same_v<decltype(state.suspend), bool>;
         };
 
+        struct BasicThreadContext {
+            bool stop;
+            bool suspend;
+        };
+
         template <hemlock::thread::InterruptibleState ThreadState>
         class IThreadTask;
 
