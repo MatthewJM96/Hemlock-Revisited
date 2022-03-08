@@ -63,6 +63,24 @@ ui32 hio::IOManagerBase::apply_to_globpath(const fs::path& globpath, Delegate<bo
     return apply_to_paths(glob::glob(globpath), func);
 }
 
+bool hio::IOManagerBase::memory_map_file(const fs::path& path, OUT hio::fs::mapped_file& file) const {
+    fs::path abs_path{};
+    if (!resolve_path(path, abs_path)) return false;
+
+    file.open(abs_path.string());
+
+    return true;
+}
+
+bool hio::IOManagerBase::memory_map_read_only_file(const fs::path& path, OUT hio::fs::mapped_file_source& file) const {
+    fs::path abs_path{};
+    if (!resolve_path(path, abs_path)) return false;
+
+    file.open(abs_path.string());
+
+    return true;
+}
+
 bool hio::IOManagerBase::read_file_to_string(const fs::path& path, std::string& buffer) const {
     fs::path abs_path{};
     if (!resolve_path(path, abs_path)) return false;

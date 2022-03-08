@@ -47,6 +47,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <boost/iostreams/device/mapped_file.hpp>
 
 // SDL2
 #include <SDL2/SDL.h>
