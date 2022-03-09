@@ -245,7 +245,9 @@ bool hio::img::png::load(std::string filepath, void*& data, ui32v2& dimensions, 
     png_read_update_info(png, info);
 
     // Get number of bytes per row of the image.
-    ui32 row_size = png_get_rowbytes(png, info);
+    ui32 row_size = static_cast<ui32>(
+                        png_get_rowbytes(png, info)
+                    );
 
     // Allocate the buffer we'll be reading into.
     data = reinterpret_cast<void*>(new ui8[dimensions.y * row_size]);

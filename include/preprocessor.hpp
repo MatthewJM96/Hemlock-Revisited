@@ -600,7 +600,7 @@
  * Not a preprocessor but a constexpr to convert ID "I", "II" etc to integer.
  */
 constexpr uint32_t ID_TO_INT(std::string_view ID) {
-  return ID.size() - 1;
+  return static_cast<uint32_t>(ID.size() - 1);
 }
 
 #endif // hemlock_preprocessor_h
