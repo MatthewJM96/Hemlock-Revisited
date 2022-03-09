@@ -172,6 +172,7 @@ public:
         m_state = happ::ScreenState::RUNNING;
 
         m_input_manager = static_cast<happ::SingleWindowApp*>(m_process)->input_manager();
+        m_input_manager->init();
 
         m_camera.attach_to_window(m_process->window());
         m_camera.set_position(f32v3{35.0f, 9.0f, -22.0f});
