@@ -196,5 +196,14 @@ target_link_libraries(Hemlock_Revisited
     SDL2::SDL2main
     SDL2::SDL2
     SDL2_ttf::SDL2_ttf
-    FastNoise
 )
+
+if(CMAKE_BUILD_TYPE STREQUAL "Release")
+    target_link_libraries(Hemlock_Revisited
+        FastNoise
+    )
+else()
+    target_link_libraries(Hemlock_Revisited
+        FastNoiseD
+    )
+endif()
