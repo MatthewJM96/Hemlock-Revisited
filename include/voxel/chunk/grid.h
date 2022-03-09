@@ -2,11 +2,13 @@
 #define __hemlock_voxel_chunk_grid_h
 
 #include "timing.h"
+#include "voxel/coordinate_system.h"
 #include "voxel/chunk.h"
-#include "voxel/chunk/generator_task.h"
+#include "voxel/chunk/load_task.hpp"
 
 namespace hemlock {
     namespace voxel {
+        struct Chunk;
         // TODO(Matthew): We can do better storage of chunks and blocks at this level.
         // TODO(Matthew): We should add support for LOD, different generation stages, disabling meshing etc.
 

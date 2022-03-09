@@ -2,6 +2,7 @@
 
 #include "graphics/mesh.h"
 
+#include "voxel/block.hpp"
 #include "voxel/chunk/grid.h"
 
 void hvox::ChunkLoadTask::init(Chunk* chunk, ChunkGrid* chunk_grid) {
