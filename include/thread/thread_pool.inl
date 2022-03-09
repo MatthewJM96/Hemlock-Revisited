@@ -1,4 +1,4 @@
-template <hemlock::thread::InterruptibleState ThreadState>
+template <hthread::InterruptibleState ThreadState>
 void hthread::basic_thread_main( typename Thread<ThreadState>::State* state,
                                               TaskQueue<ThreadState>* task_queue  ) {
     state->context.stop    = false;
@@ -26,7 +26,7 @@ void hthread::basic_thread_main( typename Thread<ThreadState>::State* state,
     }
 }
 
-template <hemlock::thread::InterruptibleState ThreadState>
+template <hthread::InterruptibleState ThreadState>
 void hthread::ThreadPool<ThreadState>::init(           ui32 thread_count,
                                 ThreadMainFunc<ThreadState> thread_main_func /*= {basic_thread_main}*/  )
 {
@@ -55,7 +55,7 @@ void hthread::ThreadPool<ThreadState>::init(           ui32 thread_count,
     }
 }
 
-template <hemlock::thread::InterruptibleState ThreadState>
+template <hthread::InterruptibleState ThreadState>
 void hthread::ThreadPool<ThreadState>::dispose() {
     if (!m_is_initialised) return;
     m_is_initialised = false;
@@ -75,24 +75,24 @@ void hthread::ThreadPool<ThreadState>::dispose() {
     Threads<ThreadState>().swap(m_threads);
 }
 
-template <hemlock::thread::InterruptibleState ThreadState>
+template <hthread::InterruptibleState ThreadState>
 void hthread::ThreadPool<ThreadState>::suspend() {
     for (auto& thread : m_threads)
         thread.state.context.suspend = true;
 }
 
-template <hemlock::thread::InterruptibleState ThreadState>
+template <hthread::InterruptibleState ThreadState>
 void hthread::ThreadPool<ThreadState>::resume() {
     for (auto& thread : m_threads)
         thread.state.context.suspend = false;
 }
 
-template <hemlock::thread::InterruptibleState ThreadState>
+template <hthread::InterruptibleState ThreadState>
 void hthread::ThreadPool<ThreadState>::add_task(HeldTask<ThreadState> task) {
     m_tasks.enqueue(m_producer_token, task);
 }
 
-template <hemlock::thread::InterruptibleState ThreadState>
+template <hthread::InterruptibleState ThreadState>
 void hthread::ThreadPool<ThreadState>::add_tasks(HeldTask<ThreadState> tasks[], size_t task_count) {
     m_tasks.enqueue_bulk(m_producer_token, tasks, task_count);
 }
