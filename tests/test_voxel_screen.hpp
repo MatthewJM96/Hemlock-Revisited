@@ -3,8 +3,8 @@
 
 #include <FastNoise/FastNoise.h>
 
-#include "voxel/chunk/generator_task.h"
-#include "voxel/chunk/mesh/naive_task.h"
+#include "voxel/chunk/generator_task.hpp"
+#include "voxel/chunk/mesh/naive_task.hpp"
 
 #include "iomanager.hpp"
 

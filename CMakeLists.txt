@@ -63,6 +63,7 @@ set(Hemlock_Requirements
     sdl_ttf/2.0.18
     libpng/1.6.37
     concurrentqueue/1.0.3
+    boost/1.78.0
 )
 
 if (HEMLOCK_USING_OPENGL)
@@ -93,6 +94,7 @@ find_package(SDL2 REQUIRED)
 find_package(SDL2_ttf REQUIRED)
 find_package(PNG REQUIRED)
 find_package(concurrentqueue REQUIRED)
+find_package(Boost COMPONENTS iostreams REQUIRED)
 
 if (HEMLOCK_USING_SDL)
     add_compile_definitions(HEMLOCK_USING_SDL=1)
@@ -142,6 +144,9 @@ add_executable(Hemlock_Revisited
     "${PROJECT_SOURCE_DIR}/src/voxel/chunk.cpp"
     "${PROJECT_SOURCE_DIR}/src/voxel/chunk/grid.cpp"
     "${PROJECT_SOURCE_DIR}/src/voxel/coordinate_system.cpp"
+    "${PROJECT_SOURCE_DIR}/src/voxel/io/chunk_file_task.cpp"
+    "${PROJECT_SOURCE_DIR}/src/voxel/io/chunk_load_task.cpp"
+    "${PROJECT_SOURCE_DIR}/src/voxel/io/chunk_save_task.cpp"
     "${PROJECT_SOURCE_DIR}/tests/main.cpp"
 )
 
@@ -157,6 +162,7 @@ set(Hemlock_Include_Dirs
     ${SDL2_ttf_INCLUDE_DIRS}
     ${PNG_INCLUDE_DIRS}
     ${concurrentqueue_INCLUDE_DIRS}
+    ${Boost_INCLUDE_DIRS}
 )
 
 if (HEMLOCK_USING_OPENGL)
@@ -196,6 +202,7 @@ target_link_libraries(Hemlock_Revisited
     SDL2::SDL2main
     SDL2::SDL2
     SDL2_ttf::SDL2_ttf
+    Boost::iostreams
 )
 
 if(CMAKE_BUILD_TYPE STREQUAL "Release")

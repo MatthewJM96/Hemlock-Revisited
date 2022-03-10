@@ -35,6 +35,9 @@ namespace hemlock {
             void apply_to_globpath(const fs::path& globpath, Delegate<void(const fs::path&)> func) const;
             ui32 apply_to_globpath(const fs::path& globpath, Delegate<bool(const fs::path&)> func) const;
 
+            bool memory_map_file(const fs::path& path, OUT hio::fs::mapped_file& file) const;
+            bool memory_map_read_only_file(const fs::path& path, OUT hio::fs::mapped_file_source& file) const;
+
                            bool read_file_to_string(const fs::path& path, OUT std::string& buffer) const;
             CALLER_DELETE char* read_file_to_string(const fs::path& path, OUT ui32* length = nullptr) const;
 

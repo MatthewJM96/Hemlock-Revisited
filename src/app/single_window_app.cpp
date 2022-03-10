@@ -80,8 +80,7 @@ void happ::SingleWindowApp::prepare_window() {
         ) < 0
     ) {
         debug_printf("Couldn't initialise SDL.\n");
-        const char* err = SDL_GetError();
-        debug_printf("%s\n", err);
+        debug_printf("%s\n", SDL_GetError());
         exit(1);
     }
     SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
