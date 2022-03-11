@@ -205,12 +205,18 @@ target_link_libraries(Hemlock_Revisited
     Boost::iostreams
 )
 
-if(CMAKE_BUILD_TYPE STREQUAL "Release")
-    target_link_libraries(Hemlock_Revisited
-        FastNoise
-    )
+if (MSVC)
+    if(CMAKE_BUILD_TYPE STREQUAL "Release")
+        target_link_libraries(Hemlock_Revisited
+            FastNoise
+        )
+    else()
+        target_link_libraries(Hemlock_Revisited
+            FastNoiseD
+        )
+    endif()
 else()
     target_link_libraries(Hemlock_Revisited
-        FastNoiseD
+        FastNoise
     )
 endif()
