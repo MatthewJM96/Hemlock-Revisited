@@ -10,16 +10,28 @@ hg::MeshHandles hvox::ChunkRenderer::block_mesh_handles = {};
 hvox::ChunkRenderer::ChunkRenderer() :
     handle_chunk_mesh_change(Subscriber<>{
         [&](Sender sender) {
-            const Chunk* chunk = reinterpret_cast<const Chunk*>(sender);
+            hmem::WeakHandle<Chunk> handle = sender.get_handle<Chunk>();
 
-            m_chunk_dirty_queue.enqueue(chunk);
+            auto chunk = handle.lock();
+            // If chunk is nullptr, then there's no point
+            // handling the mesh change as we will have
+            // an unload event for this chunk.
+            if (chunk == nullptr) return;
+
+            m_chunk_dirty_queue.enqueue({ handle, chunk->id() });
         }
     }),
     handle_chunk_unload(Subscriber<>{
         [&](Sender sender) {
-            const Chunk* chunk = reinterpret_cast<const Chunk*>(sender);
+            hmem::WeakHandle<Chunk> handle = sender.get_handle<Chunk>();
 
-            m_chunk_removal_queue.enqueue(chunk);
+            auto chunk = handle.lock();
+            // If chunk is nullptr, then we have
+            // a major problem. on_unload MUST
+            // complete before chunk is released.
+            assert(chunk != nullptr);
+
+            m_chunk_removal_queue.enqueue({ handle, chunk->id() });
         }
     }),
     m_page_size(0)
@@ -82,11 +94,16 @@ void hvox::ChunkRenderer::draw(TimeData) {
     }
 }
 
-void hvox::ChunkRenderer::add_chunk(Chunk* chunk) {
+void hvox::ChunkRenderer::add_chunk(hmem::WeakHandle<Chunk> handle) {
+    auto chunk = handle.lock();
+
+    if (chunk == nullptr) return;
+
     chunk->on_mesh_change += &handle_chunk_mesh_change;
     chunk->on_unload      += &handle_chunk_unload;
 
-    m_chunk_metadata[chunk] = PagedChunkMetadata{};
+    m_all_paged_chunks[chunk->id()] = handle;
+    m_chunk_metadata[chunk->id()] = PagedChunkMetadata{};
 }
 
 hvox::ChunkRenderPage* hvox::ChunkRenderer::create_pages(ui32 count) {
@@ -129,8 +146,8 @@ hvox::ChunkRenderPage* hvox::ChunkRenderer::create_pages(ui32 count) {
     return first_new_page;
 }
 
-void hvox::ChunkRenderer::put_chunk_in_page(const Chunk* chunk, ui32 first_page_idx) {
-    PagedChunkMetadata& metadata = m_chunk_metadata[chunk];
+void hvox::ChunkRenderer::put_chunk_in_page(hmem::Handle<Chunk> chunk, ui32 first_page_idx) {
+    PagedChunkMetadata& metadata = m_chunk_metadata[chunk->id()];
 
     ui32 page_idx = first_page_idx;
     ChunkRenderPage* page = nullptr;
@@ -147,7 +164,7 @@ void hvox::ChunkRenderer::put_chunk_in_page(const Chunk* chunk, ui32 first_page_
     }
 
     ui32 chunk_idx = page->chunks.size();
-    page->chunks.emplace_back(chunk);
+    page->chunks.emplace_back(chunk->id());
 
     if (page->first_dirtied_chunk_idx >= page->chunks.size()) {
         page->first_dirtied_chunk_idx  = page->chunks.size() - 1;
@@ -166,14 +183,21 @@ void hvox::ChunkRenderer::process_pages() {
     // TODO(Matthew): Lock on chunk instance data? Perhaps
     //                we can use double buffering to avoid that?
 
-    const Chunk* chunk;
+    HandleAndID handle_and_id;
 
     /*****************\
      * Remove Chunks *
     \*****************/
 
-    while (m_chunk_removal_queue.try_dequeue(chunk)) {
-        auto it = m_chunk_metadata.find(chunk);
+    while (m_chunk_removal_queue.try_dequeue(handle_and_id)) {
+        auto it = m_chunk_metadata.find(handle_and_id.id);
+
+        // TODO(Matthew): should this be an assertion against this?
+        //                only one on_unload event should ever fire for a chunk...
+        //                then again, the renderer is left in the same state,
+        //                so probably fine.
+        if (it == m_chunk_metadata.end())
+            continue;
 
         PagedChunkMetadata metadata = it->second;
 
@@ -204,28 +228,39 @@ void hvox::ChunkRenderer::process_pages() {
                 page.first_dirtied_chunk_idx = metadata.chunk_idx;
             }
 
+            // Make sure page is reprocessed.
             page.dirty = true;
         } else {
             page.chunks.pop_back();
 
-            page.voxel_count = 0;
-            for (auto paged_chunk : page.chunks) {
-                page.voxel_count += paged_chunk->instance.count;
+            // If only dirty chunk was the one we just removed, and
+            // given we just popped the final chunk in the page, we
+            // can mark as clean.
+            if (page.first_dirtied_chunk_idx == metadata.chunk_idx) {
+                page.first_dirtied_chunk_idx = std::numeric_limits<ui32>::max();
+
+                page.dirty = false;
             }
         }
+
+        // Deduct removed voxels from page voxel count, allowing
+        // a new chunk to join if extra space permits.
+        page.voxel_count -= metadata.last_voxel_count;
     }
 
     /*****************\
      * Update Chunks *
     \*****************/
 
-    while (m_chunk_dirty_queue.try_dequeue(chunk)) {
-        auto it = m_chunk_metadata.find(chunk);
+    while (m_chunk_dirty_queue.try_dequeue(handle_and_id)) {
+        auto it = m_chunk_metadata.find(handle_and_id.id);
 
         if (it == m_chunk_metadata.end())
             continue;
 
         PagedChunkMetadata metadata = it->second;
+
+        auto chunk = handle_and_id.handle.lock();
 
         if (metadata.paged) {
             ChunkRenderPage& page = m_chunk_pages[metadata.page_idx];
@@ -235,7 +270,7 @@ void hvox::ChunkRenderer::process_pages() {
             }
 
             page.dirty = true;
-        } else {
+        } else if (chunk != nullptr) {
             put_chunk_in_page(chunk, 0);
         }
     }
@@ -252,23 +287,37 @@ void hvox::ChunkRenderer::process_pages() {
 
         ui32 voxels_instanced = 0;
         for (ui32 chunk_idx = 0; chunk_idx < page.first_dirtied_chunk_idx; ++chunk_idx) {
-            voxels_instanced += page.chunks[chunk_idx]->instance.count;
+            voxels_instanced += m_chunk_metadata[page.chunks[chunk_idx]].last_voxel_count;
         }
 
         for (ui32 chunk_idx = page.first_dirtied_chunk_idx; chunk_idx < page.chunks.size();) {
-            chunk = page.chunks[chunk_idx];
+            ChunkID id = page.chunks[chunk_idx];
+
+            auto chunk = m_all_paged_chunks[id].lock();
+
+            // Dirty chunk that has ceased to exist, can't
+            // update it so drop it. Don't need to do anything
+            // special as it will have been added to the removal
+            // queue.
+            if (chunk == nullptr) continue;
+
             auto data = chunk->instance;
 
             // Check chunk still fits in this page, if not, remove it and place
             // it in a page that might still have space for it (else creating a
             // new page for it).
-            if (page.voxel_count + data.count > block_page_size()) {
+            if (voxels_instanced + data.count > block_page_size()) {
+                // Swap non-fitting chunk with last chunk in page, pop it,
+                // and update the metadata for the chunk that we swapped in.
                 std::swap(page.chunks[chunk_idx], page.chunks.back());
                 page.chunks.pop_back();
+                m_chunk_metadata[page.chunks[chunk_idx]].chunk_idx = chunk_idx;
+
                 // TODO(Matthew): Does this lead to too much memory use? Perhaps
-                //                search all pages for space, but do a double
-                //                pass of this page processing logic?
+                //                do a shuffle phase to fit all chunks and then
+                //                do the instance data processing logic.
                 put_chunk_in_page(chunk, page_idx + 1);
+
                 // We don't want to do any more processing of this chunk just yet.
                 // chunk_idx now indexes to what was previously the last chunk in
                 // this page.
@@ -282,6 +331,7 @@ void hvox::ChunkRenderer::process_pages() {
                 reinterpret_cast<void*>(data.data)
             );
 
+            m_chunk_metadata[id].last_voxel_count = data.count;
             voxels_instanced += data.count;
 
             ++chunk_idx;

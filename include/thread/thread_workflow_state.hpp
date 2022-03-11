@@ -17,10 +17,16 @@ namespace hemlock {
         using ThreadWorkflowTaskID = i32;
 
         template <InterruptibleState ThreadState>
-        using ThreadWorkflowTasksView = std::span<HeldWorkflowTask<ThreadState>>;
+        struct ThreadWorkflowTasksView {
+            hmem::Handle<HeldWorkflowTask<ThreadState>[]>   tasks;
+            ui32                                            count;
+        };
 
-        using ThreadWorkflowTaskCompletion     =           std::atomic<ui32> ;
-        using ThreadWorkflowTaskCompletionView = std::span<std::atomic<ui32>>;
+        using ThreadWorkflowTaskCompletion = std::atomic<ui32>;
+        struct ThreadWorkflowTaskCompletionView {
+            hmem::Handle<ThreadWorkflowTaskCompletion[]>    completion_states;
+            ui32                                            count;
+        };
 
         using ThreadWorkflowTaskIntoCount = std::vector<ThreadWorkflowTaskID>;
         using ThreadWorkflowTaskIndexList = std::unordered_set<ThreadWorkflowTaskID>;

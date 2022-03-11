@@ -5,7 +5,11 @@
 
 template <hvox::ChunkMeshComparator MeshComparator>
 bool hvox::ChunkGreedyMeshTask<MeshComparator>::run_task(ChunkLoadThreadState*, ChunkLoadTaskQueue*) {
-    m_chunk->mesh_task_active.store(true, std::memory_order_release);
+    auto chunk = m_chunk.lock();
+
+    if (chunk == nullptr) return false;
+
+    chunk->mesh_task_active.store(true, std::memory_order_release);
 
     // TODO(Matthew): Better guess work should be possible and expand only when needed.
     //                  Maybe in addition to managing how all chunk's transformations are
@@ -15,19 +19,19 @@ bool hvox::ChunkGreedyMeshTask<MeshComparator>::run_task(ChunkLoadThreadState*, 
     //                      unique, scalings will not be, and so an index buffer could
     //                      further improve performance and also remove the difficulty
     //                      of the above TODO.
-    m_chunk->instance = {
-        new ChunkInstanceData[CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE],
-        0
-    };
+    if (chunk->instance.data == nullptr)
+        chunk->instance.data = new ChunkInstanceData[CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE];
 
-    Block* blocks = m_chunk->blocks;
+    chunk->instance.count = 0;
+
+    Block* blocks = chunk->blocks;
 
     std::queue<BlockChunkPosition> queued_for_visit;
 
     bool* visited = new bool[CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE]{false};
 
-    auto  data        = m_chunk->instance.data;
-    auto& voxel_count = m_chunk->instance.count;
+    auto  data        = chunk->instance.data;
+    auto& voxel_count = chunk->instance.count;
 
     const Block*        source = &blocks[0];
     BlockChunkPosition  start  = BlockChunkPosition{0};
@@ -64,10 +68,12 @@ bool hvox::ChunkGreedyMeshTask<MeshComparator>::run_task(ChunkLoadThreadState*, 
         }
     };
 
+    Chunk* raw_chunk_ptr = chunk.get();
+
     bool blocks_to_consider = true;
     while (blocks_to_consider) {
 process_new_source:
-        bool found_instanceable = are_same_instanceable(source, source, {}, m_chunk);
+        bool found_instanceable = are_same_instanceable(source, source, {}, raw_chunk_ptr);
 
         /***************\
          * Scan X - 1D *
@@ -82,7 +88,7 @@ process_new_source:
             if (!found_instanceable) {
                 // Found a instanceable source block that hasn't already
                 // been visited.
-                if (are_same_instanceable(target, target, target_pos, m_chunk)
+                if (are_same_instanceable(target, target, target_pos, raw_chunk_ptr)
                         && !visited[target_idx]) {
                     add_border_blocks_to_queue(start, target_pos);
 
@@ -99,7 +105,7 @@ process_new_source:
                 }
             // We are scanning for the extent of an instanceable source block.
             } else {
-                if (!are_same_instanceable(source, target, target_pos, m_chunk)
+                if (!are_same_instanceable(source, target, target_pos, raw_chunk_ptr)
                         || visited[target_idx]) {
                     end.x = target_pos.x - 1;
 
@@ -143,7 +149,7 @@ process_new_source:
                 if (!found_instanceable) {
                     // Found a instanceable source block that hasn't already
                     // been visited.
-                    if (are_same_instanceable(target, target, target_pos, m_chunk)
+                    if (are_same_instanceable(target, target, target_pos, raw_chunk_ptr)
                             && !visited[target_idx]) {
                         add_border_blocks_to_queue(start, target_pos);
 
@@ -159,7 +165,7 @@ process_new_source:
                         continue;
                     }
                 // We are scanning for the extent of an instanceable source block.
-                } else if (!are_same_instanceable(source, target, target_pos, m_chunk)
+                } else if (!are_same_instanceable(source, target, target_pos, raw_chunk_ptr)
                                 || visited[target_idx]) {
                     end.z = target_pos.z - 1;
 
@@ -207,7 +213,7 @@ process_new_source:
                     if (!found_instanceable) {
                         // Found a instanceable source block that hasn't already
                         // been visited.
-                        if (are_same_instanceable(target, target, target_pos, m_chunk)
+                        if (are_same_instanceable(target, target, target_pos, raw_chunk_ptr)
                                 && !visited[target_idx]) {
                             add_border_blocks_to_queue(start, target_pos);
 
@@ -223,7 +229,7 @@ process_new_source:
                             continue;
                         }
                     // We are scanning for the extent of an instanceable source block.
-                    } else if (!are_same_instanceable(source, target, target_pos, m_chunk)
+                    } else if (!are_same_instanceable(source, target, target_pos, raw_chunk_ptr)
                                     || visited[target_idx]) {
                         end.y = target_pos.y - 1;
 
@@ -261,8 +267,8 @@ process_new_source:
         \*******************/
 
         if (found_instanceable) {
-            BlockWorldPosition start_world = block_world_position(m_chunk->position, start);
-            BlockWorldPosition end_world   = block_world_position(m_chunk->position, end);
+            BlockWorldPosition start_world = block_world_position(chunk->position, start);
+            BlockWorldPosition end_world   = block_world_position(chunk->position, end);
 
             f32v3 centre_of_cuboid = (f32v3{end_world} - f32v3{start_world}) / 2.0f;
             f32v3 centre_of_cuboid_in_world = centre_of_cuboid + f32v3{start_world};
@@ -303,16 +309,16 @@ process_new_source:
 
     delete[] visited;
 
-    m_chunk->state.store(ChunkState::MESHED, std::memory_order_release);
+    chunk->state.store(ChunkState::MESHED, std::memory_order_release);
 
-    m_chunk->mesh_task_active.store(false, std::memory_order_release);
+    chunk->mesh_task_active.store(false, std::memory_order_release);
 
-    m_chunk->on_mesh_change();
+    chunk->on_mesh_change();
 
     // TODO(Matthew): Set next task if chunk unload is false? Or else set that
     //                between this task and next, but would need adjusting
     //                workflow.
-    m_chunk->pending_task.store(ChunkLoadTaskKind::NONE, std::memory_order_release);
+    chunk->pending_task.store(ChunkLoadTaskKind::NONE, std::memory_order_release);
 
-    return !m_chunk->unload.load(std::memory_order_acquire);
+    return !chunk->unload.load(std::memory_order_acquire);
 }

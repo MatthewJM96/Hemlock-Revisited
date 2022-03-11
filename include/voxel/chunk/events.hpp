@@ -9,14 +9,14 @@ namespace hemlock {
         struct Chunk;
 
         struct BlockChangeEvent {
-            Chunk*              chunk;
+            hmem::Handle<Chunk> chunk;
             Block               old_block;
             Block               new_block;
             BlockChunkPosition  block_position;
         };
 
         struct BulkBlockChangeEvent {
-            Chunk*              chunk;
+            hmem::Handle<Chunk> chunk;
             Block*              new_blocks;
             bool                single_block;
             BlockChunkPosition  start_position;

@@ -37,10 +37,10 @@ namespace hemlock {
         using ChunkLoadTaskQueue   = thread::TaskQueue<ChunkLoadTaskContext>;
         class ChunkLoadTask : public thread::IThreadWorkflowTask<ChunkLoadTaskContext> {
         public:
-            void init(Chunk* chunk, ChunkGrid* chunk_grid);
+            void init(hmem::WeakHandle<Chunk> chunk, ChunkGrid* chunk_grid);
         protected:
-            Chunk*     m_chunk;
-            ChunkGrid* m_chunk_grid;
+            hmem::WeakHandle<Chunk> m_chunk;
+            ChunkGrid*              m_chunk_grid;
         };
     }
 }

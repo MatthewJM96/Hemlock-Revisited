@@ -6,7 +6,7 @@
 namespace hemlock {
     namespace graphics {
         GLuint load_texture(const std::string& filepath) {
-            void*   data = nullptr;
+            ui8*   data = nullptr;
             ui32v2 dims = ui32v2{0};
             hio::img::PixelFormat format;
             if (!hio::img::png::load(filepath, data, dims, format)) return 0;

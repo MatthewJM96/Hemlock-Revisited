@@ -23,12 +23,14 @@ namespace hemlock {
          */
         struct Chunk {
             Chunk();
+            ~Chunk();
 
-            void init();
-            void init(Block* _blocks);
-            void dispose();
+            void init(hmem::WeakHandle<Chunk> self);
+            void init(hmem::WeakHandle<Chunk> self, Block* block_buffer/*, ChunkInstanceDataPager& instance_data_pager*/);
 
             void update(TimeData);
+
+            ChunkID id() const { return position.id; }
 
             ChunkGridPosition position;
             Neighbours        neighbours;
@@ -45,8 +47,9 @@ namespace hemlock {
             std::atomic<ChunkState>         state;
             std::atomic<ChunkLoadTaskKind>  pending_task;
             std::atomic<bool>               gen_task_active, mesh_task_active;
-            std::atomic<ChunkAliveState>    alive_state;
-            std::atomic<ui32>               ref_count;
+
+            // TODO(Matthew): Remove?
+            std::atomic<bool> unload;
 
             CancellableEvent<BlockChangeEvent>      on_block_change;
             CancellableEvent<BulkBlockChangeEvent>  on_bulk_block_change;
@@ -64,9 +67,12 @@ namespace hemlock {
             Event<RenderState>                      on_render_state_change;
             Event<>                                 on_unload;
         protected:
-            void init_events();
+            void dispose();
 
-            bool m_owns_blocks;
+            void init_events(hmem::WeakHandle<Chunk> self);
+
+            // ChunkInstanceDataPager& m_instance_data_pager;
+            bool                    m_owns_blocks;
         };
 
         /**
@@ -79,9 +85,9 @@ namespace hemlock {
          *
          * @return True if the block was set, false otherwise.
          */
-        bool set_block( Chunk* chunk,
-            BlockChunkPosition block_position,
-                         Block block );
+        bool set_block( hmem::Handle<Chunk> chunk,
+                         BlockChunkPosition block_position,
+                                      Block block );
         /**
          * @brief Set all points in a rectangular cuboid of the
          * passed in chunk to a specific block.
@@ -95,10 +101,10 @@ namespace hemlock {
          *
          * @return True if the blocks were set, false otherwise.
          */
-        bool set_blocks( Chunk* chunk,
-             BlockChunkPosition start_block_position,
-             BlockChunkPosition end_block_position,
-                          Block block );
+        bool set_blocks( hmem::Handle<Chunk> chunk,
+                          BlockChunkPosition start_block_position,
+                          BlockChunkPosition end_block_position,
+                                       Block block );
         /**
          * @brief Set all points in a rectangular cuboid of the
          * passed in chunk to each block in a buffer. Note, the
@@ -111,10 +117,10 @@ namespace hemlock {
          *
          * @return True if the blocks were set, false otherwise.
          */
-        bool set_blocks( Chunk* chunk,
-             BlockChunkPosition start_block_position,
-             BlockChunkPosition end_block_position,
-                         Block* blocks );
+        bool set_blocks( hmem::Handle<Chunk> chunk,
+                          BlockChunkPosition start_block_position,
+                          BlockChunkPosition end_block_position,
+                                      Block* blocks );
 
         template <typename DataType>
         void set_per_block_data( DataType* buffer,
@@ -130,6 +136,16 @@ namespace hemlock {
     }
 }
 namespace hvox = hemlock::voxel;
+
+namespace std {
+    template <>
+    struct hash<hvox::Chunk> {
+        std::size_t operator()(const hvox::Chunk& chunk) const {
+            std::hash<hvox::ColumnID> hash;
+            return hash(chunk.id());
+        }
+    };
+}
 
 #include "voxel/chunk.inl"
 

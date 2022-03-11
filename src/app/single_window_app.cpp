@@ -29,6 +29,8 @@ void happ::SingleWindowApp::dispose() {
     delete m_input_manager;
     m_input_manager = nullptr;
 
+    delete m_fps_limiter;
+
     ProcessBase::dispose();
 
 #if defined(HEMLOCK_USING_SDL_TTF)
@@ -68,6 +70,9 @@ void happ::SingleWindowApp::run() {
 
         m_fps_limiter->end();
     }
+
+    // TODO(Matthew): need to make sure thread pools are properly cleaned up.
+    // dispose();
 }
 
 void happ::SingleWindowApp::prepare_window() {

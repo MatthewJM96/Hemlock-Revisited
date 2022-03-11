@@ -17,7 +17,7 @@
 #include <vector>
 
 // Views
-// #include <ranges>
+#include <ranges>
 #include <iterator>
 
 // Strings
@@ -87,7 +87,10 @@
 #include "types.hpp"
 
 // Our Containers
-#include "pager.hpp"
+#include "memory/handle.hpp"
+#include "memory/pager.hpp"
+#include "memory/heterogenous_pager.hpp"
+#include "memory/paged_allocator.hpp"
 
 // Our Thread Handling
 #include "thread/thread_pool.hpp"
@@ -98,8 +101,8 @@
 #include "io/filesystem.hpp"
 #include "io/path.hpp"
 
-// Our Cache
-#include "cache.hpp"
+// Our IO management
+#include "io/cache.hpp"
 
 // Our Events
 #include "event.hpp"

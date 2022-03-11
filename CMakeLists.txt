@@ -30,10 +30,36 @@ option(HEMLOCK_USING_SDL_TTF "Whether Hemlock uses the SDL TTF library." ON)
 option(HEMLOCK_USING_OPENGL "Whether Hemlock uses OpenGL." ON)
 option(HEMLOCK_USING_VULKAN "Whether Hemlock uses Vulkan." OFF)
 
+option(HEMLOCK_ENABLE_ADDRESS_SANITIZER "Whether to compile with address sanitizer." OFF)
+option(HEMLOCK_ENABLE_THREAD_SANITIZER "Whether to compile with thread sanitizer." OFF)
+option(HEMLOCK_ENABLE_MEMORY_SANITIZER "Whether to compile with memory sanitizer." OFF)
+option(HEMLOCK_ENABLE_GPERF_PROFILER "Whether to compile with GPerf profiler." OFF)
+
 if (UNIX OR MINGW)
-    set(CMAKE_CXX_FLAGS "-pthread -Wall -Wextra -Wold-style-cast -Wshadow -Wformat=2 -Werror")
-    set(CMAKE_CXX_FLAGS_RELEASE "-O3")
-    set(CMAKE_CXX_FLAGS_DEBUG "-g")
+    set(CMAKE_CXX_FLAGS "-pthread")
+    if (HEMLOCK_ENABLE_ADDRESS_SANITIZER)
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address -fno-omit-frame-pointer")
+        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fsanitize=address -fno-omit-frame-pointer")
+        set(CMAKE_CXX_FLAGS_RELEASE "-g -O2")
+        set(CMAKE_CXX_FLAGS_DEBUG "-g -O1")
+    elseif(HEMLOCK_ENABLE_THREAD_SANITIZER)
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=thread -fno-omit-frame-pointer")
+        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fsanitize=thread -fno-omit-frame-pointer")
+        set(CMAKE_CXX_FLAGS_RELEASE "-g -O2")
+        set(CMAKE_CXX_FLAGS_DEBUG "-g -O1")
+    elseif(HEMLOCK_ENABLE_MEMORY_SANITIZER)
+            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=memory -fsanitize-memory-track-origins -fPIE -fno-omit-frame-pointer")
+            set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fsanitize=memory -fsanitize-memory-track-origins -pie -fno-omit-frame-pointer")
+            set(CMAKE_CXX_FLAGS_RELEASE "-g -O2")
+            set(CMAKE_CXX_FLAGS_DEBUG "-g -O1")
+    elseif(HEMLOCK_ENABLE_GPERF_PROFILER)
+        set(CMAKE_CXX_FLAGS_RELEASE "-g -O3")
+        set(CMAKE_CXX_FLAGS_DEBUG "-g -O1")
+    else()
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wold-style-cast -Wshadow -Wformat=2 -Werror")
+        set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+        set(CMAKE_CXX_FLAGS_DEBUG "-g")
+    endif()
 
     if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wduplicated-cond -Wuseless-cast")
@@ -64,6 +90,7 @@ set(Hemlock_Requirements
     libpng/1.6.37
     concurrentqueue/1.0.3
     boost/1.78.0
+    # bullet3/3.24
 )
 
 if (HEMLOCK_USING_OPENGL)
@@ -95,6 +122,7 @@ find_package(SDL2_ttf REQUIRED)
 find_package(PNG REQUIRED)
 find_package(concurrentqueue REQUIRED)
 find_package(Boost COMPONENTS iostreams REQUIRED)
+# find_package(Bullet REQUIRED)
 
 if (HEMLOCK_USING_SDL)
     add_compile_definitions(HEMLOCK_USING_SDL=1)
@@ -142,9 +170,7 @@ add_executable(Hemlock_Revisited
     "${PROJECT_SOURCE_DIR}/src/ui/input/dispatcher.cpp"
     "${PROJECT_SOURCE_DIR}/src/ui/input/manager.cpp"
     "${PROJECT_SOURCE_DIR}/src/voxel/chunk.cpp"
-    "${PROJECT_SOURCE_DIR}/src/voxel/chunk/allocator.cpp"
     "${PROJECT_SOURCE_DIR}/src/voxel/chunk/grid.cpp"
-    "${PROJECT_SOURCE_DIR}/src/voxel/chunk/handle.cpp"
     "${PROJECT_SOURCE_DIR}/src/voxel/chunk/renderer.cpp"
     "${PROJECT_SOURCE_DIR}/src/voxel/coordinate_system.cpp"
     "${PROJECT_SOURCE_DIR}/src/voxel/io/chunk_file_task.cpp"
@@ -166,6 +192,7 @@ set(Hemlock_Include_Dirs
     ${PNG_INCLUDE_DIRS}
     ${concurrentqueue_INCLUDE_DIRS}
     ${Boost_INCLUDE_DIRS}
+    # ${Bullet_INCLUDE_DIRS}
 )
 
 if (HEMLOCK_USING_OPENGL)
@@ -179,14 +206,71 @@ target_include_directories(Hemlock_Revisited
     SYSTEM
     PUBLIC
     ${Hemlock_Include_Dirs}
-    "${PROJECT_SOURCE_DIR}/deps/include"
     "${PROJECT_SOURCE_DIR}/include"
 )
 
-target_link_directories(Hemlock_Revisited
+if (UNIX OR MINGW)
+    if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+        if(CMAKE_BUILD_TYPE STREQUAL "Release")
+            target_include_directories(Hemlock_Revisited
+                SYSTEM
+                PUBLIC
+                "${PROJECT_SOURCE_DIR}/deps/GCC-x64-Release/include"
+            )
+
+            target_link_directories(Hemlock_Revisited
+                PUBLIC
+                "${PROJECT_SOURCE_DIR}/deps/GCC-x64-Release/lib"
+            )
+        else()
+            target_include_directories(Hemlock_Revisited
+                SYSTEM
+                PUBLIC
+                "${PROJECT_SOURCE_DIR}/deps/GCC-x64-Debug/include"
+            )
+
+            target_link_directories(Hemlock_Revisited
+                PUBLIC
+                "${PROJECT_SOURCE_DIR}/deps/GCC-x64-Debug/lib"
+            )
+        endif()
+    elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+        if(CMAKE_BUILD_TYPE STREQUAL "Release")
+            target_include_directories(Hemlock_Revisited
+                SYSTEM
+                PUBLIC
+                "${PROJECT_SOURCE_DIR}/deps/Clang-x64-Release/include"
+            )
+
+            target_link_directories(Hemlock_Revisited
+                PUBLIC
+                "${PROJECT_SOURCE_DIR}/deps/Clang-x64-Release/lib"
+            )
+        else()
+            target_include_directories(Hemlock_Revisited
+                SYSTEM
+                PUBLIC
+                "${PROJECT_SOURCE_DIR}/deps/Clang-x64-Debug/include"
+            )
+
+            target_link_directories(Hemlock_Revisited
+                PUBLIC
+                "${PROJECT_SOURCE_DIR}/deps/Clang-x64-Debug/lib"
+            )
+        endif()
+    endif()
+else()
+    target_include_directories(Hemlock_Revisited
+    SYSTEM
+    PUBLIC
+    "${PROJECT_SOURCE_DIR}/deps/include"
+    )
+
+    target_link_directories(Hemlock_Revisited
     PUBLIC
     "${PROJECT_SOURCE_DIR}/deps/lib"
-)
+    )
+endif()
 
 
 if (HEMLOCK_USING_OPENGL)
@@ -200,12 +284,19 @@ elseif (HEMLOCK_USING_VULKAN)
     target_link_libraries(Hemlock_Revisited vulkan)
 endif()
 
+if(HEMLOCK_ENABLE_GPERF_PROFILER)
+    target_link_libraries(Hemlock_Revisited
+        profiler
+    )
+endif()
+
 target_link_libraries(Hemlock_Revisited
     PNG::PNG
     SDL2::SDL2main
     SDL2::SDL2
     SDL2_ttf::SDL2_ttf
     Boost::iostreams
+    # Bullet::Bullet
 )
 
 if(CMAKE_BUILD_TYPE STREQUAL "Release")

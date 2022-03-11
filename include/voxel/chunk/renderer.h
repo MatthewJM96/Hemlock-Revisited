@@ -15,15 +15,22 @@ namespace hemlock {
             f32v3 translation, scaling;
         };
 
-        using PagedChunks = std::vector<const Chunk*>;
+        using AllPagedChunks = std::unordered_map<ChunkID, hmem::WeakHandle<Chunk>>;
+
+        using PagedChunks = std::vector<ChunkID>;
 
         struct PagedChunkMetadata {
             ui32 page_idx;
             ui32 chunk_idx;
+            ui32 last_voxel_count;
             bool paged;
         };
-        using PagedChunksMetadata   = std::unordered_map<const Chunk*, PagedChunkMetadata>;
-        using PagedChunkQueue       = moodycamel::ConcurrentQueue<const Chunk*>;
+        using PagedChunksMetadata   = std::unordered_map<ChunkID, PagedChunkMetadata>;
+        struct HandleAndID {
+            hmem::WeakHandle<Chunk> handle;
+            ChunkID                 id;
+        };
+        using PagedChunkQueue       = moodycamel::ConcurrentQueue<HandleAndID>;
 
         struct ChunkRenderPage {
             PagedChunks chunks;
@@ -70,9 +77,9 @@ namespace hemlock {
              * chunk's events to manage rendering of
              * the chunk.
              *
-             * @param chunk 
+             * @param handle Weak handle on chunk to add.
              */
-            void add_chunk(Chunk* chunk);
+            void add_chunk(hmem::WeakHandle<Chunk> handle);
         protected:
             static hg::MeshHandles block_mesh_handles;
 
@@ -97,7 +104,7 @@ namespace hemlock {
              * @param first_page_idx The index of the first page
              * to consider.
              */
-            void put_chunk_in_page(const Chunk* chunk, ui32 first_page_idx);
+            void put_chunk_in_page(hmem::Handle<Chunk> chunk, ui32 first_page_idx);
 
             /**
              * @brief Updates chunks, removing those that
@@ -106,6 +113,7 @@ namespace hemlock {
              */
             void process_pages();
 
+            AllPagedChunks      m_all_paged_chunks;
             ChunkRenderPages    m_chunk_pages;
             PagedChunksMetadata m_chunk_metadata;
             PagedChunkQueue     m_chunk_removal_queue;

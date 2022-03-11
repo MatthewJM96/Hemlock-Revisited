@@ -32,10 +32,24 @@ namespace hemlock {
         };
 
         union Neighbours {
+            Neighbours() :
+                all({})
+            { /* Empty. */ }
+            Neighbours(const Neighbours& rhs) {
+                for (size_t i = 0; i < 8; ++i) all[i] = rhs.all[i];
+            }
+            ~Neighbours() { /* Empty. */ }
+
+
+            Neighbours& operator=(const Neighbours& rhs) {
+                for (size_t i = 0; i < 8; ++i) all[i] = rhs.all[i];
+                return *this;
+            }
+
             struct {
-                Chunk *left, *right, *top, *bottom, *front, *back;
-            };
-            Chunk* neighbours[8];
+                hmem::WeakHandle<Chunk> left, right, top, bottom, front, back;
+            } one;
+            hmem::WeakHandle<Chunk> all[8];
         };
     }
 }

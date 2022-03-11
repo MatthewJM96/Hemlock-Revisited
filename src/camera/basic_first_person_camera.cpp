@@ -5,11 +5,11 @@
 #include "camera/basic_first_person_camera.h"
 
 hcam::BasicFirstPersonCamera::BasicFirstPersonCamera() :
-    BaseCamera<PerspectiveCameraState>(Subscriber<happ::ResizeEvent>([&](Sender, happ::ResizeEvent ev) {
+    BaseCamera<PerspectiveCameraState>(Subscriber<happ::ResizeEvent>{[&](Sender, happ::ResizeEvent ev) {
         f32 new_aspect_ratio = static_cast<f32>(ev.now.width) / static_cast<f32>(ev.now.height);
         if (m_state.aspect_ratio != new_aspect_ratio)
             set_aspect_ratio(new_aspect_ratio);
-    })),
+    }}),
     m_clamp_up({true, 60.0f / 360.0f * 2.0f * static_cast<f32>(M_PI)})
 { /* Empty. */ }
 
@@ -108,7 +108,7 @@ void hcam::BasicFirstPersonCamera::roll_from_mouse(f32 dx, f32 speed) {
 void hcam::BasicFirstPersonCamera::assure_clamp_up() {
     f32 up_angle = glm::acos(glm::dot(m_state.up, ABSOLUTE_UP));
 
-    f32 correction_angle;
+    f32 correction_angle = 0.0;
     if (up_angle < -1.0f * m_clamp_up.angle) {
         correction_angle = -1.0f * m_clamp_up.angle - up_angle;
     } else if (up_angle > m_clamp_up.angle) {

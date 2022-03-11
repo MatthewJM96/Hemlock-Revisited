@@ -5,7 +5,7 @@
 #include "camera/basic_orthographic_camera.h"
 
 hcam::BasicOrthographicCamera::BasicOrthographicCamera() :
-    BaseCamera<OrthographicCameraState>(Subscriber<happ::ResizeEvent>([&](Sender, happ::ResizeEvent ev) {
+    BaseCamera<OrthographicCameraState>(Subscriber<happ::ResizeEvent>{[&](Sender, happ::ResizeEvent ev) {
         f32 dx = static_cast<f32>(ev.now.width)  / static_cast<f32>(ev.before.width);
         f32 dy = static_cast<f32>(ev.now.height) / static_cast<f32>(ev.before.height);
 
@@ -26,7 +26,7 @@ hcam::BasicOrthographicCamera::BasicOrthographicCamera() :
 
             set_du_clipping(du_com - new_du_range_2, du_com + new_du_range_2);
         }
-    }))
+    }})
 { /* Empty. */ }
 
 

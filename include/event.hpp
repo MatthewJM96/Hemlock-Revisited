@@ -2,10 +2,105 @@
 #define __hemlock_event_h
 
 namespace hemlock {
+    using SmartSender = hmem::WeakHandle<const void*>;
     // Sender is the object responsible for handling the event, and is stored
     // simply as a void pointer; making things easier for us and harder for
     // users to do stupid things.
-    using Sender = const void*;
+    class Sender {
+    public:
+        Sender() {
+            m_is_smart = false;
+            m_ptr.smart = SmartSender();
+        }
+        ~Sender() {
+            if (m_is_smart) m_ptr.smart.SmartSender::~weak_ptr();
+        }
+        Sender(std::nullptr_t) {
+            m_is_smart = false;
+            m_ptr.simple = nullptr;
+        }
+        Sender(const Sender& rhs) {
+            m_is_smart = rhs.m_is_smart;
+            if (m_is_smart) {
+                m_ptr.smart = rhs.m_ptr.smart;
+            } else {
+                m_ptr.simple = rhs.m_ptr.simple;
+            }
+        }
+        Sender(Sender&& rhs) {
+            m_is_smart = rhs.m_is_smart;
+            if (m_is_smart) {
+                m_ptr.smart = std::forward<SmartSender>(rhs.m_ptr.smart);
+            } else {
+                m_ptr.simple = rhs.m_ptr.simple;
+            }
+        }
+        template <typename Type>
+            requires std::is_pointer_v<Type>
+        Sender(Type value) {
+            m_is_smart = false;
+            m_ptr.simple = reinterpret_cast<const void*>(value);
+        }
+        template <typename Type>
+            requires is_weak_ptr_v<Type>
+        Sender(Type value) {
+            m_is_smart = true;
+            m_ptr.smart = *reinterpret_cast<SmartSender*>(&value);
+        }
+        template <typename Type>
+            requires is_shared_ptr_v<Type>
+        Sender(Type value) {
+            m_is_smart = true;
+            m_ptr.smart = SmartSender(reinterpret_pointer_cast<const void*>(value));
+        }
+
+        Sender& operator=(std::nullptr_t) {
+            m_is_smart = false;
+            m_ptr.simple = nullptr;
+            return *this;
+        }
+        Sender& operator=(const Sender& rhs) {
+            m_is_smart = rhs.m_is_smart;
+            if (m_is_smart) {
+                m_ptr.smart = rhs.m_ptr.smart;
+            } else {
+                m_ptr.simple = rhs.m_ptr.simple;
+            }
+            return *this;
+        }
+        Sender& operator=(Sender&& rhs) {
+            m_is_smart = rhs.m_is_smart;
+            if (m_is_smart) {
+                m_ptr.smart = std::forward<SmartSender>(rhs.m_ptr.smart);
+            } else {
+                m_ptr.simple = rhs.m_ptr.simple;
+            }
+            return *this;
+        }
+
+        template <typename Type>
+        Type* get_ptr() {
+            assert(!m_is_smart);
+
+            return reinterpret_cast<Type*>(m_ptr.simple);
+        }
+
+        template <typename Type>
+        hmem::WeakHandle<Type> get_handle() {
+            assert(m_is_smart);
+
+            return *reinterpret_cast<hmem::WeakHandle<Type>*>(&m_ptr.smart); // reinterpret_pointer_cast<Type>(m_ptr.smart.lock());
+        }
+    protected:
+        bool m_is_smart;
+        union SimpleOrSmart {
+            SimpleOrSmart() : smart(SmartSender()) { /* Empty. */ }
+            ~SimpleOrSmart() { /* Empty. */ }
+
+            const void* simple;
+            SmartSender smart;
+        } m_ptr;
+    };
 
     /**
      * @brief Event base class, provides all aspects of the Event class that don't
@@ -20,8 +115,8 @@ namespace hemlock {
         * any subscribers on the event being triggered along with any other
         * specified data.
         */
-        EventBase(Sender sender = nullptr) :
-            m_sender(sender)
+        EventBase(Sender&& sender = nullptr) :
+            m_sender(std::forward<Sender>(sender))
         { /* Empty */ }
 
         /**
@@ -29,8 +124,8 @@ namespace hemlock {
         *
         * @param sender Optional owner of the event. Setting nullptr disowns the event.
         */
-        void set_sender(Sender sender) {
-            m_sender = sender;
+        void set_sender(Sender&& sender) {
+            m_sender = std::forward<Sender>(sender);
         }
     protected:
         Sender m_sender;
@@ -87,8 +182,8 @@ namespace hemlock {
         * any subscribers on the event being triggered along with any other
         * specified data.
         */
-        REvent(Sender sender = nullptr) :
-            EventBase(sender),
+        REvent(Sender&& sender = nullptr) :
+            EventBase(std::forward<Sender>(sender)),
             m_triggering(false)
         { /* Empty */ }
         /**
@@ -108,7 +203,7 @@ namespace hemlock {
         * @param event The event object to move from.
         */
         REvent(REvent&& event) :
-            EventBase(event.m_sender) {
+            EventBase(std::move(event.m_sender)) {
             m_subscribers   = std::move(event.m_subscribers);
             m_removal_queue = std::move(event.m_removal_queue);
             m_triggering    = false;
@@ -137,7 +232,7 @@ namespace hemlock {
         * @return The event that has been copied to.
         */
         REvent& operator=(REvent&& event) {
-            m_sender        = event.m_sender;
+            m_sender        = std::move(event.m_sender);
             m_subscribers   = std::move(event.m_subscribers);
             m_removal_queue = std::move(event.m_removal_queue);
             m_triggering    = false;

@@ -7,6 +7,7 @@
 #include "graphics/glsl_program.h"
 #include "graphics/texture.hpp"
 #include "graphics/sprite/batcher.h"
+#include "memory/handle.hpp"
 #include "ui/input/dispatcher.h"
 #include "ui/input/keys.hpp"
 #include "ui/input/manager.h"
@@ -22,7 +23,7 @@ struct TRS_BlockComparator {
     }
 };
 struct TRS_VoxelGenerator {
-    void operator()(hvox::Chunk* chunk) const {
+    void operator()(hmem::Handle<hvox::Chunk> chunk) const {
         // for (auto y = 0; y < CHUNK_SIZE; y += 2) {
         // for (auto x = 0; x < CHUNK_SIZE; x += 2) {
         for (auto y = 0; y < 10; y += 1) {
@@ -56,14 +57,14 @@ public:
         for (auto x = -NUM; x < NUM; ++x) {
             for (auto z = -NUM; z < NUM; ++z) {
                 for (auto y = -2 * NUM; y < 0; ++ y) {
-                    m_chunk_grid.preload_chunk_at({ x, y, z });
+                    m_chunk_grid.preload_chunk_at({ {x, y, z} });
                 }
             }
         }
         for (auto x = -NUM; x < NUM; ++x) {
             for (auto z = -NUM; z < NUM; ++z) {
                 for (auto y = -2 * NUM; y < 0; ++ y) {
-                    m_chunk_grid.load_chunk_at({ x, y, z });
+                    m_chunk_grid.load_chunk_at({ {x, y, z} });
                 }
             }
         }
@@ -86,7 +87,7 @@ public:
             "Hello, world!",
             f32v4{300.0f, 300.0f, 1000.0f, 1000.0f},
             f32v4{295.0f, 295.0f, 1010.0f, 1010.0f},
-            hg::f::StringSizing{hg::f::StringSizingKind::SCALED, f32v2{1.0f}},
+            hg::f::StringSizing{hg::f::StringSizingKind::SCALED, {f32v2{1.0f}}},
             colour4{0, 0, 0, 255},
             "fonts/Orbitron-Regular.ttf",
             hg::f::TextAlign::TOP_LEFT,
@@ -182,19 +183,20 @@ public:
         m_camera.update();
 
         // std::cout << std::endl << my_shader_parser("shaders/default_sprite.frag", &my_iom) << std::endl << std::endl;
-        m_shader_cache.init(&m_iom, hg::ShaderCache::Parser(
+        m_shader_cache.init(&m_iom, hg::ShaderCache::Parser{
             [](const hio::fs::path& path, hio::IOManagerBase* iom) -> std::string {
                 std::string buffer;
                 if (!iom->read_file_to_string(path, buffer)) return "";
 
                 return buffer;
             }
-        ));
+        });
 
         m_shader.init(&m_shader_cache);
 
         m_shader.set_attribute("v_position",      0);
         m_shader.set_attribute("v_texture_coord", 1);
+        m_shader.set_attribute("v_normal",        2);
 
         m_shader.add_shaders("shaders/test_vox.vert", "shaders/test_vox.frag");
 
@@ -207,9 +209,10 @@ public:
             workflow_builder.init(&m_chunk_load_dag);
             workflow_builder.chain_tasks(2);
         }
-        m_chunk_grid.init(10, &m_chunk_load_dag, hvox::ChunkLoadTaskListBuilder([](hvox::Chunk* chunk, hvox::ChunkGrid* chunk_grid) {
-            // TODO(Matthew): How do we clean up this?
-            hthread::HeldWorkflowTask<hvox::ChunkLoadTaskContext>* tasks = new hthread::HeldWorkflowTask<hvox::ChunkLoadTaskContext>[2];
+        m_chunk_grid.init(10, &m_chunk_load_dag, hvox::ChunkLoadTaskListBuilder{[](hmem::WeakHandle<hvox::Chunk> chunk, hvox::ChunkGrid* chunk_grid) {
+            hthread::ThreadWorkflowTasksView<hvox::ChunkLoadTaskContext> tasks;
+            tasks.tasks = hmem::Handle<hthread::HeldWorkflowTask<hvox::ChunkLoadTaskContext>[]>(new hthread::HeldWorkflowTask<hvox::ChunkLoadTaskContext>[2]);
+            tasks.count = 2;
 
             auto gen_task  = new hvox::ChunkGenerationTask<TRS_VoxelGenerator>();
             auto mesh_task = new hvox::ChunkGreedyMeshTask<TRS_BlockComparator>();
@@ -217,13 +220,13 @@ public:
             gen_task->init(chunk, chunk_grid);
             mesh_task->init(chunk, chunk_grid);
 
-            tasks[0] = { reinterpret_cast<hthread::IThreadWorkflowTask<hvox::ChunkLoadTaskContext>*>(gen_task),  true };
-            tasks[1] = { reinterpret_cast<hthread::IThreadWorkflowTask<hvox::ChunkLoadTaskContext>*>(mesh_task), true };
+            tasks.tasks.get()[0] = { reinterpret_cast<hthread::IThreadWorkflowTask<hvox::ChunkLoadTaskContext>*>(gen_task),  true };
+            tasks.tasks.get()[1] = { reinterpret_cast<hthread::IThreadWorkflowTask<hvox::ChunkLoadTaskContext>*>(mesh_task), true };
 
-            return hthread::ThreadWorkflowTasksView<hvox::ChunkLoadTaskContext>{ tasks, 2 };
-        }));
+            return tasks;
+        }});
 
-        handle_mouse_move = hemlock::Subscriber<hui::MouseMoveEvent>(
+        handle_mouse_move = hemlock::Subscriber<hui::MouseMoveEvent>{
             [&](hemlock::Sender, hui::MouseMoveEvent ev) {
                 if (m_input_manager->is_pressed(static_cast<ui8>(hui::MouseButton::LEFT))) {
                     m_camera.rotate_from_mouse_with_absolute_up(
@@ -233,11 +236,11 @@ public:
                     );
                 }
             }
-        );
+        };
 
         hui::InputDispatcher::instance()->on_mouse.move += &handle_mouse_move;
 
-        m_font_cache.init(&m_iom, hg::f::FontCache::Parser(
+        m_font_cache.init(&m_iom, hg::f::FontCache::Parser{
             [](const hio::fs::path& path, hio::IOManagerBase* iom) -> hg::f::Font {
                 hio::fs::path actual_path;
                 if (!iom->resolve_path(path, actual_path)) return hg::f::Font{};
@@ -247,7 +250,7 @@ public:
 
                 return font;
             }
-        ));
+        });
 
 
         auto font = m_font_cache.fetch("fonts/Orbitron-Regular.ttf");

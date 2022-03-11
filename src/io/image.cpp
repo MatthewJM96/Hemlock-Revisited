@@ -18,7 +18,7 @@ hio::img::bin::InternalPixelFormat hio::img::bin::convert_pixel_format(PixelForm
     }
 }
 
-bool hio::img::bin::load(std::string filepath, void*& data, ui32v2& dimensions, PixelFormat& format) {
+bool hio::img::bin::load(std::string filepath, ui8*& data, ui32v2& dimensions, PixelFormat& format) {
     // Open file, if we can't then fail.
     FILE* file = fopen(filepath.data(), "rb");
     if (file == nullptr) return false;
@@ -79,7 +79,7 @@ bool hio::img::bin::load(std::string filepath, void*& data, ui32v2& dimensions, 
 
     // Determine size of needed pixel buffer and create that buffer.
     ui32 imageSize = imgHeader.width * imgHeader.height * channels * bytesPerChannel;
-    data = reinterpret_cast<void*>(new ui8[imageSize]);
+    data = new ui8[imageSize];
 
     // Read pixel data into a buffer.
     read = fread(data, 1, imageSize, file);
@@ -93,7 +93,7 @@ bool hio::img::bin::load(std::string filepath, void*& data, ui32v2& dimensions, 
     return true;
 }
 
-bool hio::img::bin::save(std::string filepath, const void* data, ui32v2 dimensions, PixelFormat format) {
+bool hio::img::bin::save(std::string filepath, const ui8* data, ui32v2 dimensions, PixelFormat format) {
     // Extract pixel information from format.
     auto [channels, bytesPerChannel] = convert_pixel_format(format);
 
@@ -134,7 +134,7 @@ bool hio::img::bin::save(std::string filepath, const void* data, ui32v2 dimensio
     if (written != sizeof(BinImageHeader)) return false;
 
     // Write the data, if we couldn't, fail.
-    written = fwrite(data, 1, imageSize, file);
+    written = fwrite(reinterpret_cast<const void*>(data), 1, imageSize, file);
     if (written != imageSize) return false;
 
     // Close the file and return.
@@ -180,7 +180,7 @@ hio::img::PixelFormat hio::img::png::convert_internal_pixel_format(InternalPixel
     return PixelFormat::SENTINEL;
 }
 
-bool hio::img::png::load(std::string filepath, void*& data, ui32v2& dimensions, PixelFormat& format) {
+bool hio::img::png::load(std::string filepath, ui8*& data, ui32v2& dimensions, PixelFormat& format) {
     // Open the image file we will save to.
     FILE* file = fopen(filepath.data(), "rb");
     // Check we successfully opened the file.
@@ -250,12 +250,12 @@ bool hio::img::png::load(std::string filepath, void*& data, ui32v2& dimensions, 
                     );
 
     // Allocate the buffer we'll be reading into.
-    data = reinterpret_cast<void*>(new ui8[dimensions.y * row_size]);
+    data = new ui8[dimensions.y * row_size];
 
     png_bytep* rows = new png_bytep[dimensions.y];
     for (ui32 y = 0; y < dimensions.y; ++y) {
         ui32 row_idx = y * row_size;
-        rows[y] = &reinterpret_cast<png_bytep>(data)[row_idx];
+        rows[y] = &data[row_idx];
     }
 
     // Read the PNG.
@@ -273,7 +273,7 @@ bool hio::img::png::load(std::string filepath, void*& data, ui32v2& dimensions, 
     return true;
 }
 
-bool hio::img::png::save(std::string filepath, const void* data, ui32v2 dimensions, PixelFormat format) {
+bool hio::img::png::save(std::string filepath, const ui8* data, ui32v2 dimensions, PixelFormat format) {
     // Open the image file we will save to.
     FILE* file = fopen(filepath.data(), "wb");
     // Check we successfully opened the file.
@@ -348,7 +348,11 @@ bool hio::img::png::save(std::string filepath, const void* data, ui32v2 dimensio
 
     // Begin preparing data for writing.
     png_bytep* rows  = new png_bytep[dimensions.y];
-    png_byte*  image = static_cast<png_byte*>(const_cast<void*>(data));
+    png_byte*  image = static_cast<png_byte*>(
+        const_cast<void*>(
+            reinterpret_cast<const void*>(data)
+        )
+    );
 
     // The position were at in the data.
     size_t pos    = 0;

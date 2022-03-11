@@ -56,7 +56,7 @@ happ::WindowError happ::Window::init(WindowSettings settings /*= {}*/) {
     if (m_window == nullptr) {
         debug_printf("Couldn't create SDL Window.\n");
 
-        debug_printf(SDL_GetError());
+        debug_printf("%s\n", SDL_GetError());
 
         return WindowError::SDL_WINDOW;
     }
@@ -69,7 +69,7 @@ happ::WindowError happ::Window::init(WindowSettings settings /*= {}*/) {
     if (m_context == nullptr) {
         debug_printf("Couldn't create OpenGL context for SDL Window.\n");
 
-        debug_printf(SDL_GetError());
+        debug_printf("%s\n", SDL_GetError());
 
         return WindowError::SDL_GL_CONTEXT;
     }
@@ -78,7 +78,10 @@ happ::WindowError happ::Window::init(WindowSettings settings /*= {}*/) {
     if (error != GLEW_OK) {
         debug_printf("Couldn't initialise Glew.\n");
 
-        debug_printf(reinterpret_cast<const char*>(glewGetErrorString(error)));
+        debug_printf(
+            "%s\n",
+            reinterpret_cast<const char*>(glewGetErrorString(error))
+        );
 
         return WindowError::GLEW_INIT;
     }
@@ -184,7 +187,7 @@ happ::WindowError happ::Window::init(WindowSettings settings /*= {}*/) {
     if (m_instance == nullptr) {
         debug_printf("Couldn't create Vulkan instance for SDL Window.\n");
 
-        debug_printf(SDL_GetError());
+        debug_printf("%s\n", SDL_GetError());
 
         return WindowError::SDL_VULKAN_SURFACE;
     }
@@ -318,7 +321,7 @@ void happ::Window::set_fullscreen_mode(FullscreenMode fullscreen_mode) {
     if (!SDL_SetWindowDisplayMode(m_window, &mode)) {
         debug_printf("Could not set window display mode for %u.\n", m_window_id);
 
-        debug_printf(SDL_GetError());
+        debug_printf("%s\n", SDL_GetError());
     }
 #endif // defined(HEMLOCK_USING_SDL)
 

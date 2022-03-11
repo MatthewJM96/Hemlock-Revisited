@@ -3,10 +3,17 @@
 
 #include <FastNoise/FastNoise.h>
 
+#include "memory/handle.hpp"
 #include "voxel/chunk/generator_task.hpp"
 #include "voxel/chunk/mesh/greedy_task.hpp"
 
 #include "iomanager.hpp"
+
+#if defined(DEBUG)
+#   define VIEW_DIST 4
+#else
+#   define VIEW_DIST 10
+#endif
 
 struct TVS_BlockComparator {
     bool operator()(const hvox::Block* source, const hvox::Block* target, hvox::BlockChunkPosition, hvox::Chunk*) const {
@@ -14,7 +21,7 @@ struct TVS_BlockComparator {
     }
 };
 struct TVS_VoxelGenerator {
-    void operator() (hvox::Chunk* chunk) const {
+    void operator() (hmem::Handle<hvox::Chunk> chunk) const {
         auto simplex_1                  = FastNoise::New<FastNoise::Simplex>();
         auto fractal_1                  = FastNoise::New<FastNoise::FractalFBm>();
         auto domain_scale_1             = FastNoise::New<FastNoise::DomainScale>();
@@ -50,6 +57,8 @@ struct TVS_VoxelGenerator {
 
         f32* data = new f32[CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE];
         domain_warp_fract_prog_1->GenUniformGrid3D(
+        // domain_warp_grad_1->GenUniformGrid3D(
+        // fractal_1.get()->GenUniformGrid3D(
             data,
             static_cast<int>(chunk->position.x) * CHUNK_SIZE,
             -1 * static_cast<int>(chunk->position.y) * CHUNK_SIZE,
@@ -60,6 +69,18 @@ struct TVS_VoxelGenerator {
             0.005f,
             1337
         );
+        // f32* data = new f32[CHUNK_SIZE * CHUNK_SIZE];
+        // domain_warp_fract_prog_1->GenUniformGrid2D(
+        // // domain_warp_grad_1->GenUniformGrid2D(
+        // // fractal_1.get()->GenUniformGrid2D(
+        //     data,
+        //     static_cast<int>(chunk->position.x) * CHUNK_SIZE,
+        //     static_cast<int>(chunk->position.z) * CHUNK_SIZE,
+        //     CHUNK_SIZE,
+        //     CHUNK_SIZE,
+        //     0.2f,
+        //     1337
+        // );
 
         ui64 noise_idx = 0;
         for (ui8 z = 0; z < CHUNK_SIZE; ++z) {
@@ -69,6 +90,20 @@ struct TVS_VoxelGenerator {
                 }
             }
         }
+
+        // hvox::set_blocks(chunk, hvox::BlockChunkPosition{0}, hvox::BlockChunkPosition{CHUNK_SIZE - 1}, hvox::Block{0});
+        // ui64 noise_idx = 0;
+        // for (ui8 z = 0; z < CHUNK_SIZE; ++z) {
+        //     for (ui8 x = 0; x < CHUNK_SIZE; ++x) {
+        //         i32 y = hvox::block_world_position(chunk->position, 0).y;
+
+        //         i32 height = -1 * static_cast<i32>(data[noise_idx++]);
+        //         // debug_printf("Height at (%d, %d): %d\n", x, z, height);
+        //         if (y >= height) continue;
+
+        //         hvox::set_blocks(chunk, {x, 0, z}, {x, glm::min(height - y, CHUNK_SIZE - 1), z}, hvox::Block{1});
+        //     }
+        // }
 
         delete[] data;
     }
@@ -86,26 +121,36 @@ public:
     virtual void start(TimeData time) override {
         happ::ScreenBase::start(time);
 
-#define NUM 4
-        for (auto x = -NUM; x < NUM; ++x) {
-            for (auto z = -NUM; z < NUM; ++z) {
+        for (auto x = -VIEW_DIST; x <= VIEW_DIST; ++x) {
+            for (auto z = -VIEW_DIST; z <= VIEW_DIST; ++z) {
                 for (auto y = -1; y < 2; ++ y) {
-                    m_chunk_grid.preload_chunk_at({ x, y, z });
+                    m_chunk_grid.preload_chunk_at({ {x, y, z} });
                 }
             }
         }
-        for (auto x = -NUM; x < NUM; ++x) {
-            for (auto z = -NUM; z < NUM; ++z) {
+        for (auto x = -VIEW_DIST; x <= VIEW_DIST; ++x) {
+            for (auto z = -VIEW_DIST; z <= VIEW_DIST; ++z) {
                 for (auto y = -1; y < 2; ++ y) {
-                    m_chunk_grid.load_chunk_at({ x, y, z });
+                    m_chunk_grid.load_chunk_at({ {x, y, z} });
                 }
             }
         }
-#undef NUM
     }
 
     virtual void update(TimeData time) override {
-        m_chunk_grid.update(time);
+        static f32v3 last_pos{0.0f};
+
+        static bool do_chunk_check = false;
+
+        if (m_input_manager->is_pressed(hui::PhysicalKey::H_J)) {
+            do_chunk_check = false;
+        }
+
+        if (do_chunk_check) return;
+
+        if (m_input_manager->is_pressed(hui::PhysicalKey::H_K)) {
+            do_chunk_check = true;
+        }
 
         f32 speed_mult = 1.0f;
         if (m_input_manager->key_modifier_state().ctrl) {
@@ -141,18 +186,17 @@ public:
             do_unloads = true;
             start = time.total;
         }
-#define NUM 4
-        for (auto x = -NUM; x < NUM; ++x) {
-            for (auto z = -NUM; z < NUM; ++z) {
-                if (do_unloads &&
-                    (start + ((x + NUM) + (2 * NUM + 1) * (z + NUM)) * 300) < time.total) {
-                    m_chunk_grid.unload_chunk_at({ x, 0, z });
-                    m_chunk_grid.unload_chunk_at({ x, 1, z });
-                    m_chunk_grid.unload_chunk_at({ x, 2, z });
+        if (do_unloads) {
+            for (auto x = -VIEW_DIST; x < VIEW_DIST; ++x) {
+                for (auto z = -VIEW_DIST; z < VIEW_DIST; ++z) {
+                    if (start + ((x + VIEW_DIST) + (2 * VIEW_DIST + 1) * (z + VIEW_DIST)) * 300 < time.total) {
+                        m_chunk_grid.unload_chunk_at({ {x, 0, z} });
+                        m_chunk_grid.unload_chunk_at({ {x, 1, z} });
+                        m_chunk_grid.unload_chunk_at({ {x, 2, z} });
+                    }
                 }
             }
         }
-#undef NUM
 
 #if defined(DEBUG)
         static f64 last_time = 0.0;
@@ -168,6 +212,90 @@ public:
 
         m_camera.offset_position(delta_pos);
         m_camera.update();
+
+        f32v3 current_pos = glm::floor(m_camera.position() / static_cast<f32>(CHUNK_SIZE));
+
+        i32 x_step = static_cast<i32>(current_pos.x) - static_cast<i32>(last_pos.x);
+        if (x_step != 0) {
+            for (auto z = static_cast<i32>(current_pos.z) - VIEW_DIST; z <= static_cast<i32>(current_pos.z) + VIEW_DIST; ++z) {
+                for (auto y = -1; y < 2; ++ y) {
+                    m_unloading_chunks.emplace_back(hmem::WeakHandle<hvox::Chunk>{});
+                    auto& handle = m_unloading_chunks.back();
+                    m_chunk_grid.unload_chunk_at({ {
+                        x_step < 0 ? static_cast<i32>(current_pos.x) + VIEW_DIST + 1 : static_cast<i32>(current_pos.x) - VIEW_DIST - 1,
+                        y, z
+                    } }, &handle);
+                }
+            }
+            for (auto z = static_cast<i32>(current_pos.z) - VIEW_DIST; z <= static_cast<i32>(current_pos.z) + VIEW_DIST; ++z) {
+                for (auto y = -1; y < 2; ++ y) {
+                    m_chunk_grid.preload_chunk_at({ {
+                        x_step < 0 ? static_cast<i32>(current_pos.x) - VIEW_DIST : static_cast<i32>(current_pos.x) + VIEW_DIST,
+                        y, z
+                    } });
+                }
+            }
+            for (auto z = static_cast<i32>(current_pos.z) - VIEW_DIST; z <= static_cast<i32>(current_pos.z) + VIEW_DIST; ++z) {
+                for (auto y = -1; y < 2; ++ y) {
+                    m_chunk_grid.load_chunk_at({ {
+                        x_step < 0 ? static_cast<i32>(current_pos.x) - VIEW_DIST : static_cast<i32>(current_pos.x) + VIEW_DIST,
+                        y, z
+                    } });
+                }
+            }
+        }
+
+        i32 z_step = static_cast<i32>(current_pos.z) - static_cast<i32>(last_pos.z);
+        if (z_step != 0) {
+            for (auto x = static_cast<i32>(current_pos.x) - VIEW_DIST; x <= static_cast<i32>(current_pos.x) + VIEW_DIST; ++x) {
+                for (auto y = -1; y < 2; ++ y) {
+                    m_unloading_chunks.emplace_back(hmem::WeakHandle<hvox::Chunk>{});
+                    auto& handle = m_unloading_chunks.back();
+                    m_chunk_grid.unload_chunk_at({ {
+                        x, y,
+                        z_step < 0 ? static_cast<i32>(current_pos.z) + VIEW_DIST + 1 : static_cast<i32>(current_pos.z) - VIEW_DIST - 1
+                    } }, &handle);
+                }
+            }
+            for (auto x = static_cast<i32>(current_pos.x) - VIEW_DIST; x <= static_cast<i32>(current_pos.x) + VIEW_DIST; ++x) {
+                for (auto y = -1; y < 2; ++ y) {
+                    m_chunk_grid.preload_chunk_at({ {
+                        x, y,
+                        z_step < 0 ? static_cast<i32>(current_pos.z) - VIEW_DIST : static_cast<i32>(current_pos.z) + VIEW_DIST
+                    } });
+                }
+            }
+            for (auto x = static_cast<i32>(current_pos.x) - VIEW_DIST; x <= static_cast<i32>(current_pos.x) + VIEW_DIST; ++x) {
+                for (auto y = -1; y < 2; ++ y) {
+                    m_chunk_grid.load_chunk_at({ {
+                        x, y,
+                        z_step < 0 ? static_cast<i32>(current_pos.z) - VIEW_DIST : static_cast<i32>(current_pos.z) + VIEW_DIST
+                    } });
+                }
+            }
+        }
+
+        last_pos = current_pos;
+
+        m_chunk_grid.update(time);
+
+        if (do_chunk_check) {
+            debug_printf("Camera at: (%d, %d, %d)\n", static_cast<i32>(current_pos.x), static_cast<i32>(current_pos.y), static_cast<i32>(current_pos.z));
+
+            debug_printf("Chunks still not unloaded:\n");
+            for (auto& handle : m_unloading_chunks) {
+                if (handle.expired()) continue;
+
+                auto chunk = handle.lock();
+
+                if (
+                    (chunk->position.x < static_cast<i32>(current_pos.x) - VIEW_DIST) || (chunk->position.x > static_cast<i32>(current_pos.x) - VIEW_DIST) ||
+                    (chunk->position.z < static_cast<i32>(current_pos.z) - VIEW_DIST) || (chunk->position.z > static_cast<i32>(current_pos.z) - VIEW_DIST)
+                ) {
+                    debug_printf("    (%d, %d, %d)\n", chunk->position.x, chunk->position.y, chunk->position.z);
+                }
+            }
+        }
     }
     virtual void draw(TimeData time) override {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -183,6 +311,17 @@ public:
 
         // Deactivate our shader.
         m_shader.unuse();
+
+        m_line_shader.use();
+
+        f32v3 line_colour = {1.0f, 0.0f, 0.0f};
+
+        glUniformMatrix4fv(m_line_shader.uniform_location("view_proj"),  1, GL_FALSE, &m_camera.view_projection_matrix()[0][0]);
+        glUniform3fv(m_line_shader.uniform_location("colour"), 1, &line_colour[0]);
+
+        m_chunk_grid.draw_grid();
+
+        m_line_shader.unuse();
     }
 
     virtual void init(const std::string& name, happ::ProcessBase* process) override {
@@ -194,28 +333,37 @@ public:
         m_input_manager->init();
 
         m_camera.attach_to_window(m_process->window());
-        m_camera.set_position(f32v3{189.0f, 109.0f, -189.0f});
+        m_camera.set_position(f32v3{0.0f, 60.0f, 0.0f});
         m_camera.rotate_from_mouse_with_absolute_up(-130.0f, 160.0f, 0.005f);
         m_camera.set_fov(90.0f);
         m_camera.update();
 
-        m_shader_cache.init(&m_iom, hg::ShaderCache::Parser(
+        m_shader_cache.init(&m_iom, hg::ShaderCache::Parser{
             [](const hio::fs::path& path, hio::IOManagerBase* iom) -> std::string {
                 std::string buffer;
                 if (!iom->read_file_to_string(path, buffer)) return "";
 
                 return buffer;
             }
-        ));
+        });
 
         m_shader.init(&m_shader_cache);
 
         m_shader.set_attribute("v_position",      0);
         m_shader.set_attribute("v_texture_coord", 1);
+        m_shader.set_attribute("v_normal",        2);
 
         m_shader.add_shaders("shaders/test_vox.vert", "shaders/test_vox.frag");
 
         m_shader.link();
+
+        m_line_shader.init(&m_shader_cache);
+
+        m_line_shader.set_attribute("v_position",      0);
+
+        m_line_shader.add_shaders("shaders/line.vert", "shaders/line.frag");
+
+        m_line_shader.link();
 
         m_default_texture = hg::load_texture("test_tex.png");
 
@@ -224,25 +372,25 @@ public:
             workflow_builder.init(&m_chunk_load_dag);
             workflow_builder.chain_tasks(2);
         }
-        m_chunk_grid.init(10, &m_chunk_load_dag, hvox::ChunkLoadTaskListBuilder([](hvox::Chunk* chunk, hvox::ChunkGrid* chunk_grid) {
-            // TODO(Matthew): How do we clean up this?
-            hthread::HeldWorkflowTask<hvox::ChunkLoadTaskContext>* tasks = new hthread::HeldWorkflowTask<hvox::ChunkLoadTaskContext>[2];
+        m_chunk_grid.init(10, &m_chunk_load_dag, hvox::ChunkLoadTaskListBuilder{[](hmem::WeakHandle<hvox::Chunk> chunk, hvox::ChunkGrid* chunk_grid) {
+            hthread::ThreadWorkflowTasksView<hvox::ChunkLoadTaskContext> tasks;
+            tasks.tasks = hmem::Handle<hthread::HeldWorkflowTask<hvox::ChunkLoadTaskContext>[]>(new hthread::HeldWorkflowTask<hvox::ChunkLoadTaskContext>[2]);
+            tasks.count = 2;
 
             auto gen_task  = new hvox::ChunkGenerationTask<TVS_VoxelGenerator>();
-            // Greedy meshing is broken.
             auto mesh_task = new hvox::ChunkGreedyMeshTask<TRS_BlockComparator>();
             // auto mesh_task = new hvox::ChunkNaiveMeshTask<TRS_BlockComparator>();
 
             gen_task->init(chunk, chunk_grid);
             mesh_task->init(chunk, chunk_grid);
 
-            tasks[0] = { reinterpret_cast<hthread::IThreadWorkflowTask<hvox::ChunkLoadTaskContext>*>(gen_task),  true };
-            tasks[1] = { reinterpret_cast<hthread::IThreadWorkflowTask<hvox::ChunkLoadTaskContext>*>(mesh_task), true };
+            tasks.tasks[0] = { reinterpret_cast<hthread::IThreadWorkflowTask<hvox::ChunkLoadTaskContext>*>(gen_task),  true };
+            tasks.tasks[1] = { reinterpret_cast<hthread::IThreadWorkflowTask<hvox::ChunkLoadTaskContext>*>(mesh_task), true };
 
-            return hthread::ThreadWorkflowTasksView<hvox::ChunkLoadTaskContext>{ tasks, 2 };
-        }));
+            return tasks;
+        }});
 
-        handle_mouse_move = hemlock::Subscriber<hui::MouseMoveEvent>(
+        handle_mouse_move = hemlock::Subscriber<hui::MouseMoveEvent>{
             [&](hemlock::Sender, hui::MouseMoveEvent ev) {
                 if (m_input_manager->is_pressed(static_cast<ui8>(hui::MouseButton::LEFT))) {
                     m_camera.rotate_from_mouse_with_absolute_up(
@@ -252,7 +400,7 @@ public:
                     );
                 }
             }
-        );
+        };
 
         hui::InputDispatcher::instance()->on_mouse.move += &handle_mouse_move;
     }
@@ -266,8 +414,10 @@ protected:
     hcam::BasicFirstPersonCamera m_camera;
     hui::InputManager*           m_input_manager;
     hvox::ChunkGrid              m_chunk_grid;
-    hg::GLSLProgram              m_shader;
+    hg::GLSLProgram              m_shader, m_line_shader;
     hthread::ThreadWorkflowDAG   m_chunk_load_dag;
+
+    std::vector<hmem::WeakHandle<hvox::Chunk>> m_unloading_chunks;
 };
 
 #endif // __hemlock_tests_test_voxel_screen_hpp

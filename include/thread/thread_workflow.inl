@@ -25,10 +25,10 @@ void hthread::IThreadWorkflowTask<ThreadState>::execute(typename Thread<ThreadSt
             auto next_task_idx = (*start).second;
 
             // fetch_add returns value before add!
-            ui32 into_completed = m_task_completion_states[next_task_idx].fetch_add(1) + 1;
+            ui32 into_completed = m_task_completion_states.completion_states.get()[next_task_idx].fetch_add(1) + 1;
             if (into_completed == m_dag->into_counts[next_task_idx]) {
-                m_tasks[next_task_idx].task->set_workflow_metadata(m_tasks, next_task_idx, m_dag, m_task_completion_states);
-                task_queue->enqueue(state->producer_token, {m_tasks[next_task_idx].task, m_tasks[next_task_idx].should_delete});
+                m_tasks.tasks.get()[next_task_idx].task->set_workflow_metadata(m_tasks, next_task_idx, m_dag, m_task_completion_states);
+                task_queue->enqueue(state->producer_token, {m_tasks.tasks.get()[next_task_idx].task, m_tasks.tasks.get()[next_task_idx].should_delete});
             }
         }
     }
@@ -51,16 +51,19 @@ void hthread::ThreadWorkflow<ThreadState>::dispose() {
 
 template <hthread::InterruptibleState ThreadState>
 void hthread::ThreadWorkflow<ThreadState>::run(ThreadWorkflowTasksView<ThreadState> tasks) {
-    ThreadWorkflowTaskCompletion* task_completion_states = new ThreadWorkflowTaskCompletion[m_dag->task_count]{};
+        ThreadWorkflowTaskCompletionView task_completion_states;
+        task_completion_states.completion_states = hmem::Handle<ThreadWorkflowTaskCompletion[]>(new ThreadWorkflowTaskCompletion[m_dag->task_count]);
+        task_completion_states.count             = m_dag->task_count;
 
+    // TODO(Matthew): tasks is being copied into metadata of each task in the workflow. Can be done better.
     for (auto entry_task : m_dag->entry_tasks) {
-        tasks[entry_task].task
+        tasks.tasks.get()[entry_task].task
             ->set_workflow_metadata(
                 tasks,
                 entry_task,
                 m_dag,
-                { task_completion_states, m_dag->task_count }
+                task_completion_states
         );
-        m_thread_pool->add_task({tasks[entry_task].task, tasks[entry_task].should_delete});
+        m_thread_pool->add_task({tasks.tasks.get()[entry_task].task, tasks.tasks.get()[entry_task].should_delete});
     }
 }
