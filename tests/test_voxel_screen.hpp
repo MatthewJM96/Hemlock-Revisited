@@ -4,7 +4,7 @@
 #include <FastNoise/FastNoise.h>
 
 #include "voxel/chunk/generator_task.hpp"
-#include "voxel/chunk/mesh/naive_task.hpp"
+#include "voxel/chunk/mesh/greedy_task.hpp"
 
 #include "iomanager.hpp"
 
@@ -211,8 +211,8 @@ public:
 
             auto gen_task  = new hvox::ChunkGenerationTask<TVS_VoxelGenerator>();
             // Greedy meshing is broken.
-            // auto mesh_task = new hvox::ChunkGreedyMeshTask<TRS_BlockComparator>();
-            auto mesh_task = new hvox::ChunkNaiveMeshTask<TRS_BlockComparator>();
+            auto mesh_task = new hvox::ChunkGreedyMeshTask<TRS_BlockComparator>();
+            // auto mesh_task = new hvox::ChunkNaiveMeshTask<TRS_BlockComparator>();
 
             gen_task->init(chunk, chunk_grid);
             mesh_task->init(chunk, chunk_grid);
