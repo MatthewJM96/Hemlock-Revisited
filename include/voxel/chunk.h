@@ -49,9 +49,7 @@ namespace hemlock {
         };
         const Neighbours NULL_NEIGHBOURS = Neighbours{ nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
 
-        struct ChunkInstanceData {
-            f32v3 translation, scaling;
-        };
+        struct ChunkInstanceData;
 
         /**
          * @brief 

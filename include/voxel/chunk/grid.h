@@ -5,6 +5,7 @@
 #include "voxel/coordinate_system.h"
 #include "voxel/chunk.h"
 #include "voxel/chunk/load_task.hpp"
+#include "voxel/chunk/renderer.h"
 
 namespace hemlock {
     namespace voxel {
@@ -67,6 +68,8 @@ namespace hemlock {
              * calling this when not already suspended.
              */
             void resume_chunk_tasks()  { m_chunk_load_thread_pool.resume();  }
+
+            ChunkRenderer* renderer() { return &m_renderer; }
 
             /**
              * @brief Loads chunks with the assumption none specified
@@ -269,6 +272,8 @@ namespace hemlock {
             GLuint            m_instance_vbo;
             bool              m_TEMP_not_all_ready;
             ui32              m_voxel_count;
+
+            ChunkRenderer m_renderer;
 
             Chunks m_chunks;
         };

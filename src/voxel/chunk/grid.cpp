@@ -19,6 +19,9 @@ void hvox::ChunkGrid::init(                       ui32 thread_count,
     m_chunk_load_thread_pool.init(thread_count);
     m_chunk_load_workflow.init(chunk_load_dag, &m_chunk_load_thread_pool);
 
+    // TODO(Matthew): smarter setting of page size - maybe should be dependent on draw distance.
+    m_renderer.init(20);
+
     m_TEMP_not_all_ready = true;
 
     hg::upload_mesh(BLOCK_MESH, m_mesh_handles, hg::MeshDataVolatility::STATIC);
@@ -33,6 +36,8 @@ void hvox::ChunkGrid::update(TimeData time) {
     for (auto& chunk : m_chunks) {
         chunk.second->update(time);
     }
+    // TODO(Matthew): Handle changes in chunk requiring change in renderer here.
+    m_renderer.update(time);
 }
 
 void hvox::ChunkGrid::draw(TimeData time [[maybe_unused]]) {
@@ -85,8 +90,7 @@ void hvox::ChunkGrid::draw(TimeData time [[maybe_unused]]) {
         m_TEMP_not_all_ready = false;
     }
 
-    glBindVertexArray(m_mesh_handles.vao);
-    glDrawArraysInstanced(GL_TRIANGLES, 0, BLOCK_VERTEX_COUNT, m_voxel_count);
+    m_renderer.draw();
 }
 
 bool hvox::ChunkGrid::load_from_scratch_chunks(ChunkGridPosition* chunk_positions, ui32 chunk_count) {
