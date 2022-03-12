@@ -37,6 +37,33 @@ bool hvox::ChunkGreedyMeshTask<MeshComparator>::run_task(ChunkLoadThreadState*, 
     // Determines if two blocks are of the same mesheable kind.
     const MeshComparator are_same_instanceable{};
 
+    auto add_border_blocks_to_queue = [&](BlockChunkPosition _start, BlockChunkPosition _end) {
+        // Add blocks adjacent to X-face to queue.
+        if (_end.x != CHUNK_SIZE - 1) {
+            for (ui32 z = _start.z; z <= _end.z; ++z) {
+                for (ui32 y = _start.y; y <= _end.y; ++y) {
+                    queued_for_visit.push({_end.x + 1, y, z});
+                }
+            }
+        }
+        // Add blocks adjacent to Z-face to queue.
+        if (_end.z != CHUNK_SIZE - 1) {
+            for (ui32 x = _start.x; x <= _end.x; ++x) {
+                for (ui32 y = _start.y; y <= _end.y; ++y) {
+                    queued_for_visit.push({x, y, _end.z + 1});
+                }
+            }
+        }
+        // Add blocks adjacent to Y-face to queue.
+        if (_end.y != CHUNK_SIZE - 1) {
+            for (ui32 x = _start.x; x <= _end.x; ++x) {
+                for (ui32 z = _start.z; z <= _end.z; ++z) {
+                    queued_for_visit.push({x, _end.y + 1, z});
+                }
+            }
+        }
+    };
+
     bool blocks_to_consider = true;
     while (blocks_to_consider) {
 process_new_source:
@@ -57,6 +84,8 @@ process_new_source:
                 // been visited.
                 if (are_same_instanceable(target, target, target_pos, m_chunk)
                         && !visited[target_idx]) {
+                    add_border_blocks_to_queue(start, target_pos);
+
                     source = target;
                     start  = target_pos;
                     end    = target_pos;
@@ -116,6 +145,8 @@ process_new_source:
                     // been visited.
                     if (are_same_instanceable(target, target, target_pos, m_chunk)
                             && !visited[target_idx]) {
+                        add_border_blocks_to_queue(start, target_pos);
+
                         source = target;
                         start  = target_pos;
                         end    = target_pos;
@@ -178,6 +209,8 @@ process_new_source:
                         // been visited.
                         if (are_same_instanceable(target, target, target_pos, m_chunk)
                                 && !visited[target_idx]) {
+                            add_border_blocks_to_queue(start, target_pos);
+
                             source = target;
                             start  = target_pos;
                             end    = target_pos;
@@ -209,30 +242,8 @@ process_new_source:
         if (target_pos.y == CHUNK_SIZE)
             end.y = CHUNK_SIZE - 1;
 
-        // Add blocks adjacent to X-face to queue.
-        if (end.x != CHUNK_SIZE - 1) {
-            for (ui32 z = start.z; z <= end.z; ++z) {
-                for (ui32 y = start.y; y <= end.y; ++y) {
-                    queued_for_visit.push({end.x + 1, y, z});
-                }
-            }
-        }
-        // Add blocks adjacent to Z-face to queue.
-        if (end.z != CHUNK_SIZE - 1) {
-            for (ui32 x = start.x; x <= end.x; ++x) {
-                for (ui32 y = start.y; y <= end.y; ++y) {
-                    queued_for_visit.push({x, y, end.z + 1});
-                }
-            }
-        }
-        // Add blocks adjacent to Y-face to queue.
-        if (end.y != CHUNK_SIZE - 1) {
-            for (ui32 x = start.x; x <= end.x; ++x) {
-                for (ui32 z = start.z; z <= end.z; ++z) {
-                    queued_for_visit.push({x, end.y + 1, z});
-                }
-            }
-        }
+
+        add_border_blocks_to_queue(start, end);
 
         // If we were scanning for the extent of an instanceable source block,
         // we now set the visited status of scanned blocks.
