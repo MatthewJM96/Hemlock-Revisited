@@ -62,14 +62,20 @@ namespace hemlock {
             void draw(TimeData time);
 
             /**
-             * @brief Renders a chunk into a sufficiently free page
-             * for drawing.
+             * @brief Adds a chunk to the renderer, the
+             * renderer registering with some of the
+             * chunk's events to manage rendering of
+             * the chunk.
              *
              * @param chunk 
              */
-            void render_chunk(Chunk* chunk);
+            void add_chunk(Chunk* chunk);
         protected:
             static hg::MeshHandles block_mesh_handles;
+
+            Subscriber<>            handle_chunk_mesh_change;
+            Subscriber<RenderState> handle_chunk_render_status_change;
+            Subscriber<>            handle_chunk_unload;
 
             /**
              * @brief Creates count number of new pages.

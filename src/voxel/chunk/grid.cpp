@@ -41,7 +41,7 @@ void hvox::ChunkGrid::update(TimeData time) {
 
         auto [exists, meshed] = query_chunk_state(chunk.second, ChunkState::MESHED);
         if (meshed) {
-            m_renderer.render_chunk(chunk.second);
+            m_renderer.add_chunk(chunk.second);
             chunk.second->TEMP_in_page = true;
         }
     }

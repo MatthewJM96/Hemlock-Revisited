@@ -26,6 +26,19 @@ namespace hemlock {
             MESH_UPLOADED   = 4
         };
 
+        enum class RenderState : ui8 {
+            NONE    = 0,
+            LOD_0   = 1,
+            LOD_1   = 2,
+            LOD_2   = 3,
+            LOD_3   = 4,
+            LOD_4   = 5,
+            LOD_5   = 6,
+            LOD_6   = 7,
+            LOD_7   = 8,
+            FULL    = 9
+        };
+
         struct BlockChangeEvent {
             Chunk*              chunk;
             Block               old_block;
@@ -67,6 +80,7 @@ namespace hemlock {
             Neighbours        neighbours;
             Block*            blocks;
 
+            RenderState render_state;
             struct {
                 ChunkInstanceData*  data;
                 ui32                count;
@@ -74,13 +88,16 @@ namespace hemlock {
             // TODO(Matthew): Do this better.
             bool TEMP_in_page = false;
 
-            std::atomic<ChunkState>        state;
-            std::atomic<ChunkLoadTaskKind> pending_task;
+            std::atomic<ChunkState>         state;
+            std::atomic<ChunkLoadTaskKind>  pending_task;
             std::atomic<bool>               gen_task_active, mesh_task_active;
 
-            CancellableEvent<BlockChangeEvent>     on_block_change;
-            CancellableEvent<BulkBlockChangeEvent> on_bulk_block_change;
-            Event<>                                on_mesh_change;
+            CancellableEvent<BlockChangeEvent>      on_block_change;
+            CancellableEvent<BulkBlockChangeEvent>  on_bulk_block_change;
+
+            Event<>                                 on_mesh_change;
+            Event<RenderState>                      on_render_state_change;
+            Event<>                                 on_unload;
         protected:
             bool m_owns_blocks;
         };
