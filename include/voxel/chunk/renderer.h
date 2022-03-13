@@ -85,9 +85,9 @@ namespace hemlock {
              * @brief Updates the buffer stored in the GPU
              * to reflect changes in the page's host buffer.
              *
-             * @param page_id The ID of the page to process.
+             * @param page The page to process.
              */
-            void process_page(ui32 page_id);
+            void process_page(ChunkRenderPage& page);
 
             ChunkRenderPages m_chunk_pages;
 

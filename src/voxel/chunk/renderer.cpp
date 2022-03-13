@@ -54,7 +54,10 @@ void hvox::ChunkRenderer::update(TimeData) {
     //                render a chunk to a page on mesh completion, or
     //                wait a bit in-case of a player moving fast?
 
-    
+    for (auto& page : m_chunk_pages) {
+        if (page.dirty)
+            process_page(page);
+    }
 }
 
 void hvox::ChunkRenderer::draw(TimeData) {
@@ -132,9 +135,7 @@ hvox::ChunkRenderPage* hvox::ChunkRenderer::create_pages(ui32 count) {
     return first_new_page;
 }
 
-void hvox::ChunkRenderer::process_page(ui32 page_id) {
-    ChunkRenderPage& page = m_chunk_pages[page_id];
-
+void hvox::ChunkRenderer::process_page(ChunkRenderPage& page) {
     ui32 start_from_chunk = page.first_dirtied_chunk_idx;
 
     // if (page.gpu_alloc_size < page.voxel_count) {
