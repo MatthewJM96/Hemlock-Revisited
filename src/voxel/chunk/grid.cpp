@@ -32,6 +32,13 @@ void hvox::ChunkGrid::update(TimeData time) {
     for (auto& chunk : m_chunks) {
         chunk.second->update(time);
     }
+
+    for (auto& chunk : m_chunks) {
+        auto [exists, meshed] = query_chunk_state(chunk.second, ChunkState::MESHED);
+        if (meshed)
+            m_renderer.render_chunk(chunk.second);
+    }
+
     // TODO(Matthew): Handle changes in chunk requiring change in renderer here.
     m_renderer.update(time);
 }
