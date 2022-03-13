@@ -96,6 +96,12 @@ void hvox::ChunkRenderer::render_chunk(Chunk* chunk) {
 hvox::ChunkRenderPage* hvox::ChunkRenderer::create_pages(ui32 count) {
     m_chunk_pages.reserve(m_chunk_pages.size() + count);
 
+    /*
+     * For now we create GPU buffers at the size of the page, we were
+     * using a page-grow approach but this seems costly for little
+     * memory saving up-front, and none for a long-running session.
+     */
+
     /**************************\
      * Append first new page. *
     \**************************/
@@ -105,6 +111,7 @@ hvox::ChunkRenderPage* hvox::ChunkRenderer::create_pages(ui32 count) {
     ChunkRenderPage* first_new_page = &m_chunk_pages.back();
 
     glCreateBuffers(1, &first_new_page->vbo);
+    glNamedBufferData(first_new_page->vbo, m_page_size * sizeof(ChunkInstanceData), nullptr, GL_STATIC_DRAW);
 
     first_new_page->chunks.reserve(m_page_size);
 
@@ -117,6 +124,7 @@ hvox::ChunkRenderPage* hvox::ChunkRenderer::create_pages(ui32 count) {
         ChunkRenderPage* new_page = &m_chunk_pages.back();
 
         glCreateBuffers(1, &new_page->vbo);
+        glNamedBufferData(new_page->vbo, m_page_size * sizeof(ChunkInstanceData), nullptr, GL_STATIC_DRAW);
 
         new_page->chunks.reserve(m_page_size);
     }
@@ -130,13 +138,13 @@ void hvox::ChunkRenderer::process_page(ui32 page_id) {
 
     ui32 start_from_chunk = page.first_dirtied_chunk_idx;
 
-    if (page.gpu_alloc_size < page.voxel_count) {
-        page.gpu_alloc_size = page.voxel_count;
+    // if (page.gpu_alloc_size < page.voxel_count) {
+    //     page.gpu_alloc_size = page.voxel_count;
 
-        glNamedBufferData(page.vbo, page.voxel_count * sizeof(ChunkInstanceData), nullptr, GL_STATIC_DRAW);
+    //     glNamedBufferData(page.vbo, page.voxel_count * sizeof(ChunkInstanceData), nullptr, GL_STATIC_DRAW);
 
-        start_from_chunk = 0;
-    }
+    //     start_from_chunk = 0;
+    // }
 
     ui32 cursor = 0;
     for (ui32 i= 0; i < start_from_chunk; ++i) {
