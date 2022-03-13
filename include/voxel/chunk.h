@@ -71,6 +71,8 @@ namespace hemlock {
                 ChunkInstanceData*  data;
                 ui32                count;
             } instance;
+            // TODO(Matthew): Do this better.
+            bool TEMP_in_page = false;
 
             std::atomic<ChunkState>        state;
             std::atomic<ChunkLoadTaskKind> pending_task;
