@@ -63,6 +63,8 @@ void hvox::ChunkRenderer::update(TimeData) {
 void hvox::ChunkRenderer::draw(TimeData) {
     glBindVertexArray(block_mesh_handles.vao);
     for (auto& chunk_page : m_chunk_pages) {
+        if (chunk_page.voxel_count == 0) continue;
+
         glVertexArrayVertexBuffer(block_mesh_handles.vao, 1, chunk_page.vbo, 0, sizeof(ChunkInstanceData));
 
         glDrawArraysInstanced(GL_TRIANGLES, 0, BLOCK_VERTEX_COUNT, chunk_page.voxel_count);
