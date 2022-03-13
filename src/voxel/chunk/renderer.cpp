@@ -115,7 +115,7 @@ hvox::ChunkRenderPage* hvox::ChunkRenderer::create_pages(ui32 count) {
     ChunkRenderPage* first_new_page = &m_chunk_pages.back();
 
     glCreateBuffers(1, &first_new_page->vbo);
-    glNamedBufferData(first_new_page->vbo, block_page_size() * sizeof(ChunkInstanceData), nullptr, GL_STATIC_DRAW);
+    glNamedBufferData(first_new_page->vbo, block_page_size() * sizeof(ChunkInstanceData), nullptr, GL_DYNAMIC_DRAW);
 
     first_new_page->chunks.reserve(m_page_size);
 
@@ -128,7 +128,7 @@ hvox::ChunkRenderPage* hvox::ChunkRenderer::create_pages(ui32 count) {
         ChunkRenderPage* new_page = &m_chunk_pages.back();
 
         glCreateBuffers(1, &new_page->vbo);
-        glNamedBufferData(new_page->vbo, block_page_size() * sizeof(ChunkInstanceData), nullptr, GL_STATIC_DRAW);
+        glNamedBufferData(new_page->vbo, block_page_size() * sizeof(ChunkInstanceData), nullptr, GL_DYNAMIC_DRAW);
 
         new_page->chunks.reserve(m_page_size);
     }
@@ -143,7 +143,7 @@ void hvox::ChunkRenderer::process_page(ChunkRenderPage& page) {
     // if (page.gpu_alloc_size < page.voxel_count) {
     //     page.gpu_alloc_size = page.voxel_count;
 
-    //     glNamedBufferData(page.vbo, page.voxel_count * sizeof(ChunkInstanceData), nullptr, GL_STATIC_DRAW);
+    //     glNamedBufferData(page.vbo, page.voxel_count * sizeof(ChunkInstanceData), nullptr, GL_DYNAMIC_DRAW);
 
     //     start_from_chunk = 0;
     // }
