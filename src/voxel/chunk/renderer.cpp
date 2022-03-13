@@ -69,7 +69,7 @@ void hvox::ChunkRenderer::draw(TimeData) {
 void hvox::ChunkRenderer::render_chunk(Chunk* chunk) {
     ChunkRenderPage* target_page = nullptr;
     for (auto& chunk_page : m_chunk_pages) {
-        if (chunk_page.voxel_count + chunk->instance.count <= m_page_size) {
+        if (chunk_page.voxel_count + chunk->instance.count <= block_page_size()) {
             target_page = &chunk_page;
             break;
         }
