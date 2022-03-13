@@ -88,8 +88,8 @@ void hvox::ChunkRenderer::render_chunk(Chunk* chunk) {
         .chunk = chunk
     });
 
-    if (target_page->first_dirtied_chunk_idx > target_page->chunks.size()) {
-        target_page->first_dirtied_chunk_idx = target_page->chunks.size();
+    if (target_page->first_dirtied_chunk_idx >= target_page->chunks.size()) {
+        target_page->first_dirtied_chunk_idx  = target_page->chunks.size() - 1;
     }
 
     target_page->voxel_count += chunk->instance.count;
