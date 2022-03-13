@@ -99,6 +99,8 @@ namespace hemlock {
             Event<RenderState>                      on_render_state_change;
             Event<>                                 on_unload;
         protected:
+            void init_events();
+
             bool m_owns_blocks;
         };
 

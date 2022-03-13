@@ -13,6 +13,8 @@ hvox::Chunk::Chunk() :
 { /* Empty. */ }
 
 void hvox::Chunk::init() {
+    init_events();
+
     blocks = new Block[CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE];
     std::fill_n(blocks, CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE, Block{ false });
 
@@ -22,6 +24,8 @@ void hvox::Chunk::init() {
 }
 
 void hvox::Chunk::init(Block* _blocks) {
+    init_events();
+
     blocks = _blocks;
     m_owns_blocks = false;
 
@@ -39,6 +43,14 @@ void hvox::Chunk::dispose() {
 
 void hvox::Chunk::update(TimeData) {
     // Empty for now.
+}
+
+void hvox::Chunk::init_events() {
+    on_block_change         .set_sender(reinterpret_cast<Sender>(this));
+    on_bulk_block_change    .set_sender(reinterpret_cast<Sender>(this));
+    on_mesh_change          .set_sender(reinterpret_cast<Sender>(this));
+    on_render_state_change  .set_sender(reinterpret_cast<Sender>(this));
+    on_unload               .set_sender(reinterpret_cast<Sender>(this));
 }
 
 bool hvox::set_block( Chunk* chunk,
