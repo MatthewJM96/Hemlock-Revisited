@@ -175,8 +175,8 @@ public:
         m_input_manager->init();
 
         m_camera.attach_to_window(m_process->window());
-        m_camera.set_position(f32v3{35.0f, 9.0f, -22.0f});
-        m_camera.rotate_from_mouse_with_absolute_up(-160.0f, 160.0f, 0.005f);
+        m_camera.set_position(f32v3{189.0f, 109.0f, -189.0f});
+        m_camera.rotate_from_mouse_with_absolute_up(-130.0f, 160.0f, 0.005f);
         m_camera.set_fov(90.0f);
         m_camera.update();
 
