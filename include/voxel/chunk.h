@@ -76,9 +76,9 @@ namespace hemlock {
             std::atomic<ChunkLoadTaskKind> pending_task;
             std::atomic<bool>               gen_task_active, mesh_task_active;
 
-            // TODO(Matthew): Store these here? Somehow feels dodgy.
             CancellableEvent<BlockChangeEvent>     on_block_change;
             CancellableEvent<BulkBlockChangeEvent> on_bulk_block_change;
+            Event<>                                on_mesh_change;
         protected:
             bool m_owns_blocks;
         };

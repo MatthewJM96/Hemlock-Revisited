@@ -20,11 +20,7 @@ void hvox::ChunkGrid::init(                       ui32 thread_count,
     m_chunk_load_workflow.init(chunk_load_dag, &m_chunk_load_thread_pool);
 
     // TODO(Matthew): smarter setting of page size - maybe should be dependent on draw distance.
-    m_renderer.init(20);
-
-    m_TEMP_not_all_ready = true;
-
-    hg::upload_mesh(BLOCK_MESH, m_mesh_handles, hg::MeshDataVolatility::STATIC);
+    m_renderer.init(20, 2);
 }
 
 void hvox::ChunkGrid::dispose() {
@@ -40,57 +36,8 @@ void hvox::ChunkGrid::update(TimeData time) {
     m_renderer.update(time);
 }
 
-void hvox::ChunkGrid::draw(TimeData time [[maybe_unused]]) {
-    // TODO(Matthew): Set up instancing data somewhere else.
-    //                   We'll need to be somewhat smart as we can only really
-    //                   do this with every chunk's instance data combined.
-    //                      Can probably manage buffer in GPU with some smart
-    //                      lazy shuffling, maybe we use a vertex attribute
-    //                      to mark instances dead? This sounds dodgy as it
-    //                      means branching in shader, but worth considering.
-    if (m_TEMP_not_all_ready) {
-        ui32 voxel_count = 0;
-        bool all_chunks_meshed = true;
-        for (auto chunk : m_chunks) {
-            all_chunks_meshed = all_chunks_meshed
-                                    && query_chunk_state(chunk.second, ChunkState::MESHED).second;
-            voxel_count += chunk.second->instance.count;
-        }
-        if (!all_chunks_meshed) return;
-
-        m_voxel_count = voxel_count;
-
-        glCreateBuffers(1, &m_instance_vbo);
-        glVertexArrayVertexBuffer(m_mesh_handles.vao, 1, m_instance_vbo, 0, sizeof(f32v3) * 2);
-
-        glNamedBufferData(m_instance_vbo, voxel_count * sizeof(f32v3) * 2, nullptr, GL_STATIC_DRAW);
-
-        ui32 cursor = 0;
-        for (auto chunk : m_chunks) {
-            auto data = chunk.second->instance;
-            glNamedBufferSubData(
-                m_instance_vbo,
-                cursor * sizeof(f32v3) * 2,
-                data.count * sizeof(f32v3) * 2,
-                reinterpret_cast<void*>(data.data)
-            );
-            cursor += data.count;
-        }
-
-        glEnableVertexArrayAttrib(m_mesh_handles.vao,  3);
-        glVertexArrayAttribFormat(m_mesh_handles.vao,  3, 3, GL_FLOAT, GL_FALSE, 0);
-        glVertexArrayAttribBinding(m_mesh_handles.vao, 3, 1);
-
-        glEnableVertexArrayAttrib(m_mesh_handles.vao,  4);
-        glVertexArrayAttribFormat(m_mesh_handles.vao,  4, 3, GL_FLOAT, GL_FALSE, sizeof(f32v3));
-        glVertexArrayAttribBinding(m_mesh_handles.vao, 4, 1);
-
-        glVertexArrayBindingDivisor(m_mesh_handles.vao, 1, 1);
-
-        m_TEMP_not_all_ready = false;
-    }
-
-    m_renderer.draw();
+void hvox::ChunkGrid::draw(TimeData time) {
+    m_renderer.draw(time);
 }
 
 bool hvox::ChunkGrid::load_from_scratch_chunks(ChunkGridPosition* chunk_positions, ui32 chunk_count) {

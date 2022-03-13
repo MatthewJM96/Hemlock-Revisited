@@ -8,17 +8,27 @@
 namespace hemlock {
     namespace voxel {
         struct Chunk;
+
         class ChunkGrid;
 
         struct ChunkInstanceData {
             f32v3 translation, scaling;
         };
 
+        struct PagedChunk {
+            Chunk* chunk;
+
+        };
+        using PagedChunks = std::vector<PagedChunk>;
+
         struct ChunkRenderPage {
-            ui32               voxel_count;
-            ChunkInstanceData* instance_data;
-            GLuint             vbo;
-            bool               dirty;
+            PagedChunks chunks;
+            ui32        chunk_count;
+            ui32        voxel_count;
+            GLuint      vbo;
+            ui32        gpu_alloc_size;
+            bool        dirty;
+            ui32        first_dirtied_chunk_idx;
         };
         using ChunkRenderPages = std::vector<ChunkRenderPage>;
 
@@ -68,6 +78,14 @@ namespace hemlock {
              * page created by this call.
              */
             inline ChunkRenderPage* create_pages(ui32 count);
+
+            /**
+             * @brief Updates the buffer stored in the GPU
+             * to reflect changes in the page's host buffer.
+             *
+             * @param page_id The ID of the page to process.
+             */
+            void process_page(ui32 page_id);
 
             ChunkRenderPages m_chunk_pages;
 

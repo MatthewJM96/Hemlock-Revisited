@@ -266,13 +266,6 @@ namespace hemlock {
             thread::ThreadPool<ChunkLoadTaskContext>        m_chunk_load_thread_pool;
             thread::ThreadWorkflow<ChunkLoadTaskContext>    m_chunk_load_workflow;
 
-            // TODO(Matthew): this probably should go elsewhere later, but
-            //                to get instancing working this will do.
-            hg::MeshHandles   m_mesh_handles;
-            GLuint            m_instance_vbo;
-            bool              m_TEMP_not_all_ready;
-            ui32              m_voxel_count;
-
             ChunkRenderer m_renderer;
 
             Chunks m_chunks;

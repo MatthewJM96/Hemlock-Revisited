@@ -14,6 +14,16 @@ hvox::ChunkRenderer::ChunkRenderer() :
 void hvox::ChunkRenderer::init(ui32 page_size, ui32 max_unused_pages) {
     if (block_mesh_handles.vao == 0) {
         hg::upload_mesh(BLOCK_MESH, block_mesh_handles, hg::MeshDataVolatility::STATIC);
+
+        glEnableVertexArrayAttrib(block_mesh_handles.vao,  3);
+        glVertexArrayAttribFormat(block_mesh_handles.vao,  3, 3, GL_FLOAT, GL_FALSE, 0);
+        glVertexArrayAttribBinding(block_mesh_handles.vao, 3, 1);
+
+        glEnableVertexArrayAttrib(block_mesh_handles.vao,  4);
+        glVertexArrayAttribFormat(block_mesh_handles.vao,  4, 3, GL_FLOAT, GL_FALSE, sizeof(f32v3));
+        glVertexArrayAttribBinding(block_mesh_handles.vao, 4, 1);
+
+        glVertexArrayBindingDivisor(block_mesh_handles.vao, 1, 1);
     }
 
     m_page_size        = page_size;
@@ -28,8 +38,6 @@ void hvox::ChunkRenderer::dispose() {
     m_page_size = 0;
 
     for (auto& chunk_page : m_chunk_pages) {
-        delete[] chunk_page.instance_data;
-
         glDeleteBuffers(1, &chunk_page.vbo);
     }
     ChunkRenderPages().swap(m_chunk_pages);
@@ -52,7 +60,7 @@ void hvox::ChunkRenderer::update(TimeData) {
 void hvox::ChunkRenderer::draw(TimeData) {
     glBindVertexArray(block_mesh_handles.vao);
     for (auto& chunk_page : m_chunk_pages) {
-        // TODO(Matthew): bind correct VBO to the VAO.
+        glVertexArrayVertexBuffer(block_mesh_handles.vao, 1, chunk_page.vbo, 0, sizeof(ChunkInstanceData));
 
         glDrawArraysInstanced(GL_TRIANGLES, 0, BLOCK_VERTEX_COUNT, chunk_page.voxel_count);
     }
@@ -71,11 +79,15 @@ void hvox::ChunkRenderer::render_chunk(Chunk* chunk) {
         target_page = create_pages(1);
     }
 
-    std::memcpy(
-        &target_page->instance_data[target_page->voxel_count],
-        chunk->instance.data,
-        chunk->instance.count * sizeof(ChunkInstanceData)
-    );
+    target_page->chunks[target_page->chunk_count] = PagedChunk{
+        .chunk = chunk
+    };
+
+    if (target_page->first_dirtied_chunk_idx > target_page->chunk_count) {
+        target_page->first_dirtied_chunk_idx = target_page->chunk_count;
+    }
+
+    target_page->chunk_count += 1;
     target_page->voxel_count += chunk->instance.count;
 
     target_page->dirty = true;
@@ -92,7 +104,9 @@ hvox::ChunkRenderPage* hvox::ChunkRenderer::create_pages(ui32 count) {
 
     ChunkRenderPage* first_new_page = &m_chunk_pages.back();
 
-    first_new_page->instance_data = new ChunkInstanceData[m_page_size];
+    glCreateBuffers(1, &first_new_page->vbo);
+
+    first_new_page->chunks.reserve(m_page_size);
 
     /********************************\
      * Append subsequent new pages. *
@@ -102,9 +116,45 @@ hvox::ChunkRenderPage* hvox::ChunkRenderer::create_pages(ui32 count) {
 
         ChunkRenderPage* new_page = &m_chunk_pages.back();
 
-        new_page->instance_data = new ChunkInstanceData[m_page_size];
+        glCreateBuffers(1, &new_page->vbo);
+
+        new_page->chunks.reserve(m_page_size);
     }
 
     // Return pointer to the first page created.
     return first_new_page;
+}
+
+void hvox::ChunkRenderer::process_page(ui32 page_id) {
+    ChunkRenderPage& page = m_chunk_pages[page_id];
+
+    ui32 start_from_chunk = page.first_dirtied_chunk_idx;
+
+    if (page.gpu_alloc_size < page.voxel_count) {
+        page.gpu_alloc_size = page.voxel_count;
+
+        glNamedBufferData(page.vbo, page.voxel_count * sizeof(ChunkInstanceData), nullptr, GL_STATIC_DRAW);
+
+        start_from_chunk = 0;
+    }
+
+    ui32 cursor = 0;
+    for (ui32 i= 0; i < start_from_chunk; ++i) {
+        cursor += page.chunks[i].chunk->instance.count;
+    }
+
+    for (ui32 i = start_from_chunk; i < page.chunk_count; ++i) {
+        auto data = page.chunks[i].chunk->instance;
+
+        glNamedBufferSubData(
+            page.vbo,
+            cursor * sizeof(ChunkInstanceData),
+            data.count * sizeof(ChunkInstanceData),
+            reinterpret_cast<void*>(data.data)
+        );
+
+        cursor += data.count;
+    }
+
+    page.first_dirtied_chunk_idx = std::numeric_limits<ui32>::max();
 }
