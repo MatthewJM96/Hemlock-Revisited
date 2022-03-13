@@ -147,7 +147,7 @@ void hvox::ChunkRenderer::process_page(ui32 page_id) {
     // }
 
     ui32 cursor = 0;
-    for (ui32 i= 0; i < start_from_chunk; ++i) {
+    for (ui32 i = 0; i < start_from_chunk; ++i) {
         cursor += page.chunks[i].chunk->instance.count;
     }
 
