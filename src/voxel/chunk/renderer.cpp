@@ -148,6 +148,8 @@ void hvox::ChunkRenderer::process_page(ChunkRenderPage& page) {
     //     start_from_chunk = 0;
     // }
 
+    if (start_from_chunk > page.chunks.size()) return;
+
     ui32 cursor = 0;
     for (ui32 i = 0; i < start_from_chunk; ++i) {
         cursor += page.chunks[i].chunk->instance.count;
