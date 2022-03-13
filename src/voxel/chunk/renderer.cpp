@@ -83,11 +83,10 @@ void hvox::ChunkRenderer::render_chunk(Chunk* chunk) {
         .chunk = chunk
     };
 
-    if (target_page->first_dirtied_chunk_idx > target_page->chunk_count) {
-        target_page->first_dirtied_chunk_idx = target_page->chunk_count;
+    if (target_page->first_dirtied_chunk_idx > target_page->chunks.size()) {
+        target_page->first_dirtied_chunk_idx = target_page->chunks.size();
     }
 
-    target_page->chunk_count += 1;
     target_page->voxel_count += chunk->instance.count;
 
     target_page->dirty = true;
@@ -151,7 +150,7 @@ void hvox::ChunkRenderer::process_page(ui32 page_id) {
         cursor += page.chunks[i].chunk->instance.count;
     }
 
-    for (ui32 i = start_from_chunk; i < page.chunk_count; ++i) {
+    for (ui32 i = start_from_chunk; i < page.chunks.size(); ++i) {
         auto data = page.chunks[i].chunk->instance;
 
         glNamedBufferSubData(

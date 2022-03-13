@@ -23,7 +23,6 @@ namespace hemlock {
 
         struct ChunkRenderPage {
             PagedChunks chunks;
-            ui32        chunk_count;
             ui32        voxel_count;
             GLuint      vbo;
             ui32        gpu_alloc_size;
