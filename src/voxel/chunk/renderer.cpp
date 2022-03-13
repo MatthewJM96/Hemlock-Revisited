@@ -8,6 +8,20 @@
 hg::MeshHandles hvox::ChunkRenderer::block_mesh_handles = {};
 
 hvox::ChunkRenderer::ChunkRenderer() :
+    handle_chunk_mesh_change(Subscriber<>{
+        [&](Sender sender) {
+            const Chunk* chunk = reinterpret_cast<const Chunk*>(sender);
+
+            mark_chunk_dirty(chunk);
+        }
+    }),
+    handle_chunk_unload(Subscriber<>{
+        [&](Sender sender) {
+            const Chunk* chunk = reinterpret_cast<const Chunk*>(sender);
+
+            mark_chunk_to_remove(chunk);
+        }
+    }),
     m_page_size(0)
 { /* Empty. */ }
 
@@ -63,6 +77,8 @@ void hvox::ChunkRenderer::update(TimeData) {
 void hvox::ChunkRenderer::draw(TimeData) {
     glBindVertexArray(block_mesh_handles.vao);
     for (auto& chunk_page : m_chunk_pages) {
+        std::lock_guard<std::mutex> lock(chunk_page.mutex);
+
         if (chunk_page.voxel_count == 0) continue;
 
         glVertexArrayVertexBuffer(block_mesh_handles.vao, 1, chunk_page.vbo, 0, sizeof(ChunkInstanceData));
@@ -71,7 +87,9 @@ void hvox::ChunkRenderer::draw(TimeData) {
     }
 }
 
-void hvox::ChunkRenderer::add_chunk(Chunk* chunk) {
+void hvox::ChunkRenderer::add_chunk(const Chunk* chunk) {
+    m_chunk_metadata[chunk] = PagedChunkMetadata{};
+
     ChunkRenderPage* target_page = nullptr;
     for (auto& chunk_page : m_chunk_pages) {
         if (chunk_page.voxel_count + chunk->instance.count <= block_page_size()) {
@@ -84,9 +102,7 @@ void hvox::ChunkRenderer::add_chunk(Chunk* chunk) {
         target_page = create_pages(1);
     }
 
-    target_page->chunks.emplace_back(PagedChunk{
-        .chunk = chunk
-    });
+    target_page->chunks.emplace_back(chunk);
 
     if (target_page->first_dirtied_chunk_idx >= target_page->chunks.size()) {
         target_page->first_dirtied_chunk_idx  = target_page->chunks.size() - 1;
@@ -138,6 +154,8 @@ hvox::ChunkRenderPage* hvox::ChunkRenderer::create_pages(ui32 count) {
 }
 
 void hvox::ChunkRenderer::process_page(ChunkRenderPage& page) {
+    std::lock_guard<std::mutex> lock(page.mutex);
+
     ui32 start_from_chunk = page.first_dirtied_chunk_idx;
 
     // if (page.gpu_alloc_size < page.voxel_count) {
@@ -152,11 +170,11 @@ void hvox::ChunkRenderer::process_page(ChunkRenderPage& page) {
 
     ui32 cursor = 0;
     for (ui32 i = 0; i < start_from_chunk; ++i) {
-        cursor += page.chunks[i].chunk->instance.count;
+        cursor += page.chunks[i]->instance.count;
     }
 
     for (ui32 i = start_from_chunk; i < page.chunks.size(); ++i) {
-        auto data = page.chunks[i].chunk->instance;
+        auto data = page.chunks[i]->instance;
 
         glNamedBufferSubData(
             page.vbo,
@@ -170,4 +188,12 @@ void hvox::ChunkRenderer::process_page(ChunkRenderPage& page) {
 
     page.dirty = false;
     page.first_dirtied_chunk_idx = std::numeric_limits<ui32>::max();
+}
+
+void hvox::ChunkRenderer::mark_chunk_dirty(const Chunk* chunk) {
+
+}
+
+void hvox::ChunkRenderer::mark_chunk_to_remove(const Chunk* chunk) {
+    m_chunk_removal_queue.emplace(chunk);
 }

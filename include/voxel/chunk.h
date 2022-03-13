@@ -95,6 +95,15 @@ namespace hemlock {
             CancellableEvent<BlockChangeEvent>      on_block_change;
             CancellableEvent<BulkBlockChangeEvent>  on_bulk_block_change;
 
+            // NOTE(Matthew): These events, at least on_mesh_change, can be
+            //                called from multiple threads. Events are NOT
+            //                thread-safe. Our one guarantee is not really
+            //                a full guarantee but should hold true: only
+            //                one thread that could make a state change
+            //                should be processing a task regarding this
+            //                chunk at any point in time. If this fails
+            //                to hold up, then we could easily get race
+            //                conditions inside the events.
             Event<>                                 on_mesh_change;
             Event<RenderState>                      on_render_state_change;
             Event<>                                 on_unload;

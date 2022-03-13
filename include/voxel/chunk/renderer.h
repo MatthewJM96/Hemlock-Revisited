@@ -15,11 +15,15 @@ namespace hemlock {
             f32v3 translation, scaling;
         };
 
-        struct PagedChunk {
-            Chunk* chunk;
+        using PagedChunks = std::vector<const Chunk*>;
 
+        struct PagedChunkMetadata {
+            ui32 page_idx;
+            ui32 chunk_idx;
+            bool paged;
         };
-        using PagedChunks = std::vector<PagedChunk>;
+        using PagedChunksMetadata   = std::unordered_map<const Chunk*, PagedChunkMetadata>;
+        using PagedChunkQueue       = std::queue<const Chunk*>;
 
         struct ChunkRenderPage {
             PagedChunks chunks;
@@ -28,6 +32,7 @@ namespace hemlock {
             ui32        gpu_alloc_size;
             bool        dirty;
             ui32        first_dirtied_chunk_idx;
+            std::mutex  mutex;
         };
         using ChunkRenderPages = std::vector<ChunkRenderPage>;
 
@@ -55,8 +60,8 @@ namespace hemlock {
              */
             void set_page_size(ui32 page_size);
 
-            ui32 page_size()       { return m_page_size;                                            };
-            ui32 block_page_size() { return m_page_size * CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE / 2; };
+            ui32 page_size()       const { return m_page_size;                                            };
+            ui32 block_page_size() const { return m_page_size * CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE / 2; };
 
             void update(TimeData time);
             void draw(TimeData time);
@@ -69,7 +74,7 @@ namespace hemlock {
              *
              * @param chunk 
              */
-            void add_chunk(Chunk* chunk);
+            void add_chunk(const Chunk* chunk);
         protected:
             static hg::MeshHandles block_mesh_handles;
 
@@ -95,12 +100,28 @@ namespace hemlock {
              */
             void process_page(ChunkRenderPage& page);
 
-            ChunkRenderPages m_chunk_pages;
+            /**
+             * @brief Marks page a chunk sits in as
+             * dirty.
+             *
+             * @param chunk The chunk whose page is
+             * to be marked dirty.
+             */
+            void mark_chunk_dirty(const Chunk* chunk);
+            /**
+             * @brief Marks a chunk as to be removed.
+             *
+             * @param chunk The chunk to mark for
+             * removal
+             */
+            void mark_chunk_to_remove(const Chunk* chunk);
+
+            ChunkRenderPages    m_chunk_pages;
+            PagedChunksMetadata m_chunk_metadata;
+            PagedChunkQueue     m_chunk_removal_queue;
 
             ui32 m_page_size;
             ui32 m_max_unused_pages;
-
-            ChunkRenderPages pages;
         };
     }
 }
