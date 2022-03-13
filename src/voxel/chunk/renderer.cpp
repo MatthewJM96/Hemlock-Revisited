@@ -79,9 +79,9 @@ void hvox::ChunkRenderer::render_chunk(Chunk* chunk) {
         target_page = create_pages(1);
     }
 
-    target_page->chunks[target_page->chunk_count] = PagedChunk{
+    target_page->chunks.emplace_back(PagedChunk{
         .chunk = chunk
-    };
+    });
 
     if (target_page->first_dirtied_chunk_idx > target_page->chunks.size()) {
         target_page->first_dirtied_chunk_idx = target_page->chunks.size();
