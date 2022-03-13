@@ -168,5 +168,6 @@ void hvox::ChunkRenderer::process_page(ChunkRenderPage& page) {
         cursor += data.count;
     }
 
+    page.dirty = false;
     page.first_dirtied_chunk_idx = std::numeric_limits<ui32>::max();
 }
