@@ -261,3 +261,55 @@ hvox::QueriedChunkState hvox::ChunkGrid::query_all_neighbour_states(Chunk* chunk
 
     return {true, all_neighbours_satisfy_constraint};
 }
+
+hvox::QueriedChunkState hvox::ChunkGrid::query_chunk_exact_state(ChunkGridPosition chunk_position, ChunkState required_state) {
+    auto it = m_chunks.find(chunk_position.id);
+    if (it == m_chunks.end()) return {false, false};
+
+    return query_chunk_exact_state((*it).second, required_state);
+}
+
+hvox::QueriedChunkState hvox::ChunkGrid::query_chunk_exact_state(Chunk* chunk, ChunkState required_state) {
+    if (chunk == nullptr) return {false, false};
+
+    ChunkState actual_state = chunk->state.load(std::memory_order_acquire);
+
+    return {true, actual_state == required_state};
+}
+
+hvox::QueriedChunkPendingTask hvox::ChunkGrid::query_chunk_exact_pending_task(ChunkGridPosition chunk_position, ChunkLoadTaskKind required_pending_task) {
+    auto it = m_chunks.find(chunk_position.id);
+    if (it == m_chunks.end()) return {false, false};
+
+    return query_chunk_exact_pending_task((*it).second, required_pending_task);
+}
+
+hvox::QueriedChunkPendingTask hvox::ChunkGrid::query_chunk_exact_pending_task(Chunk* chunk, ChunkLoadTaskKind required_pending_task) {
+    if (chunk == nullptr) return {false, false};
+
+    ChunkLoadTaskKind actual_pending_task = chunk->pending_task.load(std::memory_order_acquire);
+
+    return {true, actual_pending_task == required_pending_task};
+}
+
+hvox::QueriedChunkState hvox::ChunkGrid::query_all_neighbour_exact_states(ChunkGridPosition chunk_position, ChunkState required_state) {
+    auto it = m_chunks.find(chunk_position.id);
+    if (it == m_chunks.end()) return {false, false};
+
+    return query_all_neighbour_exact_states((*it).second, required_state);
+}
+
+hvox::QueriedChunkState hvox::ChunkGrid::query_all_neighbour_exact_states(Chunk* chunk, ChunkState required_state) {
+    if (chunk == nullptr) return {false, false};
+
+    bool all_neighbours_satisfy_constraint = true;
+    for (ui32 i = 0; i < 8; ++i) {
+        if (chunk->neighbours.neighbours[i] == nullptr) continue;
+
+        ChunkState actual_state = chunk->neighbours.neighbours[i]->state.load(std::memory_order_acquire);
+
+        all_neighbours_satisfy_constraint = all_neighbours_satisfy_constraint && (actual_state == required_state);
+    }
+
+    return {true, all_neighbours_satisfy_constraint};
+}
