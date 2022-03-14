@@ -172,11 +172,12 @@ void hvox::ChunkRenderer::process_pages() {
      * Remove Chunks *
     \*****************/
 
-    // TODO(Matthew): removal coming first could lead to a chunk being
-    //                reintroduced in dirty queue. Do we just flag it
-    //                as removed by removing entry in metadata map?
     while (m_chunk_removal_queue.try_dequeue(chunk)) {
-        PagedChunkMetadata metadata = m_chunk_metadata[chunk];
+        auto it = m_chunk_metadata.find(chunk);
+
+        PagedChunkMetadata metadata = it->second;
+
+        m_chunk_metadata.erase(it);
 
         if (!metadata.paged) continue;
 
@@ -219,7 +220,12 @@ void hvox::ChunkRenderer::process_pages() {
     \*****************/
 
     while (m_chunk_dirty_queue.try_dequeue(chunk)) {
-        PagedChunkMetadata metadata = m_chunk_metadata[chunk];
+        auto it = m_chunk_metadata.find(chunk);
+
+        if (it == m_chunk_metadata.end())
+            continue;
+
+        PagedChunkMetadata metadata = it->second;
 
         if (metadata.paged) {
             ChunkRenderPage& page = m_chunk_pages[metadata.page_idx];
