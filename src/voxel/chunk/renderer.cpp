@@ -130,18 +130,23 @@ hvox::ChunkRenderPage* hvox::ChunkRenderer::create_pages(ui32 count) {
 }
 
 void hvox::ChunkRenderer::put_chunk_in_page(const Chunk* chunk, ui32 first_page_idx) {
+    PagedChunkMetadata& metadata = m_chunk_metadata[chunk];
+
+    ui32 page_idx = first_page_idx;
     ChunkRenderPage* page = nullptr;
-    for (ui32 i = first_page_idx; i < m_chunk_pages.size(); ++i) {
-        if (m_chunk_pages[i].voxel_count + chunk->instance.count <= block_page_size()) {
-            page = &m_chunk_pages[i];
+    for (; page_idx < m_chunk_pages.size(); ++page_idx) {
+        if (m_chunk_pages[page_idx].voxel_count + chunk->instance.count <= block_page_size()) {
+            page = &m_chunk_pages[page_idx];
             break;
         }
     }
 
     if (page == nullptr) {
         page = create_pages(1);
+        ++page_idx;
     }
 
+    ui32 chunk_idx = page->chunks.size();
     page->chunks.emplace_back(chunk);
 
     if (page->first_dirtied_chunk_idx >= page->chunks.size()) {
@@ -151,6 +156,10 @@ void hvox::ChunkRenderer::put_chunk_in_page(const Chunk* chunk, ui32 first_page_
     page->voxel_count += chunk->instance.count;
 
     page->dirty = true;
+
+    metadata.chunk_idx = chunk_idx;
+    metadata.page_idx  = page_idx;
+    metadata.paged     = true;
 }
 
 void hvox::ChunkRenderer::process_pages() {
