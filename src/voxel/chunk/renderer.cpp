@@ -182,14 +182,36 @@ void hvox::ChunkRenderer::process_pages() {
 
         ChunkRenderPage& page = m_chunk_pages[metadata.page_idx];
 
-        std::swap(page.chunks.back(), page.chunks[metadata.chunk_idx]);
-        page.chunks.pop_back();
+        // Only do full clean up if the chunk we're removing is not
+        // at the end of the page already.
+        if (metadata.chunk_idx != page.chunks.size() - 1) {
+            std::swap(page.chunks.back(), page.chunks[metadata.chunk_idx]);
+            page.chunks.pop_back();
 
-        if (page.first_dirtied_chunk_idx > metadata.chunk_idx) {
-            page.first_dirtied_chunk_idx = metadata.chunk_idx;
+            // TODO(Matthew): This updates chunk indexes, but feels like it
+            //                isn't the best approach. Perhaps we can do
+            //                better?
+            for (
+                ui32 chunk_idx = metadata.chunk_idx;
+                chunk_idx < page.chunks.size();
+                ++chunk_idx
+            ) {
+                m_chunk_metadata[page.chunks[chunk_idx]].chunk_idx = chunk_idx;
+            }
+
+            if (page.first_dirtied_chunk_idx > metadata.chunk_idx) {
+                page.first_dirtied_chunk_idx = metadata.chunk_idx;
+            }
+
+            page.dirty = true;
+        } else {
+            page.chunks.pop_back();
+
+            page.voxel_count = 0;
+            for (auto paged_chunk : page.chunks) {
+                page.voxel_count += paged_chunk->instance.count;
+            }
         }
-
-        page.dirty = true;
     }
 
     /*****************\
