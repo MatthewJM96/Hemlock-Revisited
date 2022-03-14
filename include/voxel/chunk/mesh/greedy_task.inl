@@ -303,11 +303,16 @@ process_new_source:
 
     delete[] visited;
 
-    m_chunk->mesh_task_active.store(false, std::memory_order_release);
-
     m_chunk->state.store(ChunkState::MESHED, std::memory_order_release);
 
+    m_chunk->mesh_task_active.store(false, std::memory_order_release);
+
     m_chunk->on_mesh_change();
+
+    // TODO(Matthew): Set next task if chunk unload is false? Or else set that
+    //                between this task and next, but would need adjusting
+    //                workflow.
+    m_chunk->pending_task.store(ChunkLoadTaskKind::NONE, std::memory_order_release);
 
     return !m_chunk->unload.load(std::memory_order_acquire);
 }
