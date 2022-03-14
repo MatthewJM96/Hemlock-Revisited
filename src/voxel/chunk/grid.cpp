@@ -127,9 +127,15 @@ bool hvox::ChunkGrid::unload_chunk_at(ChunkGridPosition chunk_position) {
     auto it = m_chunks.find(chunk_position.id);
     if (it == m_chunks.end()) return false;
 
-    // TODO(Matthew): Should check for pending tasks, and wait on them before unloading.
-    // TODO(Matthew): Maybe we want to even add an unload task so things can hook into this.
-    //                    But then tbh we probably want to just use an event for this.
+    auto [exists, not_pending] = query_chunk_exact_pending_task((*it).second, ChunkLoadTaskKind::NONE);
+
+    // If we are pending any task.
+    if (!not_pending)  {
+        (*it).second->unload.store(true, std::memory_order_release);
+        return true;
+    }
+
+    (*it).second->on_unload();
 
     (*it).second->dispose();
     delete (*it).second;

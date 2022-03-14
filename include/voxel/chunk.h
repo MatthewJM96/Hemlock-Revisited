@@ -89,6 +89,7 @@ namespace hemlock {
             std::atomic<ChunkState>         state;
             std::atomic<ChunkLoadTaskKind>  pending_task;
             std::atomic<bool>               gen_task_active, mesh_task_active;
+            std::atomic<bool>               unload;
 
             CancellableEvent<BlockChangeEvent>      on_block_change;
             CancellableEvent<BulkBlockChangeEvent>  on_bulk_block_change;

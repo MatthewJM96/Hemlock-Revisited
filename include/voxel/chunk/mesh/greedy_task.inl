@@ -309,5 +309,5 @@ process_new_source:
 
     m_chunk->on_mesh_change();
 
-    return true;
+    return !m_chunk->unload.load(std::memory_order_acquire);
 }

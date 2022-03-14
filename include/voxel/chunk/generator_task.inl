@@ -15,5 +15,5 @@ bool hvox::ChunkGenerationTask<GenerationStrategy>::run_task(ChunkLoadThreadStat
 
     m_chunk->gen_task_active.store(false, std::memory_order_release);
 
-    return true;
+    return !m_chunk->unload.load(std::memory_order_acquire);
 }
