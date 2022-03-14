@@ -33,20 +33,6 @@ void hvox::ChunkGrid::update(TimeData time) {
         chunk.second->update(time);
     }
 
-    // TODO(Matthew): This should not run every update. Probs
-    //                use multi-prod-single-consumer in renderer
-    //                added to from mesh thread tasks.
-    for (auto& chunk : m_chunks) {
-        if (chunk.second->TEMP_in_page) continue;
-
-        auto [exists, meshed] = query_chunk_state(chunk.second, ChunkState::MESHED);
-        if (meshed) {
-            m_renderer.add_chunk(chunk.second);
-            chunk.second->TEMP_in_page = true;
-        }
-    }
-
-    // TODO(Matthew): Handle changes in chunk requiring change in renderer here.
     m_renderer.update(time);
 }
 
@@ -79,6 +65,8 @@ bool hvox::ChunkGrid::preload_chunk_at(ChunkGridPosition chunk_position) {
     establish_chunk_neighbours(chunk);
 
     m_chunks[chunk_position.id] = chunk;
+
+    m_renderer.add_chunk(chunk);
 
     return true;
 }

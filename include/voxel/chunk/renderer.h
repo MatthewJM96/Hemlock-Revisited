@@ -23,16 +23,14 @@ namespace hemlock {
             bool paged;
         };
         using PagedChunksMetadata   = std::unordered_map<const Chunk*, PagedChunkMetadata>;
-        using PagedChunkQueue       = std::queue<const Chunk*>;
+        using PagedChunkQueue       = moodycamel::ConcurrentQueue<const Chunk*>;
 
         struct ChunkRenderPage {
             PagedChunks chunks;
             ui32        voxel_count;
             GLuint      vbo;
-            ui32        gpu_alloc_size;
             bool        dirty;
             ui32        first_dirtied_chunk_idx;
-            std::mutex  mutex;
         };
         using ChunkRenderPages = std::vector<ChunkRenderPage>;
 
@@ -74,13 +72,12 @@ namespace hemlock {
              *
              * @param chunk 
              */
-            void add_chunk(const Chunk* chunk);
+            void add_chunk(Chunk* chunk);
         protected:
             static hg::MeshHandles block_mesh_handles;
 
-            Subscriber<>            handle_chunk_mesh_change;
-            Subscriber<RenderState> handle_chunk_render_status_change;
-            Subscriber<>            handle_chunk_unload;
+            Subscriber<>    handle_chunk_mesh_change;
+            Subscriber<>    handle_chunk_unload;
 
             /**
              * @brief Creates count number of new pages.
@@ -93,32 +90,26 @@ namespace hemlock {
             inline ChunkRenderPage* create_pages(ui32 count);
 
             /**
-             * @brief Updates the buffer stored in the GPU
-             * to reflect changes in the page's host buffer.
+             * @brief Puts a chunk in the first page starting
+             * from the given index that has enough space for it.
              *
-             * @param page The page to process.
+             * @param chunk The chunk to find a page for.
+             * @param first_page_idx The index of the first page
+             * to consider.
              */
-            void process_page(ChunkRenderPage& page);
+            void put_chunk_in_page(const Chunk* chunk, ui32 first_page_idx);
 
             /**
-             * @brief Marks page a chunk sits in as
-             * dirty.
-             *
-             * @param chunk The chunk whose page is
-             * to be marked dirty.
+             * @brief Updates chunks, removing those that
+             * are to be removed and then processing pages
+             * that have dirtied chunks.
              */
-            void mark_chunk_dirty(const Chunk* chunk);
-            /**
-             * @brief Marks a chunk as to be removed.
-             *
-             * @param chunk The chunk to mark for
-             * removal
-             */
-            void mark_chunk_to_remove(const Chunk* chunk);
+            void process_pages();
 
             ChunkRenderPages    m_chunk_pages;
             PagedChunksMetadata m_chunk_metadata;
             PagedChunkQueue     m_chunk_removal_queue;
+            PagedChunkQueue     m_chunk_dirty_queue;
 
             ui32 m_page_size;
             ui32 m_max_unused_pages;

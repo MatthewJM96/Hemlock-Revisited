@@ -191,5 +191,7 @@ bool hvox::ChunkNaiveMeshTask<MeshComparator>::run_task(ChunkLoadThreadState* st
 
     m_chunk->state.store(ChunkState::MESHED, std::memory_order_release);
 
+    m_chunk->on_mesh_change();
+
     return true;
 }

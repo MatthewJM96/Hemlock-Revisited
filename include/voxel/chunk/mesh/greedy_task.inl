@@ -307,5 +307,7 @@ process_new_source:
 
     m_chunk->state.store(ChunkState::MESHED, std::memory_order_release);
 
+    m_chunk->on_mesh_change();
+
     return true;
 }
