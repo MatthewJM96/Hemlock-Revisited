@@ -135,6 +135,25 @@ public:
             delta_pos -= glm::normalize(m_camera.up()) * static_cast<f32>(time.frame) * 0.01f * speed_mult;
         }
 
+        static bool do_unloads = false;
+        static f64 start = 0.;
+        if (m_input_manager->is_pressed(hui::PhysicalKey::H_U)) {
+            do_unloads = true;
+            start = time.total;
+        }
+#define NUM 4
+        for (auto x = -NUM; x < NUM; ++x) {
+            for (auto z = -NUM; z < NUM; ++z) {
+                if (do_unloads &&
+                    (start + ((x + NUM) + (2 * NUM + 1) * (z + NUM)) * 300) < time.total) {
+                    m_chunk_grid.unload_chunk_at({ x, 0, z });
+                    m_chunk_grid.unload_chunk_at({ x, 1, z });
+                    m_chunk_grid.unload_chunk_at({ x, 2, z });
+                }
+            }
+        }
+#undef NUM
+
 #if defined(DEBUG)
         static f64 last_time = 0.0;
         if (m_input_manager->is_pressed(hui::PhysicalKey::H_T)) {
