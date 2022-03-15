@@ -8,60 +8,13 @@
 #include "timing.h"
 #include "graphics/mesh.h"
 #include "voxel/block.hpp"
-#include "voxel/chunk/load_task.hpp"
 #include "voxel/coordinate_system.h"
+#include "voxel/chunk/events.hpp"
+#include "voxel/chunk/load_task.hpp"
+#include "voxel/chunk/state.hpp"
 
 namespace hemlock {
     namespace voxel {
-        struct Chunk;
-        class ChunkGrid;
-
-        // TODO(Matthew): We shoud instance block and upload scale/translation transformations only.
-        //                  Initially just translation, scale comes after we optimise.
-        enum class ChunkState : ui8 {
-            NONE            = 0,
-            PRELOADED       = 1,
-            GENERATED       = 2,
-            MESHED          = 3,
-            MESH_UPLOADED   = 4
-        };
-
-        enum class RenderState : ui8 {
-            NONE    = 0,
-            LOD_0   = 1,
-            LOD_1   = 2,
-            LOD_2   = 3,
-            LOD_3   = 4,
-            LOD_4   = 5,
-            LOD_5   = 6,
-            LOD_6   = 7,
-            LOD_7   = 8,
-            FULL    = 9
-        };
-
-        struct BlockChangeEvent {
-            Chunk*              chunk;
-            Block               old_block;
-            Block               new_block;
-            BlockChunkPosition  block_position;
-        };
-
-        struct BulkBlockChangeEvent {
-            Chunk*              chunk;
-            Block*              new_blocks;
-            bool                single_block;
-            BlockChunkPosition  start_position;
-            BlockChunkPosition  end_position;
-        };
-
-        union Neighbours {
-            struct {
-                Chunk *left, *right, *top, *bottom, *front, *back;
-            };
-            Chunk* neighbours[8];
-        };
-        const Neighbours NULL_NEIGHBOURS = Neighbours{ nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
-
         struct ChunkInstanceData;
 
         /**
