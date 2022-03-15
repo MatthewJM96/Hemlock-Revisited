@@ -8,7 +8,7 @@ void hvox::ChunkAllocator::dispose() {
     std::lock_guard<std::mutex> lock(m_handles_mutex);
 
     for (auto& handle : m_handles) {
-        assert(handle.second->ref_count == 0);
+        try_deallocate(handle.second);
     }
     ChunkHandles().swap(m_handles);
 }
