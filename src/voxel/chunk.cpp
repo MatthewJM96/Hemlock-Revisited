@@ -5,7 +5,7 @@
 #include "voxel/chunk.h"
 
 hvox::Chunk::Chunk() :
-    neighbours(NULL_NEIGHBOURS),
+    neighbours({}),
     blocks(nullptr),
     state(ChunkState::NONE),
     pending_task(ChunkLoadTaskKind::NONE),
@@ -18,7 +18,7 @@ void hvox::Chunk::init() {
     blocks = new Block[CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE];
     std::fill_n(blocks, CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE, Block{ false });
 
-    neighbours = NULL_NEIGHBOURS;
+    neighbours = {};
 
     state.store(ChunkState::PRELOADED, std::memory_order_release);
 }
@@ -29,7 +29,7 @@ void hvox::Chunk::init(Block* _blocks) {
     blocks = _blocks;
     m_owns_blocks = false;
 
-    neighbours = NULL_NEIGHBOURS;
+    neighbours = {};
 
     state.store(ChunkState::PRELOADED, std::memory_order_release);
 }
@@ -38,7 +38,7 @@ void hvox::Chunk::dispose() {
     if (m_owns_blocks) delete[] blocks;
     blocks = nullptr;
 
-    neighbours = NULL_NEIGHBOURS;
+    neighbours = {};
 }
 
 void hvox::Chunk::update(TimeData) {
