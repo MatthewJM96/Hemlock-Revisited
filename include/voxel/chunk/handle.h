@@ -32,6 +32,8 @@ namespace hemlock {
             bool operator!=(void* possible_nullptr);
             bool operator!=(const ChunkHandle& handle);
         protected:
+            static ChunkHandle acquire_existing(const ChunkHandle& handle);
+
             ChunkHandle(Chunk* chunk);
 
             Chunk* m_chunk;

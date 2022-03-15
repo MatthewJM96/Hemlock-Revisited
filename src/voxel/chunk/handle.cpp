@@ -4,8 +4,6 @@
 
 #include "voxel/chunk/handle.h"
 
-hvox::ChunkHandleMetadatas hvox::ChunkHandle::metadata = {};
-
 hvox::ChunkHandle::ChunkHandle() :
     m_chunk(nullptr)
 {
@@ -13,11 +11,11 @@ hvox::ChunkHandle::ChunkHandle() :
 }
 
 hvox::ChunkHandle::ChunkHandle(const ChunkHandle& rhs) {
-    *this = std::move(ChunkHandle::acquire_existing(rhs->position.id));
+    *this = std::move(ChunkHandle::acquire_existing(rhs));
 }
 
 hvox::ChunkHandle& hvox::ChunkHandle::operator=(const ChunkHandle& rhs) {
-    *this = std::move(ChunkHandle::acquire_existing(rhs->position.id));
+    *this = std::move(ChunkHandle::acquire_existing(rhs));
 
     return *this;
 }
@@ -66,4 +64,22 @@ bool hvox::ChunkHandle::operator!=(void* possible_nullptr) {
 
 bool hvox::ChunkHandle::operator!=(const ChunkHandle& handle) {
     return !(*this == handle);
+}
+
+hvox::ChunkHandle hvox::ChunkHandle::acquire_existing(const ChunkHandle& handle) {
+    ChunkHandle new_handle;
+
+    new_handle.m_chunk = handle.m_chunk;
+
+    if (new_handle == nullptr)
+        return new_handle;
+
+    new_handle->ref_count++;
+
+    if (new_handle->alive_state.load(std::memory_order_acquire) == ChunkAliveState::DEAD) {
+        new_handle->ref_count.store(0, std::memory_order_release);
+        new_handle.m_chunk = nullptr;
+    }
+
+    return new_handle;
 }
