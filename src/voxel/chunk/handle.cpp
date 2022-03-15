@@ -51,3 +51,19 @@ hvox::Chunk* hvox::ChunkHandle::operator->() {
 const hvox::Chunk* hvox::ChunkHandle::operator->() const {
     return m_chunk;
 }
+
+bool hvox::ChunkHandle::operator==(void* possible_nullptr) {
+    return (possible_nullptr == nullptr) && (m_chunk == nullptr);
+}
+
+bool hvox::ChunkHandle::operator==(const ChunkHandle& handle) {
+    return m_chunk == handle.m_chunk;
+}
+
+bool hvox::ChunkHandle::operator!=(void* possible_nullptr) {
+    return !(*this == possible_nullptr);
+}
+
+bool hvox::ChunkHandle::operator!=(const ChunkHandle& handle) {
+    return !(*this == handle);
+}

@@ -25,6 +25,12 @@ namespace hemlock {
 
             Chunk* operator->();
             const Chunk* operator->() const;
+
+            bool operator==(void* possible_nullptr);
+            bool operator==(const ChunkHandle& handle);
+
+            bool operator!=(void* possible_nullptr);
+            bool operator!=(const ChunkHandle& handle);
         protected:
             ChunkHandle(Chunk* chunk);
 
