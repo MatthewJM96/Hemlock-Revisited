@@ -8,6 +8,8 @@ namespace hemlock {
         struct Chunk;
         struct ChunkHandle;
 
+        using ChunkHandles = std::unordered_map<ChunkID, ChunkHandle>;
+
         class ChunkAllocator {
         public:
             ChunkAllocator()  { /* Empty. */ }
@@ -15,14 +17,17 @@ namespace hemlock {
 
             void dispose();
 
-            ChunkHandle& acquire(ChunkGridPosition pos);
-            ChunkHandle& acquire(ChunkID id);
+            ChunkHandle acquire(ChunkGridPosition pos);
+            ChunkHandle acquire(ChunkID id);
 
             bool release(ChunkHandle&& handle);
         protected:
-            ChunkHandle& acquire_existing(ChunkID id);
+            ChunkHandle allocate(ChunkID id);
 
-            ChunkHandleMetadatas m_metadata;
+            bool try_deallocate(ChunkHandle& handle);
+
+            std::mutex   m_handles_mutex;
+            ChunkHandles m_handles;
         };
     }
 }
