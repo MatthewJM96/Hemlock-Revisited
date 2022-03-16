@@ -20,7 +20,7 @@ namespace hemlock {
             ChunkHandle acquire(ChunkGridPosition pos);
             ChunkHandle acquire(ChunkID id);
 
-            bool release(ChunkHandle&& handle);
+            bool release(ChunkHandle& handle);
         protected:
             ChunkHandle allocate(ChunkID id);
 

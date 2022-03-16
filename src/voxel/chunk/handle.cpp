@@ -1,6 +1,7 @@
 #include "stdafx.h"
 
 #include "voxel/chunk.h"
+#include "voxel/chunk/allocator.h"
 
 #include "voxel/chunk/handle.h"
 
@@ -64,6 +65,12 @@ bool hvox::ChunkHandle::operator!=(void* possible_nullptr) {
 
 bool hvox::ChunkHandle::operator!=(const ChunkHandle& handle) {
     return !(*this == handle);
+}
+
+bool hvox::ChunkHandle::release() {
+    if (m_chunk == nullptr) return false;
+
+    return m_chunk->allocator->release(*this);
 }
 
 hvox::ChunkHandle hvox::ChunkHandle::acquire_existing(const ChunkHandle& handle) {

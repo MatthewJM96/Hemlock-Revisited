@@ -28,7 +28,7 @@ hvox::ChunkHandle hvox::ChunkAllocator::acquire(ChunkID id) {
     }
 }
 
-bool hvox::ChunkAllocator::release(ChunkHandle&& handle) {
+bool hvox::ChunkAllocator::release(ChunkHandle& handle) {
     std::lock_guard<std::mutex> lock(m_handles_mutex);
 
     if (handle == nullptr) return false;

@@ -15,6 +15,7 @@
 
 namespace hemlock {
     namespace voxel {
+        struct ChunkAllocator;
         struct ChunkInstanceData;
 
         /**
@@ -32,6 +33,8 @@ namespace hemlock {
             ChunkGridPosition position;
             Neighbours        neighbours;
             Block*            blocks;
+
+            ChunkAllocator*   allocator;
 
             RenderState render_state;
             struct {
