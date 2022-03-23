@@ -8,50 +8,14 @@
 #include "timing.h"
 #include "graphics/mesh.h"
 #include "voxel/block.hpp"
-#include "voxel/chunk/load_task.hpp"
 #include "voxel/coordinate_system.h"
+#include "voxel/chunk/events.hpp"
+#include "voxel/chunk/load_task.hpp"
+#include "voxel/chunk/state.hpp"
 
 namespace hemlock {
     namespace voxel {
-        struct Chunk;
-        class ChunkGrid;
-
-        // TODO(Matthew): We shoud instance block and upload scale/translation transformations only.
-        //                  Initially just translation, scale comes after we optimise.
-        enum class ChunkState : ui8 {
-            NONE            = 0,
-            PRELOADED       = 1,
-            GENERATED       = 2,
-            MESHED          = 3,
-            MESH_UPLOADED   = 4
-        };
-
-        struct BlockChangeEvent {
-            Chunk*              chunk;
-            Block               old_block;
-            Block               new_block;
-            BlockChunkPosition  block_position;
-        };
-
-        struct BulkBlockChangeEvent {
-            Chunk*              chunk;
-            Block*              new_blocks;
-            bool                single_block;
-            BlockChunkPosition  start_position;
-            BlockChunkPosition  end_position;
-        };
-
-        union Neighbours {
-            struct {
-                Chunk *left, *right, *top, *bottom, *front, *back;
-            };
-            Chunk* neighbours[8];
-        };
-        const Neighbours NULL_NEIGHBOURS = Neighbours{ nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
-
-        struct ChunkInstanceData {
-            f32v3 translation, scaling;
-        };
+        struct ChunkInstanceData;
 
         /**
          * @brief 
@@ -69,19 +33,36 @@ namespace hemlock {
             Neighbours        neighbours;
             Block*            blocks;
 
+            RenderState render_state;
             struct {
                 ChunkInstanceData*  data;
                 ui32                count;
             } instance;
 
-            std::atomic<ChunkState>        state;
-            std::atomic<ChunkLoadTaskKind> pending_task;
+            std::atomic<ChunkState>         state;
+            std::atomic<ChunkLoadTaskKind>  pending_task;
             std::atomic<bool>               gen_task_active, mesh_task_active;
+            std::atomic<ChunkAliveState>    alive_state;
+            std::atomic<ui32>               ref_count;
 
-            // TODO(Matthew): Store these here? Somehow feels dodgy.
-            CancellableEvent<BlockChangeEvent>     on_block_change;
-            CancellableEvent<BulkBlockChangeEvent> on_bulk_block_change;
+            CancellableEvent<BlockChangeEvent>      on_block_change;
+            CancellableEvent<BulkBlockChangeEvent>  on_bulk_block_change;
+
+            // NOTE(Matthew): These events, at least on_mesh_change, can be
+            //                called from multiple threads. Events are NOT
+            //                thread-safe. Our one guarantee is not really
+            //                a full guarantee but should hold true: only
+            //                one thread that could make a state change
+            //                should be processing a task regarding this
+            //                chunk at any point in time. If this fails
+            //                to hold up, then we could easily get race
+            //                conditions inside the events.
+            Event<>                                 on_mesh_change;
+            Event<RenderState>                      on_render_state_change;
+            Event<>                                 on_unload;
         protected:
+            void init_events();
+
             bool m_owns_blocks;
         };
 

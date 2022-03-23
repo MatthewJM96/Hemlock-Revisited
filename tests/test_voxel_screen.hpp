@@ -4,7 +4,7 @@
 #include <FastNoise/FastNoise.h>
 
 #include "voxel/chunk/generator_task.hpp"
-#include "voxel/chunk/mesh/naive_task.hpp"
+#include "voxel/chunk/mesh/greedy_task.hpp"
 
 #include "iomanager.hpp"
 
@@ -135,6 +135,25 @@ public:
             delta_pos -= glm::normalize(m_camera.up()) * static_cast<f32>(time.frame) * 0.01f * speed_mult;
         }
 
+        static bool do_unloads = false;
+        static f64 start = 0.;
+        if (m_input_manager->is_pressed(hui::PhysicalKey::H_U)) {
+            do_unloads = true;
+            start = time.total;
+        }
+#define NUM 4
+        for (auto x = -NUM; x < NUM; ++x) {
+            for (auto z = -NUM; z < NUM; ++z) {
+                if (do_unloads &&
+                    (start + ((x + NUM) + (2 * NUM + 1) * (z + NUM)) * 300) < time.total) {
+                    m_chunk_grid.unload_chunk_at({ x, 0, z });
+                    m_chunk_grid.unload_chunk_at({ x, 1, z });
+                    m_chunk_grid.unload_chunk_at({ x, 2, z });
+                }
+            }
+        }
+#undef NUM
+
 #if defined(DEBUG)
         static f64 last_time = 0.0;
         if (m_input_manager->is_pressed(hui::PhysicalKey::H_T)) {
@@ -175,8 +194,8 @@ public:
         m_input_manager->init();
 
         m_camera.attach_to_window(m_process->window());
-        m_camera.set_position(f32v3{35.0f, 9.0f, -22.0f});
-        m_camera.rotate_from_mouse_with_absolute_up(-160.0f, 160.0f, 0.005f);
+        m_camera.set_position(f32v3{189.0f, 109.0f, -189.0f});
+        m_camera.rotate_from_mouse_with_absolute_up(-130.0f, 160.0f, 0.005f);
         m_camera.set_fov(90.0f);
         m_camera.update();
 
@@ -211,8 +230,8 @@ public:
 
             auto gen_task  = new hvox::ChunkGenerationTask<TVS_VoxelGenerator>();
             // Greedy meshing is broken.
-            // auto mesh_task = new hvox::ChunkGreedyMeshTask<TRS_BlockComparator>();
-            auto mesh_task = new hvox::ChunkNaiveMeshTask<TRS_BlockComparator>();
+            auto mesh_task = new hvox::ChunkGreedyMeshTask<TRS_BlockComparator>();
+            // auto mesh_task = new hvox::ChunkNaiveMeshTask<TRS_BlockComparator>();
 
             gen_task->init(chunk, chunk_grid);
             mesh_task->init(chunk, chunk_grid);

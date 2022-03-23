@@ -5,6 +5,7 @@
 #include "voxel/coordinate_system.h"
 #include "voxel/chunk.h"
 #include "voxel/chunk/load_task.hpp"
+#include "voxel/chunk/renderer.h"
 
 namespace hemlock {
     namespace voxel {
@@ -67,6 +68,8 @@ namespace hemlock {
              * calling this when not already suspended.
              */
             void resume_chunk_tasks()  { m_chunk_load_thread_pool.resume();  }
+
+            ChunkRenderer* renderer() { return &m_renderer; }
 
             /**
              * @brief Loads chunks with the assumption none specified
@@ -254,6 +257,124 @@ namespace hemlock {
              */
             QueriedChunkState query_all_neighbour_states(Chunk* chunk, ChunkState required_minimum_state);
 
+            /**
+             * @brief Queries the state of the chunk at the given
+             * position. The requirement verified here is that
+             * the so-positioned chunk is exactly in the specified
+             * state; "later" states shall not satisfy the
+             * requirement here.
+             *
+             * @param chunk_position The position of the chunk
+             * to query.
+             * @param required_state The state required
+             * of the chunk.
+             * @return [true, true] if the chunk is in the required
+             * state, [true, false] if the chunk exists but does
+             * not satisfy the state requirement, [false, false]
+             * if the chunk does not exist. Note: [false, true]
+             * should never occur and represents invalid query
+             * processing.
+             */
+            QueriedChunkState query_chunk_exact_state(ChunkGridPosition chunk_position, ChunkState required_state);
+            /**
+             * @brief Queries the state of the chunk. The
+             * requirement verified here is that the chunk
+             * is exactly in the specified state; "later"
+             * states shall not satisfy the requirement
+             * here.
+             *
+             * @param chunk The chunk to query
+             * @param required_state The required state
+             * required of the chunk.
+             * @return [true, true] if the chunk is in the
+             * required state, [true, false] if the chunk exists
+             * but does not satisfy the state requirement,
+             * [false, false] if the chunk does not exist. Note:
+             * [false, true] should never occur and represents
+             * invalid query processing.
+             */
+            QueriedChunkState query_chunk_exact_state(Chunk* chunk, ChunkState required_state);
+
+            /**
+             * @brief Queries the pending task of the chunk
+             * at the given position. The requirement verified
+             * here is that the so-positioned chunk is exactly
+             * in the specified state; "later" states shall
+             * not satisfy the requirement here.
+             *
+             * @param chunk_position The position of the chunk
+             * to query.
+             * @param required_pending_task The task required
+             * to be pending for the chunk.
+             * @return [true, true] if the chunk is pending
+             * the required task, [true, false] if the chunk
+             * exists but does not satisfy the pending task
+             * requirement, [false, false] if the chunk does
+             * not exist. Note: [false, true] should never
+             * occur and represents invalid query processing.
+             */
+            QueriedChunkPendingTask query_chunk_exact_pending_task(ChunkGridPosition chunk_position, ChunkLoadTaskKind required_pending_task);
+            /**
+             * @brief Queries the pending task of the chunk
+             * The requirement verified here is that the
+             * chunk is exactly in the specified state;
+             * "later" states shall not satisfy the
+             * requirement here.
+             *
+             * @param chunk The chunk to query
+             * @param required_pending_task The task
+             * required of the chunk.
+             * @return [true, true] if the chunk is pending
+             * the required task, [true, false] if the chunk
+             * exists but does not satisfy the pending task
+             * requirement, [false, false] if the chunk does
+             * not exist. Note: [false, true] should never
+             * occur and represents invalid query processing.
+             */
+            QueriedChunkPendingTask query_chunk_exact_pending_task(Chunk* chunk, ChunkLoadTaskKind required_pending_task);
+
+            /**
+             * @brief Queries the state of the neighbours of
+             * the chunk at the given position. The requirement
+             * verified here is that the neighbours of the
+             * so-positioned chunk are exactly in the specified
+             * state; "later" states shall not satisfy the
+             * requirement here.
+             *
+             * @param chunk_position The position of the chunk
+             * whose neighbours are to be queried.
+             * @param required_state The state required of the
+             * neighbouring chunks.
+             * @return [true, true] if the neighbouring chunks
+             * are in the required state, [true, false] if the
+             * chunk whose neighbours we are querying exists but
+             * its neighbours do not satisfy the state requirement,
+             * [false, false] if the chunk whose neighbours we are
+             * querying does not exist. Note: [false, true] should
+             * never occur and represents invalid query processing.
+             */
+            QueriedChunkState query_all_neighbour_exact_states(ChunkGridPosition chunk_position, ChunkState required_state);
+            /**
+             * @brief Queries the state of the neighbours of
+             * the chunk. The requirement verified here is
+             * that the neighbours of the chunk are exactly
+             * in the specified state; "later" states shall
+             * not satisfy the requirement here.
+             *
+             * @param chunk The chunk whose neighbours are to
+             * be queried.
+             * @param required_state The state required of the
+             * neighbouring chunks.
+             * @return [true, true] if the neighbouring chunks are
+             * in the required state, [true, false] if the chunk
+             * whose neighbours we are querying exists but its
+             * neighbours do not satisfy the state requirement,
+             * [false, false] if the chunk whose neighbours we are
+             * querying does not exist. Note: [false, true] should
+             * never occur and represents invalid query processing.
+             */
+            QueriedChunkState query_all_neighbour_exact_states(Chunk* chunk, ChunkState required_state);
+
             const Chunks& chunks() { return m_chunks; }
         protected:
             void establish_chunk_neighbours(Chunk* chunk);
@@ -263,12 +384,7 @@ namespace hemlock {
             thread::ThreadPool<ChunkLoadTaskContext>        m_chunk_load_thread_pool;
             thread::ThreadWorkflow<ChunkLoadTaskContext>    m_chunk_load_workflow;
 
-            // TODO(Matthew): this probably should go elsewhere later, but
-            //                to get instancing working this will do.
-            hg::MeshHandles   m_mesh_handles;
-            GLuint            m_instance_vbo;
-            bool              m_TEMP_not_all_ready;
-            ui32              m_voxel_count;
+            ChunkRenderer m_renderer;
 
             Chunks m_chunks;
         };

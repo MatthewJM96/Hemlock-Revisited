@@ -5,7 +5,7 @@
 #include "voxel/chunk.h"
 
 hvox::Chunk::Chunk() :
-    neighbours(NULL_NEIGHBOURS),
+    neighbours({}),
     blocks(nullptr),
     state(ChunkState::NONE),
     pending_task(ChunkLoadTaskKind::NONE),
@@ -13,19 +13,23 @@ hvox::Chunk::Chunk() :
 { /* Empty. */ }
 
 void hvox::Chunk::init() {
+    init_events();
+
     blocks = new Block[CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE];
     std::fill_n(blocks, CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE, Block{ false });
 
-    neighbours = NULL_NEIGHBOURS;
+    neighbours = {};
 
     state.store(ChunkState::PRELOADED, std::memory_order_release);
 }
 
 void hvox::Chunk::init(Block* _blocks) {
+    init_events();
+
     blocks = _blocks;
     m_owns_blocks = false;
 
-    neighbours = NULL_NEIGHBOURS;
+    neighbours = {};
 
     state.store(ChunkState::PRELOADED, std::memory_order_release);
 }
@@ -34,11 +38,19 @@ void hvox::Chunk::dispose() {
     if (m_owns_blocks) delete[] blocks;
     blocks = nullptr;
 
-    neighbours = NULL_NEIGHBOURS;
+    neighbours = {};
 }
 
 void hvox::Chunk::update(TimeData) {
     // Empty for now.
+}
+
+void hvox::Chunk::init_events() {
+    on_block_change         .set_sender(reinterpret_cast<Sender>(this));
+    on_bulk_block_change    .set_sender(reinterpret_cast<Sender>(this));
+    on_mesh_change          .set_sender(reinterpret_cast<Sender>(this));
+    on_render_state_change  .set_sender(reinterpret_cast<Sender>(this));
+    on_unload               .set_sender(reinterpret_cast<Sender>(this));
 }
 
 bool hvox::set_block( Chunk* chunk,
