@@ -22,13 +22,13 @@ namespace hemlock {
          */
         struct Chunk : public hmem::Handleable {
             Chunk();
+            ~Chunk();
 
             void init();
             void init(
                                  Block* block_buffer//,
                 // ChunkInstanceDataPager& instance_data_pager
             );
-            void dispose();
 
             void update(TimeData);
 
@@ -65,6 +65,8 @@ namespace hemlock {
             Event<RenderState>                      on_render_state_change;
             Event<>                                 on_unload;
         protected:
+            void dispose();
+
             void init_events();
 
             // ChunkInstanceDataPager& m_instance_data_pager;

@@ -32,6 +32,7 @@ void hvox::ChunkGrid::update(TimeData time) {
     // Update chunks, removing those marked for unload that
     // are done with pending tasks.
     for (auto it = m_chunks.begin(); it != m_chunks.end();) {
+        // TODO(Matthew): we shouldn't do this explicitly with unload.
         if ((*it).second->unload.load(std::memory_order_acquire)) {
             auto [exists, not_pending] =
                 query_chunk_exact_pending_task(
@@ -152,18 +153,9 @@ bool hvox::ChunkGrid::unload_chunk_at(ChunkGridPosition chunk_position) {
     auto it = m_chunks.find(chunk_position.id);
     if (it == m_chunks.end()) return false;
 
-    auto [exists, not_pending] = query_chunk_exact_pending_task((*it).second, ChunkLoadTaskKind::NONE);
-
-    // If we are pending any task.
-    if (!not_pending)  {
-        (*it).second->unload.store(true, std::memory_order_release);
-        return true;
-    }
-
     (*it).second->on_unload();
 
-    (*it).second->dispose();
-    delete (*it).second;
+    (*it).second.release();
 
     m_chunks.erase(it);
 

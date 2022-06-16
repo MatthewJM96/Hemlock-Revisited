@@ -43,9 +43,16 @@ bool hmem::PagedAllocator<DataType, PageSize>::deallocate(Handle<DataType>&& han
 
     if (handle == nullptr) return false;
 
+    // Give the underlying a chance to release any memory it was
+    // holding onto.
+    handle.m_data.~DataType();
+
     m_free_items.emplace_back(handle.m_data);
 
     // Need to think about how to even do this, given live handles can hardly be notified of this.
+    //   Probably can compact only by being more careful about which free item is next used as
+    //   an allocation - perhaps keep each page's free items in a separate bucket and prefer
+    //   to allocate to the most full bucket with availability?
     do_compaction_if_needed();
 
     return true;

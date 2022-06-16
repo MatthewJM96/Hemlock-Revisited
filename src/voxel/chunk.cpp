@@ -14,6 +14,10 @@ hvox::Chunk::Chunk() :
     m_owns_blocks(true)
 { /* Empty. */ }
 
+hvox::Chunk::~Chunk() {
+    dispose();
+}
+
 void hvox::Chunk::init() {
     init_events();
 
