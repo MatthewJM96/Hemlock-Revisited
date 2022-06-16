@@ -9,6 +9,7 @@
 #include "graphics/mesh.h"
 #include "voxel/block.hpp"
 #include "voxel/coordinate_system.h"
+#include "voxel/chunk/allocator.h"
 #include "voxel/chunk/events.hpp"
 #include "voxel/chunk/load_task.hpp"
 #include "voxel/chunk/state.hpp"
@@ -20,11 +21,13 @@ namespace hemlock {
         /**
          * @brief 
          */
-        struct Chunk {
+        struct Chunk : public Handleable {
             Chunk();
 
-            void init();
-            void init(Block* _blocks);
+            void init(
+                                 Block* block_buffer,
+                ChunkInstanceDataPager& instance_data_pager
+            );
             void dispose();
 
             void update(TimeData);
@@ -42,8 +45,6 @@ namespace hemlock {
             std::atomic<ChunkState>         state;
             std::atomic<ChunkLoadTaskKind>  pending_task;
             std::atomic<bool>               gen_task_active, mesh_task_active;
-            std::atomic<ChunkAliveState>    alive_state;
-            std::atomic<ui32>               ref_count;
 
             CancellableEvent<BlockChangeEvent>      on_block_change;
             CancellableEvent<BulkBlockChangeEvent>  on_bulk_block_change;
@@ -63,7 +64,8 @@ namespace hemlock {
         protected:
             void init_events();
 
-            bool m_owns_blocks;
+            ChunkInstanceDataPager& m_instance_data_pager;
+            bool                    m_owns_blocks;
         };
 
         /**
@@ -127,6 +129,16 @@ namespace hemlock {
     }
 }
 namespace hvox = hemlock::voxel;
+
+namespace std {
+    template <>
+    struct hash<hvox::Chunk> {
+        std::size_t operator()(const hvox::Chunk& chunk) const {
+            std::hash<hvox::ColumnID> hash;
+            return hash(chunk.position.id);
+        }
+    };
+}
 
 #include "voxel/chunk.inl"
 
