@@ -20,7 +20,7 @@ namespace hemlock {
         /**
          * @brief 
          */
-        struct Chunk : public Handleable {
+        struct Chunk : public hmem::Handleable {
             Chunk();
 
             void init(
