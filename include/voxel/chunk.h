@@ -9,7 +9,6 @@
 #include "graphics/mesh.h"
 #include "voxel/block.hpp"
 #include "voxel/coordinate_system.h"
-#include "voxel/chunk/allocator.h"
 #include "voxel/chunk/events.hpp"
 #include "voxel/chunk/load_task.hpp"
 #include "voxel/chunk/state.hpp"
