@@ -10,6 +10,7 @@ hvox::Chunk::Chunk() :
     blocks(nullptr),
     state(ChunkState::NONE),
     pending_task(ChunkLoadTaskKind::NONE),
+    unload(false),
     m_owns_blocks(true)
 { /* Empty. */ }
 

@@ -23,9 +23,10 @@ namespace hemlock {
         struct Chunk : public hmem::Handleable {
             Chunk();
 
+            void init();
             void init(
-                                 Block* block_buffer,
-                ChunkInstanceDataPager& instance_data_pager
+                                 Block* block_buffer//,
+                // ChunkInstanceDataPager& instance_data_pager
             );
             void dispose();
 
@@ -45,6 +46,9 @@ namespace hemlock {
             std::atomic<ChunkLoadTaskKind>  pending_task;
             std::atomic<bool>               gen_task_active, mesh_task_active;
 
+            // TODO(Matthew): Remove?
+            std::atomic<bool> unload;
+
             CancellableEvent<BlockChangeEvent>      on_block_change;
             CancellableEvent<BulkBlockChangeEvent>  on_bulk_block_change;
 
@@ -63,7 +67,7 @@ namespace hemlock {
         protected:
             void init_events();
 
-            ChunkInstanceDataPager& m_instance_data_pager;
+            // ChunkInstanceDataPager& m_instance_data_pager;
             bool                    m_owns_blocks;
         };
 

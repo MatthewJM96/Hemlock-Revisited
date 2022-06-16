@@ -9,6 +9,17 @@
 
 namespace hemlock {
     namespace voxel {
+
+        // TODO(Matthew): Does page size want to be made a run-time thing,
+        //                as it may be nice to base this on view distance.
+        // using ChunkPager = Pager<Chunk, 8 * 8 * 8>;
+        // using ChunkInstanceDataPager =
+        //     Pager<ChunkInstanceData,
+        //             CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE / 4>;
+        // using ChunkBlockPager =
+        //     Pager<Block,
+        //             CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE>;
+
         struct Chunk;
         // TODO(Matthew): We can do better storage of chunks and blocks at this level.
         // TODO(Matthew): We should add support for LOD, different generation stages, disabling meshing etc.
