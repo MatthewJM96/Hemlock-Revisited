@@ -33,9 +33,9 @@ namespace hemlock {
 
         union Neighbours {
             struct {
-                Chunk *left, *right, *top, *bottom, *front, *back;
+                hmem::Handle<Chunk> left, right, top, bottom, front, back;
             };
-            Chunk* neighbours[8];
+            hmem::Handle<Chunk> neighbours[8];
         };
     }
 }

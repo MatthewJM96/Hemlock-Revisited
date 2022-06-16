@@ -12,24 +12,23 @@ namespace hemlock {
 
         // TODO(Matthew): Does page size want to be made a run-time thing,
         //                as it may be nice to base this on view distance.
-        // using ChunkPager = Pager<Chunk, 8 * 8 * 8>;
-        // using ChunkInstanceDataPager =
-        //     Pager<ChunkInstanceData,
-        //             CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE / 4>;
-        // using ChunkBlockPager =
-        //     Pager<Block,
-        //             CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE>;
+        using ChunkAllocator = hmem::PagedAllocator<Chunk, 4 * 4 * 4>;
+        using ChunkInstanceDataPager =
+            hmem::Pager<ChunkInstanceData,
+                    CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE / 4>;
+        using ChunkBlockPager =
+            hmem::Pager<Block,
+                    CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE>;
 
         struct Chunk;
-        // TODO(Matthew): We can do better storage of chunks and blocks at this level.
         // TODO(Matthew): We should add support for LOD, different generation stages, disabling meshing etc.
 
-        using Chunks = std::unordered_map<ChunkID, Chunk*>;
+        using Chunks = std::unordered_map<ChunkID, hmem::Handle<Chunk>>;
 
         using QueriedChunkState       = std::pair<bool, bool>;
         using QueriedChunkPendingTask = std::pair<bool, bool>;
 
-        using ChunkLoadTaskListBuilder = Delegate<hthread::ThreadWorkflowTasksView<ChunkLoadTaskContext>(Chunk*, ChunkGrid*)>;
+        using ChunkLoadTaskListBuilder = Delegate<hthread::ThreadWorkflowTasksView<ChunkLoadTaskContext>(hmem::Handle<Chunk>, ChunkGrid*)>;
 
         class ChunkGrid {
         public:
@@ -181,7 +180,7 @@ namespace hemlock {
              * [false, true] should never occur and represents
              * invalid query processing.
              */
-            QueriedChunkState query_chunk_state(Chunk* chunk, ChunkState required_minimum_state);
+            QueriedChunkState query_chunk_state(hmem::Handle<Chunk> chunk, ChunkState required_minimum_state);
 
             /**
              * @brief Queries the pending task of the chunk
@@ -224,7 +223,7 @@ namespace hemlock {
              * never occur and represents invalid query
              * processing.
              */
-            QueriedChunkPendingTask query_chunk_pending_task(Chunk* chunk, ChunkLoadTaskKind required_minimum_pending_task);
+            QueriedChunkPendingTask query_chunk_pending_task(hmem::Handle<Chunk> chunk, ChunkLoadTaskKind required_minimum_pending_task);
 
             /**
              * @brief Queries the state of the neighbours of
@@ -266,7 +265,7 @@ namespace hemlock {
              * not exist. Note: [false, true] should never occur
              * and represents invalid query processing.
              */
-            QueriedChunkState query_all_neighbour_states(Chunk* chunk, ChunkState required_minimum_state);
+            QueriedChunkState query_all_neighbour_states(hmem::Handle<Chunk> chunk, ChunkState required_minimum_state);
 
             /**
              * @brief Queries the state of the chunk at the given
@@ -304,7 +303,7 @@ namespace hemlock {
              * [false, true] should never occur and represents
              * invalid query processing.
              */
-            QueriedChunkState query_chunk_exact_state(Chunk* chunk, ChunkState required_state);
+            QueriedChunkState query_chunk_exact_state(hmem::Handle<Chunk> chunk, ChunkState required_state);
 
             /**
              * @brief Queries the pending task of the chunk
@@ -342,7 +341,7 @@ namespace hemlock {
              * not exist. Note: [false, true] should never
              * occur and represents invalid query processing.
              */
-            QueriedChunkPendingTask query_chunk_exact_pending_task(Chunk* chunk, ChunkLoadTaskKind required_pending_task);
+            QueriedChunkPendingTask query_chunk_exact_pending_task(hmem::Handle<Chunk> chunk, ChunkLoadTaskKind required_pending_task);
 
             /**
              * @brief Queries the state of the neighbours of
@@ -384,16 +383,20 @@ namespace hemlock {
              * querying does not exist. Note: [false, true] should
              * never occur and represents invalid query processing.
              */
-            QueriedChunkState query_all_neighbour_exact_states(Chunk* chunk, ChunkState required_state);
+            QueriedChunkState query_all_neighbour_exact_states(hmem::Handle<Chunk> chunk, ChunkState required_state);
 
             const Chunks& chunks() { return m_chunks; }
         protected:
-            void establish_chunk_neighbours(Chunk* chunk);
+            void establish_chunk_neighbours(hmem::Handle<Chunk> chunk);
 
             ChunkLoadTaskListBuilder   build_load_tasks;
 
             thread::ThreadPool<ChunkLoadTaskContext>        m_chunk_load_thread_pool;
             thread::ThreadWorkflow<ChunkLoadTaskContext>    m_chunk_load_workflow;
+
+            ChunkAllocator          m_chunk_allocator;
+            ChunkInstanceDataPager  m_instance_data_pager;
+            ChunkBlockPager         m_block_pager;
 
             ChunkRenderer m_renderer;
 
