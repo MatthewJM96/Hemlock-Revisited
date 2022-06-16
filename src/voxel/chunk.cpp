@@ -5,6 +5,7 @@
 #include "voxel/chunk.h"
 
 hvox::Chunk::Chunk() :
+    Handleable(),
     neighbours({}),
     blocks(nullptr),
     state(ChunkState::NONE),
