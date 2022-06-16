@@ -11,6 +11,11 @@ namespace hemlock {
         };
 
         struct Handleable {
+            Handleable() :
+                alive_state(HandledAliveState::ALIVE),
+                ref_count(1)
+            { /* Empty. */ }
+
             std::atomic<HandledAliveState> alive_state;
             std::atomic<i32>               ref_count;
         };
