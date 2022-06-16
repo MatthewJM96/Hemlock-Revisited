@@ -108,7 +108,7 @@ void hcam::BasicFirstPersonCamera::roll_from_mouse(f32 dx, f32 speed) {
 void hcam::BasicFirstPersonCamera::assure_clamp_up() {
     f32 up_angle = glm::acos(glm::dot(m_state.up, ABSOLUTE_UP));
 
-    f32 correction_angle;
+    f32 correction_angle = 0.0;
     if (up_angle < -1.0f * m_clamp_up.angle) {
         correction_angle = -1.0f * m_clamp_up.angle - up_angle;
     } else if (up_angle > m_clamp_up.angle) {
