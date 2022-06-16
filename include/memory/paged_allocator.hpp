@@ -6,7 +6,7 @@
 
 namespace hemlock {
     namespace memory {
-        template <typename DataType, size_t PageSize>
+        template <IsHandleable DataType, size_t PageSize>
         class PagedAllocator : public Allocator<DataType> {
         protected:
             using _Page  = Page<DataType, PageSize>;

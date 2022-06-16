@@ -10,14 +10,15 @@ namespace hemlock {
             DYING
         };
 
-        // TODO(Matthew): Figure thread-safe impl. Atomic or mutex, not both.
-        template <typename CandidateType>
-        concept Handleable = requires(CandidateType a) {
-            { a.alive_state } -> std::same_as<std::atomic<HandledAliveState>>;
-            { a.ref_count   } -> std::same_as<std::atomic<i32>>;
+        struct Handleable {
+            std::atomic<HandledAliveState> alive_state;
+            std::atomic<i32>               ref_count;
         };
 
-        template <Handleable UnderlyingType>
+        template <typename CandidateType>
+        concept IsHandleable = std::derived_from<CandidateType, Handleable>;
+
+        template <IsHandleable UnderlyingType>
         class Handle;
 
         template <typename DataType>

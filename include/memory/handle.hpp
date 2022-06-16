@@ -5,7 +5,7 @@
 
 namespace hemlock {
     namespace memory {
-        template <Handleable UnderlyingType>
+        template <IsHandleable UnderlyingType>
         class Handle {
             friend Allocator<UnderlyingType>;
         public:

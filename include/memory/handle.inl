@@ -1,4 +1,4 @@
-template <hmem::Handleable UnderlyingType>
+template <hmem::IsHandleable UnderlyingType>
 hmem::Handle<UnderlyingType>::Handle() :
     m_data(nullptr),
     m_allocator(nullptr)
@@ -6,19 +6,19 @@ hmem::Handle<UnderlyingType>::Handle() :
     // Empty.
 }
 
-template <hmem::Handleable UnderlyingType>
+template <hmem::IsHandleable UnderlyingType>
 hmem::Handle<UnderlyingType>::Handle(const Handle<UnderlyingType>& rhs) {
     *this = std::move(Handle::acquire_existing(rhs));
 }
 
-template <hmem::Handleable UnderlyingType>
+template <hmem::IsHandleable UnderlyingType>
 hmem::Handle<UnderlyingType>& hmem::Handle<UnderlyingType>::operator=(const Handle<UnderlyingType>& rhs) {
     *this = std::move(Handle::acquire_existing(rhs));
 
     return *this;
 }
 
-template <hmem::Handleable UnderlyingType>
+template <hmem::IsHandleable UnderlyingType>
 hmem::Handle<UnderlyingType>::Handle(Handle<UnderlyingType>&& rhs) :
     m_data(rhs.m_data),
     m_allocator(rhs.m_allocator)
@@ -26,7 +26,7 @@ hmem::Handle<UnderlyingType>::Handle(Handle<UnderlyingType>&& rhs) :
     rhs.m_data = nullptr;
 }
 
-template <hmem::Handleable UnderlyingType>
+template <hmem::IsHandleable UnderlyingType>
 hmem::Handle<UnderlyingType>& hmem::Handle<UnderlyingType>::operator=(Handle<UnderlyingType>&& rhs) {
     m_data = rhs.m_data;
     m_allocator = rhs.m_allocator;
@@ -36,7 +36,7 @@ hmem::Handle<UnderlyingType>& hmem::Handle<UnderlyingType>::operator=(Handle<Und
     return *this;
 }
 
-template <hmem::Handleable UnderlyingType>
+template <hmem::IsHandleable UnderlyingType>
 bool hmem::Handle<UnderlyingType>::release() {
     if (!m_data) return false;
 
@@ -81,47 +81,47 @@ bool hmem::Handle<UnderlyingType>::release() {
     return m_allocator->release(*this);
 }
 
-template <hmem::Handleable UnderlyingType>
+template <hmem::IsHandleable UnderlyingType>
 UnderlyingType& hmem::Handle<UnderlyingType>::operator*() {
     return *m_data;
 }
 
-template <hmem::Handleable UnderlyingType>
+template <hmem::IsHandleable UnderlyingType>
 const UnderlyingType& hmem::Handle<UnderlyingType>::operator*() const {
     return *m_data;
 }
 
-template <hmem::Handleable UnderlyingType>
+template <hmem::IsHandleable UnderlyingType>
 UnderlyingType* hmem::Handle<UnderlyingType>::operator->() {
     return m_data;
 }
 
-template <hmem::Handleable UnderlyingType>
+template <hmem::IsHandleable UnderlyingType>
 const UnderlyingType* hmem::Handle<UnderlyingType>::operator->() const {
     return m_data;
 }
 
-template <hmem::Handleable UnderlyingType>
+template <hmem::IsHandleable UnderlyingType>
 bool hmem::Handle<UnderlyingType>::operator==(std::nullptr_t possible_nullptr) {
     return m_data == nullptr;
 }
 
-template <hmem::Handleable UnderlyingType>
+template <hmem::IsHandleable UnderlyingType>
 bool hmem::Handle<UnderlyingType>::operator==(const Handle<UnderlyingType>& handle) {
     return m_data == handle.m_data;
 }
 
-template <hmem::Handleable UnderlyingType>
+template <hmem::IsHandleable UnderlyingType>
 bool hmem::Handle<UnderlyingType>::operator!=(std::nullptr_t possible_nullptr) {
     return !(*this == possible_nullptr);
 }
 
-template <hmem::Handleable UnderlyingType>
+template <hmem::IsHandleable UnderlyingType>
 bool hmem::Handle<UnderlyingType>::operator!=(const Handle<UnderlyingType>& handle) {
     return !(*this == handle);
 }
 
-template <hmem::Handleable UnderlyingType>
+template <hmem::IsHandleable UnderlyingType>
 hmem::Handle<UnderlyingType> hmem::Handle<UnderlyingType>::acquire_existing(const Handle<UnderlyingType>& handle) {
     Handle<UnderlyingType> new_handle;
 
@@ -158,7 +158,7 @@ hmem::Handle<UnderlyingType> hmem::Handle<UnderlyingType>::acquire_existing(cons
     return new_handle;
 }
 
-template <hmem::Handleable UnderlyingType>
+template <hmem::IsHandleable UnderlyingType>
 hmem::Handle<UnderlyingType>::Handle(UnderlyingType* data, Allocator<UnderlyingType>* allocator) :
     m_data(data),
     m_allocator(allocator)

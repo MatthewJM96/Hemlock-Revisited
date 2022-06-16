@@ -1,5 +1,5 @@
 
-template <typename DataType, size_t PageSize>
+template <hmem::IsHandleable DataType, size_t PageSize>
 void hmem::PagedAllocator<DataType, PageSize>::init(size_t max_free_pages /*= 3*/, size_t compaction_factor /*= 2*/) {
     std::lock_guard<std::mutex> lock(m_free_items_mutex);
 
@@ -10,7 +10,7 @@ void hmem::PagedAllocator<DataType, PageSize>::init(size_t max_free_pages /*= 3*
     m_free_items.reserve(PageSize * compaction_factor);
 }
 
-template <typename DataType, size_t PageSize>
+template <hmem::IsHandleable DataType, size_t PageSize>
 void hmem::PagedAllocator<DataType, PageSize>::dispose() {
     std::lock_guard<std::mutex> lock(m_free_items_mutex);
 
@@ -19,7 +19,7 @@ void hmem::PagedAllocator<DataType, PageSize>::dispose() {
     _Items().swap(m_free_items);
 }
 
-template <typename DataType, size_t PageSize>
+template <hmem::IsHandleable DataType, size_t PageSize>
 hmem::Handle<DataType> hmem::PagedAllocator<DataType, PageSize>::allocate() {
     std::lock_guard<std::mutex> lock(m_free_items_mutex);
 
@@ -37,7 +37,7 @@ hmem::Handle<DataType> hmem::PagedAllocator<DataType, PageSize>::allocate() {
     return Handle<DataType>(&page[0], this);
 }
 
-template <typename DataType, size_t PageSize>
+template <hmem::IsHandleable DataType, size_t PageSize>
 bool hmem::PagedAllocator<DataType, PageSize>::deallocate(Handle<DataType>&& handle) {
     std::lock_guard<std::mutex> lock(m_free_items_mutex);
 
@@ -51,7 +51,7 @@ bool hmem::PagedAllocator<DataType, PageSize>::deallocate(Handle<DataType>&& han
     return true;
 }
 
-template <typename DataType, size_t PageSize>
+template <hmem::IsHandleable DataType, size_t PageSize>
 void hmem::PagedAllocator<DataType, PageSize>::do_compaction_if_needed() {
     // Empty... for now.
 }
