@@ -118,6 +118,42 @@
             }
         },
         {
+            "name": "Clang-x64-Tsan",
+            "displayName": "Clang x64 Thread Sanitizer",
+            "description": "Configuration for Clang x64 with thread sanitizer build.",
+            "inherits": "base",
+            "generator": "Unix Makefiles",
+            "cacheVariables": {
+                "CMAKE_C_COMPILER": "clang",
+                "CMAKE_CXX_COMPILER": "clang++",
+                "CMAKE_BUILD_TYPE": "Debug",
+                "HEMLOCK_ENABLE_THREAD_SANITIZER": "On"
+            },
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Linux"
+            }
+        },
+        {
+            "name": "Clang-x64-Msan",
+            "displayName": "Clang x64 Memory Sanitizer",
+            "description": "Configuration for Clang x64 with memory sanitizer build.",
+            "inherits": "base",
+            "generator": "Unix Makefiles",
+            "cacheVariables": {
+                "CMAKE_C_COMPILER": "clang",
+                "CMAKE_CXX_COMPILER": "clang++",
+                "CMAKE_BUILD_TYPE": "Debug",
+                "HEMLOCK_ENABLE_MEMORY_SANITIZER": "On"
+            },
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Linux"
+            }
+        },
+        {
             "name": "VS2022-x64-Debug",
             "displayName": "VS2022 x64 Debug",
             "description": "Configuration for VS2022 x64 debug build.",
@@ -261,6 +297,28 @@
             "displayName": "Clang x64 Address Sanitizer",
             "description": "Configuration for Clang x64 with address sanitizer build.",
             "configurePreset": "Clang-x64-Asan",
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Linux"
+            }
+        },
+        {
+            "name": "Clang-x64-Tsan",
+            "displayName": "Clang x64 Thread Sanitizer",
+            "description": "Configuration for Clang x64 with thread sanitizer build.",
+            "configurePreset": "Clang-x64-Tsan",
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Linux"
+            }
+        },
+        {
+            "name": "Clang-x64-Msan",
+            "displayName": "Clang x64 Memory Sanitizer",
+            "description": "Configuration for Clang x64 with memory sanitizer build.",
+            "configurePreset": "Clang-x64-Msan",
             "condition": {
                 "type": "equals",
                 "lhs": "${hostSystemName}",
