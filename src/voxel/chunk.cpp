@@ -14,6 +14,8 @@ hvox::Chunk::Chunk() :
 { /* Empty. */ }
 
 hvox::Chunk::~Chunk() {
+    debug_printf("Unloading chunk at (%d, %d, %d).\n", position.x, position.y, position.z);
+
     dispose();
 }
 
