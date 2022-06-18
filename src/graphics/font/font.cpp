@@ -47,7 +47,7 @@ bool hg::f::FontInstance::save(std::string filepath, hio::image::Saver save) {
         // Bind the texture, load it into our buffer, and then unbind it.
         glGetTextureImage(texture, 0, GL_RGBA, GL_UNSIGNED_BYTE, texture_size.x * texture_size.y * 4, pixels);
 
-        return save(filepath, reinterpret_cast<void*>(pixels), texture_size, hio::image::PixelFormat::RGBA_UI8);
+        return save(filepath, pixels, texture_size, hio::image::PixelFormat::RGBA_UI8);
 }
 
 hg::f::Font::Font() :
