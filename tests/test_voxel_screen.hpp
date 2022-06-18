@@ -9,6 +9,9 @@
 
 #include "iomanager.hpp"
 
+
+#define VIEW_DIST 4
+
 struct TVS_BlockComparator {
     bool operator()(const hvox::Block* source, const hvox::Block* target, hvox::BlockChunkPosition, hmem::Handle<hvox::Chunk>) const {
         return (source->id == target->id) && (source->id != 0);
@@ -87,25 +90,25 @@ public:
     virtual void start(TimeData time) override {
         happ::ScreenBase::start(time);
 
-#define NUM 4
-        for (auto x = -NUM; x < NUM; ++x) {
-            for (auto z = -NUM; z < NUM; ++z) {
+        for (auto x = -VIEW_DIST; x <= VIEW_DIST; ++x) {
+            for (auto z = -VIEW_DIST; z <= VIEW_DIST; ++z) {
                 for (auto y = -1; y < 2; ++ y) {
                     m_chunk_grid.preload_chunk_at({ {x, y, z} });
                 }
             }
         }
-        for (auto x = -NUM; x < NUM; ++x) {
-            for (auto z = -NUM; z < NUM; ++z) {
+        for (auto x = -VIEW_DIST; x <= VIEW_DIST; ++x) {
+            for (auto z = -VIEW_DIST; z <= VIEW_DIST; ++z) {
                 for (auto y = -1; y < 2; ++ y) {
                     m_chunk_grid.load_chunk_at({ {x, y, z} });
                 }
             }
         }
-#undef NUM
     }
 
     virtual void update(TimeData time) override {
+        static f32v3 last_pos{0.0f};
+
         m_chunk_grid.update(time);
 
         f32 speed_mult = 1.0f;
@@ -169,6 +172,66 @@ public:
 
         m_camera.offset_position(delta_pos);
         m_camera.update();
+
+        f32v3 current_pos = glm::floor(m_camera.position() / static_cast<f32>(CHUNK_SIZE));
+
+        i32 x_step = static_cast<i32>(current_pos.x) - static_cast<i32>(last_pos.x);
+        if (x_step != 0) {
+            for (auto z = static_cast<i32>(current_pos.z) - VIEW_DIST; z <= static_cast<i32>(current_pos.z) + VIEW_DIST; ++z) {
+                for (auto y = -1; y < 2; ++ y) {
+                    m_chunk_grid.unload_chunk_at({ {
+                        x_step < 0 ? static_cast<i32>(current_pos.x) + VIEW_DIST + 1 : static_cast<i32>(current_pos.x) - VIEW_DIST - 1,
+                        y, z
+                    } });
+                }
+            }
+            for (auto z = static_cast<i32>(current_pos.z) - VIEW_DIST; z <= static_cast<i32>(current_pos.z) + VIEW_DIST; ++z) {
+                for (auto y = -1; y < 2; ++ y) {
+                    m_chunk_grid.preload_chunk_at({ {
+                        x_step < 0 ? static_cast<i32>(current_pos.x) - VIEW_DIST : static_cast<i32>(current_pos.x) + VIEW_DIST,
+                        y, z
+                    } });
+                }
+            }
+            for (auto z = static_cast<i32>(current_pos.z) - VIEW_DIST; z <= static_cast<i32>(current_pos.z) + VIEW_DIST; ++z) {
+                for (auto y = -1; y < 2; ++ y) {
+                    m_chunk_grid.load_chunk_at({ {
+                        x_step < 0 ? static_cast<i32>(current_pos.x) - VIEW_DIST : static_cast<i32>(current_pos.x) + VIEW_DIST,
+                        y, z
+                    } });
+                }
+            }
+        }
+
+        i32 z_step = static_cast<i32>(current_pos.z) - static_cast<i32>(last_pos.z);
+        if (z_step != 0) {
+            for (auto x = static_cast<i32>(current_pos.x) - VIEW_DIST; x <= static_cast<i32>(current_pos.x) + VIEW_DIST; ++x) {
+                for (auto y = -1; y < 2; ++ y) {
+                    m_chunk_grid.unload_chunk_at({ {
+                        x, y,
+                        z_step < 0 ? static_cast<i32>(current_pos.z) + VIEW_DIST + 1 : static_cast<i32>(current_pos.z) - VIEW_DIST - 1
+                    } });
+                }
+            }
+            for (auto x = static_cast<i32>(current_pos.x) - VIEW_DIST; x <= static_cast<i32>(current_pos.x) + VIEW_DIST; ++x) {
+                for (auto y = -1; y < 2; ++ y) {
+                    m_chunk_grid.preload_chunk_at({ {
+                        x, y,
+                        z_step < 0 ? static_cast<i32>(current_pos.z) - VIEW_DIST : static_cast<i32>(current_pos.z) + VIEW_DIST
+                    } });
+                }
+            }
+            for (auto x = static_cast<i32>(current_pos.x) - VIEW_DIST; x <= static_cast<i32>(current_pos.x) + VIEW_DIST; ++x) {
+                for (auto y = -1; y < 2; ++ y) {
+                    m_chunk_grid.load_chunk_at({ {
+                        x, y,
+                        z_step < 0 ? static_cast<i32>(current_pos.z) - VIEW_DIST : static_cast<i32>(current_pos.z) + VIEW_DIST
+                    } });
+                }
+            }
+        }
+
+        last_pos = current_pos;
     }
     virtual void draw(TimeData time) override {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -195,7 +258,7 @@ public:
         m_input_manager->init();
 
         m_camera.attach_to_window(m_process->window());
-        m_camera.set_position(f32v3{189.0f, 109.0f, -189.0f});
+        m_camera.set_position(f32v3{0.0f, 60.0f, 0.0f});
         m_camera.rotate_from_mouse_with_absolute_up(-130.0f, 160.0f, 0.005f);
         m_camera.set_fov(90.0f);
         m_camera.update();
