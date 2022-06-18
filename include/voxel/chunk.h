@@ -29,6 +29,8 @@ namespace hemlock {
 
             void update(TimeData);
 
+            ChunkID id() const { return position.id; }
+
             ChunkGridPosition position;
             Neighbours        neighbours;
             Block*            blocks;
@@ -137,7 +139,7 @@ namespace std {
     struct hash<hvox::Chunk> {
         std::size_t operator()(const hvox::Chunk& chunk) const {
             std::hash<hvox::ColumnID> hash;
-            return hash(chunk.position.id);
+            return hash(chunk.id());
         }
     };
 }
