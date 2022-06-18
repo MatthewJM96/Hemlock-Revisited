@@ -9,7 +9,7 @@ typename hmem::PagedAllocator<DataType, PageSize, MaxFreePages>::size_type
 template <typename DataType, size_t PageSize, size_t MaxFreePages>
 requires (PageSize > 0 && MaxFreePages > 0)
 hmem::PagedAllocator<DataType, PageSize, MaxFreePages>::PagedAllocator() {
-    m_state = std::make_shared<PagedAllocatorState<DataType, PageSize, MaxFreePages>>();
+    m_state = make_handle<PagedAllocatorState<PageSize, MaxFreePages>>();
 }
 
 template <typename DataType, size_t PageSize, size_t MaxFreePages>
@@ -26,11 +26,7 @@ template <typename OtherDataType>
 hmem::PagedAllocator<DataType, PageSize, MaxFreePages>::PagedAllocator(
     const PagedAllocator<OtherDataType, PageSize, MaxFreePages>& alloc
 ) {
-    // TODO(Matthew): this patently isn't going to work. we need to somehow
-    //                make the pager more generic so that it can allocate pages
-    //                with type information at call to get_page.
-    // m_state = alloc.m_state;
-    m_state = std::make_shared<PagedAllocatorState<DataType, PageSize, MaxFreePages>>();
+    m_state = alloc.m_state;
 }
 
 template <typename DataType, size_t PageSize, size_t MaxFreePages>
@@ -42,13 +38,17 @@ typename hmem::PagedAllocator<DataType, PageSize, MaxFreePages>::pointer
 
     std::lock_guard<std::mutex> lock(m_state->free_items_mutex);
 
-    if (m_state->free_items.size() > 0) {
-        pointer item = m_state->free_items.back();
-        m_state->free_items.pop_back();
+    auto page_type = typeid(DataType).hash_code();
+
+    m_state->free_items.try_emplace(page_type, std::vector<void*>{});
+
+    if (m_state->free_items[page_type].size() > 0) {
+        pointer item = reinterpret_cast<pointer>(m_state->free_items[page_type].back());
+        m_state->free_items[page_type].pop_back();
         return item;
     }
 
-    _Page page = m_state->pager.get_page();
+    _Page page = m_state->pager.template get_page<DataType>();
 
     // Add all items in page after `count` first items
     // to the free items list.
@@ -56,7 +56,7 @@ typename hmem::PagedAllocator<DataType, PageSize, MaxFreePages>::pointer
         // auto item_ptrs = std::ranges::transform_view(page, [](DataType& el) { return &el; });
         // m_state->free_items.insert(m_state->free_items.end(), std::begin(item_ptrs) + count, std::end(item_ptrs));
 
-        for (size_t i = count; i < PageSize; ++i) m_state->free_items.emplace_back(&page[i]);
+        for (size_t i = count; i < PageSize; ++i) m_state->free_items[page_type].emplace_back(&page[i]);
     }
 
     return &page[0];
@@ -76,12 +76,16 @@ void hmem::PagedAllocator<DataType, PageSize, MaxFreePages>::deallocate(pointer 
 
     std::lock_guard<std::mutex> lock(m_state->free_items_mutex);
 
+    auto page_type = typeid(DataType).hash_code();
+
+    m_state->free_items.try_emplace(page_type, std::vector<void*>{});
+
     // TODO(Matthew): is this notably slower for the case of count == 1 than emplace_back?
     // auto items = std::span(data, count);
     // auto item_ptrs = std::ranges::transform_view(items, [](DataType& el) { return &el; });
     // m_state->free_items.insert(m_state->free_items.end(), std::begin(item_ptrs), std::end(item_ptrs));
 
-    for (size_t i = 0; i < count; ++i) m_state->free_items.emplace_back(&data[i]);
+    for (size_t i = 0; i < count; ++i) m_state->free_items[page_type].emplace_back(&data[i]);
 
     // Need to think about how to even do this, given live handles can hardly be notified of this.
     //   Probably can compact only by being more careful about which free item is next used as

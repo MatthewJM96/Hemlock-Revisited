@@ -2,11 +2,11 @@
 #define __hemlock_memory_paged_allocator_hpp
 
 #include "handle.hpp"
-#include "pager.hpp"
+#include "heterogenous_pager.hpp"
 
 namespace hemlock {
     namespace memory {
-        template <typename DataType, size_t PageSize, size_t MaxFreePages>
+        template <size_t PageSize, size_t MaxFreePages>
         requires (PageSize > 0)
         struct PagedAllocatorState {
             ~PagedAllocatorState() {
@@ -16,9 +16,8 @@ namespace hemlock {
                 pager.dispose();
             }
 
-            using _Page  = Page<DataType>;
-            using _Pager = Pager<DataType, PageSize, MaxFreePages>;
-            using _Items = std::vector<DataType*>;
+            using _Pager = HeterogenousPager<PageSize, MaxFreePages>;
+            using _Items = std::unordered_map<size_t, std::vector<void*>>;
 
             _Pager      pager;
             std::mutex  free_items_mutex;
@@ -28,6 +27,9 @@ namespace hemlock {
         template <typename DataType, size_t PageSize, size_t MaxFreePages>
         requires (PageSize > 0 && MaxFreePages > 0)
         class PagedAllocator {
+            template <typename D, size_t P, size_t M>
+            requires (P > 0 && M > 0)
+            friend class PagedAllocator;
         public:
             using value_type        = DataType;
             using pointer           = DataType*;
@@ -44,9 +46,9 @@ namespace hemlock {
                 using other = PagedAllocator<OtherDataType, PageSize, MaxFreePages>;
             };
         protected:
-            using _Page  = typename PagedAllocatorState<DataType, PageSize, MaxFreePages>::_Page;
-            using _Pager = typename PagedAllocatorState<DataType, PageSize, MaxFreePages>::_Pager;
-            using _Items = typename PagedAllocatorState<DataType, PageSize, MaxFreePages>::_Items;
+            using _Page  = Page<DataType>;
+            using _Pager = typename PagedAllocatorState<PageSize, MaxFreePages>::_Pager;
+            using _Items = typename PagedAllocatorState<PageSize, MaxFreePages>::_Items;
         public:
             PagedAllocator();
             PagedAllocator(const PagedAllocator<DataType, PageSize, MaxFreePages>& alloc);
@@ -61,7 +63,7 @@ namespace hemlock {
 
             void deallocate(pointer data, size_type count);
         protected:
-            std::shared_ptr<PagedAllocatorState<DataType, PageSize, MaxFreePages>> m_state;
+            Handle<PagedAllocatorState<PageSize, MaxFreePages>> m_state;
         };
     }
 }
