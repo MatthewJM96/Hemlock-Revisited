@@ -1,6 +1,10 @@
 #ifndef __hemlock_memory_pager_hpp
 #define __hemlock_memory_pager_hpp
 
+// TODO(Matthew): We don't currently track issued but not free pages.
+//                This means a memory leak can occur if pager is
+//                disposed without first explicitly freeing all pages.
+
 namespace hemlock {
     namespace memory {
         template <typename DataType>
