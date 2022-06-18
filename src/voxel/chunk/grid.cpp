@@ -49,9 +49,6 @@ void hvox::ChunkGrid::update(TimeData time) {
 
             (*it).second->on_unload();
 
-            (*it).second->dispose();
-            delete (*it).second;
-
             it = m_chunks.erase(it);
         } else {
             (*it).second->update(time);
@@ -154,8 +151,6 @@ bool hvox::ChunkGrid::unload_chunk_at(ChunkGridPosition chunk_position) {
     if (it == m_chunks.end()) return false;
 
     (*it).second->on_unload();
-
-    (*it).second.release();
 
     m_chunks.erase(it);
 
