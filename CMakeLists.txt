@@ -33,6 +33,7 @@ option(HEMLOCK_USING_VULKAN "Whether Hemlock uses Vulkan." OFF)
 option(HEMLOCK_ENABLE_ADDRESS_SANITIZER "Whether to compile with address sanitizer." OFF)
 option(HEMLOCK_ENABLE_THREAD_SANITIZER "Whether to compile with thread sanitizer." OFF)
 option(HEMLOCK_ENABLE_MEMORY_SANITIZER "Whether to compile with memory sanitizer." OFF)
+option(HEMLOCK_ENABLE_GPERF_PROFILER "Whether to compile with GPerf profiler." OFF)
 
 if (UNIX OR MINGW)
     set(CMAKE_CXX_FLAGS "-pthread")
@@ -51,6 +52,9 @@ if (UNIX OR MINGW)
             set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fsanitize=memory -fsanitize-memory-track-origins -pie -fno-omit-frame-pointer")
             set(CMAKE_CXX_FLAGS_RELEASE "-g -O2")
             set(CMAKE_CXX_FLAGS_DEBUG "-g -O1")
+    elseif(HEMLOCK_ENABLE_GPERF_PROFILER)
+        set(CMAKE_CXX_FLAGS_RELEASE "-g -O3")
+        set(CMAKE_CXX_FLAGS_DEBUG "-g -O1")
     else()
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wold-style-cast -Wshadow -Wformat=2 -Werror")
         set(CMAKE_CXX_FLAGS_RELEASE "-O3")
@@ -218,6 +222,12 @@ if (HEMLOCK_USING_OPENGL)
     endif()
 elseif (HEMLOCK_USING_VULKAN)
     target_link_libraries(Hemlock_Revisited vulkan)
+endif()
+
+if(HEMLOCK_ENABLE_GPERF_PROFILER)
+    target_link_libraries(Hemlock_Revisited
+        profiler
+    )
 endif()
 
 target_link_libraries(Hemlock_Revisited

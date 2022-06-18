@@ -154,6 +154,24 @@
             }
         },
         {
+            "name": "Clang-x64-Gperf",
+            "displayName": "Clang x64 Gperf Profiler",
+            "description": "Configuration for Clang x64 with Gperf profiler build.",
+            "inherits": "base",
+            "generator": "Unix Makefiles",
+            "cacheVariables": {
+                "CMAKE_C_COMPILER": "clang",
+                "CMAKE_CXX_COMPILER": "clang++",
+                "CMAKE_BUILD_TYPE": "Release",
+                "HEMLOCK_ENABLE_GPERF_PROFILER": "On"
+            },
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Linux"
+            }
+        },
+        {
             "name": "VS2022-x64-Debug",
             "displayName": "VS2022 x64 Debug",
             "description": "Configuration for VS2022 x64 debug build.",
@@ -319,6 +337,17 @@
             "displayName": "Clang x64 Memory Sanitizer",
             "description": "Configuration for Clang x64 with memory sanitizer build.",
             "configurePreset": "Clang-x64-Msan",
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Linux"
+            }
+        },
+        {
+            "name": "Clang-x64-Gperf",
+            "displayName": "Clang x64 Gperf Profiler",
+            "description": "Configuration for Clang x64 with Gperf profiler build.",
+            "configurePreset": "Clang-x64-Gperf",
             "condition": {
                 "type": "equals",
                 "lhs": "${hostSystemName}",
