@@ -290,21 +290,21 @@ public:
             workflow_builder.chain_tasks(2);
         }
         m_chunk_grid.init(10, &m_chunk_load_dag, hvox::ChunkLoadTaskListBuilder{[](hmem::WeakHandle<hvox::Chunk> chunk, hvox::ChunkGrid* chunk_grid) {
-            // TODO(Matthew): How do we clean up this?
-            hthread::HeldWorkflowTask<hvox::ChunkLoadTaskContext>* tasks = new hthread::HeldWorkflowTask<hvox::ChunkLoadTaskContext>[2];
+            hthread::ThreadWorkflowTasksView<hvox::ChunkLoadTaskContext> tasks;
+            tasks.tasks = hmem::Handle<hthread::HeldWorkflowTask<hvox::ChunkLoadTaskContext>[]>(new hthread::HeldWorkflowTask<hvox::ChunkLoadTaskContext>[2]);
+            tasks.count = 2;
 
             auto gen_task  = new hvox::ChunkGenerationTask<TVS_VoxelGenerator>();
-            // Greedy meshing is broken.
             auto mesh_task = new hvox::ChunkGreedyMeshTask<TRS_BlockComparator>();
             // auto mesh_task = new hvox::ChunkNaiveMeshTask<TRS_BlockComparator>();
 
             gen_task->init(chunk, chunk_grid);
             mesh_task->init(chunk, chunk_grid);
 
-            tasks[0] = { reinterpret_cast<hthread::IThreadWorkflowTask<hvox::ChunkLoadTaskContext>*>(gen_task),  true };
-            tasks[1] = { reinterpret_cast<hthread::IThreadWorkflowTask<hvox::ChunkLoadTaskContext>*>(mesh_task), true };
+            tasks.tasks[0] = { reinterpret_cast<hthread::IThreadWorkflowTask<hvox::ChunkLoadTaskContext>*>(gen_task),  true };
+            tasks.tasks[1] = { reinterpret_cast<hthread::IThreadWorkflowTask<hvox::ChunkLoadTaskContext>*>(mesh_task), true };
 
-            return hthread::ThreadWorkflowTasksView<hvox::ChunkLoadTaskContext>{ tasks, 2 };
+            return tasks;
         }});
 
         handle_mouse_move = hemlock::Subscriber<hui::MouseMoveEvent>{
