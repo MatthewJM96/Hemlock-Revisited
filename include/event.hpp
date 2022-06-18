@@ -86,10 +86,10 @@ namespace hemlock {
         }
 
         template <typename Type>
-        hmem::Handle<Type> get_handle() {
+        hmem::WeakHandle<Type> get_handle() {
             assert(m_is_smart);
 
-            return reinterpret_pointer_cast<Type>(m_ptr.smart.lock());
+            return *reinterpret_cast<hmem::WeakHandle<Type>*>(&m_ptr.smart); // reinterpret_pointer_cast<Type>(m_ptr.smart.lock());
         }
     protected:
         bool m_is_smart;
