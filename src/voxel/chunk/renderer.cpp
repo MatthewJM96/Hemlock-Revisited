@@ -215,6 +215,7 @@ void hvox::ChunkRenderer::process_pages() {
 
             if (page.first_dirtied_chunk_idx == metadata.chunk_idx) {
                 page.first_dirtied_chunk_idx = std::numeric_limits<ui32>::max();
+                page.dirty = false;
             }
         }
     }
