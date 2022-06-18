@@ -133,9 +133,9 @@ bool hvox::ChunkGrid::load_chunk_at(ChunkGridPosition chunk_position) {
     if (!chunk_preloaded)
         return false;
 
-    auto tasks = build_load_tasks(chunk, this);
-
-    m_chunk_load_workflow.run(tasks);
+    m_chunk_load_workflow.run(
+        build_load_tasks(chunk, this)
+    );
     chunk->pending_task.store(ChunkLoadTaskKind::GENERATION, std::memory_order_release);
 
     return true;
