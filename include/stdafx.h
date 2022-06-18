@@ -89,6 +89,7 @@
 // Our Containers
 #include "memory/handle.hpp"
 #include "memory/pager.hpp"
+#include "memory/heterogenous_pager.hpp"
 #include "memory/paged_allocator.hpp"
 
 // Our Thread Handling
