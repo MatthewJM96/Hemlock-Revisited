@@ -71,7 +71,8 @@ void happ::SingleWindowApp::run() {
         m_fps_limiter->end();
     }
 
-    dispose();
+    // TODO(Matthew): need to make sure thread pools are properly cleaned up.
+    // dispose();
 }
 
 void happ::SingleWindowApp::prepare_window() {
