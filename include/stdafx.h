@@ -87,6 +87,7 @@
 #include "types.hpp"
 
 // Our Containers
+#include "memory/handle.hpp"
 #include "memory/pager.hpp"
 #include "memory/paged_allocator.hpp"
 
