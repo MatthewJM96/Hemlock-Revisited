@@ -19,7 +19,7 @@ namespace hemlock {
             }
         protected:
             hmem::WeakHandle<Chunk> m_chunk;
-            static hio::fs::mapped_file chunk_data_file;
+            // static hio::fs::mapped_file chunk_data_file;
         };
     }
 }
