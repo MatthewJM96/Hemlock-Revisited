@@ -3,18 +3,19 @@
 
 #include <FastNoise/FastNoise.h>
 
+#include "memory/handle.hpp"
 #include "voxel/chunk/generator_task.hpp"
 #include "voxel/chunk/mesh/greedy_task.hpp"
 
 #include "iomanager.hpp"
 
 struct TVS_BlockComparator {
-    bool operator()(const hvox::Block* source, const hvox::Block* target, hvox::BlockChunkPosition, hvox::Chunk*) const {
+    bool operator()(const hvox::Block* source, const hvox::Block* target, hvox::BlockChunkPosition, hmem::Handle<hvox::Chunk>) const {
         return (source->id == target->id) && (source->id != 0);
     }
 };
 struct TVS_VoxelGenerator {
-    void operator() (hvox::Chunk* chunk) const {
+    void operator() (hmem::Handle<hvox::Chunk> chunk) const {
         auto simplex_1                  = FastNoise::New<FastNoise::Simplex>();
         auto fractal_1                  = FastNoise::New<FastNoise::FractalFBm>();
         auto domain_scale_1             = FastNoise::New<FastNoise::DomainScale>();

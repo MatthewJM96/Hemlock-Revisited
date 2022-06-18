@@ -7,6 +7,7 @@
 #include "graphics/glsl_program.h"
 #include "graphics/texture.hpp"
 #include "graphics/sprite/batcher.h"
+#include "memory/handle.hpp"
 #include "ui/input/dispatcher.h"
 #include "ui/input/keys.hpp"
 #include "ui/input/manager.h"
@@ -17,12 +18,12 @@
 #include "iomanager.hpp"
 
 struct TRS_BlockComparator {
-    bool operator()(const hvox::Block* source, const hvox::Block* target, hvox::BlockChunkPosition, hvox::Chunk*) const {
+    bool operator()(const hvox::Block* source, const hvox::Block* target, hvox::BlockChunkPosition, hmem::Handle<hvox::Chunk>) const {
         return (source->id == target->id) && (source->id != 0);
     }
 };
 struct TRS_VoxelGenerator {
-    void operator()(hvox::Chunk* chunk) const {
+    void operator()(hmem::Handle<hvox::Chunk> chunk) const {
         // for (auto y = 0; y < CHUNK_SIZE; y += 2) {
         // for (auto x = 0; x < CHUNK_SIZE; x += 2) {
         for (auto y = 0; y < 10; y += 1) {
