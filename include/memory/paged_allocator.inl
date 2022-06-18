@@ -30,6 +30,7 @@ hmem::PagedAllocator<DataType, PageSize, MaxFreePages>::PagedAllocator(
     //                make the pager more generic so that it can allocate pages
     //                with type information at call to get_page.
     // m_state = alloc.m_state;
+    m_state = std::make_shared<PagedAllocatorState<DataType, PageSize, MaxFreePages>>();
 }
 
 template <typename DataType, size_t PageSize, size_t MaxFreePages>
