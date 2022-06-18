@@ -70,6 +70,8 @@ void happ::SingleWindowApp::run() {
 
         m_fps_limiter->end();
     }
+
+    dispose();
 }
 
 void happ::SingleWindowApp::prepare_window() {
