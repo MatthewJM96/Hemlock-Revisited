@@ -11,7 +11,7 @@ namespace hemlock {
 
         template <typename DataType, typename Allocator, class... Args>
         Handle<DataType> allocate_handle(const Allocator& allocator, Args&&... args) {
-            return std::allocate_shared<DataType>(allocator, args...);
+            return std::allocate_shared<DataType>(allocator, std::forward<Args...>(args...));
         }
 
         template <typename DataType, typename Allocator>
@@ -48,7 +48,7 @@ namespace hemlock {
 
         template <typename DataType, class... Args>
         Handle<DataType> make_handle(Args&&... args) {
-            return std::make_shared<DataType>(args...);
+            return std::make_shared<DataType, Args...>(std::forward<Args...>(args...));
         }
 
         template <typename DataType>
