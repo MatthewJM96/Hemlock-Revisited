@@ -7,6 +7,7 @@
 hvox::Chunk::Chunk() :
     neighbours({}),
     blocks(nullptr),
+    instance({nullptr, 0}),
     state(ChunkState::NONE),
     pending_task(ChunkLoadTaskKind::NONE),
     unload(false),
