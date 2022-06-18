@@ -19,10 +19,10 @@ bool hvox::ChunkGreedyMeshTask<MeshComparator>::run_task(ChunkLoadThreadState*, 
     //                      unique, scalings will not be, and so an index buffer could
     //                      further improve performance and also remove the difficulty
     //                      of the above TODO.
-    chunk->instance = {
-        new ChunkInstanceData[CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE],
-        0
-    };
+    if (chunk->instance.data == nullptr)
+        chunk->instance.data = new ChunkInstanceData[CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE];
+
+    chunk->instance.count = 0;
 
     Block* blocks = chunk->blocks;
 
