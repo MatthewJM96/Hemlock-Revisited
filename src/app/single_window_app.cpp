@@ -29,6 +29,8 @@ void happ::SingleWindowApp::dispose() {
     delete m_input_manager;
     m_input_manager = nullptr;
 
+    delete m_fps_limiter;
+
     ProcessBase::dispose();
 
 #if defined(HEMLOCK_USING_SDL_TTF)
