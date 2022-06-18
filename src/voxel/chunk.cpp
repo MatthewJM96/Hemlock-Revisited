@@ -5,7 +5,6 @@
 #include "voxel/chunk.h"
 
 hvox::Chunk::Chunk() :
-    hmem::Handleable(),
     neighbours({}),
     blocks(nullptr),
     state(ChunkState::NONE),
@@ -18,8 +17,8 @@ hvox::Chunk::~Chunk() {
     dispose();
 }
 
-void hvox::Chunk::init() {
-    init_events();
+void hvox::Chunk::init(hmem::Handle<Chunk> self) {
+    init_events(self);
 
     blocks = new Block[CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE];
     std::fill_n(blocks, CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE, Block{ false });
@@ -29,8 +28,8 @@ void hvox::Chunk::init() {
     state.store(ChunkState::PRELOADED, std::memory_order_release);
 }
 
-void hvox::Chunk::init(Block* _blocks) {
-    init_events();
+void hvox::Chunk::init(hmem::Handle<Chunk> self, Block* _blocks) {
+    init_events(self);
 
     blocks = _blocks;
     m_owns_blocks = false;
@@ -51,17 +50,17 @@ void hvox::Chunk::update(TimeData) {
     // Empty for now.
 }
 
-void hvox::Chunk::init_events() {
-    on_block_change         .set_sender(reinterpret_cast<Sender>(this));
-    on_bulk_block_change    .set_sender(reinterpret_cast<Sender>(this));
-    on_mesh_change          .set_sender(reinterpret_cast<Sender>(this));
-    on_render_state_change  .set_sender(reinterpret_cast<Sender>(this));
-    on_unload               .set_sender(reinterpret_cast<Sender>(this));
+void hvox::Chunk::init_events(hmem::Handle<Chunk> self) {
+    on_block_change         .set_sender(Sender(self));
+    on_bulk_block_change    .set_sender(Sender(self));
+    on_mesh_change          .set_sender(Sender(self));
+    on_render_state_change  .set_sender(Sender(self));
+    on_unload               .set_sender(Sender(self));
 }
 
-bool hvox::set_block( Chunk* chunk,
-          BlockChunkPosition block_position,
-                       Block block )
+bool hvox::set_block( hmem::Handle<Chunk> chunk,
+                       BlockChunkPosition block_position,
+                                    Block block )
 {
     auto block_idx = block_index(block_position);
 
@@ -81,10 +80,10 @@ bool hvox::set_block( Chunk* chunk,
     return true;
 }
 
-bool hvox::set_blocks( Chunk* chunk,
-           BlockChunkPosition start_block_position,
-           BlockChunkPosition end_block_position,
-                        Block block )
+bool hvox::set_blocks( hmem::Handle<Chunk> chunk,
+                        BlockChunkPosition start_block_position,
+                        BlockChunkPosition end_block_position,
+                                     Block block )
 {
     bool gen_task_active = chunk->gen_task_active.load(std::memory_order_acquire);
     if (!gen_task_active) {
@@ -108,10 +107,10 @@ bool hvox::set_blocks( Chunk* chunk,
     return true;
 }
 
-bool hvox::set_blocks( Chunk* chunk,
-           BlockChunkPosition start_block_position,
-           BlockChunkPosition end_block_position,
-                       Block* blocks )
+bool hvox::set_blocks( hmem::Handle<Chunk> chunk,
+                        BlockChunkPosition start_block_position,
+                        BlockChunkPosition end_block_position,
+                                    Block* blocks )
 {
     bool gen_task_active = chunk->gen_task_active.load(std::memory_order_acquire);
     if (!gen_task_active) {

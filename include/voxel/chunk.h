@@ -20,15 +20,12 @@ namespace hemlock {
         /**
          * @brief 
          */
-        struct Chunk : public hmem::Handleable {
+        struct Chunk {
             Chunk();
             ~Chunk();
 
-            void init();
-            void init(
-                                 Block* block_buffer//,
-                // ChunkInstanceDataPager& instance_data_pager
-            );
+            void init(hmem::Handle<Chunk> self);
+            void init(hmem::Handle<Chunk> self, Block* block_buffer/*, ChunkInstanceDataPager& instance_data_pager*/);
 
             void update(TimeData);
 
@@ -67,7 +64,7 @@ namespace hemlock {
         protected:
             void dispose();
 
-            void init_events();
+            void init_events(hmem::Handle<Chunk> self);
 
             // ChunkInstanceDataPager& m_instance_data_pager;
             bool                    m_owns_blocks;
@@ -83,9 +80,9 @@ namespace hemlock {
          *
          * @return True if the block was set, false otherwise.
          */
-        bool set_block( Chunk* chunk,
-            BlockChunkPosition block_position,
-                         Block block );
+        bool set_block( hmem::Handle<Chunk> chunk,
+                         BlockChunkPosition block_position,
+                                      Block block );
         /**
          * @brief Set all points in a rectangular cuboid of the
          * passed in chunk to a specific block.
@@ -99,10 +96,10 @@ namespace hemlock {
          *
          * @return True if the blocks were set, false otherwise.
          */
-        bool set_blocks( Chunk* chunk,
-             BlockChunkPosition start_block_position,
-             BlockChunkPosition end_block_position,
-                          Block block );
+        bool set_blocks( hmem::Handle<Chunk> chunk,
+                          BlockChunkPosition start_block_position,
+                          BlockChunkPosition end_block_position,
+                                       Block block );
         /**
          * @brief Set all points in a rectangular cuboid of the
          * passed in chunk to each block in a buffer. Note, the
@@ -115,10 +112,10 @@ namespace hemlock {
          *
          * @return True if the blocks were set, false otherwise.
          */
-        bool set_blocks( Chunk* chunk,
-             BlockChunkPosition start_block_position,
-             BlockChunkPosition end_block_position,
-                         Block* blocks );
+        bool set_blocks( hmem::Handle<Chunk> chunk,
+                          BlockChunkPosition start_block_position,
+                          BlockChunkPosition end_block_position,
+                                      Block* blocks );
 
         template <typename DataType>
         void set_per_block_data( DataType* buffer,

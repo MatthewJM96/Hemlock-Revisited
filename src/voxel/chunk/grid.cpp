@@ -84,9 +84,9 @@ bool hvox::ChunkGrid::preload_chunk_at(ChunkGridPosition chunk_position) {
     auto it = m_chunks.find(chunk_position.id);
     if (it != m_chunks.end()) return false;
 
-    hmem::Handle<Chunk> chunk = m_chunk_allocator.allocate();
+    hmem::Handle<Chunk> chunk = hmem::allocate_handle<Chunk>(m_chunk_allocator);
     chunk->position = chunk_position;
-    chunk->init();
+    chunk->init(chunk);
 
     establish_chunk_neighbours(chunk);
 
@@ -171,10 +171,10 @@ void hvox::ChunkGrid::establish_chunk_neighbours(hmem::Handle<Chunk> chunk) {
     neighbour_position.x -= 1;
     auto it = m_chunks.find(neighbour_position.id);
     if (it != m_chunks.end()) {
-        chunk->neighbours.left = (*it).second;
-        (*it).second->neighbours.right = chunk;
+        chunk->neighbours.one.left = (*it).second;
+        (*it).second->neighbours.one.right = chunk;
     } else {
-        chunk->neighbours.left = hmem::Handle<Chunk>();
+        chunk->neighbours.one.left = hmem::WeakHandle<Chunk>();
     }
 
     // RIGHT
@@ -182,10 +182,10 @@ void hvox::ChunkGrid::establish_chunk_neighbours(hmem::Handle<Chunk> chunk) {
     neighbour_position.x += 1;
     it = m_chunks.find(neighbour_position.id);
     if (it != m_chunks.end()) {
-        chunk->neighbours.right = (*it).second;
-        (*it).second->neighbours.left = chunk;
+        chunk->neighbours.one.right = (*it).second;
+        (*it).second->neighbours.one.left = chunk;
     } else {
-        chunk->neighbours.right = hmem::Handle<Chunk>();
+        chunk->neighbours.one.right = hmem::WeakHandle<Chunk>();
     }
 
     // TOP
@@ -193,10 +193,10 @@ void hvox::ChunkGrid::establish_chunk_neighbours(hmem::Handle<Chunk> chunk) {
     neighbour_position.y += 1;
     it = m_chunks.find(neighbour_position.id);
     if (it != m_chunks.end()) {
-        chunk->neighbours.top = (*it).second;
-        (*it).second->neighbours.bottom = chunk;
+        chunk->neighbours.one.top = (*it).second;
+        (*it).second->neighbours.one.bottom = chunk;
     } else {
-        chunk->neighbours.top = hmem::Handle<Chunk>();
+        chunk->neighbours.one.top = hmem::WeakHandle<Chunk>();
     }
 
     // BOTTOM
@@ -204,10 +204,10 @@ void hvox::ChunkGrid::establish_chunk_neighbours(hmem::Handle<Chunk> chunk) {
     neighbour_position.y -= 1;
     it = m_chunks.find(neighbour_position.id);
     if (it != m_chunks.end()) {
-        chunk->neighbours.bottom = (*it).second;
-        (*it).second->neighbours.top = chunk;
+        chunk->neighbours.one.bottom = (*it).second;
+        (*it).second->neighbours.one.top = chunk;
     } else {
-        chunk->neighbours.bottom = hmem::Handle<Chunk>();
+        chunk->neighbours.one.bottom = hmem::WeakHandle<Chunk>();
     }
 
     // FRONT
@@ -215,10 +215,10 @@ void hvox::ChunkGrid::establish_chunk_neighbours(hmem::Handle<Chunk> chunk) {
     neighbour_position.z -= 1;
     it = m_chunks.find(neighbour_position.id);
     if (it != m_chunks.end()) {
-        chunk->neighbours.front = (*it).second;
-        (*it).second->neighbours.back = chunk;
+        chunk->neighbours.one.front = (*it).second;
+        (*it).second->neighbours.one.back = chunk;
     } else {
-        chunk->neighbours.front = hmem::Handle<Chunk>();
+        chunk->neighbours.one.front = hmem::WeakHandle<Chunk>();
     }
 
     // BACK
@@ -226,10 +226,10 @@ void hvox::ChunkGrid::establish_chunk_neighbours(hmem::Handle<Chunk> chunk) {
     neighbour_position.z += 1;
     it = m_chunks.find(neighbour_position.id);
     if (it != m_chunks.end()) {
-        chunk->neighbours.back = (*it).second;
-        (*it).second->neighbours.front = chunk;
+        chunk->neighbours.one.back = (*it).second;
+        (*it).second->neighbours.one.front = chunk;
     } else {
-        chunk->neighbours.back = hmem::Handle<Chunk>();
+        chunk->neighbours.one.back = hmem::WeakHandle<Chunk>();
     }
 }
 
@@ -275,9 +275,10 @@ hvox::QueriedChunkState hvox::ChunkGrid::query_all_neighbour_states(hmem::Handle
 
     bool all_neighbours_satisfy_constraint = true;
     for (ui32 i = 0; i < 8; ++i) {
-        if (chunk->neighbours.neighbours[i] == nullptr) continue;
+        auto neighbour = chunk->neighbours.all[i].lock();
+        if (neighbour == nullptr) continue;
 
-        ChunkState actual_state = chunk->neighbours.neighbours[i]->state.load(std::memory_order_acquire);
+        ChunkState actual_state = neighbour->state.load(std::memory_order_acquire);
 
         all_neighbours_satisfy_constraint = all_neighbours_satisfy_constraint && (actual_state >= required_minimum_state);
     }
@@ -327,9 +328,10 @@ hvox::QueriedChunkState hvox::ChunkGrid::query_all_neighbour_exact_states(hmem::
 
     bool all_neighbours_satisfy_constraint = true;
     for (ui32 i = 0; i < 8; ++i) {
-        if (chunk->neighbours.neighbours[i] == nullptr) continue;
+        auto neighbour = chunk->neighbours.all[i].lock();
+        if (neighbour == nullptr) continue;
 
-        ChunkState actual_state = chunk->neighbours.neighbours[i]->state.load(std::memory_order_acquire);
+        ChunkState actual_state = neighbour->state.load(std::memory_order_acquire);
 
         all_neighbours_satisfy_constraint = all_neighbours_satisfy_constraint && (actual_state == required_state);
     }

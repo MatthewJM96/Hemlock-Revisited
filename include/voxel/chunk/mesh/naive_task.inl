@@ -88,12 +88,15 @@ bool hvox::ChunkNaiveMeshTask<MeshComparator>::run_task(ChunkLoadThreadState* st
         if (voxel != NULL_BLOCK) {
             BlockWorldPosition block_position = block_world_position(m_chunk->position, i);
 
+            hmem::Handle<Chunk> neighbour;
+
             // Check its neighbours, to decide whether to add its quads.
             // LEFT
             if (is_at_left_face(i)) {
                 // Get corresponding neighbour index in neighbour chunk and check.
                 BlockIndex j = index_at_right_face(i);
-                if (m_chunk->neighbours.left == nullptr || m_chunk->neighbours.left->blocks[j] == NULL_BLOCK) {
+                neighbour = m_chunk->neighbours.one.left.lock();
+                if (neighbour == nullptr || neighbour->blocks[j] == NULL_BLOCK) {
                     add_block(block_position);
                     continue;
                 }
@@ -109,7 +112,8 @@ bool hvox::ChunkNaiveMeshTask<MeshComparator>::run_task(ChunkLoadThreadState* st
             if (is_at_right_face(i)) {
                 // Get corresponding neighbour index in neighbour chunk and check.
                 BlockIndex j = index_at_left_face(i);
-                if (m_chunk->neighbours.right == nullptr || m_chunk->neighbours.right->blocks[j] == NULL_BLOCK) {
+                neighbour = m_chunk->neighbours.one.right.lock();
+                if (neighbour == nullptr || neighbour->blocks[j] == NULL_BLOCK) {
                     add_block(block_position);
                     continue;
                 }
@@ -125,7 +129,8 @@ bool hvox::ChunkNaiveMeshTask<MeshComparator>::run_task(ChunkLoadThreadState* st
             if (is_at_bottom_face(i)) {
                 // Get corresponding neighbour index in neighbour chunk and check.
                 BlockIndex j = index_at_top_face(i);
-                if (m_chunk->neighbours.bottom == nullptr || m_chunk->neighbours.bottom->blocks[j] == NULL_BLOCK) {
+                neighbour = m_chunk->neighbours.one.bottom.lock();
+                if (neighbour == nullptr || neighbour->blocks[j] == NULL_BLOCK) {
                     add_block(block_position);
                     continue;
                 }
@@ -141,7 +146,8 @@ bool hvox::ChunkNaiveMeshTask<MeshComparator>::run_task(ChunkLoadThreadState* st
             if (is_at_top_face(i)) {
                 // Get corresponding neighbour index in neighbour chunk and check.
                 BlockIndex j = index_at_bottom_face(i);
-                if (m_chunk->neighbours.top == nullptr || m_chunk->neighbours.top->blocks[j] == NULL_BLOCK) {
+                neighbour = m_chunk->neighbours.one.top.lock();
+                if (neighbour == nullptr || neighbour->blocks[j] == NULL_BLOCK) {
                     add_block(block_position);
                     continue;
                 }
@@ -157,7 +163,8 @@ bool hvox::ChunkNaiveMeshTask<MeshComparator>::run_task(ChunkLoadThreadState* st
             if (is_at_front_face(i)) {
                 // Get corresponding neighbour index in neighbour chunk and check.
                 BlockIndex j = index_at_back_face(i);
-                if (m_chunk->neighbours.front == nullptr || m_chunk->neighbours.front->blocks[j] == NULL_BLOCK) {
+                neighbour = m_chunk->neighbours.one.front.lock();
+                if (neighbour == nullptr || neighbour->blocks[j] == NULL_BLOCK) {
                     add_block(block_position);
                     continue;
                 }
@@ -173,7 +180,8 @@ bool hvox::ChunkNaiveMeshTask<MeshComparator>::run_task(ChunkLoadThreadState* st
             if (is_at_back_face(i)) {
                 // Get corresponding neighbour index in neighbour chunk and check.
                 BlockIndex j = index_at_front_face(i);
-                if (m_chunk->neighbours.back == nullptr || m_chunk->neighbours.back->blocks[j] == NULL_BLOCK) {
+                neighbour = m_chunk->neighbours.one.back.lock();
+                if (neighbour == nullptr || neighbour->blocks[j] == NULL_BLOCK) {
                     add_block(block_position);
                     continue;
                 }

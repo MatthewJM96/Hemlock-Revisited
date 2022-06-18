@@ -12,7 +12,7 @@ namespace hemlock {
 
         // TODO(Matthew): Does page size want to be made a run-time thing,
         //                as it may be nice to base this on view distance.
-        using ChunkAllocator = hmem::PagedAllocator<Chunk, 4 * 4 * 4>;
+        using ChunkAllocator = hmem::PagedAllocator<Chunk, 4 * 4 * 4, 3>;
         using ChunkInstanceDataPager =
             hmem::Pager<ChunkInstanceData,
                     CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE / 4>;

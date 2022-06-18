@@ -10,14 +10,14 @@ hg::MeshHandles hvox::ChunkRenderer::block_mesh_handles = {};
 hvox::ChunkRenderer::ChunkRenderer() :
     handle_chunk_mesh_change(Subscriber<>{
         [&](Sender sender) {
-            const Chunk* chunk = reinterpret_cast<const Chunk*>(sender);
+            hmem::Handle<Chunk> chunk = sender.get_handle<Chunk>();
 
             m_chunk_dirty_queue.enqueue(chunk);
         }
     }),
     handle_chunk_unload(Subscriber<>{
         [&](Sender sender) {
-            const Chunk* chunk = reinterpret_cast<const Chunk*>(sender);
+            hmem::Handle<Chunk> chunk = sender.get_handle<Chunk>();
 
             m_chunk_removal_queue.enqueue(chunk);
         }
@@ -82,7 +82,7 @@ void hvox::ChunkRenderer::draw(TimeData) {
     }
 }
 
-void hvox::ChunkRenderer::add_chunk(Chunk* chunk) {
+void hvox::ChunkRenderer::add_chunk(hmem::Handle<Chunk> chunk) {
     chunk->on_mesh_change += &handle_chunk_mesh_change;
     chunk->on_unload      += &handle_chunk_unload;
 
@@ -129,7 +129,7 @@ hvox::ChunkRenderPage* hvox::ChunkRenderer::create_pages(ui32 count) {
     return first_new_page;
 }
 
-void hvox::ChunkRenderer::put_chunk_in_page(const Chunk* chunk, ui32 first_page_idx) {
+void hvox::ChunkRenderer::put_chunk_in_page(hmem::Handle<Chunk> chunk, ui32 first_page_idx) {
     PagedChunkMetadata& metadata = m_chunk_metadata[chunk];
 
     ui32 page_idx = first_page_idx;
@@ -166,7 +166,7 @@ void hvox::ChunkRenderer::process_pages() {
     // TODO(Matthew): Lock on chunk instance data? Perhaps
     //                we can use double buffering to avoid that?
 
-    const Chunk* chunk;
+    hmem::Handle<Chunk> chunk;
 
     /*****************\
      * Remove Chunks *

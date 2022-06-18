@@ -14,7 +14,7 @@ namespace hemlock {
         template <typename StrategyCandidate>
         concept ChunkGenerationStrategy = requires (
              StrategyCandidate s,
-                        Chunk* c
+           hmem::Handle<Chunk> c
         ) {
             { s.operator()(c) } -> std::same_as<void>;
         };

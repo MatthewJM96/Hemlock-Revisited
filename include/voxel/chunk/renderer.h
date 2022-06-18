@@ -15,15 +15,17 @@ namespace hemlock {
             f32v3 translation, scaling;
         };
 
-        using PagedChunks = std::vector<const Chunk*>;
+        // TODO(Matthew): can these be weak handles, promoted only when needed? I think so...
+
+        using PagedChunks = std::vector<hmem::Handle<Chunk>>;
 
         struct PagedChunkMetadata {
             ui32 page_idx;
             ui32 chunk_idx;
             bool paged;
         };
-        using PagedChunksMetadata   = std::unordered_map<const Chunk*, PagedChunkMetadata>;
-        using PagedChunkQueue       = moodycamel::ConcurrentQueue<const Chunk*>;
+        using PagedChunksMetadata   = std::unordered_map<hmem::Handle<Chunk>, PagedChunkMetadata>;
+        using PagedChunkQueue       = moodycamel::ConcurrentQueue<hmem::Handle<Chunk>>;
 
         struct ChunkRenderPage {
             PagedChunks chunks;
@@ -72,7 +74,7 @@ namespace hemlock {
              *
              * @param chunk 
              */
-            void add_chunk(Chunk* chunk);
+            void add_chunk(hmem::Handle<Chunk> chunk);
         protected:
             static hg::MeshHandles block_mesh_handles;
 
@@ -97,7 +99,7 @@ namespace hemlock {
              * @param first_page_idx The index of the first page
              * to consider.
              */
-            void put_chunk_in_page(const Chunk* chunk, ui32 first_page_idx);
+            void put_chunk_in_page(hmem::Handle<Chunk> chunk, ui32 first_page_idx);
 
             /**
              * @brief Updates chunks, removing those that

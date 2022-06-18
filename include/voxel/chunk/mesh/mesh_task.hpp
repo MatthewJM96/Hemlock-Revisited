@@ -16,7 +16,7 @@ namespace hemlock {
              ComparatorCandidate s,
                     const Block* b,
               BlockChunkPosition p,
-                          Chunk* c
+             hmem::Handle<Chunk> c
         ) {
             { s.operator()(b, b, p, c) } -> std::same_as<bool>;
         };
