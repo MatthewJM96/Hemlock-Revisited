@@ -5,10 +5,10 @@
 
 namespace hemlock {
     namespace voxel {
-        class ChunkLoadTask : public ChunkFileTask {
-        public:
-            virtual void execute(ChunkFileTaskThreadState* state, ChunkFileTaskTaskQueue* task_queue) override;
-        };
+        // class ChunkLoadTask : public ChunkFileTask {
+        // public:
+        //     virtual void execute(ChunkFileTaskThreadState* state, ChunkFileTaskTaskQueue* task_queue) override;
+        // };
     }
 }
 namespace hvox = hemlock::voxel;
