@@ -209,7 +209,7 @@ public:
             workflow_builder.init(&m_chunk_load_dag);
             workflow_builder.chain_tasks(2);
         }
-        m_chunk_grid.init(10, &m_chunk_load_dag, hvox::ChunkLoadTaskListBuilder{[](hmem::Handle<hvox::Chunk> chunk, hvox::ChunkGrid* chunk_grid) {
+        m_chunk_grid.init(10, &m_chunk_load_dag, hvox::ChunkLoadTaskListBuilder{[](hmem::WeakHandle<hvox::Chunk> chunk, hvox::ChunkGrid* chunk_grid) {
             // TODO(Matthew): How do we clean up this?
             hthread::HeldWorkflowTask<hvox::ChunkLoadTaskContext>* tasks = new hthread::HeldWorkflowTask<hvox::ChunkLoadTaskContext>[2];
 

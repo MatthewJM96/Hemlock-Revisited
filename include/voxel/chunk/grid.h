@@ -28,7 +28,7 @@ namespace hemlock {
         using QueriedChunkState       = std::pair<bool, bool>;
         using QueriedChunkPendingTask = std::pair<bool, bool>;
 
-        using ChunkLoadTaskListBuilder = Delegate<hthread::ThreadWorkflowTasksView<ChunkLoadTaskContext>(hmem::Handle<Chunk>, ChunkGrid*)>;
+        using ChunkLoadTaskListBuilder = Delegate<hthread::ThreadWorkflowTasksView<ChunkLoadTaskContext>(hmem::WeakHandle<Chunk>, ChunkGrid*)>;
 
         class ChunkGrid {
         public:
