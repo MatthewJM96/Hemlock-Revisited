@@ -45,6 +45,42 @@ namespace hemlock {
         Handle<DataType> allocate_handle_for_overwrite(const Allocator& allocator, std::size_t N) {
             return std::allocate_shared_for_overwrite<DataType>(allocator, N);
         }
+
+        template <typename DataType, class... Args>
+        Handle<DataType> make_handle(Args&&... args) {
+            return std::make_shared<DataType>(args...);
+        }
+
+        template <typename DataType>
+        Handle<DataType> make_handle(std::size_t N) {
+            return std::make_shared<DataType>(N);
+        }
+
+        template <typename DataType>
+        Handle<DataType> make_handle() {
+            return std::make_shared<DataType>();
+        }
+
+        template <typename DataType>
+        Handle<DataType> make_handle(std::size_t N,
+                                    const std::remove_extent_t<DataType>& u) {
+            return std::make_shared<DataType>(N, u);
+        }
+
+        template <typename DataType>
+        Handle<DataType> make_handle(const std::remove_extent_t<DataType>& u) {
+            return std::make_shared<DataType>(u);
+        }
+
+        template <typename DataType>
+        Handle<DataType> make_handle_for_overwrite() {
+            return std::make_shared_for_overwrite<DataType>();
+        }
+
+        template <typename DataType>
+        Handle<DataType> make_handle_for_overwrite(std::size_t N) {
+            return std::make_shared_for_overwrite<DataType>(N);
+        }
     }
 }
 namespace hmem = hemlock::memory;
