@@ -571,6 +571,8 @@ void hg::s::SpriteBatcher::generate_batches() {
 
         // Send the indices over to the GPU.
         glNamedBufferData(m_ibo, m_index_count * sizeof(ui32), indices, m_usage_hint);
+
+        delete[] indices;
     }
 
     // Write our data to GPU.
