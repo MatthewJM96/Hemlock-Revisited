@@ -212,6 +212,10 @@ void hvox::ChunkRenderer::process_pages() {
             for (auto paged_chunk : page.chunks) {
                 page.voxel_count += paged_chunk->instance.count;
             }
+
+            if (page.first_dirtied_chunk_idx == metadata.chunk_idx) {
+                page.first_dirtied_chunk_idx = std::numeric_limits<ui32>::max();
+            }
         }
     }
 
