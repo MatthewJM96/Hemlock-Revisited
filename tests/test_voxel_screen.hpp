@@ -213,6 +213,7 @@ public:
 
         m_shader.set_attribute("v_position",      0);
         m_shader.set_attribute("v_texture_coord", 1);
+        m_shader.set_attribute("v_normal",        2);
 
         m_shader.add_shaders("shaders/test_vox.vert", "shaders/test_vox.frag");
 
