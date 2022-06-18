@@ -1,45 +1,35 @@
-template <typename DataType, size_t PageSize>
-requires (PageSize > 0)
-void hmem::Pager<DataType, PageSize>::init(size_t max_free_pages) {
-    // NOTE: We don't resize if m_free_pages already has non-zero size/capacity.
-    //          Assuming init/dispose called correctly.
-    m_free_pages.reserve(max_free_pages);
-}
-
-template <typename DataType, size_t PageSize>
-requires (PageSize > 0)
-void hmem::Pager<DataType, PageSize>::dispose() {
+template <typename DataType, size_t PageSize, size_t MaxFreePages>
+requires (PageSize > 0 && MaxFreePages > 0)
+void hmem::Pager<DataType, PageSize, MaxFreePages>::dispose() {
     std::lock_guard<std::mutex> lock(m_free_pages_mutex);
 
     for (auto& free_page : m_free_pages) {
-        delete[] free_page.data();
+        delete[] free_page;
     }
 
     _Pages().swap(m_free_pages);
+    m_free_page_count = 0;
 }
 
-template <typename DataType, size_t PageSize>
-requires (PageSize > 0)
-hmem::Page<DataType, PageSize> hmem::Pager<DataType, PageSize>::get_page() {
+template <typename DataType, size_t PageSize, size_t MaxFreePages>
+requires (PageSize > 0 && MaxFreePages > 0)
+hmem::Page<DataType> hmem::Pager<DataType, PageSize, MaxFreePages>::get_page() {
     std::lock_guard<std::mutex> lock(m_free_pages_mutex);
 
-    if (m_free_pages.size() > 0) {
-        _Page page = m_free_pages.back();
-        m_free_pages.pop_back();
-        return page;
-    }
+    if (m_free_page_count > 0)
+        return m_free_pages[--m_free_page_count];
 
-    return _Page{ reinterpret_cast<DataType*>(new ui8[sizeof(DataType) * PageSize]), PageSize };
+    return reinterpret_cast<_Page>(new ui8[sizeof(DataType) * PageSize]);
 }
 
-template <typename DataType, size_t PageSize>
-requires (PageSize > 0)
-void hmem::Pager<DataType, PageSize>::free_page(Page<DataType, PageSize> page) {
+template <typename DataType, size_t PageSize, size_t MaxFreePages>
+requires (PageSize > 0 && MaxFreePages > 0)
+void hmem::Pager<DataType, PageSize, MaxFreePages>::free_page(Page<DataType> page) {
     std::lock_guard<std::mutex> lock(m_free_pages_mutex);
     
-    if (m_free_pages.size() < m_free_pages.capacity()) {
-        m_free_pages.emplace_back(page);
+    if (m_free_page_count < MaxFreePages) {
+        m_free_pages[m_free_page_count] = page;
     } else {
-        delete[] page.data();
+        delete[] page;
     }
 }

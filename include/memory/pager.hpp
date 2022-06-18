@@ -3,25 +3,25 @@
 
 namespace hemlock {
     namespace memory {
-        template <typename DataType, size_t PageSize>
-        requires (PageSize > 0)
-        using Page = std::span<DataType, PageSize>;
+        template <typename DataType>
+        using Page = DataType*;
 
-        template <typename DataType, size_t PageSize>
-        requires (PageSize > 0)
-        using Pages = std::vector<Page<DataType, PageSize>>;
+        template <typename DataType, size_t MaxFreePages>
+        requires (MaxFreePages > 0)
+        using Pages = std::array<Page<DataType>, MaxFreePages>;
 
-        template <typename DataType, size_t PageSize>
-        requires (PageSize > 0)
+        template <typename DataType, size_t PageSize, size_t MaxFreePages>
+        requires (PageSize > 0 && MaxFreePages > 0)
         class Pager {
         protected:
-            using _Page  = Page<DataType, PageSize>;
-            using _Pages = Pages<DataType, PageSize>;
+            using _Page  = Page<DataType>;
+            using _Pages = Pages<DataType, MaxFreePages>;
         public:
-            Pager()  { /* Empty. */ }
+            Pager() :
+                m_free_page_count(0)
+            { /* Empty. */ }
             ~Pager() { /* Empty. */ }
 
-            void init(size_t max_free_pages);
             void dispose();
 
             _Page get_page();
@@ -29,6 +29,7 @@ namespace hemlock {
         protected:
             std::mutex  m_free_pages_mutex;
             _Pages      m_free_pages;
+            size_t      m_free_page_count;
         };
     }
 }

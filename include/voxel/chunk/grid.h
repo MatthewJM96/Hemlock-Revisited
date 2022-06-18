@@ -15,10 +15,10 @@ namespace hemlock {
         using ChunkAllocator = hmem::PagedAllocator<Chunk, 4 * 4 * 4, 3>;
         using ChunkInstanceDataPager =
             hmem::Pager<ChunkInstanceData,
-                    CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE / 4>;
+                    CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE / 4, 3>;
         using ChunkBlockPager =
             hmem::Pager<Block,
-                    CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE>;
+                    CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE, 3>;
 
         struct Chunk;
         // TODO(Matthew): We should add support for LOD, different generation stages, disabling meshing etc.

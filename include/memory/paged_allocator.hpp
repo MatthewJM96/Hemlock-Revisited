@@ -6,18 +6,18 @@
 
 namespace hemlock {
     namespace memory {
-        template <typename DataType, size_t PageSize>
+        template <typename DataType, size_t PageSize, size_t MaxFreePages>
         requires (PageSize > 0)
         struct PagedAllocatorState {
             ~PagedAllocatorState() {
-                std::lock_guard lock(free_items_mutex);
+                std::lock_guard<std::mutex> lock(free_items_mutex);
                 _Items().swap(free_items);
 
                 pager.dispose();
             }
 
-            using _Page  = Page<DataType, PageSize>;
-            using _Pager = Pager<DataType, PageSize>;
+            using _Page  = Page<DataType>;
+            using _Pager = Pager<DataType, PageSize, MaxFreePages>;
             using _Items = std::vector<DataType*>;
 
             _Pager      pager;
@@ -44,9 +44,9 @@ namespace hemlock {
                 using other = PagedAllocator<OtherDataType, PageSize, MaxFreePages>;
             };
         protected:
-            using _Page  = typename PagedAllocatorState<DataType, PageSize>::_Page;
-            using _Pager = typename PagedAllocatorState<DataType, PageSize>::_Pager;
-            using _Items = typename PagedAllocatorState<DataType, PageSize>::_Items;
+            using _Page  = typename PagedAllocatorState<DataType, PageSize, MaxFreePages>::_Page;
+            using _Pager = typename PagedAllocatorState<DataType, PageSize, MaxFreePages>::_Pager;
+            using _Items = typename PagedAllocatorState<DataType, PageSize, MaxFreePages>::_Items;
         public:
             PagedAllocator();
             PagedAllocator(const PagedAllocator<DataType, PageSize, MaxFreePages>& alloc);
@@ -61,7 +61,7 @@ namespace hemlock {
 
             void deallocate(pointer data, size_type count);
         protected:
-            std::shared_ptr<PagedAllocatorState<DataType, PageSize>> m_state;
+            std::shared_ptr<PagedAllocatorState<DataType, PageSize, MaxFreePages>> m_state;
         };
     }
 }
