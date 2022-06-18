@@ -1,48 +1,52 @@
 #ifndef __hemlock_memory_handle_hpp
 #define __hemlock_memory_handle_hpp
 
-#include "allocator.hpp"
-
 namespace hemlock {
     namespace memory {
-        template <IsHandleable UnderlyingType>
-        class Handle {
-            friend Allocator<UnderlyingType>;
-        public:
-            Handle();
-            ~Handle() { release(); }
+        template <typename DataType>
+        using Handle = std::shared_ptr<DataType>;
 
-            Handle(const Handle&);
-            Handle& operator=(const Handle&);
+        template <typename DataType>
+        using WeakHandle = std::weak_ptr<DataType>;
 
-            Handle(Handle&&);
-            Handle& operator=(Handle&&);
+        template <typename DataType, typename Allocator, class... Args>
+        Handle<DataType> allocate_handle(const Allocator& allocator, Args&&... args) {
+            return std::allocate_shared<DataType>(allocator, args...);
+        }
 
-            bool release();
+        template <typename DataType, typename Allocator>
+        Handle<DataType> allocate_handle(const Allocator& allocator, std::size_t N) {
+            return std::allocate_shared<DataType>(allocator, N);
+        }
 
-            UnderlyingType& operator*();
-            const UnderlyingType& operator*() const;
+        template <typename DataType, typename Allocator>
+        Handle<DataType> allocate_handle(const Allocator& allocator) {
+            return std::allocate_shared<DataType>(allocator);
+        }
 
-            UnderlyingType* operator->();
-            const UnderlyingType* operator->() const;
+        template <typename DataType, typename Allocator>
+        Handle<DataType> allocate_handle(const Allocator& allocator, std::size_t N,
+                                    const std::remove_extent_t<DataType>& u) {
+            return std::allocate_shared<DataType>(allocator, N, u);
+        }
 
-            bool operator==(std::nullptr_t possible_nullptr);
-            bool operator==(const Handle& handle);
+        template <typename DataType, typename Allocator>
+        Handle<DataType> allocate_handle(const Allocator& allocator,
+                                    const std::remove_extent_t<DataType>& u) {
+            return std::allocate_shared<DataType>(allocator, u);
+        }
 
-            bool operator!=(std::nullptr_t possible_nullptr);
-            bool operator!=(const Handle& handle);
-        protected:
-            static Handle acquire_existing(const Handle& handle);
+        template <typename DataType, typename Allocator>
+        Handle<DataType> allocate_handle_for_overwrite(const Allocator& allocator) {
+            return std::allocate_shared_for_overwrite<DataType>(allocator);
+        }
 
-            Handle(UnderlyingType* data, Allocator<UnderlyingType>* allocator);
-
-            UnderlyingType* m_data;
-            Allocator<UnderlyingType>* m_allocator;
-        };
+        template <typename DataType, typename Allocator>
+        Handle<DataType> allocate_handle_for_overwrite(const Allocator& allocator, std::size_t N) {
+            return std::allocate_shared_for_overwrite<DataType>(allocator, N);
+        }
     }
 }
 namespace hmem = hemlock::memory;
-
-#include "handle.inl"
 
 #endif // __hemlock_memory_handle_hpp

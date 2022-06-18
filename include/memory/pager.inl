@@ -1,4 +1,5 @@
 template <typename DataType, size_t PageSize>
+requires (PageSize > 0)
 void hmem::Pager<DataType, PageSize>::init(size_t max_free_pages) {
     // NOTE: We don't resize if m_free_pages already has non-zero size/capacity.
     //          Assuming init/dispose called correctly.
@@ -6,6 +7,7 @@ void hmem::Pager<DataType, PageSize>::init(size_t max_free_pages) {
 }
 
 template <typename DataType, size_t PageSize>
+requires (PageSize > 0)
 void hmem::Pager<DataType, PageSize>::dispose() {
     std::lock_guard<std::mutex> lock(m_free_pages_mutex);
 
@@ -17,6 +19,7 @@ void hmem::Pager<DataType, PageSize>::dispose() {
 }
 
 template <typename DataType, size_t PageSize>
+requires (PageSize > 0)
 hmem::Page<DataType, PageSize> hmem::Pager<DataType, PageSize>::get_page() {
     std::lock_guard<std::mutex> lock(m_free_pages_mutex);
 
@@ -26,10 +29,11 @@ hmem::Page<DataType, PageSize> hmem::Pager<DataType, PageSize>::get_page() {
         return page;
     }
 
-    return { new DataType[PageSize] };
+    return _Page{ reinterpret_cast<DataType*>(new ui8[sizeof(DataType) * PageSize]), PageSize };
 }
 
 template <typename DataType, size_t PageSize>
+requires (PageSize > 0)
 void hmem::Pager<DataType, PageSize>::free_page(Page<DataType, PageSize> page) {
     std::lock_guard<std::mutex> lock(m_free_pages_mutex);
     

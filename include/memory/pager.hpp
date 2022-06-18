@@ -4,9 +4,11 @@
 namespace hemlock {
     namespace memory {
         template <typename DataType, size_t PageSize>
+        requires (PageSize > 0)
         using Page = std::span<DataType, PageSize>;
 
         template <typename DataType, size_t PageSize>
+        requires (PageSize > 0)
         using Pages = std::vector<Page<DataType, PageSize>>;
 
         template <typename DataType, size_t PageSize>
@@ -16,7 +18,7 @@ namespace hemlock {
             using _Page  = Page<DataType, PageSize>;
             using _Pages = Pages<DataType, PageSize>;
         public:
-            Pager();
+            Pager()  { /* Empty. */ }
             ~Pager() { /* Empty. */ }
 
             void init(size_t max_free_pages);

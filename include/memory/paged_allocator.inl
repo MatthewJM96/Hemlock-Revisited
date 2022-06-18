@@ -1,64 +1,98 @@
-
-template <hmem::IsHandleable DataType, size_t PageSize>
-void hmem::PagedAllocator<DataType, PageSize>::init(size_t max_free_pages /*= 3*/, size_t compaction_factor /*= 2*/) {
-    std::lock_guard<std::mutex> lock(m_free_items_mutex);
-
-    m_pager.init(max_free_pages);
-
-    // NOTE: We don't resize if m_free_items already has non-zero size/capacity.
-    //          Assuming init/dispose called correctly.
-    m_free_items.reserve(PageSize * compaction_factor);
+template <typename DataType, size_t PageSize, size_t MaxFreePages>
+requires (PageSize > 0 && MaxFreePages > 0)
+typename hmem::PagedAllocator<DataType, PageSize, MaxFreePages>::size_type
+    hmem::PagedAllocator<DataType, PageSize, MaxFreePages>::max_size() const
+{
+    return PageSize;
 }
 
-template <hmem::IsHandleable DataType, size_t PageSize>
-void hmem::PagedAllocator<DataType, PageSize>::dispose() {
-    std::lock_guard<std::mutex> lock(m_free_items_mutex);
+template <typename DataType, size_t PageSize, size_t MaxFreePages>
+requires (PageSize > 0 && MaxFreePages > 0)
+hmem::PagedAllocator<DataType, PageSize, MaxFreePages>::PagedAllocator() {
+    m_state = std::make_shared<PagedAllocatorState<DataType, PageSize>>();
 
-    m_pager.dispose();
-
-    _Items().swap(m_free_items);
+    m_state->pager.init(MaxFreePages);
 }
 
-template <hmem::IsHandleable DataType, size_t PageSize>
-hmem::Handle<DataType> hmem::PagedAllocator<DataType, PageSize>::allocate() {
-    std::lock_guard<std::mutex> lock(m_free_items_mutex);
+template <typename DataType, size_t PageSize, size_t MaxFreePages>
+requires (PageSize > 0 && MaxFreePages > 0)
+hmem::PagedAllocator<DataType, PageSize, MaxFreePages>::PagedAllocator(
+    const PagedAllocator<DataType, PageSize, MaxFreePages>& alloc
+) {
+    m_state = alloc.m_state;
+}
 
-    if (m_free_items.size() > 0) {
-        DataType item = m_free_items.back();
-        m_free_items.pop_back();
-        return Handle<DataType>(item, this);
+template <typename DataType, size_t PageSize, size_t MaxFreePages>
+requires (PageSize > 0 && MaxFreePages > 0)
+template <typename OtherDataType>
+hmem::PagedAllocator<DataType, PageSize, MaxFreePages>::PagedAllocator(
+    const PagedAllocator<OtherDataType, PageSize, MaxFreePages>& alloc
+) {
+    // TODO(Matthew): this patently isn't going to work. we need to somehow
+    //                make the pager more generic so that it can allocate pages
+    //                with type information at call to get_page.
+    // m_state = alloc.m_state;
+    m_state->pager.init(MaxFreePages);
+}
+
+template <typename DataType, size_t PageSize, size_t MaxFreePages>
+requires (PageSize > 0 && MaxFreePages > 0)
+typename hmem::PagedAllocator<DataType, PageSize, MaxFreePages>::pointer
+    hmem::PagedAllocator<DataType, PageSize, MaxFreePages>::allocate(size_type count, const void* /*= 0*/)
+{
+    if (count == 0) return nullptr;
+
+    std::lock_guard<std::mutex> lock(m_state->free_items_mutex);
+
+    if (m_state->free_items.size() > 0) {
+        pointer item = m_state->free_items.back();
+        m_state->free_items.pop_back();
+        return item;
     }
 
-    _Page page = m_pager.get_page();
-    // Can we use a range transform here? This is a bit ugly.
-    auto page_ptrs = std::ranges::transform_view(page, [](DataType& el) { return &el; });
-    m_free_items.insert(m_free_items.end(), std::begin(page_ptrs) + 1, std::end(page_ptrs));
+    _Page page = m_state->pager.get_page();
 
-    return Handle<DataType>(&page[0], this);
+    // Add all items in page after `count` first items
+    // to the free items list.
+    if (count < PageSize) {
+        // auto item_ptrs = std::ranges::transform_view(page, [](DataType& el) { return &el; });
+        // m_state->free_items.insert(m_state->free_items.end(), std::begin(item_ptrs) + count, std::end(item_ptrs));
+
+        for (size_t i = count; i < PageSize; ++i) m_state->free_items.emplace_back(&page[i]);
+    }
+
+    return &page[0];
 }
 
-template <hmem::IsHandleable DataType, size_t PageSize>
-bool hmem::PagedAllocator<DataType, PageSize>::deallocate(Handle<DataType>&& handle) {
-    std::lock_guard<std::mutex> lock(m_free_items_mutex);
+template <typename DataType, size_t PageSize, size_t MaxFreePages>
+requires (PageSize > 0 && MaxFreePages > 0)
+template <typename ...Args>
+void hmem::PagedAllocator<DataType, PageSize, MaxFreePages>::construct(pointer data, Args&&... args) {
+    new ((void*)data) DataType(args...);
+}
 
-    if (handle == nullptr) return false;
+template <typename DataType, size_t PageSize, size_t MaxFreePages>
+requires (PageSize > 0 && MaxFreePages > 0)
+void hmem::PagedAllocator<DataType, PageSize, MaxFreePages>::deallocate(pointer data, size_type count) {
+    if (data == nullptr || count == 0) return;
 
-    // Give the underlying a chance to release any memory it was
-    // holding onto.
-    handle.m_data.~DataType();
+    std::lock_guard<std::mutex> lock(m_state->free_items_mutex);
 
-    m_free_items.emplace_back(handle.m_data);
+    // TODO(Matthew): is this notably slower for the case of count == 1 than emplace_back?
+    // auto items = std::span(data, count);
+    // auto item_ptrs = std::ranges::transform_view(items, [](DataType& el) { return &el; });
+    // m_state->free_items.insert(m_state->free_items.end(), std::begin(item_ptrs), std::end(item_ptrs));
+
+    for (size_t i = 0; i < count; ++i) m_state->free_items.emplace_back(&data[i]);
 
     // Need to think about how to even do this, given live handles can hardly be notified of this.
     //   Probably can compact only by being more careful about which free item is next used as
     //   an allocation - perhaps keep each page's free items in a separate bucket and prefer
     //   to allocate to the most full bucket with availability?
-    do_compaction_if_needed();
-
-    return true;
+    //do_compaction_if_needed();
 }
 
-template <hmem::IsHandleable DataType, size_t PageSize>
-void hmem::PagedAllocator<DataType, PageSize>::do_compaction_if_needed() {
-    // Empty... for now.
-}
+// template <typename DataType, size_t PageSize, size_t MaxFreePages>
+// void hmem::PagedAllocator<DataType, PageSize, MaxFreePages>::do_compaction_if_needed() {
+//     // Empty... for now.
+// }
