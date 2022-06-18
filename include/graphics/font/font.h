@@ -201,7 +201,7 @@ namespace hemlock {
                 FontInstanceMap m_font_instances;
             };
 
-            class FontCache : public Cache<Font, std::unordered_map<std::string, Font>> {};
+            class FontCache : public hio::Cache<Font, std::unordered_map<std::string, Font>> {};
         }
         namespace f = font;
     }

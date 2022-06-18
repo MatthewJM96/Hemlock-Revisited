@@ -46,7 +46,7 @@ namespace hemlock {
             LINK_FAIL      = -4
         };
 
-        class ShaderCache : public Cache<std::string, std::unordered_map<std::string, std::string>> {};
+        class ShaderCache : public hio::Cache<std::string, std::unordered_map<std::string, std::string>> {};
 
         class GLSLProgram {
         public:
