@@ -239,11 +239,11 @@ namespace hemlock {
         typename ContainerType::key_equal;
     }
         && requires(
-            ContainerType                     c,
-            ContainerType::key_type         key,
-            ContainerType::mapped_type    value,
-            ContainerType::iterator          it,
-            ContainerType::mapped_type const_it
+                     ContainerType                     c,
+            typename ContainerType::key_type         key,
+            typename ContainerType::mapped_type    value,
+            typename ContainerType::iterator          it,
+            typename ContainerType::mapped_type const_it
         )
     {
         { c()[key]    } -> std::same_as<typename ContainerType::mapped_type&>;
@@ -261,6 +261,29 @@ namespace hemlock {
     {
         { c.dispose() };
     };
+
+    template <typename>
+    struct is_pointer_like : public std::false_type { };
+    template <typename Type>
+    struct is_pointer_like<std::shared_ptr<Type>> : public std::true_type {};
+    template <typename Type>
+    struct is_pointer_like<std::weak_ptr<Type>> : public std::true_type {};
+    template <typename Type>
+    constexpr bool is_pointer_like_v = is_pointer_like<Type>::value;
+
+    template <typename>
+    struct is_shared_ptr : public std::false_type { };
+    template <typename Type>
+    struct is_shared_ptr<std::shared_ptr<Type>> : public std::true_type {};
+    template <typename Type>
+    constexpr bool is_shared_ptr_v = is_shared_ptr<Type>::value;
+
+    template <typename>
+    struct is_weak_ptr : public std::false_type { };
+    template <typename Type>
+    struct is_weak_ptr<std::weak_ptr<Type>> : public std::true_type {};
+    template <typename Type>
+    constexpr bool is_weak_ptr_v = is_weak_ptr<Type>::value;
 }
 
 #endif // __hemlock_basic_concepts_hpp
