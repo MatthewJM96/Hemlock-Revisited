@@ -152,6 +152,11 @@ bool hvox::ChunkGrid::unload_chunk_at(ChunkGridPosition chunk_position) {
 
     (*it).second->on_unload();
 
+    // TODO(Matthew): wherever unloaded, we need to make sure we get IO right,
+    //                as chunk will "float" and something could act as if that
+    //                floating data is true even as the chunk is reloaded from
+    //                disk with a different truth.
+
     m_chunks.erase(it);
 
     return true;
