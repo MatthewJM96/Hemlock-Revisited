@@ -20,7 +20,8 @@ void hvox::ChunkGrid::init(                       ui32 thread_count,
     m_chunk_load_workflow.init(chunk_load_dag, &m_chunk_load_thread_pool);
 
     // TODO(Matthew): smarter setting of page size - maybe should be dependent on draw distance.
-    m_renderer.init(20, 2);
+    // m_renderer.init(20, 2);
+    m_renderer.init(5, 2);
 }
 
 void hvox::ChunkGrid::dispose() {
