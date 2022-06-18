@@ -32,7 +32,9 @@ namespace hemlock {
         };
 
         union Neighbours {
-            Neighbours() { /* Empty. */ }
+            Neighbours() :
+                all({})
+            { /* Empty. */ }
             Neighbours(const Neighbours& rhs) {
                 for (size_t i = 0; i < 8; ++i) all[i] = rhs.all[i];
             }

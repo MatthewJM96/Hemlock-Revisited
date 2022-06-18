@@ -2,6 +2,7 @@
 #define __hemlock_event_h
 
 namespace hemlock {
+    using SmartSender = hmem::WeakHandle<const void*>;
     // Sender is the object responsible for handling the event, and is stored
     // simply as a void pointer; making things easier for us and harder for
     // users to do stupid things.
@@ -9,10 +10,10 @@ namespace hemlock {
     public:
         Sender() {
             m_is_smart = false;
-            m_ptr.simple = nullptr;
+            m_ptr.smart = SmartSender();
         }
         ~Sender() {
-            if (m_is_smart) m_ptr.smart.hmem::WeakHandle<const void*>::~weak_ptr();
+            if (m_is_smart) m_ptr.smart.SmartSender::~weak_ptr();
         }
         Sender(std::nullptr_t) {
             m_is_smart = false;
@@ -29,7 +30,7 @@ namespace hemlock {
         Sender(Sender&& rhs) {
             m_is_smart = rhs.m_is_smart;
             if (m_is_smart) {
-                m_ptr.smart = std::move(rhs.m_ptr.smart);
+                m_ptr.smart = std::forward<SmartSender>(rhs.m_ptr.smart);
             } else {
                 m_ptr.simple = rhs.m_ptr.simple;
             }
@@ -44,13 +45,13 @@ namespace hemlock {
             requires is_weak_ptr_v<Type>
         Sender(Type value) {
             m_is_smart = true;
-            m_ptr.smart = *reinterpret_cast<hmem::WeakHandle<const void*>*>(&value);
+            m_ptr.smart = *reinterpret_cast<SmartSender*>(&value);
         }
         template <typename Type>
             requires is_shared_ptr_v<Type>
         Sender(Type value) {
             m_is_smart = true;
-            m_ptr.smart = hmem::WeakHandle<const void*>(*reinterpret_cast<hmem::Handle<const void*>*>(&value));
+            m_ptr.smart = SmartSender(reinterpret_pointer_cast<const void*>(value));
         }
 
         Sender& operator=(std::nullptr_t) {
@@ -70,7 +71,7 @@ namespace hemlock {
         Sender& operator=(Sender&& rhs) {
             m_is_smart = rhs.m_is_smart;
             if (m_is_smart) {
-                m_ptr.smart = std::move(rhs.m_ptr.smart);
+                m_ptr.smart = std::forward<SmartSender>(rhs.m_ptr.smart);
             } else {
                 m_ptr.simple = rhs.m_ptr.simple;
             }
@@ -93,11 +94,11 @@ namespace hemlock {
     protected:
         bool m_is_smart;
         union SimpleOrSmart {
-            SimpleOrSmart() : simple(nullptr) { /* Empty. */ }
+            SimpleOrSmart() : smart(SmartSender()) { /* Empty. */ }
             ~SimpleOrSmart() { /* Empty. */ }
 
-            const void*                     simple;
-            hmem::WeakHandle<const void*>   smart;
+            const void* simple;
+            SmartSender smart;
         } m_ptr;
     };
 
