@@ -28,7 +28,7 @@ void hmem::Pager<DataType, PageSize, MaxFreePages>::free_page(Page<DataType> pag
     std::lock_guard<std::mutex> lock(m_free_pages_mutex);
     
     if (m_free_page_count < MaxFreePages) {
-        m_free_pages[m_free_page_count] = page;
+        m_free_pages[m_free_page_count++] = page;
     } else {
         delete[] page;
     }
