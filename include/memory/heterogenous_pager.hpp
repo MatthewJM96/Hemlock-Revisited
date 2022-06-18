@@ -17,9 +17,7 @@ namespace hemlock {
         protected:
             using _HeterogenousPages = HeterogenousPages<MaxFreePages>;
         public:
-            HeterogenousPager() :
-                m_free_page_count(0)
-            { /* Empty. */ }
+            HeterogenousPager()  { /* Empty. */ }
             ~HeterogenousPager() { /* Empty. */ }
 
             void dispose();
