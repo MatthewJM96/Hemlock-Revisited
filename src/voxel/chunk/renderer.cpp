@@ -266,7 +266,7 @@ void hvox::ChunkRenderer::process_pages() {
             // Check chunk still fits in this page, if not, remove it and place
             // it in a page that might still have space for it (else creating a
             // new page for it).
-            if (page.voxel_count + data.count > block_page_size()) {
+            if (voxels_instanced + data.count > block_page_size()) {
                 std::swap(page.chunks[chunk_idx], page.chunks.back());
                 page.chunks.pop_back();
                 // TODO(Matthew): Does this lead to too much memory use? Perhaps
