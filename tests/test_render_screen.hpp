@@ -56,14 +56,14 @@ public:
         for (auto x = -NUM; x < NUM; ++x) {
             for (auto z = -NUM; z < NUM; ++z) {
                 for (auto y = -2 * NUM; y < 0; ++ y) {
-                    m_chunk_grid.preload_chunk_at({ x, y, z });
+                    m_chunk_grid.preload_chunk_at({ {x, y, z} });
                 }
             }
         }
         for (auto x = -NUM; x < NUM; ++x) {
             for (auto z = -NUM; z < NUM; ++z) {
                 for (auto y = -2 * NUM; y < 0; ++ y) {
-                    m_chunk_grid.load_chunk_at({ x, y, z });
+                    m_chunk_grid.load_chunk_at({ {x, y, z} });
                 }
             }
         }
@@ -86,7 +86,7 @@ public:
             "Hello, world!",
             f32v4{300.0f, 300.0f, 1000.0f, 1000.0f},
             f32v4{295.0f, 295.0f, 1010.0f, 1010.0f},
-            hg::f::StringSizing{hg::f::StringSizingKind::SCALED, f32v2{1.0f}},
+            hg::f::StringSizing{hg::f::StringSizingKind::SCALED, {f32v2{1.0f}}},
             colour4{0, 0, 0, 255},
             "fonts/Orbitron-Regular.ttf",
             hg::f::TextAlign::TOP_LEFT,
@@ -182,14 +182,14 @@ public:
         m_camera.update();
 
         // std::cout << std::endl << my_shader_parser("shaders/default_sprite.frag", &my_iom) << std::endl << std::endl;
-        m_shader_cache.init(&m_iom, hg::ShaderCache::Parser(
+        m_shader_cache.init(&m_iom, hg::ShaderCache::Parser{
             [](const hio::fs::path& path, hio::IOManagerBase* iom) -> std::string {
                 std::string buffer;
                 if (!iom->read_file_to_string(path, buffer)) return "";
 
                 return buffer;
             }
-        ));
+        });
 
         m_shader.init(&m_shader_cache);
 
@@ -207,7 +207,7 @@ public:
             workflow_builder.init(&m_chunk_load_dag);
             workflow_builder.chain_tasks(2);
         }
-        m_chunk_grid.init(10, &m_chunk_load_dag, hvox::ChunkLoadTaskListBuilder([](hvox::Chunk* chunk, hvox::ChunkGrid* chunk_grid) {
+        m_chunk_grid.init(10, &m_chunk_load_dag, hvox::ChunkLoadTaskListBuilder{[](hmem::Handle<hvox::Chunk> chunk, hvox::ChunkGrid* chunk_grid) {
             // TODO(Matthew): How do we clean up this?
             hthread::HeldWorkflowTask<hvox::ChunkLoadTaskContext>* tasks = new hthread::HeldWorkflowTask<hvox::ChunkLoadTaskContext>[2];
 
@@ -221,9 +221,9 @@ public:
             tasks[1] = { reinterpret_cast<hthread::IThreadWorkflowTask<hvox::ChunkLoadTaskContext>*>(mesh_task), true };
 
             return hthread::ThreadWorkflowTasksView<hvox::ChunkLoadTaskContext>{ tasks, 2 };
-        }));
+        }});
 
-        handle_mouse_move = hemlock::Subscriber<hui::MouseMoveEvent>(
+        handle_mouse_move = hemlock::Subscriber<hui::MouseMoveEvent>{
             [&](hemlock::Sender, hui::MouseMoveEvent ev) {
                 if (m_input_manager->is_pressed(static_cast<ui8>(hui::MouseButton::LEFT))) {
                     m_camera.rotate_from_mouse_with_absolute_up(
@@ -233,11 +233,11 @@ public:
                     );
                 }
             }
-        );
+        };
 
         hui::InputDispatcher::instance()->on_mouse.move += &handle_mouse_move;
 
-        m_font_cache.init(&m_iom, hg::f::FontCache::Parser(
+        m_font_cache.init(&m_iom, hg::f::FontCache::Parser{
             [](const hio::fs::path& path, hio::IOManagerBase* iom) -> hg::f::Font {
                 hio::fs::path actual_path;
                 if (!iom->resolve_path(path, actual_path)) return hg::f::Font{};
@@ -247,7 +247,7 @@ public:
 
                 return font;
             }
-        ));
+        });
 
 
         auto font = m_font_cache.fetch("fonts/Orbitron-Regular.ttf");

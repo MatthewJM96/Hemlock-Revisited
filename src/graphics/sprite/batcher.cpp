@@ -247,7 +247,7 @@ void hg::s::SpriteBatcher::add_sprite(
                   f32v4 uv_rect  /*= f32v4(0.0f, 0.0f, 1.0f, 1.0f)*/
 ) {
     m_sprites.emplace_back(Sprite{
-        &impl::basic_build_quad,
+        { &impl::basic_build_quad },
         texture,
         position,
         size,
@@ -269,7 +269,7 @@ void hg::s::SpriteBatcher::add_sprite(
                  f32v4 uv_rect  /*= f32v4(0.0f, 0.0f, 1.0f, 1.0f)*/
 ) {
     m_sprites.emplace_back(Sprite{
-        &impl::basic_build_quad,
+        { &impl::basic_build_quad },
         m_default_texture,
         position,
         size,

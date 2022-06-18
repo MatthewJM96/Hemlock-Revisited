@@ -5,9 +5,9 @@
 #include "app/app_base.h"
 
 happ::AppBase::AppBase()  :
-    handle_external_quit([&](Sender) {
+    handle_external_quit(Subscriber<>{[&](Sender) {
         set_should_quit();
-    }),
+    }}),
     m_process_manager(nullptr)
 { /* Empty */ }
 

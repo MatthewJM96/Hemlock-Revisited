@@ -31,7 +31,7 @@ public:
 
         m_state = happ::ScreenState::RUNNING;
 
-        handle_key_down = hemlock::Subscriber<hui::KeyboardButtonEvent>(
+        handle_key_down = hemlock::Subscriber<hui::KeyboardButtonEvent>{
             [&](hemlock::Sender, hui::KeyboardButtonEvent ev) {
                 switch (ev.physical_key) {
                 case hui::PhysicalKey::H_R:
@@ -44,21 +44,21 @@ public:
                     break;
                 }
             }
-        );
+        };
 
         hui::InputDispatcher* dispatcher = hui::InputDispatcher::instance();
         dispatcher->on_keyboard.button_down += &handle_key_down;
 
-        m_shader_cache.init(&m_iom, hg::ShaderCache::Parser(
+        m_shader_cache.init(&m_iom, hg::ShaderCache::Parser{
             [](const hio::fs::path& path, hio::IOManagerBase* iom) -> std::string {
                 std::string buffer;
                 if (!iom->read_file_to_string(path, buffer)) return "";
 
                 return buffer;
             }
-        ));
+        });
 
-        m_font_cache.init(&m_iom, hg::f::FontCache::Parser(
+        m_font_cache.init(&m_iom, hg::f::FontCache::Parser{
             [](const hio::fs::path& path, hio::IOManagerBase* iom) -> hg::f::Font {
                 hio::fs::path actual_path;
                 if (!iom->resolve_path(path, actual_path)) return hg::f::Font{};
@@ -68,7 +68,7 @@ public:
 
                 return font;
             }
-        ));
+        });
 
         auto font = m_font_cache.fetch("fonts/Orbitron-Regular.ttf");
         font->set_default_size(22);
@@ -80,7 +80,7 @@ public:
             "Test render screen (R)",
             f32v4{30.0f, 30.0f, 1000.0f, 100.0f},
             f32v4{25.0f, 25.0f, 1010.0f, 110.0f},
-            hg::f::StringSizing{hg::f::StringSizingKind::SCALED, f32v2{1.0f}},
+            hg::f::StringSizing{hg::f::StringSizingKind::SCALED, {f32v2{1.0f}}},
             colour4{0, 0, 0, 255},
             "fonts/Orbitron-Regular.ttf",
             hg::f::TextAlign::TOP_LEFT,
@@ -90,7 +90,7 @@ public:
             "Test voxel screen (V)",
             f32v4{30.0f, 60.0f, 1000.0f, 100.0f},
             f32v4{25.0f, 55.0f, 1010.0f, 110.0f},
-            hg::f::StringSizing{hg::f::StringSizingKind::SCALED, f32v2{1.0f}},
+            hg::f::StringSizing{hg::f::StringSizingKind::SCALED, {f32v2{1.0f}}},
             colour4{0, 0, 0, 255},
             "fonts/Orbitron-Regular.ttf",
             hg::f::TextAlign::TOP_LEFT,

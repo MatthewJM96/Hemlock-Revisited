@@ -5,11 +5,11 @@
 #include "camera/basic_first_person_camera.h"
 
 hcam::BasicFirstPersonCamera::BasicFirstPersonCamera() :
-    BaseCamera<PerspectiveCameraState>(Subscriber<happ::ResizeEvent>([&](Sender, happ::ResizeEvent ev) {
+    BaseCamera<PerspectiveCameraState>(Subscriber<happ::ResizeEvent>{[&](Sender, happ::ResizeEvent ev) {
         f32 new_aspect_ratio = static_cast<f32>(ev.now.width) / static_cast<f32>(ev.now.height);
         if (m_state.aspect_ratio != new_aspect_ratio)
             set_aspect_ratio(new_aspect_ratio);
-    })),
+    }}),
     m_clamp_up({true, 60.0f / 360.0f * 2.0f * static_cast<f32>(M_PI)})
 { /* Empty. */ }
 

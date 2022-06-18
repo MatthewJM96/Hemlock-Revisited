@@ -90,14 +90,14 @@ public:
         for (auto x = -NUM; x < NUM; ++x) {
             for (auto z = -NUM; z < NUM; ++z) {
                 for (auto y = -1; y < 2; ++ y) {
-                    m_chunk_grid.preload_chunk_at({ x, y, z });
+                    m_chunk_grid.preload_chunk_at({ {x, y, z} });
                 }
             }
         }
         for (auto x = -NUM; x < NUM; ++x) {
             for (auto z = -NUM; z < NUM; ++z) {
                 for (auto y = -1; y < 2; ++ y) {
-                    m_chunk_grid.load_chunk_at({ x, y, z });
+                    m_chunk_grid.load_chunk_at({ {x, y, z} });
                 }
             }
         }
@@ -146,9 +146,9 @@ public:
             for (auto z = -NUM; z < NUM; ++z) {
                 if (do_unloads &&
                     (start + ((x + NUM) + (2 * NUM + 1) * (z + NUM)) * 300) < time.total) {
-                    m_chunk_grid.unload_chunk_at({ x, 0, z });
-                    m_chunk_grid.unload_chunk_at({ x, 1, z });
-                    m_chunk_grid.unload_chunk_at({ x, 2, z });
+                    m_chunk_grid.unload_chunk_at({ {x, 0, z} });
+                    m_chunk_grid.unload_chunk_at({ {x, 1, z} });
+                    m_chunk_grid.unload_chunk_at({ {x, 2, z} });
                 }
             }
         }
@@ -199,14 +199,14 @@ public:
         m_camera.set_fov(90.0f);
         m_camera.update();
 
-        m_shader_cache.init(&m_iom, hg::ShaderCache::Parser(
+        m_shader_cache.init(&m_iom, hg::ShaderCache::Parser{
             [](const hio::fs::path& path, hio::IOManagerBase* iom) -> std::string {
                 std::string buffer;
                 if (!iom->read_file_to_string(path, buffer)) return "";
 
                 return buffer;
             }
-        ));
+        });
 
         m_shader.init(&m_shader_cache);
 
@@ -224,7 +224,7 @@ public:
             workflow_builder.init(&m_chunk_load_dag);
             workflow_builder.chain_tasks(2);
         }
-        m_chunk_grid.init(10, &m_chunk_load_dag, hvox::ChunkLoadTaskListBuilder([](hvox::Chunk* chunk, hvox::ChunkGrid* chunk_grid) {
+        m_chunk_grid.init(10, &m_chunk_load_dag, hvox::ChunkLoadTaskListBuilder{[](hmem::Handle<hvox::Chunk> chunk, hvox::ChunkGrid* chunk_grid) {
             // TODO(Matthew): How do we clean up this?
             hthread::HeldWorkflowTask<hvox::ChunkLoadTaskContext>* tasks = new hthread::HeldWorkflowTask<hvox::ChunkLoadTaskContext>[2];
 
@@ -240,9 +240,9 @@ public:
             tasks[1] = { reinterpret_cast<hthread::IThreadWorkflowTask<hvox::ChunkLoadTaskContext>*>(mesh_task), true };
 
             return hthread::ThreadWorkflowTasksView<hvox::ChunkLoadTaskContext>{ tasks, 2 };
-        }));
+        }});
 
-        handle_mouse_move = hemlock::Subscriber<hui::MouseMoveEvent>(
+        handle_mouse_move = hemlock::Subscriber<hui::MouseMoveEvent>{
             [&](hemlock::Sender, hui::MouseMoveEvent ev) {
                 if (m_input_manager->is_pressed(static_cast<ui8>(hui::MouseButton::LEFT))) {
                     m_camera.rotate_from_mouse_with_absolute_up(
@@ -252,7 +252,7 @@ public:
                     );
                 }
             }
-        );
+        };
 
         hui::InputDispatcher::instance()->on_mouse.move += &handle_mouse_move;
     }
