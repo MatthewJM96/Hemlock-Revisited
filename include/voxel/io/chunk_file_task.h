@@ -12,13 +12,13 @@ namespace hemlock {
 
         class ChunkFileTask : public io::IOTask {
         public:
-            void init(Chunk* chunk, io::IOManagerBase* iomanager) {
+            void init(hmem::Handle<Chunk> chunk, io::IOManagerBase* iomanager) {
                 io::IOTask::init(iomanager);
 
                 m_chunk = chunk;
             }
         protected:
-            Chunk* m_chunk;
+            hmem::Handle<Chunk> m_chunk;
             static hio::fs::mapped_file chunk_data_file;
         };
     }
