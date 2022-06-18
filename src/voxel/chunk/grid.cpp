@@ -5,7 +5,7 @@
 #include "voxel/block.hpp"
 #include "voxel/chunk/grid.h"
 
-void hvox::ChunkLoadTask::init(hmem::Handle<Chunk> chunk, ChunkGrid* chunk_grid) {
+void hvox::ChunkLoadTask::init(hmem::WeakHandle<Chunk> chunk, ChunkGrid* chunk_grid) {
     m_chunk      = chunk;
     m_chunk_grid = chunk_grid;
 }
