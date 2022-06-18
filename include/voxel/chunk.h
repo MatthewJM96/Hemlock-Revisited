@@ -24,8 +24,8 @@ namespace hemlock {
             Chunk();
             ~Chunk();
 
-            void init(hmem::Handle<Chunk> self);
-            void init(hmem::Handle<Chunk> self, Block* block_buffer/*, ChunkInstanceDataPager& instance_data_pager*/);
+            void init(hmem::WeakHandle<Chunk> self);
+            void init(hmem::WeakHandle<Chunk> self, Block* block_buffer/*, ChunkInstanceDataPager& instance_data_pager*/);
 
             void update(TimeData);
 
@@ -64,7 +64,7 @@ namespace hemlock {
         protected:
             void dispose();
 
-            void init_events(hmem::Handle<Chunk> self);
+            void init_events(hmem::WeakHandle<Chunk> self);
 
             // ChunkInstanceDataPager& m_instance_data_pager;
             bool                    m_owns_blocks;

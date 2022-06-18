@@ -17,7 +17,7 @@ hvox::Chunk::~Chunk() {
     dispose();
 }
 
-void hvox::Chunk::init(hmem::Handle<Chunk> self) {
+void hvox::Chunk::init(hmem::WeakHandle<Chunk> self) {
     init_events(self);
 
     blocks = new Block[CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE];
@@ -28,7 +28,7 @@ void hvox::Chunk::init(hmem::Handle<Chunk> self) {
     state.store(ChunkState::PRELOADED, std::memory_order_release);
 }
 
-void hvox::Chunk::init(hmem::Handle<Chunk> self, Block* _blocks) {
+void hvox::Chunk::init(hmem::WeakHandle<Chunk> self, Block* _blocks) {
     init_events(self);
 
     blocks = _blocks;
@@ -50,7 +50,7 @@ void hvox::Chunk::update(TimeData) {
     // Empty for now.
 }
 
-void hvox::Chunk::init_events(hmem::Handle<Chunk> self) {
+void hvox::Chunk::init_events(hmem::WeakHandle<Chunk> self) {
     on_block_change         .set_sender(Sender(self));
     on_bulk_block_change    .set_sender(Sender(self));
     on_mesh_change          .set_sender(Sender(self));
