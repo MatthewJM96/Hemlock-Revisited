@@ -127,14 +127,14 @@ public:
 
         for (auto x = -VIEW_DIST; x <= VIEW_DIST; ++x) {
             for (auto z = -VIEW_DIST; z <= VIEW_DIST; ++z) {
-                for (auto y = -1; y < 2; ++ y) {
+                for (auto y = -2; y < 6; ++ y) {
                     m_chunk_grid.preload_chunk_at({ {x, y, z} });
                 }
             }
         }
         for (auto x = -VIEW_DIST; x <= VIEW_DIST; ++x) {
             for (auto z = -VIEW_DIST; z <= VIEW_DIST; ++z) {
-                for (auto y = -1; y < 2; ++ y) {
+                for (auto y = -2; y < 6; ++ y) {
                     m_chunk_grid.load_chunk_at({ {x, y, z} });
                 }
             }
@@ -222,7 +222,7 @@ public:
         i32 x_step = static_cast<i32>(current_pos.x) - static_cast<i32>(last_pos.x);
         if (x_step != 0) {
             for (auto z = static_cast<i32>(current_pos.z) - VIEW_DIST; z <= static_cast<i32>(current_pos.z) + VIEW_DIST; ++z) {
-                for (auto y = -1; y < 2; ++ y) {
+                for (auto y = -2; y < 6; ++ y) {
                     m_unloading_chunks.emplace_back(hmem::WeakHandle<hvox::Chunk>{});
                     auto& handle = m_unloading_chunks.back();
                     m_chunk_grid.unload_chunk_at({ {
@@ -232,7 +232,7 @@ public:
                 }
             }
             for (auto z = static_cast<i32>(current_pos.z) - VIEW_DIST; z <= static_cast<i32>(current_pos.z) + VIEW_DIST; ++z) {
-                for (auto y = -1; y < 2; ++ y) {
+                for (auto y = -2; y < 6; ++ y) {
                     m_chunk_grid.preload_chunk_at({ {
                         x_step < 0 ? static_cast<i32>(current_pos.x) - VIEW_DIST : static_cast<i32>(current_pos.x) + VIEW_DIST,
                         y, z
@@ -240,7 +240,7 @@ public:
                 }
             }
             for (auto z = static_cast<i32>(current_pos.z) - VIEW_DIST; z <= static_cast<i32>(current_pos.z) + VIEW_DIST; ++z) {
-                for (auto y = -1; y < 2; ++ y) {
+                for (auto y = -2; y < 6; ++ y) {
                     m_chunk_grid.load_chunk_at({ {
                         x_step < 0 ? static_cast<i32>(current_pos.x) - VIEW_DIST : static_cast<i32>(current_pos.x) + VIEW_DIST,
                         y, z
@@ -252,7 +252,7 @@ public:
         i32 z_step = static_cast<i32>(current_pos.z) - static_cast<i32>(last_pos.z);
         if (z_step != 0) {
             for (auto x = static_cast<i32>(current_pos.x) - VIEW_DIST; x <= static_cast<i32>(current_pos.x) + VIEW_DIST; ++x) {
-                for (auto y = -1; y < 2; ++ y) {
+                for (auto y = -2; y < 6; ++ y) {
                     m_unloading_chunks.emplace_back(hmem::WeakHandle<hvox::Chunk>{});
                     auto& handle = m_unloading_chunks.back();
                     m_chunk_grid.unload_chunk_at({ {
@@ -262,7 +262,7 @@ public:
                 }
             }
             for (auto x = static_cast<i32>(current_pos.x) - VIEW_DIST; x <= static_cast<i32>(current_pos.x) + VIEW_DIST; ++x) {
-                for (auto y = -1; y < 2; ++ y) {
+                for (auto y = -2; y < 6; ++ y) {
                     m_chunk_grid.preload_chunk_at({ {
                         x, y,
                         z_step < 0 ? static_cast<i32>(current_pos.z) - VIEW_DIST : static_cast<i32>(current_pos.z) + VIEW_DIST
@@ -270,7 +270,7 @@ public:
                 }
             }
             for (auto x = static_cast<i32>(current_pos.x) - VIEW_DIST; x <= static_cast<i32>(current_pos.x) + VIEW_DIST; ++x) {
-                for (auto y = -1; y < 2; ++ y) {
+                for (auto y = -2; y < 6; ++ y) {
                     m_chunk_grid.load_chunk_at({ {
                         x, y,
                         z_step < 0 ? static_cast<i32>(current_pos.z) - VIEW_DIST : static_cast<i32>(current_pos.z) + VIEW_DIST
