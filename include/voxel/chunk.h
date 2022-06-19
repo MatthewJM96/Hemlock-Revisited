@@ -15,7 +15,6 @@
 
 namespace hemlock {
     namespace voxel {
-        struct ChunkAllocator;
         struct ChunkInstanceData;
 
         /**
@@ -37,8 +36,6 @@ namespace hemlock {
 
             std::shared_mutex blocks_mutex;
             Block*            blocks;
-
-            ChunkAllocator*   allocator;
 
             RenderState render_state;
             struct {
