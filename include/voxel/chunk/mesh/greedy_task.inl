@@ -68,10 +68,12 @@ bool hvox::ChunkGreedyMeshTask<MeshComparator>::run_task(ChunkLoadThreadState*, 
         }
     };
 
+    Chunk* raw_chunk_ptr = chunk.get();
+
     bool blocks_to_consider = true;
     while (blocks_to_consider) {
 process_new_source:
-        bool found_instanceable = are_same_instanceable(source, source, {}, chunk);
+        bool found_instanceable = are_same_instanceable(source, source, {}, raw_chunk_ptr);
 
         /***************\
          * Scan X - 1D *
@@ -86,7 +88,7 @@ process_new_source:
             if (!found_instanceable) {
                 // Found a instanceable source block that hasn't already
                 // been visited.
-                if (are_same_instanceable(target, target, target_pos, chunk)
+                if (are_same_instanceable(target, target, target_pos, raw_chunk_ptr)
                         && !visited[target_idx]) {
                     add_border_blocks_to_queue(start, target_pos);
 
@@ -103,7 +105,7 @@ process_new_source:
                 }
             // We are scanning for the extent of an instanceable source block.
             } else {
-                if (!are_same_instanceable(source, target, target_pos, chunk)
+                if (!are_same_instanceable(source, target, target_pos, raw_chunk_ptr)
                         || visited[target_idx]) {
                     end.x = target_pos.x - 1;
 
@@ -147,7 +149,7 @@ process_new_source:
                 if (!found_instanceable) {
                     // Found a instanceable source block that hasn't already
                     // been visited.
-                    if (are_same_instanceable(target, target, target_pos, chunk)
+                    if (are_same_instanceable(target, target, target_pos, raw_chunk_ptr)
                             && !visited[target_idx]) {
                         add_border_blocks_to_queue(start, target_pos);
 
@@ -163,7 +165,7 @@ process_new_source:
                         continue;
                     }
                 // We are scanning for the extent of an instanceable source block.
-                } else if (!are_same_instanceable(source, target, target_pos, chunk)
+                } else if (!are_same_instanceable(source, target, target_pos, raw_chunk_ptr)
                                 || visited[target_idx]) {
                     end.z = target_pos.z - 1;
 
@@ -211,7 +213,7 @@ process_new_source:
                     if (!found_instanceable) {
                         // Found a instanceable source block that hasn't already
                         // been visited.
-                        if (are_same_instanceable(target, target, target_pos, chunk)
+                        if (are_same_instanceable(target, target, target_pos, raw_chunk_ptr)
                                 && !visited[target_idx]) {
                             add_border_blocks_to_queue(start, target_pos);
 
@@ -227,7 +229,7 @@ process_new_source:
                             continue;
                         }
                     // We are scanning for the extent of an instanceable source block.
-                    } else if (!are_same_instanceable(source, target, target_pos, chunk)
+                    } else if (!are_same_instanceable(source, target, target_pos, raw_chunk_ptr)
                                     || visited[target_idx]) {
                         end.y = target_pos.y - 1;
 

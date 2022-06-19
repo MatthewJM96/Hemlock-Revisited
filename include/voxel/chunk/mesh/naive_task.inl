@@ -85,6 +85,8 @@ bool hvox::ChunkNaiveMeshTask<MeshComparator>::run_task(ChunkLoadThreadState* st
                                         = { f32v3(pos), f32v3(1.0f) };
     };
 
+    Chunk* raw_chunk_ptr = chunk.get();
+
     // TODO(Matthew): Checking block is NULL_BLOCK is wrong check really, we will have transparent blocks
     //                e.g. air, to account for too.
     for (BlockIndex i = 0; i < CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE; ++i) {
@@ -106,7 +108,7 @@ bool hvox::ChunkNaiveMeshTask<MeshComparator>::run_task(ChunkLoadThreadState* st
                 }
             } else {
                 // Get corresponding neighbour index in this chunk and check.
-                if (meshable(&chunk->blocks[i - 1], &chunk->blocks[i - 1], block_chunk_position(i), chunk)) {
+                if (meshable(&chunk->blocks[i - 1], &chunk->blocks[i - 1], block_chunk_position(i), raw_chunk_ptr)) {
                     add_block(block_position);
                     continue;
                 }
@@ -123,7 +125,7 @@ bool hvox::ChunkNaiveMeshTask<MeshComparator>::run_task(ChunkLoadThreadState* st
                 }
             } else {
                 // Get corresponding neighbour index in this chunk and check.
-                if (meshable(&chunk->blocks[i + 1], &chunk->blocks[i + 1], block_chunk_position(i), chunk)) {
+                if (meshable(&chunk->blocks[i + 1], &chunk->blocks[i + 1], block_chunk_position(i), raw_chunk_ptr)) {
                     add_block(block_position);
                     continue;
                 }
@@ -140,7 +142,7 @@ bool hvox::ChunkNaiveMeshTask<MeshComparator>::run_task(ChunkLoadThreadState* st
                 }
             } else {
                 // Get corresponding neighbour index in this chunk and check.
-                if (meshable(&chunk->blocks[i - CHUNK_SIZE], &chunk->blocks[i - CHUNK_SIZE], block_chunk_position(i), chunk)) {
+                if (meshable(&chunk->blocks[i - CHUNK_SIZE], &chunk->blocks[i - CHUNK_SIZE], block_chunk_position(i), raw_chunk_ptr)) {
                     add_block(block_position);
                     continue;
                 }
@@ -157,7 +159,7 @@ bool hvox::ChunkNaiveMeshTask<MeshComparator>::run_task(ChunkLoadThreadState* st
                 }
             } else {
                 // Get corresponding neighbour index in this chunk and check.
-                if (meshable(&chunk->blocks[i + CHUNK_SIZE], &chunk->blocks[i + CHUNK_SIZE], block_chunk_position(i), chunk)) {
+                if (meshable(&chunk->blocks[i + CHUNK_SIZE], &chunk->blocks[i + CHUNK_SIZE], block_chunk_position(i), raw_chunk_ptr)) {
                     add_block(block_position);
                     continue;
                 }
@@ -174,7 +176,7 @@ bool hvox::ChunkNaiveMeshTask<MeshComparator>::run_task(ChunkLoadThreadState* st
                 }
             } else {
                 // Get corresponding neighbour index in this chunk and check.
-                if (meshable(&chunk->blocks[i - (CHUNK_SIZE * CHUNK_SIZE)], &chunk->blocks[i - (CHUNK_SIZE * CHUNK_SIZE)], block_chunk_position(i), chunk)) {
+                if (meshable(&chunk->blocks[i - (CHUNK_SIZE * CHUNK_SIZE)], &chunk->blocks[i - (CHUNK_SIZE * CHUNK_SIZE)], block_chunk_position(i), raw_chunk_ptr)) {
                     add_block(block_position);
                     continue;
                 }
@@ -191,7 +193,7 @@ bool hvox::ChunkNaiveMeshTask<MeshComparator>::run_task(ChunkLoadThreadState* st
                 }
             } else {
                 // Get corresponding neighbour index in this chunk and check.
-                if (meshable(&chunk->blocks[i + (CHUNK_SIZE * CHUNK_SIZE)], &chunk->blocks[i + (CHUNK_SIZE * CHUNK_SIZE)], block_chunk_position(i), chunk)) {
+                if (meshable(&chunk->blocks[i + (CHUNK_SIZE * CHUNK_SIZE)], &chunk->blocks[i + (CHUNK_SIZE * CHUNK_SIZE)], block_chunk_position(i), raw_chunk_ptr)) {
                     add_block(block_position);
                     continue;
                 }

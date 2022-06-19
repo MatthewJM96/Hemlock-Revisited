@@ -18,7 +18,7 @@
 #include "iomanager.hpp"
 
 struct TRS_BlockComparator {
-    bool operator()(const hvox::Block* source, const hvox::Block* target, hvox::BlockChunkPosition, hmem::Handle<hvox::Chunk>) const {
+    bool operator()(const hvox::Block* source, const hvox::Block* target, hvox::BlockChunkPosition, hvox::Chunk*) const {
         return (source->id == target->id) && (source->id != 0);
     }
 };
