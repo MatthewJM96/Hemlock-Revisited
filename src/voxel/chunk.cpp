@@ -24,7 +24,9 @@ void hvox::Chunk::init(hmem::WeakHandle<Chunk> self) {
     init_events(self);
 
     blocks = new Block[CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE];
-    std::fill_n(blocks, CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE, Block{ false });
+    std::fill_n(blocks, CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE, Block{0});
+
+    m_owns_blocks = true;
 
     neighbours = {};
 
