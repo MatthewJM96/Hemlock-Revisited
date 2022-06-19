@@ -12,8 +12,8 @@ void hthread::basic_thread_main( typename Thread<ThreadState>::State* state,
             std::chrono::seconds(1)
         );
 
-        // TODO(Matthew): This is bad, but it'll work for now.
         while (state->context.suspend)
+            std::this_thread::yield();
             continue;
 
         if (!held.task) continue;
