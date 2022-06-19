@@ -66,7 +66,7 @@ namespace hemlock {
             void set_page_size(ui32 page_size);
 
             ui32 page_size()       const { return m_page_size;                                            };
-            ui32 block_page_size() const { return m_page_size * CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE / 2; };
+            ui32 block_page_size() const { return m_page_size * CHUNK_VOLUME / 2; };
 
             void update(TimeData time);
             void draw(TimeData time);

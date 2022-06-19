@@ -55,29 +55,29 @@ struct TVS_VoxelGenerator {
         domain_warp_fract_prog_1->SetOctaveCount(2);
         domain_warp_fract_prog_1->SetLacunarity(2.5f);
 
-        f32* data = new f32[CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE];
+        f32* data = new f32[CHUNK_VOLUME];
         domain_warp_fract_prog_1->GenUniformGrid3D(
         // domain_warp_grad_1->GenUniformGrid3D(
         // fractal_1.get()->GenUniformGrid3D(
             data,
-            static_cast<int>(chunk->position.x) * CHUNK_SIZE,
-            -1 * static_cast<int>(chunk->position.y) * CHUNK_SIZE,
-            static_cast<int>(chunk->position.z) * CHUNK_SIZE,
-            CHUNK_SIZE,
-            CHUNK_SIZE,
-            CHUNK_SIZE,
+            static_cast<int>(chunk->position.x) * CHUNK_LENGTH,
+            -1 * static_cast<int>(chunk->position.y) * CHUNK_LENGTH,
+            static_cast<int>(chunk->position.z) * CHUNK_LENGTH,
+            CHUNK_LENGTH,
+            CHUNK_LENGTH,
+            CHUNK_LENGTH,
             0.005f,
             1337
         );
-        // f32* data = new f32[CHUNK_SIZE * CHUNK_SIZE];
+        // f32* data = new f32[CHUNK_AREA];
         // domain_warp_fract_prog_1->GenUniformGrid2D(
         // // domain_warp_grad_1->GenUniformGrid2D(
         // // fractal_1.get()->GenUniformGrid2D(
         //     data,
-        //     static_cast<int>(chunk->position.x) * CHUNK_SIZE,
-        //     static_cast<int>(chunk->position.z) * CHUNK_SIZE,
-        //     CHUNK_SIZE,
-        //     CHUNK_SIZE,
+        //     static_cast<int>(chunk->position.x) * CHUNK_LENGTH,
+        //     static_cast<int>(chunk->position.z) * CHUNK_LENGTH,
+        //     CHUNK_LENGTH,
+        //     CHUNK_LENGTH,
         //     0.2f,
         //     1337
         // );
@@ -86,26 +86,26 @@ struct TVS_VoxelGenerator {
             std::lock_guard lock(chunk->blocks_mutex);
 
             ui64 noise_idx = 0;
-            for (ui8 z = 0; z < CHUNK_SIZE; ++z) {
-                for (ui8 y = 0; y < CHUNK_SIZE; ++y) {
-                    for (ui8 x = 0; x < CHUNK_SIZE; ++x) {
-                        chunk->blocks[hvox::block_index({x, CHUNK_SIZE - y - 1, z})] = data[noise_idx++] > 0 ? hvox::Block{1} : hvox::Block{0};
+            for (ui8 z = 0; z < CHUNK_LENGTH; ++z) {
+                for (ui8 y = 0; y < CHUNK_LENGTH; ++y) {
+                    for (ui8 x = 0; x < CHUNK_LENGTH; ++x) {
+                        chunk->blocks[hvox::block_index({x, CHUNK_LENGTH - y - 1, z})] = data[noise_idx++] > 0 ? hvox::Block{1} : hvox::Block{0};
                     }
                 }
             }
         }
 
-        // hvox::set_blocks(chunk, hvox::BlockChunkPosition{0}, hvox::BlockChunkPosition{CHUNK_SIZE - 1}, hvox::Block{0});
+        // hvox::set_blocks(chunk, hvox::BlockChunkPosition{0}, hvox::BlockChunkPosition{CHUNK_LENGTH - 1}, hvox::Block{0});
         // ui64 noise_idx = 0;
-        // for (ui8 z = 0; z < CHUNK_SIZE; ++z) {
-        //     for (ui8 x = 0; x < CHUNK_SIZE; ++x) {
+        // for (ui8 z = 0; z < CHUNK_LENGTH; ++z) {
+        //     for (ui8 x = 0; x < CHUNK_LENGTH; ++x) {
         //         i32 y = hvox::block_world_position(chunk->position, 0).y;
 
         //         i32 height = -1 * static_cast<i32>(data[noise_idx++]);
         //         // debug_printf("Height at (%d, %d): %d\n", x, z, height);
         //         if (y >= height) continue;
 
-        //         hvox::set_blocks(chunk, {x, 0, z}, {x, glm::min(height - y, CHUNK_SIZE - 1), z}, hvox::Block{1});
+        //         hvox::set_blocks(chunk, {x, 0, z}, {x, glm::min(height - y, CHUNK_LENGTH - 1), z}, hvox::Block{1});
         //     }
         // }
 
@@ -221,7 +221,7 @@ public:
         m_camera.offset_position(delta_pos);
         m_camera.update();
 
-        f32v3 current_pos = glm::floor(m_camera.position() / static_cast<f32>(CHUNK_SIZE));
+        f32v3 current_pos = glm::floor(m_camera.position() / static_cast<f32>(CHUNK_LENGTH));
 
         i32 x_step = static_cast<i32>(current_pos.x) - static_cast<i32>(last_pos.x);
         if (x_step != 0) {

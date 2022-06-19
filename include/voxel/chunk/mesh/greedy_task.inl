@@ -20,7 +20,7 @@ bool hvox::ChunkGreedyMeshTask<MeshComparator>::run_task(ChunkLoadThreadState*, 
     //                      further improve performance and also remove the difficulty
     //                      of the above TODO.
     if (chunk->instance.data == nullptr)
-        chunk->instance.data = new ChunkInstanceData[CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE];
+        chunk->instance.data = new ChunkInstanceData[CHUNK_VOLUME];
 
     chunk->instance.count = 0;
 
@@ -30,7 +30,7 @@ bool hvox::ChunkGreedyMeshTask<MeshComparator>::run_task(ChunkLoadThreadState*, 
 
     std::queue<BlockChunkPosition> queued_for_visit;
 
-    bool* visited = new bool[CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE]{false};
+    bool* visited = new bool[CHUNK_VOLUME]{false};
 
     auto  data        = chunk->instance.data;
     auto& voxel_count = chunk->instance.count;
@@ -45,7 +45,7 @@ bool hvox::ChunkGreedyMeshTask<MeshComparator>::run_task(ChunkLoadThreadState*, 
 
     auto add_border_blocks_to_queue = [&](BlockChunkPosition _start, BlockChunkPosition _end) {
         // Add blocks adjacent to X-face to queue.
-        if (_end.x != CHUNK_SIZE - 1) {
+        if (_end.x != CHUNK_LENGTH - 1) {
             for (ui32 z = _start.z; z <= _end.z; ++z) {
                 for (ui32 y = _start.y; y <= _end.y; ++y) {
                     queued_for_visit.push({_end.x + 1, y, z});
@@ -53,7 +53,7 @@ bool hvox::ChunkGreedyMeshTask<MeshComparator>::run_task(ChunkLoadThreadState*, 
             }
         }
         // Add blocks adjacent to Z-face to queue.
-        if (_end.z != CHUNK_SIZE - 1) {
+        if (_end.z != CHUNK_LENGTH - 1) {
             for (ui32 x = _start.x; x <= _end.x; ++x) {
                 for (ui32 y = _start.y; y <= _end.y; ++y) {
                     queued_for_visit.push({x, y, _end.z + 1});
@@ -61,7 +61,7 @@ bool hvox::ChunkGreedyMeshTask<MeshComparator>::run_task(ChunkLoadThreadState*, 
             }
         }
         // Add blocks adjacent to Y-face to queue.
-        if (_end.y != CHUNK_SIZE - 1) {
+        if (_end.y != CHUNK_LENGTH - 1) {
             for (ui32 x = _start.x; x <= _end.x; ++x) {
                 for (ui32 z = _start.z; z <= _end.z; ++z) {
                     queued_for_visit.push({x, _end.y + 1, z});
@@ -82,7 +82,7 @@ process_new_source:
         \***************/
 
         target_pos = start;
-        for (; target_pos.x < CHUNK_SIZE; ++target_pos.x) {
+        for (; target_pos.x < CHUNK_LENGTH; ++target_pos.x) {
             auto target_idx = block_index(target_pos);
 
             const Block* target = &blocks[target_idx];
@@ -117,8 +117,8 @@ process_new_source:
         }
 
         // If we scanned all the way, we won't have set end component, so set it.
-        if (target_pos.x == CHUNK_SIZE)
-            end.x = CHUNK_SIZE - 1;
+        if (target_pos.x == CHUNK_LENGTH)
+            end.x = CHUNK_LENGTH - 1;
 
         // If we were scanning for the extent of an instanceable source block,
         // we now set the visited status of scanned blocks.
@@ -136,7 +136,7 @@ process_new_source:
         \***************/
 
         target_pos = start + BlockChunkPosition{0, 0, 1};
-        for (; target_pos.z < CHUNK_SIZE; ++target_pos.z) {
+        for (; target_pos.z < CHUNK_LENGTH; ++target_pos.z) {
             bool done = false;
 
             // Scan across X for each Z coord. Should any given Z's X-wise scan
@@ -180,8 +180,8 @@ process_new_source:
         }
 
         // If we scanned all the way, we won't have set end component, so set it.
-        if (target_pos.z == CHUNK_SIZE)
-            end.z = CHUNK_SIZE - 1;
+        if (target_pos.z == CHUNK_LENGTH)
+            end.z = CHUNK_LENGTH - 1;
 
         // If we were scanning for the extent of an instanceable source block,
         // we now set the visited status of scanned blocks.
@@ -199,7 +199,7 @@ process_new_source:
         \***************/
 
         target_pos = start + BlockChunkPosition{0, 1, 0};
-        for (; target_pos.y < CHUNK_SIZE; ++target_pos.y) {
+        for (; target_pos.y < CHUNK_LENGTH; ++target_pos.y) {
             bool done = false;
 
             // Scan across X-Z plane for each Y coord. Should any given Y's
@@ -247,8 +247,8 @@ process_new_source:
         }
 
         // If we scanned all the way, we won't have set end component, so set it.
-        if (target_pos.y == CHUNK_SIZE)
-            end.y = CHUNK_SIZE - 1;
+        if (target_pos.y == CHUNK_LENGTH)
+            end.y = CHUNK_LENGTH - 1;
 
 
         add_border_blocks_to_queue(start, end);

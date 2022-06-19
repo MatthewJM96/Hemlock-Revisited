@@ -3,41 +3,41 @@
 #include "voxel/chunk/grid.h"
 
 static inline bool is_at_left_face(hvox::BlockIndex index) {
-    return (index % CHUNK_SIZE) == 0;
+    return (index % CHUNK_LENGTH) == 0;
 }
 static inline bool is_at_right_face(hvox::BlockIndex index) {
-    return ((index + 1) % CHUNK_SIZE) == 0;
+    return ((index + 1) % CHUNK_LENGTH) == 0;
 }
 static inline bool is_at_bottom_face(hvox::BlockIndex index) {
-    return (index % (CHUNK_SIZE * CHUNK_SIZE)) < CHUNK_SIZE;
+    return (index % (CHUNK_AREA)) < CHUNK_LENGTH;
 }
 static inline bool is_at_top_face(hvox::BlockIndex index) {
-    return (index % (CHUNK_SIZE * CHUNK_SIZE)) >= (CHUNK_SIZE * (CHUNK_SIZE - 1));
+    return (index % (CHUNK_AREA)) >= (CHUNK_LENGTH * (CHUNK_LENGTH - 1));
 }
 static inline bool is_at_front_face(hvox::BlockIndex index) {
-    return index < (CHUNK_SIZE * CHUNK_SIZE);
+    return index < (CHUNK_AREA);
 }
 static inline bool is_at_back_face(hvox::BlockIndex index) {
-    return index >= (CHUNK_SIZE * CHUNK_SIZE * (CHUNK_SIZE - 1));
+    return index >= (CHUNK_AREA * (CHUNK_LENGTH - 1));
 }
 
 static inline hvox::BlockIndex index_at_right_face(hvox::BlockIndex index) {
-    return index + CHUNK_SIZE - 1;
+    return index + CHUNK_LENGTH - 1;
 }
 static inline hvox::BlockIndex index_at_left_face(hvox::BlockIndex index) {
-    return index - CHUNK_SIZE + 1;
+    return index - CHUNK_LENGTH + 1;
 }
 static inline hvox::BlockIndex index_at_top_face(hvox::BlockIndex index) {
-    return index + (CHUNK_SIZE * (CHUNK_SIZE - 1));
+    return index + (CHUNK_LENGTH * (CHUNK_LENGTH - 1));
 }
 static inline hvox::BlockIndex index_at_bottom_face(hvox::BlockIndex index) {
-    return index - (CHUNK_SIZE * (CHUNK_SIZE - 1));
+    return index - (CHUNK_LENGTH * (CHUNK_LENGTH - 1));
 }
 static inline hvox::BlockIndex index_at_front_face(hvox::BlockIndex index) {
-    return index - (CHUNK_SIZE * CHUNK_SIZE * (CHUNK_SIZE - 1));
+    return index - (CHUNK_AREA * (CHUNK_LENGTH - 1));
 }
 static inline hvox::BlockIndex index_at_back_face(hvox::BlockIndex index) {
-    return index + (CHUNK_SIZE * CHUNK_SIZE * (CHUNK_SIZE - 1));
+    return index + (CHUNK_AREA * (CHUNK_LENGTH - 1));
 }
 
 template <hvox::ChunkMeshComparator MeshComparator>
@@ -81,7 +81,7 @@ bool hvox::ChunkNaiveMeshTask<MeshComparator>::run_task(ChunkLoadThreadState* st
     //                      unique, scalings will not be, and so an index buffer could
     //                      further improve performance and also remove the difficulty
     //                      of the above TODO.
-    chunk->instance.data = new ChunkInstanceData[CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE];
+    chunk->instance.data = new ChunkInstanceData[CHUNK_VOLUME];
 
     // Determines if block is meshable.
     const MeshComparator meshable{};
@@ -99,7 +99,7 @@ bool hvox::ChunkNaiveMeshTask<MeshComparator>::run_task(ChunkLoadThreadState* st
 
     // TODO(Matthew): Checking block is NULL_BLOCK is wrong check really, we will have transparent blocks
     //                e.g. air, to account for too.
-    for (BlockIndex i = 0; i < CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE; ++i) {
+    for (BlockIndex i = 0; i < CHUNK_VOLUME; ++i) {
         Block& voxel = chunk->blocks[i];
         if (voxel != NULL_BLOCK) {
             BlockWorldPosition block_position = block_world_position(chunk->position, i);
@@ -155,7 +155,7 @@ bool hvox::ChunkNaiveMeshTask<MeshComparator>::run_task(ChunkLoadThreadState* st
                 }
             } else {
                 // Get corresponding neighbour index in this chunk and check.
-                if (meshable(&chunk->blocks[i - CHUNK_SIZE], &chunk->blocks[i - CHUNK_SIZE], block_chunk_position(i), raw_chunk_ptr)) {
+                if (meshable(&chunk->blocks[i - CHUNK_LENGTH], &chunk->blocks[i - CHUNK_LENGTH], block_chunk_position(i), raw_chunk_ptr)) {
                     add_block(block_position);
                     continue;
                 }
@@ -173,7 +173,7 @@ bool hvox::ChunkNaiveMeshTask<MeshComparator>::run_task(ChunkLoadThreadState* st
                 }
             } else {
                 // Get corresponding neighbour index in this chunk and check.
-                if (meshable(&chunk->blocks[i + CHUNK_SIZE], &chunk->blocks[i + CHUNK_SIZE], block_chunk_position(i), raw_chunk_ptr)) {
+                if (meshable(&chunk->blocks[i + CHUNK_LENGTH], &chunk->blocks[i + CHUNK_LENGTH], block_chunk_position(i), raw_chunk_ptr)) {
                     add_block(block_position);
                     continue;
                 }
@@ -191,7 +191,7 @@ bool hvox::ChunkNaiveMeshTask<MeshComparator>::run_task(ChunkLoadThreadState* st
                 }
             } else {
                 // Get corresponding neighbour index in this chunk and check.
-                if (meshable(&chunk->blocks[i - (CHUNK_SIZE * CHUNK_SIZE)], &chunk->blocks[i - (CHUNK_SIZE * CHUNK_SIZE)], block_chunk_position(i), raw_chunk_ptr)) {
+                if (meshable(&chunk->blocks[i - (CHUNK_AREA)], &chunk->blocks[i - (CHUNK_AREA)], block_chunk_position(i), raw_chunk_ptr)) {
                     add_block(block_position);
                     continue;
                 }
@@ -209,7 +209,7 @@ bool hvox::ChunkNaiveMeshTask<MeshComparator>::run_task(ChunkLoadThreadState* st
                 }
             } else {
                 // Get corresponding neighbour index in this chunk and check.
-                if (meshable(&chunk->blocks[i + (CHUNK_SIZE * CHUNK_SIZE)], &chunk->blocks[i + (CHUNK_SIZE * CHUNK_SIZE)], block_chunk_position(i), raw_chunk_ptr)) {
+                if (meshable(&chunk->blocks[i + (CHUNK_AREA)], &chunk->blocks[i + (CHUNK_AREA)], block_chunk_position(i), raw_chunk_ptr)) {
                     add_block(block_position);
                     continue;
                 }

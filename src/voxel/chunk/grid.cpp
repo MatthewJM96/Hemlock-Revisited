@@ -93,51 +93,51 @@ void hvox::ChunkGrid::draw_grid() {
     for (auto& [id, chunk] : m_chunks) {
         // bottom back left - top back left
         lines.emplace_back(f32v3(block_world_position(chunk->position, 0)));
-        lines.emplace_back(f32v3(block_world_position(chunk->position, 0) + i32v3{0, CHUNK_SIZE, 0}));
+        lines.emplace_back(f32v3(block_world_position(chunk->position, 0) + i32v3{0, CHUNK_LENGTH, 0}));
 
         // bottom back left - bottom front left
         lines.emplace_back(f32v3(block_world_position(chunk->position, 0)));
-        lines.emplace_back(f32v3(block_world_position(chunk->position, 0) + i32v3{0, 0, CHUNK_SIZE}));
+        lines.emplace_back(f32v3(block_world_position(chunk->position, 0) + i32v3{0, 0, CHUNK_LENGTH}));
 
         // bottom back left - bottom back right
         lines.emplace_back(f32v3(block_world_position(chunk->position, 0)));
-        lines.emplace_back(f32v3(block_world_position(chunk->position, 0) + i32v3{CHUNK_SIZE, 0, 0}));
+        lines.emplace_back(f32v3(block_world_position(chunk->position, 0) + i32v3{CHUNK_LENGTH, 0, 0}));
 
         // top front right - top front left
-        lines.emplace_back(f32v3(block_world_position(chunk->position, 0) + i32v3{CHUNK_SIZE, CHUNK_SIZE, CHUNK_SIZE}));
-        lines.emplace_back(f32v3(block_world_position(chunk->position, 0) + i32v3{0, CHUNK_SIZE, CHUNK_SIZE}));
+        lines.emplace_back(f32v3(block_world_position(chunk->position, 0) + i32v3{CHUNK_LENGTH, CHUNK_LENGTH, CHUNK_LENGTH}));
+        lines.emplace_back(f32v3(block_world_position(chunk->position, 0) + i32v3{0, CHUNK_LENGTH, CHUNK_LENGTH}));
 
         // top front right - top back right
-        lines.emplace_back(f32v3(block_world_position(chunk->position, 0) + i32v3{CHUNK_SIZE, CHUNK_SIZE, CHUNK_SIZE}));
-        lines.emplace_back(f32v3(block_world_position(chunk->position, 0) + i32v3{CHUNK_SIZE, CHUNK_SIZE, 0}));
+        lines.emplace_back(f32v3(block_world_position(chunk->position, 0) + i32v3{CHUNK_LENGTH, CHUNK_LENGTH, CHUNK_LENGTH}));
+        lines.emplace_back(f32v3(block_world_position(chunk->position, 0) + i32v3{CHUNK_LENGTH, CHUNK_LENGTH, 0}));
 
         // top front right - bottom front right
-        lines.emplace_back(f32v3(block_world_position(chunk->position, 0) + i32v3{CHUNK_SIZE, CHUNK_SIZE, CHUNK_SIZE}));
-        lines.emplace_back(f32v3(block_world_position(chunk->position, 0) + i32v3{CHUNK_SIZE, 0, CHUNK_SIZE}));
+        lines.emplace_back(f32v3(block_world_position(chunk->position, 0) + i32v3{CHUNK_LENGTH, CHUNK_LENGTH, CHUNK_LENGTH}));
+        lines.emplace_back(f32v3(block_world_position(chunk->position, 0) + i32v3{CHUNK_LENGTH, 0, CHUNK_LENGTH}));
 
         // top back left - top front left
-        lines.emplace_back(f32v3(block_world_position(chunk->position, 0) + i32v3{0, CHUNK_SIZE, 0}));
-        lines.emplace_back(f32v3(block_world_position(chunk->position, 0) + i32v3{0, CHUNK_SIZE, CHUNK_SIZE}));
+        lines.emplace_back(f32v3(block_world_position(chunk->position, 0) + i32v3{0, CHUNK_LENGTH, 0}));
+        lines.emplace_back(f32v3(block_world_position(chunk->position, 0) + i32v3{0, CHUNK_LENGTH, CHUNK_LENGTH}));
 
         // top front left - bottom front left
-        lines.emplace_back(f32v3(block_world_position(chunk->position, 0) + i32v3{0, CHUNK_SIZE, CHUNK_SIZE}));
-        lines.emplace_back(f32v3(block_world_position(chunk->position, 0) + i32v3{0, 0, CHUNK_SIZE}));
+        lines.emplace_back(f32v3(block_world_position(chunk->position, 0) + i32v3{0, CHUNK_LENGTH, CHUNK_LENGTH}));
+        lines.emplace_back(f32v3(block_world_position(chunk->position, 0) + i32v3{0, 0, CHUNK_LENGTH}));
 
         // top back left - top back right
-        lines.emplace_back(f32v3(block_world_position(chunk->position, 0) + i32v3{0, CHUNK_SIZE, 0}));
-        lines.emplace_back(f32v3(block_world_position(chunk->position, 0) + i32v3{CHUNK_SIZE, CHUNK_SIZE, 0}));
+        lines.emplace_back(f32v3(block_world_position(chunk->position, 0) + i32v3{0, CHUNK_LENGTH, 0}));
+        lines.emplace_back(f32v3(block_world_position(chunk->position, 0) + i32v3{CHUNK_LENGTH, CHUNK_LENGTH, 0}));
 
         // bottom front right - bottom front left
-        lines.emplace_back(f32v3(block_world_position(chunk->position, 0) + i32v3{CHUNK_SIZE, 0, CHUNK_SIZE}));
-        lines.emplace_back(f32v3(block_world_position(chunk->position, 0) + i32v3{0, 0, CHUNK_SIZE}));
+        lines.emplace_back(f32v3(block_world_position(chunk->position, 0) + i32v3{CHUNK_LENGTH, 0, CHUNK_LENGTH}));
+        lines.emplace_back(f32v3(block_world_position(chunk->position, 0) + i32v3{0, 0, CHUNK_LENGTH}));
 
         // bottom front right - bottom back right
-        lines.emplace_back(f32v3(block_world_position(chunk->position, 0) + i32v3{CHUNK_SIZE, 0, CHUNK_SIZE}));
-        lines.emplace_back(f32v3(block_world_position(chunk->position, 0) + i32v3{CHUNK_SIZE, 0, 0}));
+        lines.emplace_back(f32v3(block_world_position(chunk->position, 0) + i32v3{CHUNK_LENGTH, 0, CHUNK_LENGTH}));
+        lines.emplace_back(f32v3(block_world_position(chunk->position, 0) + i32v3{CHUNK_LENGTH, 0, 0}));
 
         // bottom back right - top back right
-        lines.emplace_back(f32v3(block_world_position(chunk->position, 0) + i32v3{CHUNK_SIZE, 0, 0}));
-        lines.emplace_back(f32v3(block_world_position(chunk->position, 0) + i32v3{CHUNK_SIZE, CHUNK_SIZE, 0}));
+        lines.emplace_back(f32v3(block_world_position(chunk->position, 0) + i32v3{CHUNK_LENGTH, 0, 0}));
+        lines.emplace_back(f32v3(block_world_position(chunk->position, 0) + i32v3{CHUNK_LENGTH, CHUNK_LENGTH, 0}));
     }
 
     glNamedBufferSubData(
