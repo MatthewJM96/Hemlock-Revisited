@@ -173,18 +173,17 @@ public:
             do_unloads = true;
             start = time.total;
         }
-#define NUM 4
-        for (auto x = -NUM; x < NUM; ++x) {
-            for (auto z = -NUM; z < NUM; ++z) {
-                if (do_unloads &&
-                    (start + ((x + NUM) + (2 * NUM + 1) * (z + NUM)) * 300) < time.total) {
-                    m_chunk_grid.unload_chunk_at({ {x, 0, z} });
-                    m_chunk_grid.unload_chunk_at({ {x, 1, z} });
-                    m_chunk_grid.unload_chunk_at({ {x, 2, z} });
+        if (do_unloads) {
+            for (auto x = -VIEW_DIST; x < VIEW_DIST; ++x) {
+                for (auto z = -VIEW_DIST; z < VIEW_DIST; ++z) {
+                    if (start + ((x + VIEW_DIST) + (2 * VIEW_DIST + 1) * (z + VIEW_DIST)) * 300 < time.total) {
+                        m_chunk_grid.unload_chunk_at({ {x, 0, z} });
+                        m_chunk_grid.unload_chunk_at({ {x, 1, z} });
+                        m_chunk_grid.unload_chunk_at({ {x, 2, z} });
+                    }
                 }
             }
         }
-#undef NUM
 
 #if defined(DEBUG)
         static f64 last_time = 0.0;
