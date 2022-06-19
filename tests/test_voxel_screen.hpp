@@ -156,6 +156,10 @@ public:
             do_chunk_check = true;
         }
 
+        if (m_input_manager->is_pressed(hui::PhysicalKey::H_L)) {
+            m_draw_chunk_outlines = !m_draw_chunk_outlines;
+        }
+
         f32 speed_mult = 1.0f;
         if (m_input_manager->key_modifier_state().ctrl) {
             speed_mult = 10.0f;
@@ -316,16 +320,18 @@ public:
         // Deactivate our shader.
         m_shader.unuse();
 
-        m_line_shader.use();
+        if (m_draw_chunk_outlines) {
+            m_line_shader.use();
 
-        f32v3 line_colour = {1.0f, 0.0f, 0.0f};
+            f32v3 line_colour = {1.0f, 0.0f, 0.0f};
 
-        glUniformMatrix4fv(m_line_shader.uniform_location("view_proj"),  1, GL_FALSE, &m_camera.view_projection_matrix()[0][0]);
-        glUniform3fv(m_line_shader.uniform_location("colour"), 1, &line_colour[0]);
+            glUniformMatrix4fv(m_line_shader.uniform_location("view_proj"),  1, GL_FALSE, &m_camera.view_projection_matrix()[0][0]);
+            glUniform3fv(m_line_shader.uniform_location("colour"), 1, &line_colour[0]);
 
-        m_chunk_grid.draw_grid();
+            m_chunk_grid.draw_grid();
 
-        m_line_shader.unuse();
+            m_line_shader.unuse();
+        }
     }
 
     virtual void init(const std::string& name, happ::ProcessBase* process) override {
@@ -360,6 +366,8 @@ public:
         m_shader.add_shaders("shaders/test_vox.vert", "shaders/test_vox.frag");
 
         m_shader.link();
+
+        m_draw_chunk_outlines = false;
 
         m_line_shader.init(&m_shader_cache);
 
@@ -420,6 +428,8 @@ protected:
     hvox::ChunkGrid              m_chunk_grid;
     hg::GLSLProgram              m_shader, m_line_shader;
     hthread::ThreadWorkflowDAG   m_chunk_load_dag;
+
+    bool m_draw_chunk_outlines;
 
     std::vector<hmem::WeakHandle<hvox::Chunk>> m_unloading_chunks;
 };
