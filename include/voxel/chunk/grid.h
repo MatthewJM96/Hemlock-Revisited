@@ -67,6 +67,13 @@ namespace hemlock {
              */
             void draw(TimeData time);
 
+            // TODO(Matthew): move this out of here. we should look
+            //                at Vulkan for how we might better architect drawing.
+            /**
+             * @brief Draw chunk grid.
+             */
+            void draw_grid();
+
             /**
              * @brief Suspends chunk tasks. This is a hammer, but
              * for testing it can definitely be useful. Probably
@@ -401,6 +408,9 @@ namespace hemlock {
             ChunkRenderer m_renderer;
 
             Chunks m_chunks;
+
+            // TODO(Matthew): MOVE IT
+            GLuint m_grid_vao, m_grid_vbo;
         };
     }
 }

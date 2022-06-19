@@ -22,6 +22,25 @@ void hvox::ChunkGrid::init(                       ui32 thread_count,
     // TODO(Matthew): smarter setting of page size - maybe should be dependent on draw distance.
     // m_renderer.init(20, 2);
     m_renderer.init(5, 2);
+
+
+    // TODO(Matthew): MOVE IT
+    glCreateVertexArrays(1, &m_grid_vao);
+
+    glCreateBuffers(1, &m_grid_vbo);
+    glNamedBufferData(
+        m_grid_vbo,
+        sizeof(f32v3) * 2 * 12 * (10 * 10 * 10), // 2 points per line, 12 lines per chunk, a whole lotta chunks.
+        nullptr,
+        GL_DYNAMIC_DRAW
+    );
+
+    glVertexArrayVertexBuffer(m_grid_vao, 0, m_grid_vbo, 0, sizeof(f32v3));
+
+    glEnableVertexArrayAttrib(m_grid_vao, 0);
+    glVertexArrayAttribFormat(m_grid_vao, 0, 3, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(m_grid_vao, 0, 0);
+
 }
 
 void hvox::ChunkGrid::dispose() {
@@ -62,6 +81,69 @@ void hvox::ChunkGrid::update(TimeData time) {
 
 void hvox::ChunkGrid::draw(TimeData time) {
     m_renderer.draw(time);
+}
+
+void hvox::ChunkGrid::draw_grid() {
+    // TODO(Matthew): deduplicate lines.
+
+    std::vector<f32v3> lines;
+    for (auto& [id, chunk] : m_chunks) {
+        // bottom back left - top back left
+        lines.emplace_back(f32v3(block_world_position(chunk->position, 0)));
+        lines.emplace_back(f32v3(block_world_position(chunk->position, 0) + i32v3{0, CHUNK_SIZE, 0}));
+
+        // bottom back left - bottom front left
+        lines.emplace_back(f32v3(block_world_position(chunk->position, 0)));
+        lines.emplace_back(f32v3(block_world_position(chunk->position, 0) + i32v3{0, 0, CHUNK_SIZE}));
+
+        // bottom back left - bottom back right
+        lines.emplace_back(f32v3(block_world_position(chunk->position, 0)));
+        lines.emplace_back(f32v3(block_world_position(chunk->position, 0) + i32v3{CHUNK_SIZE, 0, 0}));
+
+        // top front right - top front left
+        lines.emplace_back(f32v3(block_world_position(chunk->position, 0) + i32v3{CHUNK_SIZE, CHUNK_SIZE, CHUNK_SIZE}));
+        lines.emplace_back(f32v3(block_world_position(chunk->position, 0) + i32v3{0, CHUNK_SIZE, CHUNK_SIZE}));
+
+        // top front right - top back right
+        lines.emplace_back(f32v3(block_world_position(chunk->position, 0) + i32v3{CHUNK_SIZE, CHUNK_SIZE, CHUNK_SIZE}));
+        lines.emplace_back(f32v3(block_world_position(chunk->position, 0) + i32v3{CHUNK_SIZE, CHUNK_SIZE, 0}));
+
+        // top front right - bottom front right
+        lines.emplace_back(f32v3(block_world_position(chunk->position, 0) + i32v3{CHUNK_SIZE, CHUNK_SIZE, CHUNK_SIZE}));
+        lines.emplace_back(f32v3(block_world_position(chunk->position, 0) + i32v3{CHUNK_SIZE, 0, CHUNK_SIZE}));
+
+        // top back left - top front left
+        lines.emplace_back(f32v3(block_world_position(chunk->position, 0) + i32v3{0, CHUNK_SIZE, 0}));
+        lines.emplace_back(f32v3(block_world_position(chunk->position, 0) + i32v3{0, CHUNK_SIZE, CHUNK_SIZE}));
+
+        // top front left - bottom front left
+        lines.emplace_back(f32v3(block_world_position(chunk->position, 0) + i32v3{0, CHUNK_SIZE, CHUNK_SIZE}));
+        lines.emplace_back(f32v3(block_world_position(chunk->position, 0) + i32v3{0, 0, CHUNK_SIZE}));
+
+        // top back left - top back right
+        lines.emplace_back(f32v3(block_world_position(chunk->position, 0) + i32v3{0, CHUNK_SIZE, 0}));
+        lines.emplace_back(f32v3(block_world_position(chunk->position, 0) + i32v3{CHUNK_SIZE, CHUNK_SIZE, 0}));
+
+        // bottom front right - bottom front left
+        lines.emplace_back(f32v3(block_world_position(chunk->position, 0) + i32v3{CHUNK_SIZE, 0, CHUNK_SIZE}));
+        lines.emplace_back(f32v3(block_world_position(chunk->position, 0) + i32v3{0, 0, CHUNK_SIZE}));
+
+        // bottom front right - bottom back right
+        lines.emplace_back(f32v3(block_world_position(chunk->position, 0) + i32v3{CHUNK_SIZE, 0, CHUNK_SIZE}));
+        lines.emplace_back(f32v3(block_world_position(chunk->position, 0) + i32v3{CHUNK_SIZE, 0, 0}));
+
+        // bottom back right - top back right
+        lines.emplace_back(f32v3(block_world_position(chunk->position, 0) + i32v3{CHUNK_SIZE, 0, 0}));
+        lines.emplace_back(f32v3(block_world_position(chunk->position, 0) + i32v3{CHUNK_SIZE, CHUNK_SIZE, 0}));
+    }
+
+    glNamedBufferSubData(
+        m_grid_vbo, 0, lines.size() * sizeof(f32v3),
+        reinterpret_cast<void*>(&lines[0])
+    );
+
+    glBindVertexArray(m_grid_vao);
+    glDrawArrays(GL_LINES, 0, lines.size());
 }
 
 bool hvox::ChunkGrid::load_from_scratch_chunks(ChunkGridPosition* chunk_positions, ui32 chunk_count) {

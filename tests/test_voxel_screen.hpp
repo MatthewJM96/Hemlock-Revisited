@@ -275,6 +275,17 @@ public:
 
         // Deactivate our shader.
         m_shader.unuse();
+
+        m_line_shader.use();
+
+        f32v3 line_colour = {1.0f, 0.0f, 0.0f};
+
+        glUniformMatrix4fv(m_line_shader.uniform_location("view_proj"),  1, GL_FALSE, &m_camera.view_projection_matrix()[0][0]);
+        glUniform3fv(m_line_shader.uniform_location("colour"), 1, &line_colour[0]);
+
+        m_chunk_grid.draw_grid();
+
+        m_line_shader.unuse();
     }
 
     virtual void init(const std::string& name, happ::ProcessBase* process) override {
@@ -309,6 +320,14 @@ public:
         m_shader.add_shaders("shaders/test_vox.vert", "shaders/test_vox.frag");
 
         m_shader.link();
+
+        m_line_shader.init(&m_shader_cache);
+
+        m_line_shader.set_attribute("v_position",      0);
+
+        m_line_shader.add_shaders("shaders/line.vert", "shaders/line.frag");
+
+        m_line_shader.link();
 
         m_default_texture = hg::load_texture("test_tex.png");
 
@@ -359,7 +378,7 @@ protected:
     hcam::BasicFirstPersonCamera m_camera;
     hui::InputManager*           m_input_manager;
     hvox::ChunkGrid              m_chunk_grid;
-    hg::GLSLProgram              m_shader;
+    hg::GLSLProgram              m_shader, m_line_shader;
     hthread::ThreadWorkflowDAG   m_chunk_load_dag;
 };
 
