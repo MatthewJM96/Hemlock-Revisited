@@ -203,14 +203,71 @@ target_include_directories(Hemlock_Revisited
     SYSTEM
     PUBLIC
     ${Hemlock_Include_Dirs}
-    "${PROJECT_SOURCE_DIR}/deps/include"
     "${PROJECT_SOURCE_DIR}/include"
 )
 
-target_link_directories(Hemlock_Revisited
+if (UNIX OR MINGW)
+    if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+        if(CMAKE_BUILD_TYPE STREQUAL "Release")
+            target_include_directories(Hemlock_Revisited
+                SYSTEM
+                PUBLIC
+                "${PROJECT_SOURCE_DIR}/deps/GCC-x64-Release/include"
+            )
+
+            target_link_directories(Hemlock_Revisited
+                PUBLIC
+                "${PROJECT_SOURCE_DIR}/deps/GCC-x64-Release/lib"
+            )
+        else()
+            target_include_directories(Hemlock_Revisited
+                SYSTEM
+                PUBLIC
+                "${PROJECT_SOURCE_DIR}/deps/GCC-x64-Debug/include"
+            )
+
+            target_link_directories(Hemlock_Revisited
+                PUBLIC
+                "${PROJECT_SOURCE_DIR}/deps/GCC-x64-Debug/lib"
+            )
+        endif()
+    elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+        if(CMAKE_BUILD_TYPE STREQUAL "Release")
+            target_include_directories(Hemlock_Revisited
+                SYSTEM
+                PUBLIC
+                "${PROJECT_SOURCE_DIR}/deps/Clang-x64-Release/include"
+            )
+
+            target_link_directories(Hemlock_Revisited
+                PUBLIC
+                "${PROJECT_SOURCE_DIR}/deps/Clang-x64-Release/lib"
+            )
+        else()
+            target_include_directories(Hemlock_Revisited
+                SYSTEM
+                PUBLIC
+                "${PROJECT_SOURCE_DIR}/deps/Clang-x64-Debug/include"
+            )
+
+            target_link_directories(Hemlock_Revisited
+                PUBLIC
+                "${PROJECT_SOURCE_DIR}/deps/Clang-x64-Debug/lib"
+            )
+        endif()
+    endif()
+else()
+    target_include_directories(Hemlock_Revisited
+    SYSTEM
+    PUBLIC
+    "${PROJECT_SOURCE_DIR}/deps/include"
+    )
+
+    target_link_directories(Hemlock_Revisited
     PUBLIC
     "${PROJECT_SOURCE_DIR}/deps/lib"
-)
+    )
+endif()
 
 
 if (HEMLOCK_USING_OPENGL)
@@ -238,18 +295,12 @@ target_link_libraries(Hemlock_Revisited
     Boost::iostreams
 )
 
-if (MSVC)
-    if(CMAKE_BUILD_TYPE STREQUAL "Release")
-        target_link_libraries(Hemlock_Revisited
-            FastNoise
-        )
-    else()
-        target_link_libraries(Hemlock_Revisited
-            FastNoiseD
-        )
-    endif()
-else()
+if(CMAKE_BUILD_TYPE STREQUAL "Release")
     target_link_libraries(Hemlock_Revisited
         FastNoise
+    )
+else()
+    target_link_libraries(Hemlock_Revisited
+        FastNoiseD
     )
 endif()
