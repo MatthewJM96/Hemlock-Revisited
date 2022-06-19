@@ -24,6 +24,8 @@ bool hvox::ChunkGreedyMeshTask<MeshComparator>::run_task(ChunkLoadThreadState*, 
 
     chunk->instance.count = 0;
 
+    std::shared_lock lock(chunk->blocks_mutex);
+
     Block* blocks = chunk->blocks;
 
     std::queue<BlockChunkPosition> queued_for_visit;

@@ -33,6 +33,8 @@ namespace hemlock {
 
             ChunkGridPosition position;
             Neighbours        neighbours;
+
+            std::shared_mutex blocks_mutex;
             Block*            blocks;
 
             RenderState render_state;

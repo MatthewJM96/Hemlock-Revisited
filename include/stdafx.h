@@ -34,6 +34,8 @@
 #include <utility>
 
 // Thread Handling
+#include <mutex>
+#include <shared_mutex>
 #include <thread>
 
 // Error Handling

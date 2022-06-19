@@ -69,16 +69,22 @@ bool hvox::set_block( hmem::Handle<Chunk> chunk,
 {
     auto block_idx = block_index(block_position);
 
-    bool gen_task_active = chunk->gen_task_active.load(std::memory_order_acquire);
-    if (!gen_task_active) {
-        bool should_cancel = chunk->on_block_change({
-            chunk,
-            chunk->blocks[block_idx],
-            block,
-            block_position
-        });
-        if (should_cancel) return false;
+    {
+        std::shared_lock lock(chunk->blocks_mutex);
+
+        bool gen_task_active = chunk->gen_task_active.load(std::memory_order_acquire);
+        if (!gen_task_active) {
+            bool should_cancel = chunk->on_block_change({
+                chunk,
+                chunk->blocks[block_idx],
+                block,
+                block_position
+            });
+            if (should_cancel) return false;
+        }
     }
+
+    std::lock_guard lock(chunk->blocks_mutex);
 
     chunk->blocks[block_idx] = block;
 
@@ -90,17 +96,23 @@ bool hvox::set_blocks( hmem::Handle<Chunk> chunk,
                         BlockChunkPosition end_block_position,
                                      Block block )
 {
-    bool gen_task_active = chunk->gen_task_active.load(std::memory_order_acquire);
-    if (!gen_task_active) {
-        bool should_cancel = chunk->on_bulk_block_change({
-            chunk,
-            &block,
-            true,
-            start_block_position,
-            end_block_position
-        });
-        if (should_cancel) return false;
+    {
+        std::shared_lock lock(chunk->blocks_mutex);
+
+        bool gen_task_active = chunk->gen_task_active.load(std::memory_order_acquire);
+        if (!gen_task_active) {
+            bool should_cancel = chunk->on_bulk_block_change({
+                chunk,
+                &block,
+                true,
+                start_block_position,
+                end_block_position
+            });
+            if (should_cancel) return false;
+        }
     }
+
+    std::lock_guard lock(chunk->blocks_mutex);
 
     set_per_block_data(
         chunk->blocks,
@@ -117,17 +129,23 @@ bool hvox::set_blocks( hmem::Handle<Chunk> chunk,
                         BlockChunkPosition end_block_position,
                                     Block* blocks )
 {
-    bool gen_task_active = chunk->gen_task_active.load(std::memory_order_acquire);
-    if (!gen_task_active) {
-        bool should_cancel = chunk->on_bulk_block_change({
-            chunk,
-            blocks,
-            false,
-            start_block_position,
-            end_block_position
-        });
-        if (should_cancel) return false;
+    {
+        std::shared_lock lock(chunk->blocks_mutex);
+
+        bool gen_task_active = chunk->gen_task_active.load(std::memory_order_acquire);
+        if (!gen_task_active) {
+            bool should_cancel = chunk->on_bulk_block_change({
+                chunk,
+                blocks,
+                false,
+                start_block_position,
+                end_block_position
+            });
+            if (should_cancel) return false;
+        }
     }
+
+    std::lock_guard lock(chunk->blocks_mutex);
 
     set_per_block_data(
         chunk->blocks,

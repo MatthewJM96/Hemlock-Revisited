@@ -87,6 +87,10 @@ bool hvox::ChunkNaiveMeshTask<MeshComparator>::run_task(ChunkLoadThreadState* st
 
     Chunk* raw_chunk_ptr = chunk.get();
 
+    std::shared_lock block_lock(chunk->blocks_mutex);
+    std::shared_lock<std::shared_mutex> neighbour_lock;
+
+
     // TODO(Matthew): Checking block is NULL_BLOCK is wrong check really, we will have transparent blocks
     //                e.g. air, to account for too.
     for (BlockIndex i = 0; i < CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE; ++i) {
@@ -102,6 +106,7 @@ bool hvox::ChunkNaiveMeshTask<MeshComparator>::run_task(ChunkLoadThreadState* st
                 // Get corresponding neighbour index in neighbour chunk and check.
                 BlockIndex j = index_at_right_face(i);
                 neighbour = chunk->neighbours.one.left.lock();
+                neighbour_lock = std::shared_lock(neighbour->blocks_mutex);
                 if (neighbour == nullptr || neighbour->blocks[j] == NULL_BLOCK) {
                     add_block(block_position);
                     continue;
@@ -119,6 +124,7 @@ bool hvox::ChunkNaiveMeshTask<MeshComparator>::run_task(ChunkLoadThreadState* st
                 // Get corresponding neighbour index in neighbour chunk and check.
                 BlockIndex j = index_at_left_face(i);
                 neighbour = chunk->neighbours.one.right.lock();
+                neighbour_lock = std::shared_lock(neighbour->blocks_mutex);
                 if (neighbour == nullptr || neighbour->blocks[j] == NULL_BLOCK) {
                     add_block(block_position);
                     continue;
@@ -136,6 +142,7 @@ bool hvox::ChunkNaiveMeshTask<MeshComparator>::run_task(ChunkLoadThreadState* st
                 // Get corresponding neighbour index in neighbour chunk and check.
                 BlockIndex j = index_at_top_face(i);
                 neighbour = chunk->neighbours.one.bottom.lock();
+                neighbour_lock = std::shared_lock(neighbour->blocks_mutex);
                 if (neighbour == nullptr || neighbour->blocks[j] == NULL_BLOCK) {
                     add_block(block_position);
                     continue;
@@ -153,6 +160,7 @@ bool hvox::ChunkNaiveMeshTask<MeshComparator>::run_task(ChunkLoadThreadState* st
                 // Get corresponding neighbour index in neighbour chunk and check.
                 BlockIndex j = index_at_bottom_face(i);
                 neighbour = chunk->neighbours.one.top.lock();
+                neighbour_lock = std::shared_lock(neighbour->blocks_mutex);
                 if (neighbour == nullptr || neighbour->blocks[j] == NULL_BLOCK) {
                     add_block(block_position);
                     continue;
@@ -170,6 +178,7 @@ bool hvox::ChunkNaiveMeshTask<MeshComparator>::run_task(ChunkLoadThreadState* st
                 // Get corresponding neighbour index in neighbour chunk and check.
                 BlockIndex j = index_at_back_face(i);
                 neighbour = chunk->neighbours.one.front.lock();
+                neighbour_lock = std::shared_lock(neighbour->blocks_mutex);
                 if (neighbour == nullptr || neighbour->blocks[j] == NULL_BLOCK) {
                     add_block(block_position);
                     continue;
@@ -187,6 +196,7 @@ bool hvox::ChunkNaiveMeshTask<MeshComparator>::run_task(ChunkLoadThreadState* st
                 // Get corresponding neighbour index in neighbour chunk and check.
                 BlockIndex j = index_at_front_face(i);
                 neighbour = chunk->neighbours.one.back.lock();
+                neighbour_lock = std::shared_lock(neighbour->blocks_mutex);
                 if (neighbour == nullptr || neighbour->blocks[j] == NULL_BLOCK) {
                     add_block(block_position);
                     continue;
