@@ -176,6 +176,7 @@ add_executable(Hemlock_Revisited
     "${PROJECT_SOURCE_DIR}/src/voxel/io/chunk_file_task.cpp"
     "${PROJECT_SOURCE_DIR}/src/voxel/io/chunk_load_task.cpp"
     "${PROJECT_SOURCE_DIR}/src/voxel/io/chunk_save_task.cpp"
+    "${PROJECT_SOURCE_DIR}/src/voxel/ray.cpp"
     "${PROJECT_SOURCE_DIR}/tests/main.cpp"
 )
 
