@@ -12,9 +12,10 @@ void hthread::basic_thread_main( typename Thread<ThreadState>::State* state,
             std::chrono::seconds(1)
         );
 
-        while (state->context.suspend)
+        while (state->context.suspend) {
             std::this_thread::yield();
             continue;
+        }
 
         if (!held.task) continue;
 
