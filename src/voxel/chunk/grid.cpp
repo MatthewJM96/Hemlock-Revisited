@@ -30,7 +30,7 @@ void hvox::ChunkGrid::init(                       ui32 thread_count,
     glCreateBuffers(1, &m_grid_vbo);
     glNamedBufferData(
         m_grid_vbo,
-        sizeof(f32v3) * 2 * 12 * (10 * 10 * 10), // 2 points per line, 12 lines per chunk, a whole lotta chunks.
+        sizeof(f32v3) * 2 * 12 * (100 * 100 * 100), // 2 points per line, 12 lines per chunk, a whole lotta chunks.
         nullptr,
         GL_DYNAMIC_DRAW
     );
