@@ -5,15 +5,18 @@
 #include "voxel/block.hpp"
 #include "voxel/chunk/grid.h"
 
-void hvox::ChunkLoadTask::init(hmem::WeakHandle<Chunk> chunk, ChunkGrid* chunk_grid) {
+void hvox::ChunkLoadTask::init(hmem::WeakHandle<Chunk> chunk, hmem::WeakHandle<ChunkGrid> chunk_grid) {
     m_chunk      = chunk;
     m_chunk_grid = chunk_grid;
 }
 
-void hvox::ChunkGrid::init(                       ui32 thread_count,
-                            thread::ThreadWorkflowDAG* chunk_load_dag,
-                              ChunkLoadTaskListBuilder chunk_load_task_list_builder )
+void hvox::ChunkGrid::init( hmem::WeakHandle<ChunkGrid> self,
+                                                   ui32 thread_count,
+                             thread::ThreadWorkflowDAG* chunk_load_dag,
+                               ChunkLoadTaskListBuilder chunk_load_task_list_builder )
 {
+    m_self = self;
+
     build_load_tasks = chunk_load_task_list_builder;
 
     m_chunk_load_thread_pool.init(thread_count);
@@ -216,7 +219,7 @@ bool hvox::ChunkGrid::load_chunk_at(ChunkGridPosition chunk_position) {
         return false;
 
     m_chunk_load_workflow.run(
-        build_load_tasks(chunk, this)
+        build_load_tasks(chunk, m_self)
     );
     chunk->pending_task.store(ChunkLoadTaskKind::GENERATION, std::memory_order_release);
 

@@ -28,7 +28,7 @@ namespace hemlock {
         using QueriedChunkState       = std::pair<bool, bool>;
         using QueriedChunkPendingTask = std::pair<bool, bool>;
 
-        using ChunkLoadTaskListBuilder = Delegate<hthread::ThreadWorkflowTasksView<ChunkLoadTaskContext>(hmem::WeakHandle<Chunk>, ChunkGrid*)>;
+        using ChunkLoadTaskListBuilder = Delegate<hthread::ThreadWorkflowTasksView<ChunkLoadTaskContext>(hmem::WeakHandle<Chunk>, hmem::WeakHandle<ChunkGrid>)>;
 
         class ChunkGrid {
         public:
@@ -39,14 +39,18 @@ namespace hemlock {
              * @brief Initialises the chunk grid and the
              * underlying thread pool.
              *
+             * @param self A weak handle on this grid instance.
              * @param thread_count The number of threads
              * that the grid can use for loading tasks.
              * @param chunk_load_dag The DAG of the workflow
              * to do chunk loading with.
+             * @param chunk_load_task_list_builder The builder
+             * used to generate tasks for loading chunks.
              */
-            void init(                       ui32 thread_count,
-                       thread::ThreadWorkflowDAG* chunk_load_dag,
-                         ChunkLoadTaskListBuilder chunk_load_task_list_builder );
+            void init( hmem::WeakHandle<ChunkGrid> self,
+                                              ui32 thread_count,
+                        thread::ThreadWorkflowDAG* chunk_load_dag,
+                          ChunkLoadTaskListBuilder chunk_load_task_list_builder );
             /**
              * @brief Disposes of the chunk grid, ending
              * the tasks on the thread pool and unloading
@@ -415,6 +419,8 @@ namespace hemlock {
             ChunkRenderer m_renderer;
 
             Chunks m_chunks;
+
+            hmem::WeakHandle<ChunkGrid> m_self;
 
             // TODO(Matthew): MOVE IT
             GLuint m_grid_vao, m_grid_vbo;

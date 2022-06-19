@@ -48,20 +48,26 @@ bool hvox::ChunkNaiveMeshTask<MeshComparator>::run_task(ChunkLoadThreadState* st
 
     chunk->mesh_task_active.store(true, std::memory_order_release);
 
-    // Only execute if all preloaded neighbouring chunks have at least been generated.
-    auto [ _, neighbours_in_required_state ] =
-            m_chunk_grid->query_all_neighbour_states(chunk, ChunkState::GENERATED);
+    {
+        auto chunk_grid = m_chunk_grid.lock();
 
-    if (!neighbours_in_required_state) {
-        // Mark as no longer engaging in this meshing task.
-        chunk->mesh_task_active.store(false, std::memory_order_release);
-        // Put copy of this mesh task back onto the load task queue.
-        ChunkNaiveMeshTask<MeshComparator>* mesh_task = new ChunkNaiveMeshTask<MeshComparator>();
-        mesh_task->set_workflow_metadata(m_tasks, m_task_idx, m_dag, m_task_completion_states);
-        mesh_task->init(chunk, m_chunk_grid);
-        task_queue->enqueue(state->producer_token, { mesh_task, true });
-        chunk->pending_task.store(ChunkLoadTaskKind::MESH, std::memory_order_release);
-        return false;
+        if (chunk_grid == nullptr) return false;
+
+        // Only execute if all preloaded neighbouring chunks have at least been generated.
+        auto [ _, neighbours_in_required_state ] =
+                chunk_grid->query_all_neighbour_states(chunk, ChunkState::GENERATED);
+
+        if (!neighbours_in_required_state) {
+            // Mark as no longer engaging in this meshing task.
+            chunk->mesh_task_active.store(false, std::memory_order_release);
+            // Put copy of this mesh task back onto the load task queue.
+            ChunkNaiveMeshTask<MeshComparator>* mesh_task = new ChunkNaiveMeshTask<MeshComparator>();
+            mesh_task->set_workflow_metadata(m_tasks, m_task_idx, m_dag, m_task_completion_states);
+            mesh_task->init(m_chunk, m_chunk_grid);
+            task_queue->enqueue(state->producer_token, { mesh_task, true });
+            chunk->pending_task.store(ChunkLoadTaskKind::MESH, std::memory_order_release);
+            return false;
+        }
     }
 
     chunk->instance = { nullptr, 0 };
