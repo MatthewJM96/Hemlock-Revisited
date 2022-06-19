@@ -229,11 +229,15 @@ bool hvox::ChunkGrid::load_from_scratch_chunk_at(ChunkGridPosition chunk_positio
     return load_chunk_at(chunk_position);
 }
 
-bool hvox::ChunkGrid::unload_chunk_at(ChunkGridPosition chunk_position) {
+bool hvox::ChunkGrid::unload_chunk_at(ChunkGridPosition chunk_position, hmem::WeakHandle<Chunk>* handle /*= nullptr*/) {
     auto it = m_chunks.find(chunk_position.id);
     if (it == m_chunks.end()) return false;
 
     (*it).second->on_unload();
+
+    if (handle) {
+        *handle = (*it).second;
+    }
 
     // TODO(Matthew): wherever unloaded, we need to make sure we get IO right,
     //                as chunk will "float" and something could act as if that

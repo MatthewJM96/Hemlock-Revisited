@@ -143,13 +143,20 @@ namespace hemlock {
              * pending tasks for this chunk and releasing memory
              * associated with it.
              *
+             * NOTE: this is a non-blocking action, and the chunk
+             * will only release memory once all active queries and
+             * actions are completed.
+             *
              * @param chunk_position The coords of the chunk to unload.
+             * @param handle Optional weak handle into which the chunk
+             * will be placed. Useful to detect when the chunk is finally
+             * fully released.
              * @return True if the chunk was unloaded, false otherwise.
              * False usually will mean that the chunk was not yet
              * existent, as if it is in any existing state some degree
              * of work will be done to unload it.
              */
-            bool unload_chunk_at(ChunkGridPosition chunk_position);
+            bool unload_chunk_at(ChunkGridPosition chunk_position, hmem::WeakHandle<Chunk>* handle = nullptr);
 
             /**
              * @brief Queries the state of the chunk at the given
