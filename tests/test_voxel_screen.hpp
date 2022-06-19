@@ -128,14 +128,14 @@ public:
         for (auto x = -VIEW_DIST; x <= VIEW_DIST; ++x) {
             for (auto z = -VIEW_DIST; z <= VIEW_DIST; ++z) {
                 for (auto y = -2; y < 6; ++ y) {
-                    m_chunk_grid.preload_chunk_at({ {x, y, z} });
+                    m_chunk_grid->preload_chunk_at({ {x, y, z} });
                 }
             }
         }
         for (auto x = -VIEW_DIST; x <= VIEW_DIST; ++x) {
             for (auto z = -VIEW_DIST; z <= VIEW_DIST; ++z) {
                 for (auto y = -2; y < 6; ++ y) {
-                    m_chunk_grid.load_chunk_at({ {x, y, z} });
+                    m_chunk_grid->load_chunk_at({ {x, y, z} });
                 }
             }
         }
@@ -198,9 +198,9 @@ public:
             for (auto x = -VIEW_DIST; x < VIEW_DIST; ++x) {
                 for (auto z = -VIEW_DIST; z < VIEW_DIST; ++z) {
                     if (start + ((x + VIEW_DIST) + (2 * VIEW_DIST + 1) * (z + VIEW_DIST)) * 300 < time.total) {
-                        m_chunk_grid.unload_chunk_at({ {x, 0, z} });
-                        m_chunk_grid.unload_chunk_at({ {x, 1, z} });
-                        m_chunk_grid.unload_chunk_at({ {x, 2, z} });
+                        m_chunk_grid->unload_chunk_at({ {x, 0, z} });
+                        m_chunk_grid->unload_chunk_at({ {x, 1, z} });
+                        m_chunk_grid->unload_chunk_at({ {x, 2, z} });
                     }
                 }
             }
@@ -229,7 +229,7 @@ public:
                 for (auto y = -2; y < 6; ++ y) {
                     m_unloading_chunks.emplace_back(hmem::WeakHandle<hvox::Chunk>{});
                     auto& handle = m_unloading_chunks.back();
-                    m_chunk_grid.unload_chunk_at({ {
+                    m_chunk_grid->unload_chunk_at({ {
                         x_step < 0 ? static_cast<i32>(current_pos.x) + VIEW_DIST + 1 : static_cast<i32>(current_pos.x) - VIEW_DIST - 1,
                         y, z
                     } }, &handle);
@@ -237,7 +237,7 @@ public:
             }
             for (auto z = static_cast<i32>(current_pos.z) - VIEW_DIST; z <= static_cast<i32>(current_pos.z) + VIEW_DIST; ++z) {
                 for (auto y = -2; y < 6; ++ y) {
-                    m_chunk_grid.preload_chunk_at({ {
+                    m_chunk_grid->preload_chunk_at({ {
                         x_step < 0 ? static_cast<i32>(current_pos.x) - VIEW_DIST : static_cast<i32>(current_pos.x) + VIEW_DIST,
                         y, z
                     } });
@@ -245,7 +245,7 @@ public:
             }
             for (auto z = static_cast<i32>(current_pos.z) - VIEW_DIST; z <= static_cast<i32>(current_pos.z) + VIEW_DIST; ++z) {
                 for (auto y = -2; y < 6; ++ y) {
-                    m_chunk_grid.load_chunk_at({ {
+                    m_chunk_grid->load_chunk_at({ {
                         x_step < 0 ? static_cast<i32>(current_pos.x) - VIEW_DIST : static_cast<i32>(current_pos.x) + VIEW_DIST,
                         y, z
                     } });
@@ -259,7 +259,7 @@ public:
                 for (auto y = -2; y < 6; ++ y) {
                     m_unloading_chunks.emplace_back(hmem::WeakHandle<hvox::Chunk>{});
                     auto& handle = m_unloading_chunks.back();
-                    m_chunk_grid.unload_chunk_at({ {
+                    m_chunk_grid->unload_chunk_at({ {
                         x, y,
                         z_step < 0 ? static_cast<i32>(current_pos.z) + VIEW_DIST + 1 : static_cast<i32>(current_pos.z) - VIEW_DIST - 1
                     } }, &handle);
@@ -267,7 +267,7 @@ public:
             }
             for (auto x = static_cast<i32>(current_pos.x) - VIEW_DIST; x <= static_cast<i32>(current_pos.x) + VIEW_DIST; ++x) {
                 for (auto y = -2; y < 6; ++ y) {
-                    m_chunk_grid.preload_chunk_at({ {
+                    m_chunk_grid->preload_chunk_at({ {
                         x, y,
                         z_step < 0 ? static_cast<i32>(current_pos.z) - VIEW_DIST : static_cast<i32>(current_pos.z) + VIEW_DIST
                     } });
@@ -275,7 +275,7 @@ public:
             }
             for (auto x = static_cast<i32>(current_pos.x) - VIEW_DIST; x <= static_cast<i32>(current_pos.x) + VIEW_DIST; ++x) {
                 for (auto y = -2; y < 6; ++ y) {
-                    m_chunk_grid.load_chunk_at({ {
+                    m_chunk_grid->load_chunk_at({ {
                         x, y,
                         z_step < 0 ? static_cast<i32>(current_pos.z) - VIEW_DIST : static_cast<i32>(current_pos.z) + VIEW_DIST
                     } });
@@ -285,7 +285,7 @@ public:
 
         last_pos = current_pos;
 
-        m_chunk_grid.update(time);
+        m_chunk_grid->update(time);
 
         if (do_chunk_check) {
             debug_printf("Camera at: (%d, %d, %d)\n", static_cast<i32>(current_pos.x), static_cast<i32>(current_pos.y), static_cast<i32>(current_pos.z));
@@ -315,7 +315,7 @@ public:
         glBindTextureUnit(0, m_default_texture);
         glUniform1i(m_shader.uniform_location("tex"), 0);
 
-        m_chunk_grid.draw(time);
+        m_chunk_grid->draw(time);
 
         // Deactivate our shader.
         m_shader.unuse();
@@ -328,7 +328,7 @@ public:
             glUniformMatrix4fv(m_line_shader.uniform_location("view_proj"),  1, GL_FALSE, &m_camera.view_projection_matrix()[0][0]);
             glUniform3fv(m_line_shader.uniform_location("colour"), 1, &line_colour[0]);
 
-            m_chunk_grid.draw_grid();
+            m_chunk_grid->draw_grid();
 
             m_line_shader.unuse();
         }
@@ -384,7 +384,8 @@ public:
             workflow_builder.init(&m_chunk_load_dag);
             workflow_builder.chain_tasks(2);
         }
-        m_chunk_grid.init(10, &m_chunk_load_dag, hvox::ChunkLoadTaskListBuilder{[](hmem::WeakHandle<hvox::Chunk> chunk, hvox::ChunkGrid* chunk_grid) {
+        m_chunk_grid = hmem::make_handle<hvox::ChunkGrid>();
+        m_chunk_grid->init(m_chunk_grid, 10, &m_chunk_load_dag, hvox::ChunkLoadTaskListBuilder{[](hmem::WeakHandle<hvox::Chunk> chunk, hmem::WeakHandle<hvox::ChunkGrid> chunk_grid) {
             hthread::ThreadWorkflowTasksView<hvox::ChunkLoadTaskContext> tasks;
             tasks.tasks = hmem::Handle<hthread::HeldWorkflowTask<hvox::ChunkLoadTaskContext>[]>(new hthread::HeldWorkflowTask<hvox::ChunkLoadTaskContext>[2]);
             tasks.count = 2;
@@ -425,7 +426,7 @@ protected:
     hg::ShaderCache              m_shader_cache;
     hcam::BasicFirstPersonCamera m_camera;
     hui::InputManager*           m_input_manager;
-    hvox::ChunkGrid              m_chunk_grid;
+    hmem::Handle<hvox::ChunkGrid>   m_chunk_grid;
     hg::GLSLProgram              m_shader, m_line_shader;
     hthread::ThreadWorkflowDAG   m_chunk_load_dag;
 

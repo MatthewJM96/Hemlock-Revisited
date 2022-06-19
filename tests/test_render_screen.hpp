@@ -57,14 +57,14 @@ public:
         for (auto x = -NUM; x < NUM; ++x) {
             for (auto z = -NUM; z < NUM; ++z) {
                 for (auto y = -2 * NUM; y < 0; ++ y) {
-                    m_chunk_grid.preload_chunk_at({ {x, y, z} });
+                    m_chunk_grid->preload_chunk_at({ {x, y, z} });
                 }
             }
         }
         for (auto x = -NUM; x < NUM; ++x) {
             for (auto z = -NUM; z < NUM; ++z) {
                 for (auto y = -2 * NUM; y < 0; ++ y) {
-                    m_chunk_grid.load_chunk_at({ {x, y, z} });
+                    m_chunk_grid->load_chunk_at({ {x, y, z} });
                 }
             }
         }
@@ -98,7 +98,7 @@ public:
         );
         m_sprite_batcher.end();
 
-        m_chunk_grid.update(time);
+        m_chunk_grid->update(time);
 
         f32 speed_mult = 1.0f;
         if (m_input_manager->key_modifier_state().ctrl) {
@@ -158,7 +158,7 @@ public:
         glBindTextureUnit(0, m_default_texture);
         glUniform1i(m_shader.uniform_location("tex"), 0);
 
-        m_chunk_grid.draw(time);
+        m_chunk_grid->draw(time);
 
         // Deactivate our shader.
         m_shader.unuse();
@@ -209,7 +209,8 @@ public:
             workflow_builder.init(&m_chunk_load_dag);
             workflow_builder.chain_tasks(2);
         }
-        m_chunk_grid.init(10, &m_chunk_load_dag, hvox::ChunkLoadTaskListBuilder{[](hmem::WeakHandle<hvox::Chunk> chunk, hvox::ChunkGrid* chunk_grid) {
+        m_chunk_grid = hmem::make_handle<hvox::ChunkGrid>();
+        m_chunk_grid->init(m_chunk_grid, 10, &m_chunk_load_dag, hvox::ChunkLoadTaskListBuilder{[](hmem::WeakHandle<hvox::Chunk> chunk, hmem::WeakHandle<hvox::ChunkGrid> chunk_grid) {
             hthread::ThreadWorkflowTasksView<hvox::ChunkLoadTaskContext> tasks;
             tasks.tasks = hmem::Handle<hthread::HeldWorkflowTask<hvox::ChunkLoadTaskContext>[]>(new hthread::HeldWorkflowTask<hvox::ChunkLoadTaskContext>[2]);
             tasks.count = 2;
@@ -272,7 +273,7 @@ protected:
     hg::s::SpriteBatcher         m_sprite_batcher;
     hcam::BasicFirstPersonCamera m_camera;
     hui::InputManager*           m_input_manager;
-    hvox::ChunkGrid              m_chunk_grid;
+    hmem::Handle<hvox::ChunkGrid>   m_chunk_grid;
     hg::GLSLProgram              m_shader;
     hthread::ThreadWorkflowDAG   m_chunk_load_dag;
 };
