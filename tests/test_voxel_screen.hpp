@@ -140,7 +140,17 @@ public:
     virtual void update(TimeData time) override {
         static f32v3 last_pos{0.0f};
 
-        m_chunk_grid.update(time);
+        static bool do_chunk_check = false;
+
+        if (m_input_manager->is_pressed(hui::PhysicalKey::H_J)) {
+            do_chunk_check = false;
+        }
+
+        if (do_chunk_check) return;
+
+        if (m_input_manager->is_pressed(hui::PhysicalKey::H_K)) {
+            do_chunk_check = true;
+        }
 
         f32 speed_mult = 1.0f;
         if (m_input_manager->key_modifier_state().ctrl) {
@@ -209,10 +219,12 @@ public:
         if (x_step != 0) {
             for (auto z = static_cast<i32>(current_pos.z) - VIEW_DIST; z <= static_cast<i32>(current_pos.z) + VIEW_DIST; ++z) {
                 for (auto y = -1; y < 2; ++ y) {
+                    m_unloading_chunks.emplace_back(hmem::WeakHandle<hvox::Chunk>{});
+                    auto& handle = m_unloading_chunks.back();
                     m_chunk_grid.unload_chunk_at({ {
                         x_step < 0 ? static_cast<i32>(current_pos.x) + VIEW_DIST + 1 : static_cast<i32>(current_pos.x) - VIEW_DIST - 1,
                         y, z
-                    } });
+                    } }, &handle);
                 }
             }
             for (auto z = static_cast<i32>(current_pos.z) - VIEW_DIST; z <= static_cast<i32>(current_pos.z) + VIEW_DIST; ++z) {
@@ -237,10 +249,12 @@ public:
         if (z_step != 0) {
             for (auto x = static_cast<i32>(current_pos.x) - VIEW_DIST; x <= static_cast<i32>(current_pos.x) + VIEW_DIST; ++x) {
                 for (auto y = -1; y < 2; ++ y) {
+                    m_unloading_chunks.emplace_back(hmem::WeakHandle<hvox::Chunk>{});
+                    auto& handle = m_unloading_chunks.back();
                     m_chunk_grid.unload_chunk_at({ {
                         x, y,
                         z_step < 0 ? static_cast<i32>(current_pos.z) + VIEW_DIST + 1 : static_cast<i32>(current_pos.z) - VIEW_DIST - 1
-                    } });
+                    } }, &handle);
                 }
             }
             for (auto x = static_cast<i32>(current_pos.x) - VIEW_DIST; x <= static_cast<i32>(current_pos.x) + VIEW_DIST; ++x) {
@@ -262,6 +276,26 @@ public:
         }
 
         last_pos = current_pos;
+
+        m_chunk_grid.update(time);
+
+        if (do_chunk_check) {
+            debug_printf("Camera at: (%d, %d, %d)\n", static_cast<i32>(current_pos.x), static_cast<i32>(current_pos.y), static_cast<i32>(current_pos.z));
+
+            debug_printf("Chunks still not unloaded:\n");
+            for (auto& handle : m_unloading_chunks) {
+                if (handle.expired()) continue;
+
+                auto chunk = handle.lock();
+
+                if (
+                    (chunk->position.x < static_cast<i32>(current_pos.x) - VIEW_DIST) || (chunk->position.x > static_cast<i32>(current_pos.x) - VIEW_DIST) ||
+                    (chunk->position.z < static_cast<i32>(current_pos.z) - VIEW_DIST) || (chunk->position.z > static_cast<i32>(current_pos.z) - VIEW_DIST)
+                ) {
+                    debug_printf("    (%d, %d, %d)\n", chunk->position.x, chunk->position.y, chunk->position.z);
+                }
+            }
+        }
     }
     virtual void draw(TimeData time) override {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -382,6 +416,8 @@ protected:
     hvox::ChunkGrid              m_chunk_grid;
     hg::GLSLProgram              m_shader, m_line_shader;
     hthread::ThreadWorkflowDAG   m_chunk_load_dag;
+
+    std::vector<hmem::WeakHandle<hvox::Chunk>> m_unloading_chunks;
 };
 
 #endif // __hemlock_tests_test_voxel_screen_hpp
