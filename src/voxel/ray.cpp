@@ -35,5 +35,12 @@ bool hvox::Ray::cast_to_block(      f32v3 start,
 
     // TODO(Matthew): implement
 
+    (void)start;
+    (void)direction;
+    (void)block_is_target;
+    (void)max_steps;
+    (void)position;
+    (void)distance;
+
     return false;
 }
