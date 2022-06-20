@@ -4,6 +4,16 @@ void hthread::basic_thread_main( typename Thread<ThreadState>::State* state,
     state->context.stop    = false;
     state->context.suspend = false;
 
+    // NOTE(Matthew): Technically can get an exception here if we attempt
+    //                a dequeue before the queue is fully constructed.
+    //                I think as the semaphore wait causes an early return
+    //                on timeout, we avoid it with the blocking approach.
+    //                  This issue will definitely come up if we were to
+    //                  use the non-blocking queue. That said, we shouldn't
+    //                  do that unless we're absolutely sure the partial
+    //                  spin pattern used in lightweight semaphore is
+    //                  doing anything bad to us. This is doubtful.
+
     HeldTask<ThreadState> held = {nullptr, false};
     while (!state->context.stop) {
         task_queue->wait_dequeue_timed(
@@ -12,9 +22,13 @@ void hthread::basic_thread_main( typename Thread<ThreadState>::State* state,
             std::chrono::seconds(1)
         );
 
-        while (state->context.suspend) std::this_thread::yield();
+        while (state->context.suspend)
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
-        if (!held.task) continue;
+        if (!held.task) {
+            std::this_thread::yield();
+            continue;
+        }
 
         held.task->execute(state, task_queue);
         held.task->is_finished = true;
