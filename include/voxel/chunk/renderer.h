@@ -35,7 +35,7 @@ namespace hemlock {
             bool        dirty;
             ui32        first_dirtied_chunk_idx;
         };
-        using ChunkRenderPages = std::vector<ChunkRenderPage>;
+        using ChunkRenderPages = std::vector<ChunkRenderPage*>;
 
         class ChunkRenderer {
         public:

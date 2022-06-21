@@ -64,7 +64,7 @@ void hvox::ChunkRenderer::dispose() {
     m_page_size = 0;
 
     for (auto& chunk_page : m_chunk_pages) {
-        glDeleteBuffers(1, &chunk_page.vbo);
+        glDeleteBuffers(1, &chunk_page->vbo);
     }
     ChunkRenderPages().swap(m_chunk_pages);
 }
@@ -86,11 +86,11 @@ void hvox::ChunkRenderer::update(TimeData) {
 void hvox::ChunkRenderer::draw(TimeData) {
     glBindVertexArray(block_mesh_handles.vao);
     for (auto& chunk_page : m_chunk_pages) {
-        if (chunk_page.voxel_count == 0) continue;
+        if (chunk_page->voxel_count == 0) continue;
 
-        glVertexArrayVertexBuffer(block_mesh_handles.vao, 1, chunk_page.vbo, 0, sizeof(ChunkInstanceData));
+        glVertexArrayVertexBuffer(block_mesh_handles.vao, 1, chunk_page->vbo, 0, sizeof(ChunkInstanceData));
 
-        glDrawArraysInstanced(GL_TRIANGLES, 0, BLOCK_VERTEX_COUNT, chunk_page.voxel_count);
+        glDrawArraysInstanced(GL_TRIANGLES, 0, BLOCK_VERTEX_COUNT, chunk_page->voxel_count);
     }
 }
 
@@ -119,9 +119,9 @@ hvox::ChunkRenderPage* hvox::ChunkRenderer::create_pages(ui32 count) {
      * Append first new page. *
     \**************************/
 
-    m_chunk_pages.emplace_back(ChunkRenderPage{});
+    m_chunk_pages.emplace_back(new ChunkRenderPage{});
 
-    ChunkRenderPage* first_new_page = &m_chunk_pages.back();
+    ChunkRenderPage* first_new_page = m_chunk_pages.back();
 
     glCreateBuffers(1, &first_new_page->vbo);
     glNamedBufferData(first_new_page->vbo, block_page_size() * sizeof(ChunkInstanceData), nullptr, GL_DYNAMIC_DRAW);
@@ -132,9 +132,9 @@ hvox::ChunkRenderPage* hvox::ChunkRenderer::create_pages(ui32 count) {
      * Append subsequent new pages. *
     \********************************/
     for (ui32 i = 0; i < count; ++i) {
-        m_chunk_pages.emplace_back(ChunkRenderPage{});
+        m_chunk_pages.emplace_back(new ChunkRenderPage{});
 
-        ChunkRenderPage* new_page = &m_chunk_pages.back();
+        ChunkRenderPage* new_page = m_chunk_pages.back();
 
         glCreateBuffers(1, &new_page->vbo);
         glNamedBufferData(new_page->vbo, block_page_size() * sizeof(ChunkInstanceData), nullptr, GL_DYNAMIC_DRAW);
@@ -152,8 +152,8 @@ void hvox::ChunkRenderer::put_chunk_in_page(hmem::Handle<Chunk> chunk, ui32 firs
     ui32 page_idx = first_page_idx;
     ChunkRenderPage* page = nullptr;
     for (; page_idx < m_chunk_pages.size(); ++page_idx) {
-        if (m_chunk_pages[page_idx].voxel_count + chunk->instance.count <= block_page_size()) {
-            page = &m_chunk_pages[page_idx];
+        if (m_chunk_pages[page_idx]->voxel_count + chunk->instance.count <= block_page_size()) {
+            page = m_chunk_pages[page_idx];
             break;
         }
     }
@@ -205,7 +205,7 @@ void hvox::ChunkRenderer::process_pages() {
 
         if (!metadata.paged) continue;
 
-        ChunkRenderPage& page = m_chunk_pages[metadata.page_idx];
+        ChunkRenderPage& page = *m_chunk_pages[metadata.page_idx];
 
         // Only do full clean up if the chunk we're removing is not
         // at the end of the page already.
@@ -263,7 +263,7 @@ void hvox::ChunkRenderer::process_pages() {
         auto chunk = handle_and_id.handle.lock();
 
         if (metadata.paged) {
-            ChunkRenderPage& page = m_chunk_pages[metadata.page_idx];
+            ChunkRenderPage& page = *m_chunk_pages[metadata.page_idx];
 
             if (page.first_dirtied_chunk_idx > metadata.chunk_idx) {
                 page.first_dirtied_chunk_idx = metadata.chunk_idx;
@@ -280,7 +280,7 @@ void hvox::ChunkRenderer::process_pages() {
     \*****************/
 
     for (ui32 page_idx = 0; page_idx < m_chunk_pages.size(); ++page_idx) {
-        ChunkRenderPage& page = m_chunk_pages[page_idx];
+        ChunkRenderPage& page = *m_chunk_pages[page_idx];
         if (!page.dirty) continue;
 
         assert(page.first_dirtied_chunk_idx < page.chunks.size());
