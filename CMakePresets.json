@@ -108,7 +108,7 @@
             "cacheVariables": {
                 "CMAKE_C_COMPILER": "clang",
                 "CMAKE_CXX_COMPILER": "clang++",
-                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_BUILD_TYPE": "Release",
                 "HEMLOCK_ENABLE_ADDRESS_SANITIZER": "On"
             },
             "condition": {
