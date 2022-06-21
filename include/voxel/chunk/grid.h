@@ -397,7 +397,24 @@ namespace hemlock {
              */
             QueriedChunkState query_all_neighbour_exact_states(hmem::Handle<Chunk> chunk, ChunkState required_state);
 
-            const Chunks& chunks() { return m_chunks; }
+            /**
+             * @brief Returns a handle on the identified chunk
+             * if it is held by the chunk grid.
+             *
+             * @param id The ID of the chunk to fetch.
+             * @return hmem::Handle<Chunk> Handle on the
+             * requested chunk, nullptr otherwise.
+             */
+            inline hmem::Handle<Chunk> chunk(ChunkID id);
+            /**
+             * @brief Returns a handle on the identified chunk
+             * if it is held by the chunk grid.
+             *
+             * @param position The position of the chunk.
+             * @return hmem::Handle<Chunk> Handle on the
+             * requested chunk, nullptr otherwise.
+             */
+            inline hmem::Handle<Chunk> chunk(ChunkGridPosition position) { return chunk(position.id); }
         protected:
             void establish_chunk_neighbours(hmem::Handle<Chunk> chunk);
 
