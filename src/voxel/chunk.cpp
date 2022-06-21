@@ -10,45 +10,39 @@ hvox::Chunk::Chunk() :
     instance({nullptr, 0}),
     state(ChunkState::NONE),
     pending_task(ChunkLoadTaskKind::NONE),
-    unload(false),
-    m_owns_blocks(true)
+    unload(false)
 { /* Empty. */ }
 
 hvox::Chunk::~Chunk() {
     // debug_printf("Unloading chunk at (%d, %d, %d).\n", position.x, position.y, position.z);
 
-    dispose();
-}
-
-void hvox::Chunk::init(hmem::WeakHandle<Chunk> self) {
-    init_events(self);
-
-    blocks = new Block[CHUNK_VOLUME];
-    std::fill_n(blocks, CHUNK_VOLUME, Block{0});
-
-    m_owns_blocks = true;
-
-    neighbours = {};
-
-    state.store(ChunkState::PRELOADED, std::memory_order_release);
-}
-
-void hvox::Chunk::init(hmem::WeakHandle<Chunk> self, Block* _blocks) {
-    init_events(self);
-
-    blocks = _blocks;
-    m_owns_blocks = false;
-
-    neighbours = {};
-
-    state.store(ChunkState::PRELOADED, std::memory_order_release);
-}
-
-void hvox::Chunk::dispose() {
-    if (m_owns_blocks) delete[] blocks;
+    m_block_pager->free_page(blocks);
     blocks = nullptr;
 
+    m_instance_data_pager->free_page(instance.data);
+    instance.data = nullptr;
+    instance.count = 0;
+
     neighbours = {};
+}
+
+void hvox::Chunk::init(
+                 hmem::WeakHandle<Chunk> self,
+           hmem::Handle<ChunkBlockPager> block_pager,
+    hmem::Handle<ChunkInstanceDataPager> instance_data_pager
+) {
+    init_events(self);
+
+    m_block_pager = block_pager;
+    m_instance_data_pager = instance_data_pager;
+
+    blocks = block_pager->get_page();
+    instance.data = instance_data_pager->get_page();
+    instance.count = 0;
+
+    neighbours = {};
+
+    state.store(ChunkState::PRELOADED, std::memory_order_release);
 }
 
 void hvox::Chunk::update(TimeData) {

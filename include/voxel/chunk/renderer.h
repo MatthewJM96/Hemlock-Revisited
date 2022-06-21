@@ -11,10 +11,6 @@ namespace hemlock {
 
         class ChunkGrid;
 
-        struct ChunkInstanceData {
-            f32v3 translation, scaling;
-        };
-
         using AllPagedChunks = std::unordered_map<ChunkID, hmem::WeakHandle<Chunk>>;
 
         using PagedChunks = std::vector<ChunkID>;

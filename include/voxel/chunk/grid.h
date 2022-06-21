@@ -13,12 +13,6 @@ namespace hemlock {
         // TODO(Matthew): Does page size want to be made a run-time thing,
         //                as it may be nice to base this on view distance.
         using ChunkAllocator = hmem::PagedAllocator<Chunk, 4 * 4 * 4, 3>;
-        using ChunkInstanceDataPager =
-            hmem::Pager<ChunkInstanceData,
-                    CHUNK_VOLUME / 4, 3>;
-        using ChunkBlockPager =
-            hmem::Pager<Block,
-                    CHUNK_VOLUME, 3>;
 
         struct Chunk;
         // TODO(Matthew): We should add support for LOD, different generation stages, disabling meshing etc.
@@ -412,9 +406,9 @@ namespace hemlock {
             thread::ThreadPool<ChunkLoadTaskContext>        m_chunk_load_thread_pool;
             thread::ThreadWorkflow<ChunkLoadTaskContext>    m_chunk_load_workflow;
 
-            ChunkAllocator          m_chunk_allocator;
-            ChunkInstanceDataPager  m_instance_data_pager;
-            ChunkBlockPager         m_block_pager;
+            ChunkAllocator                          m_chunk_allocator;
+            hmem::Handle<ChunkBlockPager>           m_block_pager;
+            hmem::Handle<ChunkInstanceDataPager>    m_instance_data_pager;
 
             ChunkRenderer m_renderer;
 

@@ -70,8 +70,6 @@ bool hvox::ChunkNaiveMeshTask<MeshComparator>::run_task(ChunkLoadThreadState* st
         }
     }
 
-    chunk->instance = { nullptr, 0 };
-
     // TODO(Matthew): Better guess work should be possible and expand only when needed.
     //                  Maybe in addition to managing how all chunk's transformations are
     //                  stored on GPU, ChunkGrid-level should also manage this data?
@@ -81,7 +79,6 @@ bool hvox::ChunkNaiveMeshTask<MeshComparator>::run_task(ChunkLoadThreadState* st
     //                      unique, scalings will not be, and so an index buffer could
     //                      further improve performance and also remove the difficulty
     //                      of the above TODO.
-    chunk->instance.data = new ChunkInstanceData[CHUNK_VOLUME];
 
     // Determines if block is meshable.
     const MeshComparator meshable{};

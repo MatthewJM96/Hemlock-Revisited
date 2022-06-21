@@ -21,7 +21,14 @@
 
 namespace hemlock {
     namespace voxel {
-        struct ChunkInstanceData;
+        struct ChunkInstanceData {
+            f32v3 translation, scaling;
+        };
+
+        // TODO(Matthew): Maybe we want to make this even smaller pages,
+        //                and expand on demand.
+        using ChunkInstanceDataPager = hmem::Pager<ChunkInstanceData, CHUNK_VOLUME / 2, 3>;
+        using ChunkBlockPager = hmem::Pager<Block,  CHUNK_VOLUME, 3>;
 
         /**
          * @brief 
@@ -30,8 +37,9 @@ namespace hemlock {
             Chunk();
             ~Chunk();
 
-            void init(hmem::WeakHandle<Chunk> self);
-            void init(hmem::WeakHandle<Chunk> self, Block* block_buffer/*, ChunkInstanceDataPager& instance_data_pager*/);
+            void init(           hmem::WeakHandle<Chunk> self,
+                           hmem::Handle<ChunkBlockPager> block_pager,
+                    hmem::Handle<ChunkInstanceDataPager> instance_data_pager  );
 
             void update(TimeData);
 
@@ -72,12 +80,10 @@ namespace hemlock {
             Event<RenderState>                      on_render_state_change;
             Event<>                                 on_unload;
         protected:
-            void dispose();
-
             void init_events(hmem::WeakHandle<Chunk> self);
 
-            // ChunkInstanceDataPager& m_instance_data_pager;
-            bool                    m_owns_blocks;
+            hmem::Handle<ChunkBlockPager>           m_block_pager;
+            hmem::Handle<ChunkInstanceDataPager>    m_instance_data_pager;
         };
 
         /**
