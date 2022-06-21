@@ -3,6 +3,8 @@
 #include "voxel/chunk/grid.h"
 #include "voxel/ray.h"
 
+// TODO(Matthew): so many ways to make this faster it hurts, but fine for now.
+
 /**
  * @brief Steps a ray from the given position to the next
  * block in its path. The position, the corresponding block
@@ -30,25 +32,33 @@ void step_to_next_block_position(
 
     // X
     if (direction.x < 0.0f) {
-        min_axis        = 0;
-        min_weighting   = (glm::floor(position.x) - position.x) / direction.x;
+        candidate_weighting = (glm::floor(position.x) - position.x) / direction.x;
+
+        if (candidate_weighting != 0.0f) {
+            min_axis        = 0;
+            min_weighting   = candidate_weighting;
+        }
     } else if (direction.x > 0.0f) {
-        min_axis        = 0;
-        min_weighting   = (glm::ceil(position.x) - position.x) / direction.x;
+        candidate_weighting = (glm::ceil(position.x) - position.x) / direction.x;
+
+        if (candidate_weighting != 0.0f) {
+            min_axis        = 0;
+            min_weighting   = candidate_weighting;
+        }
     }
 
     // Y
     if (direction.y < 0.0f) {
         candidate_weighting = (glm::floor(position.y) - position.y) / direction.y;
 
-        if (candidate_weighting < min_weighting) {
+        if (candidate_weighting < min_weighting && candidate_weighting != 0.0f) {
             min_axis        = 1;
             min_weighting   = candidate_weighting;
         }
     } else if (direction.y > 0.0f) {
         candidate_weighting = (glm::ceil(position.y) - position.y) / direction.y;
 
-        if (candidate_weighting < min_weighting) {
+        if (candidate_weighting < min_weighting && candidate_weighting != 0.0f) {
             min_axis        = 1;
             min_weighting   = candidate_weighting;
         }
@@ -58,26 +68,41 @@ void step_to_next_block_position(
     if (direction.z < 0.0f) {
         candidate_weighting = (glm::floor(position.z) - position.z) / direction.z;
 
-        if (candidate_weighting < min_weighting) {
+        if (candidate_weighting < min_weighting && candidate_weighting != 0.0f) {
             min_axis        = 2;
             min_weighting   = candidate_weighting;
         }
     } else if (direction.z > 0.0f) {
         candidate_weighting = (glm::ceil(position.z) - position.z) / direction.z;
 
-        if (candidate_weighting < min_weighting) {
+        if (candidate_weighting < min_weighting && candidate_weighting != 0.0f) {
             min_axis        = 2;
             min_weighting   = candidate_weighting;
         }
     }
 
-    block_coord[min_axis] += 1;
+    if (min_weighting > glm::sqrt(3.0f) + std::numeric_limits<f32>::epsilon()) {
+        if (direction.x > direction.y) {
+            if (direction.x > direction.z) {
+                min_axis        = 0;
+                min_weighting   = 0.01;
+            } else {
+                min_axis        = 2;
+                min_weighting   = 0.01;
+            }
+        } else if (direction.y > direction.z) {
+            min_axis        = 1;
+            min_weighting   = 0.01;
+        } else {
+            min_axis        = 2;
+            min_weighting   = 0.01;
+        }
+    }
 
-    f32v3 old_position = position;
+    block_coord[min_axis] += direction[min_axis] < 0.0f ? -1 : 1;
+
     position += min_weighting * direction;
-
-    f32v3 move = old_position - position;
-    distance = glm::sqrt(glm::dot(move, move));
+    distance  = min_weighting;
 }
 
 bool hvox::Ray::cast_to_block(      f32v3 start, 
@@ -125,6 +150,8 @@ bool hvox::Ray::cast_to_block(      f32v3 start,
 
         auto chunk = chunk_grid->chunk(chunk_grid_position(position));
 
+        if (chunk == nullptr) continue;
+
         std::shared_lock lock(chunk->blocks_mutex);
 
         auto idx = block_index(
@@ -171,6 +198,7 @@ bool hvox::Ray::cast_to_block_before( f32v3 start,
     if (chunk_grid == nullptr) return false;
 
     BlockWorldPosition block_position = block_world_position(start);
+    position = block_position;
     distance = 0.0f;
 
     ui32 steps = 0;
@@ -182,15 +210,17 @@ bool hvox::Ray::cast_to_block_before( f32v3 start,
 
         auto chunk = chunk_grid->chunk(chunk_grid_position(block_position));
 
-        std::shared_lock lock(chunk->blocks_mutex);
+        if (chunk != nullptr) {
+            std::shared_lock lock(chunk->blocks_mutex);
 
-        auto idx = block_index(
-            block_chunk_position(block_position)
-        );
+            auto idx = block_index(
+                block_chunk_position(block_position)
+            );
 
-        block = chunk->blocks[idx];
+            block = chunk->blocks[idx];
 
-        if (block_is_target(block)) return true;
+            if (block_is_target(block)) return true;
+        }
 
         distance += step_size;
         position  = block_position;

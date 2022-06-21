@@ -26,7 +26,7 @@ namespace hemlock {
 
         class ChunkGrid {
         public:
-            ChunkGrid()  { /* Empty. */ }
+            ChunkGrid();
             ~ChunkGrid() { /* Empty. */ }
 
             /**
@@ -419,6 +419,8 @@ namespace hemlock {
             void establish_chunk_neighbours(hmem::Handle<Chunk> chunk);
 
             ChunkLoadTaskListBuilder   build_load_tasks;
+
+            BlockChangeHandler handle_block_change;
 
             thread::ThreadPool<ChunkLoadTaskContext>        m_chunk_load_thread_pool;
             thread::ThreadWorkflow<ChunkLoadTaskContext>    m_chunk_load_workflow;

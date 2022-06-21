@@ -6,6 +6,7 @@
 #include "memory/handle.hpp"
 #include "voxel/chunk/generator_task.hpp"
 #include "voxel/chunk/mesh/greedy_task.hpp"
+#include "voxel/ray.h"
 
 #include "iomanager.hpp"
 
@@ -403,6 +404,25 @@ public:
             return tasks;
         }});
 
+
+        handle_mouse_button = hemlock::Subscriber<hui::MouseButtonEvent>{
+            [&](hemlock::Sender, hui::MouseButtonEvent ev) {
+                if (ev.button_id == static_cast<ui8>(hui::MouseButton::LEFT)) {
+                    hvox::BlockWorldPosition position;
+                    f32 distance;
+
+                    if (hvox::Ray::cast_to_block_before(m_camera.position(), m_camera.direction(), m_chunk_grid, hvox::Block{1}, 10, position, distance)) {
+                        auto chunk = m_chunk_grid->chunk(hvox::chunk_grid_position(position));
+
+                        if (chunk != nullptr) {
+                            hvox::set_block(chunk, hvox::block_chunk_position(position), hvox::Block{1});
+                        }
+                    }
+                }
+            }
+        };
+        hui::InputDispatcher::instance()->on_mouse.button_down += &handle_mouse_button;
+
         handle_mouse_move = hemlock::Subscriber<hui::MouseMoveEvent>{
             [&](hemlock::Sender, hui::MouseMoveEvent ev) {
                 if (m_input_manager->is_pressed(static_cast<ui8>(hui::MouseButton::LEFT))) {
@@ -419,6 +439,7 @@ public:
     }
 protected:
     hemlock::Subscriber<hui::MouseMoveEvent>      handle_mouse_move;
+    hemlock::Subscriber<hui::MouseButtonEvent>    handle_mouse_button;
 
     ui32 m_default_texture;
 

@@ -10,6 +10,28 @@ void hvox::ChunkLoadTask::init(hmem::WeakHandle<Chunk> chunk, hmem::WeakHandle<C
     m_chunk_grid = chunk_grid;
 }
 
+hvox::ChunkGrid::ChunkGrid() :
+    handle_block_change(BlockChangeHandler{
+        [&](Sender sender, BlockChangeEvent) {
+            hmem::WeakHandle<Chunk> handle = sender.get_handle<Chunk>();
+
+            auto chunk = handle.lock();
+            // If chunk is nullptr, then there's no point
+            // handling the block change as we will have
+            // an unload event for this chunk.
+            if (chunk == nullptr) return true;
+
+            // TODO(Matthew): Memory leak, and just so bad. We should rearchitect the load tasks
+            //                system.
+            m_chunk_load_thread_pool.add_task({build_load_tasks(chunk, m_self).tasks.get()[1].task, true});
+
+            return false;
+        }
+    })
+{
+    // Empty.
+}
+
 void hvox::ChunkGrid::init( hmem::WeakHandle<ChunkGrid> self,
                                                    ui32 thread_count,
                              thread::ThreadWorkflowDAG* chunk_load_dag,
@@ -173,6 +195,8 @@ bool hvox::ChunkGrid::preload_chunk_at(ChunkGridPosition chunk_position) {
     hmem::Handle<Chunk> chunk = hmem::allocate_handle<Chunk>(m_chunk_allocator);
     chunk->position = chunk_position;
     chunk->init(chunk, m_block_pager, m_instance_data_pager);
+
+    chunk->on_block_change += &handle_block_change;
 
     establish_chunk_neighbours(chunk);
 
