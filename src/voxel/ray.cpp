@@ -30,51 +30,51 @@ void step_to_next_block_position(
 
     // X
     if (direction.x < 0.0f) {
-        min_axis                    = 0;
-        min_orthogonal_weighting    = (glm::floor(position.x) - position.x) / direction.x;
+        min_axis        = 0;
+        min_weighting   = (glm::floor(position.x) - position.x) / direction.x;
     } else if (direction.x > 0.0f) {
-        min_axis                    = 0;
-        min_orthogonal_weighting    = (glm::ceil(position.x) - position.x) / direction.x;
+        min_axis        = 0;
+        min_weighting   = (glm::ceil(position.x) - position.x) / direction.x;
     }
 
     // Y
     if (direction.y < 0.0f) {
-        candidate_orthogonal_weighting = (glm::floor(position.y) - position.y) / direction.y;
+        candidate_weighting = (glm::floor(position.y) - position.y) / direction.y;
 
-        if (candidate_orthogonal_weighting < min_orthogonal_weighting) {
-            min_axis                    = 1;
-            min_orthogonal_weighting    = candidate_orthogonal_weighting;
+        if (candidate_weighting < min_weighting) {
+            min_axis        = 1;
+            min_weighting   = candidate_weighting;
         }
     } else if (direction.y > 0.0f) {
-        candidate_orthogonal_weighting = (glm::ceil(position.y) - position.y) / direction.y;
+        candidate_weighting = (glm::ceil(position.y) - position.y) / direction.y;
 
-        if (candidate_orthogonal_weighting < min_orthogonal_weighting) {
-            min_axis                    = 1;
-            min_orthogonal_weighting    = candidate_orthogonal_weighting;
+        if (candidate_weighting < min_weighting) {
+            min_axis        = 1;
+            min_weighting   = candidate_weighting;
         }
     }
 
     // Z
     if (direction.z < 0.0f) {
-        candidate_orthogonal_weighting = (glm::floor(position.z) - position.z) / direction.z;
+        candidate_weighting = (glm::floor(position.z) - position.z) / direction.z;
 
-        if (candidate_orthogonal_weighting < min_orthogonal_weighting) {
-            min_axis                    = 2;
-            min_orthogonal_weighting    = candidate_orthogonal_weighting;
+        if (candidate_weighting < min_weighting) {
+            min_axis        = 2;
+            min_weighting   = candidate_weighting;
         }
     } else if (direction.z > 0.0f) {
-        candidate_orthogonal_weighting = (glm::ceil(position.z) - position.z) / direction.z;
+        candidate_weighting = (glm::ceil(position.z) - position.z) / direction.z;
 
-        if (candidate_orthogonal_weighting < min_orthogonal_weighting) {
-            min_axis                    = 2;
-            min_orthogonal_weighting    = candidate_orthogonal_weighting;
+        if (candidate_weighting < min_weighting) {
+            min_axis        = 2;
+            min_weighting   = candidate_weighting;
         }
     }
 
     block_coord[min_axis] += 1;
 
     f32v3 old_position = position;
-    position += min_orthogonal_weighting * direction;
+    position += min_weighting * direction;
 
     f32v3 move = old_position - position;
     distance = glm::sqrt(glm::dot(move, move));
@@ -134,7 +134,7 @@ bool hvox::Ray::cast_to_block(      f32v3 start,
         block = chunk->blocks[idx];
 
         if (block_is_target(block)) return true;
-    } while (++steps < max_steps)
+    } while (++steps < max_steps);
 
     return false;
 }
@@ -158,7 +158,7 @@ bool hvox::Ray::cast_to_block_before( f32v3 start,
     );
 }
 
-bool hvox::Ray::cast_to_block_before( f32v3start,
+bool hvox::Ray::cast_to_block_before( f32v3 start,
                                       f32v3 direction,
                 hmem::WeakHandle<ChunkGrid> chunk_handle,
                                   BlockTest block_is_target,
@@ -166,9 +166,6 @@ bool hvox::Ray::cast_to_block_before( f32v3start,
                     OUT BlockWorldPosition& position,
                                    OUT f32& distance      )
 {
-    auto chunk_grid = chunk_handle.lock();
-
-    if (chunk_grid == nullptr) return false;
     auto chunk_grid = chunk_handle.lock();
 
     if (chunk_grid == nullptr) return false;
@@ -197,7 +194,7 @@ bool hvox::Ray::cast_to_block_before( f32v3start,
 
         distance += step_size;
         position  = block_position;
-    } while (++steps < max_steps)
+    } while (++steps < max_steps);
 
     return false;
 }

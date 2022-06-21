@@ -405,7 +405,7 @@ namespace hemlock {
              * @return hmem::Handle<Chunk> Handle on the
              * requested chunk, nullptr otherwise.
              */
-            inline hmem::Handle<Chunk> chunk(ChunkID id);
+            hmem::Handle<Chunk> chunk(ChunkID id);
             /**
              * @brief Returns a handle on the identified chunk
              * if it is held by the chunk grid.
@@ -414,7 +414,7 @@ namespace hemlock {
              * @return hmem::Handle<Chunk> Handle on the
              * requested chunk, nullptr otherwise.
              */
-            inline hmem::Handle<Chunk> chunk(ChunkGridPosition position) { return chunk(position.id); }
+            hmem::Handle<Chunk> chunk(ChunkGridPosition position) { return chunk(position.id); }
         protected:
             void establish_chunk_neighbours(hmem::Handle<Chunk> chunk);
 

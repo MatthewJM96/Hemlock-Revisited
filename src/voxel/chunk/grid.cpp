@@ -255,7 +255,7 @@ bool hvox::ChunkGrid::unload_chunk_at(ChunkGridPosition chunk_position, hmem::We
     return true;
 }
 
-hmem::Handle<Chunk> hvox::ChunkGrid::chunk(ChunkID id) {
+hmem::Handle<hvox::Chunk> hvox::ChunkGrid::chunk(ChunkID id) {
     auto it = m_chunks.find(id);
 
     if (it == m_chunks.end()) return nullptr;
