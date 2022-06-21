@@ -265,14 +265,12 @@ process_new_source:
         \*******************/
 
         if (found_instanceable) {
-            BlockWorldPosition start_world = block_world_position(chunk->position, start);
-            BlockWorldPosition end_world   = block_world_position(chunk->position, end);
+            BlockWorldPosition start_instance = block_world_position(chunk->position, start);
+            BlockWorldPosition end_instance   = block_world_position(chunk->position, end);
 
-            f32v3 centre_of_cuboid = (f32v3{end_world} - f32v3{start_world}) / 2.0f;
-            f32v3 centre_of_cuboid_in_world = centre_of_cuboid + f32v3{start_world};
-            f32v3 scale_of_cuboid  =  f32v3{end_world} - f32v3{start_world} + f32v3{1.0f};
+            f32v3 scale_of_cuboid  =  f32v3{end_instance} - f32v3{start_instance} + f32v3{1.0f};
 
-            data[voxel_count++] = ChunkInstanceData{ centre_of_cuboid_in_world, scale_of_cuboid };
+            data[voxel_count++] = ChunkInstanceData{ start_instance, scale_of_cuboid };
         }
 
         /***************\
