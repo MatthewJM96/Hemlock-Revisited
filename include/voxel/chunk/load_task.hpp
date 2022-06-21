@@ -37,6 +37,8 @@ namespace hemlock {
         using ChunkLoadTaskQueue   = thread::TaskQueue<ChunkLoadTaskContext>;
         class ChunkLoadTask : public thread::IThreadWorkflowTask<ChunkLoadTaskContext> {
         public:
+            virtual ~ChunkLoadTask() { /* Empty. */ }
+
             void init(hmem::WeakHandle<Chunk> chunk, hmem::WeakHandle<ChunkGrid> chunk_grid);
         protected:
             hmem::WeakHandle<Chunk>     m_chunk;

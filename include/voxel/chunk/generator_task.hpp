@@ -22,6 +22,8 @@ namespace hemlock {
         template <hvox::ChunkGenerationStrategy GenerationStrategy>
         class ChunkGenerationTask : public ChunkLoadTask {
         public:
+            virtual ~ChunkGenerationTask() { /* Empty. */ }
+
             virtual bool run_task(ChunkLoadThreadState* state, ChunkLoadTaskQueue* task_queue) override;
         };
     }
