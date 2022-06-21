@@ -21,14 +21,14 @@ hvox::BlockChunkPosition hvox::block_chunk_position(BlockWorldPosition block_wor
 hvox::BlockChunkPosition hvox::block_chunk_position(ui32 index) {
     BlockChunkPositionCoord z =
         static_cast<BlockChunkPositionCoord>(
-            glm::floor(static_cast<f32>(index) / static_cast<f32>(CHUNK_AREA))
+            static_cast<f32>(index) / static_cast<f32>(CHUNK_AREA)
         );
 
     index %= CHUNK_AREA;
 
     BlockChunkPositionCoord y =
         static_cast<BlockChunkPositionCoord>(
-            glm::floor(static_cast<f32>(index) / static_cast<f32>(CHUNK_LENGTH))
+            static_cast<f32>(index) / static_cast<f32>(CHUNK_LENGTH)
         );
 
     BlockChunkPositionCoord x = static_cast<BlockChunkPositionCoord>(index % CHUNK_LENGTH);
