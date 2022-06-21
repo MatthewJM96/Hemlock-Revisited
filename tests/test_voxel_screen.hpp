@@ -321,18 +321,43 @@ public:
         // Deactivate our shader.
         m_shader.unuse();
 
-        if (m_draw_chunk_outlines) {
-            m_line_shader.use();
+        m_line_shader.use();
 
-            f32v3 line_colour = {1.0f, 0.0f, 0.0f};
+        f32v3 line_colour{1.0f};
+
+        auto dims = m_process->window()->dimensions();
+        std::vector<f32v3> lines;
+        lines.emplace_back(f32v3{dims.width / 2.0f - 20.0f, dims.height / 2.0f,         0.0f});
+        lines.emplace_back(f32v3{dims.width / 2.0f + 20.0f, dims.height / 2.0f,         0.0f});
+        lines.emplace_back(f32v3{dims.width / 2.0f,         dims.height / 2.0f - 20.0f, 0.0f});
+        lines.emplace_back(f32v3{dims.width / 2.0f,         dims.height / 2.0f + 20.0f, 0.0f});
+
+        glNamedBufferSubData(
+            m_crosshair_vbo, 0, lines.size() * sizeof(f32v3),
+            reinterpret_cast<void*>(&lines[0])
+        );
+
+        f32m4 mvp = glm::ortho(
+                        0.0f, static_cast<f32>(dims.width),
+                        0.0f, static_cast<f32>(dims.height)
+                    );
+
+        glUniformMatrix4fv(m_line_shader.uniform_location("view_proj"),  1, GL_FALSE, &mvp[0][0]);
+        glUniform3fv(m_line_shader.uniform_location("colour"), 1, &line_colour[0]);
+
+        glBindVertexArray(m_crosshair_vao);
+        glDrawArrays(GL_LINES, 0, 4);
+
+        if (m_draw_chunk_outlines) {
+            line_colour = {1.0f, 0.0f, 0.0f};
 
             glUniformMatrix4fv(m_line_shader.uniform_location("view_proj"),  1, GL_FALSE, &m_camera.view_projection_matrix()[0][0]);
             glUniform3fv(m_line_shader.uniform_location("colour"), 1, &line_colour[0]);
 
             m_chunk_grid->draw_grid();
-
-            m_line_shader.unuse();
         }
+
+        m_line_shader.unuse();
     }
 
     virtual void init(const std::string& name, happ::ProcessBase* process) override {
@@ -404,6 +429,21 @@ public:
             return tasks;
         }});
 
+        glCreateVertexArrays(1, &m_crosshair_vao);
+
+        glCreateBuffers(1, &m_crosshair_vbo);
+        glNamedBufferData(
+            m_crosshair_vbo,
+            sizeof(f32v3) * 2 * 2, // 2 points per line, 2 lines for crosshair.
+            nullptr,
+            GL_DYNAMIC_DRAW
+        );
+
+        glVertexArrayVertexBuffer(m_crosshair_vao, 0, m_crosshair_vbo, 0, sizeof(f32v3));
+
+        glEnableVertexArrayAttrib(m_crosshair_vao, 0);
+        glVertexArrayAttribFormat(m_crosshair_vao, 0, 3, GL_FLOAT, GL_FALSE, 0);
+        glVertexArrayAttribBinding(m_crosshair_vao, 0, 0);
 
         handle_mouse_button = hemlock::Subscriber<hui::MouseButtonEvent>{
             [&](hemlock::Sender, hui::MouseButtonEvent ev) {
@@ -452,6 +492,8 @@ protected:
     hthread::ThreadWorkflowDAG   m_chunk_load_dag;
 
     bool m_draw_chunk_outlines;
+
+    GLuint m_crosshair_vao, m_crosshair_vbo;
 
     std::vector<hmem::WeakHandle<hvox::Chunk>> m_unloading_chunks;
 };
