@@ -8,7 +8,10 @@ namespace hemlock {
         template <InterruptibleState ThreadState>
         class IThreadWorkflowTask : public IThreadTask<ThreadState> {
         public:
-            IThreadWorkflowTask() { /* Empty. */ }
+            IThreadWorkflowTask() :
+                m_task_idx(0),
+                m_dag(nullptr)
+            { /* Empty. */ }
             virtual ~IThreadWorkflowTask() { /* Empty. */ }
             /**
              * @brief If any special handling is needed to clean

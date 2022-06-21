@@ -19,7 +19,7 @@ void hthread::IThreadWorkflowTask<ThreadState>::set_workflow_metadata( ThreadWor
 
 template <hthread::InterruptibleState ThreadState>
 void hthread::IThreadWorkflowTask<ThreadState>::execute(typename Thread<ThreadState>::State* state, TaskQueue<ThreadState>* task_queue) {
-    if (run_task(state, task_queue)) {
+    if (run_task(state, task_queue) && m_dag) {
         auto [start, last] = m_dag->graph.equal_range(m_task_idx);
         for (; start != last; ++start) {
             auto next_task_idx = (*start).second;
