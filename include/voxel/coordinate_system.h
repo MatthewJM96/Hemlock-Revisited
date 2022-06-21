@@ -84,6 +84,15 @@ namespace hemlock {
         BlockChunkPosition block_chunk_position(ui32 index);
 
         /**
+         * @brief Converts a general point to the block coordinate in which it can be
+         * found.
+         *
+         * @param position The general position to locate in block coordinates.
+         * @return BlockWorldPosition The block inside which a general position is located.
+         */
+        BlockWorldPosition block_world_position(f32v3 position);
+
+        /**
          * @brief Converts a chunk grid position and block chunk position into a corresponding
          * world position.
          * 
@@ -103,6 +112,15 @@ namespace hemlock {
          * @return BlockWorldPosition The position of the block within world space.
          */
         BlockWorldPosition block_world_position(ChunkGridPosition chunk_grid_position, ui32 index);
+
+        /**
+         * @brief Converts a block's world position into the grid position of the
+         * chunk in which it exists.
+         *
+         * @param block_world_position The world position of the block.
+         * @return ChunkGridPosition The grid position of the enclosing chunk.
+         */
+        ChunkGridPosition chunk_grid_position(BlockWorldPosition block_world_position);
     }
 }
 namespace hvox = hemlock::voxel;
