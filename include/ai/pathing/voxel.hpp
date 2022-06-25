@@ -8,7 +8,8 @@ namespace hemlock {
         namespace pathing {
             namespace Voxel {
                 // TODO(Matthew): We want to handle general cases of movement. I.e. some arbitrary combination of movement capabilities such as
-                //                stepping, jumping up, jumping down, teleporting, flying, gliding, etc. This likely means not providing the
+                //                stepping, jumping up, jumping down, teleporting, (flying, gliding? continuous movements are a bit different
+                //                to voxel-limited movements and this may need separate handling?), etc. This likely means not providing the
                 //                candidate start/end coordinates as opposed to just the step from coordinate, and then have evaluation
                 //                strategies determine the field of candidates they can evaluate (perhaps make that two-stage?). We likely
                 //                need some method of letting the evaluators know "agent desires outcome X" or "agent is in state Y", this
