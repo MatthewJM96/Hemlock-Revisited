@@ -91,6 +91,7 @@ set(Hemlock_Requirements
     concurrentqueue/1.0.3
     boost/1.78.0
     # bullet3/3.24
+    entt/3.10.1
 )
 
 if (HEMLOCK_USING_OPENGL)
@@ -123,6 +124,7 @@ find_package(PNG REQUIRED)
 find_package(concurrentqueue REQUIRED)
 find_package(Boost COMPONENTS iostreams REQUIRED)
 # find_package(Bullet REQUIRED)
+find_package(EnTT REQUIRED)
 
 if (HEMLOCK_USING_SDL)
     add_compile_definitions(HEMLOCK_USING_SDL=1)
@@ -194,6 +196,7 @@ set(Hemlock_Include_Dirs
     ${concurrentqueue_INCLUDE_DIRS}
     ${Boost_INCLUDE_DIRS}
     # ${Bullet_INCLUDE_DIRS}
+    ${EnTT_INCLUDE_DIRS}
 )
 
 if (HEMLOCK_USING_OPENGL)
