@@ -27,9 +27,15 @@ hvox::ChunkGrid::ChunkGrid() :
 
             auto task = m_build_mesh_task();
             task->set_state(chunk, m_self);
-            m_thread_pool.add_task({task, true});
+            m_thread_pool.threadsafe_add_task({task, true});
         }
     }),
+    // TODO(Matthew): handle bulk block change too.
+    // TODO(Matthew): right now we remesh even if block change is cancelled.
+    //                perhaps we can count changes and if at least 1 change
+    //                on end of update loop then schedule remesh, only
+    //                incrementing if block change actually occurs
+    //                  i.e. stop queuing here.
     handle_block_change(Delegate<bool(Sender, BlockChangeEvent)>{
         [&](Sender sender, BlockChangeEvent) {
             hmem::WeakHandle<Chunk> handle = sender.get_handle<Chunk>();
