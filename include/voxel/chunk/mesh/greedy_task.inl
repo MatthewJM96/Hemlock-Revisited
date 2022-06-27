@@ -4,7 +4,7 @@
 #include "voxel/chunk/grid.h"
 
 template <hvox::ChunkMeshComparator MeshComparator>
-bool hvox::ChunkGreedyMeshTask<MeshComparator>::run_task(ChunkLoadThreadState*, ChunkLoadTaskQueue*) {
+void hvox::ChunkGreedyMeshTask<MeshComparator>::execute(ChunkLoadThreadState*, ChunkTaskQueue*) {
     auto chunk = m_chunk.lock();
 
     if (chunk == nullptr) return false;
@@ -314,7 +314,5 @@ process_new_source:
     // TODO(Matthew): Set next task if chunk unload is false? Or else set that
     //                between this task and next, but would need adjusting
     //                workflow.
-    chunk->pending_task.store(ChunkLoadTaskKind::NONE, std::memory_order_release);
-
-    return !chunk->unload.load(std::memory_order_acquire);
+    chunk->pending_task.store(ChunkTaskKind::NONE, std::memory_order_release);
 }

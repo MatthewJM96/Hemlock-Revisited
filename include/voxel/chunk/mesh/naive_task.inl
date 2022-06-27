@@ -41,7 +41,7 @@ static inline hvox::BlockIndex index_at_back_face(hvox::BlockIndex index) {
 }
 
 template <hvox::ChunkMeshComparator MeshComparator>
-bool hvox::ChunkNaiveMeshTask<MeshComparator>::run_task(ChunkLoadThreadState* state, ChunkLoadTaskQueue* task_queue) {
+void hvox::ChunkNaiveMeshTask<MeshComparator>::execute(ChunkLoadThreadState* state, ChunkTaskQueue* task_queue) {
     auto chunk = m_chunk.lock();
 
     if (chunk == nullptr) return false;
@@ -62,10 +62,9 @@ bool hvox::ChunkNaiveMeshTask<MeshComparator>::run_task(ChunkLoadThreadState* st
             chunk->mesh_task_active.store(false, std::memory_order_release);
             // Put copy of this mesh task back onto the load task queue.
             ChunkNaiveMeshTask<MeshComparator>* mesh_task = new ChunkNaiveMeshTask<MeshComparator>();
-            mesh_task->set_workflow_metadata(m_tasks, m_task_idx, m_dag, m_task_completion_states);
-            mesh_task->init(m_chunk, m_chunk_grid);
+            mesh_task->set_state(m_chunk, m_chunk_grid);
             task_queue->enqueue(state->producer_token, { mesh_task, true });
-            chunk->pending_task.store(ChunkLoadTaskKind::MESH, std::memory_order_release);
+            chunk->pending_task.store(ChunkTaskKind::MESH, std::memory_order_release);
             return false;
         }
     }
@@ -223,7 +222,5 @@ bool hvox::ChunkNaiveMeshTask<MeshComparator>::run_task(ChunkLoadThreadState* st
     // TODO(Matthew): Set next task if chunk unload is false? Or else set that
     //                between this task and next, but would need adjusting
     //                workflow.
-    chunk->pending_task.store(ChunkLoadTaskKind::NONE, std::memory_order_release);
-
-    return !chunk->unload.load(std::memory_order_acquire);
+    chunk->pending_task.store(ChunkTaskKind::NONE, std::memory_order_release);
 }

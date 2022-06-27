@@ -3,11 +3,11 @@
 // #include "voxel/chunk/mesh/greedy_task.hpp"
 #include "voxel/chunk/mesh/naive_task.hpp"
 
-template <hvox::ChunkGenerationStrategy GenerationStrategy>   
-bool hvox::ChunkGenerationTask<GenerationStrategy>::run_task(ChunkLoadThreadState* state, ChunkLoadTaskQueue* task_queue) {
+template <hvox::ChunkGenerationStrategy GenerationStrategy>
+void hvox::ChunkGenerationTask<GenerationStrategy>::execute(ChunkLoadThreadState* state, ChunkTaskQueue* task_queue) {
     auto chunk = m_chunk.lock();
 
-    if (chunk == nullptr) return false;
+    if (chunk == nullptr) return;
 
     chunk->gen_task_active.store(true, std::memory_order_release);
 
@@ -19,10 +19,10 @@ bool hvox::ChunkGenerationTask<GenerationStrategy>::run_task(ChunkLoadThreadStat
 
     chunk->gen_task_active.store(false, std::memory_order_release);
 
+    chunk->on_load();
+
     // TODO(Matthew): Set next task if chunk unload is false? Or else set that
     //                between this task and next, but would need adjusting
     //                workflow.
-    chunk->pending_task.store(ChunkLoadTaskKind::NONE, std::memory_order_release);
-
-    return !chunk->unload.load(std::memory_order_acquire);
+    chunk->pending_task.store(ChunkTaskKind::NONE, std::memory_order_release);
 }

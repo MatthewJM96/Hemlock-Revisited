@@ -9,8 +9,7 @@ hvox::Chunk::Chunk() :
     blocks(nullptr),
     instance({nullptr, 0}),
     state(ChunkState::NONE),
-    pending_task(ChunkLoadTaskKind::NONE),
-    unload(false)
+    pending_task(ChunkTaskKind::NONE)
 { /* Empty. */ }
 
 hvox::Chunk::~Chunk() {
@@ -52,6 +51,7 @@ void hvox::Chunk::update(TimeData) {
 void hvox::Chunk::init_events(hmem::WeakHandle<Chunk> self) {
     on_block_change         .set_sender(Sender(self));
     on_bulk_block_change    .set_sender(Sender(self));
+    on_load                 .set_sender(Sender(self));
     on_mesh_change          .set_sender(Sender(self));
     on_render_state_change  .set_sender(Sender(self));
     on_unload               .set_sender(Sender(self));

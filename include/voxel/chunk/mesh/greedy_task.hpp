@@ -1,17 +1,17 @@
 #ifndef __hemlock_voxel_chunk_mesh_greedy_h
 #define __hemlock_voxel_chunk_mesh_greedy_h
 
-#include "voxel/chunk/load_task.hpp"
+#include "voxel/chunk/task.hpp"
 #include "voxel/chunk/mesh/mesh_task.hpp"
 
 namespace hemlock {
     namespace voxel {
         template <hvox::ChunkMeshComparator MeshComparator>
-        class ChunkGreedyMeshTask : public ChunkLoadTask {
+        class ChunkGreedyMeshTask : public ChunkTask {
         public:
             virtual ~ChunkGreedyMeshTask() { /* Empty. */ }
 
-            virtual bool run_task(ChunkLoadThreadState* state, ChunkLoadTaskQueue* task_queue) override;
+            virtual void execute(ChunkLoadThreadState* state, ChunkTaskQueue* task_queue) override;
         };
     }
 }

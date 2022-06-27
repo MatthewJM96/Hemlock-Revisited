@@ -11,8 +11,8 @@ namespace hemlock {
         };
 
         struct BasicThreadContext {
-            bool stop;
-            bool suspend;
+            volatile bool stop;
+            volatile bool suspend;
         };
 
         template <InterruptibleState ThreadState>
