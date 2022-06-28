@@ -284,6 +284,12 @@ void hvox::ChunkRenderer::process_pages() {
     //                First guess to check was that the instance count is incorrect and some
     //                chunk simply cannot be fit even into an empty page.
     //                  For now we have added an assert on this condition.
+    //                  The problem is in instances not being removed that are remeshed. We are
+    //                  ending up with many duplicate instances (possibly different size) which
+    //                  is particularly visible when we stop tiling textures.
+    //                    It feels particularly likely that every time we remesh a chunk an entire
+    //                    duplication of the instances it contains is made, hence how we hit the
+    //                    case of more instances in a chunk than a page can contain so fast.
 
     for (ui32 page_idx = 0; page_idx < m_chunk_pages.size(); ++page_idx) {
         ChunkRenderPage& page = *m_chunk_pages[page_idx];
