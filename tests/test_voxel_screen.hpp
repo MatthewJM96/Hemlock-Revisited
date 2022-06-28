@@ -289,7 +289,8 @@ public:
         m_chunk_grid->update(time);
 
         if (do_chunk_check) {
-            debug_printf("Camera at: (%d, %d, %d)\n", static_cast<i32>(current_pos.x), static_cast<i32>(current_pos.y), static_cast<i32>(current_pos.z));
+            debug_printf("Camera at:         (%d, %d, %d)\n", static_cast<i32>(current_pos.x), static_cast<i32>(current_pos.y), static_cast<i32>(current_pos.z));
+            debug_printf("Camera looking at: (%f, %f, %f)\n", m_camera.direction().x, m_camera.direction().y, m_camera.direction().z);
 
             debug_printf("Chunks still not unloaded:\n");
             for (auto& handle : m_unloading_chunks) {
