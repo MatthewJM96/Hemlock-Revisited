@@ -38,8 +38,6 @@ namespace hemlock {
 
                 template <StepEvaluationStrategy... Strategies>
                 void find_valid_steps(        BlockWorldPosition step_from,
-                                              BlockWorldPosition candidate_start,
-                                              BlockWorldPosition candidate_end,
                             OUT std::vector<BlockWorldPosition>& valid_steps,
                                          hmem::Handle<ChunkGrid> chunk_grid     );
             }

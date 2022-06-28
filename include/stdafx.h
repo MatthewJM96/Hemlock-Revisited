@@ -109,4 +109,7 @@
 // Our Events
 #include "event.hpp"
 
+// Our common components.
+#include "physics/common_components.hpp"
+
 #endif // __hemlock_stdafx_h
