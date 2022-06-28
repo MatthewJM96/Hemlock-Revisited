@@ -30,6 +30,8 @@ option(HEMLOCK_USING_SDL_TTF "Whether Hemlock uses the SDL TTF library." ON)
 option(HEMLOCK_USING_OPENGL "Whether Hemlock uses OpenGL." ON)
 option(HEMLOCK_USING_VULKAN "Whether Hemlock uses Vulkan." OFF)
 
+option(HEMLOCK_FAST_DEBUG "Whether to compile debug builds with some optimisation." OFF)
+
 option(HEMLOCK_ENABLE_ADDRESS_SANITIZER "Whether to compile with address sanitizer." OFF)
 option(HEMLOCK_ENABLE_THREAD_SANITIZER "Whether to compile with thread sanitizer." OFF)
 option(HEMLOCK_ENABLE_MEMORY_SANITIZER "Whether to compile with memory sanitizer." OFF)
@@ -59,6 +61,10 @@ if (UNIX OR MINGW)
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wold-style-cast -Wshadow -Wformat=2 -Werror")
         set(CMAKE_CXX_FLAGS_RELEASE "-O3")
         set(CMAKE_CXX_FLAGS_DEBUG "-g")
+    endif()
+
+    if (HEMLOCK_FAST_DEBUG)
+        set(CMAKE_CXX_FLAGS_DEBUG "-g -O1")
     endif()
 
     if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
