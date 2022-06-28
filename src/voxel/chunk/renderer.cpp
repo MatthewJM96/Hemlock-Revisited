@@ -279,6 +279,12 @@ void hvox::ChunkRenderer::process_pages() {
      * Process Pages *
     \*****************/
 
+    // TODO(Matthew): we have just recently seen an infinite loop in this logic causing
+    //                put_chunk_in_page to be called over and over, and in turn create_pages.
+    //                First guess to check was that the instance count is incorrect and some
+    //                chunk simply cannot be fit even into an empty page.
+    //                  For now we have added an assert on this condition.
+
     for (ui32 page_idx = 0; page_idx < m_chunk_pages.size(); ++page_idx) {
         ChunkRenderPage& page = *m_chunk_pages[page_idx];
         if (!page.dirty) continue;
@@ -302,6 +308,8 @@ void hvox::ChunkRenderer::process_pages() {
             if (chunk == nullptr) continue;
 
             auto data = chunk->instance;
+
+            assert(data.count <= block_page_size());
 
             // Check chunk still fits in this page, if not, remove it and place
             // it in a page that might still have space for it (else creating a
