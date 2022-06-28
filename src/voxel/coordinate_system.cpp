@@ -12,9 +12,9 @@ ui32 hvox::block_index(BlockChunkPosition block_chunk_position) {
 
 hvox::BlockChunkPosition hvox::block_chunk_position(BlockWorldPosition block_world_position) {
     return {
-        static_cast<BlockChunkPositionCoord>(block_world_position.x % CHUNK_LENGTH),
-        static_cast<BlockChunkPositionCoord>(block_world_position.y % CHUNK_LENGTH),
-        static_cast<BlockChunkPositionCoord>(block_world_position.z % CHUNK_LENGTH)
+        static_cast<BlockChunkPositionCoord>((block_world_position.x % CHUNK_LENGTH + CHUNK_LENGTH) % CHUNK_LENGTH),
+        static_cast<BlockChunkPositionCoord>((block_world_position.y % CHUNK_LENGTH + CHUNK_LENGTH) % CHUNK_LENGTH),
+        static_cast<BlockChunkPositionCoord>((block_world_position.z % CHUNK_LENGTH + CHUNK_LENGTH) % CHUNK_LENGTH)
     };
 }
 
@@ -38,9 +38,9 @@ hvox::BlockChunkPosition hvox::block_chunk_position(ui32 index) {
 
 hvox::BlockWorldPosition hvox::block_world_position(f32v3 position) {
     return {
-        static_cast<BlockWorldPositionCoord>(position.x),
-        static_cast<BlockWorldPositionCoord>(position.y),
-        static_cast<BlockWorldPositionCoord>(position.z)
+        static_cast<BlockWorldPositionCoord>(glm::floor(position.x)),
+        static_cast<BlockWorldPositionCoord>(glm::floor(position.y)),
+        static_cast<BlockWorldPositionCoord>(glm::floor(position.z))
     };
 }
 
@@ -60,9 +60,9 @@ hvox::BlockWorldPosition hvox::block_world_position(ChunkGridPosition chunk_grid
 hvox::ChunkGridPosition hvox::chunk_grid_position(BlockWorldPosition block_world_position) {
     return {
         {
-            static_cast<i64>(static_cast<f32>(block_world_position.x) / static_cast<f32>(CHUNK_LENGTH)),
-            static_cast<i64>(static_cast<f32>(block_world_position.y) / static_cast<f32>(CHUNK_LENGTH)),
-            static_cast<i64>(static_cast<f32>(block_world_position.z) / static_cast<f32>(CHUNK_LENGTH))
+            static_cast<i64>(glm::floor(static_cast<f32>(block_world_position.x) / static_cast<f32>(CHUNK_LENGTH))),
+            static_cast<i64>(glm::floor(static_cast<f32>(block_world_position.y) / static_cast<f32>(CHUNK_LENGTH))),
+            static_cast<i64>(glm::floor(static_cast<f32>(block_world_position.z) / static_cast<f32>(CHUNK_LENGTH)))
         }
     };
 }
