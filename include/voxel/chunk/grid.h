@@ -9,13 +9,13 @@
 
 namespace hemlock {
     namespace voxel {
-
         // TODO(Matthew): Does page size want to be made a run-time thing,
         //                as it may be nice to base this on view distance.
         using ChunkAllocator = hmem::PagedAllocator<Chunk, 4 * 4 * 4, 3>;
 
-        struct Chunk;
-        // TODO(Matthew): We should add support for LOD, different generation stages, disabling meshing etc.
+        // TODO(Matthew): Do a better job managing instance data. Probably encapsulate in a class that "generates" and "obtains" instance data buffers, where
+        //                the former grabs a page only if needed (as we are in the meshers), and the latter returns a handle on the to-be-freed data. Or
+        //                something like that.
 
         using Chunks = std::unordered_map<ChunkID, hmem::Handle<Chunk>>;
 
@@ -416,6 +416,7 @@ namespace hemlock {
              * requested chunk, nullptr otherwise.
              */
             hmem::Handle<Chunk> chunk(ChunkGridPosition position) { return chunk(position.id); }
+
         protected:
             void establish_chunk_neighbours(hmem::Handle<Chunk> chunk);
 
@@ -425,7 +426,8 @@ namespace hemlock {
             ChunkTaskBuilder m_build_load_or_generate_task, m_build_mesh_task;
             thread::ThreadPool<ChunkTaskContext> m_thread_pool;
 
-            ChunkAllocator                          m_chunk_allocator;
+            ChunkAllocator m_chunk_allocator;
+
             hmem::Handle<ChunkBlockPager>           m_block_pager;
             hmem::Handle<ChunkInstanceDataPager>    m_instance_data_pager;
 

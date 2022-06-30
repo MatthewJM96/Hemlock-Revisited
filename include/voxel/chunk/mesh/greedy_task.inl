@@ -5,8 +5,9 @@
 
 template <hvox::ChunkMeshComparator MeshComparator>
 void hvox::ChunkGreedyMeshTask<MeshComparator>::execute(ChunkLoadThreadState*, ChunkTaskQueue*) {
+    auto chunk_grid = m_chunk_grid.lock();
+    if (chunk_grid == nullptr) return false;
     auto chunk = m_chunk.lock();
-
     if (chunk == nullptr) return false;
 
     chunk->mesh_task_active.store(true, std::memory_order_release);
@@ -20,7 +21,7 @@ void hvox::ChunkGreedyMeshTask<MeshComparator>::execute(ChunkLoadThreadState*, C
     //                      further improve performance and also remove the difficulty
     //                      of the above TODO.
 
-    std::shared_lock lock(chunk->blocks_mutex);
+    std::shared_lock block_lock(chunk->blocks_mutex);
 
     Block* blocks = chunk->blocks;
 
@@ -28,8 +29,10 @@ void hvox::ChunkGreedyMeshTask<MeshComparator>::execute(ChunkLoadThreadState*, C
 
     bool* visited = new bool[CHUNK_VOLUME]{false};
 
-    auto  data        = chunk->instance.data;
-    auto& voxel_count = chunk->instance.count;
+    chunk->instance.generate_buffer();
+
+    std::unique_lock<std::shared_mutex> instance_lock;
+    auto& instance = chunk->instance.get(instance_lock);
 
     const Block*        source = &blocks[0];
     BlockChunkPosition  start  = BlockChunkPosition{0};
@@ -270,7 +273,7 @@ process_new_source:
 
             f32v3 scale_of_cuboid  =  f32v3{end_instance} - f32v3{start_instance} + f32v3{1.0f};
 
-            data[voxel_count++] = ChunkInstanceData{ start_instance, scale_of_cuboid };
+            instance.data[instance.count++] = ChunkInstanceData{ start_instance, scale_of_cuboid };
         }
 
         /***************\

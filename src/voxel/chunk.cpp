@@ -7,7 +7,6 @@
 hvox::Chunk::Chunk() :
     neighbours({}),
     blocks(nullptr),
-    instance({nullptr, 0}),
     state(ChunkState::NONE),
     pending_task(ChunkTaskKind::NONE)
 { /* Empty. */ }
@@ -18,9 +17,7 @@ hvox::Chunk::~Chunk() {
     m_block_pager->free_page(blocks);
     blocks = nullptr;
 
-    m_instance_data_pager->free_page(instance.data);
-    instance.data = nullptr;
-    instance.count = 0;
+    instance.dispose();
 
     neighbours = {};
 }
@@ -32,12 +29,10 @@ void hvox::Chunk::init(
 ) {
     init_events(self);
 
-    m_block_pager = block_pager;
-    m_instance_data_pager = instance_data_pager;
-
     blocks = block_pager->get_page();
-    instance.data = instance_data_pager->get_page();
-    instance.count = 0;
+    m_block_pager = block_pager;
+
+    instance.init(instance_data_pager);
 
     neighbours = {};
 

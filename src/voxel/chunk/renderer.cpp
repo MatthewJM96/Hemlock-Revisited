@@ -146,13 +146,13 @@ hvox::ChunkRenderPage* hvox::ChunkRenderer::create_pages(ui32 count) {
     return first_new_page;
 }
 
-void hvox::ChunkRenderer::put_chunk_in_page(hmem::Handle<Chunk> chunk, ui32 first_page_idx) {
-    PagedChunkMetadata& metadata = m_chunk_metadata[chunk->id()];
+void hvox::ChunkRenderer::put_chunk_in_page(ChunkID chunk_id, ui32 instance_count, ui32 first_page_idx) {
+    PagedChunkMetadata& metadata = m_chunk_metadata[chunk_id];
 
     ui32 page_idx = first_page_idx;
     ChunkRenderPage* page = nullptr;
     for (; page_idx < m_chunk_pages.size(); ++page_idx) {
-        if (m_chunk_pages[page_idx]->voxel_count + chunk->instance.count <= block_page_size()) {
+        if (m_chunk_pages[page_idx]->voxel_count + instance_count <= block_page_size()) {
             page = m_chunk_pages[page_idx];
             break;
         }
@@ -164,13 +164,13 @@ void hvox::ChunkRenderer::put_chunk_in_page(hmem::Handle<Chunk> chunk, ui32 firs
     }
 
     ui32 chunk_idx = page->chunks.size();
-    page->chunks.emplace_back(chunk->id());
+    page->chunks.emplace_back(chunk_id);
 
     if (page->first_dirtied_chunk_idx >= page->chunks.size()) {
         page->first_dirtied_chunk_idx  = page->chunks.size() - 1;
     }
 
-    page->voxel_count += chunk->instance.count;
+    page->voxel_count += instance_count;
 
     page->dirty = true;
 
@@ -245,7 +245,7 @@ void hvox::ChunkRenderer::process_pages() {
 
         // Deduct removed voxels from page voxel count, allowing
         // a new chunk to join if extra space permits.
-        page.voxel_count -= metadata.last_voxel_count;
+        page.voxel_count -= metadata.on_gpu_voxel_count;
     }
 
     /*****************\
@@ -258,7 +258,8 @@ void hvox::ChunkRenderer::process_pages() {
         if (it == m_chunk_metadata.end())
             continue;
 
-        PagedChunkMetadata metadata = it->second;
+        PagedChunkMetadata& metadata = it->second;
+        // metadata.dirty = true;
 
         auto chunk = handle_and_id.handle.lock();
 
@@ -271,25 +272,16 @@ void hvox::ChunkRenderer::process_pages() {
 
             page.dirty = true;
         } else if (chunk != nullptr) {
-            put_chunk_in_page(chunk, 0);
+            std::shared_lock<std::shared_mutex> instance_lock;
+            const auto& instance = chunk->instance.get(instance_lock);
+
+            put_chunk_in_page(chunk->id(), instance.count, 0);
         }
     }
 
     /*****************\
      * Process Pages *
     \*****************/
-
-    // TODO(Matthew): we have just recently seen an infinite loop in this logic causing
-    //                put_chunk_in_page to be called over and over, and in turn create_pages.
-    //                First guess to check was that the instance count is incorrect and some
-    //                chunk simply cannot be fit even into an empty page.
-    //                  For now we have added an assert on this condition.
-    //                  The problem is in instances not being removed that are remeshed. We are
-    //                  ending up with many duplicate instances (possibly different size) which
-    //                  is particularly visible when we stop tiling textures.
-    //                    It feels particularly likely that every time we remesh a chunk an entire
-    //                    duplication of the instances it contains is made, hence how we hit the
-    //                    case of more instances in a chunk than a page can contain so fast.
 
     for (ui32 page_idx = 0; page_idx < m_chunk_pages.size(); ++page_idx) {
         ChunkRenderPage& page = *m_chunk_pages[page_idx];
@@ -299,11 +291,15 @@ void hvox::ChunkRenderer::process_pages() {
 
         ui32 voxels_instanced = 0;
         for (ui32 chunk_idx = 0; chunk_idx < page.first_dirtied_chunk_idx; ++chunk_idx) {
-            voxels_instanced += m_chunk_metadata[page.chunks[chunk_idx]].last_voxel_count;
+            voxels_instanced += m_chunk_metadata[page.chunks[chunk_idx]].on_gpu_voxel_count;
         }
 
         for (ui32 chunk_idx = page.first_dirtied_chunk_idx; chunk_idx < page.chunks.size();) {
             ChunkID id = page.chunks[chunk_idx];
+
+            auto it = m_chunk_metadata.find(id);
+            assert(it != m_chunk_metadata.end());
+            PagedChunkMetadata& metadata = it->second;
 
             auto chunk = m_all_paged_chunks[id].lock();
 
@@ -313,40 +309,51 @@ void hvox::ChunkRenderer::process_pages() {
             // queue.
             if (chunk == nullptr) continue;
 
-            auto data = chunk->instance;
+            /*if (metadata.dirty)*/ {
+                std::shared_lock<std::shared_mutex> instance_lock;
+                const auto& instance = chunk->instance.get(instance_lock);
 
-            assert(data.count <= block_page_size());
+                assert(instance.count <= block_page_size());
 
-            // Check chunk still fits in this page, if not, remove it and place
-            // it in a page that might still have space for it (else creating a
-            // new page for it).
-            if (voxels_instanced + data.count > block_page_size()) {
-                // Swap non-fitting chunk with last chunk in page, pop it,
-                // and update the metadata for the chunk that we swapped in.
-                std::swap(page.chunks[chunk_idx], page.chunks.back());
-                page.chunks.pop_back();
-                m_chunk_metadata[page.chunks[chunk_idx]].chunk_idx = chunk_idx;
+                // Check chunk still fits in this page, if not, remove it and place
+                // it in a page that might still have space for it (else creating a
+                // new page for it).
+                if (voxels_instanced + instance.count > block_page_size()) {
+                    // Swap non-fitting chunk with last chunk in page, pop it,
+                    // and update the metadata for the chunk that we swapped in.
+                    std::swap(page.chunks[chunk_idx], page.chunks.back());
+                    page.chunks.pop_back();
+                    metadata.chunk_idx = chunk_idx;
 
-                // TODO(Matthew): Does this lead to too much memory use? Perhaps
-                //                do a shuffle phase to fit all chunks and then
-                //                do the instance data processing logic.
-                put_chunk_in_page(chunk, page_idx + 1);
+                    // TODO(Matthew): Does this lead to too much memory use? Perhaps
+                    //                do a shuffle phase to fit all chunks and then
+                    //                do the instance data processing logic.
+                    put_chunk_in_page(chunk->id(), instance.count, page_idx + 1);
 
-                // We don't want to do any more processing of this chunk just yet.
-                // chunk_idx now indexes to what was previously the last chunk in
-                // this page.
-                continue;
-            }
+                    // We don't want to do any more processing of this chunk just yet.
+                    // chunk_idx now indexes to what was previously the last chunk in
+                    // this page.
+                    continue;
+                }
 
-            glNamedBufferSubData(
-                page.vbo,
-                voxels_instanced * sizeof(ChunkInstanceData),
-                data.count       * sizeof(ChunkInstanceData),
-                reinterpret_cast<void*>(data.data)
-            );
+                glNamedBufferSubData(
+                    page.vbo,
+                    voxels_instanced * sizeof(ChunkInstanceData),
+                    instance.count   * sizeof(ChunkInstanceData),
+                    reinterpret_cast<void*>(instance.data)
+                );
+                metadata.on_gpu_offset      = voxels_instanced;
+                metadata.on_gpu_page_idx    = page_idx;
+                metadata.on_gpu_voxel_count = instance.count;
 
-            m_chunk_metadata[id].last_voxel_count = data.count;
-            voxels_instanced += data.count;
+                voxels_instanced += instance.count;
+            }/* else {
+                
+            }*/
+
+            metadata.dirty = false;
+
+            // chunk->instance.free_buffer();
 
             ++chunk_idx;
         }

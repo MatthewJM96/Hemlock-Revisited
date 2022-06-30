@@ -1,35 +1,18 @@
 #ifndef __hemlock_voxel_chunk_h
 #define __hemlock_voxel_chunk_h
 
-#ifndef CHUNK_LENGTH
-#define CHUNK_LENGTH 32
-#endif
-
-#undef CHUNK_AREA
-#define CHUNK_AREA CHUNK_LENGTH * CHUNK_LENGTH
-
-#undef CHUNK_VOLUME
-#define CHUNK_VOLUME CHUNK_LENGTH * CHUNK_LENGTH * CHUNK_LENGTH
-
 #include "timing.h"
 #include "graphics/mesh.h"
 #include "voxel/block.hpp"
 #include "voxel/coordinate_system.h"
+#include "voxel/chunk/constants.hpp"
 #include "voxel/chunk/events.hpp"
 #include "voxel/chunk/task.hpp"
 #include "voxel/chunk/state.hpp"
+#include "voxel/chunk/mesh/instance_manager.h"
 
 namespace hemlock {
     namespace voxel {
-        struct ChunkInstanceData {
-            f32v3 translation, scaling;
-        };
-
-        // TODO(Matthew): Maybe we want to make this even smaller pages,
-        //                and expand on demand.
-        using ChunkInstanceDataPager = hmem::Pager<ChunkInstanceData, CHUNK_VOLUME / 2, 3>;
-        using ChunkBlockPager = hmem::Pager<Block,  CHUNK_VOLUME, 3>;
-
         /**
          * @brief 
          */
@@ -52,10 +35,8 @@ namespace hemlock {
             Block*            blocks;
 
             RenderState render_state;
-            struct {
-                ChunkInstanceData*  data;
-                ui32                count;
-            } instance;
+
+            ChunkInstanceManager instance;
 
             std::atomic<ChunkState>     state;
             std::atomic<ChunkTaskKind>  pending_task;
@@ -81,7 +62,6 @@ namespace hemlock {
             void init_events(hmem::WeakHandle<Chunk> self);
 
             hmem::Handle<ChunkBlockPager>           m_block_pager;
-            hmem::Handle<ChunkInstanceDataPager>    m_instance_data_pager;
         };
 
         /**
