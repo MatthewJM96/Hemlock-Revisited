@@ -259,7 +259,7 @@ void hvox::ChunkRenderer::process_pages() {
             continue;
 
         PagedChunkMetadata& metadata = it->second;
-        // metadata.dirty = true;
+        metadata.dirty = true;
 
         auto chunk = handle_and_id.handle.lock();
 
@@ -283,16 +283,34 @@ void hvox::ChunkRenderer::process_pages() {
      * Process Pages *
     \*****************/
 
+    // TODO(Matthew): Could change this to simply two VBOs per page, and swap back
+    //                and forth between them. That way we don't keep creating
+    //                new buffer objects (we'd still want to deallocate buffers).
+
+    // We will swap all prior-existing pages' VBOs with these.
+    // For undirtied pages this will not actually change their VBO.
+    std::vector<GLuint> new_vbos(m_chunk_pages.size(), 0);
+
     for (ui32 page_idx = 0; page_idx < m_chunk_pages.size(); ++page_idx) {
         ChunkRenderPage& page = *m_chunk_pages[page_idx];
-        if (!page.dirty) continue;
+        if (!page.dirty) {
+            new_vbos[page_idx] = page.vbo;
+            continue;
+        }
 
         assert(page.first_dirtied_chunk_idx < page.chunks.size());
+
+        // Create a new on-GPU buffer to populate.
+        glCreateBuffers(1, &new_vbos[page_idx]);
+        glNamedBufferData(new_vbos[page_idx], block_page_size() * sizeof(ChunkInstanceData), nullptr, GL_DYNAMIC_DRAW);
 
         ui32 voxels_instanced = 0;
         for (ui32 chunk_idx = 0; chunk_idx < page.first_dirtied_chunk_idx; ++chunk_idx) {
             voxels_instanced += m_chunk_metadata[page.chunks[chunk_idx]].on_gpu_voxel_count;
         }
+
+        // Copy unchanged original data into new buffer.
+        glCopyNamedBufferSubData(page.vbo, new_vbos[page_idx], 0, 0, voxels_instanced * sizeof(ChunkInstanceData));
 
         for (ui32 chunk_idx = page.first_dirtied_chunk_idx; chunk_idx < page.chunks.size();) {
             ChunkID id = page.chunks[chunk_idx];
@@ -303,13 +321,16 @@ void hvox::ChunkRenderer::process_pages() {
 
             auto chunk = m_all_paged_chunks[id].lock();
 
-            // Dirty chunk that has ceased to exist, can't
+            // "Dirty" chunk that has ceased to exist, can't
             // update it so drop it. Don't need to do anything
             // special as it will have been added to the removal
             // queue.
             if (chunk == nullptr) continue;
 
-            /*if (metadata.dirty)*/ {
+            // Is chunk actually dirty (i.e. does a new set of instance
+            // data exist to upload to the GPU), or can we copy its previous
+            // data from wherever that lies on the GPU?
+            if (metadata.dirty) {
                 std::shared_lock<std::shared_mutex> instance_lock;
                 const auto& instance = chunk->instance.get(instance_lock);
 
@@ -337,7 +358,7 @@ void hvox::ChunkRenderer::process_pages() {
                 }
 
                 glNamedBufferSubData(
-                    page.vbo,
+                    new_vbos[page_idx],
                     voxels_instanced * sizeof(ChunkInstanceData),
                     instance.count   * sizeof(ChunkInstanceData),
                     reinterpret_cast<void*>(instance.data)
@@ -347,13 +368,23 @@ void hvox::ChunkRenderer::process_pages() {
                 metadata.on_gpu_voxel_count = instance.count;
 
                 voxels_instanced += instance.count;
-            }/* else {
-                
-            }*/
 
-            metadata.dirty = false;
+                metadata.dirty = false;
+            } else {
+                glCopyNamedBufferSubData(
+                    m_chunk_pages[metadata.on_gpu_page_idx]->vbo,
+                    new_vbos[page_idx],
+                    metadata.on_gpu_offset      * sizeof(ChunkInstanceData),
+                    voxels_instanced            * sizeof(ChunkInstanceData),
+                    metadata.on_gpu_voxel_count * sizeof(ChunkInstanceData)
+                );
+                metadata.on_gpu_offset      = voxels_instanced;
+                metadata.on_gpu_page_idx    = page_idx;
 
-            // chunk->instance.free_buffer();
+                voxels_instanced += metadata.on_gpu_voxel_count;
+            }
+
+            chunk->instance.free_buffer();
 
             ++chunk_idx;
         }
@@ -361,5 +392,12 @@ void hvox::ChunkRenderer::process_pages() {
         page.voxel_count = voxels_instanced;
         page.dirty = false;
         page.first_dirtied_chunk_idx = std::numeric_limits<ui32>::max();
+    }
+
+    for (ui32 page_idx = 0; page_idx < new_vbos.size(); ++page_idx) {
+        if (new_vbos[page_idx] != m_chunk_pages[page_idx]->vbo) {
+            glDeleteBuffers(1, &m_chunk_pages[page_idx]->vbo);
+            m_chunk_pages[page_idx]->vbo = new_vbos[page_idx];
+        }
     }
 }
