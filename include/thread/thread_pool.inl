@@ -108,3 +108,13 @@ template <hthread::InterruptibleState ThreadState>
 void hthread::ThreadPool<ThreadState>::add_tasks(HeldTask<ThreadState> tasks[], size_t task_count) {
     m_tasks.enqueue_bulk(m_producer_token, tasks, task_count);
 }
+
+template <hthread::InterruptibleState ThreadState>
+void hthread::ThreadPool<ThreadState>::threadsafe_add_task(HeldTask<ThreadState> task) {
+    m_tasks.enqueue(task);
+}
+
+template <hthread::InterruptibleState ThreadState>
+void hthread::ThreadPool<ThreadState>::threadsafe_add_tasks(HeldTask<ThreadState> tasks[], size_t task_count) {
+    m_tasks.enqueue_bulk(tasks, task_count);
+}

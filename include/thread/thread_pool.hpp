@@ -11,8 +11,8 @@ namespace hemlock {
         };
 
         struct BasicThreadContext {
-            bool stop;
-            bool suspend;
+            volatile bool stop;
+            volatile bool suspend;
         };
 
         template <InterruptibleState ThreadState>
@@ -125,16 +125,43 @@ namespace hemlock {
 
             /**
              * @brief Adds a task to the task queue.
-             * 
+             *
+             * NOTE: This should only ever be called
+             * from thread owning the thread pool.
+             *
              * @param task The task to add.
              */
-            void add_task (HeldTask<ThreadState> task);
+            void add_task(HeldTask<ThreadState> task);
             /**
              * @brief Adds a set of tasks to the task queue.
-             * 
+             *
+             * NOTE: This should only ever be called
+             * from thread owning the thread pool.
+             *
              * @param task The tasks to add.
              */
             void add_tasks(HeldTask<ThreadState> tasks[], size_t task_count);
+
+            /**
+             * @brief Adds a task to the task queue.
+             *
+             * NOTE: This can be called from any thread,
+             * but comes with a performance penalty as
+             * no producer token is used.
+             *
+             * @param task The task to add.
+             */
+            void threadsafe_add_task(HeldTask<ThreadState> task);
+            /**
+             * @brief Adds a set of tasks to the task queue.
+             *
+             * NOTE: This can be called from any thread,
+             * but comes with a performance penalty as
+             * no producer token is used.
+             *
+             * @param task The tasks to add.
+             */
+            void threadsafe_add_tasks(HeldTask<ThreadState> tasks[], size_t task_count);
 
             /**
              * @brief The number of threads held by the thread pool.

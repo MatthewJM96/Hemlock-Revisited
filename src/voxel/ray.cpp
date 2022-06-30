@@ -5,6 +5,40 @@
 
 // TODO(Matthew): so many ways to make this faster it hurts, but fine for now.
 
+static i32 sign(f32 num) {
+    if (num > 0.0f) return 1;
+    if (num < 0.0f) return -1;
+    return 0;
+}
+
+/**
+ * @brief Returns smallest integer, t, that satisfies:
+ *              s + t * ds = integer
+ *
+ * @param s Starting float.
+ * @param ds Small delta float.
+ * @return i32 Integer coefficient required to multiply ds
+ * such that adding the result to s returns an integer.
+ */
+static f32 min_coeff_to_int(f32 s, f32 ds) {
+    if (ds < 0.0f)
+        return min_coeff_to_int(-s, -ds);
+
+    // E.g. where ' refers to sign handling above,
+    // and '' refers to fmod below.
+    //
+    //  |   s  |  ds  |  s'  |  ds'  |  s''  |  s/ds  |
+    //  |------|------|------|-------|-------|--------|
+    //  |  0.4 |  0.1 |  0.4 |  0.1  |  0.6  |    6   |
+    //  |  0.4 | -0.1 | -0.4 |  0.1  |  0.4  |    4   |
+    //  | -0.4 |  0.1 | -0.4 |  0.1  |  0.4  |    4   |
+    //  | -0.4 | -0.1 |  0.4 |  0.1  |  0.6  |    6   |
+
+    s = abs(fmod(fmod(s, 1.0f) - 1.0f, 1.0f));
+
+    return s / ds;
+}
+
 /**
  * @brief Steps a ray from the given position to the next
  * block in its path. The position, the corresponding block
@@ -12,6 +46,12 @@
  *
  * @param position The position of the ray.
  * @param block_coord The stepped-to block coordinate.
+ * @param steps_to_next The number of steps needed to get to
+ * next block in each axis..
+ * @param step If we step along an axis, this is which way.
+ * @param delta The relative weighting of stepping along each
+ * axis. Higher delta means "more" steps to get to next block
+ * along that axis.
  * @param direction The direction of the ray.
  * @param distance The distance the ray travelled in the step.
  */
@@ -19,90 +59,65 @@ inline static
 void step_to_next_block_position(
     IN OUT                      f32v3& position,
     IN OUT   hvox::BlockWorldPosition& block_coord,
+    IN OUT                      f32v3& steps_to_next,
+       const hvox::BlockWorldPosition& step,
+                          const f32v3& delta,
                                  f32v3 direction,
-       OUT                        f32& distance
+    IN OUT                        f32& distance
 ) {
     // Assume direction here is normalised.
 
     distance = 0.0f;
 
-    size_t min_axis             = std::numeric_limits<size_t>::max();
-    f32    min_weighting        = std::numeric_limits<f32>::max();
-    f32    candidate_weighting  = 0.0f;
-
-    // X
-    if (direction.x < 0.0f) {
-        candidate_weighting = (glm::floor(position.x) - position.x) / direction.x;
-
-        if (candidate_weighting != 0.0f) {
-            min_axis        = 0;
-            min_weighting   = candidate_weighting;
-        }
-    } else if (direction.x > 0.0f) {
-        candidate_weighting = (glm::ceil(position.x) - position.x) / direction.x;
-
-        if (candidate_weighting != 0.0f) {
-            min_axis        = 0;
-            min_weighting   = candidate_weighting;
-        }
-    }
-
-    // Y
-    if (direction.y < 0.0f) {
-        candidate_weighting = (glm::floor(position.y) - position.y) / direction.y;
-
-        if (candidate_weighting < min_weighting && candidate_weighting != 0.0f) {
-            min_axis        = 1;
-            min_weighting   = candidate_weighting;
-        }
-    } else if (direction.y > 0.0f) {
-        candidate_weighting = (glm::ceil(position.y) - position.y) / direction.y;
-
-        if (candidate_weighting < min_weighting && candidate_weighting != 0.0f) {
-            min_axis        = 1;
-            min_weighting   = candidate_weighting;
-        }
-    }
-
-    // Z
-    if (direction.z < 0.0f) {
-        candidate_weighting = (glm::floor(position.z) - position.z) / direction.z;
-
-        if (candidate_weighting < min_weighting && candidate_weighting != 0.0f) {
-            min_axis        = 2;
-            min_weighting   = candidate_weighting;
-        }
-    } else if (direction.z > 0.0f) {
-        candidate_weighting = (glm::ceil(position.z) - position.z) / direction.z;
-
-        if (candidate_weighting < min_weighting && candidate_weighting != 0.0f) {
-            min_axis        = 2;
-            min_weighting   = candidate_weighting;
-        }
-    }
-
-    if (min_weighting > glm::sqrt(3.0f) + std::numeric_limits<f32>::epsilon()) {
-        if (direction.x > direction.y) {
-            if (direction.x > direction.z) {
-                min_axis        = 0;
-                min_weighting   = 0.01;
+    if (steps_to_next.x < steps_to_next.y) {
+        if (steps_to_next.x < steps_to_next.z) {
+            if (steps_to_next.x < delta.x) {
+                position += steps_to_next.x * direction;
+                distance += steps_to_next.x;
             } else {
-                min_axis        = 2;
-                min_weighting   = 0.01;
+                position += delta.x  * direction;
+                distance += delta.x;
             }
-        } else if (direction.y > direction.z) {
-            min_axis        = 1;
-            min_weighting   = 0.01;
+
+            block_coord.x   += step.x;
+            steps_to_next.x += delta.x;
         } else {
-            min_axis        = 2;
-            min_weighting   = 0.01;
+            if (steps_to_next.z < delta.z) {
+                position += steps_to_next.z * direction;
+                distance += steps_to_next.z;
+            } else {
+                position += delta.z  * direction;
+                distance += delta.z;
+            }
+
+            block_coord.z   += step.z;
+            steps_to_next.z += delta.z;
+        }
+    } else {
+        if (steps_to_next.y < steps_to_next.z) {
+            if (steps_to_next.y < delta.y) {
+                position += steps_to_next.y * direction;
+                distance += steps_to_next.y;
+            } else {
+                position += delta.y  * direction;
+                distance += delta.y;
+            }
+
+            block_coord.y   += step.y;
+            steps_to_next.y += delta.y;
+        } else {
+            if (steps_to_next.z < delta.z) {
+                position += steps_to_next.z * direction;
+                distance += steps_to_next.z;
+            } else {
+                position += delta.z  * direction;
+                distance += delta.z;
+            }
+
+            block_coord.z   += step.z;
+            steps_to_next.z += delta.z;
         }
     }
-
-    block_coord[min_axis] += direction[min_axis] < 0.0f ? -1 : 1;
-
-    position += min_weighting * direction;
-    distance  = min_weighting;
 }
 
 bool hvox::Ray::cast_to_block(      f32v3 start, 
@@ -136,21 +151,44 @@ bool hvox::Ray::cast_to_block(      f32v3 start,
 
     if (chunk_grid == nullptr) return false;
 
+    BlockWorldPosition step = BlockWorldPosition{
+        sign(direction.x), sign(direction.y), sign(direction.z)
+    };
+    f32v3 delta = f32v3{
+        static_cast<f32>(step.x) / direction.x,
+        static_cast<f32>(step.y) / direction.y,
+        static_cast<f32>(step.z) / direction.z,
+    };
+    f32v3 steps_to_next = f32v3{
+        min_coeff_to_int(start.x, direction.x),
+        min_coeff_to_int(start.y, direction.y),
+        min_coeff_to_int(start.z, direction.z)
+    };
     position = block_world_position(start);
     distance = 0.0f;
 
     ui32 steps = 0;
     Block block{};
 
+    ChunkGridPosition old_chunk_pos = chunk_grid_position(position);
+
+    auto chunk = chunk_grid->chunk(old_chunk_pos);
+
+    if (chunk == nullptr) return false;
+
     do {
-        f32 step_size;
-        step_to_next_block_position(start, position, direction, step_size);
+        step_to_next_block_position(start, position, steps_to_next, step, delta, direction, distance);
 
-        distance += step_size;
+        ChunkGridPosition new_chunk_pos = chunk_grid_position(position);
 
-        auto chunk = chunk_grid->chunk(chunk_grid_position(position));
+        if (new_chunk_pos != old_chunk_pos) {
+            chunk = chunk_grid->chunk(new_chunk_pos);
 
-        if (chunk == nullptr) continue;
+            // TODO(Matthew): do we want to allow "seeing through" unloaded chunks?
+            if (chunk == nullptr) return false;
+        }
+
+        old_chunk_pos = new_chunk_pos;
 
         std::shared_lock lock(chunk->blocks_mutex);
 
@@ -197,6 +235,19 @@ bool hvox::Ray::cast_to_block_before( f32v3 start,
 
     if (chunk_grid == nullptr) return false;
 
+    BlockWorldPosition step = BlockWorldPosition{
+        sign(direction.x), sign(direction.y), sign(direction.z)
+    };
+    f32v3 delta = f32v3{
+        static_cast<f32>(step.x) / direction.x,
+        static_cast<f32>(step.y) / direction.y,
+        static_cast<f32>(step.z) / direction.z,
+    };
+    f32v3 steps_to_next = f32v3{
+        min_coeff_to_int(start.x, direction.x),
+        min_coeff_to_int(start.y, direction.y),
+        min_coeff_to_int(start.z, direction.z)
+    };
     BlockWorldPosition block_position = block_world_position(start);
     position = block_position;
     distance = 0.0f;
@@ -204,25 +255,38 @@ bool hvox::Ray::cast_to_block_before( f32v3 start,
     ui32 steps = 0;
     Block block{};
 
+    ChunkGridPosition old_chunk_pos = chunk_grid_position(block_position);
+
+    auto chunk = chunk_grid->chunk(old_chunk_pos);
+
+    if (chunk == nullptr) return false;
+
     do {
-        f32 step_size;
-        step_to_next_block_position(start, block_position, direction, step_size);
+        f32 step_distance = 0.0f;
+        step_to_next_block_position(start, block_position, steps_to_next, step, delta, direction, step_distance);
 
-        auto chunk = chunk_grid->chunk(chunk_grid_position(block_position));
+        ChunkGridPosition new_chunk_pos = chunk_grid_position(block_position);
 
-        if (chunk != nullptr) {
-            std::shared_lock lock(chunk->blocks_mutex);
+        if (new_chunk_pos != old_chunk_pos) {
+            chunk = chunk_grid->chunk(new_chunk_pos);
 
-            auto idx = block_index(
-                block_chunk_position(block_position)
-            );
-
-            block = chunk->blocks[idx];
-
-            if (block_is_target(block)) return true;
+            // TODO(Matthew): do we want to allow "seeing through" unloaded chunks?
+            if (chunk == nullptr) return false;
         }
 
-        distance += step_size;
+        old_chunk_pos = new_chunk_pos;
+
+        std::shared_lock lock(chunk->blocks_mutex);
+
+        auto idx = block_index(
+            block_chunk_position(block_position)
+        );
+
+        block = chunk->blocks[idx];
+
+        if (block_is_target(block)) return true;
+
+        distance += step_distance;
         position  = block_position;
     } while (++steps < max_steps);
 

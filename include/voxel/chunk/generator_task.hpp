@@ -1,7 +1,7 @@
 #ifndef __hemlock_voxel_chunk_generator_h
 #define __hemlock_voxel_chunk_generator_h
 
-#include "voxel/chunk/load_task.hpp"
+#include "voxel/chunk/task.hpp"
 #include "voxel/coordinate_system.h"
 
 namespace hemlock {
@@ -20,11 +20,11 @@ namespace hemlock {
         };
 
         template <hvox::ChunkGenerationStrategy GenerationStrategy>
-        class ChunkGenerationTask : public ChunkLoadTask {
+        class ChunkGenerationTask : public ChunkTask {
         public:
             virtual ~ChunkGenerationTask() { /* Empty. */ }
 
-            virtual bool run_task(ChunkLoadThreadState* state, ChunkLoadTaskQueue* task_queue) override;
+            virtual void execute(ChunkLoadThreadState* state, ChunkTaskQueue* task_queue) override;
         };
     }
 }

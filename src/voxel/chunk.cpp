@@ -7,10 +7,8 @@
 hvox::Chunk::Chunk() :
     neighbours({}),
     blocks(nullptr),
-    instance({nullptr, 0}),
     state(ChunkState::NONE),
-    pending_task(ChunkLoadTaskKind::NONE),
-    unload(false)
+    pending_task(ChunkTaskKind::NONE)
 { /* Empty. */ }
 
 hvox::Chunk::~Chunk() {
@@ -19,9 +17,7 @@ hvox::Chunk::~Chunk() {
     m_block_pager->free_page(blocks);
     blocks = nullptr;
 
-    m_instance_data_pager->free_page(instance.data);
-    instance.data = nullptr;
-    instance.count = 0;
+    instance.dispose();
 
     neighbours = {};
 }
@@ -33,12 +29,10 @@ void hvox::Chunk::init(
 ) {
     init_events(self);
 
-    m_block_pager = block_pager;
-    m_instance_data_pager = instance_data_pager;
-
     blocks = block_pager->get_page();
-    instance.data = instance_data_pager->get_page();
-    instance.count = 0;
+    m_block_pager = block_pager;
+
+    instance.init(instance_data_pager);
 
     neighbours = {};
 
@@ -52,6 +46,7 @@ void hvox::Chunk::update(TimeData) {
 void hvox::Chunk::init_events(hmem::WeakHandle<Chunk> self) {
     on_block_change         .set_sender(Sender(self));
     on_bulk_block_change    .set_sender(Sender(self));
+    on_load                 .set_sender(Sender(self));
     on_mesh_change          .set_sender(Sender(self));
     on_render_state_change  .set_sender(Sender(self));
     on_unload               .set_sender(Sender(self));

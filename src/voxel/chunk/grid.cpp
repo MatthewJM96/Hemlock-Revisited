@@ -5,13 +5,38 @@
 #include "voxel/block.hpp"
 #include "voxel/chunk/grid.h"
 
-void hvox::ChunkLoadTask::init(hmem::WeakHandle<Chunk> chunk, hmem::WeakHandle<ChunkGrid> chunk_grid) {
+void hvox::ChunkTask::set_state(hmem::WeakHandle<Chunk> chunk, hmem::WeakHandle<ChunkGrid> chunk_grid) {
     m_chunk      = chunk;
     m_chunk_grid = chunk_grid;
 }
 
 hvox::ChunkGrid::ChunkGrid() :
-    handle_block_change(BlockChangeHandler{
+    // TODO(Matthew): both of these are rather inefficient, we remesh literally every block change, rather than
+    //                once per update loop, likewise with chunk loads.
+    // TODO(Matthew): as these are called in threadpool threads, we'd like them to
+    //                be able to use the appropriate producer tokens.
+    handle_chunk_load(Delegate<void(Sender)>{
+        [&](Sender sender) {
+            hmem::WeakHandle<Chunk> handle = sender.get_handle<Chunk>();
+
+            auto chunk = handle.lock();
+            // If chunk is nullptr, then there's no point
+            // handling the block change as we will have
+            // an unload event for this chunk.
+            if (chunk == nullptr) return;
+
+            auto task = m_build_mesh_task();
+            task->set_state(chunk, m_self);
+            m_thread_pool.threadsafe_add_task({task, true});
+        }
+    }),
+    // TODO(Matthew): handle bulk block change too.
+    // TODO(Matthew): right now we remesh even if block change is cancelled.
+    //                perhaps we can count changes and if at least 1 change
+    //                on end of update loop then schedule remesh, only
+    //                incrementing if block change actually occurs
+    //                  i.e. stop queuing here.
+    handle_block_change(Delegate<bool(Sender, BlockChangeEvent)>{
         [&](Sender sender, BlockChangeEvent) {
             hmem::WeakHandle<Chunk> handle = sender.get_handle<Chunk>();
 
@@ -21,9 +46,9 @@ hvox::ChunkGrid::ChunkGrid() :
             // an unload event for this chunk.
             if (chunk == nullptr) return true;
 
-            // TODO(Matthew): Memory leak, and just so bad. We should rearchitect the load tasks
-            //                system.
-            m_chunk_load_thread_pool.add_task({build_load_tasks(chunk, m_self).tasks.get()[1].task, true});
+            auto task = m_build_mesh_task();
+            task->set_state(chunk, m_self);
+            m_thread_pool.add_task({task, true});
 
             return false;
         }
@@ -34,15 +59,15 @@ hvox::ChunkGrid::ChunkGrid() :
 
 void hvox::ChunkGrid::init( hmem::WeakHandle<ChunkGrid> self,
                                                    ui32 thread_count,
-                             thread::ThreadWorkflowDAG* chunk_load_dag,
-                               ChunkLoadTaskListBuilder chunk_load_task_list_builder )
+                                       ChunkTaskBuilder build_load_or_generate_task,
+                                       ChunkTaskBuilder build_mesh_task )
 {
     m_self = self;
 
-    build_load_tasks = chunk_load_task_list_builder;
+    m_build_load_or_generate_task   = build_load_or_generate_task;
+    m_build_mesh_task               = build_mesh_task;
 
-    m_chunk_load_thread_pool.init(thread_count);
-    m_chunk_load_workflow.init(chunk_load_dag, &m_chunk_load_thread_pool);
+    m_thread_pool.init(thread_count);
 
     m_block_pager           = hmem::make_handle<ChunkBlockPager>();
     m_instance_data_pager   = hmem::make_handle<ChunkInstanceDataPager>();
@@ -72,36 +97,12 @@ void hvox::ChunkGrid::init( hmem::WeakHandle<ChunkGrid> self,
 }
 
 void hvox::ChunkGrid::dispose() {
-    m_chunk_load_thread_pool.dispose();
-    m_chunk_load_workflow.dispose();
+    m_thread_pool.dispose();
 }
 
 void hvox::ChunkGrid::update(TimeData time) {
-    // Update chunks, removing those marked for unload that
-    // are done with pending tasks.
-    for (auto it = m_chunks.begin(); it != m_chunks.end();) {
-        // TODO(Matthew): we shouldn't do this explicitly with unload.
-        if ((*it).second->unload.load(std::memory_order_acquire)) {
-            auto [exists, not_pending] =
-                query_chunk_exact_pending_task(
-                    (*it).second,
-                    ChunkLoadTaskKind::NONE
-                );
-
-            // If we are pending any task, don't unload
-            // the task just yet.
-            if (!not_pending) {
-                ++it;
-                continue;
-            }
-
-            (*it).second->on_unload();
-
-            it = m_chunks.erase(it);
-        } else {
-            (*it).second->update(time);
-            ++it;
-        }
+    for (auto chunk : m_chunks) {
+        chunk.second->update(time);
     }
 
     m_renderer.update(time);
@@ -196,7 +197,8 @@ bool hvox::ChunkGrid::preload_chunk_at(ChunkGridPosition chunk_position) {
     chunk->position = chunk_position;
     chunk->init(chunk, m_block_pager, m_instance_data_pager);
 
-    chunk->on_block_change += &handle_block_change;
+    chunk->on_load          += &handle_chunk_load;
+    chunk->on_block_change  += &handle_block_change;
 
     establish_chunk_neighbours(chunk);
 
@@ -227,7 +229,7 @@ bool hvox::ChunkGrid::load_chunk_at(ChunkGridPosition chunk_position) {
     // If chunk is in the process of being generated, we don't
     // need to add it to the queue again.
     auto [ _1, chunk_pending_generation ] =
-            query_chunk_pending_task(chunk, ChunkLoadTaskKind::GENERATION);
+            query_chunk_pending_task(chunk, ChunkTaskKind::GENERATION);
     if (chunk_pending_generation)
         return false;
 
@@ -245,10 +247,11 @@ bool hvox::ChunkGrid::load_chunk_at(ChunkGridPosition chunk_position) {
     if (!chunk_preloaded)
         return false;
 
-    m_chunk_load_workflow.run(
-        build_load_tasks(chunk, m_self)
-    );
-    chunk->pending_task.store(ChunkLoadTaskKind::GENERATION, std::memory_order_release);
+    chunk->pending_task.store(ChunkTaskKind::GENERATION, std::memory_order_release);
+
+    auto task = m_build_load_or_generate_task();
+    task->set_state(chunk, m_self);
+    m_thread_pool.add_task({task, true});
 
     return true;
 }
@@ -373,17 +376,17 @@ hvox::QueriedChunkState hvox::ChunkGrid::query_chunk_state(hmem::Handle<Chunk> c
     return {true, actual_state >= required_minimum_state};
 }
 
-hvox::QueriedChunkPendingTask hvox::ChunkGrid::query_chunk_pending_task(ChunkGridPosition chunk_position, ChunkLoadTaskKind required_minimum_pending_task) {
+hvox::QueriedChunkPendingTask hvox::ChunkGrid::query_chunk_pending_task(ChunkGridPosition chunk_position, ChunkTaskKind required_minimum_pending_task) {
     auto it = m_chunks.find(chunk_position.id);
     if (it == m_chunks.end()) return {false, false};
 
     return query_chunk_pending_task((*it).second, required_minimum_pending_task);
 }
 
-hvox::QueriedChunkPendingTask hvox::ChunkGrid::query_chunk_pending_task(hmem::Handle<Chunk> chunk, ChunkLoadTaskKind required_minimum_pending_task) {
+hvox::QueriedChunkPendingTask hvox::ChunkGrid::query_chunk_pending_task(hmem::Handle<Chunk> chunk, ChunkTaskKind required_minimum_pending_task) {
     if (chunk == nullptr) return {false, false};
 
-    ChunkLoadTaskKind actual_pending_task = chunk->pending_task.load(std::memory_order_acquire);
+    ChunkTaskKind actual_pending_task = chunk->pending_task.load(std::memory_order_acquire);
 
     return {true, actual_pending_task >= required_minimum_pending_task};
 }
@@ -426,17 +429,17 @@ hvox::QueriedChunkState hvox::ChunkGrid::query_chunk_exact_state(hmem::Handle<Ch
     return {true, actual_state == required_state};
 }
 
-hvox::QueriedChunkPendingTask hvox::ChunkGrid::query_chunk_exact_pending_task(ChunkGridPosition chunk_position, ChunkLoadTaskKind required_pending_task) {
+hvox::QueriedChunkPendingTask hvox::ChunkGrid::query_chunk_exact_pending_task(ChunkGridPosition chunk_position, ChunkTaskKind required_pending_task) {
     auto it = m_chunks.find(chunk_position.id);
     if (it == m_chunks.end()) return {false, false};
 
     return query_chunk_exact_pending_task((*it).second, required_pending_task);
 }
 
-hvox::QueriedChunkPendingTask hvox::ChunkGrid::query_chunk_exact_pending_task(hmem::Handle<Chunk> chunk, ChunkLoadTaskKind required_pending_task) {
+hvox::QueriedChunkPendingTask hvox::ChunkGrid::query_chunk_exact_pending_task(hmem::Handle<Chunk> chunk, ChunkTaskKind required_pending_task) {
     if (chunk == nullptr) return {false, false};
 
-    ChunkLoadTaskKind actual_pending_task = chunk->pending_task.load(std::memory_order_acquire);
+    ChunkTaskKind actual_pending_task = chunk->pending_task.load(std::memory_order_acquire);
 
     return {true, actual_pending_task == required_pending_task};
 }

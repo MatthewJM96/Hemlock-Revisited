@@ -4,25 +4,25 @@
 #include "timing.h"
 #include "voxel/coordinate_system.h"
 #include "voxel/chunk.h"
-#include "voxel/chunk/load_task.hpp"
+#include "voxel/chunk/task.hpp"
 #include "voxel/chunk/renderer.h"
 
 namespace hemlock {
     namespace voxel {
-
         // TODO(Matthew): Does page size want to be made a run-time thing,
         //                as it may be nice to base this on view distance.
         using ChunkAllocator = hmem::PagedAllocator<Chunk, 4 * 4 * 4, 3>;
 
-        struct Chunk;
-        // TODO(Matthew): We should add support for LOD, different generation stages, disabling meshing etc.
+        // TODO(Matthew): Do a better job managing instance data. Probably encapsulate in a class that "generates" and "obtains" instance data buffers, where
+        //                the former grabs a page only if needed (as we are in the meshers), and the latter returns a handle on the to-be-freed data. Or
+        //                something like that.
 
         using Chunks = std::unordered_map<ChunkID, hmem::Handle<Chunk>>;
 
         using QueriedChunkState       = std::pair<bool, bool>;
         using QueriedChunkPendingTask = std::pair<bool, bool>;
 
-        using ChunkLoadTaskListBuilder = Delegate<hthread::ThreadWorkflowTasksView<ChunkLoadTaskContext>(hmem::WeakHandle<Chunk>, hmem::WeakHandle<ChunkGrid>)>;
+        using ChunkTaskBuilder = Delegate<ChunkTask*(void)>;
 
         class ChunkGrid {
         public:
@@ -36,15 +36,16 @@ namespace hemlock {
              * @param self A weak handle on this grid instance.
              * @param thread_count The number of threads
              * that the grid can use for loading tasks.
-             * @param chunk_load_dag The DAG of the workflow
-             * to do chunk loading with.
-             * @param chunk_load_task_list_builder The builder
-             * used to generate tasks for loading chunks.
+             * @param build_load_or_generate_task Builder that returns
+             * a valid task to load a chunk from disk if present or
+             * otherwise generate it.
+             * @param build_mesh_task Builder that returns a valid
+             * task to mesh a chunk.
              */
             void init( hmem::WeakHandle<ChunkGrid> self,
                                               ui32 thread_count,
-                        thread::ThreadWorkflowDAG* chunk_load_dag,
-                          ChunkLoadTaskListBuilder chunk_load_task_list_builder );
+                                  ChunkTaskBuilder build_load_or_generate_task,
+                                  ChunkTaskBuilder build_mesh_task );
             /**
              * @brief Disposes of the chunk grid, ending
              * the tasks on the thread pool and unloading
@@ -77,12 +78,12 @@ namespace hemlock {
              * for testing it can definitely be useful. Probably
              * don't ever call this in practise.
              */
-            void suspend_chunk_tasks() { m_chunk_load_thread_pool.suspend(); }
+            void suspend_chunk_tasks() { m_thread_pool.suspend(); }
             /**
              * @brief Resumes chunk tasks. No consequences for
              * calling this when not already suspended.
              */
-            void resume_chunk_tasks()  { m_chunk_load_thread_pool.resume();  }
+            void resume_chunk_tasks()  { m_thread_pool.resume();  }
 
             ChunkRenderer* renderer() { return &m_renderer; }
 
@@ -215,7 +216,7 @@ namespace hemlock {
              * never occur and represents invalid query
              * processing.
              */
-            QueriedChunkPendingTask query_chunk_pending_task(ChunkGridPosition chunk_position, ChunkLoadTaskKind required_minimum_pending_task);
+            QueriedChunkPendingTask query_chunk_pending_task(ChunkGridPosition chunk_position, ChunkTaskKind required_minimum_pending_task);
             /**
              * @brief Queries the pending task of the chunk
              *  The requirement verified here is that the
@@ -235,7 +236,7 @@ namespace hemlock {
              * never occur and represents invalid query
              * processing.
              */
-            QueriedChunkPendingTask query_chunk_pending_task(hmem::Handle<Chunk> chunk, ChunkLoadTaskKind required_minimum_pending_task);
+            QueriedChunkPendingTask query_chunk_pending_task(hmem::Handle<Chunk> chunk, ChunkTaskKind required_minimum_pending_task);
 
             /**
              * @brief Queries the state of the neighbours of
@@ -335,7 +336,7 @@ namespace hemlock {
              * not exist. Note: [false, true] should never
              * occur and represents invalid query processing.
              */
-            QueriedChunkPendingTask query_chunk_exact_pending_task(ChunkGridPosition chunk_position, ChunkLoadTaskKind required_pending_task);
+            QueriedChunkPendingTask query_chunk_exact_pending_task(ChunkGridPosition chunk_position, ChunkTaskKind required_pending_task);
             /**
              * @brief Queries the pending task of the chunk
              * The requirement verified here is that the
@@ -353,7 +354,7 @@ namespace hemlock {
              * not exist. Note: [false, true] should never
              * occur and represents invalid query processing.
              */
-            QueriedChunkPendingTask query_chunk_exact_pending_task(hmem::Handle<Chunk> chunk, ChunkLoadTaskKind required_pending_task);
+            QueriedChunkPendingTask query_chunk_exact_pending_task(hmem::Handle<Chunk> chunk, ChunkTaskKind required_pending_task);
 
             /**
              * @brief Queries the state of the neighbours of
@@ -415,17 +416,18 @@ namespace hemlock {
              * requested chunk, nullptr otherwise.
              */
             hmem::Handle<Chunk> chunk(ChunkGridPosition position) { return chunk(position.id); }
+
         protected:
             void establish_chunk_neighbours(hmem::Handle<Chunk> chunk);
 
-            ChunkLoadTaskListBuilder   build_load_tasks;
+            Delegate<void(Sender)>                      handle_chunk_load;
+            Delegate<bool(Sender, BlockChangeEvent)>    handle_block_change;
 
-            BlockChangeHandler handle_block_change;
+            ChunkTaskBuilder m_build_load_or_generate_task, m_build_mesh_task;
+            thread::ThreadPool<ChunkTaskContext> m_thread_pool;
 
-            thread::ThreadPool<ChunkLoadTaskContext>        m_chunk_load_thread_pool;
-            thread::ThreadWorkflow<ChunkLoadTaskContext>    m_chunk_load_workflow;
+            ChunkAllocator m_chunk_allocator;
 
-            ChunkAllocator                          m_chunk_allocator;
             hmem::Handle<ChunkBlockPager>           m_block_pager;
             hmem::Handle<ChunkInstanceDataPager>    m_instance_data_pager;
 

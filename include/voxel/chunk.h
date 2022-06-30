@@ -1,37 +1,18 @@
 #ifndef __hemlock_voxel_chunk_h
 #define __hemlock_voxel_chunk_h
 
-#ifndef CHUNK_LENGTH
-#define CHUNK_LENGTH 32
-#endif
-
-#undef CHUNK_AREA
-#define CHUNK_AREA CHUNK_LENGTH * CHUNK_LENGTH
-
-#undef CHUNK_VOLUME
-#define CHUNK_VOLUME CHUNK_LENGTH * CHUNK_LENGTH * CHUNK_LENGTH
-
 #include "timing.h"
 #include "graphics/mesh.h"
 #include "voxel/block.hpp"
 #include "voxel/coordinate_system.h"
+#include "voxel/chunk/constants.hpp"
 #include "voxel/chunk/events.hpp"
-#include "voxel/chunk/load_task.hpp"
+#include "voxel/chunk/task.hpp"
 #include "voxel/chunk/state.hpp"
+#include "voxel/chunk/mesh/instance_manager.h"
 
 namespace hemlock {
     namespace voxel {
-        struct ChunkInstanceData {
-            f32v3 translation, scaling;
-        };
-
-        // TODO(Matthew): Maybe we want to make this even smaller pages,
-        //                and expand on demand.
-        using ChunkInstanceDataPager = hmem::Pager<ChunkInstanceData, CHUNK_VOLUME / 2, 3>;
-        using ChunkBlockPager = hmem::Pager<Block,  CHUNK_VOLUME, 3>;
-
-        using BlockChangeHandler = Delegate<bool(Sender, BlockChangeEvent)>;
-
         /**
          * @brief 
          */
@@ -54,17 +35,12 @@ namespace hemlock {
             Block*            blocks;
 
             RenderState render_state;
-            struct {
-                ChunkInstanceData*  data;
-                ui32                count;
-            } instance;
 
-            std::atomic<ChunkState>         state;
-            std::atomic<ChunkLoadTaskKind>  pending_task;
-            std::atomic<bool>               gen_task_active, mesh_task_active;
+            ChunkInstanceManager instance;
 
-            // TODO(Matthew): Remove?
-            std::atomic<bool> unload;
+            std::atomic<ChunkState>     state;
+            std::atomic<ChunkTaskKind>  pending_task;
+            std::atomic<bool>           gen_task_active, mesh_task_active;
 
             CancellableEvent<BlockChangeEvent>      on_block_change;
             CancellableEvent<BulkBlockChangeEvent>  on_bulk_block_change;
@@ -78,14 +54,14 @@ namespace hemlock {
             //                chunk at any point in time. If this fails
             //                to hold up, then we could easily get race
             //                conditions inside the events.
-            Event<>                                 on_mesh_change;
-            Event<RenderState>                      on_render_state_change;
-            Event<>                                 on_unload;
+            Event<>             on_load;
+            Event<>             on_mesh_change;
+            Event<RenderState>  on_render_state_change;
+            Event<>             on_unload;
         protected:
             void init_events(hmem::WeakHandle<Chunk> self);
 
             hmem::Handle<ChunkBlockPager>           m_block_pager;
-            hmem::Handle<ChunkInstanceDataPager>    m_instance_data_pager;
         };
 
         /**

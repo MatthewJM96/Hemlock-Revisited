@@ -18,7 +18,10 @@ namespace hemlock {
         struct PagedChunkMetadata {
             ui32 page_idx;
             ui32 chunk_idx;
-            ui32 last_voxel_count;
+            ui32 on_gpu_offset;
+            ui32 on_gpu_page_idx;
+            ui32 on_gpu_voxel_count;
+            bool dirty;
             bool paged;
         };
         using PagedChunksMetadata   = std::unordered_map<ChunkID, PagedChunkMetadata>;
@@ -96,11 +99,12 @@ namespace hemlock {
              * @brief Puts a chunk in the first page starting
              * from the given index that has enough space for it.
              *
-             * @param chunk The chunk to find a page for.
+             * @param chunk_id The ID of the chunk to find a page for.
+             * @param instance_count The number of instances representing the chunk.
              * @param first_page_idx The index of the first page
              * to consider.
              */
-            void put_chunk_in_page(hmem::Handle<Chunk> chunk, ui32 first_page_idx);
+            void put_chunk_in_page(ChunkID chunk_id, ui32 instance_count, ui32 first_page_idx);
 
             /**
              * @brief Updates chunks, removing those that
