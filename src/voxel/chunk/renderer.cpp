@@ -180,9 +180,6 @@ void hvox::ChunkRenderer::put_chunk_in_page(ChunkID chunk_id, ui32 instance_coun
 }
 
 void hvox::ChunkRenderer::process_pages() {
-    // TODO(Matthew): Lock on chunk instance data? Perhaps
-    //                we can use double buffering to avoid that?
-
     HandleAndID handle_and_id;
 
     /*****************\
@@ -192,12 +189,7 @@ void hvox::ChunkRenderer::process_pages() {
     while (m_chunk_removal_queue.try_dequeue(handle_and_id)) {
         auto it = m_chunk_metadata.find(handle_and_id.id);
 
-        // TODO(Matthew): should this be an assertion against this?
-        //                only one on_unload event should ever fire for a chunk...
-        //                then again, the renderer is left in the same state,
-        //                so probably fine.
-        if (it == m_chunk_metadata.end())
-            continue;
+        assert(it != m_chunk_metadata.end());
 
         PagedChunkMetadata metadata = it->second;
 
