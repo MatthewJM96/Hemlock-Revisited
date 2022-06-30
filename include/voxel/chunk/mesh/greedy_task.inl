@@ -6,9 +6,9 @@
 template <hvox::ChunkMeshComparator MeshComparator>
 void hvox::ChunkGreedyMeshTask<MeshComparator>::execute(ChunkLoadThreadState*, ChunkTaskQueue*) {
     auto chunk_grid = m_chunk_grid.lock();
-    if (chunk_grid == nullptr) return false;
+    if (chunk_grid == nullptr) return;
     auto chunk = m_chunk.lock();
-    if (chunk == nullptr) return false;
+    if (chunk == nullptr) return;
 
     chunk->mesh_task_active.store(true, std::memory_order_release);
 
