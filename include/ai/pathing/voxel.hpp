@@ -19,6 +19,9 @@ namespace hemlock {
                 //                some gameplay limitations as this is sharing knowledge between agents. Inevitably test, but keep in mind
                 //                caching opportunities such as in identifying valid blocks to step to (perhaps cahce by building up graphs,
                 //                one per evaluation strategy, that can be referred to and thus skip the step search stage of pathing).
+                // TODO(Matthew): Sharing pheromone maps can extend to:
+                //                  - observing player movement in specified scenarios
+                //                      - such as in "settlement" locations, when following the player, etc.
 
                 /**
                  * @brief Defines a struct whose opeartor() evaluates a coordinate for being a valid

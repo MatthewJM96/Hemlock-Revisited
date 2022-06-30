@@ -6,6 +6,8 @@
 namespace hemlock {
     namespace ai {
         namespace pathing {
+            // TODO(Matthew): Probably this isn't a specific component, but rather a component group
+            //                composed of AgentComponent and DynamicComponent (ExtendedComponent by necessity?).
             struct PathableAgenta
         }
     }
