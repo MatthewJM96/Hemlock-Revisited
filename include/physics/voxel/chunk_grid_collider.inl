@@ -4,7 +4,7 @@ template <hphys::VoxelShapeEvaluator ShapeEvaluator>
 bool hphys::ChunkGridCollider::determine_candidate_colliding_voxels(
       AnchoredComponent ac,
        DynamicComponent dc,
-    CollidableComponent cc,
+     RigidBodyComponent rbc,
        btCompoundShape* voxels
 ) {
     const ShapeEvaluator shape_evaluator = {};
@@ -23,7 +23,7 @@ bool hphys::ChunkGridCollider::determine_candidate_colliding_voxels(
     const f32 dt = 1.0f;
 
     btVector3 min_aabb, max_aabb;
-    cc.shape->getAabb(btTransform::getIdentity(), min_aabb, max_aabb);
+    rbc.body->getAabb(min_aabb, max_aabb);
 
     f32v3 max_ds = glm::abs(dc.velocity) * dt;
 

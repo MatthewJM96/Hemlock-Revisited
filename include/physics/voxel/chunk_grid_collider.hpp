@@ -23,7 +23,7 @@ namespace hemlock {
 
         namespace ChunkGridCollider {
             template <hphys::VoxelShapeEvaluator ShapeEvaluator>
-            bool determine_candidate_colliding_voxels(AnchoredComponent ac, DynamicComponent dc, CollidableComponent cc, btCompoundShape* voxels);
+            bool determine_candidate_colliding_voxels(AnchoredComponent ac, DynamicComponent dc, RigidBodyComponent rbc, btCompoundShape* voxels);
         }
     }
 }

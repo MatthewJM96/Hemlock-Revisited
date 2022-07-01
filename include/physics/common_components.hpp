@@ -1,7 +1,7 @@
 #ifndef __hemlock_physics_common_components_hpp
 #define __hemlock_physics_common_components_hpp
 
-#include <bullet/BulletCollision/CollisionShapes/btCompoundShape.h>
+#include <bullet/BulletDynamics/Dynamics/btRigidBody.h>
 
 namespace hemlock {
     namespace physics {
@@ -28,11 +28,16 @@ namespace hemlock {
 
         // TODO(Matthew): get bullet working and incorporate shapes here.
         struct DynamicComponent {
+            
             f32v3 velocity;
         };
 
-        struct CollidableComponent {
-            btCompoundShape* shape = nullptr;
+        struct RigidBodyComponent {
+            btRigidBody* body = nullptr;
+        };
+
+        struct CollidableEntityComponent {
+
         };
     }
 }

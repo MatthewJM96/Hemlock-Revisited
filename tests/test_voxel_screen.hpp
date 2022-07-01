@@ -17,7 +17,7 @@
 #if defined(DEBUG)
 #   define VIEW_DIST 4
 #else
-#   define VIEW_DIST 10
+#   define VIEW_DIST 8
 #endif
 
 struct TVS_BlockComparator {
@@ -292,23 +292,24 @@ public:
         }
 
 #if defined(DEBUG)
-        static f64 last_time = 0.0;
+        static f64 countdown = 1000.0;
+        countdown -= static_cast<f64>(std::chrono::duration_cast<std::chrono::milliseconds>(time).count());
         if (m_input_manager->is_pressed(hui::PhysicalKey::H_T)) {
-            if (last_time + 1000.0 < time.total) {
-                last_time = time.total;
+            if (countdown < 0.0) {
                 f32v3 pos = m_camera.position();
                 f32v3 dir = m_camera.direction();
                 debug_printf("Camera Coords: (%f, %f, %f)\nCamera Direction: (%f, %f, %f)\n", pos.x, pos.y, pos.z, dir.x, dir.y, dir.z);
             }
         }
+        if (countdown < 0.0) countdown = 1000.0;
 #endif
 
         m_player.ac.position += hvox::EntityWorldPosition{f32v3{delta_pos.x, 0.0f, delta_pos.z} * static_cast<f32>(1ll << 32)};
         m_camera.offset_position(f32v3{delta_pos.x, 0.0f, delta_pos.z});
         {
-            auto transform = m_player_body->getWorldTransform();
+            auto transform = m_player.rbc.body->getWorldTransform();
             transform.setOrigin(btVector3(m_camera.position().x, m_camera.position().y, m_camera.position().z));
-            m_player_body->setWorldTransform(transform);
+            m_player.rbc.body->setWorldTransform(transform);
         }
         m_camera.update();
 
@@ -392,7 +393,7 @@ public:
         }
 
         voxel_patch = new btCompoundShape();
-        if (hphys::ChunkGridCollider::determine_candidate_colliding_voxels<TVS_VoxelShapeEvaluator>(m_player.ac, m_player.dc, m_player.cc, voxel_patch)) {
+        if (hphys::ChunkGridCollider::determine_candidate_colliding_voxels<TVS_VoxelShapeEvaluator>(m_player.ac, m_player.dc, m_player.rbc, voxel_patch)) {
             btTransform transform = btTransform::getIdentity();
             transform.setOrigin(btVector3(glm::floor(m_camera.position().x), glm::floor(m_camera.position().y), glm::floor(m_camera.position().z)));
             btDefaultMotionState* motion_state = new btDefaultMotionState(transform);
@@ -406,13 +407,13 @@ public:
             m_phys.world->addRigidBody(voxel_patch_body);
         }
 
-        m_player_body->activate();
-        m_phys.world->stepSimulation(time.frame / 1000.0f);
+        m_player.rbc.body->activate();
+        m_phys.world->stepSimulation(hemlock::frame_time_to_floating<std::chrono::seconds, btScalar>(time));
 
         m_camera.set_position(f32v3{
-            m_player_body->getWorldTransform().getOrigin().x(),
-            m_player_body->getWorldTransform().getOrigin().y(),
-            m_player_body->getWorldTransform().getOrigin().z()
+            m_player.rbc.body->getWorldTransform().getOrigin().x(),
+            m_player.rbc.body->getWorldTransform().getOrigin().y(),
+            m_player.rbc.body->getWorldTransform().getOrigin().z()
         });
         m_player.ac.position = hvox::EntityWorldPosition{
             static_cast<hvox::EntityWorldPositionCoord>(m_camera.position().x * static_cast<f32>(1ll << 32)),
@@ -427,7 +428,7 @@ public:
             debug_printf("Camera looking at: (%f, %f, %f)\n", m_camera.direction().x, m_camera.direction().y, m_camera.direction().z);
 
             auto _voxel_patch = new btCompoundShape();
-            if (hphys::ChunkGridCollider::determine_candidate_colliding_voxels<TVS_VoxelShapeEvaluator>(m_player.ac, m_player.dc, m_player.cc, _voxel_patch)) {
+            if (hphys::ChunkGridCollider::determine_candidate_colliding_voxels<TVS_VoxelShapeEvaluator>(m_player.ac, m_player.dc, m_player.rbc, _voxel_patch)) {
                 btVector3 min_aabb, max_aabb;
                 _voxel_patch->getAabb(btTransform::getIdentity(), min_aabb, max_aabb);
 
@@ -577,8 +578,6 @@ public:
 
         m_player.ac.position   = hvox::EntityWorldPosition{0, static_cast<hvox::EntityWorldPositionCoord>(60) << 32, 0};
         m_player.ac.chunk_grid = m_chunk_grid;
-        m_player.cc.shape = new btCompoundShape();
-        m_player.cc.shape->addChildShape(btTransform::getIdentity(), new btBoxShape(btVector3{0.5f, 1.5f, 0.5f}));
         // TODO(Matthew): update this.
         m_player.dc.velocity   = f32v3(2.0f);
 
@@ -592,19 +591,20 @@ public:
         m_phys.world->getDebugDrawer()->setDebugMode(btIDebugDraw::DBG_DrawWireframe);
 
         {
+            btBoxShape* box = new btBoxShape(btVector3{0.5f, 1.5f, 0.5f});
             btQuaternion rotation;
             rotation.setEulerZYX(0.0f, 1.0f, 0.0f);
             btVector3 position = btVector3(m_camera.position().x, m_camera.position().y, m_camera.position().z);
             btDefaultMotionState* motion_state = new btDefaultMotionState(btTransform(rotation, position));
             btVector3 inertia;
             btScalar mass = 80.0f;
-            m_player.cc.shape->calculateLocalInertia(mass, inertia);
-            btRigidBody::btRigidBodyConstructionInfo body_info = btRigidBody::btRigidBodyConstructionInfo(mass, motion_state, m_player.cc.shape, inertia);
+            box->calculateLocalInertia(mass, inertia);
+            btRigidBody::btRigidBodyConstructionInfo body_info = btRigidBody::btRigidBodyConstructionInfo(mass, motion_state, box, inertia);
             body_info.m_restitution = 0.0f;
             body_info.m_friction = 1000.0f;
-            m_player_body = new btRigidBody(body_info);
-            m_player_body->setAngularFactor(0.0f);
-            m_phys.world->addRigidBody(m_player_body);
+            m_player.rbc.body = new btRigidBody(body_info);
+            m_player.rbc.body->setAngularFactor(0.0f);
+            m_phys.world->addRigidBody(m_player.rbc.body);
         }
 
         glCreateVertexArrays(1, &m_crosshair_vao);
@@ -669,11 +669,10 @@ protected:
     hg::GLSLProgram              m_shader, m_line_shader;
     hthread::ThreadWorkflowDAG   m_chunk_load_dag;
     struct {
-        hphys::CollidableComponent cc;
+        hphys::RigidBodyComponent rbc;
         hphys::AnchoredComponent   ac;
         hphys::DynamicComponent    dc;
     } m_player;
-    btRigidBody* m_player_body;
     struct {
         btDbvtBroadphase*                       broadphase;
         btDefaultCollisionConfiguration*        collision_config;
