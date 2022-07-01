@@ -19,8 +19,6 @@ void happ::AppBase::set_should_quit(bool should_quit /*= true*/) {
 void happ::AppBase::quit() {
     m_process_manager->dispose();
 
-    dispose();
-
 #if defined(HEMLOCK_USING_SDL)
     SDL_Quit();
 #endif // defined(HEMLOCK_USING_SDL)

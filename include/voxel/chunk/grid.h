@@ -58,13 +58,13 @@ namespace hemlock {
              *
              * @param time The time data for the frame.
              */
-            void update(TimeData time);
+            void update(FrameTime time);
             /**
              * @brief Draw loop for chunks.
              *
              * @param time The time data for the frame.
              */
-            void draw(TimeData time);
+            void draw(FrameTime time);
 
             // TODO(Matthew): move this out of here. we should look
             //                at Vulkan for how we might better architect drawing.

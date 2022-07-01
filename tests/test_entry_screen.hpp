@@ -16,10 +16,10 @@ public:
     { /* Empty. */ }
     virtual ~TestEntryScreen() { /* Empty */ };
 
-    virtual void update(TimeData) override {
+    virtual void update(hemlock::FrameTime) override {
         // Empty.
     }
-    virtual void draw(TimeData) override {
+    virtual void draw(hemlock::FrameTime) override {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         happ::WindowDimensions dims = m_process->window()->dimensions();
@@ -35,10 +35,10 @@ public:
             [&](hemlock::Sender, hui::KeyboardButtonEvent ev) {
                 switch (ev.physical_key) {
                 case hui::PhysicalKey::H_R:
-                    m_process->go_to_screen("test_render_screen", m_process->current_times());
+                    m_process->go_to_screen("test_render_screen", m_process->timer()->frame_times().back());
                     return;
                 case hui::PhysicalKey::H_V:
-                    m_process->go_to_screen("test_voxel_screen", m_process->current_times());
+                    m_process->go_to_screen("test_voxel_screen", m_process->timer()->frame_times().back());
                     return;
                 default:
                     break;

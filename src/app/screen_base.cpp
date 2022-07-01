@@ -22,10 +22,10 @@ void happ::ScreenBase::dispose() {
     m_state = ScreenState::NONE;
 }
 
-void happ::ScreenBase::start(TimeData) {
+void happ::ScreenBase::start(FrameTime) {
     m_state = ScreenState::RUNNING;
 }
 
-void happ::ScreenBase::end(TimeData) {
+void happ::ScreenBase::end(FrameTime) {
     m_state = ScreenState::NONE;
 }

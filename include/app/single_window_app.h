@@ -3,40 +3,33 @@
 
 #include "app/app_base.h"
 #include "app/process/process_base.h"
+#include "ui/input/manager.h"
 
 namespace hemlock {
-    class FpsLimiter;
-    namespace ui {
-        class InputManager;
-    }
-
     namespace app {
         class ScreenBase;
 
         class SingleWindowApp : public AppBase, public ProcessBase {
         public:
             SingleWindowApp() :
-                AppBase(),
-                m_input_manager(nullptr),
-                m_fps_limiter(nullptr)
+                AppBase(), ProcessBase()
             { /* Empty */ };
             virtual ~SingleWindowApp() { /* Empty */ };
 
-            virtual void init()    override;
+            virtual void init() override;
+            virtual void init(CALLEE_DELETE FrameTimer* timer);
+            virtual void init(f32 target_fps, size_t tracked_frames_count = 5);
             virtual void dispose() override;
 
             virtual void run() override;
 
-            hemlock::ui::InputManager* input_manager() const { return m_input_manager; }
+            hui::InputManager* input_manager() const { return const_cast<hui::InputManager*>(&m_input_manager); }
         protected:
             virtual void prepare_window() override;
 
-            void calculate_times();
-
             virtual void end_process() override { dispose(); }
 
-            hemlock::ui::InputManager* m_input_manager;
-            hemlock::FpsLimiter*       m_fps_limiter;
+            hui::InputManager m_input_manager;
         };
     }
 }

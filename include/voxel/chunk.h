@@ -24,7 +24,7 @@ namespace hemlock {
                            hmem::Handle<ChunkBlockPager> block_pager,
                     hmem::Handle<ChunkInstanceDataPager> instance_data_pager  );
 
-            void update(TimeData);
+            void update(FrameTime);
 
             ChunkID id() const { return position.id; }
 

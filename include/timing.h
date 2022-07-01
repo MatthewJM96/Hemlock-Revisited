@@ -2,36 +2,48 @@
 #define __hemlock_timing_h
 
 namespace hemlock {
-    class FpsTimer {
+    using FramePoint = std::chrono::steady_clock::time_point;
+    using FrameTime  = std::chrono::nanoseconds;
+    using FrameTimes = boost::circular_buffer<FrameTime>;
+
+    template <typename Units = std::chrono::milliseconds, typename Precision = f32>
+    Precision frame_time_to_floating(FrameTime frame_time) {
+        return static_cast<Precision>(std::chrono::duration_cast<Units>(frame_time).count());
+    }
+
+    class FrameTimer {
     public:
-        FpsTimer() { /* Empty. */ }
-        virtual ~FpsTimer() { /* Empty. */ }
+        FrameTimer(size_t frames_count = 5) :
+            m_frame_times(FrameTimes(frames_count))
+        { /* Empty. */ }
+        virtual ~FrameTimer() { /* Empty. */ }
 
-        virtual void begin();
-        virtual f64 end();
+        virtual void start();
+        virtual void frame_end();
 
-        f64 frame_time() const { return m_frame_time; }
-        f64 fps()        const { return m_fps; }
+        const FrameTimes& frame_times()         { return m_frame_times;         }
+                FrameTime latest_frame_time()   { return m_frame_times.back();  }
+
+        f32 fps();
     protected:
-        f64  m_frame_time = 0.0;
-        f64  m_fps        = 0.0;
-        ui32 m_start_time =   0;
-
-        void calculate_fps();
+        FramePoint  m_last_frame_point;
+        FrameTimes  m_frame_times;
     };
 
-    class FpsLimiter : public FpsTimer {
+    class FrameLimiter : public FrameTimer {
     public:
-        FpsLimiter() { /* Empty. */ }
-        virtual ~FpsLimiter() { /* Empty. */ }
+        FrameLimiter(size_t frames_count, f32 target_fps) :
+            FrameTimer(frames_count), m_target_fps(target_fps)
+        { /* Empty. */ }
+        virtual ~FrameLimiter() { /* Empty. */ }
 
-        void init(f64 max_fps) { m_max_fps = max_fps; }
+        f32 target_fps() { return m_target_fps; }
 
-        void set_max_fps(f64 max_fps) { m_max_fps = max_fps; }
+        void set_target_fps(f32 target_fps) { m_target_fps = target_fps; }
 
-        f64 end();
+        virtual void frame_end() override;
     private:
-        f64 m_max_fps;
+        f32 m_target_fps;
     };
 }
 

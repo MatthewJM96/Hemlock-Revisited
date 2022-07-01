@@ -171,11 +171,6 @@ struct colour4 {
     }
 };
 
-struct TimeData {
-    f64 total;
-    f64 frame;
-};
-
 namespace hemlock {
     template<typename ReturnType, typename... Args>
     struct Delegate;

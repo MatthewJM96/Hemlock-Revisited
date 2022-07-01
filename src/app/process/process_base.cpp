@@ -18,9 +18,6 @@ void happ::ProcessBase::init() {
 
     m_should_end_process = false;
 
-    m_current_times  = {};
-    m_previous_times = {};
-
     prepare_window();
 
     prepare_screens();
@@ -47,7 +44,7 @@ bool happ::ProcessBase::add_screen(Screen&& screen) {
     return true;
 }
 
-bool happ::ProcessBase::go_to_screen(const std::string& name, TimeData time) {
+bool happ::ProcessBase::go_to_screen(const std::string& name, FrameTime time) {
     auto it = m_screens.find(name);
     if (it == m_screens.end()) return false;
 
@@ -81,12 +78,12 @@ bool happ::ProcessBase::handle_screen_requests() {
 
     switch (m_current_screen->state()) {
         case ScreenState::CHANGE_NEXT:
-            m_current_screen->end(m_current_times);
+            m_current_screen->end(m_timer->frame_times().back());
 
             goto_next_screen();
 
             if (m_current_screen != nullptr) {
-                m_current_screen->start(m_current_times);
+                m_current_screen->start(m_timer->frame_times().back());
             } else {
                 set_should_end_process();
                 return false;
@@ -94,12 +91,12 @@ bool happ::ProcessBase::handle_screen_requests() {
             return true;
 
         case ScreenState::CHANGE_PREV:
-            m_current_screen->end(m_current_times);
+            m_current_screen->end(m_timer->frame_times().back());
 
             goto_prev_screen();
 
             if (m_current_screen != nullptr) {
-                m_current_screen->start(m_current_times);
+                m_current_screen->start(m_timer->frame_times().back());
             } else {
                 set_should_end_process();
                 return false;

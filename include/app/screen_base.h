@@ -1,6 +1,5 @@
 #ifndef __hemlock_app_screen_h
 #define __hemlock_app_screen_h
-
 namespace hemlock {
     namespace app {
         class ProcessBase;
@@ -32,11 +31,11 @@ namespace hemlock {
             virtual void init(const std::string& name, ProcessBase* process);
             virtual void dispose(); 
 
-            virtual void start (TimeData time);
-            virtual void end   (TimeData time);
+            virtual void start (FrameTime time);
+            virtual void end   (FrameTime time);
 
-            virtual void update (TimeData time) = 0;
-            virtual void draw   (TimeData time) = 0;
+            virtual void update (FrameTime time) = 0;
+            virtual void draw   (FrameTime time) = 0;
 
             bool is_initialised() const { return m_initialised; }
             bool is_running()     const { return m_state == ScreenState::RUNNING; }
