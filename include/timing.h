@@ -8,7 +8,7 @@ namespace hemlock {
 
     template <typename Units = std::chrono::milliseconds, typename Precision = f32>
     Precision frame_time_to_floating(FrameTime frame_time) {
-        return static_cast<Precision>(std::chrono::duration_cast<Units>(frame_time).count());
+        return static_cast<Precision>(frame_time.count()) / static_cast<Precision>(Units::period::den);
     }
 
     class FrameTimer {
