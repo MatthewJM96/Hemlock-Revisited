@@ -96,7 +96,8 @@ set(Hemlock_Requirements
     libpng/1.6.37
     concurrentqueue/1.0.3
     boost/1.78.0
-    # bullet3/3.24
+    bullet3/3.24
+    entt/3.10.1
 )
 
 if (HEMLOCK_USING_OPENGL)
@@ -128,7 +129,8 @@ find_package(SDL2_ttf REQUIRED)
 find_package(PNG REQUIRED)
 find_package(concurrentqueue REQUIRED)
 find_package(Boost COMPONENTS iostreams REQUIRED)
-# find_package(Bullet REQUIRED)
+find_package(Bullet REQUIRED)
+find_package(EnTT REQUIRED)
 
 if (HEMLOCK_USING_SDL)
     add_compile_definitions(HEMLOCK_USING_SDL=1)
@@ -200,7 +202,8 @@ set(Hemlock_Include_Dirs
     ${PNG_INCLUDE_DIRS}
     ${concurrentqueue_INCLUDE_DIRS}
     ${Boost_INCLUDE_DIRS}
-    # ${Bullet_INCLUDE_DIRS}
+    ${Bullet_INCLUDE_DIRS}
+    ${EnTT_INCLUDE_DIRS}
 )
 
 if (HEMLOCK_USING_OPENGL)
@@ -211,10 +214,14 @@ if (HEMLOCK_USING_OPENGL)
 endif()
 
 target_include_directories(Hemlock_Revisited
+    PUBLIC
+    "${PROJECT_SOURCE_DIR}/include"
+)
+
+target_include_directories(Hemlock_Revisited
     SYSTEM
     PUBLIC
     ${Hemlock_Include_Dirs}
-    "${PROJECT_SOURCE_DIR}/include"
 )
 
 if (UNIX OR MINGW)
@@ -304,7 +311,7 @@ target_link_libraries(Hemlock_Revisited
     SDL2::SDL2
     SDL2_ttf::SDL2_ttf
     Boost::iostreams
-    # Bullet::Bullet
+    Bullet::Bullet
 )
 
 if(CMAKE_BUILD_TYPE STREQUAL "Release")

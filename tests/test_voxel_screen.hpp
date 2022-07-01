@@ -1,12 +1,16 @@
 #ifndef __hemlock_tests_test_voxel_screen_hpp
 #define __hemlock_tests_test_voxel_screen_hpp
 
+#include <bullet/BulletCollision/CollisionShapes/btBoxShape.h>
+#include <bullet/btBulletDynamicsCommon.h>
 #include <FastNoise/FastNoise.h>
 
 #include "memory/handle.hpp"
 #include "voxel/chunk/generator_task.hpp"
 #include "voxel/chunk/mesh/greedy_task.hpp"
 #include "voxel/ray.h"
+
+#include "physics/voxel/chunk_grid_collider.hpp"
 
 #include "iomanager.hpp"
 
@@ -114,6 +118,79 @@ struct TVS_VoxelGenerator {
     }
 };
 
+struct TVS_VoxelShapeEvaluator {
+    btCollisionShape* operator()(hvox::Block b, btTransform&) const {
+        if (b == hvox::Block{1}) {
+            return new btBoxShape(btVector3{0.5f, 0.5f, 0.5f});
+        }
+        return nullptr;
+    }
+};
+
+class VoxelPhysDrawer : public btIDebugDraw {
+public:
+    VoxelPhysDrawer(hcam::BasicFirstPersonCamera* camera, hg::GLSLProgram* shader) : btIDebugDraw() {
+        m_camera = camera;
+        m_line_shader = shader;
+
+        glCreateVertexArrays(1, &m_vao);
+
+        glCreateBuffers(1, &m_vbo);
+        glNamedBufferData(
+            m_vbo,
+            sizeof(f32v3) * 2,
+            nullptr,
+            GL_DYNAMIC_DRAW
+        );
+
+        glVertexArrayVertexBuffer(m_vao, 0, m_vbo, 0, sizeof(f32v3));
+
+        glEnableVertexArrayAttrib(m_vao, 0);
+        glVertexArrayAttribFormat(m_vao, 0, 3, GL_FLOAT, GL_FALSE, 0);
+        glVertexArrayAttribBinding(m_vao, 0, 0);
+    }
+    virtual ~VoxelPhysDrawer() { /* Empty. */ }
+
+    virtual void drawLine(const btVector3& from, const btVector3& to, const btVector3&) override {
+        f32v3 points[2] = {
+            f32v3{
+                from.x()/* + m_camera->position().x*/,
+                from.y()/* + m_camera->position().y*/,
+                from.z()/* + m_camera->position().z*/
+            },
+            f32v3{
+                to.x()/* + m_camera->position().x*/,
+                to.y()/* + m_camera->position().y*/,
+                to.z()/* + m_camera->position().z*/
+            }
+        };
+
+        glNamedBufferSubData(m_vbo, 0, 2 * sizeof(f32v3), reinterpret_cast<void*>(&points[0]));
+
+        f32v3 _colour = f32v3{1.0f, 1.0f, 0.0f};
+        glUniformMatrix4fv(m_line_shader->uniform_location("view_proj"),  1, GL_FALSE, &m_camera->view_projection_matrix()[0][0]);
+        glUniform3fv(m_line_shader->uniform_location("colour"), 1, &_colour[0]);
+
+        glBindVertexArray(m_vao);
+        glDrawArrays(GL_LINES, 0, 2);
+    }
+
+	virtual void drawContactPoint(const btVector3&, const btVector3&, btScalar, int, const btVector3&) override { /* Empty. */ }
+
+	virtual void reportErrorWarning(const char* warning_string) override { debug_printf(warning_string); }
+
+	virtual void draw3dText(const btVector3&, const char*) override { /* Empty. */ }
+
+	virtual void setDebugMode(int debug_mode) override { m_debug_mode = debug_mode; }
+
+	virtual int getDebugMode() const override { return m_debug_mode; }
+protected:
+    int m_debug_mode;
+    GLuint m_vao, m_vbo;
+    hcam::BasicFirstPersonCamera* m_camera;
+    hg::GLSLProgram* m_line_shader;
+};
+
 
 class TestVoxelScreen : public happ::ScreenBase {
 public:
@@ -144,6 +221,11 @@ public:
 
     virtual void update(TimeData time) override {
         static f32v3 last_pos{0.0f};
+
+        if (m_input_manager->is_pressed(hui::PhysicalKey::H_G)) {
+            m_phys.world->setGravity(btVector3(0, -9.8f, 0));
+            debug_printf("Turning on gravity.\n");
+        }
 
         static bool do_chunk_check = false;
 
@@ -219,7 +301,13 @@ public:
         }
 #endif
 
-        m_camera.offset_position(delta_pos);
+        m_player.ac.position += hvox::EntityWorldPosition{f32v3{delta_pos.x, 0.0f, delta_pos.z} * static_cast<f32>(1ll << 32)};
+        m_camera.offset_position(f32v3{delta_pos.x, 0.0f, delta_pos.z});
+        {
+            auto transform = m_player_body->getWorldTransform();
+            transform.setOrigin(btVector3(m_camera.position().x, m_camera.position().y, m_camera.position().z));
+            m_player_body->setWorldTransform(transform);
+        }
         m_camera.update();
 
         f32v3 current_pos = glm::floor(m_camera.position() / static_cast<f32>(CHUNK_LENGTH));
@@ -288,9 +376,70 @@ public:
 
         m_chunk_grid->update(time);
 
+        static btRigidBody*     voxel_patch_body    = nullptr;
+        static btCompoundShape* voxel_patch         = nullptr;
+
+        if (voxel_patch_body) {
+            m_phys.world->removeRigidBody(voxel_patch_body);
+            delete voxel_patch_body;
+            voxel_patch_body = nullptr;
+        }
+        if (voxel_patch) {
+            delete voxel_patch;
+            voxel_patch = nullptr;
+        }
+
+        voxel_patch = new btCompoundShape();
+        if (hphys::ChunkGridCollider::determine_candidate_colliding_voxels<TVS_VoxelShapeEvaluator>(m_player.ac, m_player.dc, m_player.cc, voxel_patch)) {
+            btTransform transform = btTransform::getIdentity();
+            transform.setOrigin(btVector3(glm::floor(m_camera.position().x), glm::floor(m_camera.position().y), glm::floor(m_camera.position().z)));
+            btDefaultMotionState* motion_state = new btDefaultMotionState(transform);
+            btVector3 inertia;
+            btScalar mass = 0.0f;
+            voxel_patch->calculateLocalInertia(mass, inertia);
+            btRigidBody::btRigidBodyConstructionInfo body_info = btRigidBody::btRigidBodyConstructionInfo(mass, motion_state, voxel_patch, inertia);
+            body_info.m_restitution = 0.0f;
+            body_info.m_friction = 1.0f;
+            voxel_patch_body = new btRigidBody(body_info);
+            m_phys.world->addRigidBody(voxel_patch_body);
+        }
+
+        m_player_body->activate();
+        m_phys.world->stepSimulation(time.frame / 1000.0f);
+
+        m_camera.set_position(f32v3{
+            m_player_body->getWorldTransform().getOrigin().x(),
+            m_player_body->getWorldTransform().getOrigin().y(),
+            m_player_body->getWorldTransform().getOrigin().z()
+        });
+        m_player.ac.position = hvox::EntityWorldPosition{
+            static_cast<hvox::EntityWorldPositionCoord>(m_camera.position().x * static_cast<f32>(1ll << 32)),
+            static_cast<hvox::EntityWorldPositionCoord>(m_camera.position().y * static_cast<f32>(1ll << 32)),
+            static_cast<hvox::EntityWorldPositionCoord>(m_camera.position().z * static_cast<f32>(1ll << 32))
+        };
+
         if (do_chunk_check) {
-            debug_printf("Camera at:         (%d, %d, %d)\n", static_cast<i32>(current_pos.x), static_cast<i32>(current_pos.y), static_cast<i32>(current_pos.z));
+            debug_printf("Frame time: %f\n", time.frame);
+
+            debug_printf("Camera at:         (%f, %f, %f)\n", m_camera.position().x, m_camera.position().y, m_camera.position().z);
             debug_printf("Camera looking at: (%f, %f, %f)\n", m_camera.direction().x, m_camera.direction().y, m_camera.direction().z);
+
+            auto _voxel_patch = new btCompoundShape();
+            if (hphys::ChunkGridCollider::determine_candidate_colliding_voxels<TVS_VoxelShapeEvaluator>(m_player.ac, m_player.dc, m_player.cc, _voxel_patch)) {
+                btVector3 min_aabb, max_aabb;
+                _voxel_patch->getAabb(btTransform::getIdentity(), min_aabb, max_aabb);
+
+                debug_printf("Voxel patch spans:\n    (%f, %f, %f)\n    (%f, %f, %f)\n",
+                            min_aabb.x() + m_camera.position().x,
+                            min_aabb.y() + m_camera.position().y,
+                            min_aabb.z() + m_camera.position().z,
+                            max_aabb.x() + m_camera.position().x,
+                            max_aabb.y() + m_camera.position().y,
+                            max_aabb.z() + m_camera.position().z
+                );
+            } else {
+                debug_printf("No voxels in voxel patch.\n");
+            }
 
             debug_printf("Chunks still not unloaded:\n");
             for (auto& handle : m_unloading_chunks) {
@@ -323,6 +472,8 @@ public:
         m_shader.unuse();
 
         m_line_shader.use();
+
+        m_phys.world->debugDrawWorld();
 
         f32v3 line_colour{1.0f};
 
@@ -422,6 +573,38 @@ public:
             }}
         );
 
+        m_player.ac.position   = hvox::EntityWorldPosition{0, static_cast<hvox::EntityWorldPositionCoord>(60) << 32, 0};
+        m_player.ac.chunk_grid = m_chunk_grid;
+        m_player.cc.shape = new btCompoundShape();
+        m_player.cc.shape->addChildShape(btTransform::getIdentity(), new btBoxShape(btVector3{0.5f, 1.5f, 0.5f}));
+        // TODO(Matthew): update this.
+        m_player.dc.velocity   = f32v3(2.0f);
+
+        m_phys.broadphase       = new btDbvtBroadphase();
+        m_phys.collision_config = new btDefaultCollisionConfiguration();
+        m_phys.dispatcher       = new btCollisionDispatcher(m_phys.collision_config);
+        m_phys.solver           = new btSequentialImpulseConstraintSolver();
+        m_phys.world            = new btDiscreteDynamicsWorld(m_phys.dispatcher, m_phys.broadphase, m_phys.solver, m_phys.collision_config);
+        m_phys.world->setGravity(btVector3(0, 0, 0));
+        m_phys.world->setDebugDrawer(new VoxelPhysDrawer(&m_camera, &m_line_shader));
+        m_phys.world->getDebugDrawer()->setDebugMode(btIDebugDraw::DBG_DrawWireframe);
+
+        {
+            btQuaternion rotation;
+            rotation.setEulerZYX(0.0f, 1.0f, 0.0f);
+            btVector3 position = btVector3(m_camera.position().x, m_camera.position().y, m_camera.position().z);
+            btDefaultMotionState* motion_state = new btDefaultMotionState(btTransform(rotation, position));
+            btVector3 inertia;
+            btScalar mass = 80.0f;
+            m_player.cc.shape->calculateLocalInertia(mass, inertia);
+            btRigidBody::btRigidBodyConstructionInfo body_info = btRigidBody::btRigidBodyConstructionInfo(mass, motion_state, m_player.cc.shape, inertia);
+            body_info.m_restitution = 0.0f;
+            body_info.m_friction = 1000.0f;
+            m_player_body = new btRigidBody(body_info);
+            m_player_body->setAngularFactor(0.0f);
+            m_phys.world->addRigidBody(m_player_body);
+        }
+
         glCreateVertexArrays(1, &m_crosshair_vao);
 
         glCreateBuffers(1, &m_crosshair_vbo);
@@ -483,6 +666,19 @@ protected:
     hmem::Handle<hvox::ChunkGrid>   m_chunk_grid;
     hg::GLSLProgram              m_shader, m_line_shader;
     hthread::ThreadWorkflowDAG   m_chunk_load_dag;
+    struct {
+        hphys::CollidableComponent cc;
+        hphys::AnchoredComponent   ac;
+        hphys::DynamicComponent    dc;
+    } m_player;
+    btRigidBody* m_player_body;
+    struct {
+        btDbvtBroadphase*                       broadphase;
+        btDefaultCollisionConfiguration*        collision_config;
+        btCollisionDispatcher*                  dispatcher;
+        btSequentialImpulseConstraintSolver*    solver;
+        btDiscreteDynamicsWorld*                world;
+    } m_phys;
 
     bool m_draw_chunk_outlines;
 

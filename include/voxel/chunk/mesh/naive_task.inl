@@ -44,14 +44,14 @@ template <hvox::ChunkMeshComparator MeshComparator>
 void hvox::ChunkNaiveMeshTask<MeshComparator>::execute(ChunkLoadThreadState* state, ChunkTaskQueue* task_queue) {
     auto chunk = m_chunk.lock();
 
-    if (chunk == nullptr) return false;
+    if (chunk == nullptr) return;
 
     chunk->mesh_task_active.store(true, std::memory_order_release);
 
     {
         auto chunk_grid = m_chunk_grid.lock();
 
-        if (chunk_grid == nullptr) return false;
+        if (chunk_grid == nullptr) return;
 
         // Only execute if all preloaded neighbouring chunks have at least been generated.
         auto [ _, neighbours_in_required_state ] =
@@ -65,7 +65,7 @@ void hvox::ChunkNaiveMeshTask<MeshComparator>::execute(ChunkLoadThreadState* sta
             mesh_task->set_state(m_chunk, m_chunk_grid);
             task_queue->enqueue(state->producer_token, { mesh_task, true });
             chunk->pending_task.store(ChunkTaskKind::MESH, std::memory_order_release);
-            return false;
+            return;
         }
     }
 

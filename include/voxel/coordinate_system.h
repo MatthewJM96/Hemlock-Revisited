@@ -30,6 +30,15 @@ namespace hemlock {
         using BlockWorldPosition      = i32v3;
 
         /**
+         * @brief Position of entity in world-space.
+         * Note that these values are 32/32 fixed-point
+         * numbers.
+         */
+        using EntityWorldPositionCoord = i64;
+        using EntityWorldPosition2D    = i64v2;
+        using EntityWorldPosition      = i64v3;
+
+        /**
          * @brief Unique ID of a column.
          */
         using ColumnID = ui64;
@@ -135,15 +144,15 @@ namespace std {
     template <>
     struct hash<hvox::ColumnWorldPosition> {
         std::size_t operator()(hvox::ColumnWorldPosition cwp) const {
-            std::hash<hvox::ColumnID> hash;
-            return hash(cwp.id);
+            std::hash<hvox::ColumnID> _hash;
+            return _hash(cwp.id);
         }
     };
     template <>
     struct hash<hvox::ChunkGridPosition> {
         std::size_t operator()(hvox::ChunkGridPosition cwp) const {
-            std::hash<hvox::ChunkID> hash;
-            return hash(cwp.id);
+            std::hash<hvox::ChunkID> _hash;
+            return _hash(cwp.id);
         }
     };
 }
