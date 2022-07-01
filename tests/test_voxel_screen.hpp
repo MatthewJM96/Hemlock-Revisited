@@ -292,15 +292,16 @@ public:
         }
 
 #if defined(DEBUG)
-        static f64 last_time = 0.0;
+        static f64 countdown = 1000.0;
+        countdown -= static_cast<f64>(std::chrono::duration_cast<std::chrono::milliseconds>(time).count());
         if (m_input_manager->is_pressed(hui::PhysicalKey::H_T)) {
-            if (last_time + 1000.0 < time.total) {
-                last_time = time.total;
+            if (countdown < 0.0) {
                 f32v3 pos = m_camera.position();
                 f32v3 dir = m_camera.direction();
                 debug_printf("Camera Coords: (%f, %f, %f)\nCamera Direction: (%f, %f, %f)\n", pos.x, pos.y, pos.z, dir.x, dir.y, dir.z);
             }
         }
+        if (countdown < 0.0) countdown = 1000.0;
 #endif
 
         m_player.ac.position += hvox::EntityWorldPosition{f32v3{delta_pos.x, 0.0f, delta_pos.z} * static_cast<f32>(1ll << 32)};
@@ -407,7 +408,7 @@ public:
         }
 
         m_player_body->activate();
-        m_phys.world->stepSimulation(time.frame / 1000.0f);
+        m_phys.world->stepSimulation(hemlock::frame_time_to_floating<std::chrono::seconds, btScalar>(time));
 
         m_camera.set_position(f32v3{
             m_player_body->getWorldTransform().getOrigin().x(),
