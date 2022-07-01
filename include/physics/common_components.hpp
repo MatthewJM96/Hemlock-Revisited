@@ -6,6 +6,8 @@
 namespace hemlock {
     namespace physics {
         // TODO(Matthew): fixed-point coordinates here as in voxel coordinate system, likewise for time.
+        //                  Using them but should consider a library like fpm (perhaps integrates with
+        //                  GLM) to make the maths cleaner.
         // TODO(Matthew): All dynamic (extended?) components can be anchored to some voxel (chunk) grid
         //                their global coordinates being in fixed-point on that grid, with floating-point
         //                being used by Bullet relative to those dynamic (extended?) components' origins.
@@ -30,7 +32,7 @@ namespace hemlock {
         };
 
         struct CollidableComponent {
-            btCompoundShape shape;
+            btCompoundShape* shape = nullptr;
         };
     }
 }

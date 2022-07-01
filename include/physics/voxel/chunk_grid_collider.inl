@@ -1,7 +1,7 @@
 #include "voxel/chunk/grid.h"
 
 template <hphys::VoxelShapeEvaluator ShapeEvaluator>
-void hphys::ChunkGridCollider::determine_candidate_colliding_voxels(
+bool hphys::ChunkGridCollider::determine_candidate_colliding_voxels(
       AnchoredComponent ac,
        DynamicComponent dc,
     CollidableComponent cc,
@@ -10,8 +10,8 @@ void hphys::ChunkGridCollider::determine_candidate_colliding_voxels(
     const ShapeEvaluator shape_evaluator = {};
 
     auto chunk_grid = ac.chunk_grid.lock();
-    // TODO(Matthew): too strict?
-    assert(chunk_grid != nullptr);
+    if (chunk_grid == nullptr)
+        return false;
 
     // TODO(Matthew): This should be set somehow to reflect a reasonable amount
     //                of time a physics collision handling will occur over
@@ -23,7 +23,7 @@ void hphys::ChunkGridCollider::determine_candidate_colliding_voxels(
     const f32 dt = 1.0f;
 
     btVector3 min_aabb, max_aabb;
-    cc.shape.getAabb(btTransform::getIdentity(), min_aabb, max_aabb);
+    cc.shape->getAabb(btTransform::getIdentity(), min_aabb, max_aabb);
 
     f32v3 max_ds = glm::abs(dc.velocity) * dt;
 
@@ -70,7 +70,13 @@ void hphys::ChunkGridCollider::determine_candidate_colliding_voxels(
     );
     auto old_chunk_coord = new_chunk_coord;
 
+    bool any_collidable = false;
+
     auto chunk = chunk_grid->chunk(new_chunk_coord);
+    // TODO(Matthew): we don't want to fall through unloaded chunks.
+    if (chunk == nullptr)
+        return false;
+
     std::shared_lock lock(chunk->blocks_mutex);
     for (auto x = min_world_block_coord.x; x < max_world_block_coord.x; ++x) {
         for (auto y = min_world_block_coord.y; y < max_world_block_coord.y; ++y) {
@@ -89,14 +95,6 @@ void hphys::ChunkGridCollider::determine_candidate_colliding_voxels(
                 btTransform transform = btTransform::getIdentity();
                 btCollisionShape* shape = shape_evaluator(block, transform);
                 if (shape) {
-                    // TODO(Matthew): Correct this, we actually need to do the full fixed-point
-                    //                subtraction and then convert the fixed-point to a correct
-                    //                float, not truncate the position of the colliding entity.
-                    // transform.getOrigin() += btVector3{
-                    //     static_cast<btScalar>(x - (ac.position.x >> 32)),
-                    //     static_cast<btScalar>(y - (ac.position.y >> 32)),
-                    //     static_cast<btScalar>(z - (ac.position.z >> 32))
-                    // };
                     // TODO(Matthew): In general, we need to make sure we are getting the
                     //                coordinate systems of the colliding entity and the patch
                     //                of the chunk grid voxels aligned correctly - at whichever
@@ -110,8 +108,12 @@ void hphys::ChunkGridCollider::determine_candidate_colliding_voxels(
                         static_cast<btScalar>(z) - half_range.z() - static_cast<btScalar>(min_world_block_coord.z)
                     };
                     voxels->addChildShape(transform, shape);
+
+                    any_collidable = true;
                 }
             }
         }
     }
+
+    return any_collidable;
 }
