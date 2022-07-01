@@ -55,6 +55,12 @@ void hphys::ChunkGridCollider::determine_candidate_colliding_voxels(
         static_cast<hvox::BlockWorldPositionCoord>(max_world_entity_coord.z >> 32)
     };
 
+    btVector3 half_range = btVector3{
+        (static_cast<btScalar>(max_world_block_coord.x) - static_cast<btScalar>(min_world_block_coord.x)) / 2.0f,
+        (static_cast<btScalar>(max_world_block_coord.y) - static_cast<btScalar>(min_world_block_coord.y)) / 2.0f,
+        (static_cast<btScalar>(max_world_block_coord.z) - static_cast<btScalar>(min_world_block_coord.z)) / 2.0f
+    };
+
     auto new_chunk_coord = hvox::chunk_grid_position(
         hvox::BlockWorldPosition{
             min_world_block_coord.x,
@@ -82,8 +88,29 @@ void hphys::ChunkGridCollider::determine_candidate_colliding_voxels(
 
                 btTransform transform = btTransform::getIdentity();
                 btCollisionShape* shape = shape_evaluator(block, transform);
-                if (shape)
+                if (shape) {
+                    // TODO(Matthew): Correct this, we actually need to do the full fixed-point
+                    //                subtraction and then convert the fixed-point to a correct
+                    //                float, not truncate the position of the colliding entity.
+                    // transform.getOrigin() += btVector3{
+                    //     static_cast<btScalar>(x - (ac.position.x >> 32)),
+                    //     static_cast<btScalar>(y - (ac.position.y >> 32)),
+                    //     static_cast<btScalar>(z - (ac.position.z >> 32))
+                    // };
+                    // TODO(Matthew): In general, we need to make sure we are getting the
+                    //                coordinate systems of the colliding entity and the patch
+                    //                of the chunk grid voxels aligned correctly - at whichever
+                    //                point in the collision calculation process bullet wants
+                    //                that.
+                    //                    Probably here we want to just subtract the average
+                    //                    like so:
+                    transform.getOrigin() += btVector3{
+                        static_cast<btScalar>(x) - half_range.x() - static_cast<btScalar>(min_world_block_coord.x),
+                        static_cast<btScalar>(y) - half_range.y() - static_cast<btScalar>(min_world_block_coord.y),
+                        static_cast<btScalar>(z) - half_range.z() - static_cast<btScalar>(min_world_block_coord.z)
+                    };
                     voxels->addChildShape(transform, shape);
+                }
             }
         }
     }
