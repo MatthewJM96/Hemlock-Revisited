@@ -1,6 +1,8 @@
 #ifndef __hemlock_physics_common_components_hpp
 #define __hemlock_physics_common_components_hpp
 
+#include <bullet/BulletCollision/CollisionShapes/btCompoundShape.h>
+
 namespace hemlock {
     namespace physics {
         // TODO(Matthew): fixed-point coordinates here as in voxel coordinate system, likewise for time.
@@ -15,20 +17,21 @@ namespace hemlock {
         //                  for small numbers.
 
 
+        // TODO(Matthew): Do we need this? For now keeping location in AnchoredComponent
+        //                as position type choice is dependent on if we are talking about
+        //                a chunk grid, a space system, etc.
         struct StaticComponent {
             f32v3 position;
         };
 
         // TODO(Matthew): get bullet working and incorporate shapes here.
-        // TODO(Matthew): can use StaticComponent AND NOT DynamicComponent group/view,
-        //                but could just inheriting StaticComponent make sense here?
         struct DynamicComponent {
             f32v3 velocity;
         };
-        struct DynamicCollidableComponent {
-            f32v3 size;
-        };
 
+        struct CollidableComponent {
+            btCompoundShape shape;
+        };
     }
 }
 namespace hphys = hemlock::physics;

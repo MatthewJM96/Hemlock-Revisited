@@ -8,6 +8,8 @@
 #include "voxel/chunk/mesh/greedy_task.hpp"
 #include "voxel/ray.h"
 
+#include "physics/voxel/chunk_grid_collider.hpp"
+
 #include "iomanager.hpp"
 
 #if defined(DEBUG)
