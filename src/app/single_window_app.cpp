@@ -1,6 +1,5 @@
 #include "stdafx.h"
 
-#include "timing.h"
 #include "app/screen_base.h"
 #include "app/window/window.h"
 #include "ui/input/dispatcher.h"
@@ -9,12 +8,14 @@
 #include "app/single_window_app.h"
 
 void happ::SingleWindowApp::init() {
-    m_input_manager = new hui::InputManager();
-    hui::InputDispatcher::instance()->init(m_input_manager);
-    hui::InputDispatcher::instance()->on_quit += &handle_external_quit;
+    init(new FrameTimer());
+}
 
-    m_fps_limiter = new FpsLimiter();
-    m_fps_limiter->init(60.0); // TODO(Matthew): Get max FPS from user preferences.
+void happ::SingleWindowApp::init(FrameTimer* timer) {
+    m_timer = timer;
+
+    hui::InputDispatcher::instance()->init(&m_input_manager);
+    hui::InputDispatcher::instance()->on_quit += &handle_external_quit;
 
 #if defined(HEMLOCK_USING_DEVIL)
     ilutRenderer(ILUT_OPENGL);
@@ -24,12 +25,15 @@ void happ::SingleWindowApp::init() {
     ProcessBase::init();
 }
 
-void happ::SingleWindowApp::dispose() {
-    m_input_manager->dispose();
-    delete m_input_manager;
-    m_input_manager = nullptr;
+void happ::SingleWindowApp::init(f32 target_fps, size_t tracked_frames_count /*= 5*/) {
+    init(new FrameLimiter(tracked_frames_count, target_fps));
+}
 
-    delete m_fps_limiter;
+void happ::SingleWindowApp::dispose() {
+    m_input_manager.dispose();
+
+    delete m_timer;
+    m_timer = nullptr;
 
     ProcessBase::dispose();
 
@@ -41,21 +45,19 @@ void happ::SingleWindowApp::dispose() {
 void happ::SingleWindowApp::run() {
     init();
 
+    m_timer->start();
+
     while (!m_should_quit) {
-        m_fps_limiter->begin();
-
-        calculate_times();
-
         SDL_PumpEvents();
 
         // Update screen if it is in a state ready to act.
         if (handle_screen_requests()) {
-            m_current_screen->update(m_current_times);
+            m_current_screen->update(m_timer->frame_times().back());
 
             // Draw screen if it is still in a state ready to
             // act after the update phase.
             if (handle_screen_requests()) {
-                m_current_screen->draw(m_current_times);
+                m_current_screen->draw(m_timer->frame_times().back());
             }
         }
 
@@ -64,11 +66,11 @@ void happ::SingleWindowApp::run() {
 #if defined(OUTPUT_FPS)
         static i32 i = 0;
         if (i++ % 20 == 0) {
-            std::cout << "FPS: " << m_fps_limiter->getFPS() << std::endl;
+            printf("FPS: %f\n", m_timer->fps());
         }
 #endif
 
-        m_fps_limiter->end();
+        m_timer->frame_end();
     }
 
     // TODO(Matthew): need to make sure thread pools are properly cleaned up.
@@ -113,11 +115,4 @@ void happ::SingleWindowApp::prepare_window() {
     glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &nr_attributes);
     debug_printf("Maximum # of vertex attributes supported: %d.\n", nr_attributes);
 #endif // defined(HEMLOCK_USING_OPENGL)
-}
-
-void happ::SingleWindowApp::calculate_times() {
-    m_previous_times = m_current_times;
-
-    m_current_times.frame  = m_fps_limiter->frame_time();
-    m_current_times.total += m_current_times.frame;
 }

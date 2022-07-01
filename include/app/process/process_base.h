@@ -30,13 +30,11 @@ namespace hemlock {
 
             bool add_screen(Screen&& screen);
 
-            bool go_to_screen(const std::string& name, TimeData time);
+            bool go_to_screen(const std::string& name, FrameTime time);
 
             WindowBase* window()         { return m_window;         }
             ScreenBase* current_screen() { return m_current_screen; }
-
-            TimeData current_times()  { return m_current_times;  }
-            TimeData previous_times() { return m_previous_times; }
+            FrameTimer* timer()          { return m_timer;          }
 
             bool should_end_process() { return m_should_end_process; }
             void set_should_end_process(bool should_end_process = true);
@@ -66,12 +64,11 @@ namespace hemlock {
 
             volatile bool m_should_end_process;
 
-            TimeData m_current_times, m_previous_times;
-
             Screens     m_screens;
             ScreenBase* m_current_screen;
 
             WindowBase* m_window;
+            FrameTimer* m_timer;
         };
     }
 }

@@ -67,8 +67,8 @@ namespace hemlock {
             ui32 page_size()       const { return m_page_size;                                            };
             ui32 block_page_size() const { return m_page_size * CHUNK_VOLUME / 2; };
 
-            void update(TimeData time);
-            void draw(TimeData time);
+            void update(FrameTime time);
+            void draw(FrameTime time);
 
             /**
              * @brief Adds a chunk to the renderer, the

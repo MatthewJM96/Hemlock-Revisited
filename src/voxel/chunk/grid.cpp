@@ -100,7 +100,7 @@ void hvox::ChunkGrid::dispose() {
     m_thread_pool.dispose();
 }
 
-void hvox::ChunkGrid::update(TimeData time) {
+void hvox::ChunkGrid::update(FrameTime time) {
     for (auto chunk : m_chunks) {
         chunk.second->update(time);
     }
@@ -108,7 +108,7 @@ void hvox::ChunkGrid::update(TimeData time) {
     m_renderer.update(time);
 }
 
-void hvox::ChunkGrid::draw(TimeData time) {
+void hvox::ChunkGrid::draw(FrameTime time) {
     m_renderer.draw(time);
 }
 

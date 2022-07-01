@@ -39,7 +39,7 @@ void hvox::Chunk::init(
     state.store(ChunkState::PRELOADED, std::memory_order_release);
 }
 
-void hvox::Chunk::update(TimeData) {
+void hvox::Chunk::update(FrameTime) {
     // Empty for now.
 }
 

@@ -73,7 +73,7 @@ void hvox::ChunkRenderer::set_page_size(ui32 page_size) {
     m_page_size = page_size;
 }
 
-void hvox::ChunkRenderer::update(TimeData) {
+void hvox::ChunkRenderer::update(FrameTime) {
     // TODO(Matthew): Do we really want to de-dirty pages every update?
     //                Perhaps track how long since we last did and try
     //                to spread this out. But likewise do we want to
@@ -83,7 +83,7 @@ void hvox::ChunkRenderer::update(TimeData) {
     process_pages();
 }
 
-void hvox::ChunkRenderer::draw(TimeData) {
+void hvox::ChunkRenderer::draw(FrameTime) {
     glBindVertexArray(block_mesh_handles.vao);
     for (auto& chunk_page : m_chunk_pages) {
         if (chunk_page->voxel_count == 0) continue;

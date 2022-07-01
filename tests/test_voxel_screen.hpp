@@ -200,7 +200,7 @@ public:
     { /* Empty. */ }
     virtual ~TestVoxelScreen() { /* Empty */ };
 
-    virtual void start(TimeData time) override {
+    virtual void start(hemlock::FrameTime time) override {
         happ::ScreenBase::start(time);
 
         for (auto x = -VIEW_DIST; x <= VIEW_DIST; ++x) {
@@ -219,7 +219,7 @@ public:
         }
     }
 
-    virtual void update(TimeData time) override {
+    virtual void update(hemlock::FrameTime time) override {
         static f32v3 last_pos{0.0f};
 
         if (m_input_manager->is_pressed(hui::PhysicalKey::H_G)) {
@@ -251,36 +251,38 @@ public:
             speed_mult = 50.0f;
         }
 
+        f32 frame_time = hemlock::frame_time_to_floating<>(time);
+
         f32v3 delta_pos{0.0f};
         if (m_input_manager->is_pressed(hui::PhysicalKey::H_W)) {
-            delta_pos += glm::normalize(m_camera.direction()) * static_cast<f32>(time.frame) * 0.01f * speed_mult;
+            delta_pos += glm::normalize(m_camera.direction()) * frame_time * 0.01f * speed_mult;
         }
         if (m_input_manager->is_pressed(hui::PhysicalKey::H_A)) {
-            delta_pos -= glm::normalize(m_camera.right()) * static_cast<f32>(time.frame) * 0.01f * speed_mult;
+            delta_pos -= glm::normalize(m_camera.right()) * frame_time * 0.01f * speed_mult;
         }
         if (m_input_manager->is_pressed(hui::PhysicalKey::H_S)) {
-            delta_pos -= glm::normalize(m_camera.direction()) * static_cast<f32>(time.frame) * 0.01f * speed_mult;
+            delta_pos -= glm::normalize(m_camera.direction()) * frame_time * 0.01f * speed_mult;
         }
         if (m_input_manager->is_pressed(hui::PhysicalKey::H_D)) {
-            delta_pos += glm::normalize(m_camera.right()) * static_cast<f32>(time.frame) * 0.01f * speed_mult;
+            delta_pos += glm::normalize(m_camera.right()) * frame_time * 0.01f * speed_mult;
         }
         if (m_input_manager->is_pressed(hui::PhysicalKey::H_Q)) {
-            delta_pos += glm::normalize(m_camera.up()) * static_cast<f32>(time.frame) * 0.01f * speed_mult;
+            delta_pos += glm::normalize(m_camera.up()) * frame_time * 0.01f * speed_mult;
         }
         if (m_input_manager->is_pressed(hui::PhysicalKey::H_E)) {
-            delta_pos -= glm::normalize(m_camera.up()) * static_cast<f32>(time.frame) * 0.01f * speed_mult;
+            delta_pos -= glm::normalize(m_camera.up()) * frame_time * 0.01f * speed_mult;
         }
 
         static bool do_unloads = false;
-        static f64 start = 0.;
         if (m_input_manager->is_pressed(hui::PhysicalKey::H_U)) {
             do_unloads = true;
-            start = time.total;
         }
         if (do_unloads) {
+            static f32 t = 0.0f;
+            t += hemlock::frame_time_to_floating<>(time);
             for (auto x = -VIEW_DIST; x < VIEW_DIST; ++x) {
                 for (auto z = -VIEW_DIST; z < VIEW_DIST; ++z) {
-                    if (start + ((x + VIEW_DIST) + (2 * VIEW_DIST + 1) * (z + VIEW_DIST)) * 300 < time.total) {
+                    if (((x + VIEW_DIST) + (2 * VIEW_DIST + 1) * (z + VIEW_DIST)) * 300 < t) {
                         m_chunk_grid->unload_chunk_at({ {x, 0, z} });
                         m_chunk_grid->unload_chunk_at({ {x, 1, z} });
                         m_chunk_grid->unload_chunk_at({ {x, 2, z} });
@@ -419,7 +421,7 @@ public:
         };
 
         if (do_chunk_check) {
-            debug_printf("Frame time: %f\n", time.frame);
+            debug_printf("Frame time: %f\n", hemlock::frame_time_to_floating<>(time));
 
             debug_printf("Camera at:         (%f, %f, %f)\n", m_camera.position().x, m_camera.position().y, m_camera.position().z);
             debug_printf("Camera looking at: (%f, %f, %f)\n", m_camera.direction().x, m_camera.direction().y, m_camera.direction().z);
@@ -456,7 +458,7 @@ public:
             }
         }
     }
-    virtual void draw(TimeData time) override {
+    virtual void draw(hemlock::FrameTime time) override {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         m_shader.use();

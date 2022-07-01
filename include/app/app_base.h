@@ -15,9 +15,6 @@ namespace hemlock {
             AppBase();
             virtual ~AppBase() { /* Empty */ };
 
-            virtual void init()    = 0;
-            virtual void dispose() = 0;
-
             virtual void run() = 0;
 
             bool should_quit() { return m_should_quit; }

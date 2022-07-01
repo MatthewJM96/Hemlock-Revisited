@@ -50,7 +50,7 @@ public:
     { /* Empty. */ }
     virtual ~TestRenderScreen() { /* Empty */ };
 
-    virtual void start(TimeData time) override {
+    virtual void start(hemlock::FrameTime time) override {
         happ::ScreenBase::start(time);
 
 #define NUM 6
@@ -71,12 +71,12 @@ public:
 #undef NUM
     }
 
-    virtual void update(TimeData time) override {
+    virtual void update(hemlock::FrameTime time) override {
         m_sprite_batcher.begin();
         m_sprite_batcher.add_sprite(
             f32v2{
-                60.0f + 30.0f * sin(time.total / 1000.0f),
-                60.0f + 30.0f * cos(time.total / 1000.0f)
+                60.0f + 30.0f * sin(std::chrono::duration_cast<std::chrono::seconds>(time).count()),
+                60.0f + 30.0f * cos(std::chrono::duration_cast<std::chrono::seconds>(time).count())
             },
             f32v2{200.0f, 200.0f},
             colour4{255,   0, 0, 255},
@@ -108,36 +108,39 @@ public:
             speed_mult = 50.0f;
         }
 
+        f32 frame_time = hemlock::frame_time_to_floating<>(time);
+
         f32v3 delta_pos{0.0f};
         if (m_input_manager->is_pressed(hui::PhysicalKey::H_W)) {
-            delta_pos += glm::normalize(m_camera.direction()) * static_cast<f32>(time.frame) * 0.01f * speed_mult;
+            delta_pos += glm::normalize(m_camera.direction()) * frame_time * 0.01f * speed_mult;
         }
         if (m_input_manager->is_pressed(hui::PhysicalKey::H_A)) {
-            delta_pos -= glm::normalize(m_camera.right()) * static_cast<f32>(time.frame) * 0.01f * speed_mult;
+            delta_pos -= glm::normalize(m_camera.right()) * frame_time * 0.01f * speed_mult;
         }
         if (m_input_manager->is_pressed(hui::PhysicalKey::H_S)) {
-            delta_pos -= glm::normalize(m_camera.direction()) * static_cast<f32>(time.frame) * 0.01f * speed_mult;
+            delta_pos -= glm::normalize(m_camera.direction()) * frame_time * 0.01f * speed_mult;
         }
         if (m_input_manager->is_pressed(hui::PhysicalKey::H_D)) {
-            delta_pos += glm::normalize(m_camera.right()) * static_cast<f32>(time.frame) * 0.01f * speed_mult;
+            delta_pos += glm::normalize(m_camera.right()) * frame_time * 0.01f * speed_mult;
         }
         if (m_input_manager->is_pressed(hui::PhysicalKey::H_Q)) {
-            delta_pos += glm::normalize(m_camera.up()) * static_cast<f32>(time.frame) * 0.01f * speed_mult;
+            delta_pos += glm::normalize(m_camera.up()) * frame_time * 0.01f * speed_mult;
         }
         if (m_input_manager->is_pressed(hui::PhysicalKey::H_E)) {
-            delta_pos -= glm::normalize(m_camera.up()) * static_cast<f32>(time.frame) * 0.01f * speed_mult;
+            delta_pos -= glm::normalize(m_camera.up()) * frame_time * 0.01f * speed_mult;
         }
 
 #if defined(DEBUG)
-        static f64 last_time = 0.0;
+        static f64 countdown = 1000.0;
+        countdown -= static_cast<f64>(std::chrono::duration_cast<std::chrono::milliseconds>(time).count());
         if (m_input_manager->is_pressed(hui::PhysicalKey::H_T)) {
-            if (last_time + 1000.0 < time.total) {
-                last_time = time.total;
+            if (countdown < 0.0) {
                 f32v3 pos = m_camera.position();
                 f32v3 dir = m_camera.direction();
                 debug_printf("Camera Coords: (%f, %f, %f)\nCamera Direction: (%f, %f, %f)\n", pos.x, pos.y, pos.z, dir.x, dir.y, dir.z);
             }
         }
+        if (countdown < 0.0) countdown = 1000.0;
 #endif
 
         // const f32 turn_clamp_on_at = 60.0f / 360.0f * 2.0f * M_PI;
@@ -148,7 +151,7 @@ public:
         m_camera.offset_position(delta_pos);
         m_camera.update();
     }
-    virtual void draw(TimeData time) override {
+    virtual void draw(hemlock::FrameTime time) override {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         m_shader.use();
