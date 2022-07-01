@@ -214,10 +214,14 @@ if (HEMLOCK_USING_OPENGL)
 endif()
 
 target_include_directories(Hemlock_Revisited
+    PUBLIC
+    "${PROJECT_SOURCE_DIR}/include"
+)
+
+target_include_directories(Hemlock_Revisited
     SYSTEM
     PUBLIC
     ${Hemlock_Include_Dirs}
-    "${PROJECT_SOURCE_DIR}/include"
 )
 
 if (UNIX OR MINGW)

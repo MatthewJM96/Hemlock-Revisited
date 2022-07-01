@@ -144,15 +144,15 @@ namespace std {
     template <>
     struct hash<hvox::ColumnWorldPosition> {
         std::size_t operator()(hvox::ColumnWorldPosition cwp) const {
-            std::hash<hvox::ColumnID> hash;
-            return hash(cwp.id);
+            std::hash<hvox::ColumnID> _hash;
+            return _hash(cwp.id);
         }
     };
     template <>
     struct hash<hvox::ChunkGridPosition> {
         std::size_t operator()(hvox::ChunkGridPosition cwp) const {
-            std::hash<hvox::ChunkID> hash;
-            return hash(cwp.id);
+            std::hash<hvox::ChunkID> _hash;
+            return _hash(cwp.id);
         }
     };
 }

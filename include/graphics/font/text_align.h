@@ -37,4 +37,4 @@ namespace hemlock {
 }
 namespace hg = hemlock::graphics;
 
-#endif __hemlock_graphics_font_text_align_h
+#endif // __hemlock_graphics_font_text_align_h

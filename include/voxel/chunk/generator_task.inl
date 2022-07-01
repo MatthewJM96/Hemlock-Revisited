@@ -4,7 +4,7 @@
 #include "voxel/chunk/mesh/naive_task.hpp"
 
 template <hvox::ChunkGenerationStrategy GenerationStrategy>
-void hvox::ChunkGenerationTask<GenerationStrategy>::execute(ChunkLoadThreadState* state, ChunkTaskQueue* task_queue) {
+void hvox::ChunkGenerationTask<GenerationStrategy>::execute(ChunkLoadThreadState*, ChunkTaskQueue*) {
     auto chunk = m_chunk.lock();
 
     if (chunk == nullptr) return;

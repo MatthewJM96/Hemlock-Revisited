@@ -165,7 +165,7 @@ namespace hemlock {
                 bool dispose_instance( FontSize size,
                                       FontStyle style       = FontStyle::NORMAL,
                                 FontRenderStyle render_style = FontRenderStyle::BLENDED ) {
-                    dispose_instance(hash(size, style, render_style));
+                    return dispose_instance(hash(size, style, render_style));
                 }
                 /**
                  * @brief Disposes the font instance corresponding to the given size, style and render

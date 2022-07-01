@@ -130,8 +130,8 @@ namespace std {
     template <>
     struct hash<hvox::Chunk> {
         std::size_t operator()(const hvox::Chunk& chunk) const {
-            std::hash<hvox::ColumnID> hash;
-            return hash(chunk.id());
+            std::hash<hvox::ColumnID> _hash;
+            return _hash(chunk.id());
         }
     };
 }

@@ -22,7 +22,7 @@ namespace hemlock {
                           ui32 display_idx()         { return m_settings.display_idx;                        }
                 FullscreenMode fullscreen_mode()     { return m_settings.fullscreen_mode;                    }
                         ui32v2 aspect_ratio()        { return m_aspect_ratio;                                }
-                           f32 aspect_ratio_frac()   { return (f32)m_aspect_ratio.x / (f32)m_aspect_ratio.y; }
+                           f32 aspect_ratio_frac()   { return static_cast<f32>(m_aspect_ratio.x) / static_cast<f32>(m_aspect_ratio.y); }
                           bool fake_fullscreen()     { return m_settings.fake_fullscreen;                    }
                           bool is_fullscreen()       { return m_settings.is_fullscreen;                      }
                           bool is_resizable()        { return m_settings.is_resizable;                       }
