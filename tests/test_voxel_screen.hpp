@@ -177,7 +177,7 @@ public:
 
 	virtual void drawContactPoint(const btVector3&, const btVector3&, btScalar, int, const btVector3&) override { /* Empty. */ }
 
-	virtual void reportErrorWarning(const char* warning_string) override { debug_printf(warning_string); }
+	virtual void reportErrorWarning(const char* warning_string) override { printf("%s\n", warning_string); }
 
 	virtual void draw3dText(const btVector3&, const char*) override { /* Empty. */ }
 
@@ -223,7 +223,8 @@ public:
         static f32v3 last_pos{0.0f};
 
         if (m_input_manager->is_pressed(hui::PhysicalKey::H_G)) {
-            m_phys.world->setGravity(btVector3(0, -9.8f, 0));
+            m_phys.world->setGravity(btVector3(0, -19.6f, 0));
+            // m_phys.world->setGravity(btVector3(0, -9.8f, 0));
             debug_printf("Turning on gravity.\n");
         }
 
@@ -304,6 +305,12 @@ public:
         if (countdown < 0.0) countdown = 1000.0;
 #endif
 
+        // NOTE(Matthew): This will be useful for things like vehicles, but it really isn't for a player character.
+        //                With these examples we can probably begin to put together a class that uses a dummy geometry
+        //                to do collision checking but incorporate features such as jumping, crouching, crawling, and so on.
+        //                  If we get fancy, we could event try out implementing some nice "magic" movement (auto crouch,
+        //                  ledge mounting, etc.).
+        // m_player.rbc.body->setLinearVelocity(btVector3(delta_pos.x * 100.0f / frame_time, m_player.rbc.body->getLinearVelocity().y(), delta_pos.z * 100.0f  / frame_time));
         m_player.ac.position += hvox::EntityWorldPosition{f32v3{delta_pos.x, 0.0f, delta_pos.z} * static_cast<f32>(1ll << 32)};
         m_camera.offset_position(f32v3{delta_pos.x, 0.0f, delta_pos.z});
         {
@@ -311,7 +318,13 @@ public:
             transform.setOrigin(btVector3(m_camera.position().x, m_camera.position().y, m_camera.position().z));
             m_player.rbc.body->setWorldTransform(transform);
         }
-        m_camera.update();
+        // m_player.ac.position += hvox::EntityWorldPosition{f32v3{delta_pos.x, delta_pos.y, delta_pos.z} * static_cast<f32>(1ll << 32)};
+        // m_camera.offset_position(f32v3{delta_pos.x, delta_pos.y, delta_pos.z});
+        // {
+        //     auto transform = m_player.rbc.body->getWorldTransform();
+        //     transform.setOrigin(btVector3(m_camera.position().x, m_camera.position().y, m_camera.position().z));
+        //     m_player.rbc.body->setWorldTransform(transform);
+        //
 
         f32v3 current_pos = glm::floor(m_camera.position() / static_cast<f32>(CHUNK_LENGTH));
 
@@ -394,9 +407,7 @@ public:
 
         voxel_patch = new btCompoundShape();
         if (hphys::ChunkGridCollider::determine_candidate_colliding_voxels<TVS_VoxelShapeEvaluator>(m_player.ac, m_player.dc, m_player.rbc, voxel_patch)) {
-            btTransform transform = btTransform::getIdentity();
-            transform.setOrigin(btVector3(glm::floor(m_camera.position().x), glm::floor(m_camera.position().y), glm::floor(m_camera.position().z)));
-            btDefaultMotionState* motion_state = new btDefaultMotionState(transform);
+            btDefaultMotionState* motion_state = new btDefaultMotionState();
             btVector3 inertia;
             btScalar mass = 0.0f;
             voxel_patch->calculateLocalInertia(mass, inertia);
@@ -420,6 +431,8 @@ public:
             static_cast<hvox::EntityWorldPositionCoord>(m_camera.position().y * static_cast<f32>(1ll << 32)),
             static_cast<hvox::EntityWorldPositionCoord>(m_camera.position().z * static_cast<f32>(1ll << 32))
         };
+
+        m_camera.update();
 
         if (do_chunk_check) {
             debug_printf("Frame time: %f\n", hemlock::frame_time_to_floating<>(time));
@@ -591,7 +604,10 @@ public:
         m_phys.world->getDebugDrawer()->setDebugMode(btIDebugDraw::DBG_DrawWireframe);
 
         {
-            btBoxShape* box = new btBoxShape(btVector3{0.5f, 1.5f, 0.5f});
+            // NOTE(Matthew): When implementing dedicated class for bipedal entities,
+            //                we should account for btBoxShape being centered (camera
+            //                is not here near 7 blocks high, rather 3.5 blocks).
+            btBoxShape* box = new btBoxShape(btVector3{0.75f, 3.5f, 0.75f});
             btQuaternion rotation;
             rotation.setEulerZYX(0.0f, 1.0f, 0.0f);
             btVector3 position = btVector3(m_camera.position().x, m_camera.position().y, m_camera.position().z);
