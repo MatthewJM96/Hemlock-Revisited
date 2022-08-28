@@ -3,6 +3,8 @@
 
 #include <bullet/BulletDynamics/Dynamics/btRigidBody.h>
 
+#include "physics/entity/entity.hpp"
+
 namespace hemlock {
     namespace physics {
         // TODO(Matthew): fixed-point coordinates here as in voxel coordinate system, likewise for time.
@@ -28,16 +30,11 @@ namespace hemlock {
 
         // TODO(Matthew): get bullet working and incorporate shapes here.
         struct DynamicComponent {
-            
             f32v3 velocity;
         };
 
         struct RigidBodyComponent {
             btRigidBody* body = nullptr;
-        };
-
-        struct CollidableEntityComponent {
-
         };
     }
 }
