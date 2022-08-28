@@ -328,7 +328,7 @@ void halgo::BasicACS<VertexCoordType, NextStepGenerator, VertexChoiceStrategy>
                 //                that the ants walk over?
                 map.edge_weight_map[edge] =
                             (1.0f - m_local_evaporation) * map.edge_weight_map[edge]
-                          +         m_local_evaporation  * m_local_increment * static_cast<float>(ant_groups_new[ant_group_idx].size);
+                          +         m_local_evaporation  * m_local_increment * static_cast<f32>(ant_groups_new[ant_group_idx].size);
 
                 step_start = step_end;
             }
