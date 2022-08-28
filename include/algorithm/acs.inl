@@ -158,13 +158,14 @@ void halgo::BasicACS<VertexCoordType, NextStepGenerator, VertexChoiceStrategy>
     _VertexDescriptor visited_vertices[AntCount * MaxSteps] = {};
 
     // The actual ants.
-    _Ant ants[AntCount];
+    _Ant ants[AntCount] = {};
 
     // TODO(Matthew): Do we want to handle large AntCount? This isn't okay for that.
     // The ant groups used for calculating entropy.
-    _AntGroup ant_groups_new[AntCount], ant_groups_old[AntCount];
-    // The number of ant groups active.
-    size_t ant_group_count = 0;
+    struct {
+        _AntGroup groups[AntCount]  = {};
+        size_t    count             = 0;
+    } ant_groups_new, ant_groups_old;
 
     for (size_t ant_idx = 0; ant_idx < AntCount; ++ant_idx) {
         ants[ant_idx].previous_vertices = &visited_vertices[ant_idx * MaxSteps];
@@ -189,21 +190,21 @@ void halgo::BasicACS<VertexCoordType, NextStepGenerator, VertexChoiceStrategy>
     for (size_t iteration = 0; iteration < m_max_iterations; ++iteration) {
         ants            = {};
         ant_groups_old  = {};
-        ant_groups_new  = {};
         for (size_t ant_idx = 0; ant_idx < AntCount; ++ant_idx) {
             ants[ant_idx].current_vertex = source_vertex;
-            ant_groups_old[0].ants[ant_idx] = &ants[ant_idx];
-            ant_groups_new[0].ants[ant_idx] = &ants[ant_idx];
+            ant_groups_old.groups[0].ants[ant_idx] = &ants[ant_idx];
         }
-        ant_groups_old[0].size = AntCount;
-        ant_groups_new[0].size = AntCount;
-        ant_group_count = 1;
+        ant_groups_old.groups[0].size = AntCount;
+        ant_groups_old.count = 1;
 
         // 2 * MaxSteps for return journey.
         //      TODO(Matthew): Do we just do one-way and apply pheromone
         //                     in separate subsequent pass?
         size_t ants_found_food = 0;
         for (size_t step = 0; step < /*2 **/ MaxSteps; ++step) {
+            ant_groups_new = {};
+            ant_groups_new.count = ant_groups_old.count;
+
             size_t ant_group_cursors[AntCount] = {};
 
             for (size_t ant_idx = 0; ant_idx < AntCount; ++ant_idx) {
@@ -219,84 +220,78 @@ void halgo::BasicACS<VertexCoordType, NextStepGenerator, VertexChoiceStrategy>
                 _VertexDescriptor next_vertex = ??;
                 
 
-                // TODO(Matthew): Think about how to do this better, where we swap ants about
-                //                we are affecting order and this means the assumption that
-                //                each ant group has ants ordered by their index in the ants
-                //                array is false.
-                //                  Change data structure as the current actually requires
-                //                  a "shuffle" to keep things matching assumptions.
+                bool need_new_group = false;
+                bool changed_group  = false;
 
-                // bool need_new_group = false;
-                // bool joined_existing_group = false;
+                // Increment cursor in ant's old group, use decremnted value
+                // in subsequent loop.
+                ant_group_cursors[ant.group] += 1;
 
-                // for (size_t cursor = 0; cursor < ant_group_cursors[ant.group]; ++cursor) {
-                //     Ant& companion_ant = *ant_groups_old[ant.group][cursor];
+                for (size_t cursor = 0; cursor < ant_group_cursors[ant.group] - 1; ++cursor) {
+                    _Ant& companion_ant = *ant_groups_old.groups[ant.group].ants[cursor];
 
-                //     /**
-                //      * If we find an ant from this ant's previous path group who has moved to a new path group
-                //      * in this step, and both ants have moved to the same vertex, then we should put this current
-                //      * ant into the same path group.
-                //      *      We have to be careful about how we performed this change, notes below detail the logic
-                //      *      of how we ensure things don't go weird.
-                //      *      We break when we get here as we have found the appropriate path group.
-                //      */
-                //     if (   companion_ant.current_vertex == ant.current_vertex
-                //                  && companion_ant.group != ant.group      ) {
-                //         // Remove ant from previous path group.
-                //         //   It should be fine to just remove ant from previous path group like this as
-                //         //   it will be replaced in its position by an ant beyond the cursor for that path group.
-                //         _Ant* tmp = ant_groups_new[ant.group].ants[ant_group_cursors[ant.group]];
-                //         ant_groups_new[ant.group].ants[ant_group_cursors[ant.group] - 1];
+                    /**
+                     * If we find an ant from this ant's previous path group who has moved to a new path group
+                     * in this step, and both ants have moved to the same vertex, then we should put this current
+                     * ant into the same path group.
+                     *      We have to be careful about how we performed this change, notes below detail the logic
+                     *      of how we ensure things don't go weird.
+                     *      We break when we get here as we have found the appropriate path group.
+                     */
+                    if (   companion_ant.current_vertex == ant.current_vertex
+                                 && companion_ant.group != ant.group      ) {
+                        // Place ant in same group as companion ant who has taken
+                        // same step.
+                        auto& new_group = ant_groups_new.groups[companion_ant.group];
+                        new_group.ants[new_group.size++] = &ant;
 
-                //         // Update ant's path group assignment.
-                //         ant.group = companion_ant.group;
-                //         // Make sure to put ant in path group at current point of that path group's cursor.
-                //         auto& group = ant_path_tracker_new[companion_ant.group];
-                //         group.push_back(group[group_curors[ant.group]]);
-                //         group[group_curors[ant.group]] = &ant;
-                //         // Ant no longer needs its own new path group.
-                //         need_new_group   = false;
-                //         joined_existing_group = true;
-                //         // Break out of search for new path group.
-                //         break;
-                //     }
+                        // Update ant's path group assignment.
+                        ant.group = companion_ant.group;
 
-                //     /**
-                //      * If this current ant has moved to a different vertex as an ant who was previously
-                //      * in the same path group and who has already taken their step, then this current
-                //      * ant no longer can belong to the same path group and so should be marked to receive
-                //      * one.
-                //      *      We continue the loop however, in case another ant moved to the same vertex
-                //      *      as this current ant.
-                //      */
-                //     if (   companion_ant.current_vertex != ant.current_vertex
-                //             && companion_ant.group == ant.group      ) {
-                //         need_new_group = true;
-                //     }
-                // }
+                        // Ant no longer needs its own new path group.
+                        need_new_group  = false;
+                        changed_group   = true;
 
-                // /**
-                //  * If this current ant is flagged as needing a new path group,
-                //  * then make it one and put it in it.
-                //  *      While we don't have to worry about how it gets into the new
-                //  *      path group, we still have to be careful of how it leaves its
-                //  *      old one.
-                //  */
-                // if (need_new_group) {
-                //     size_t new_group = ant_group_count;
+                        // Break out of search for new path group.
+                        break;
+                    }
 
-                //     // Remove ant from previous path group.
-                //     //   It should be fine to just remove ant from previous path group like this as
-                //     //   it will be replaced in its position by an ant beyond the cursor for that path group.
-                //     std::remove(ant_path_tracker_new[ant.group].begin(), ant_path_tracker_new[ant.path_group].end(), &ant);
-                //     ant_path_tracker_new[ant.path_group].erase(ant_path_tracker_new[ant.path_group].end() - 1);
+                    /**
+                     * If this current ant has moved to a different vertex as an ant who was previously
+                     * in the same path group and who has already taken their step, then this current
+                     * ant no longer can belong to the same path group and so should be marked to receive
+                     * one.
+                     *      We continue the loop however, in case another ant moved to the same vertex
+                     *      as this current ant.
+                     */
+                    if (   companion_ant.current_vertex != ant.current_vertex
+                            && companion_ant.group == ant.group      ) {
+                        need_new_group = true;
+                        changed_group  = false;
+                    }
+                }
 
-                //     ant_path_tracker_new[new_path_group] = Ants(1, &ant);
-                //     path_group_curors[new_path_group] = 0;
-                //     ant.path_group = new_path_group;
-                // } else if (!joined_existing_group) {
-                //     path_group_curors[ant.path_group] += 1;
-                // }
+                /**
+                 * If this current ant is flagged as needing a new path group,
+                 * then make it one and put it in it.
+                 *      While we don't have to worry about how it gets into the new
+                 *      path group, we still have to be careful of how it leaves its
+                 *      old one.
+                 */
+                if (need_new_group) {
+                    // Add new group on at end of list of groups, to avoid issues with
+                    // groups that already exist.
+                    auto& new_group = ant_groups_new.groups[ant_groups_new.count];
+                    new_group.ants[new_group.size++] = &ant;
+
+                    ant_groups_new.count += 1;
+
+                    ant.group = new_group;
+                } else if (!changed_group) {
+                    // Place ant in group is was in on last step, it hasn't moved.
+                    auto& new_group = ant_groups_new.groups[ant.group];
+                    new_group.ants[new_group.size++] = &ant;
+                }
 
                 ant.previous_vertices[step] = next_vertex;
                 ant.current_vertex          = next_vertex;
@@ -312,14 +307,15 @@ void halgo::BasicACS<VertexCoordType, NextStepGenerator, VertexChoiceStrategy>
             if (ants_found_food == AntCount) break;
         }
 
+        // TODO(Matthew): remove by referring to groups by reference only.
         std::memcpy(&ant_groups_old, &ant_groups_new, AntCount * sizeof(_AntGroup));
 
-        for (size_t ant_group_idx = 0; ant_group_idx < ant_group_count; ++ant_group_idx) {
+        for (size_t ant_group_idx = 0; ant_group_idx < ant_groups_new.count; ++ant_group_idx) {
             _VertexDescriptor step_start, step_end;
             step_start = source_vertex;
 
-            for (size_t step_idx = 0; step_idx < ant_groups_new[ant_group_idx].ants[0].steps_taken; ++step_idx) {
-                step_end = ant_groups_new[ant_group_idx].ants[0].previous_vertices[step_idx];
+            for (size_t step_idx = 0; step_idx < ant_groups_new.groups[ant_group_idx].ants[0].steps_taken; ++step_idx) {
+                step_end = ant_groups_new.groups[ant_group_idx].ants[0].previous_vertices[step_idx];
 
                 auto [edge, _] = boost::edge(step_start, step_end, map.graph);
 
@@ -328,7 +324,7 @@ void halgo::BasicACS<VertexCoordType, NextStepGenerator, VertexChoiceStrategy>
                 //                that the ants walk over?
                 map.edge_weight_map[edge] =
                             (1.0f - m_local_evaporation) * map.edge_weight_map[edge]
-                          +         m_local_evaporation  * m_local_increment * static_cast<f32>(ant_groups_new[ant_group_idx].size);
+                          +         m_local_evaporation  * m_local_increment * static_cast<f32>(ant_groups_new.groups[ant_group_idx].size);
 
                 step_start = step_end;
             }
@@ -336,8 +332,8 @@ void halgo::BasicACS<VertexCoordType, NextStepGenerator, VertexChoiceStrategy>
 
         // Calculate entropy of iteration.
         entropy = 0.0f;
-        for (size_t ant_group_idx = 0; ant_group_idx < ant_group_count; ++ant_group_idx) {
-            f32 popularity = static_cast<f32>(ant_groups_new[ant_group_idx].size) / static_cast<f32>(AntCount);
+        for (size_t ant_group_idx = 0; ant_group_idx < ant_groups_new.count; ++ant_group_idx) {
+            f32 popularity = static_cast<f32>(ant_groups_new.groups[ant_group_idx].size) / static_cast<f32>(AntCount);
             entropy += popularity * log(popularity);
         }
         entropy /= log(1.0f / static_cast<f32>(AntCount));
