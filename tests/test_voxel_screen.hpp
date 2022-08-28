@@ -14,6 +14,10 @@
 
 #include "iomanager.hpp"
 
+
+#include "algorithm/acs.hpp"
+
+
 #if defined(DEBUG)
 #   define VIEW_DIST 4
 #else
