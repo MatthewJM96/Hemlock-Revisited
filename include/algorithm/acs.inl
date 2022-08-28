@@ -323,9 +323,12 @@ void halgo::BasicACS<VertexCoordType, NextStepGenerator, VertexChoiceStrategy>
 
                 auto [edge, _] = boost::edge(step_start, step_end, map.graph);
 
+                // TODO(Matthew): Do we need to apply evaporation per ant? Also, do we
+                //                need to apply evaporation to every edge or just those
+                //                that the ants walk over?
                 map.edge_weight_map[edge] =
                             (1.0f - m_local_evaporation) * map.edge_weight_map[edge]
-                          +         m_local_evaporation  * m_local_increment;
+                          +         m_local_evaporation  * m_local_increment * static_cast<float>(ant_groups_new[ant_group_idx].size);
 
                 step_start = step_end;
             }
