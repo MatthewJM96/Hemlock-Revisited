@@ -217,8 +217,11 @@ void halgo::BasicACS<VertexCoordType, NextStepGenerator, VertexChoiceStrategy>
                 // TODO(Matthew): Reimplement back-stepping? Could be more performant than
                 //                simply doing more iterations to compensate for not doing this.
 
-                _VertexDescriptor next_vertex = ??;
-                
+                // TODO(Matthew): Implement some vertex choice strategy(s), and set a default for ACS.
+                //                  These take either vertex choice generator or the result of running
+                //                  such generator. The former seems better.
+                //                      Called like, e.g.:
+                _VertexDescriptor next_vertex = VertexChoiceStrategy.choose<NextStepGenerator>(ant.current_vertex);
 
                 bool need_new_group = false;
                 bool changed_group  = false;
