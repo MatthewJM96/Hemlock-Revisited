@@ -13,8 +13,6 @@ namespace hemlock {
 
             VertexDescriptor* previous_vertices;
             VertexDescriptor  current_vertex;
-            // TODO(Matthew): performance gain?
-            //  unordered map of bools for coords against visited vertices (probably array of bools one per ant?).
         };
 
         template <typename VertexCoordType, typename VertexDescriptor, size_t AntCount>
