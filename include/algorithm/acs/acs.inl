@@ -1,144 +1,131 @@
-template <typename VertexCoordType, typename NextStepGenerator, typename VertexChoiceStrategy>
-halgo::BasicACS<VertexCoordType, NextStepGenerator, VertexChoiceStrategy>&
-halgo::BasicACS<VertexCoordType, NextStepGenerator, VertexChoiceStrategy>::set_max_iterations(size_t max_iterations) {
+template <typename VertexData, typename NextActionFinder, typename VertexChoiceStrategy>
+halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>&
+halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>::set_max_iterations(size_t max_iterations) {
     m_max_iterations = max_iterations;
 
     return *this;
 }
 
-template <typename VertexCoordType, typename NextStepGenerator, typename VertexChoiceStrategy>
-halgo::BasicACS<VertexCoordType, NextStepGenerator, VertexChoiceStrategy>&
-halgo::BasicACS<VertexCoordType, NextStepGenerator, VertexChoiceStrategy>::set_break_on_path_change(f32 break_on_path_change) {
+template <typename VertexData, typename NextActionFinder, typename VertexChoiceStrategy>
+halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>&
+halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>::set_break_on_path_change(f32 break_on_path_change) {
     m_break_on_path_change = break_on_path_change;
 
     return *this;
 }
 
-template <typename VertexCoordType, typename NextStepGenerator, typename VertexChoiceStrategy>
-halgo::BasicACS<VertexCoordType, NextStepGenerator, VertexChoiceStrategy>&
-halgo::BasicACS<VertexCoordType, NextStepGenerator, VertexChoiceStrategy>::set_break_on_iterations(size_t break_on_iterations) {
+template <typename VertexData, typename NextActionFinder, typename VertexChoiceStrategy>
+halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>&
+halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>::set_break_on_iterations(size_t break_on_iterations) {
     m_break_on_iterations = break_on_iterations;
 
     return *this;
 }
 
-// template <typename VertexCoordType, typename NextStepGenerator, typename VertexChoiceStrategy>
-// halgo::BasicACS<VertexCoordType, NextStepGenerator, VertexChoiceStrategy>&
-// halgo::BasicACS<VertexCoordType, NextStepGenerator, VertexChoiceStrategy>::set_max_steps(size_t max_steps) {
+// template <typename VertexData, typename NextActionFinder, typename VertexChoiceStrategy>
+// halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>&
+// halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>::set_max_steps(size_t max_steps) {
 //     m_max_steps = max_steps;
 //
 //     return *this;
 // }
 
-// template <typename VertexCoordType, typename NextStepGenerator, typename VertexChoiceStrategy>
-// halgo::BasicACS<VertexCoordType, NextStepGenerator, VertexChoiceStrategy>&
-// halgo::BasicACS<VertexCoordType, NextStepGenerator, VertexChoiceStrategy>::set_ant_count(size_t ant_count) {
+// template <typename VertexData, typename NextActionFinder, typename VertexChoiceStrategy>
+// halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>&
+// halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>::set_ant_count(size_t ant_count) {
 //     m_ant_count = ant_count;
 //
 //     return *this;
 // }
 
-template <typename VertexCoordType, typename NextStepGenerator, typename VertexChoiceStrategy>
-halgo::BasicACS<VertexCoordType, NextStepGenerator, VertexChoiceStrategy>&
-halgo::BasicACS<VertexCoordType, NextStepGenerator, VertexChoiceStrategy>::set_exploitation_base(f32 exploitation_base) {
+template <typename VertexData, typename NextActionFinder, typename VertexChoiceStrategy>
+halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>&
+halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>::set_exploitation_base(f32 exploitation_base) {
     m_exploitation_base = exploitation_base;
 
     return *this;
 }
 
-template <typename VertexCoordType, typename NextStepGenerator, typename VertexChoiceStrategy>
-halgo::BasicACS<VertexCoordType, NextStepGenerator, VertexChoiceStrategy>&
-halgo::BasicACS<VertexCoordType, NextStepGenerator, VertexChoiceStrategy>::set_exploitation_coeff(f32 exploitation_coeff) {
+template <typename VertexData, typename NextActionFinder, typename VertexChoiceStrategy>
+halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>&
+halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>::set_exploitation_coeff(f32 exploitation_coeff) {
     m_exploitation_coeff = exploitation_coeff;
 
     return *this;
 }
 
-template <typename VertexCoordType, typename NextStepGenerator, typename VertexChoiceStrategy>
-halgo::BasicACS<VertexCoordType, NextStepGenerator, VertexChoiceStrategy>&
-halgo::BasicACS<VertexCoordType, NextStepGenerator, VertexChoiceStrategy>::set_exploitation_exponent(f32 exploitation_exponent) {
+template <typename VertexData, typename NextActionFinder, typename VertexChoiceStrategy>
+halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>&
+halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>::set_exploitation_exponent(f32 exploitation_exponent) {
     m_exploitation_exponent = exploitation_exponent;
 
     return *this;
 }
 
-template <typename VertexCoordType, typename NextStepGenerator, typename VertexChoiceStrategy>
-halgo::BasicACS<VertexCoordType, NextStepGenerator, VertexChoiceStrategy>&
-halgo::BasicACS<VertexCoordType, NextStepGenerator, VertexChoiceStrategy>::set_do_mean_filtering(bool do_mean_filtering) {
+template <typename VertexData, typename NextActionFinder, typename VertexChoiceStrategy>
+halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>&
+halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>::set_do_mean_filtering(bool do_mean_filtering) {
     m_do_mean_filtering = do_mean_filtering;
 
     return *this;
 }
 
-template <typename VertexCoordType, typename NextStepGenerator, typename VertexChoiceStrategy>
-halgo::BasicACS<VertexCoordType, NextStepGenerator, VertexChoiceStrategy>&
-halgo::BasicACS<VertexCoordType, NextStepGenerator, VertexChoiceStrategy>::set_mean_filtering_order(size_t mean_filtering_order) {
+template <typename VertexData, typename NextActionFinder, typename VertexChoiceStrategy>
+halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>&
+halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>::set_mean_filtering_order(size_t mean_filtering_order) {
     m_mean_filtering_order = mean_filtering_order;
 
     return *this;
 }
 
-template <typename VertexCoordType, typename NextStepGenerator, typename VertexChoiceStrategy>
-halgo::BasicACS<VertexCoordType, NextStepGenerator, VertexChoiceStrategy>&
-halgo::BasicACS<VertexCoordType, NextStepGenerator, VertexChoiceStrategy>::set_mean_filtering_trigger(f32 mean_filtering_trigger) {
+template <typename VertexData, typename NextActionFinder, typename VertexChoiceStrategy>
+halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>&
+halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>::set_mean_filtering_trigger(f32 mean_filtering_trigger) {
     m_mean_filtering_trigger = mean_filtering_trigger;
 
     return *this;
 }
 
-template <typename VertexCoordType, typename NextStepGenerator, typename VertexChoiceStrategy>
-halgo::BasicACS<VertexCoordType, NextStepGenerator, VertexChoiceStrategy>&
-halgo::BasicACS<VertexCoordType, NextStepGenerator, VertexChoiceStrategy>::set_local_increment(f32 local_increment) {
+template <typename VertexData, typename NextActionFinder, typename VertexChoiceStrategy>
+halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>&
+halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>::set_local_increment(f32 local_increment) {
     m_local_increment = local_increment;
 
     return *this;
 }
 
-template <typename VertexCoordType, typename NextStepGenerator, typename VertexChoiceStrategy>
-halgo::BasicACS<VertexCoordType, NextStepGenerator, VertexChoiceStrategy>&
-halgo::BasicACS<VertexCoordType, NextStepGenerator, VertexChoiceStrategy>::set_local_evaporation(f32 local_evaporation) {
+template <typename VertexData, typename NextActionFinder, typename VertexChoiceStrategy>
+halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>&
+halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>::set_local_evaporation(f32 local_evaporation) {
     m_local_evaporation = local_evaporation;
 
     return *this;
 }
 
-template <typename VertexCoordType, typename NextStepGenerator, typename VertexChoiceStrategy>
-halgo::BasicACS<VertexCoordType, NextStepGenerator, VertexChoiceStrategy>&
-halgo::BasicACS<VertexCoordType, NextStepGenerator, VertexChoiceStrategy>::set_global_increment(f32 global_increment) {
+template <typename VertexData, typename NextActionFinder, typename VertexChoiceStrategy>
+halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>&
+halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>::set_global_increment(f32 global_increment) {
     m_global_increment = global_increment;
 
     return *this;
 }
 
-template <typename VertexCoordType, typename NextStepGenerator, typename VertexChoiceStrategy>
-halgo::BasicACS<VertexCoordType, NextStepGenerator, VertexChoiceStrategy>&
-halgo::BasicACS<VertexCoordType, NextStepGenerator, VertexChoiceStrategy>::set_global_evaporation(f32 global_evaporation) {
+template <typename VertexData, typename NextActionFinder, typename VertexChoiceStrategy>
+halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>&
+halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>::set_global_evaporation(f32 global_evaporation) {
     m_global_evaporation = global_evaporation;
 
     return *this;
 }
 
-namespace hemlock {
-    namespace algorithm {
-        namespace impl {
-            template <size_t AntCount, typename VertexCoordType, typename VertexDescriptor>
-            void reset_ants(Ant<VertexCoordType, VertexDescriptor>* ants) {
-                for (size_t i = 0; i < AntCount; ++i) {
-                    ants[i].has_food = false;
-                }
-            }
-        }
-    }
-}
-
-template <typename VertexCoordType, typename NextStepGenerator, typename VertexChoiceStrategy>
+template <typename VertexData, typename NextActionFinder, typename VertexChoiceStrategy>
 template <size_t AntCount, size_t MaxSteps>
-void halgo::BasicACS<VertexCoordType, NextStepGenerator, VertexChoiceStrategy>
-        ::find_path(ACSGraphMap<VertexCoordType>& map, VertexCoordType source, VertexCoordType destination, ui64 seed) {
-    using _VertexDescriptor = details::VertexDescriptor<VertexCoordType>;
-    using _EdgeDescriptor   = details::EdgeDescriptor<VertexCoordType>;
-    using _Ant              = Ant<VertexCoordType, _VertexDescriptor>;
-    using _AntGroup         = AntGroup<VertexCoordType, _VertexDescriptor, AntCount>;
+void halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>
+        ::find_path(GraphMap<VertexData>& map, VertexData source, VertexData destination, ui64 seed) {
+    using _VertexDescriptor = VertexDescriptor<VertexData>;
+    using _EdgeDescriptor   = EdgeDescriptor<VertexData>;
+    using _Ant              = Ant<_VertexDescriptor>;
+    using _AntGroup         = AntGroup<_VertexDescriptor, AntCount>;
 
     /******************\
      * Initialisation *
@@ -221,7 +208,7 @@ void halgo::BasicACS<VertexCoordType, NextStepGenerator, VertexChoiceStrategy>
                 //                  These take either vertex choice generator or the result of running
                 //                  such generator. The former seems better.
                 //                      Called like, e.g.:
-                _VertexDescriptor next_vertex = VertexChoiceStrategy.choose<NextStepGenerator>(ant.current_vertex);
+                _VertexDescriptor next_vertex = VertexChoiceStrategy.choose<NextActionFinder>(ant.current_vertex, map);
 
                 bool need_new_group = false;
                 bool changed_group  = false;

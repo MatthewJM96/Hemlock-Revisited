@@ -1,11 +1,12 @@
-#ifndef __hemlock_algorithm_acs_hpp
-#define __hemlock_algorithm_acs_hpp
+#ifndef __hemlock_algorithm_acs_acs_hpp
+#define __hemlock_algorithm_acs_acs_hpp
 
-#include "algorithm/acs/graph.hpp"
+#include "algorithm/graph.hpp"
+#include "algorithm/next_action_finder.hpp"
 
 namespace hemlock {
     namespace algorithm {
-        template <typename VertexCoordType, typename VertexDescriptor>
+        template <typename VertexDescriptor>
         struct Ant {
             bool   found_food   = false;
             size_t steps_taken  = 0;
@@ -15,15 +16,15 @@ namespace hemlock {
             VertexDescriptor  current_vertex;
         };
 
-        template <typename VertexCoordType, typename VertexDescriptor, size_t AntCount>
+        template < typename VertexDescriptor, size_t AntCount>
         struct AntGroup {
-            Ant<VertexCoordType, VertexDescriptor>* ants[AntCount] = {};
+            Ant<VertexDescriptor>* ants[AntCount] = {};
             size_t  size = 0;
         };
 
         // TODO(Matthew): Don't necessarily want to provide a graph map - scenarios exist where
-        //                no sharing can or will occur and thus it will be faster to deal simply
-        //                with VertexCoordType.
+        //                no sharing can or will occur and thus it may be faster to deal simply
+        //                with VertexData.
         // TODO(Matthew): Can we drop pheromone proportionate to some metric (naively degree of
         //                distance reduction on path) so long as no ant has yet actually reached
         //                the target?
@@ -31,7 +32,7 @@ namespace hemlock {
         //                we will need to allow providing an optional metric for determining
         //                distance, and where not given the algorithm will have to disable some
         //                components.
-        template <typename VertexCoordType, typename NextStepGenerator, typename VertexChoiceStrategy>
+        template <typename VertexData, typename NextActionFinder = NextActionFromGraphFinder<VertexData>, typename VertexChoiceStrategy>
         class BasicACS {
         public:
             BasicACS();
@@ -54,7 +55,7 @@ namespace hemlock {
             BasicACS& set_global_evaporation(f32 global_evaporation);
 
             template <size_t AntCount, size_t MaxSteps>
-            void find_path(ACSGraphMap<VertexCoordType>& map, VertexCoordType source, VertexCoordType destination, ui64 seed);
+            void find_path(ACSGraphMap<VertexData>& map, VertexData source, VertexData destination, ui64 seed);
         protected:
             size_t  m_max_iterations;               //< The maximum number of iterations to perform.
             f32     m_break_on_path_change;         //< The degree of path change that is satisfactory.
@@ -80,6 +81,6 @@ namespace hemlock {
 }
 namespace halgo = hemlock::algorithm;
 
-#include "algorithm/acs.inl"
+#include "algorithm/acs/acs.inl"
 
-#endif // __hemlock_algorithm_acs_hpp
+#endif // __hemlock_algorithm_acs_acs_hpp
