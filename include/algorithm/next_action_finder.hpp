@@ -14,6 +14,8 @@ namespace hemlock {
             virtual INextActionIterator<ActionType>& operator++(i32) = 0;
         };
 
+        // TODO(Matthew): Generally need to have same constructor args in
+        //                derived classes, but don't want to enforce stack.
         template <typename Iterator>
         class INextActionFinder {
         public:
