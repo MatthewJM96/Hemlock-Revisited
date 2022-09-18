@@ -13,6 +13,8 @@ namespace hemlock {
                 return do_choose<NextActionFinder>(current_vertex, map);
             }
         };
+
+        // TODO(Matthew): alternative strategies like distance reduction preference (powers of).
     }
 }
 namespace halgo = hemlock::algorithm;
