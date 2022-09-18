@@ -60,8 +60,8 @@ namespace hemlock {
         {
         public:
             NextActionFromGraphFinder(
-                const GraphMap<ActionType>&  graph_map,
-                VertexDescriptor<ActionType> vertex
+                VertexDescriptor<ActionType> vertex,
+                const GraphMap<ActionType>&  graph_map
             ) :
                 m_iterator_pair(boost::out_edges(vertex, graph_map.graph))
             { /* Empty. */ }
