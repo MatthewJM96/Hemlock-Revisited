@@ -189,7 +189,7 @@ void halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>
         //                     in separate subsequent pass?
         size_t ants_found_food = 0;
         for (size_t step = 0; step < /*2 **/ MaxSteps; ++step) {
-            ant_groups_new = {};
+            ant_groups_new       = {};
             ant_groups_new.count = ant_groups_old.count;
 
             size_t ant_group_cursors[AntCount] = {};
@@ -197,18 +197,20 @@ void halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>
             for (size_t ant_idx = 0; ant_idx < AntCount; ++ant_idx) {
                 _Ant& ant = ants[ant_idx];
 
-                if (ant.found_food) continue;
+                // TODO(Matthew): does this have consequences for entropy calculation?
+                if (!ant.alive || ant.found_food) continue;
 
                 f32 exploitation_factor = m_exploitation_base + m_exploitation_coeff * std::pow(entropy, m_exploitation_exponent);
 
                 // TODO(Matthew): Reimplement back-stepping? Could be more performant than
                 //                simply doing more iterations to compensate for not doing this.
 
-                // TODO(Matthew): Implement some vertex choice strategy(s), and set a default for ACS.
-                //                  These take either vertex choice generator or the result of running
-                //                  such generator. The former seems better.
-                //                      Called like, e.g.:
-                _VertexDescriptor next_vertex = VertexChoiceStrategy.choose<NextActionFinder>(ant.current_vertex, map);
+                auto [found, next_vertex] = VertexChoiceStrategy().choose<NextActionFinder>(ant, ant.current_vertex, map);
+                if (!found) {
+                    // TODO(Matthew): does this have consequences for entropy calculation?
+                    ant.alive = false;
+                    continue;
+                }
 
                 bool need_new_group = false;
                 bool changed_group  = false;

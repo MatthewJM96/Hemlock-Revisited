@@ -5,12 +5,17 @@
 
 namespace hemlock {
     namespace algorithm {
+        template <typename VertexDescriptor>
+        struct Ant;
+
         template <typename ActionType>
         class ActionChoiceStrategyBase {
         public:
             template <typename NextActionFinder>
-            VertexDescriptor<ActionType> choose(VertexDescriptor<ActionType> current_vertex, const GraphMap<ActionType>& map) {
-                return do_choose<NextActionFinder>(current_vertex, map);
+            std::pair<bool, VertexDescriptor<ActionType>> choose(    Ant<VertexDescriptor<ActionType>>& ant,
+                                                                           VertexDescriptor<ActionType> current_vertex,
+                                                                            const GraphMap<ActionType>& map      ) {
+                return do_choose<NextActionFinder>(ant, current_vertex, map);
             }
         };
 

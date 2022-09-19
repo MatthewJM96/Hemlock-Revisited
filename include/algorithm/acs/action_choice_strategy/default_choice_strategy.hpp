@@ -9,7 +9,11 @@ namespace hemlock {
         class DefaultChoiceStrategy : public ActionChoiceStrategyBase<ActionType> {
         protected:
             template <typename NextActionFinder>
-            VertexDescriptor<ActionType> do_choose(VertexDescriptor<ActionType> current_vertex, const GraphMap<ActionType>& map) {
+            std::pair<bool, VertexDescriptor<ActionType>> do_choose(
+                Ant<VertexDescriptor<ActionType>>& ant,
+                      VertexDescriptor<ActionType> current_vertex,
+                       const GraphMap<ActionType>& map
+            ) {
                 NextActionFinder action_finder = NextActionFinder(current_vertex, map);
 
                 size_t total_candidates  = action_finder.end() - action_finder.begin();
@@ -58,7 +62,7 @@ namespace hemlock {
                  * If no candidates are found, then just send the ant back to where it came from.
                  */
                 if (num_candidates == 0) {
-                    // TODO(Matthew): kill this ant for this go round.
+                    return [false, 0];
                 }
 
                 /**
@@ -68,7 +72,7 @@ namespace hemlock {
                  */
                 float exploitation_val = rand(0.0f, 1.0f);
                 if (exploitation_val < (iteration > 0 ? exploitation_factor : 0.0f)) {
-                    return best_option.vertex;
+                    return [true, best_option.vertex];
                 }
 
                 // If we get here, then this ant is exploring.
@@ -80,7 +84,7 @@ namespace hemlock {
                  */
                 float choice_val = rand(0.0f, total_score);
                 for (size_t choice_idx = 0; choice_idx < num_candidates; ++choice_idx) {
-                    if (choice_val <= cumulative_scores[choice_idx]) return boost::target(action_finder.begin() + choice_idx, map.graph);
+                    if (choice_val <= cumulative_scores[choice_idx]) return [true, boost::target(action_finder.begin() + choice_idx, map.graph)];
                 }
 
                 debug_printf("Error: could not decide where to send ant, check maths of DefaultChoiceStrategy!");

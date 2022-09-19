@@ -8,6 +8,7 @@ namespace hemlock {
     namespace algorithm {
         template <typename VertexDescriptor>
         struct Ant {
+            bool   alive        = true;
             bool   found_food   = false;
             size_t steps_taken  = 0;
             size_t group        = 0;
