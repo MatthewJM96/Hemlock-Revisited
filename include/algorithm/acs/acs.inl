@@ -286,7 +286,10 @@ void halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>
 
                     ants_found_food += 1;
 
-                    // TODO(Matthew): Track if this is the best path found thus far.
+                    if (ant.steps_taken < shortest_path.length) {
+                        shortest_path.length = ant.steps_taken;
+                        std::memcpy(&shortest_path.steps[0], ant.previous_vertices, sizeof(_VertexDescriptor) * ant.steps_taken);
+                    }
                 }
             }
 
@@ -324,20 +327,20 @@ void halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>
         }
         entropy /= log(1.0f / static_cast<f32>(AntCount));
 
-        // TODO(Matthew): no longer using edge_in_path_map to track best path found, update this.
         // Global pheromone update.
+
         for (auto edge : boost::make_iterator_range(boost::edges(map.graph))) {
                 map.edge_weight_map[edge] *= (1.0f - m_global_evaporation);
+        }
 
-                /**
-                 * If edge is in shortest path, we must apply the inverse
-                 * length component of the global updating rule.
-                 */
-                if (map.edge_in_path_map[edge]) {
-                    map.edge_weight_map[edge] +=
-                        m_global_evaporation
-                            * (m_global_increment / static_cast<f32>(shortest_path.length));
-                }
+        for (size_t step_idx = 0; step_idx < shortest_path.length - 1; ++step_idx) {
+            _VertexDescriptor source_vertex         = shortest_path.steps[step_idx];
+            _VertexDescriptor destination_vertex    = shortest_path.steps[step_idx + 1];
+            _EdgeDescriptor   edge                  = boost::edge(source_vertex, destination_vertest, map.graph);
+
+            map.edge_weight_map[edge] +=
+                m_global_evaporation
+                    * (m_global_increment / static_cast<f32>(shortest_path.length));
         }
 
         // TODO(Matthew): Do some early break checking using m_break_on_*.
