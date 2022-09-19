@@ -15,7 +15,7 @@
 #include "iomanager.hpp"
 
 
-#include "algorithm/acs.hpp"
+#include "algorithm/acs/acs.hpp"
 
 
 #if defined(DEBUG)

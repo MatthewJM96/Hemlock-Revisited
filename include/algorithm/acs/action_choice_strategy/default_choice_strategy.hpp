@@ -11,6 +11,7 @@ namespace hemlock {
             template <typename NextActionFinder>
             std::pair<bool, VertexDescriptor<ActionType>> do_choose(
                 Ant<VertexDescriptor<ActionType>>& ant,
+                                               f32 exploitation_factor,
                       VertexDescriptor<ActionType> current_vertex,
                        const GraphMap<ActionType>& map
             ) {
@@ -62,17 +63,25 @@ namespace hemlock {
                  * If no candidates are found, then just send the ant back to where it came from.
                  */
                 if (num_candidates == 0) {
-                    return [false, 0];
+                    return {false, 0};
                 }
+
+                auto rand = [](f32 min, f32 max) {
+                    std::random_device rand_dev;
+                    std::mt19937 generator(rand_dev());
+                    std::uniform_real_distribution<f32> distribution(min, max);
+
+                    return distribution(generator);
+                };
 
                 /**
                  * Decide if we should "exploit" (i.e., take best possible path according to scores of edges).
                  *
                  * Note that on first iteration we do no exploitation.
                  */
-                float exploitation_val = rand(0.0f, 1.0f);
-                if (exploitation_val < (iteration > 0 ? exploitation_factor : 0.0f)) {
-                    return [true, best_option.vertex];
+                f32 exploitation_val = rand(0.0f, 1.0f);
+                if (exploitation_val < exploitation_factor) {
+                    return {true, best_option.vertex};
                 }
 
                 // If we get here, then this ant is exploring.
@@ -82,9 +91,9 @@ namespace hemlock {
                  * proportion to the score of each of the candidates. Bug if we somehow
                  * can't make a choice.
                  */
-                float choice_val = rand(0.0f, total_score);
+                f32 choice_val = rand(0.0f, total_score);
                 for (size_t choice_idx = 0; choice_idx < num_candidates; ++choice_idx) {
-                    if (choice_val <= cumulative_scores[choice_idx]) return [true, boost::target(action_finder.begin() + choice_idx, map.graph)];
+                    if (choice_val <= cumulative_scores[choice_idx]) return {true, boost::target(action_finder.begin() + choice_idx, map.graph)};
                 }
 
                 debug_printf("Error: could not decide where to send ant, check maths of DefaultChoiceStrategy!");

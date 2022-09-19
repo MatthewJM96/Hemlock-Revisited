@@ -56,7 +56,7 @@ namespace hemlock {
 
         template <typename ActionType>
         class NextActionFromGraphFinder :
-            public NextActionFinderBase<NextActionFromGraphIterator<ActionType>>
+            public INextActionFinder<NextActionFromGraphIterator<ActionType>>
         {
         public:
             NextActionFromGraphFinder(
@@ -72,8 +72,8 @@ namespace hemlock {
             const NextActionFromGraphIterator<ActionType> end()   const final;
         protected:
             std::pair<
-                boost::graph_traits<Graph<ActionType>>::out_edge_iterator,
-                boost::graph_traits<Graph<ActionType>>::out_edge_iterator
+                typename boost::graph_traits<Graph<ActionType>>::out_edge_iterator,
+                typename boost::graph_traits<Graph<ActionType>>::out_edge_iterator
             > m_iterator_pair;
         };
     }

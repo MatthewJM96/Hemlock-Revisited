@@ -205,7 +205,7 @@ void halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>
                 // TODO(Matthew): Reimplement back-stepping? Could be more performant than
                 //                simply doing more iterations to compensate for not doing this.
 
-                auto [found, next_vertex] = VertexChoiceStrategy().choose<NextActionFinder>(ant, ant.current_vertex, map);
+                auto [found, next_vertex] = VertexChoiceStrategy().template choose<NextActionFinder>(ant, exploitation_factor, ant.current_vertex, map);
                 if (!found) {
                     // TODO(Matthew): does this have consequences for entropy calculation?
                     ant.alive = false;

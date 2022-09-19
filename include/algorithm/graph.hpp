@@ -19,7 +19,7 @@ namespace hemlock {
         namespace details {
             template <typename VertexData>
             using VertexProperties = boost::property<vertex_data_t, VertexData>;
-            using EdgeProperties   = boost::property<boost::edge_weight_t, float>>;
+            using EdgeProperties   = boost::property<boost::edge_weight_t, f32>;
         }
 
         template <typename VertexData>
@@ -41,7 +41,7 @@ namespace hemlock {
         template <typename VertexData>
         using VertexCoordMap = boost::property_map<Graph<VertexData>, vertex_data_t>::type;
         template <typename VertexData>
-        using CoordVertexMap = std::unordered_map<VertexData, details::VertexDescriptor<VertexData>>;
+        using CoordVertexMap = std::unordered_map<VertexData, VertexDescriptor<VertexData>>;
 
         template <typename VertexData>
         struct GraphMap {

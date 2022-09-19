@@ -28,22 +28,22 @@
     
 // }
 
-template <typename ActionType, typename ...ConcreteStepFinders>
+template <typename ActionType>
 halgo::NextActionFromGraphIterator<ActionType> halgo::NextActionFromGraphFinder<ActionType>::begin() {
     return m_iterator_pair.first;
 }
 
-template <typename ActionType, typename ...ConcreteStepFinders>
+template <typename ActionType>
 const halgo::NextActionFromGraphIterator<ActionType> halgo::NextActionFromGraphFinder<ActionType>::begin() const {
     return m_iterator_pair.first;
 }
 
-template <typename ActionType, typename ...ConcreteStepFinders>
+template <typename ActionType>
 halgo::NextActionFromGraphIterator<ActionType> halgo::NextActionFromGraphFinder<ActionType>::end() {
     return m_iterator_pair.second;
 }
 
-template <typename ActionType, typename ...ConcreteStepFinders>
+template <typename ActionType>
 const halgo::NextActionFromGraphIterator<ActionType> halgo::NextActionFromGraphFinder<ActionType>::end() const {
     return m_iterator_pair.second;
 }

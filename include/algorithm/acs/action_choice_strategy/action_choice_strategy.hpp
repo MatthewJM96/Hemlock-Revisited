@@ -1,7 +1,7 @@
 #ifndef __hemlock_algorithm_acs_action_choice_strategy_action_choice_strategy_hpp
 #define __hemlock_algorithm_acs_action_choice_strategy_action_choice_strategy_hpp
 
-#include "algorithm/acs.hpp"
+#include "algorithm/acs/acs.hpp"
 
 namespace hemlock {
     namespace algorithm {
@@ -13,9 +13,10 @@ namespace hemlock {
         public:
             template <typename NextActionFinder>
             std::pair<bool, VertexDescriptor<ActionType>> choose(    Ant<VertexDescriptor<ActionType>>& ant,
+                                                                                                    f32 exploitation_factor,
                                                                            VertexDescriptor<ActionType> current_vertex,
                                                                             const GraphMap<ActionType>& map      ) {
-                return do_choose<NextActionFinder>(ant, current_vertex, map);
+                return do_choose<NextActionFinder>(ant, exploitation_factor, current_vertex, map);
             }
         };
 

@@ -3,6 +3,7 @@
 
 #include "algorithm/graph.hpp"
 #include "algorithm/next_action_finder.hpp"
+#include "algorithm/acs/action_choice_strategy/default_choice_strategy.hpp"
 
 namespace hemlock {
     namespace algorithm {
@@ -33,7 +34,7 @@ namespace hemlock {
         //                we will need to allow providing an optional metric for determining
         //                distance, and where not given the algorithm will have to disable some
         //                components.
-        template <typename VertexData, typename NextActionFinder = NextActionFromGraphFinder<VertexData>, typename VertexChoiceStrategy>
+        template <typename VertexData, typename NextActionFinder = NextActionFromGraphFinder<VertexData>, typename VertexChoiceStrategy = DefaultChoiceStrategy<VertexData>>
         class BasicACS {
         public:
             BasicACS();
