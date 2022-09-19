@@ -25,6 +25,8 @@
 #endif
 
 #include "tests/voxel_screen/io.hpp"
+#include "tests/voxel_screen/physics.hpp"
+#include "tests/voxel_screen/player.hpp"
 #include "tests/voxel_screen/terrain.hpp"
 
 
@@ -86,9 +88,9 @@ public:
         m_player.ac.position += hvox::EntityWorldPosition{f32v3{delta_pos.x, 0.0f, delta_pos.z} * static_cast<f32>(1ll << 32)};
         m_camera.offset_position(f32v3{delta_pos.x, 0.0f, delta_pos.z});
         {
-            auto transform = m_player_body->getWorldTransform();
+            auto transform = m_player.body->getWorldTransform();
             transform.setOrigin(btVector3(m_camera.position().x, m_camera.position().y, m_camera.position().z));
-            m_player_body->setWorldTransform(transform);
+            m_player.body->setWorldTransform(transform);
         }
         m_camera.update();
 
@@ -140,13 +142,13 @@ public:
             m_phys.world->addRigidBody(voxel_patch_body);
         }
 
-        m_player_body->activate();
+        m_player.body->activate();
         m_phys.world->stepSimulation(hemlock::frame_time_to_floating<std::chrono::seconds, btScalar>(time));
 
         m_camera.set_position(f32v3{
-            m_player_body->getWorldTransform().getOrigin().x(),
-            m_player_body->getWorldTransform().getOrigin().y(),
-            m_player_body->getWorldTransform().getOrigin().z()
+            m_player.body->getWorldTransform().getOrigin().x(),
+            m_player.body->getWorldTransform().getOrigin().y(),
+            m_player.body->getWorldTransform().getOrigin().z()
         });
         m_player.ac.position = hvox::EntityWorldPosition{
             static_cast<hvox::EntityWorldPositionCoord>(m_camera.position().x * static_cast<f32>(1ll << 32)),
@@ -309,37 +311,8 @@ public:
             }}
         );
 
-        m_player.ac.position   = hvox::EntityWorldPosition{0, static_cast<hvox::EntityWorldPositionCoord>(60) << 32, 0};
-        m_player.ac.chunk_grid = m_chunk_grid;
-        m_player.cc.shape = new btCompoundShape();
-        m_player.cc.shape->addChildShape(btTransform::getIdentity(), new btBoxShape(btVector3{0.5f, 1.5f, 0.5f}));
-        // TODO(Matthew): update this.
-        m_player.dc.velocity   = f32v3(2.0f);
-
-        m_phys.broadphase       = new btDbvtBroadphase();
-        m_phys.collision_config = new btDefaultCollisionConfiguration();
-        m_phys.dispatcher       = new btCollisionDispatcher(m_phys.collision_config);
-        m_phys.solver           = new btSequentialImpulseConstraintSolver();
-        m_phys.world            = new btDiscreteDynamicsWorld(m_phys.dispatcher, m_phys.broadphase, m_phys.solver, m_phys.collision_config);
-        m_phys.world->setGravity(btVector3(0, 0, 0));
-        m_phys.world->setDebugDrawer(new VoxelPhysDrawer(&m_camera, &m_line_shader));
-        m_phys.world->getDebugDrawer()->setDebugMode(btIDebugDraw::DBG_DrawWireframe);
-
-        {
-            btQuaternion rotation;
-            rotation.setEulerZYX(0.0f, 1.0f, 0.0f);
-            btVector3 position = btVector3(m_camera.position().x, m_camera.position().y, m_camera.position().z);
-            btDefaultMotionState* motion_state = new btDefaultMotionState(btTransform(rotation, position));
-            btVector3 inertia;
-            btScalar mass = 80.0f;
-            m_player.cc.shape->calculateLocalInertia(mass, inertia);
-            btRigidBody::btRigidBodyConstructionInfo body_info = btRigidBody::btRigidBodyConstructionInfo(mass, motion_state, m_player.cc.shape, inertia);
-            body_info.m_restitution = 0.0f;
-            body_info.m_friction = 1000.0f;
-            m_player_body = new btRigidBody(body_info);
-            m_player_body->setAngularFactor(0.0f);
-            m_phys.world->addRigidBody(m_player_body);
-        }
+        htest::voxel_screen::setup_physics(m_phys);
+        htest::voxel_screen::setup_player(m_player);
 
         glCreateVertexArrays(1, &m_crosshair_vao);
 
@@ -402,19 +375,8 @@ protected:
     hmem::Handle<hvox::ChunkGrid>   m_chunk_grid;
     hg::GLSLProgram                 m_shader, m_line_shader;
     hthread::ThreadWorkflowDAG      m_chunk_load_dag;
-    struct {
-        hphys::CollidableComponent cc;
-        hphys::AnchoredComponent   ac;
-        hphys::DynamicComponent    dc;
-    } m_player;
-    btRigidBody* m_player_body;
-    struct {
-        btDbvtBroadphase*                       broadphase;
-        btDefaultCollisionConfiguration*        collision_config;
-        btCollisionDispatcher*                  dispatcher;
-        btSequentialImpulseConstraintSolver*    solver;
-        btDiscreteDynamicsWorld*                world;
-    } m_phys;
+    htest::PlayerData  m_player;
+    htest::PhysicsData m_phys;
 
     bool m_draw_chunk_outlines;
 
