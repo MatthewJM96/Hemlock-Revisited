@@ -135,8 +135,8 @@ void halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>
     _VertexDescriptor destination_vertex    = map.coord_vertex_map[destination];
 
     struct {
-        _VertexDescriptor steps[MaxSteps];
-        size_t            length;
+        _VertexDescriptor steps[MaxSteps]   = {};
+        size_t            length            = std::numeric_limits<size_t>::max();
     } shortest_path;
 
     // TODO(Matthew): Heap allocation (paged?) at least for large number of ants & max steps?
@@ -157,6 +157,9 @@ void halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>
     for (auto edge : boost::make_iterator_range(boost::edges(map.graph))) {
         map.edge_weight_map[edge] += m_local_increment;
     }
+
+    size_t last_shortest_path = std::numeric_limits<size_t>::max();
+    size_t satisfactory_change_its = 0;
 
     /*****************\
      * Do Iterations *
@@ -343,6 +346,14 @@ void halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>
                     * (m_global_increment / static_cast<f32>(shortest_path.length));
         }
 
-        // TODO(Matthew): Do some early break checking using m_break_on_*.
+        if (std::max(last_shortest_path, shortest_path.length)
+                - std::min(last_shortest_path, shortest_path.length)
+                    < m_break_on_path_change) {
+            satisfactory_change_its += 1;
+
+            if (satisfactory_change_its >= m_break_on_iterations) break;
+        } else {
+            satisfactory_change_its = 0;
+        }
     }
 }
