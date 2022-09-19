@@ -137,7 +137,10 @@ void halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>
     struct {
         _VertexDescriptor steps[MaxSteps]   = {};
         size_t            length            = std::numeric_limits<size_t>::max();
+        bool              found             = false;
     } shortest_path;
+    size_t last_shortest_path = std::numeric_limits<size_t>::max();
+    size_t satisfactory_change_its = 0;
 
     // TODO(Matthew): Heap allocation (paged?) at least for large number of ants & max steps?
     // Bucket of visited vertices for all ants.
@@ -157,9 +160,6 @@ void halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>
     for (auto edge : boost::make_iterator_range(boost::edges(map.graph))) {
         map.edge_weight_map[edge] += m_local_increment;
     }
-
-    size_t last_shortest_path = std::numeric_limits<size_t>::max();
-    size_t satisfactory_change_its = 0;
 
     /*****************\
      * Do Iterations *
@@ -291,6 +291,7 @@ void halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>
 
                     if (ant.steps_taken < shortest_path.length) {
                         shortest_path.length = ant.steps_taken;
+                        shortest_path.found  = true;
                         std::memcpy(&shortest_path.steps[0], ant.previous_vertices, sizeof(_VertexDescriptor) * ant.steps_taken);
                     }
                 }
@@ -346,9 +347,12 @@ void halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>
                     * (m_global_increment / static_cast<f32>(shortest_path.length));
         }
 
-        if (std::max(last_shortest_path, shortest_path.length)
-                - std::min(last_shortest_path, shortest_path.length)
-                    < m_break_on_path_change) {
+        if (
+            shortest_path.found
+                && std::max(last_shortest_path, shortest_path.length)
+                    - std::min(last_shortest_path, shortest_path.length)
+                        < m_break_on_path_change
+        ) {
             satisfactory_change_its += 1;
 
             if (satisfactory_change_its >= m_break_on_iterations) break;
