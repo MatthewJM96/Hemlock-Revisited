@@ -24,176 +24,9 @@
 #   define VIEW_DIST 10
 #endif
 
-struct TVS_BlockComparator {
-    bool operator()(const hvox::Block* source, const hvox::Block* target, hvox::BlockChunkPosition, hvox::Chunk*) const {
-        return (source->id == target->id) && (source->id != 0);
-    }
-};
-struct TVS_VoxelGenerator {
-    void operator() (hmem::Handle<hvox::Chunk> chunk) const {
-        auto simplex_1                  = FastNoise::New<FastNoise::Simplex>();
-        auto fractal_1                  = FastNoise::New<FastNoise::FractalFBm>();
-        auto domain_scale_1             = FastNoise::New<FastNoise::DomainScale>();
-        auto position_output_1          = FastNoise::New<FastNoise::PositionOutput>();
-        auto add_1                      = FastNoise::New<FastNoise::Add>();
-        auto domain_warp_grad_1         = FastNoise::New<FastNoise::DomainWarpGradient>();
-        auto domain_warp_fract_prog_1   = FastNoise::New<FastNoise::DomainWarpFractalProgressive>();
+#include "tests/voxel_screen/io.hpp"
+#include "tests/voxel_screen/terrain.hpp"
 
-        fractal_1->SetSource(simplex_1);
-        fractal_1->SetOctaveCount(4);
-        fractal_1->SetGain(0.5f);
-        fractal_1->SetLacunarity(2.5f);
-
-        domain_scale_1->SetSource(fractal_1);
-        domain_scale_1->SetScale(0.66f);
-
-        position_output_1->Set<FastNoise::Dim::X>(0.0f);
-        position_output_1->Set<FastNoise::Dim::Y>(3.0f);
-        position_output_1->Set<FastNoise::Dim::Z>(0.0f);
-        position_output_1->Set<FastNoise::Dim::W>(0.0f);
-
-        add_1->SetLHS(domain_scale_1);
-        add_1->SetRHS(position_output_1);
-
-        domain_warp_grad_1->SetSource(add_1);
-        domain_warp_grad_1->SetWarpAmplitude(0.2f);
-        domain_warp_grad_1->SetWarpFrequency(2.0f);
-
-        domain_warp_fract_prog_1->SetSource(domain_warp_grad_1);
-        domain_warp_fract_prog_1->SetGain(0.6f);
-        domain_warp_fract_prog_1->SetOctaveCount(2);
-        domain_warp_fract_prog_1->SetLacunarity(2.5f);
-
-        f32* data = new f32[CHUNK_VOLUME];
-        domain_warp_fract_prog_1->GenUniformGrid3D(
-        // domain_warp_grad_1->GenUniformGrid3D(
-        // fractal_1.get()->GenUniformGrid3D(
-            data,
-            static_cast<int>(chunk->position.x) * CHUNK_LENGTH,
-            -1 * static_cast<int>(chunk->position.y) * CHUNK_LENGTH,
-            static_cast<int>(chunk->position.z) * CHUNK_LENGTH,
-            CHUNK_LENGTH,
-            CHUNK_LENGTH,
-            CHUNK_LENGTH,
-            0.005f,
-            1337
-        );
-        // f32* data = new f32[CHUNK_AREA];
-        // domain_warp_fract_prog_1->GenUniformGrid2D(
-        // // domain_warp_grad_1->GenUniformGrid2D(
-        // // fractal_1.get()->GenUniformGrid2D(
-        //     data,
-        //     static_cast<int>(chunk->position.x) * CHUNK_LENGTH,
-        //     static_cast<int>(chunk->position.z) * CHUNK_LENGTH,
-        //     CHUNK_LENGTH,
-        //     CHUNK_LENGTH,
-        //     0.2f,
-        //     1337
-        // );
-
-        {
-            std::lock_guard lock(chunk->blocks_mutex);
-
-            ui64 noise_idx = 0;
-            for (ui8 z = 0; z < CHUNK_LENGTH; ++z) {
-                for (ui8 y = 0; y < CHUNK_LENGTH; ++y) {
-                    for (ui8 x = 0; x < CHUNK_LENGTH; ++x) {
-                        chunk->blocks[hvox::block_index({x, CHUNK_LENGTH - y - 1, z})] = data[noise_idx++] > 0 ? hvox::Block{1} : hvox::Block{0};
-                    }
-                }
-            }
-        }
-
-        // hvox::set_blocks(chunk, hvox::BlockChunkPosition{0}, hvox::BlockChunkPosition{CHUNK_LENGTH - 1}, hvox::Block{0});
-        // ui64 noise_idx = 0;
-        // for (ui8 z = 0; z < CHUNK_LENGTH; ++z) {
-        //     for (ui8 x = 0; x < CHUNK_LENGTH; ++x) {
-        //         i32 y = hvox::block_world_position(chunk->position, 0).y;
-
-        //         i32 height = -1 * static_cast<i32>(data[noise_idx++]);
-        //         // debug_printf("Height at (%d, %d): %d\n", x, z, height);
-        //         if (y >= height) continue;
-
-        //         hvox::set_blocks(chunk, {x, 0, z}, {x, glm::min(height - y, CHUNK_LENGTH - 1), z}, hvox::Block{1});
-        //     }
-        // }
-
-        delete[] data;
-    }
-};
-
-struct TVS_VoxelShapeEvaluator {
-    btCollisionShape* operator()(hvox::Block b, btTransform&) const {
-        if (b == hvox::Block{1}) {
-            return new btBoxShape(btVector3{0.5f, 0.5f, 0.5f});
-        }
-        return nullptr;
-    }
-};
-
-class VoxelPhysDrawer : public btIDebugDraw {
-public:
-    VoxelPhysDrawer(hcam::BasicFirstPersonCamera* camera, hg::GLSLProgram* shader) : btIDebugDraw() {
-        m_camera = camera;
-        m_line_shader = shader;
-
-        glCreateVertexArrays(1, &m_vao);
-
-        glCreateBuffers(1, &m_vbo);
-        glNamedBufferData(
-            m_vbo,
-            sizeof(f32v3) * 2,
-            nullptr,
-            GL_DYNAMIC_DRAW
-        );
-
-        glVertexArrayVertexBuffer(m_vao, 0, m_vbo, 0, sizeof(f32v3));
-
-        glEnableVertexArrayAttrib(m_vao, 0);
-        glVertexArrayAttribFormat(m_vao, 0, 3, GL_FLOAT, GL_FALSE, 0);
-        glVertexArrayAttribBinding(m_vao, 0, 0);
-    }
-    virtual ~VoxelPhysDrawer() { /* Empty. */ }
-
-    virtual void drawLine(const btVector3& from, const btVector3& to, const btVector3&) override {
-        f32v3 points[2] = {
-            f32v3{
-                from.x()/* + m_camera->position().x*/,
-                from.y()/* + m_camera->position().y*/,
-                from.z()/* + m_camera->position().z*/
-            },
-            f32v3{
-                to.x()/* + m_camera->position().x*/,
-                to.y()/* + m_camera->position().y*/,
-                to.z()/* + m_camera->position().z*/
-            }
-        };
-
-        glNamedBufferSubData(m_vbo, 0, 2 * sizeof(f32v3), reinterpret_cast<void*>(&points[0]));
-
-        f32v3 _colour = f32v3{1.0f, 1.0f, 0.0f};
-        glUniformMatrix4fv(m_line_shader->uniform_location("view_proj"),  1, GL_FALSE, &m_camera->view_projection_matrix()[0][0]);
-        glUniform3fv(m_line_shader->uniform_location("colour"), 1, &_colour[0]);
-
-        glBindVertexArray(m_vao);
-        glDrawArrays(GL_LINES, 0, 2);
-    }
-
-	virtual void drawContactPoint(const btVector3&, const btVector3&, btScalar, int, const btVector3&) override { /* Empty. */ }
-
-	virtual void reportErrorWarning(const char* warning_string [[maybe_unused]]) override { debug_printf(warning_string); }
-
-	virtual void draw3dText(const btVector3&, const char*) override { /* Empty. */ }
-
-	virtual void setDebugMode(int debug_mode) override { m_debug_mode = debug_mode; }
-
-	virtual int getDebugMode() const override { return m_debug_mode; }
-protected:
-    int m_debug_mode;
-    GLuint m_vao, m_vbo;
-    hcam::BasicFirstPersonCamera* m_camera;
-    hg::GLSLProgram* m_line_shader;
-};
 
 
 class TestVoxelScreen : public happ::ScreenBase {
@@ -207,93 +40,35 @@ public:
     virtual void start(hemlock::FrameTime time) override {
         happ::ScreenBase::start(time);
 
-        for (auto x = -VIEW_DIST; x <= VIEW_DIST; ++x) {
-            for (auto z = -VIEW_DIST; z <= VIEW_DIST; ++z) {
-                for (auto y = -2; y < 6; ++ y) {
-                    m_chunk_grid->preload_chunk_at({ {x, y, z} });
-                }
-            }
-        }
-        for (auto x = -VIEW_DIST; x <= VIEW_DIST; ++x) {
-            for (auto z = -VIEW_DIST; z <= VIEW_DIST; ++z) {
-                for (auto y = -2; y < 6; ++ y) {
-                    m_chunk_grid->load_chunk_at({ {x, y, z} });
-                }
-            }
-        }
+        load_chunks(m_chunk_grid);
     }
 
     virtual void update(hemlock::FrameTime time) override {
         static f32v3 last_pos{0.0f};
 
-        if (m_input_manager->is_pressed(hui::PhysicalKey::H_G)) {
-            m_phys.world->setGravity(btVector3(0, -9.8f, 0));
-            debug_printf("Turning on gravity.\n");
-        }
 
-        static bool do_chunk_check = false;
-
-        if (m_input_manager->is_pressed(hui::PhysicalKey::H_J)) {
-            do_chunk_check = false;
-        }
-
-        if (do_chunk_check) return;
-
-        if (m_input_manager->is_pressed(hui::PhysicalKey::H_K)) {
-            do_chunk_check = true;
-        }
-
-        if (m_input_manager->is_pressed(hui::PhysicalKey::H_L)) {
-            m_draw_chunk_outlines = !m_draw_chunk_outlines;
-        }
-
-        f32 speed_mult = 1.0f;
-        if (m_input_manager->key_modifier_state().ctrl) {
-            speed_mult = 10.0f;
-        }
-        if (m_input_manager->key_modifier_state().alt) {
-            speed_mult = 50.0f;
-        }
+        static bool do_chunk_check  = false;
+        static bool do_unloads      = false;
 
         f32 frame_time = hemlock::frame_time_to_floating<>(time);
 
-        f32v3 delta_pos{0.0f};
-        if (m_input_manager->is_pressed(hui::PhysicalKey::H_W)) {
-            delta_pos += glm::normalize(m_camera.direction()) * frame_time * 0.01f * speed_mult;
-        }
-        if (m_input_manager->is_pressed(hui::PhysicalKey::H_A)) {
-            delta_pos -= glm::normalize(m_camera.right()) * frame_time * 0.01f * speed_mult;
-        }
-        if (m_input_manager->is_pressed(hui::PhysicalKey::H_S)) {
-            delta_pos -= glm::normalize(m_camera.direction()) * frame_time * 0.01f * speed_mult;
-        }
-        if (m_input_manager->is_pressed(hui::PhysicalKey::H_D)) {
-            delta_pos += glm::normalize(m_camera.right()) * frame_time * 0.01f * speed_mult;
-        }
-        if (m_input_manager->is_pressed(hui::PhysicalKey::H_Q)) {
-            delta_pos += glm::normalize(m_camera.up()) * frame_time * 0.01f * speed_mult;
-        }
-        if (m_input_manager->is_pressed(hui::PhysicalKey::H_E)) {
-            delta_pos -= glm::normalize(m_camera.up()) * frame_time * 0.01f * speed_mult;
-        }
+        bool  flip_chunk_check  = false;
+        f32   speed_mult        = 1.0f;
+        f32v3 delta_pos         = {};
+        htest::voxel_screen::handle_simple_user_inputs(
+            m_input_manager,
+            m_phys.world,
+            flip_chunk_check,
+            m_draw_chunk_outlines,
+            frame_time,
+            speed_mult,
+            delta_pos
+        );
 
-        static bool do_unloads = false;
-        if (m_input_manager->is_pressed(hui::PhysicalKey::H_U)) {
-            do_unloads = true;
-        }
-        if (do_unloads) {
-            static f32 t = 0.0f;
-            t += hemlock::frame_time_to_floating<>(time);
-            for (auto x = -VIEW_DIST; x < VIEW_DIST; ++x) {
-                for (auto z = -VIEW_DIST; z < VIEW_DIST; ++z) {
-                    if (((x + VIEW_DIST) + (2 * VIEW_DIST + 1) * (z + VIEW_DIST)) * 300 < t) {
-                        m_chunk_grid->unload_chunk_at({ {x, 0, z} });
-                        m_chunk_grid->unload_chunk_at({ {x, 1, z} });
-                        m_chunk_grid->unload_chunk_at({ {x, 2, z} });
-                    }
-                }
-            }
-        }
+        if (do_chunk_check && !flip_chunk_check) return;
+        if (flip_chunk_check) do_chunk_check = !do_chunk_check;
+
+        if (do_unloads) htest::voxel_screen::unload_chunks(m_chunk_grid, frame_time);
 
 #if defined(DEBUG)
         static f64 countdown = 1000.0;
@@ -319,65 +94,19 @@ public:
 
         f32v3 current_pos = glm::floor(m_camera.position() / static_cast<f32>(CHUNK_LENGTH));
 
-        i32 x_step = static_cast<i32>(current_pos.x) - static_cast<i32>(last_pos.x);
-        if (x_step != 0) {
-            for (auto z = static_cast<i32>(current_pos.z) - VIEW_DIST; z <= static_cast<i32>(current_pos.z) + VIEW_DIST; ++z) {
-                for (auto y = -2; y < 6; ++ y) {
-                    m_unloading_chunks.emplace_back(hmem::WeakHandle<hvox::Chunk>{});
-                    auto& handle = m_unloading_chunks.back();
-                    m_chunk_grid->unload_chunk_at({ {
-                        x_step < 0 ? static_cast<i32>(current_pos.x) + VIEW_DIST + 1 : static_cast<i32>(current_pos.x) - VIEW_DIST - 1,
-                        y, z
-                    } }, &handle);
-                }
-            }
-            for (auto z = static_cast<i32>(current_pos.z) - VIEW_DIST; z <= static_cast<i32>(current_pos.z) + VIEW_DIST; ++z) {
-                for (auto y = -2; y < 6; ++ y) {
-                    m_chunk_grid->preload_chunk_at({ {
-                        x_step < 0 ? static_cast<i32>(current_pos.x) - VIEW_DIST : static_cast<i32>(current_pos.x) + VIEW_DIST,
-                        y, z
-                    } });
-                }
-            }
-            for (auto z = static_cast<i32>(current_pos.z) - VIEW_DIST; z <= static_cast<i32>(current_pos.z) + VIEW_DIST; ++z) {
-                for (auto y = -2; y < 6; ++ y) {
-                    m_chunk_grid->load_chunk_at({ {
-                        x_step < 0 ? static_cast<i32>(current_pos.x) - VIEW_DIST : static_cast<i32>(current_pos.x) + VIEW_DIST,
-                        y, z
-                    } });
-                }
-            }
-        }
+        htest::voxel_screen::unload_x_chunks(
+            m_chunk_grid,
+            m_unloading_chunks,
+            current_pos,
+            last_pos
+        );
 
-        i32 z_step = static_cast<i32>(current_pos.z) - static_cast<i32>(last_pos.z);
-        if (z_step != 0) {
-            for (auto x = static_cast<i32>(current_pos.x) - VIEW_DIST; x <= static_cast<i32>(current_pos.x) + VIEW_DIST; ++x) {
-                for (auto y = -2; y < 6; ++ y) {
-                    m_unloading_chunks.emplace_back(hmem::WeakHandle<hvox::Chunk>{});
-                    auto& handle = m_unloading_chunks.back();
-                    m_chunk_grid->unload_chunk_at({ {
-                        x, y,
-                        z_step < 0 ? static_cast<i32>(current_pos.z) + VIEW_DIST + 1 : static_cast<i32>(current_pos.z) - VIEW_DIST - 1
-                    } }, &handle);
-                }
-            }
-            for (auto x = static_cast<i32>(current_pos.x) - VIEW_DIST; x <= static_cast<i32>(current_pos.x) + VIEW_DIST; ++x) {
-                for (auto y = -2; y < 6; ++ y) {
-                    m_chunk_grid->preload_chunk_at({ {
-                        x, y,
-                        z_step < 0 ? static_cast<i32>(current_pos.z) - VIEW_DIST : static_cast<i32>(current_pos.z) + VIEW_DIST
-                    } });
-                }
-            }
-            for (auto x = static_cast<i32>(current_pos.x) - VIEW_DIST; x <= static_cast<i32>(current_pos.x) + VIEW_DIST; ++x) {
-                for (auto y = -2; y < 6; ++ y) {
-                    m_chunk_grid->load_chunk_at({ {
-                        x, y,
-                        z_step < 0 ? static_cast<i32>(current_pos.z) - VIEW_DIST : static_cast<i32>(current_pos.z) + VIEW_DIST
-                    } });
-                }
-            }
-        }
+        htest::voxel_screen::unload_z_chunks(
+            m_chunk_grid,
+            m_unloading_chunks,
+            current_pos,
+            last_pos
+        );
 
         last_pos = current_pos;
 
@@ -666,13 +395,13 @@ protected:
 
     ui32 m_default_texture;
 
-    MyIOManager                  m_iom;
-    hg::ShaderCache              m_shader_cache;
-    hcam::BasicFirstPersonCamera m_camera;
-    hui::InputManager*           m_input_manager;
+    MyIOManager                     m_iom;
+    hg::ShaderCache                 m_shader_cache;
+    hcam::BasicFirstPersonCamera    m_camera;
+    hui::InputManager*              m_input_manager;
     hmem::Handle<hvox::ChunkGrid>   m_chunk_grid;
-    hg::GLSLProgram              m_shader, m_line_shader;
-    hthread::ThreadWorkflowDAG   m_chunk_load_dag;
+    hg::GLSLProgram                 m_shader, m_line_shader;
+    hthread::ThreadWorkflowDAG      m_chunk_load_dag;
     struct {
         hphys::CollidableComponent cc;
         hphys::AnchoredComponent   ac;
