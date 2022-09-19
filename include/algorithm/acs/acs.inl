@@ -154,18 +154,9 @@ void halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>
         size_t    count             = 0;
     } ant_groups_new, ant_groups_old;
 
-    for (size_t ant_idx = 0; ant_idx < AntCount; ++ant_idx) {
-        ants[ant_idx].previous_vertices = &visited_vertices[ant_idx * MaxSteps];
-    }
-
     for (auto edge : boost::make_iterator_range(boost::edges(map.graph))) {
         map.edge_weight_map[edge] += m_local_increment;
     }
-
-    std::default_random_engine            generator;
-    std::uniform_real_distribution<float> distrib(0.0f, 1.0f);
-
-    generator.seed(seed);
 
     /*****************\
      * Do Iterations *
@@ -179,6 +170,7 @@ void halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>
         ant_groups_old  = {};
         for (size_t ant_idx = 0; ant_idx < AntCount; ++ant_idx) {
             ants[ant_idx].current_vertex = source_vertex;
+            ants[ant_idx].previous_vertices = &visited_vertices[ant_idx * MaxSteps];
             ant_groups_old.groups[0].ants[ant_idx] = &ants[ant_idx];
         }
         ant_groups_old.groups[0].size = AntCount;
@@ -293,6 +285,8 @@ void halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>
                     ant.steps_taken = step + 1;
 
                     ants_found_food += 1;
+
+                    // TODO(Matthew): Track if this is the best path found thus far.
                 }
             }
 
@@ -330,6 +324,7 @@ void halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>
         }
         entropy /= log(1.0f / static_cast<f32>(AntCount));
 
+        // TODO(Matthew): no longer using edge_in_path_map to track best path found, update this.
         // Global pheromone update.
         for (auto edge : boost::make_iterator_range(boost::edges(map.graph))) {
                 map.edge_weight_map[edge] *= (1.0f - m_global_evaporation);
