@@ -13,10 +13,6 @@ namespace hemlock {
         //                as it may be nice to base this on view distance.
         using ChunkAllocator = hmem::PagedAllocator<Chunk, 4 * 4 * 4, 3>;
 
-        // TODO(Matthew): Do a better job managing instance data. Probably encapsulate in a class that "generates" and "obtains" instance data buffers, where
-        //                the former grabs a page only if needed (as we are in the meshers), and the latter returns a handle on the to-be-freed data. Or
-        //                something like that.
-
         using Chunks = std::unordered_map<ChunkID, hmem::Handle<Chunk>>;
 
         using QueriedChunkState       = std::pair<bool, bool>;
