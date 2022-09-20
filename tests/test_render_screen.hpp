@@ -12,8 +12,8 @@
 #include "ui/input/keys.hpp"
 #include "ui/input/manager.h"
 #include "voxel/chunk/grid.h"
-#include "voxel/chunk/generator_task.hpp"
-#include "voxel/chunk/mesh/greedy_task.hpp"
+#include "voxel/generation/generator_task.hpp"
+#include "voxel/graphics/mesh/greedy_task.hpp"
 
 #include "iomanager.hpp"
 

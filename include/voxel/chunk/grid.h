@@ -4,8 +4,8 @@
 #include "timing.h"
 #include "voxel/coordinate_system.h"
 #include "voxel/chunk.h"
-#include "voxel/chunk/task.hpp"
-#include "voxel/chunk/renderer.h"
+#include "voxel/task.hpp"
+#include "voxel/graphics/renderer.h"
 
 namespace hemlock {
     namespace voxel {

@@ -6,8 +6,8 @@
 #include <FastNoise/FastNoise.h>
 
 #include "memory/handle.hpp"
-#include "voxel/chunk/generator_task.hpp"
-#include "voxel/chunk/mesh/greedy_task.hpp"
+#include "voxel/generation/generator_task.hpp"
+#include "voxel/graphics/mesh/greedy_task.hpp"
 #include "voxel/ray.h"
 
 #include "physics/voxel/chunk_grid_collider.hpp"

@@ -3,7 +3,7 @@
 #include "voxel/block.hpp"
 #include "voxel/chunk.h"
 
-#include "voxel/chunk/renderer.h"
+#include "voxel/graphics/renderer.h"
 
 hg::MeshHandles hvox::ChunkRenderer::block_mesh_handles = {};
 

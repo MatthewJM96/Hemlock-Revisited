@@ -5,11 +5,11 @@
 #include "graphics/mesh.h"
 #include "voxel/block.hpp"
 #include "voxel/coordinate_system.h"
+#include "voxel/task.hpp"
 #include "voxel/chunk/constants.hpp"
 #include "voxel/chunk/events.hpp"
-#include "voxel/chunk/task.hpp"
 #include "voxel/chunk/state.hpp"
-#include "voxel/chunk/mesh/instance_manager.h"
+#include "voxel/graphics/mesh/instance_manager.h"
 
 namespace hemlock {
     namespace voxel {

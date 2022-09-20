@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "voxel/chunk/mesh/instance_manager.h"
+#include "voxel/graphics/mesh/instance_manager.h"
 
 hvox::ChunkInstanceManager::ChunkInstanceManager() :
     m_instance({nullptr, 0})
