@@ -17,7 +17,6 @@
 
 #include "algorithm/acs/acs.hpp"
 
-
 #if defined(DEBUG)
 #   define VIEW_DIST 4
 #else
@@ -28,8 +27,6 @@
 #include "tests/voxel_screen/physics.hpp"
 #include "tests/voxel_screen/player.hpp"
 #include "tests/voxel_screen/terrain.hpp"
-
-
 
 class TestVoxelScreen : public happ::ScreenBase {
 public:
