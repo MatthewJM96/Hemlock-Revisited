@@ -177,7 +177,7 @@ public:
 
 	virtual void drawContactPoint(const btVector3&, const btVector3&, btScalar, int, const btVector3&) override { /* Empty. */ }
 
-	virtual void reportErrorWarning(const char* warning_string) override { debug_printf(warning_string); }
+	virtual void reportErrorWarning(const char* warning_string [[maybe_unused]]) override { debug_printf(warning_string); }
 
 	virtual void draw3dText(const btVector3&, const char*) override { /* Empty. */ }
 
