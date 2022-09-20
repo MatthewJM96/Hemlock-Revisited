@@ -8,7 +8,7 @@
 
 #include "test_entry_screen.hpp"
 #include "test_render_screen.hpp"
-#include "test_voxel_screen.hpp"
+#include "voxel_screen/voxel_screen.hpp"
 
 class MyApp : public happ::SingleWindowApp {
 public:

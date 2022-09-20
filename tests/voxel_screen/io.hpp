@@ -6,6 +6,7 @@ namespace hemlock {
         namespace voxel_screen {
             void handle_simple_user_inputs(
                 hui::InputManager* input_manager,
+                hcam::BasicFirstPersonCamera& camera,
                 btDiscreteDynamicsWorld* world,
                 f32 frame_time,
                 OUT bool& flip_chunk_check,
@@ -35,24 +36,24 @@ namespace hemlock {
                     speed_mult = 50.0f;
                 }
 
-                delta_pos = 0.0f;
+                delta_pos = {};
                 if (input_manager->is_pressed(hui::PhysicalKey::H_W)) {
-                    delta_pos += glm::normalize(m_camera.direction()) * frame_time * 0.01f * speed_mult;
+                    delta_pos += glm::normalize(camera.direction()) * frame_time * 0.01f * speed_mult;
                 }
                 if (input_manager->is_pressed(hui::PhysicalKey::H_A)) {
-                    delta_pos -= glm::normalize(m_camera.right()) * frame_time * 0.01f * speed_mult;
+                    delta_pos -= glm::normalize(camera.right()) * frame_time * 0.01f * speed_mult;
                 }
                 if (input_manager->is_pressed(hui::PhysicalKey::H_S)) {
-                    delta_pos -= glm::normalize(m_camera.direction()) * frame_time * 0.01f * speed_mult;
+                    delta_pos -= glm::normalize(camera.direction()) * frame_time * 0.01f * speed_mult;
                 }
                 if (input_manager->is_pressed(hui::PhysicalKey::H_D)) {
-                    delta_pos += glm::normalize(m_camera.right()) * frame_time * 0.01f * speed_mult;
+                    delta_pos += glm::normalize(camera.right()) * frame_time * 0.01f * speed_mult;
                 }
                 if (input_manager->is_pressed(hui::PhysicalKey::H_Q)) {
-                    delta_pos += glm::normalize(m_camera.up()) * frame_time * 0.01f * speed_mult;
+                    delta_pos += glm::normalize(camera.up()) * frame_time * 0.01f * speed_mult;
                 }
                 if (input_manager->is_pressed(hui::PhysicalKey::H_E)) {
-                    delta_pos -= glm::normalize(m_camera.up()) * frame_time * 0.01f * speed_mult;
+                    delta_pos -= glm::normalize(camera.up()) * frame_time * 0.01f * speed_mult;
                 }
 
                 if (input_manager->is_pressed(hui::PhysicalKey::H_G)) {

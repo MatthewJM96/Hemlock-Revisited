@@ -15,9 +15,14 @@ namespace hemlock {
                 btRigidBody*               body;
             };
 
-            void setup_player(PlayerData& player, PhysicsData& phys, const hcam::BasicFirstPersonCamera& camera) {
+            void setup_player(
+                                        PlayerData& player,
+                                       PhysicsData& phys,
+                const hcam::BasicFirstPersonCamera& camera,
+                      hmem::Handle<hvox::ChunkGrid> chunk_grid
+            ) {
                 player.ac.position   = hvox::EntityWorldPosition{0, static_cast<hvox::EntityWorldPositionCoord>(60) << 32, 0};
-                player.ac.chunk_grid = m_chunk_grid;
+                player.ac.chunk_grid = chunk_grid;
                 player.cc.shape = new btCompoundShape();
                 player.cc.shape->addChildShape(btTransform::getIdentity(), new btBoxShape(btVector3{0.5f, 1.5f, 0.5f}));
                 // TODO(Matthew): update this.

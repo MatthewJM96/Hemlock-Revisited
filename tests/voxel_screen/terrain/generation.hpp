@@ -101,14 +101,14 @@ namespace hemlock {
                 for (auto x = -VIEW_DIST; x <= VIEW_DIST; ++x) {
                     for (auto z = -VIEW_DIST; z <= VIEW_DIST; ++z) {
                         for (auto y = -2; y < 6; ++ y) {
-                            m_chunk_grid->preload_chunk_at({ {x, y, z} });
+                            chunk_grid->preload_chunk_at({ {x, y, z} });
                         }
                     }
                 }
                 for (auto x = -VIEW_DIST; x <= VIEW_DIST; ++x) {
                     for (auto z = -VIEW_DIST; z <= VIEW_DIST; ++z) {
                         for (auto y = -2; y < 6; ++ y) {
-                            m_chunk_grid->load_chunk_at({ {x, y, z} });
+                            chunk_grid->load_chunk_at({ {x, y, z} });
                         }
                     }
                 }
@@ -120,9 +120,9 @@ namespace hemlock {
                 for (auto x = -VIEW_DIST; x < VIEW_DIST; ++x) {
                     for (auto z = -VIEW_DIST; z < VIEW_DIST; ++z) {
                         if (((x + VIEW_DIST) + (2 * VIEW_DIST + 1) * (z + VIEW_DIST)) * 300 < t) {
-                            m_chunk_grid->unload_chunk_at({ {x, 0, z} });
-                            m_chunk_grid->unload_chunk_at({ {x, 1, z} });
-                            m_chunk_grid->unload_chunk_at({ {x, 2, z} });
+                            chunk_grid->unload_chunk_at({ {x, 0, z} });
+                            chunk_grid->unload_chunk_at({ {x, 1, z} });
+                            chunk_grid->unload_chunk_at({ {x, 2, z} });
                         }
                     }
                 }
@@ -175,9 +175,9 @@ namespace hemlock {
                 if (z_step != 0) {
                     for (auto x = static_cast<i32>(current_pos.x) - VIEW_DIST; x <= static_cast<i32>(current_pos.x) + VIEW_DIST; ++x) {
                         for (auto y = -2; y < 6; ++ y) {
-                            m_unloading_chunks.emplace_back(hmem::WeakHandle<hvox::Chunk>{});
-                            auto& handle = m_unloading_chunks.back();
-                            m_chunk_grid->unload_chunk_at({ {
+                            unloading_chunks.emplace_back(hmem::WeakHandle<hvox::Chunk>{});
+                            auto& handle = unloading_chunks.back();
+                            chunk_grid->unload_chunk_at({ {
                                 x, y,
                                 z_step < 0 ? static_cast<i32>(current_pos.z) + VIEW_DIST + 1 : static_cast<i32>(current_pos.z) - VIEW_DIST - 1
                             } }, &handle);
@@ -185,7 +185,7 @@ namespace hemlock {
                     }
                     for (auto x = static_cast<i32>(current_pos.x) - VIEW_DIST; x <= static_cast<i32>(current_pos.x) + VIEW_DIST; ++x) {
                         for (auto y = -2; y < 6; ++ y) {
-                            m_chunk_grid->preload_chunk_at({ {
+                            chunk_grid->preload_chunk_at({ {
                                 x, y,
                                 z_step < 0 ? static_cast<i32>(current_pos.z) - VIEW_DIST : static_cast<i32>(current_pos.z) + VIEW_DIST
                             } });
@@ -193,7 +193,7 @@ namespace hemlock {
                     }
                     for (auto x = static_cast<i32>(current_pos.x) - VIEW_DIST; x <= static_cast<i32>(current_pos.x) + VIEW_DIST; ++x) {
                         for (auto y = -2; y < 6; ++ y) {
-                            m_chunk_grid->load_chunk_at({ {
+                            chunk_grid->load_chunk_at({ {
                                 x, y,
                                 z_step < 0 ? static_cast<i32>(current_pos.z) - VIEW_DIST : static_cast<i32>(current_pos.z) + VIEW_DIST
                             } });

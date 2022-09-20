@@ -12,7 +12,7 @@
 
 #include "physics/voxel/chunk_grid_collider.hpp"
 
-#include "iomanager.hpp"
+#include "tests/iomanager.hpp"
 
 
 #include "algorithm/acs/acs.hpp"
@@ -42,7 +42,7 @@ public:
     virtual void start(hemlock::FrameTime time) override {
         happ::ScreenBase::start(time);
 
-        load_chunks(m_chunk_grid);
+        htest::voxel_screen::load_chunks(m_chunk_grid);
     }
 
     virtual void update(hemlock::FrameTime time) override {
@@ -59,10 +59,12 @@ public:
         f32v3 delta_pos         = {};
         htest::voxel_screen::handle_simple_user_inputs(
             m_input_manager,
+            m_camera,
             m_phys.world,
+            frame_time,
             flip_chunk_check,
             m_draw_chunk_outlines,
-            frame_time,
+            do_unloads,
             speed_mult,
             delta_pos
         );
@@ -128,7 +130,11 @@ public:
         }
 
         voxel_patch = new btCompoundShape();
-        if (hphys::ChunkGridCollider::determine_candidate_colliding_voxels<TVS_VoxelShapeEvaluator>(m_player.ac, m_player.dc, m_player.cc, voxel_patch)) {
+        if (
+            hphys::ChunkGridCollider::determine_candidate_colliding_voxels<
+                htest::voxel_screen::TVS_VoxelShapeEvaluator
+            >(m_player.ac, m_player.dc, m_player.cc, voxel_patch)
+        ) {
             btTransform transform = btTransform::getIdentity();
             transform.setOrigin(btVector3(glm::floor(m_camera.position().x), glm::floor(m_camera.position().y), glm::floor(m_camera.position().z)));
             btDefaultMotionState* motion_state = new btDefaultMotionState(transform);
@@ -163,7 +169,11 @@ public:
             debug_printf("Camera looking at: (%f, %f, %f)\n", m_camera.direction().x, m_camera.direction().y, m_camera.direction().z);
 
             auto _voxel_patch = new btCompoundShape();
-            if (hphys::ChunkGridCollider::determine_candidate_colliding_voxels<TVS_VoxelShapeEvaluator>(m_player.ac, m_player.dc, m_player.cc, _voxel_patch)) {
+            if (
+                hphys::ChunkGridCollider::determine_candidate_colliding_voxels<
+                    htest::voxel_screen::TVS_VoxelShapeEvaluator
+                >(m_player.ac, m_player.dc, m_player.cc, _voxel_patch)
+            ) {
                 btVector3 min_aabb, max_aabb;
                 _voxel_patch->getAabb(btTransform::getIdentity(), min_aabb, max_aabb);
 
@@ -305,14 +315,14 @@ public:
             m_chunk_grid,
             10,
             hvox::ChunkTaskBuilder{[]() {
-                return new hvox::ChunkGenerationTask<TVS_VoxelGenerator>();
+                return new hvox::ChunkGenerationTask<htest::voxel_screen::TVS_VoxelGenerator>();
             }}, hvox::ChunkTaskBuilder{[]() {
-                return new hvox::ChunkGreedyMeshTask<TVS_BlockComparator>();
+                return new hvox::ChunkGreedyMeshTask<htest::voxel_screen::TVS_BlockComparator>();
             }}
         );
 
-        htest::voxel_screen::setup_physics(m_phys);
-        htest::voxel_screen::setup_player(m_player);
+        htest::voxel_screen::setup_physics(m_phys, m_camera, &m_line_shader);
+        htest::voxel_screen::setup_player(m_player, m_phys, m_camera, m_chunk_grid);
 
         glCreateVertexArrays(1, &m_crosshair_vao);
 
@@ -368,15 +378,15 @@ protected:
 
     ui32 m_default_texture;
 
-    MyIOManager                     m_iom;
-    hg::ShaderCache                 m_shader_cache;
-    hcam::BasicFirstPersonCamera    m_camera;
-    hui::InputManager*              m_input_manager;
-    hmem::Handle<hvox::ChunkGrid>   m_chunk_grid;
-    hg::GLSLProgram                 m_shader, m_line_shader;
-    hthread::ThreadWorkflowDAG      m_chunk_load_dag;
-    htest::PlayerData  m_player;
-    htest::PhysicsData m_phys;
+    MyIOManager                         m_iom;
+    hg::ShaderCache                     m_shader_cache;
+    hcam::BasicFirstPersonCamera        m_camera;
+    hui::InputManager*                  m_input_manager;
+    hmem::Handle<hvox::ChunkGrid>       m_chunk_grid;
+    hg::GLSLProgram                     m_shader, m_line_shader;
+    hthread::ThreadWorkflowDAG          m_chunk_load_dag;
+    htest::voxel_screen::PlayerData     m_player;
+    htest::voxel_screen::PhysicsData    m_phys;
 
     bool m_draw_chunk_outlines;
 

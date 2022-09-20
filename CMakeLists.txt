@@ -213,9 +213,12 @@ if (HEMLOCK_USING_OPENGL)
     )
 endif()
 
+# TODO(Matthew): remove the "${PROJECT_SOURCE_DIR}" line and properly build
+#                engine and tests separately.
 target_include_directories(Hemlock_Revisited
     PUBLIC
     "${PROJECT_SOURCE_DIR}/include"
+    "${PROJECT_SOURCE_DIR}"
 )
 
 target_include_directories(Hemlock_Revisited
