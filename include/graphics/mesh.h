@@ -134,6 +134,26 @@ GEN_MESH_UPLOADER_DECLS(PREFIX)
 #include "graphics/mesh/common_vertices_def.hpp"
 
         GEN_MESH_CASE_STRUCT_DEFS_AND_FUNC_DECLS(
+            Point_2D_32,
+            MAKE_POS2D(32)
+        )
+
+        GEN_MESH_CASE_STRUCT_DEFS_AND_FUNC_DECLS(
+            Point_3D_32,
+            MAKE_POS3D(32)
+        )
+
+        GEN_MESH_CASE_STRUCT_DEFS_AND_FUNC_DECLS(
+            Point_2D_64,
+            MAKE_POS2D(64)
+        )
+
+        GEN_MESH_CASE_STRUCT_DEFS_AND_FUNC_DECLS(
+            Point_3D_64,
+            MAKE_POS3D(64)
+        )
+
+        GEN_MESH_CASE_STRUCT_DEFS_AND_FUNC_DECLS(
             Colourless_2D_32,
             MAKE_POS2D(32),
             MAKE_UV(32)

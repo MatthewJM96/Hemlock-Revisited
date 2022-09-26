@@ -99,6 +99,8 @@ hg::ShaderCreationResult hg::GLSLProgram::add_shader(const ShaderInfo& shader) {
         glGetShaderInfoLog(shader_id, max_length, nullptr, log);
         log[max_length] = '\0';
 
+        debug_printf(log);
+
         on_shader_add_fail(ShaderCreationResult::COMPILE_FAIL);
         on_shader_compilation_fail(log);
 
@@ -162,6 +164,8 @@ hg::ShaderLinkResult hg::GLSLProgram::link() {
         char* log = new char[max_length + 1];
         glGetProgramInfoLog(m_id, max_length, nullptr, log);
         log[max_length] = '\0';
+
+        debug_printf(log);
 
         on_shader_link_fail(log);
 

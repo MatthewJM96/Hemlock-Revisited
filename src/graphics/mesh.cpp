@@ -9,6 +9,26 @@
 #endif // defined(HEMLOCK_USING_OPENGL)
 
 GEN_MESH_UPLOADER_DEFS(
+    Point_2D_32,
+    MAKE_POS2D(32)
+)
+
+GEN_MESH_UPLOADER_DEFS(
+    Point_3D_32,
+    MAKE_POS3D(32)
+)
+
+GEN_MESH_UPLOADER_DEFS(
+    Point_2D_64,
+    MAKE_POS2D(64)
+)
+
+GEN_MESH_UPLOADER_DEFS(
+    Point_3D_64,
+    MAKE_POS3D(64)
+)
+
+GEN_MESH_UPLOADER_DEFS(
     Colourless_2D_32,
     MAKE_POS2D(32),
     MAKE_UV(32)

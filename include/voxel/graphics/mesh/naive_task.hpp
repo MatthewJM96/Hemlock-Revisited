@@ -1,8 +1,8 @@
-#ifndef __hemlock_voxel_chunk_mesh_naive_h
-#define __hemlock_voxel_chunk_mesh_naive_h
+#ifndef __hemlock_voxel_graphics_mesh_naive_h
+#define __hemlock_voxel_graphics_mesh_naive_h
 
-#include "voxel/chunk/task.hpp"
-#include "voxel/chunk/mesh/mesh_task.hpp"
+#include "voxel/task.hpp"
+#include "voxel/graphics/mesh/mesh_task.hpp"
 
 namespace hemlock {
     namespace voxel {
@@ -15,6 +15,6 @@ namespace hemlock {
 }
 namespace hvox = hemlock::voxel;
 
-#include "voxel/chunk/mesh/naive_task.inl"
+#include "voxel/graphics/mesh/naive_task.inl"
 
-#endif // __hemlock_voxel_chunk_mesh_naive_h
+#endif // __hemlock_voxel_graphics_mesh_naive_h

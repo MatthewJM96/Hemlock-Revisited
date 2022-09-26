@@ -1,5 +1,5 @@
-#ifndef __hemlock_voxel_chunk_mesh_mesh_task_hpp
-#define __hemlock_voxel_chunk_mesh_mesh_task_hpp
+#ifndef __hemlock_voxel_graphics_mesh_mesh_task_hpp
+#define __hemlock_voxel_graphics_mesh_mesh_task_hpp
 
 namespace hemlock {
     namespace voxel {
@@ -24,4 +24,4 @@ namespace hemlock {
 }
 namespace hvox = hemlock::voxel;
 
-#endif // __hemlock_voxel_chunk_mesh_mesh_task_hpp
+#endif // __hemlock_voxel_graphics_mesh_mesh_task_hpp
