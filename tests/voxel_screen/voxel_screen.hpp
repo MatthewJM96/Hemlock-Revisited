@@ -6,8 +6,9 @@
 #include <FastNoise/FastNoise.h>
 
 #include "memory/handle.hpp"
-#include "voxel/chunk/generator_task.hpp"
-#include "voxel/chunk/mesh/greedy_task.hpp"
+#include "voxel/generation/generator_task.hpp"
+#include "voxel/graphics/outline_renderer.hpp"
+#include "voxel/graphics/mesh/greedy_task.hpp"
 #include "voxel/ray.h"
 
 #include "physics/voxel/chunk_grid_collider.hpp"
@@ -316,6 +317,7 @@ public:
         m_chunk_grid = hmem::make_handle<hvox::ChunkGrid>();
         m_chunk_grid->init(
             m_chunk_grid,
+            VIEW_DIST * 2 + 1,
             10,
             hvox::ChunkTaskBuilder{[]() {
                 return new hvox::ChunkGenerationTask<htest::voxel_screen::TVS_VoxelGenerator>();
