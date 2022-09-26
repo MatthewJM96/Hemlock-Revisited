@@ -58,11 +58,15 @@ hvox::ChunkGrid::ChunkGrid() :
 }
 
 void hvox::ChunkGrid::init( hmem::WeakHandle<ChunkGrid> self,
+                                                   ui32 render_distance,
                                                    ui32 thread_count,
                                        ChunkTaskBuilder build_load_or_generate_task,
                                        ChunkTaskBuilder build_mesh_task )
 {
     m_self = self;
+
+    m_render_distance           = render_distance;
+    m_chunks_in_render_distance = render_distance * render_distance * render_distance;
 
     m_build_load_or_generate_task   = build_load_or_generate_task;
     m_build_mesh_task               = build_mesh_task;
@@ -75,25 +79,6 @@ void hvox::ChunkGrid::init( hmem::WeakHandle<ChunkGrid> self,
     // TODO(Matthew): smarter setting of page size - maybe should be dependent on draw distance.
     // m_renderer.init(20, 2);
     m_renderer.init(5, 2);
-
-
-    // TODO(Matthew): MOVE IT
-    glCreateVertexArrays(1, &m_grid_vao);
-
-    glCreateBuffers(1, &m_grid_vbo);
-    glNamedBufferData(
-        m_grid_vbo,
-        sizeof(f32v3) * 2 * 12 * (100 * 100 * 100), // 2 points per line, 12 lines per chunk, a whole lotta chunks.
-        nullptr,
-        GL_DYNAMIC_DRAW
-    );
-
-    glVertexArrayVertexBuffer(m_grid_vao, 0, m_grid_vbo, 0, sizeof(f32v3));
-
-    glEnableVertexArrayAttrib(m_grid_vao, 0);
-    glVertexArrayAttribFormat(m_grid_vao, 0, 3, GL_FLOAT, GL_FALSE, 0);
-    glVertexArrayAttribBinding(m_grid_vao, 0, 0);
-
 }
 
 void hvox::ChunkGrid::dispose() {
@@ -112,67 +97,17 @@ void hvox::ChunkGrid::draw(FrameTime time) {
     m_renderer.draw(time);
 }
 
-void hvox::ChunkGrid::draw_grid() {
-    // TODO(Matthew): deduplicate lines.
+void hvox::ChunkGrid::set_render_distance(ui32 render_distance) {
+    // TODO(Matthew): Allow chunk grids with non-standard render shapes?
+    ui32 chunks_in_render_distance = render_distance * render_distance * render_distance;
 
-    std::vector<f32v3> lines;
-    for (auto& [id, chunk] : m_chunks) {
-        // bottom back left - top back left
-        lines.emplace_back(f32v3(block_world_position(chunk->position, 0)));
-        lines.emplace_back(f32v3(block_world_position(chunk->position, 0) + i32v3{0, CHUNK_LENGTH, 0}));
+    on_render_distance_change({
+        { m_render_distance, m_chunks_in_render_distance },
+        {   render_distance,   chunks_in_render_distance }
+    });
 
-        // bottom back left - bottom front left
-        lines.emplace_back(f32v3(block_world_position(chunk->position, 0)));
-        lines.emplace_back(f32v3(block_world_position(chunk->position, 0) + i32v3{0, 0, CHUNK_LENGTH}));
-
-        // bottom back left - bottom back right
-        lines.emplace_back(f32v3(block_world_position(chunk->position, 0)));
-        lines.emplace_back(f32v3(block_world_position(chunk->position, 0) + i32v3{CHUNK_LENGTH, 0, 0}));
-
-        // top front right - top front left
-        lines.emplace_back(f32v3(block_world_position(chunk->position, 0) + i32v3{CHUNK_LENGTH, CHUNK_LENGTH, CHUNK_LENGTH}));
-        lines.emplace_back(f32v3(block_world_position(chunk->position, 0) + i32v3{0, CHUNK_LENGTH, CHUNK_LENGTH}));
-
-        // top front right - top back right
-        lines.emplace_back(f32v3(block_world_position(chunk->position, 0) + i32v3{CHUNK_LENGTH, CHUNK_LENGTH, CHUNK_LENGTH}));
-        lines.emplace_back(f32v3(block_world_position(chunk->position, 0) + i32v3{CHUNK_LENGTH, CHUNK_LENGTH, 0}));
-
-        // top front right - bottom front right
-        lines.emplace_back(f32v3(block_world_position(chunk->position, 0) + i32v3{CHUNK_LENGTH, CHUNK_LENGTH, CHUNK_LENGTH}));
-        lines.emplace_back(f32v3(block_world_position(chunk->position, 0) + i32v3{CHUNK_LENGTH, 0, CHUNK_LENGTH}));
-
-        // top back left - top front left
-        lines.emplace_back(f32v3(block_world_position(chunk->position, 0) + i32v3{0, CHUNK_LENGTH, 0}));
-        lines.emplace_back(f32v3(block_world_position(chunk->position, 0) + i32v3{0, CHUNK_LENGTH, CHUNK_LENGTH}));
-
-        // top front left - bottom front left
-        lines.emplace_back(f32v3(block_world_position(chunk->position, 0) + i32v3{0, CHUNK_LENGTH, CHUNK_LENGTH}));
-        lines.emplace_back(f32v3(block_world_position(chunk->position, 0) + i32v3{0, 0, CHUNK_LENGTH}));
-
-        // top back left - top back right
-        lines.emplace_back(f32v3(block_world_position(chunk->position, 0) + i32v3{0, CHUNK_LENGTH, 0}));
-        lines.emplace_back(f32v3(block_world_position(chunk->position, 0) + i32v3{CHUNK_LENGTH, CHUNK_LENGTH, 0}));
-
-        // bottom front right - bottom front left
-        lines.emplace_back(f32v3(block_world_position(chunk->position, 0) + i32v3{CHUNK_LENGTH, 0, CHUNK_LENGTH}));
-        lines.emplace_back(f32v3(block_world_position(chunk->position, 0) + i32v3{0, 0, CHUNK_LENGTH}));
-
-        // bottom front right - bottom back right
-        lines.emplace_back(f32v3(block_world_position(chunk->position, 0) + i32v3{CHUNK_LENGTH, 0, CHUNK_LENGTH}));
-        lines.emplace_back(f32v3(block_world_position(chunk->position, 0) + i32v3{CHUNK_LENGTH, 0, 0}));
-
-        // bottom back right - top back right
-        lines.emplace_back(f32v3(block_world_position(chunk->position, 0) + i32v3{CHUNK_LENGTH, 0, 0}));
-        lines.emplace_back(f32v3(block_world_position(chunk->position, 0) + i32v3{CHUNK_LENGTH, CHUNK_LENGTH, 0}));
-    }
-
-    glNamedBufferSubData(
-        m_grid_vbo, 0, lines.size() * sizeof(f32v3),
-        reinterpret_cast<void*>(&lines[0])
-    );
-
-    glBindVertexArray(m_grid_vao);
-    glDrawArrays(GL_LINES, 0, lines.size());
+    m_render_distance           = render_distance;
+    m_chunks_in_render_distance = chunks_in_render_distance;
 }
 
 bool hvox::ChunkGrid::load_from_scratch_chunks(ChunkGridPosition* chunk_positions, ui32 chunk_count) {

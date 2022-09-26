@@ -8,6 +8,13 @@ namespace hemlock {
     namespace voxel {
         struct Chunk;
 
+        struct RenderDistanceChangeEvent {
+            struct {
+                ui32 render_distance;
+                ui32 chunks_in_render_distance;
+            } before, after;
+        };
+
         struct BlockChangeEvent {
             hmem::Handle<Chunk> chunk;
             Block               old_block;

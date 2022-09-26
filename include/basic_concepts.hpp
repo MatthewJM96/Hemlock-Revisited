@@ -262,6 +262,18 @@ namespace hemlock {
         { c.dispose() };
     };
 
+    template <typename Type>
+    concept BooleanTestable = std::convertible_to<Type, bool>;
+
+    template <typename ReturnType, typename Invocable, typename... Args>
+    concept RPredicate = std::regular_invocable<Invocable, Args...>
+        && std::same_as<std::invoke_result_t<Invocable, Args...>, ReturnType>
+        && BooleanTestable<
+            typename std::tuple_element<0, std::invoke_result_t<Invocable, Args...>>::type
+        > && requires(typename std::tuple_element<0, std::invoke_result_t<Invocable, Args...>>::type&& ret) {
+            { !static_cast<typename std::tuple_element<0, std::invoke_result_t<Invocable, Args...>>::type&&>(ret) } -> BooleanTestable;
+        };
+
     template <typename>
     struct is_pointer_like : public std::false_type { };
     template <typename Type>

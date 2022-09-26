@@ -8,6 +8,7 @@
 #include "memory/handle.hpp"
 #include "voxel/generation/generator_task.hpp"
 #include "voxel/graphics/mesh/greedy_task.hpp"
+#include "voxel/graphics/outline_renderer.hpp"
 #include "voxel/ray.h"
 
 #include "physics/voxel/chunk_grid_collider.hpp"
@@ -127,6 +128,14 @@ struct TVS_VoxelShapeEvaluator {
     }
 };
 
+struct TVS_ChunkOutlinePredicate {
+    std::tuple<bool, colour4> operator()(hmem::Handle<hvox::Chunk>) {
+        return {
+            true, {255, 0, 0, 255}
+        };
+    }
+};
+
 class VoxelPhysDrawer : public btIDebugDraw {
 public:
     VoxelPhysDrawer(hcam::BasicFirstPersonCamera* camera, hg::GLSLProgram* shader) : btIDebugDraw() {
@@ -175,15 +184,15 @@ public:
         glDrawArrays(GL_LINES, 0, 2);
     }
 
-	virtual void drawContactPoint(const btVector3&, const btVector3&, btScalar, int, const btVector3&) override { /* Empty. */ }
+    virtual void drawContactPoint(const btVector3&, const btVector3&, btScalar, int, const btVector3&) override { /* Empty. */ }
 
-	virtual void reportErrorWarning(const char* warning_string [[maybe_unused]]) override { debug_printf(warning_string); }
+    virtual void reportErrorWarning(const char* warning_string [[maybe_unused]]) override { debug_printf(warning_string); }
 
-	virtual void draw3dText(const btVector3&, const char*) override { /* Empty. */ }
+    virtual void draw3dText(const btVector3&, const char*) override { /* Empty. */ }
 
-	virtual void setDebugMode(int debug_mode) override { m_debug_mode = debug_mode; }
+    virtual void setDebugMode(int debug_mode) override { m_debug_mode = debug_mode; }
 
-	virtual int getDebugMode() const override { return m_debug_mode; }
+    virtual int getDebugMode() const override { return m_debug_mode; }
 protected:
     int m_debug_mode;
     GLuint m_vao, m_vbo;
@@ -503,16 +512,18 @@ public:
         glBindVertexArray(m_crosshair_vao);
         glDrawArrays(GL_LINES, 0, 4);
 
+        m_line_shader.unuse();
+
         if (m_draw_chunk_outlines) {
-            line_colour = {1.0f, 0.0f, 0.0f};
+            m_chunk_outline_shader.use();
 
-            glUniformMatrix4fv(m_line_shader.uniform_location("view_proj"),  1, GL_FALSE, &m_camera.view_projection_matrix()[0][0]);
-            glUniform3fv(m_line_shader.uniform_location("colour"), 1, &line_colour[0]);
+            glUniformMatrix4fv(m_chunk_outline_shader.uniform_location("view_proj"), 1, GL_FALSE, &m_camera.view_projection_matrix()[0][0]);
 
-            m_chunk_grid->draw_grid();
+            m_outline_renderer.draw(time);
+
+            m_chunk_outline_shader.unuse();
         }
 
-        m_line_shader.unuse();
     }
 
     virtual void init(const std::string& name, happ::ProcessBase* process) override {
@@ -539,24 +550,21 @@ public:
         });
 
         m_shader.init(&m_shader_cache);
-
-        m_shader.set_attribute("v_position",      0);
-        m_shader.set_attribute("v_texture_coord", 1);
-        m_shader.set_attribute("v_normal",        2);
-
+        // m_shader.set_attribute("v_position",      0);
+        // m_shader.set_attribute("v_texture_coord", 1);
+        // m_shader.set_attribute("v_normal",        2);
         m_shader.add_shaders("shaders/test_vox.vert", "shaders/test_vox.frag");
-
         m_shader.link();
 
-        m_draw_chunk_outlines = false;
-
         m_line_shader.init(&m_shader_cache);
-
-        m_line_shader.set_attribute("v_position",      0);
-
+        // m_line_shader.set_attribute("v_position",      0);
         m_line_shader.add_shaders("shaders/line.vert", "shaders/line.frag");
-
         m_line_shader.link();
+
+        m_draw_chunk_outlines = false;
+        m_chunk_outline_shader.init(&m_shader_cache);
+        m_chunk_outline_shader.add_shaders("shaders/chunk_outline.vert", "shaders/chunk_outline.frag");
+        m_chunk_outline_shader.link();
 
         m_default_texture = hg::load_texture("test_tex.png");
 
@@ -568,6 +576,7 @@ public:
         m_chunk_grid = hmem::make_handle<hvox::ChunkGrid>();
         m_chunk_grid->init(
             m_chunk_grid,
+            VIEW_DIST * 2 + 1,
             10,
             hvox::ChunkTaskBuilder{[]() {
                 return new hvox::ChunkGenerationTask<TVS_VoxelGenerator>();
@@ -575,6 +584,8 @@ public:
                 return new hvox::ChunkGreedyMeshTask<TVS_BlockComparator>();
             }}
         );
+
+        m_outline_renderer.init(TVS_ChunkOutlinePredicate{}, m_chunk_grid);
 
         m_player.ac.position   = hvox::EntityWorldPosition{0, static_cast<hvox::EntityWorldPositionCoord>(60) << 32, 0};
         m_player.ac.chunk_grid = m_chunk_grid;
@@ -662,13 +673,13 @@ protected:
 
     ui32 m_default_texture;
 
-    MyIOManager                  m_iom;
-    hg::ShaderCache              m_shader_cache;
-    hcam::BasicFirstPersonCamera m_camera;
-    hui::InputManager*           m_input_manager;
+    MyIOManager                     m_iom;
+    hg::ShaderCache                 m_shader_cache;
+    hcam::BasicFirstPersonCamera    m_camera;
+    hui::InputManager*              m_input_manager;
     hmem::Handle<hvox::ChunkGrid>   m_chunk_grid;
-    hg::GLSLProgram              m_shader, m_line_shader;
-    hthread::ThreadWorkflowDAG   m_chunk_load_dag;
+    hg::GLSLProgram                 m_shader, m_line_shader, m_chunk_outline_shader;
+    hthread::ThreadWorkflowDAG      m_chunk_load_dag;
     struct {
         hphys::CollidableComponent cc;
         hphys::AnchoredComponent   ac;
@@ -683,6 +694,7 @@ protected:
         btDiscreteDynamicsWorld*                world;
     } m_phys;
 
+    hvox::ConditionalChunkOutlineRenderer<TVS_ChunkOutlinePredicate> m_outline_renderer;
     bool m_draw_chunk_outlines;
 
     GLuint m_crosshair_vao, m_crosshair_vbo;
