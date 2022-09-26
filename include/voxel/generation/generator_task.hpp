@@ -1,8 +1,7 @@
-#ifndef __hemlock_voxel_chunk_generator_h
-#define __hemlock_voxel_chunk_generator_h
+#ifndef __hemlock_voxel_generation_generator_task_hpp
+#define __hemlock_voxel_generation_generator_task_hpp
 
-#include "voxel/chunk/task.hpp"
-#include "voxel/coordinate_system.h"
+#include "voxel/task.hpp"
 
 namespace hemlock {
     namespace voxel {
@@ -30,6 +29,6 @@ namespace hemlock {
 }
 namespace hvox = hemlock::voxel;
 
-#include "voxel/chunk/generator_task.inl"
+#include "voxel/generation/generator_task.inl"
 
-#endif // __hemlock_voxel_chunk_generator_h
+#endif // __hemlock_voxel_generation_generator_task_hpp

@@ -1,5 +1,5 @@
-#ifndef __hemlock_voxel_chunk_renderer_h
-#define __hemlock_voxel_chunk_renderer_h
+#ifndef __hemlock_voxel_graphics_renderer_h
+#define __hemlock_voxel_graphics_renderer_h
 
 #include "timing.h"
 #include "graphics/mesh.h"
@@ -126,4 +126,4 @@ namespace hemlock {
 }
 namespace hvox = hemlock::voxel;
 
-#endif // __hemlock_voxel_chunk_renderer_h
+#endif // __hemlock_voxel_graphics_renderer_h

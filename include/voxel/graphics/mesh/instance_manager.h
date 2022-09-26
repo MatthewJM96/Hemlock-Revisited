@@ -1,5 +1,5 @@
-#ifndef __hemlock_voxel_chunk_mesh_instance_manager_h
-#define __hemlock_voxel_chunk_mesh_instance_manager_h
+#ifndef __hemlock_voxel_graphics_mesh_instance_manager_h
+#define __hemlock_voxel_graphics_mesh_instance_manager_h
 
 #include "voxel/block.hpp"
 #include "voxel/chunk/constants.hpp"
@@ -41,4 +41,4 @@ namespace hemlock {
 }
 namespace hvox = hemlock::voxel;
 
-#endif // __hemlock_voxel_chunk_mesh_instance_manager_h
+#endif // __hemlock_voxel_graphics_mesh_instance_manager_h

@@ -4,18 +4,14 @@
 #include "timing.h"
 #include "voxel/coordinate_system.h"
 #include "voxel/chunk.h"
-#include "voxel/chunk/task.hpp"
-#include "voxel/chunk/renderer.h"
+#include "voxel/task.hpp"
+#include "voxel/graphics/renderer.h"
 
 namespace hemlock {
     namespace voxel {
         // TODO(Matthew): Does page size want to be made a run-time thing,
         //                as it may be nice to base this on view distance.
         using ChunkAllocator = hmem::PagedAllocator<Chunk, 4 * 4 * 4, 3>;
-
-        // TODO(Matthew): Do a better job managing instance data. Probably encapsulate in a class that "generates" and "obtains" instance data buffers, where
-        //                the former grabs a page only if needed (as we are in the meshers), and the latter returns a handle on the to-be-freed data. Or
-        //                something like that.
 
         using Chunks = std::unordered_map<ChunkID, hmem::Handle<Chunk>>;
 
@@ -34,6 +30,7 @@ namespace hemlock {
              * underlying thread pool.
              *
              * @param self A weak handle on this grid instance.
+             * @param render_distance The render distance the grid starts with.
              * @param thread_count The number of threads
              * that the grid can use for loading tasks.
              * @param build_load_or_generate_task Builder that returns
@@ -43,6 +40,7 @@ namespace hemlock {
              * task to mesh a chunk.
              */
             void init( hmem::WeakHandle<ChunkGrid> self,
+                                              ui32 render_distance,
                                               ui32 thread_count,
                                   ChunkTaskBuilder build_load_or_generate_task,
                                   ChunkTaskBuilder build_mesh_task );
@@ -66,12 +64,10 @@ namespace hemlock {
              */
             void draw(FrameTime time);
 
-            // TODO(Matthew): move this out of here. we should look
-            //                at Vulkan for how we might better architect drawing.
-            /**
-             * @brief Draw chunk grid.
-             */
-            void draw_grid();
+            void set_render_distance(ui32 render_distance);
+
+            ui32 render_distance()           const { return m_render_distance;           }
+            ui32 chunks_in_render_distance() const { return m_chunks_in_render_distance; }
 
             /**
              * @brief Suspends chunk tasks. This is a hammer, but
@@ -417,6 +413,13 @@ namespace hemlock {
              */
             hmem::Handle<Chunk> chunk(ChunkGridPosition position) { return chunk(position.id); }
 
+            const Chunks& chunks() const { return m_chunks; }
+
+            /**
+             * @brief Triggered whenever the render distance of this chunk grid
+             * changes.
+             */
+            Event<RenderDistanceChangeEvent> on_render_distance_change;
         protected:
             void establish_chunk_neighbours(hmem::Handle<Chunk> chunk);
 
@@ -431,7 +434,8 @@ namespace hemlock {
             hmem::Handle<ChunkBlockPager>           m_block_pager;
             hmem::Handle<ChunkInstanceDataPager>    m_instance_data_pager;
 
-            ChunkRenderer m_renderer;
+            ChunkRenderer   m_renderer;
+            ui32            m_render_distance, m_chunks_in_render_distance;
 
             Chunks m_chunks;
 

@@ -3,7 +3,7 @@
 #include "voxel/block.hpp"
 #include "voxel/chunk.h"
 
-#include "voxel/chunk/renderer.h"
+#include "voxel/graphics/renderer.h"
 
 hg::MeshHandles hvox::ChunkRenderer::block_mesh_handles = {};
 
@@ -67,6 +67,10 @@ void hvox::ChunkRenderer::dispose() {
         glDeleteBuffers(1, &chunk_page->vbo);
     }
     ChunkRenderPages().swap(m_chunk_pages);
+
+    // TODO(Matthew): Should do refcounting like in outline renderer for block mesh handles.
+    //                  Less important here as we probably never don't have some chunk renderer
+    //                  in existence, and it's all very cheap.
 }
 
 void hvox::ChunkRenderer::set_page_size(ui32 page_size) {

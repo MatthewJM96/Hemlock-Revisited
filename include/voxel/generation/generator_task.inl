@@ -1,8 +1,3 @@
-#include "voxel/block.hpp"
-#include "voxel/chunk.h"
-// #include "voxel/chunk/mesh/greedy_task.hpp"
-#include "voxel/chunk/mesh/naive_task.hpp"
-
 template <hvox::ChunkGenerationStrategy GenerationStrategy>
 void hvox::ChunkGenerationTask<GenerationStrategy>::execute(ChunkLoadThreadState*, ChunkTaskQueue*) {
     auto chunk = m_chunk.lock();

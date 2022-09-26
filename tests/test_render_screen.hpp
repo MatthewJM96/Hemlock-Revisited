@@ -12,8 +12,8 @@
 #include "ui/input/keys.hpp"
 #include "ui/input/manager.h"
 #include "voxel/chunk/grid.h"
-#include "voxel/chunk/generator_task.hpp"
-#include "voxel/chunk/mesh/greedy_task.hpp"
+#include "voxel/generation/generator_task.hpp"
+#include "voxel/graphics/mesh/greedy_task.hpp"
 
 #include "iomanager.hpp"
 
@@ -196,13 +196,10 @@ public:
         });
 
         m_shader.init(&m_shader_cache);
-
-        m_shader.set_attribute("v_position",      0);
-        m_shader.set_attribute("v_texture_coord", 1);
-        m_shader.set_attribute("v_normal",        2);
-
+        // m_shader.set_attribute("v_position",      0);
+        // m_shader.set_attribute("v_texture_coord", 1);
+        // m_shader.set_attribute("v_normal",        2);
         m_shader.add_shaders("shaders/test_vox.vert", "shaders/test_vox.frag");
-
         m_shader.link();
 
         m_default_texture = hg::load_texture("test_tex.png");
@@ -215,6 +212,7 @@ public:
         m_chunk_grid = hmem::make_handle<hvox::ChunkGrid>();
         m_chunk_grid->init(
             m_chunk_grid,
+            6 * 2 + 1,
             10,
             hvox::ChunkTaskBuilder{[]() {
                 return new hvox::ChunkGenerationTask<TRS_VoxelGenerator>();
