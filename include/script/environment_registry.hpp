@@ -31,10 +31,13 @@ namespace hemlock {
              * @brief Initialise the environment registry in which script
              * environments and groupings can be created.
              *
+             * @param io_manager The IO manager to use for discovering
+             * scripts when using load and run functions in registered
+             * environments.
              * @param max_script_length The maximum length of any
              * script that this environment will process.
              */
-            void init(i32 max_script_length = HEMLOCK_DEFAULT_MAX_SCRIPT_LENGTH);
+            void init(hio::IOManagerBase* io_manager, i32 max_script_length = HEMLOCK_DEFAULT_MAX_SCRIPT_LENGTH);
             /**
              * @brief Dispose the environment registry.
              */
@@ -96,6 +99,7 @@ namespace hemlock {
             ui32 m_next_group_id = 0;
             EnvironmentGroups<Environment> m_groups;
 
+            hio::IOManagerBase* m_io_manager;
             i32 m_max_script_length;
         };
     }

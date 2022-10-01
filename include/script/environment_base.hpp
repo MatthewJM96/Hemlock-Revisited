@@ -7,6 +7,9 @@
 
 namespace hemlock {
     namespace script {
+        template <typename Environment>
+        class EnvironmentRegistry;
+
         template <typename EnvironmentImpl>
         class EnvironmentBase {
         public:
@@ -24,20 +27,26 @@ namespace hemlock {
              * @brief Initialise the environment as a standalone
              * environment.
              *
+             * @param io_manager The IO manager with which the
+             * environment discovers scripts in load and run
+             * functions.
              * @param max_script_length The maximum length of any
              * script that this environment will process.
              */
-            virtual void init(i32 max_script_length = HEMLOCK_DEFAULT_MAX_SCRIPT_LENGTH) = 0;
+            virtual void init(hio::IOManagerBase* io_manager, ui32 max_script_length = HEMLOCK_DEFAULT_MAX_SCRIPT_LENGTH) = 0;
             /**
              * @brief Initialise the environment as a child of a
              * parent environment. All children of the same parent
              * share the same global state.
              *
              * @param parent The parent environment of this one.
+             * @param io_manager The IO manager with which the
+             * environment discovers scripts in load and run
+             * functions.
              * @param max_script_length The maximum length of any
              * script that this environment will process.
              */
-            virtual void init(EnvironmentBase* parent, i32 max_script_length = HEMLOCK_DEFAULT_MAX_SCRIPT_LENGTH) = 0;
+            virtual void init(EnvironmentBase* parent, hio::IOManagerBase* io_manager, ui32 max_script_length = HEMLOCK_DEFAULT_MAX_SCRIPT_LENGTH) = 0;
             /**
              * @brief Dispose the environment.
              */
@@ -48,7 +57,7 @@ namespace hemlock {
              *
              * @param filepath The filepath from which to load the script.
              */
-            virtual bool load(const hio::Path& filepath) = 0;
+            virtual bool load(const hio::fs::path& filepath) = 0;
             /**
              * @brief Load in the provided script string.
              *
@@ -67,7 +76,7 @@ namespace hemlock {
              *
              * @param filepath The filepath from which to load the script.
              */
-            virtual bool run(const hio::Path& filepath) = 0;
+            virtual bool run(const hio::fs::path& filepath) = 0;
             /**
              * @brief Loads in the provided script string, then runs it.
              *
@@ -129,6 +138,20 @@ namespace hemlock {
                 reinterpret_cast<EnvironmentImpl*>(this)->add_value(name, std::forward<Type>(val));
             }
             /**
+             * @brief Add a delegate to the environment, exposed to the
+             * scripts ran within.
+             *
+             * @tparam ReturnType The return type of the delegate.
+             * @tparam Parameters The parameters accepted by the delegate.
+             * @param name The name to expose the delegate as within the
+             * environment.
+             * @param delegate The delegate to be added to the environment.
+             */
+            template <typename ReturnType, typename ...Parameters>
+            void add_c_delegate(const std::string& name, Delegate<ReturnType, Parameters...>* delegate) {
+                reinterpret_cast<EnvironmentImpl*>(this)->add_c_delegate(name, delegate);
+            }
+            /**
              * @brief Add a function to the environment, exposed to the
              * scripts ran within.
              *
@@ -139,9 +162,42 @@ namespace hemlock {
              * @param func The function to be added to the environment.
              */
             template <typename ReturnType, typename ...Parameters>
-            void add_c_function(const std::string& name, Delegate<ReturnType, Parameters...> func) {
-                reinterpret_cast<EnvironmentImpl*>(this)->add_c_function(name, std::move(func));
+            void add_c_function(const std::string& name, ReturnType(*func)(Parameters...)) {
+                reinterpret_cast<EnvironmentImpl*>(this)->add_c_function(name, func);
             }
+            /**
+             * @brief Add a closure to the environment, exposed to the
+             * scripts ran within.
+             *
+             * @tparam Closure The closure type.
+             * @tparam ReturnType The return type of the closure's invocation.
+             * @tparam Parameters The parameters accepted by the closure's invocation.
+             * @param name The name to expose the closure as within the
+             * environment.
+             * @param closure The closure to be added to the environment.
+             * @param func The closure's invocation method.
+             */
+            template <std::invocable Closure, typename ReturnType, typename ...Parameters>
+            void add_c_closure(const std::string& name, Closure* closure, ReturnType(Closure::*func)(Parameters...)) {
+                reinterpret_cast<EnvironmentImpl*>(this)->add_c_closure(name, closure, func);
+            }
+            /**
+             * @brief Add a closure to the environment, exposed to the
+             * scripts ran within. This provides a default expecation
+             * of an unambiguous operator() in the Closure type.
+             *
+             * @tparam Closure The closure type.
+             * @tparam ReturnType The return type of the closure's invocation.
+             * @tparam Parameters The parameters accepted by the closure's invocation.
+             * @param name The name to expose the closure as within the
+             * environment.
+             * @param closure The closure to be added to the environment.
+             */
+            template <std::invocable Closure>
+            void add_c_closure(const std::string& name, Closure* closure) {
+                reinterpret_cast<EnvironmentImpl*>(this)->add_c_closure(name, closure, Closure::operator());
+            }
+
             /**
              * @brief Get a script function from the environment, allowing
              * calls within C++ into the script.
@@ -158,7 +214,10 @@ namespace hemlock {
                 return reinterpret_cast<EnvironmentImpl*>(this)->get_script_function(name, do_register);
             }
         protected:
-            i32 m_max_script_length;
+            EnvironmentRegistry<EnvironmentImpl>* m_registry;
+
+            hio::IOManagerBase* m_io_manager;
+            ui32 m_max_script_length;
         };
     }
 }

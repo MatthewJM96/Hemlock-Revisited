@@ -8,7 +8,9 @@ hscript::EnvironmentRegistry<Environment>& hscript::EnvironmentRegistry<Environm
 }
 
 template <typename Environment>
-void hscript::EnvironmentRegistry<Environment>::init(i32 max_script_length/* = HEMLOCK_DEFAULT_MAX_SCRIPT_LENGTH*/) {
+void hscript::EnvironmentRegistry<Environment>::init(hio::IOManagerBase* io_manager, i32 max_script_length/* = HEMLOCK_DEFAULT_MAX_SCRIPT_LENGTH*/) {
+    m_io_manager = io_manager;
+
     m_max_script_length = max_script_length;
 }
 
@@ -38,7 +40,7 @@ void hscript::EnvironmentRegistry<Environment>::dispose() {
 template <typename Environment>
 hscript::EnvironmentGroupID hscript::EnvironmentRegistry<Environment>::create_group(EnvironmentBuilder<Environment>* builder/* = nullptr*/) {
     Environment* group_env = new Environment();
-    group_env->init(m_max_script_length);
+    group_env->init(m_io_manager, m_max_script_length);
 
     if (builder != nullptr) {
         builder(group_env);
@@ -52,7 +54,7 @@ hscript::EnvironmentGroupID hscript::EnvironmentRegistry<Environment>::create_gr
 template <typename Environment>
 Environment* hscript::EnvironmentRegistry<Environment>::create_environment(EnvironmentBuilder<Environment>* builder/* = nullptr*/) {
     Environment* env = new Environment();
-    env->init(m_max_script_length);
+    env->init(m_io_manager, m_max_script_length);
 
     if (builder != nullptr) {
         builder(env);
@@ -73,7 +75,7 @@ Environment* hscript::EnvironmentRegistry<Environment>::create_environment(Envir
     }
 
     Environment* env = new Environment();
-    env->init(group.parent, m_max_script_length);
+    env->init(group.parent, m_io_manager, m_max_script_length);
 
     group.children.push_back(env);
 
@@ -89,7 +91,7 @@ Environment* hscript::EnvironmentRegistry<Environment>::create_environments(ui32
     for (ui32 env_idx = 0; env_idx != num; ++env_idx) {
         Environment* env = &envs[env_idx];
 
-        env->init(m_max_script_length);
+        env->init(m_io_manager, m_max_script_length);
 
         if (builder != nullptr) {
             builder(env);
@@ -117,7 +119,7 @@ Environment* hscript::EnvironmentRegistry<Environment>::create_environments(ui32
     for (ui32 env_idx = 0; env_idx != num; ++env_idx) {
         Environment* env = &envs[env_idx];
 
-        env->init(group.parent, m_max_script_length);
+        env->init(group.parent, m_io_manager, m_max_script_length);
 
         group.children.push_back(env);
     }

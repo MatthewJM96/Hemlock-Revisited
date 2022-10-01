@@ -274,6 +274,18 @@ namespace hemlock {
             { !static_cast<typename std::tuple_element<0, std::invoke_result_t<Invocable, Args...>>::type&&>(ret) } -> BooleanTestable;
         };
 
+    template <typename, typename>
+    struct is_same_template : public std::false_type { };
+    template<
+        template<typename...> typename T,
+        typename... A,
+        typename... B
+    >
+    struct is_same_template<
+        T<A...>,
+        T<B...>
+    > : std::true_type { };
+
     template <typename>
     struct is_pointer_like : public std::false_type { };
     template <typename Type>
