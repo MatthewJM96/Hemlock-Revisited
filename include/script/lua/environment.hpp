@@ -9,6 +9,8 @@
 namespace hemlock {
     namespace script {
         namespace lua {
+            using LuaFunctions = std::unordered_map<std::string, LuaFunctionState>;
+
             class Environment : EnvironmentBase<Environment> {
             public:
                 Environment() :
@@ -191,6 +193,7 @@ namespace hemlock {
 
                 LuaHandle       m_state;
                 Environment*    m_parent;
+                LuaFunctions    m_lua_functions;
             };
         }
     }

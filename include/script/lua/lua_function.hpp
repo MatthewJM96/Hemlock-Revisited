@@ -6,12 +6,6 @@
 namespace hemlock {
     namespace script {
         namespace lua {
-            struct LuaFunctionState {
-                LuaHandle   state;
-                std::string name;
-                i32         index;
-            };
-
 
         }
     }

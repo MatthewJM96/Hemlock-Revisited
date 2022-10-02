@@ -6,6 +6,12 @@ namespace hemlock {
         namespace lua {
             using LuaHandle     = lua_State*;
             using LuaInvocable  = int(*)(lua_State*);
+
+            struct LuaFunctionState {
+                LuaHandle   state;
+                std::string name;
+                i32         index;
+            };
         }
     }
 }
