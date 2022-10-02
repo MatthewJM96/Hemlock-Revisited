@@ -23,8 +23,15 @@ ui32 hscript::lua::LuaValue<Type>::push(LuaHandle state, Type value) {
         return value_count();
     }
 
+        /********\
+         * Bool *
+        \********/
     if constexpr (std::is_same<Type, bool>()) {
         lua_pushboolean(state, value);
+
+        /********\
+         * Char *
+        \********/
     } else if constexpr (std::is_same<Type, char>()) {
         char* tmp = new char[2];
         tmp[0] = value;
@@ -33,20 +40,48 @@ ui32 hscript::lua::LuaValue<Type>::push(LuaHandle state, Type value) {
         lua_pushstring(state, tmp);
 
         delete[] tmp;
+
+        /***********\
+         * Integer *
+        \***********/
     } else if constexpr (std::is_integral<Type>()) {
         lua_pushinteger(state, static_cast<lua_Integer>(value));
+
+        /*********\
+         * Float *
+        \*********/
     } else if constexpr (std::is_floating_point<Type>()) {
         lua_pushnumber(state, static_cast<lua_Number>(value));
+
+        /**********\
+         * String *
+        \**********/
     } else if constexpr (std::is_same<Type, std::string>()) {
         lua_pushstring(state, value.c_str());
+
+        /************\
+         * C-String *
+        \************/
     } else if constexpr (std::is_same<typename std::remove_const<Type>::type, char*>()) {
         lua_pushstring(state, value);
+
+        /********\
+         * Enum *
+        \********/
     } else if constexpr (std::is_enum<Type>()) {
         using Underlying = typename std::underlying_type<Type>::type;
 
         LuaValue<Underlying>::push(state, static_cast<Underlying>(value));
+
+        /*********\
+         * void* *
+        \*********/
     } else if constexpr (std::is_same<Type, void*>()) {
         lua_pushlightuserdata(state, value);
+
+        /******\
+         * T* *
+        \******/
     } else if constexpr (std::is_pointer<Type>()) {
         LuaValue<void*>::push(
             state,
@@ -88,31 +123,67 @@ Type hscript::lua::LuaValue<Type>::retrieve(LuaHandle state, i32 index) {
     // std::string in all cases.
 
     Type value = default_value();
+
+        /********\
+         * Bool *
+        \********/
     if constexpr (std::is_same<Type, bool>()) {
         // Pops bool as integer and converts.
         value = lua_toboolean(state, index) != 0;
+
+        /********\
+         * Char *
+        \********/
     } else if constexpr (std::is_same<Type, char>()) {
         // Pops char as string, return character if
         // it exists, else default value.
         std::string tmp = lua_tostring(state, index);
 
         if (tmp.length() > 0) value = tmp.c_str()[0];
+
+        /***********\
+         * Integer *
+        \***********/
     } else if constexpr (std::is_integral<Type>()) {
         value = static_cast<Type>(lua_tointeger(state, index));
+
+        /*********\
+         * Float *
+        \*********/
     } else if constexpr (std::is_floating_point<Type>()) {
         value = static_cast<Type>(lua_tonumber(state, index));
+
+        /**********\
+         * String *
+        \**********/
     } else if constexpr (std::is_same<Type, std::string>()) {
         value = lua_tostring(state, index);
+
+        /************\
+         * C-String *
+        \************/
     } else if constexpr (std::is_same<typename std::remove_const<Type>::type, char*>()) {
         std::string tmp = lua_tostring(state, index);
         
         if (tmp.length() > 0) value = const_cast<Type>(tmp.c_str());
+
+        /********\
+         * Enum *
+        \********/
     } else if constexpr (std::is_enum<Type>()) {
         using Underlying = typename std::underlying_type<Type>::type;
 
         value = static_cast<Type>(LuaValue<Underlying>::pop(state));
+
+        /*********\
+         * void* *
+        \*********/
     } else if constexpr (std::is_same<Type, void*>()) {
         value = lua_touserdata(state, index);
+
+        /******\
+         * T* *
+        \******/
     } else if constexpr (std::is_pointer<Type>()) {
         value = reinterpret_cast<Type>(LuaValue<void*>::pop(state));
     }
@@ -145,22 +216,48 @@ bool hscript::lua::LuaValue<Type>::try_retrieve(LuaHandle state, i32 index, OUT 
 
 template <typename Type>
 bool hscript::lua::LuaValue<Type>::test_index(LuaHandle state, i32 index) {
+        /********\
+         * Bool *
+        \********/
     if constexpr (std::is_same<Type, bool>()) {
         return lua_isboolean(state, index);
+
+        /************\
+         *     Char *
+         *   String *
+         * C-String *
+        \************/
     } else if constexpr (std::is_same<Type, char>()
                         || std::is_same<Type, std::string>()
                         || std::is_same<typename std::remove_const<Type>::type, char*>()
     ) {
         return lua_isstring(state, index);
+
+        /***********\
+         * Integer *
+         *   Float *
+        \***********/
     } else if constexpr (std::is_integral<Type>()
                         || std::is_floating_point<Type>()) {
         return lua_isnumber(state, index);
+
+        /********\
+         * Enum *
+        \********/
     } else if constexpr (std::is_enum<Type>()) {
         using Underlying = typename std::underlying_type<Type>::type;
 
         return LuaValue<Underlying>::test_index(state, index);
+
+        /*********\
+         * void* *
+        \*********/
     } else if constexpr (std::is_same<Type, void*>()) {
         return lua_islightuserdata(state, index);
+
+        /******\
+         * T* *
+        \******/
     } else if constexpr (std::is_pointer<Type>()) {
         return LuaValue<void*>::test_index(state, index);
     }
