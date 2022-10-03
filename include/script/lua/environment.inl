@@ -60,6 +60,8 @@ void hscript::lua::Environment::add_c_closure(const std::string& name, Closure* 
     if (m_parent) return m_parent->add_c_closure(name, closure, func);
 
     LuaValue<void*>::push(m_state, reinterpret_cast<void*>(closure));
+    // TODO(Matthew): We can't do this... it will break as sizeof(func) here is not == sizeof(void*).
+    //                  Can use lua_newuserdata to achieve what we want, but need some Typeless trick.
     LuaValue<void*>::push(m_state, reinterpret_cast<void*>(func));
 
     lua_pushcclosure(m_state, invoke_closure<Closure, ReturnType, Parameters...>, 2);
