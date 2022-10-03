@@ -155,7 +155,7 @@ namespace hemlock {
                         // For each index in type, in reverse order, pop
                         // that element and store in tmp for return.
                         for (ui32 idx = value_count(); idx != 0; --idx) {
-                            tmp[idx - 1] = LuaValue<decltype(Type{}[0])>::retrieve(state, index + static_cast<i32>(idx) - value_count());
+                            tmp[idx - 1] = LuaValue<decltype(Type{}[0])>::do_retrieve<RemoveValue>(state, index + static_cast<i32>(idx) - value_count());
                         }
                         return tmp;
                     }
@@ -217,7 +217,7 @@ namespace hemlock {
                     } else if constexpr (std::is_enum<Type>()) {
                         using Underlying = typename std::underlying_type<Type>::type;
 
-                        value = static_cast<Type>(LuaValue<Underlying>::pop(state));
+                        value = static_cast<Type>(LuaValue<Underlying>::do_retrieve<false>(state, index));
 
                         /*********\
                          * void* *
@@ -229,10 +229,10 @@ namespace hemlock {
                          * T* *
                         \******/
                     } else if constexpr (std::is_pointer<Type>()) {
-                        value = reinterpret_cast<Type>(LuaValue<void*>::pop(state));
+                        value = reinterpret_cast<Type>(LuaValue<void*>::do_retrieve<false>(state, index));
                     }
 
-                    if constexpr (RemoveValue) lua_remove(state, index);
+                    if constexpr (RemoveValue && !is_multiple_lua_type<Type>()) lua_remove(state, index);
 
                     return value;
                 }
