@@ -110,6 +110,19 @@ namespace hemlock {
                  * retrieved, false otherwise.
                  */
                 static bool try_retrieve(LuaHandle state, i32 index, OUT Type& value);
+                /**
+                 * @brief Retrieve a value of type Type
+                 * from the Lua stack at the upvalue
+                 * index specified. Upvalues are handled
+                 * by Lua and are not really on the
+                 * stack.
+                 *
+                 * @param state The Lua state.
+                 * @param index The upvalue index into
+                 * the Lua stack to retrieve from.
+                 * @return Type The value retrieved.
+                 */
+                static Type retrieve_upvalue(LuaHandle state, i32 index);
             protected:
                 /**
                  * @brief Test the given index in the
@@ -122,6 +135,107 @@ namespace hemlock {
                  * Type, false otherwise.
                  */
                 static bool test_index(LuaHandle state, i32 index);
+                /**
+                 * @brief Retrieve a value of type Type
+                 * from the Lua stack at the index
+                 * specified. The value is removed from
+                 * the Lua stack.
+                 *
+                 * @tparam RemoveValue Whether to remove
+                 * the value retrieved.
+                 * @param state The Lua state.
+                 * @param index The index into the Lua
+                 * stack to retrieve from.
+                 * @return Type The value retrieved.
+                 */
+                template <bool RemoveValue>
+                static Type do_retrieve(LuaHandle state, i32 index) {
+                    if constexpr (is_multiple_lua_type<Type>()) {
+                        Type tmp;
+                        // For each index in type, in reverse order, pop
+                        // that element and store in tmp for return.
+                        for (ui32 idx = value_count(); idx != 0; --idx) {
+                            tmp[idx - 1] = LuaValue<decltype(Type{}[0])>::retrieve(state, index + static_cast<i32>(idx) - value_count());
+                        }
+                        return tmp;
+                    }
+
+                    // Note that with lua_tostring, we are getting
+                    // a pointer to the string on the Lua stack, we
+                    // must therefore immediately make a copy to
+                    // avoid GC killing the value, hence the use of
+                    // std::string in all cases.
+
+                    Type value = default_value();
+
+                        /********\
+                         * Bool *
+                        \********/
+                    if constexpr (std::is_same<Type, bool>()) {
+                        // Pops bool as integer and converts.
+                        value = lua_toboolean(state, index) != 0;
+
+                        /********\
+                         * Char *
+                        \********/
+                    } else if constexpr (std::is_same<Type, char>()) {
+                        // Pops char as string, return character if
+                        // it exists, else default value.
+                        std::string tmp = lua_tostring(state, index);
+
+                        if (tmp.length() > 0) value = tmp.c_str()[0];
+
+                        /***********\
+                         * Integer *
+                        \***********/
+                    } else if constexpr (std::is_integral<Type>()) {
+                        value = static_cast<Type>(lua_tointeger(state, index));
+
+                        /*********\
+                         * Float *
+                        \*********/
+                    } else if constexpr (std::is_floating_point<Type>()) {
+                        value = static_cast<Type>(lua_tonumber(state, index));
+
+                        /**********\
+                         * String *
+                        \**********/
+                    } else if constexpr (std::is_same<Type, std::string>()) {
+                        value = lua_tostring(state, index);
+
+                        /************\
+                         * C-String *
+                        \************/
+                    } else if constexpr (std::is_same<typename std::remove_const<Type>::type, char*>()) {
+                        std::string tmp = lua_tostring(state, index);
+                        
+                        if (tmp.length() > 0) value = const_cast<Type>(tmp.c_str());
+
+                        /********\
+                         * Enum *
+                        \********/
+                    } else if constexpr (std::is_enum<Type>()) {
+                        using Underlying = typename std::underlying_type<Type>::type;
+
+                        value = static_cast<Type>(LuaValue<Underlying>::pop(state));
+
+                        /*********\
+                         * void* *
+                        \*********/
+                    } else if constexpr (std::is_same<Type, void*>()) {
+                        value = lua_touserdata(state, index);
+
+                        /******\
+                         * T* *
+                        \******/
+                    } else if constexpr (std::is_pointer<Type>()) {
+                        value = reinterpret_cast<Type>(LuaValue<void*>::pop(state));
+                    }
+
+                    if constexpr (RemoveValue) lua_remove(state, index);
+
+                    return value;
+                }
             };
 
             /**

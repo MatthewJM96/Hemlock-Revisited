@@ -106,91 +106,7 @@ bool hscript::lua::LuaValue<Type>::try_pop(LuaHandle state, OUT Type& value) {
 
 template <typename Type>
 Type hscript::lua::LuaValue<Type>::retrieve(LuaHandle state, i32 index) {
-    if constexpr (is_multiple_lua_value<Type>()) {
-        Type tmp;
-        // For each index in type, in reverse order, pop
-        // that element and store in tmp for return.
-        for (ui32 idx = value_count(); idx != 0; --idx) {
-            tmp[idx - 1] = LuaValue<decltype(Type{}[0])>::retrieve(state, index + static_cast<i32>(idx) - value_count());
-        }
-        return tmp;
-    }
-
-    // Note that with lua_tostring, we are getting
-    // a pointer to the string on the Lua stack, we
-    // must therefore immediately make a copy to
-    // avoid GC killing the value, hence the use of
-    // std::string in all cases.
-
-    Type value = default_value();
-
-        /********\
-         * Bool *
-        \********/
-    if constexpr (std::is_same<Type, bool>()) {
-        // Pops bool as integer and converts.
-        value = lua_toboolean(state, index) != 0;
-
-        /********\
-         * Char *
-        \********/
-    } else if constexpr (std::is_same<Type, char>()) {
-        // Pops char as string, return character if
-        // it exists, else default value.
-        std::string tmp = lua_tostring(state, index);
-
-        if (tmp.length() > 0) value = tmp.c_str()[0];
-
-        /***********\
-         * Integer *
-        \***********/
-    } else if constexpr (std::is_integral<Type>()) {
-        value = static_cast<Type>(lua_tointeger(state, index));
-
-        /*********\
-         * Float *
-        \*********/
-    } else if constexpr (std::is_floating_point<Type>()) {
-        value = static_cast<Type>(lua_tonumber(state, index));
-
-        /**********\
-         * String *
-        \**********/
-    } else if constexpr (std::is_same<Type, std::string>()) {
-        value = lua_tostring(state, index);
-
-        /************\
-         * C-String *
-        \************/
-    } else if constexpr (std::is_same<typename std::remove_const<Type>::type, char*>()) {
-        std::string tmp = lua_tostring(state, index);
-        
-        if (tmp.length() > 0) value = const_cast<Type>(tmp.c_str());
-
-        /********\
-         * Enum *
-        \********/
-    } else if constexpr (std::is_enum<Type>()) {
-        using Underlying = typename std::underlying_type<Type>::type;
-
-        value = static_cast<Type>(LuaValue<Underlying>::pop(state));
-
-        /*********\
-         * void* *
-        \*********/
-    } else if constexpr (std::is_same<Type, void*>()) {
-        value = lua_touserdata(state, index);
-
-        /******\
-         * T* *
-        \******/
-    } else if constexpr (std::is_pointer<Type>()) {
-        value = reinterpret_cast<Type>(LuaValue<void*>::pop(state));
-    }
-
-    lua_remove(state, index);
-
-    return value;
+    return do_retrieve<true>(state, index);
 }
 
 template <typename Type>
@@ -212,6 +128,11 @@ bool hscript::lua::LuaValue<Type>::try_retrieve(LuaHandle state, i32 index, OUT 
 
     value = retrieve(state, index);
     return true;
+}
+
+template <typename Type>
+Type hscript::lua::LuaValue<Type>::retrieve_upvalue(LuaHandle state, i32 index) {
+    return do_retrieve<false>(state, lua_upvalueindex(index));
 }
 
 template <typename Type>

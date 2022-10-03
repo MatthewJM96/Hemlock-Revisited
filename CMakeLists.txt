@@ -190,6 +190,7 @@ add_executable(Hemlock_Revisited
     "${PROJECT_SOURCE_DIR}/src/io/image.cpp"
     "${PROJECT_SOURCE_DIR}/src/io/iomanager.cpp"
     "${PROJECT_SOURCE_DIR}/src/script/lua/environment.cpp"
+    "${PROJECT_SOURCE_DIR}/src/script/lua/lua_function.cpp"
     "${PROJECT_SOURCE_DIR}/src/thread/thread_workflow_builder.cpp"
     "${PROJECT_SOURCE_DIR}/src/ui/input/dispatcher.cpp"
     "${PROJECT_SOURCE_DIR}/src/ui/input/manager.cpp"
