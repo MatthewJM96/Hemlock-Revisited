@@ -120,8 +120,11 @@ void hscript::lua::Environment::push_namespace(const std::string& _namespace) {
 bool hscript::lua::Environment::register_lua_function(const std::string& name, OUT LuaFunctionState* state/* = nullptr*/) {
     if (name.length() == 0) return false;
 
+    auto& cache = m_lua_functions;
+    if (m_parent) cache = m_parent->m_lua_functions;
+
     // Check cache for whether this function is already registered.
-    if (m_lua_functions.contains(name)) {
+    if (cache.contains(name)) {
         if (state) *state = m_lua_functions[name];
 
         return true;
@@ -166,7 +169,7 @@ bool hscript::lua::Environment::register_lua_function(const std::string& name, O
     // Place a reference to the function in the script
     // function table of the Lua registry, and cache
     // this.
-    m_lua_functions[name] = {
+    cache[name] = {
         .state = m_state,
         .index = luaL_ref(m_state, prior_index + 1)
     };

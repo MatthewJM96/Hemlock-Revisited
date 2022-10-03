@@ -24,6 +24,8 @@ void hscript::lua::Environment::add_value(const std::string& name, Type val) {
 
 template <typename ReturnType, typename ...Parameters>
 void hscript::lua::Environment::add_c_delegate(const std::string& name, Delegate<ReturnType, Parameters...>* delegate) {
+    if (m_parent) return m_parent->add_c_delegate(name, delegate);
+
     LuaValue<void*>::push(m_state, reinterpret_cast<void*>(delegate));
 
     lua_pushcclosure(m_state, invoke_delegate<ReturnType, Parameters...>, 1);
@@ -32,6 +34,8 @@ void hscript::lua::Environment::add_c_delegate(const std::string& name, Delegate
 
 template <typename ReturnType, typename ...Parameters>
 void hscript::lua::Environment::add_c_function(const std::string& name, ReturnType(*func)(Parameters...)) {
+    if (m_parent) return m_parent->add_c_function(name, func);
+
     LuaValue<void*>::push(m_state, reinterpret_cast<void*>(func));
 
     lua_pushcclosure(m_state, invoke_function<ReturnType, Parameters...>, 1);
@@ -40,6 +44,8 @@ void hscript::lua::Environment::add_c_function(const std::string& name, ReturnTy
 
 template <std::invocable Closure, typename ReturnType, typename ...Parameters>
 void hscript::lua::Environment::add_c_closure(const std::string& name, Closure* closure, ReturnType(Closure::*func)(Parameters...)) {
+    if (m_parent) return m_parent->add_c_closure(name, closure, func);
+
     LuaValue<void*>::push(m_state, reinterpret_cast<void*>(closure));
     LuaValue<void*>::push(m_state, reinterpret_cast<void*>(func));
 

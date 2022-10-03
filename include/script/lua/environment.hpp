@@ -11,9 +11,9 @@ namespace hemlock {
         namespace lua {
             using LuaFunctions = std::unordered_map<std::string, LuaFunctionState>;
 
-            // TODO(Matthew): Handle grouped environments better. Shared Lua function
-            //                cache, do we need to refer registering C functions to
-            //                parent? Etc.
+            // TODO(Matthew): Revisit handling of group environments:
+            //                  - verify cache and function registration handling,
+            //                  - consider if we can allow parallelism within groups.
 
             class Environment : EnvironmentBase<Environment> {
                 friend i32 register_lua_function(LuaHandle);
