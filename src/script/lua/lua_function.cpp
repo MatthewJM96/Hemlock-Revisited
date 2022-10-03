@@ -21,14 +21,15 @@ i32 hscript::lua::register_lua_function(LuaHandle state) {
         return 1;
     }
 
-    // First see if the lua function we just got already exists in the environment's register.
-    LuaFunctionState* lua_func = env->get_lua_function(name);
-    if (lua_func != nullptr) {
-        LuaValue<i32>::push(state, 0);
+    // Retrieve the Lua function from the environment, registering
+    // it if it has not yet been registered. False return indicates
+    // we failed to register the function, report failure.
+    if (!env->register_lua_function(name)) {
+        LuaValue<i32>::push(state, -3);
         return 1;
     }
 
-    // If it doesn't, make a registration for it.
-    LuaValue<i32>::push(state, env->make_lua_function(name));
+    // Lua function registered, report success.
+    LuaValue<i32>::push(state, 0);
     return 1;
 }

@@ -12,6 +12,7 @@ namespace hemlock {
             using LuaFunctions = std::unordered_map<std::string, LuaFunctionState>;
 
             class Environment : EnvironmentBase<Environment> {
+                friend i32 register_lua_function(LuaHandle);
             public:
                 Environment() :
                     m_state(nullptr),
@@ -190,6 +191,18 @@ namespace hemlock {
                  * @param _namespace The namespace to push.
                  */
                 void push_namespace(const std::string& _namespace);
+
+                /**
+                 * @brief Registers a Lua function given a name,
+                 * dot-separation for namespacing starting at global.
+                 *
+                 * @param name The name of the script function to register.
+                 * @param state Optional Lua function state struct into which
+                 * the registered Lua functions information will be placed.
+                 * @return True if the Lua function was registered, false
+                 * if it was not already registered and could not be registered.
+                 */
+                bool register_lua_function(const std::string& name, OUT LuaFunctionState* state = nullptr);
 
                 LuaHandle       m_state;
                 Environment*    m_parent;

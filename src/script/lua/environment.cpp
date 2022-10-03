@@ -116,3 +116,64 @@ void hscript::lua::Environment::push_namespace(const std::string& _namespace) {
         lua_getfield(m_state, -1, _namespace.c_str());
     }
 }
+
+bool hscript::lua::Environment::register_lua_function(const std::string& name, OUT LuaFunctionState* state/* = nullptr*/) {
+    if (name.length() == 0) return false;
+
+    // Check cache for whether this function is already registered.
+    if (m_lua_functions.contains(name)) {
+        if (state) *state = m_lua_functions[name];
+
+        return true;
+    }
+
+    /*
+     * The general idea here is that we register a lua function by
+     * creating an entry for it in the script function table we
+     * attached to the Lua registry. This table is only ever appended
+     * to via `luaL_ref` in order that Lua can handle unique
+     * identifiers for all registered functions. To avoid creating
+     * duplicate registry entries for the same function, and to
+     * speed up access to Lua functions we register, we therefore
+     * also keep a cache of the information necessary to create
+     * a C-side callable to invoke registered Lua functions.
+     */
+
+    i32 prior_index = lua_gettop(m_state);
+
+    // Get our script function table in the Lua registry and place
+    // it on the Lua stack.
+    lua_getfield(m_state, LUA_REGISTRYINDEX, H_LUA_SCRIPT_FUNCTION_TABLE);
+
+    // Now put global namespace on the stack, we will be searching
+    // for the Lua function to register from here.
+    set_global_namespace();
+
+    std::stringstream name_stream{name};
+    for (std::string token; std::getline(name_stream, token, '.');) {
+        // Grab the next namespace (or function) from the
+        // previous' table.
+        lua_getfield(m_state, -1, token.c_str());
+        // Check that the object we just retrieved exists.
+        if (lua_isnil(m_state, -1)) return false;
+    }
+
+    // Check that the last object added to the stack
+    // was a valid function, if it wasn't then we have
+    // failed.
+    if (!lua_isfunction(m_state, -1)) return false;
+
+    // Place a reference to the function in the script
+    // function table of the Lua registry, and cache
+    // this.
+    m_lua_functions[name] = {
+        .state = m_state,
+        .index = luaL_ref(m_state, prior_index + 1)
+    };
+
+    // Return stack to state prior to function registration.
+    i32 final_index = lua_gettop(m_state);
+    lua_pop(m_state, final_index - prior_index);
+
+    return true;
+}
