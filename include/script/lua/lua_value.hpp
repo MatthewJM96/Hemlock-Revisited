@@ -12,6 +12,7 @@ namespace hemlock {
                 requires (
                     std::is_arithmetic<Type>::value
                     || std::is_pointer<Type>::value
+                    || std::is_member_function_pointer<Type>::value
                     || is_same_template<std::string, Type>::value
                 )
             struct is_single_lua_type<Type> : public std::true_type { };
@@ -230,6 +231,12 @@ namespace hemlock {
                         \******/
                     } else if constexpr (std::is_pointer<Type>()) {
                         value = reinterpret_cast<Type>(LuaValue<void*>::do_retrieve<false>(state, index));
+
+                        /****************\
+                         * U(V::*)(...) *
+                        \****************/
+                    } else if constexpr (std::is_member_function_pointer<Type>()) {
+                        value = *reinterpret_cast<Type*>(lua_touserdata(state, index));
                     }
 
                     if constexpr (RemoveValue && !is_multiple_lua_type<Type>()) lua_remove(state, index);

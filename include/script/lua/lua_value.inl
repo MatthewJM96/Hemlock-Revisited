@@ -89,6 +89,14 @@ ui32 hscript::lua::LuaValue<Type>::push(LuaHandle state, Type value) {
                 const_cast<std::remove_const<Type>::type>(value)
             )
         );
+
+        /****************\
+         * U(V::*)(...) *
+        \****************/
+    } else if constexpr (std::is_member_function_pointer<Type>()) {
+        void* block = lua_newuserdata(state, sizeof(Type));
+
+        std::memcpy(block, reinterpret_cast<void*>(&value), sizeof(Type));
     }
 
     return 1;
@@ -181,6 +189,12 @@ bool hscript::lua::LuaValue<Type>::test_index(LuaHandle state, i32 index) {
         \******/
     } else if constexpr (std::is_pointer<Type>()) {
         return LuaValue<void*>::test_index(state, index);
+
+        /****************\
+         * U(V::*)(...) *
+        \****************/
+    } else if constexpr (std::is_member_function_pointer<Type>()) {
+        return lua_isuserdata(state, index);
     }
 }
 
