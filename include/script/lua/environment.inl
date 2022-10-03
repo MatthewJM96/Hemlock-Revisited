@@ -44,7 +44,7 @@ void hscript::lua::Environment::add_c_closure(const std::string& name, Closure* 
     LuaValue<void*>::push(m_state, reinterpret_cast<void*>(func));
 
     lua_pushcclosure(m_state, invoke_closure<Closure, ReturnType, Parameters...>, 2);
-    lua_setfield(m_state, -3, name.c_str());
+    lua_setfield(m_state, -2, name.c_str());
 }
 
 template <typename ReturnType, typename ...Parameters>
