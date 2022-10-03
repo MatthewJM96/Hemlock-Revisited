@@ -6,24 +6,24 @@
 namespace hemlock {
     namespace script {
         namespace lua {
-            template <typename Type>
+            template <typename>
             struct is_single_lua_type : public std::false_type { };
-            template <typename Type>
-                requires (
-                    is_bounded_array<Type>::value
-                    || is_same_template<ui8v3, Type>::value
-                )
-            struct is_single_lua_type : public std::true_type { };
-
-            template <typename Type>
-            struct is_multiple_lua_value : public std::false_type { };
             template <typename Type>
                 requires (
                     std::is_arithmetic<Type>::value
                     || std::is_pointer<Type>::value
                     || is_same_template<std::string, Type>::value
                 )
-            struct is_multiple_lua_value : public std::true_type { };
+            struct is_single_lua_type<Type> : public std::true_type { };
+
+            template <typename>
+            struct is_multiple_lua_type : public std::false_type { };
+            template <typename Type>
+                requires (
+                    std::is_bounded_array<Type>::value
+                    || is_same_template<ui8v3, Type>::value
+                )
+            struct is_multiple_lua_type<Type> : public std::true_type { };
 
             /**
              * @brief Provides an API for moving data between Lua stack and C++ side.
@@ -34,7 +34,7 @@ namespace hemlock {
              */
             template <typename Type>
                 requires (
-                    is_single_lua_type<Type>::type
+                    is_single_lua_type<Type>::value
                         || is_multiple_lua_type<Type>::value
                 )
             struct LuaValue {

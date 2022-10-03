@@ -5,7 +5,7 @@ constexpr Type hscript::lua::LuaValue<Type>::default_value() {
 
 template <typename Type>
 constexpr ui32 hscript::lua::LuaValue<Type>::value_count() {
-    if constexpr (is_multiple_lua_value<Type>()) {
+    if constexpr (is_multiple_lua_type<Type>()) {
         return sizeof(Type) / sizeof(decltype(Type{}[0]));
     }
 
@@ -14,7 +14,7 @@ constexpr ui32 hscript::lua::LuaValue<Type>::value_count() {
 
 template <typename Type>
 ui32 hscript::lua::LuaValue<Type>::push(LuaHandle state, Type value) {
-    if constexpr (is_multiple_lua_value<Type>()) {
+    if constexpr (is_multiple_lua_type<Type>()) {
         // For each index in type, push that value separately,
         // returning how many have been pushed.
         for (ui32 idx = 0; idx < value_count(); ++idx) {
@@ -111,7 +111,7 @@ Type hscript::lua::LuaValue<Type>::retrieve(LuaHandle state, i32 index) {
 
 template <typename Type>
 bool hscript::lua::LuaValue<Type>::try_retrieve(LuaHandle state, i32 index, OUT Type& value) {
-    if constexpr (is_multiple_lua_value<Type>()) {
+    if constexpr (is_multiple_lua_type<Type>()) {
         // For each index in type, test it has a
         // corresponding value on the Lua stack.
         for (ui32 idx = 0; idx < -value_count(); ++idx) {
