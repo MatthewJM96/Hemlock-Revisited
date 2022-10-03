@@ -1,3 +1,5 @@
+#include "lua_value.hpp"
+
 template <typename ReturnType, typename ...Parameters>
 hscript::ScriptDelegate<ReturnType, Parameters...> hscript::lua::make_lua_delegate(LuaFunctionState lua_func_state) {
     return ScriptDelegate<ReturnType, Parameters...>{

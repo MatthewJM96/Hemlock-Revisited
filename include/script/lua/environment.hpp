@@ -4,8 +4,6 @@
 #include "script/environment_base.hpp"
 #include "script/lua/state.hpp"
 
-#define H_LUA_SCRIPT_FUNCTION_TABLE "ScriptFunctions"
-
 namespace hemlock {
     namespace script {
         namespace lua {
