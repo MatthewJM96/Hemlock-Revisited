@@ -22,10 +22,10 @@ void hscript::lua::Environment::init(hio::IOManagerBase* io_manager, ui32 max_sc
     // Set global namespace.
     set_global_namespace();
 
-    // TODO(Matthew): Do stuff like this & event subscription.
-    // // Create a Lua function registration closure that captures this environment instance.
-    // ValueMediator<void*>::push(m_state, (void*)this);
-    // addCClosure("RegisterFunction", 1, &registerLFunction);
+    // Expose Lua function registration to environment.
+    add_c_function("register_function", &hscript::lua::register_lua_function, this);
+
+    // TODO(Matthew): Do stuff like event subscription.
 }
 
 void hscript::lua::Environment::init(EnvironmentBase* parent, hio::IOManagerBase* io_manager, ui32 max_script_length /*= HEMLOCK_DEFAULT_MAX_SCRIPT_LENGTH*/) {

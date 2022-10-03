@@ -42,6 +42,19 @@ void hscript::lua::Environment::add_c_function(const std::string& name, ReturnTy
     lua_setfield(m_state, -2, name.c_str());
 }
 
+template <typename ...Upvalues>
+void hscript::lua::Environment::add_c_function(const std::string& name, i32(*func)(LuaHandle), Upvalues... upvalues) {
+    if (m_parent) return m_parent->add_c_function(name, func, std::forward<Upvalues>(upvalues)...);
+
+    (LuaValue<Upvalues>::push(m_state, upvalues), ...);
+    LuaValue<void*>::push(m_state, reinterpret_cast<void*>(func));
+
+    i32 value_count = 1 + total_value_count<Upvalues...>();
+
+    lua_pushcclosure(m_state, func, value_count);
+    lua_setfield(m_state, -2, name.c_str());
+}
+
 template <std::invocable Closure, typename ReturnType, typename ...Parameters>
 void hscript::lua::Environment::add_c_closure(const std::string& name, Closure* closure, ReturnType(Closure::*func)(Parameters...)) {
     if (m_parent) return m_parent->add_c_closure(name, closure, func);

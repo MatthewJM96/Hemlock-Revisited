@@ -161,6 +161,17 @@ namespace hemlock {
                 template <typename ReturnType, typename ...Parameters>
                 void add_c_function(const std::string& name, ReturnType(*func)(Parameters...));
                 /**
+                 * @brief Add a function to the environment that matches the
+                 * lua_CFunction signature, with optional upvalues.
+                 *
+                 * @tparam Upvalues The types of the optional upvalues.
+                 * @param name The name of the function to expose.
+                 * @param func The function to expose.
+                 * @param upvalues The optional upvalues to bind.
+                 */
+                template <typename ...Upvalues>
+                void add_c_function(const std::string& name, i32(*func)(LuaHandle), Upvalues... upvalues);
+                /**
                  * @brief Add a closure to the environment, exposed to the
                  * scripts ran within.
                  *
