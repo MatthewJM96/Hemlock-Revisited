@@ -19,7 +19,45 @@ void hscript::lua::Environment::enter_namespaces(Strings... namespaces) {
 
 template <typename Type>
 void hscript::lua::Environment::add_value(const std::string& name, Type val) {
+    if (m_parent) return m_parent->add_value(name, val);
 
+    const i32 value_count = static_cast<i32>(LuaValue<Type>::value_count());
+
+    // TODO(Matthew): Do we want to support some degree of greater
+    //                flexibility?
+    //                  E.g. support putting PODs in with some template
+    //                  magic.
+    //                For now we allow this to be done explicitly with
+    //                use of enter_namespaces, set_namespaces.
+
+    if constexpr (value_count == 1) {
+        // In case of adding one value only, just push it onto the
+        // Lua stack and then set it as a value under the field below
+        // it on the stack, the namespace it will sit in.
+        LuaValue<Type>::push(m_state, val);
+        lua_setfield(m_state, -1, name.c_str());
+    } else {
+        // In case of adding multiple values, we first push the name
+        // to give the value as a namespace, then push the value onto
+        // the stack as multiple elements. For each element we attach
+        // it with a numeric index to the namespace we just created.
+        //   For example, if the value was a i32v3, and the name was
+        //   to be "position", then under whatever namespace was set
+        //   on calling add_value, a table would be added with form:
+        //     <current_namespace>
+        //       position
+        //         0 = val.x
+        //         1 = val.y
+        //         2 = val.z
+        push_namespace(name);
+        LuaValue<Type>::push(m_state, val);
+        for (i32 idx = value_count; idx > 0; --idx) {
+            lua_setfield(m_state, -(idx + 1), std::to_string(idx).c_str());
+        }
+        // Make sure to pop the namespace we pushed, to avoid side
+        // effects on the Lua stack.
+        lua_pop(m_state, 1);
+    }
 }
 
 template <typename ReturnType, typename ...Parameters>
