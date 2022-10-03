@@ -5,6 +5,8 @@
 #define HEMLOCK_DEFAULT_MAX_SCRIPT_LENGTH 50 * 1024 * 1024
 #endif // HEMLOCK_DEFAULT_MAX_SCRIPT_LENGTH
 
+#include "script/state.hpp"
+
 namespace hemlock {
     namespace script {
         template <typename Environment>
@@ -205,13 +207,12 @@ namespace hemlock {
              * @tparam ReturnType The return type of the script function.
              * @tparam Parameters The parameters accepted by the script function.
              * @param name The name of the script function to obtain.
-             * @param do_register Whether to register the obtained function.
-             * @return Delegate<ReturnType, Parameters...> Delegate providing
-             * means to call the script function.
+             * @param delegate Delegate providing means to call the script function.
+             * @return True if the script function was obtained, false otherwise.
              */
             template <typename ReturnType, typename ...Parameters>
-            Delegate<ReturnType, Parameters...> get_script_function(const std::string& name, bool do_register = true) {
-                return reinterpret_cast<EnvironmentImpl*>(this)->get_script_function(name, do_register);
+            bool get_script_function(const std::string& name, OUT ScriptDelegate<ReturnType, Parameters...>& delegate) {
+                return reinterpret_cast<EnvironmentImpl*>(this)->get_script_function(name);
             }
         protected:
             EnvironmentRegistry<EnvironmentImpl>* m_registry;

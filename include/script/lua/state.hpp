@@ -1,6 +1,8 @@
 #ifndef __hemlock_script_lua_state_hpp
 #define __hemlock_script_lua_state_hpp
 
+#include "script/state.hpp"
+
 namespace hemlock {
     namespace script {
         namespace lua {

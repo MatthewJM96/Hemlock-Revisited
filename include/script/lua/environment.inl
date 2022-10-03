@@ -48,6 +48,16 @@ void hscript::lua::Environment::add_c_closure(const std::string& name, Closure* 
 }
 
 template <typename ReturnType, typename ...Parameters>
-hemlock::Delegate<ReturnType, Parameters...> hscript::lua::Environment::get_script_function(const std::string& name, bool do_register/* = true*/) {
+bool hscript::lua::Environment::get_script_function(const std::string& name, OUT ScriptDelegate<ReturnType, Parameters...>& delegate) {
+    // Try to obtain the named Lua function, registering it
+    // if it was not already registered. If we could not
+    // obtain it, report failure.
+    LuaFunctionState lua_func_state;
+    if (!register_lua_function(name, &lua_func_state)) {
+        return false;
+    }
 
+    delegate = make_lua_delegate<ReturnType, Parameters...>(lua_func_state);
+
+    return true;
 }

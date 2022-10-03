@@ -170,17 +170,17 @@ namespace hemlock {
                 void add_c_closure(const std::string& name, Closure* closure, ReturnType(Closure::*func)(Parameters...));
                 /**
                  * @brief Get a script function from the environment, allowing
-                 * calls within C++ into the script.
+                 * calls within C++ into the script. Name can specify namespacing
+                 * with dot-separation.
                  *
                  * @tparam ReturnType The return type of the script function.
                  * @tparam Parameters The parameters accepted by the script function.
                  * @param name The name of the script function to obtain.
-                 * @param do_register Whether to register the obtained function.
-                 * @return Delegate<ReturnType, Parameters...> Delegate providing
-                 * means to call the script function.
+                 * @param delegate Delegate providing means to call the script function.
+                 * @return True if the script function was obtained, false otherwise.
                  */
                 template <typename ReturnType, typename ...Parameters>
-                Delegate<ReturnType, Parameters...> get_script_function(const std::string& name, bool do_register = true);
+                bool get_script_function(const std::string& name, OUT ScriptDelegate<ReturnType, Parameters...>& delegate);
             protected:
                 /**
                  * @brief Pushes namespaces onto the Lua stack. Last
