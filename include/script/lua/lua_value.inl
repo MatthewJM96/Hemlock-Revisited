@@ -186,9 +186,5 @@ bool hscript::lua::LuaValue<Type>::test_index(LuaHandle state, i32 index) {
 
 template <typename ...Types>
 constexpr ui32 hscript::lua::total_value_count() {
-    ui32 total_count = 0;
-    for (ui32 count : { 0, LuaValue<Types>::value_count()... }) {
-        total_count += count;
-    }
-    return total_count;
+    return (0 + ... + LuaValue<Types>::value_count());
 }
