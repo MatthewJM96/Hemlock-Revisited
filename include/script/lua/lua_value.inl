@@ -111,6 +111,8 @@ ui32 hscript::lua::LuaValue<Type>::push(LuaHandle state, Type value) {
         void* block = lua_newuserdata(state, sizeof(Type));
 
         std::memcpy(block, reinterpret_cast<void*>(&value), sizeof(Type));
+    } else {
+        debug_printf("Trying to push with an unsupported type.");
     }
 
     return 1;
