@@ -124,7 +124,6 @@ namespace hemlock {
                  * @return Type The value retrieved.
                  */
                 static Type retrieve_upvalue(LuaHandle state, i32 index);
-            protected:
                 /**
                  * @brief Test the given index in the
                  * Lua stack for being of type Type.
@@ -150,13 +149,13 @@ namespace hemlock {
                  * @return Type The value retrieved.
                  */
                 template <bool RemoveValue>
-                static Type do_retrieve(LuaHandle state, i32 index) {
+                static Type __do_retrieve(LuaHandle state, i32 index) {
                     if constexpr (is_multiple_lua_type<Type>()) {
                         Type tmp;
                         // For each index in type, in reverse order, pop
                         // that element and store in tmp for return.
                         for (ui32 idx = value_count(); idx != 0; --idx) {
-                            tmp[idx - 1] = LuaValue<decltype(Type{}[0])>::do_retrieve<RemoveValue>(state, index + static_cast<i32>(idx) - value_count());
+                            tmp[idx - 1] = LuaValue<decltype(Type{}[0])>::template __do_retrieve<RemoveValue>(state, index + static_cast<i32>(idx) - value_count());
                         }
                         return tmp;
                     }
@@ -218,7 +217,7 @@ namespace hemlock {
                     } else if constexpr (std::is_enum<Type>()) {
                         using Underlying = typename std::underlying_type<Type>::type;
 
-                        value = static_cast<Type>(LuaValue<Underlying>::do_retrieve<false>(state, index));
+                        value = static_cast<Type>(LuaValue<Underlying>::template __do_retrieve<false>(state, index));
 
                         /*********\
                          * void* *
@@ -230,7 +229,7 @@ namespace hemlock {
                          * T* *
                         \******/
                     } else if constexpr (std::is_pointer<Type>()) {
-                        value = reinterpret_cast<Type>(LuaValue<void*>::do_retrieve<false>(state, index));
+                        value = reinterpret_cast<Type>(LuaValue<void*>::template __do_retrieve<false>(state, index));
 
                         /****************\
                          * U(V::*)(...) *

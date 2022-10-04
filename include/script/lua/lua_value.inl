@@ -114,7 +114,7 @@ bool hscript::lua::LuaValue<Type>::try_pop(LuaHandle state, OUT Type& value) {
 
 template <typename Type>
 Type hscript::lua::LuaValue<Type>::retrieve(LuaHandle state, i32 index) {
-    return do_retrieve<true>(state, index);
+    return __do_retrieve<true>(state, index);
 }
 
 template <typename Type>
@@ -140,7 +140,7 @@ bool hscript::lua::LuaValue<Type>::try_retrieve(LuaHandle state, i32 index, OUT 
 
 template <typename Type>
 Type hscript::lua::LuaValue<Type>::retrieve_upvalue(LuaHandle state, i32 index) {
-    return do_retrieve<false>(state, lua_upvalueindex(index));
+    return __do_retrieve<false>(state, lua_upvalueindex(index));
 }
 
 template <typename Type>
