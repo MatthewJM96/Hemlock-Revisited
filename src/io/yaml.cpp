@@ -28,6 +28,10 @@ YAML::Node hio::yaml::merge(const YAML::Node left, const YAML::Node right) {
     // Iterate left-hand document's top-most layer and determine if
     // recursive merging is needed for each element.
     for (auto left_child : left) {
+        // NOTE(Matthew): we have no way to assess the equivalence
+        //                of nodes that are not scalar, and as keys
+        //                are represented as nodes, we therefore
+        //                only consider merging cases with scalar keys.
         if (left_child.first.IsScalar()) {
             auto& key = left_child.first.Scalar();
 
@@ -39,7 +43,20 @@ YAML::Node hio::yaml::merge(const YAML::Node left, const YAML::Node right) {
                 continue;
             }
         }
-        // If we get here 
+        // If we get here then either the left-hand child's key was
+        // non-scalar or the right-hand document had no same key
+        // child. We just put the left-hand child in.
+        result[left_child.first] = left_child.second;
+    }
+
+    // Now we place every child in the right-hand document into
+    // the result document with no concern of needing to merge.
+    for (auto right_child : right) {
+        // Note the const-cast is needed as yaml-cpp offers no contains method and
+        // non-const operator[] creates an entry so would always fail this test.
+        if (!right_child.first.IsScalar() || !const_cast<const YAML::Node>(result)[right_child.first.Scalar()]) {
+            result[right_child.first] = right_child.second;
+        }
     }
 
     return result;
