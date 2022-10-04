@@ -279,7 +279,8 @@
             },
             "targets": [
                 "Hemlock_Revisited"
-            ]
+            ],
+            "jobs": 8
         },
         {
             "name": "GCC-x64-Release",
@@ -290,7 +291,11 @@
                 "type": "equals",
                 "lhs": "${hostSystemName}",
                 "rhs": "Linux"
-            }
+            },
+            "targets": [
+                "Hemlock_Revisited"
+            ],
+            "jobs": 8
         },
         {
             "name": "GCC-x64-Asan",
@@ -304,7 +309,8 @@
             },
             "targets": [
                 "Hemlock_Revisited"
-            ]
+            ],
+            "jobs": 8
         },
         {
             "name": "Clang-x64-Debug",
@@ -315,7 +321,11 @@
                 "type": "equals",
                 "lhs": "${hostSystemName}",
                 "rhs": "Linux"
-            }
+            },
+            "targets": [
+                "Hemlock_Revisited"
+            ],
+            "jobs": 8
         },
         {
             "name": "Clang-x64-Fast-Debug",
@@ -326,7 +336,11 @@
                 "type": "equals",
                 "lhs": "${hostSystemName}",
                 "rhs": "Linux"
-            }
+            },
+            "targets": [
+                "Hemlock_Revisited"
+            ],
+            "jobs": 8
         },
         {
             "name": "Clang-x64-Release",
@@ -337,7 +351,11 @@
                 "type": "equals",
                 "lhs": "${hostSystemName}",
                 "rhs": "Linux"
-            }
+            },
+            "targets": [
+                "Hemlock_Revisited"
+            ],
+            "jobs": 8
         },
         {
             "name": "Clang-x64-Asan",
@@ -348,7 +366,11 @@
                 "type": "equals",
                 "lhs": "${hostSystemName}",
                 "rhs": "Linux"
-            }
+            },
+            "targets": [
+                "Hemlock_Revisited"
+            ],
+            "jobs": 8
         },
         {
             "name": "Clang-x64-Tsan",
@@ -359,7 +381,11 @@
                 "type": "equals",
                 "lhs": "${hostSystemName}",
                 "rhs": "Linux"
-            }
+            },
+            "targets": [
+                "Hemlock_Revisited"
+            ],
+            "jobs": 8
         },
         {
             "name": "Clang-x64-Msan",
@@ -370,7 +396,11 @@
                 "type": "equals",
                 "lhs": "${hostSystemName}",
                 "rhs": "Linux"
-            }
+            },
+            "targets": [
+                "Hemlock_Revisited"
+            ],
+            "jobs": 8
         },
         {
             "name": "Clang-x64-Gperf",
@@ -381,7 +411,11 @@
                 "type": "equals",
                 "lhs": "${hostSystemName}",
                 "rhs": "Linux"
-            }
+            },
+            "targets": [
+                "Hemlock_Revisited"
+            ],
+            "jobs": 8
         },
         {
             "name": "VS2022-x64-Debug",
@@ -392,7 +426,11 @@
                 "type": "equals",
                 "lhs": "${hostSystemName}",
                 "rhs": "Windows"
-            }
+            },
+            "targets": [
+                "Hemlock_Revisited"
+            ],
+            "jobs": 8
         },
         {
             "name": "VS2022-x64-Release",
@@ -403,7 +441,11 @@
                 "type": "equals",
                 "lhs": "${hostSystemName}",
                 "rhs": "Windows"
-            }
+            },
+            "targets": [
+                "Hemlock_Revisited"
+            ],
+            "jobs": 8
         },
         {
             "name": "VS2022-x86-Debug",
@@ -425,7 +467,11 @@
                 "type": "equals",
                 "lhs": "${hostSystemName}",
                 "rhs": "Windows"
-            }
+            },
+            "targets": [
+                "Hemlock_Revisited"
+            ],
+            "jobs": 8
         }
     ]
 }
