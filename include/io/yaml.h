@@ -4,7 +4,16 @@
 namespace hemlock {
     namespace io {
         namespace yaml {
-            YAML::Node merge(YAML::Node left, YAML::Node right);
+            /**
+             * @brief Merge the right-hand YAML document into the
+             * left-hand document. Neither is modified in this
+             * operation, the returned document is a new document.
+             *
+             * @param left The left-hand YAML document.
+             * @param right The right-hand YAML document.
+             * @return YAML::Node The resulting YAML document.
+             */
+            YAML::Node merge(const YAML::Node left, const YAML::Node right);
         }
     }
 }
