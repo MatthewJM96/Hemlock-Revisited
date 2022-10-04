@@ -7,6 +7,14 @@
 
 #include "script/state.hpp"
 
+
+// TODO(Matthew): Create a REPL client that can be used for dev console and so on.
+// TODO(Matthew): Create a comms environment/plug-in that attaches to groups and
+//                standalone environments to allow them to communicate with each
+//                other. Acts as a command buffer taking up commands from other
+//                groups/envs and running them asynchronously.
+
+
 namespace hemlock {
     namespace script {
         template <typename Environment>
