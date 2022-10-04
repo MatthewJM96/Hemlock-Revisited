@@ -1,9 +1,17 @@
 template <typename Type>
+    requires (
+        hscript::lua::is_single_lua_type<Type>::value
+            || hscript::lua::is_multiple_lua_type<Type>::value
+    )
 constexpr Type hscript::lua::LuaValue<Type>::default_value() {
     return Type{};
 }
 
 template <typename Type>
+    requires (
+        hscript::lua::is_single_lua_type<Type>::value
+            || hscript::lua::is_multiple_lua_type<Type>::value
+    )
 constexpr ui32 hscript::lua::LuaValue<Type>::value_count() {
     if constexpr (is_multiple_lua_type<Type>()) {
         return sizeof(Type) / sizeof(decltype(Type{}[0]));
@@ -13,6 +21,10 @@ constexpr ui32 hscript::lua::LuaValue<Type>::value_count() {
 }
 
 template <typename Type>
+    requires (
+        hscript::lua::is_single_lua_type<Type>::value
+            || hscript::lua::is_multiple_lua_type<Type>::value
+    )
 ui32 hscript::lua::LuaValue<Type>::push(LuaHandle state, Type value) {
     if constexpr (is_multiple_lua_type<Type>()) {
         // For each index in type, push that value separately,
@@ -139,11 +151,19 @@ bool hscript::lua::LuaValue<Type>::try_retrieve(LuaHandle state, i32 index, OUT 
 }
 
 template <typename Type>
+    requires (
+        hscript::lua::is_single_lua_type<Type>::value
+            || hscript::lua::is_multiple_lua_type<Type>::value
+    )
 Type hscript::lua::LuaValue<Type>::retrieve_upvalue(LuaHandle state, i32 index) {
     return __do_retrieve<false>(state, lua_upvalueindex(index));
 }
 
 template <typename Type>
+    requires (
+        hscript::lua::is_single_lua_type<Type>::value
+            || hscript::lua::is_multiple_lua_type<Type>::value
+    )
 bool hscript::lua::LuaValue<Type>::test_index(LuaHandle state, i32 index) {
         /********\
          * Bool *

@@ -31,14 +31,21 @@ namespace hemlock {
              * It is implemented for scalar types, pointer types, bounded array types
              * and glm vectors.
              *
-             * @tparam Type The type of the data to be moved.
+             * @tparam The type of the data to be moved.
              */
+            template <typename>
+            struct LuaValue { };
+            template <typename Type>
+                requires ( std::is_same<Type, void>::value )
+            struct LuaValue<Type> {
+                static constexpr ui32 value_count() { return 0; }
+            };
             template <typename Type>
                 requires (
                     is_single_lua_type<Type>::value
                         || is_multiple_lua_type<Type>::value
                 )
-            struct LuaValue {
+            struct LuaValue<Type> {
                 /**
                  * @brief Provides the default value for
                  * type Type.
