@@ -1,4 +1,5 @@
 #include "c_function.hpp"
+#include "lua_function.hpp"
 #include "lua_value.hpp"
 
 template <typename ...Strings>
