@@ -54,7 +54,7 @@ YAML::Node hio::yaml::merge(const YAML::Node left, const YAML::Node right) {
     for (auto right_child : right) {
         // Note the const-cast is needed as yaml-cpp offers no contains method and
         // non-const operator[] creates an entry so would always fail this test.
-        if (!right_child.first.IsScalar() || !(*const_cast<const YAML::Node*>(&result))[right_child.first.Scalar()]) {
+        if (!right_child.first.IsScalar() || !make_const(result)[right_child.first.Scalar()]) {
             result[right_child.first] = right_child.second;
         }
     }
