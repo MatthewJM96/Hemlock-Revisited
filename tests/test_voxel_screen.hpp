@@ -13,6 +13,11 @@
 
 #include "physics/voxel/chunk_grid_collider.hpp"
 
+#include "script/environment_base.hpp"
+#include "script/environment_registry.hpp"
+
+#include "script/lua/environment.hpp"
+
 #include "iomanager.hpp"
 
 #if defined(DEBUG)

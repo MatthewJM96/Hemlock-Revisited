@@ -9,6 +9,7 @@
 #include "test_entry_screen.hpp"
 #include "test_render_screen.hpp"
 #include "test_voxel_screen.hpp"
+#include "test_script_screen.hpp"
 
 class MyApp : public happ::SingleWindowApp {
 public:
@@ -21,10 +22,13 @@ protected:
         test_render_screen->init("test_render_screen", this);
         happ::ScreenBase* test_voxel_screen = new TestVoxelScreen();
         test_voxel_screen->init("test_voxel_screen", this);
+        happ::ScreenBase* test_script_screen = new TestScriptScreen();
+        test_script_screen->init("test_script_screen", this);
 
-        m_screens.insert({ "test_entry_screen",  test_entry_screen  });
-        m_screens.insert({ "test_render_screen", test_render_screen });
-        m_screens.insert({ "test_voxel_screen",  test_voxel_screen  });
+        m_screens.insert({ "test_entry_screen",   test_entry_screen   });
+        m_screens.insert({ "test_render_screen",  test_render_screen  });
+        m_screens.insert({ "test_voxel_screen",   test_voxel_screen   });
+        m_screens.insert({ "test_script_screen",  test_script_screen  });
 
         m_current_screen = test_entry_screen;
     }

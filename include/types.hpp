@@ -112,64 +112,8 @@ using f64m2 = glm::f64mat2;
 using f64m3 = glm::f64mat3;
 using f64m4 = glm::f64mat4;
 
-// Colours
-struct colour3 {
-    union {
-        struct {
-            ui8 r, g, b;
-        };
-        ui8 data[3];
-    };
-
-    colour3() :
-        r(0), g(0), b(0)
-    { /* Empty */ }
-    constexpr colour3(ui8 r_, ui8 g_, ui8 b_) :
-        r(r_), g(g_), b(b_)
-    { /* Empty */ }
-
-    bool operator==(const colour3& rhs) const {
-        return r == rhs.r
-            && g == rhs.g
-            && b == rhs.b;
-    }
-
-    const ui8& operator[] (const size_t& i) const {
-        return data[i];
-    }
-    ui8& operator[] (const size_t& i) {
-        return data[i];
-    }
-};
-struct colour4 {
-    union {
-        struct {
-            ui8 r, g, b, a;
-        };
-        ui8 data[4];
-    };
-
-    colour4() :
-        r(0), g(0), b(0), a(0)
-    { /* Empty */ }
-    constexpr colour4(ui8 r_, ui8 g_, ui8 b_, ui8 a_) :
-        r(r_), g(g_), b(b_), a(a_)
-    { /* Empty */ }
-
-    bool operator==(const colour4& rhs) const {
-        return r == rhs.r
-            && g == rhs.g
-            && b == rhs.b
-            && a == rhs.a;
-    }
-
-    const ui8& operator[] (const size_t& i) const {
-        return data[i];
-    }
-    ui8& operator[] (const size_t& i) {
-        return data[i];
-    }
-};
+using colour3 = ui8v3;
+using colour4 = ui8v4;
 
 namespace hemlock {
     template<typename ReturnType, typename... Args>
