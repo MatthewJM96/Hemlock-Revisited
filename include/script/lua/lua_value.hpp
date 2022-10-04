@@ -243,6 +243,8 @@ namespace hemlock {
                         \****************/
                     } else if constexpr (std::is_member_function_pointer<Type>()) {
                         value = *reinterpret_cast<Type*>(lua_touserdata(state, index));
+                    } else {
+                        debug_printf("Trying to retrieve with an unsupported type.");
                     }
 
                     if constexpr (RemoveValue && !is_multiple_lua_type<Type>()) lua_remove(state, index);

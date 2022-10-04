@@ -15,6 +15,8 @@ template <typename Type>
 constexpr ui32 hscript::lua::LuaValue<Type>::value_count() {
     if constexpr (is_multiple_lua_type<Type>()) {
         return sizeof(Type) / sizeof(decltype(Type{}[0]));
+    } else if constexpr (std::is_same<Type, void>()) {
+        return 0;
     }
 
     return 1;
@@ -215,6 +217,8 @@ bool hscript::lua::LuaValue<Type>::test_index(LuaHandle state, i32 index) {
         \****************/
     } else if constexpr (std::is_member_function_pointer<Type>()) {
         return lua_isuserdata(state, index);
+    } else {
+        debug_printf("Trying to test index with an unsupported type.");
     }
 }
 
