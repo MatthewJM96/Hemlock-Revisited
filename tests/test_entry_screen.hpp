@@ -40,6 +40,9 @@ public:
                 case hui::PhysicalKey::H_V:
                     m_process->go_to_screen("test_voxel_screen", m_process->timer()->frame_times().back());
                     return;
+                case hui::PhysicalKey::H_S:
+                    m_process->go_to_screen("test_script_screen", m_process->timer()->frame_times().back());
+                    return;
                 default:
                     break;
                 }
@@ -90,6 +93,16 @@ public:
             "Test voxel screen (V)",
             f32v4{30.0f, 60.0f, 1000.0f, 100.0f},
             f32v4{25.0f, 55.0f, 1010.0f, 110.0f},
+            hg::f::StringSizing{hg::f::StringSizingKind::SCALED, {f32v2{1.0f}}},
+            colour4{0, 0, 0, 255},
+            "fonts/Orbitron-Regular.ttf",
+            hg::f::TextAlign::TOP_LEFT,
+            hg::f::WordWrap::NONE
+        );
+        m_sprite_batcher.add_string(
+            "Test script screen (S)",
+            f32v4{30.0f, 90.0f, 1000.0f, 100.0f},
+            f32v4{25.0f, 85.0f, 1010.0f, 110.0f},
             hg::f::StringSizing{hg::f::StringSizingKind::SCALED, {f32v2{1.0f}}},
             colour4{0, 0, 0, 255},
             "fonts/Orbitron-Regular.ttf",
