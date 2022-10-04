@@ -99,6 +99,7 @@ set(Hemlock_Requirements
     boost/1.78.0
     bullet3/3.24
     entt/3.10.1
+    yaml-cpp/0.7.0
 )
 
 if (HEMLOCK_USING_OPENGL)
@@ -139,6 +140,7 @@ find_package(concurrentqueue REQUIRED)
 find_package(Boost COMPONENTS iostreams REQUIRED)
 find_package(Bullet REQUIRED)
 find_package(EnTT REQUIRED)
+find_package(yaml-cpp REQUIRED)
 if (HEMLOCK_USING_LUA)
     find_package(luajit REQUIRED)
 endif()
@@ -220,6 +222,7 @@ set(Hemlock_Include_Dirs
     ${Boost_INCLUDE_DIRS}
     ${Bullet_INCLUDE_DIRS}
     ${EnTT_INCLUDE_DIRS}
+    ${yaml-cpp_INCLUDE_DIRS}
 )
 
 if (HEMLOCK_USING_OPENGL)
@@ -336,6 +339,7 @@ target_link_libraries(Hemlock_Revisited
     SDL2_ttf::SDL2_ttf
     Boost::iostreams
     Bullet::Bullet
+    yaml-cpp
 )
 
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
