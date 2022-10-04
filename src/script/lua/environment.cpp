@@ -170,10 +170,18 @@ bool hscript::lua::Environment::register_lua_function(const std::string& name, O
     // Place a reference to the function in the script
     // function table of the Lua registry, and cache
     // this.
-    cache[name] = {
-        .state = m_state,
-        .index = luaL_ref(m_state, prior_index + 1)
-    };
+    if (state) {
+        *state = {
+            .state = m_state,
+            .index = luaL_ref(m_state, prior_index + 1)
+        };
+        cache[name] = *state;
+    } else {
+        cache[name] = {
+            .state = m_state,
+            .index = luaL_ref(m_state, prior_index + 1)
+        };
+    }
 
     // Return stack to state prior to function registration.
     i32 final_index = lua_gettop(m_state);
