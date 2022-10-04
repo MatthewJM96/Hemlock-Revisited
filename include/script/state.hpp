@@ -4,7 +4,7 @@
 namespace hemlock {
     namespace script {
         template <typename ReturnType, typename ...Parameters>
-        using ScriptDelegate = Delegate<std::conditional_t<std::is_void_v<ReturnType>, bool, std::tuple<bool, ReturnType>>, Parameters...>;
+        using ScriptDelegate = Delegate<std::conditional_t<std::is_void_v<ReturnType>, bool(), std::tuple<bool, ReturnType>()>, Parameters...>;
     }
 }
 namespace hscript = hemlock::script;
