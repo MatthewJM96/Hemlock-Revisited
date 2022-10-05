@@ -27,6 +27,18 @@ public:
         m_lua_env->get_script_function<void>("hello_world", hello_world);
 
         hello_world();
+
+        YAML::Node vec_node = YAML::Load("[1, 2, 3]");
+        i32v3 vec = vec_node.as<i32v3>();
+        std::cout << "vec: " << vec.x << " " << vec.y << " " << vec.z << std::endl;
+
+        YAML::Node sq_mat_node = YAML::Load("[[1, 2], [3, 4]]");
+        i32m2 sq_mat = sq_mat_node.as<i32m2>();
+        std::cout << "sq mat: " << sq_mat[0][0] << " " << sq_mat[1][0] << " / " << sq_mat[0][1] << " " << sq_mat[1][1] << std::endl;
+
+        YAML::Node mat_node = YAML::Load("[[1, 2], [3, 4], [5, 6]]");
+        glm::i32mat2x3 mat = mat_node.as<glm::i32mat2x3>();
+        std::cout << "mat: " << mat[0][0] << " " << mat[1][0] << " / " << mat[0][1] << " " << mat[1][1] << " / " << mat[0][2] << " " << mat[1][2] << std::endl;
     }
 
     virtual void update(hemlock::FrameTime) override {
