@@ -24,9 +24,9 @@ public:
         m_lua_env->run(hio::fs::path("scripts/hello_world.lua"));
 
         hscript::ScriptDelegate<void> hello_world;
-        m_lua_env->get_script_function<void>("hello_world", hello_world);
-
-        hello_world();
+        if (m_lua_env->get_script_function<void>("hello_world", hello_world)) {
+            hello_world();
+        }
 
         YAML::Node vec_node = YAML::Load("[1, 2, 3]");
         i32v3 vec = vec_node.as<i32v3>();
