@@ -16,6 +16,16 @@ public:
 
     virtual void start(hemlock::FrameTime time) override {
         happ::ScreenBase::start(time);
+
+        m_lua_env = new hscript::lua::Environment();
+        m_lua_env->init(&m_iom);
+
+        m_lua_env->run(hio::fs::path("scripts/hello_world.lua"));
+
+        hscript::ScriptDelegate<void> hello_world;
+        m_lua_env->get_script_function<void>("hello_world", hello_world);
+
+        hello_world();
     }
 
     virtual void update(hemlock::FrameTime) override {
@@ -33,16 +43,6 @@ public:
         m_state = happ::ScreenState::RUNNING;
 
         m_input_manager = static_cast<happ::SingleWindowApp*>(m_process)->input_manager();
-
-        m_lua_env = new hscript::lua::Environment();
-        m_lua_env->init(&m_iom);
-
-        m_lua_env->run(hio::fs::path("scripts/hello_world.lua"));
-
-        hscript::ScriptDelegate<void> hello_world;
-        m_lua_env->get_script_function<void>("hello_world", hello_world);
-
-        hello_world();
     }
 protected:
     MyIOManager                  m_iom;
