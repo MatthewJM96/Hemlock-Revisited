@@ -1,6 +1,6 @@
 #include "stdafx.h"
 
-#include "io/yaml.h"
+#include "io/yaml/yaml.h"
 
 YAML::Node hio::yaml::merge(const YAML::Node left, const YAML::Node right) {
     // If the right-hand yaml document is not a map, then it wins

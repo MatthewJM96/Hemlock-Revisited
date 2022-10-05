@@ -1,5 +1,5 @@
-#ifndef __hemlock_yaml_hpp
-#define __hemlock_yaml_hpp
+#ifndef __hemlock_yaml_h
+#define __hemlock_yaml_h
 
 namespace hemlock {
     namespace io {
@@ -12,11 +12,11 @@ namespace hemlock {
              * @param left The left-hand YAML document.
              * @param right The right-hand YAML document.
              * @return YAML::Node The resulting YAML document.
-             */
+             */ 
             YAML::Node merge(const YAML::Node left, const YAML::Node right);
         }
     }
 }
 namespace hio = hemlock::io;
 
-#endif // __hemlock_yaml_hpp
+#endif // __hemlock_yaml_h
