@@ -1,6 +1,6 @@
 #include "stdafx.h"
 
-#include "io/glob.h"
+#include "io/fs/glob.h"
 
 #include "io/iomanager.h"
 
@@ -56,11 +56,11 @@ ui32 hio::IOManagerBase::apply_to_paths(std::vector<fs::path>&& paths, Delegate<
 }
 
 void hio::IOManagerBase::apply_to_globpath(const fs::path& globpath, Delegate<void(const fs::path&)> func) const {
-    apply_to_paths(glob::glob(globpath), func);
+    apply_to_paths(fs::glob::glob(globpath), func);
 }
 
 ui32 hio::IOManagerBase::apply_to_globpath(const fs::path& globpath, Delegate<bool(const fs::path&)> func) const {
-    return apply_to_paths(glob::glob(globpath), func);
+    return apply_to_paths(fs::glob::glob(globpath), func);
 }
 
 bool hio::IOManagerBase::memory_map_file(const fs::path& path, OUT hio::fs::mapped_file& file) const {
