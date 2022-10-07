@@ -9,7 +9,8 @@ namespace hemlock {
         concept Cacheable = std::move_constructible<CacheCandidateType>;
 
         template <typename ContainerCandidateType, typename CachedType>
-        concept CacheContainer = std::same_as<
+        concept CacheContainer =
+            std::same_as<
                 typename ContainerCandidateType::mapped_type,
                 CachedType
             >
