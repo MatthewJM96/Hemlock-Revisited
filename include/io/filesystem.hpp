@@ -17,4 +17,6 @@ namespace hemlock {
 }
 namespace hio = hemlock::io;
 
+#include "io/fs/glob.h"
+
 #endif // __hemlock_io_filesystem_hpp
