@@ -1,7 +1,7 @@
 #ifndef __hemlock_cache_hpp
 #define __hemlock_cache_hpp
 
-#include "iomanager.h"
+#include "iomanager.hpp"
 
 namespace hemlock {
     namespace io {

@@ -1,6 +1,6 @@
 #include "stdafx.h"
 
-#include "io/iomanager.h"
+#include "io/iomanager.hpp"
 #include "script/lua/lua_function.hpp"
 
 #include "script/lua/environment.hpp"

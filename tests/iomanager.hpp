@@ -1,7 +1,7 @@
 #ifndef __hemlock_tests_iomanager_hpp
 #define __hemlock_tests_iomanager_hpp
 
-#include "io/iomanager.h"
+#include "io/iomanager.hpp"
 
 class MyIOManager : public hio::IOManagerBase {
 public:

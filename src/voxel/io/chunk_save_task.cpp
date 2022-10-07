@@ -1,6 +1,6 @@
 #include "stdafx.h"
 
-#include "io/iomanager.h"
+#include "io/iomanager.hpp"
 
 #include "voxel/io/chunk_save_task.h"
 
