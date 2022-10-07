@@ -114,7 +114,6 @@
 
 // Our File Handling Interface
 #include "io/filesystem.hpp"
-#include "io/path.hpp"
 
 // Our IO management
 #include "io/cache.hpp"
