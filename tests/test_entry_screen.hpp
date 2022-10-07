@@ -63,11 +63,8 @@ public:
 
         m_font_cache.init(&m_iom, hg::f::FontCache::Parser{
             [](const hio::fs::path& path, hio::IOManagerBase* iom) -> hg::f::Font {
-                hio::fs::path actual_path;
-                if (!iom->resolve_path(path, actual_path)) return hg::f::Font{};
-
                 hg::f::Font font;
-                font.init(actual_path.string());
+                font.init(hio::FileReference(path, iom));
 
                 return font;
             }

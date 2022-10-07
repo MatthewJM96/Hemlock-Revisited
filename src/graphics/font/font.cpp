@@ -51,13 +51,13 @@ bool hg::f::FontInstance::save(std::string filepath, hio::image::Saver save) {
 }
 
 hg::f::Font::Font() :
-    m_filepath(""),
+    m_file_ref({}),
     m_start(0), m_end(0),
     m_default_size(0)
 { /* Empty. */ }
 
-void hg::f::Font::init(std::string filepath, char start, char end) {
-    m_filepath = filepath;
+void hg::f::Font::init(io::FileReference file_ref, char start, char end) {
+    m_file_ref = file_ref;
     m_start    = start;
     m_end      = end;
 }
@@ -90,7 +90,9 @@ bool hg::f::Font::generate( FontSize size,
     font_instance.owner = this;
 
     // Open the font and check we didn't fail.
-    TTF_Font* font = TTF_OpenFont(m_filepath.data(), size);
+    TTF_Font* font = m_file_ref.apply_to_path(io::PathOperator<TTF_Font*>([&](const io::fs::path filepath) {
+        return TTF_OpenFont(filepath.c_str(), size);
+    }));
     if (font == nullptr) return false;
 
     // Set the font style.

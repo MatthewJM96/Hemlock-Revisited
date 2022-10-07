@@ -25,21 +25,21 @@ namespace hemlock {
                 /**
                  * @brief Initialises the font, after which it is ready to generate glyphs of specified sizes and styles.
                  *
-                 * @param filepath The path to the font's TTF file.
+                 * @param file_ref The reference to the font's TTF file.
                  * @param start The first character to generate a glyph for.
                  * @param end The final character to generate a glyph for.
                  */
-                void init(std::string filepath, char start, char end);
+                void init(io::FileReference file_ref, char start, char end);
                 /**
                  * @brief Initialises the font, after which it is ready to generate glyphs of specified sizes and styles.
                  *
                  * This version uses a default value for the first and final characters to generate glyphs for.
                  *     These characters are the printable characters in (non-extended) ASCII except for char 127.
                  *
-                 * @param filepath The path to the font's TTF file.
+                 * @param file_ref The reference to the font's TTF file.
                  */
-                void init(std::string filepath) {
-                    init(filepath, FIRST_PRINTABLE_CHAR, LAST_PRINTABLE_CHAR);
+                void init(io::FileReference file_ref) {
+                    init(file_ref, FIRST_PRINTABLE_CHAR, LAST_PRINTABLE_CHAR);
                 }
                 /**
                  * @brief Disposes of the font and all variations for which textures were generated.
@@ -195,10 +195,10 @@ namespace hemlock {
                  */
                 Row* generate_rows(Glyph* glyphs, ui32 rowCount, FontSize padding, ui32& width, ui32& height);
 
-                std::string     m_filepath;
-                char            m_start, m_end;
-                FontSize        m_default_size;
-                FontInstanceMap m_font_instances;
+                io::FileReference   m_file_ref;
+                char                m_start, m_end;
+                FontSize            m_default_size;
+                FontInstanceMap     m_font_instances;
             };
 
             class FontCache : public hio::Cache<Font, std::unordered_map<std::string, Font>> {};
