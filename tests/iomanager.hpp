@@ -4,9 +4,12 @@
 #include "io/iomanager.hpp"
 
 class MyIOManager : public hio::IOManagerBase {
-public:
-    virtual bool resolve_path(const hio::fs::path& path, OUT hio::fs::path& full_path) const override {
+protected:
+    virtual bool resolve_path(const hio::fs::path& path, OUT hio::fs::path& full_path, bool is_file = false) const override {
         full_path = hio::fs::absolute(path);
+
+        if (is_file && !hio::fs::is_regular_file(full_path)) return false;
+
         return true;
     }
     virtual bool assure_path (  const hio::fs::path& path,
@@ -20,25 +23,6 @@ public:
         }
         full_path = hio::fs::absolute(path);
         return true;
-    }
-
-    virtual bool resolve_paths(IN OUT std::vector<hio::fs::path>& paths) const override {
-        bool bad = false;
-        for (auto& path : paths) {
-            hio::fs::path tmp{};
-            bad |= !resolve_path(path, tmp);
-            path = tmp;
-        }
-        return !bad;
-    }
-    virtual bool assure_paths (IN OUT std::vector<hio::fs::path>& paths) const override {
-        bool bad = false;
-        for (auto& path : paths) {
-            hio::fs::path tmp{};
-            bad |= !assure_path(path, tmp);
-            path = tmp;
-        }
-        return !bad;
     }
 };
 
