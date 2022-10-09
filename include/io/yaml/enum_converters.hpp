@@ -1,19 +1,7 @@
-#ifndef __hemlock_yaml_enum_converters_hpp
-#define __hemlock_yaml_enum_converters_hpp
+#ifndef __hemlock_io_yaml_enum_converters_hpp
+#define __hemlock_io_yaml_enum_converters_hpp
 
-// TODO(Matthew): Finish impl, look at mesh.h for inspiration, as well as https://stackoverflow.com/questions/11714325/how-to-get-enum-item-name-from-its-value
-//                  Question: how to know to access NAME_Names not SOME_OTHER_NAME_Names for a given Type?
-
-#if !defined(H_DEF_SERIALISABLE_ENUM_CLASS)
-#define H_DEF_SERIALISABLE_ENUM_CLASS(NAME) \
-enum class NAME {                           \g
-    STUFF THAT ENUMERATES                   \
-};                                          \
-                                            \
-const char* NAME_Names[] = {                \
-    STUFF THAT NAMES ENUMERATIONS           \
-};
-#endif // !defined(H_DEF_SERIALISABLE_ENUM_CLASS)
+#include "io/serialisation.hpp"
 
 namespace YAML {
 
@@ -27,7 +15,7 @@ namespace YAML {
         using UnderlyingType = typename std::underlying_type<Type>::type;
 
         static Node encode(const Type& val) {
-            return Node(static_cast<UnderlyingType>(val));
+            return Node(std::string(hio::serialisable_enum_name(val)));
         }
 
         static bool decode(const Node& node, Type& result) {
@@ -35,7 +23,7 @@ namespace YAML {
                 return false;
             }
 
-            result = static_cast<Type>(node.as<UnderlyingType>());
+            result = hio::serialisable_enum_val<Type>(node.as<std::string>());
 
             return true;
         }
@@ -43,4 +31,4 @@ namespace YAML {
 
 }
 
-#endif // __hemlock_yaml_enum_converters_hpp
+#endif // __hemlock_io_yaml_enum_converters_hpp

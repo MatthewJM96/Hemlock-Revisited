@@ -1,5 +1,5 @@
-#ifndef __hemlock_yaml_glm_converters_hpp
-#define __hemlock_yaml_glm_converters_hpp
+#ifndef __hemlock_io_yaml_glm_converters_hpp
+#define __hemlock_io_yaml_glm_converters_hpp
 
 namespace YAML {
 
@@ -123,4 +123,4 @@ namespace YAML {
 
 }
 
-#endif // __hemlock_yaml_glm_converters_hpp
+#endif // __hemlock_io_yaml_glm_converters_hpp

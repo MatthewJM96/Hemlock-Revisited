@@ -1,5 +1,5 @@
-#ifndef __hemlock_yaml_h
-#define __hemlock_yaml_h
+#ifndef __hemlock_io_yaml_h
+#define __hemlock_io_yaml_h
 
 namespace hemlock {
     namespace io {
@@ -19,4 +19,4 @@ namespace hemlock {
 }
 namespace hio = hemlock::io;
 
-#endif // __hemlock_yaml_h
+#endif // __hemlock_io_yaml_h
