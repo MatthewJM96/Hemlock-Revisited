@@ -142,6 +142,7 @@
 #define PASS(...) __VA_ARGS__
 #define EMPTY()
 #define COMMA() ,
+#define SEMICOLON() ;
 #define PLUS() +
 #define ZERO() 0
 #define ONE() 1
