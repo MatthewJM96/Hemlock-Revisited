@@ -18,6 +18,23 @@ H_DEF_ENUM_SERIALISATION(
     (world, TestEnum::WORLD)
 )
 
+struct Person {
+    std::string name;
+};
+H_DEF_STRUCT_YAML_CONVERSION(
+    Person,
+    (name, std::string)
+);
+struct TestStruct {
+    i32v3 pos;
+    Person person;
+};
+H_DEF_STRUCT_YAML_CONVERSION(
+    TestStruct,
+    (pos, i32v3),
+    (person, Person)
+);
+
 class TestScriptScreen : public happ::ScreenBase {
 public:
     TestScriptScreen() :
@@ -54,6 +71,10 @@ public:
         YAML::Node test_enum_node = YAML::Load("[ 'hello', 'world' ]");
         std::array<TestEnum, 2> test_enum = test_enum_node.as<std::array<TestEnum, 2>>();
         std::cout << hio::serialisable_enum_name(test_enum[0]) << ", " << hio::serialisable_enum_name(test_enum[1]) << std::endl;
+
+        YAML::Node test_struct_node = YAML::Load("{ pos: [1, 2, 3], person: { name: 'Matthew' } }");
+        TestStruct test_struct = test_struct_node.as<TestStruct>();
+        std::cout << "Person: " << test_struct.person.name << " at " << test_struct.pos.x << " " << test_struct.pos.y << " " << test_struct.pos.z << std::endl;
     }
 
     virtual void update(hemlock::FrameTime) override {
