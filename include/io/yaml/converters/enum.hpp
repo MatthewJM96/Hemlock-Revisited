@@ -1,5 +1,5 @@
-#ifndef __hemlock_io_yaml_enum_converters_hpp
-#define __hemlock_io_yaml_enum_converters_hpp
+#ifndef __hemlock_io_yaml_converters_enum_hpp
+#define __hemlock_io_yaml_converters_enum_hpp
 
 #include "io/serialisation.hpp"
 
@@ -31,4 +31,4 @@ namespace YAML {
 
 }
 
-#endif // __hemlock_io_yaml_enum_converters_hpp
+#endif // __hemlock_io_yaml_converters_enum_hpp
