@@ -228,7 +228,7 @@
  * concatenated string will be produced. IS_PROBE then simply checks to see if
  * the PROBE was returned, cleanly converting the argument into a 1 or 0.
  */
-#define NOT(x) IS_PROBE(CAT(_NOT_, x))
+#define NOT(x, ...) IS_PROBE(CAT(_NOT_, x))
 #define _NOT_0 PROBE()
 
 /**
