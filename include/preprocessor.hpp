@@ -595,7 +595,7 @@
  * Strip any excess commas from a set of arguments.
  */
 #define REMOVE_TRAILING_COMMAS(...) \
-	MAP(PASS, COMMA, __VA_ARGS__)
+  MAP(PASS, COMMA, __VA_ARGS__)
 
 /**
  * Not a preprocessor but a constexpr to convert ID "I", "II" etc to integer.
