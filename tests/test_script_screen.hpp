@@ -7,6 +7,17 @@
 
 #include "iomanager.hpp"
 
+H_DEF_SERIALISABLE_ENUM(
+    TestEnum,
+    HELLO,
+    WORLD
+)
+H_DEF_ENUM_SERIALISATION(
+    TestEnum,
+    (hello, TestEnum::HELLO),
+    (world, TestEnum::WORLD)
+)
+
 class TestScriptScreen : public happ::ScreenBase {
 public:
     TestScriptScreen() :
@@ -39,6 +50,10 @@ public:
         YAML::Node mat_node = YAML::Load("[[1, 2], [3, 4], [5, 6]]");
         glm::i32mat2x3 mat = mat_node.as<glm::i32mat2x3>();
         std::cout << "mat: " << mat[0][0] << " " << mat[1][0] << " / " << mat[0][1] << " " << mat[1][1] << " / " << mat[0][2] << " " << mat[1][2] << std::endl;
+
+        YAML::Node test_enum_node = YAML::Load("[ 'hello', 'world' ]");
+        std::array<TestEnum, 2> test_enum = test_enum_node.as<std::array<TestEnum, 2>>();
+        std::cout << hio::serialisable_enum_name(test_enum[0]) << ", " << hio::serialisable_enum_name(test_enum[1]) << std::endl;
     }
 
     virtual void update(hemlock::FrameTime) override {
