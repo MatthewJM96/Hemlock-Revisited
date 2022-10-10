@@ -10,8 +10,8 @@
 H_DEF_ENUM_WITH_SERIALISATION(
     ,
     TestEnum,
-    (hello, HELLO),
-    (world, WORLD)
+    HELLO,
+    WORLD
 )
 
 H_DEF_STRUCT_WITH_YAML_CONVERSION(
@@ -59,7 +59,7 @@ public:
         glm::i32mat2x3 mat = mat_node.as<glm::i32mat2x3>();
         std::cout << "mat: " << mat[0][0] << " " << mat[1][0] << " / " << mat[0][1] << " " << mat[1][1] << " / " << mat[0][2] << " " << mat[1][2] << std::endl;
 
-        YAML::Node test_enum_node = YAML::Load("[ 'hello', 'world' ]");
+        YAML::Node test_enum_node = YAML::Load("[ 'HELLO', 'WORLD' ]");
         std::array<TestEnum, 2> test_enum = test_enum_node.as<std::array<TestEnum, 2>>();
         std::cout << hio::serialisable_enum_name(test_enum[0]) << ", " << hio::serialisable_enum_name(test_enum[1]) << std::endl;
 

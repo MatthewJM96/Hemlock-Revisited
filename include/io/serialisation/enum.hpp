@@ -17,12 +17,9 @@ namespace hio = hemlock::io;
 #endif //!defined(H_DECL_SERIALISABLE_ENUM)
 
 #if !defined(H_DEF_SERIALISABLE_ENUM)
-#  if !defined(H_ENUM_GET_VAL)
-#    define H_ENUM_GET_VAL(NAME, VAL) VAL
-#  endif //!defined(H_ENUM_GET_VAL)
 #  if !defined(H_SERIALISABLE_ENUM_ENTRY)
 #    define H_SERIALISABLE_ENUM_ENTRY(ENTRY_NAME, ID)               \
-H_ENUM_GET_VAL ENTRY_NAME = ID_TO_INT(#ID)
+ENTRY_NAME = ID_TO_INT(#ID)
 #  endif //!defined(H_SERIALISABLE_ENUM_ENTRY)
 
 #  define H_DEF_SERIALISABLE_ENUM(NAME, ...)                        \
@@ -33,20 +30,11 @@ enum class NAME {                                                   \
 #endif //!defined(H_DEF_SERIALISABLE_ENUM)
 
 #if !defined(H_DEF_SERIALISATION_OF_ENUM)
-#  if !defined(H_ENUM_GET_NAME_STR)
-#    define H_ENUM_GET_NAME_STR(NAME, VAL) #NAME
-#  endif //!defined(H_ENUM_GET_NAME_STR)
-#  if !defined(H_ENUM_GET_NAME)
-#    define H_ENUM_GET_NAME(NAME, VAL) NAME
-#  endif //!defined(H_ENUM_GET_NAME)
-#  if !defined(H_ENUM_GET_VAL)
-#    define H_ENUM_GET_VAL(NAME, VAL) VAL
-#  endif //!defined(H_ENUM_GET_VAL)
 #  if !defined(H_ENUM_NAME)
-#    define H_ENUM_NAME(ENTRY) H_ENUM_GET_NAME_STR ENTRY
+#    define H_ENUM_NAME(ENTRY) #ENTRY
 #  endif //!defined(H_ENUM_NAME)
 #  if !defined(H_ENUM_VAL)
-#    define H_ENUM_VAL(NAMESPACE, ENTRY) { H_ENUM_GET_NAME_STR ENTRY, NAMESPACE :: H_ENUM_GET_VAL ENTRY }
+#    define H_ENUM_VAL(NAMESPACE, ENTRY) { #ENTRY, NAMESPACE :: ENTRY }
 #  endif //!defined(H_ENUM_VAL)
 
 #  define H_DEF_SERIALISATION_OF_ENUM(NAMESPACE, NAME, ...)                         \
