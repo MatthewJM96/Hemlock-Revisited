@@ -13,28 +13,43 @@ namespace hemlock {
 namespace hio = hemlock::io;
 
 #if !defined(H_DECL_SERIALISABLE_ENUM)
-#define H_DECL_SERIALISABLE_ENUM(NAME) enum class NAME;
+#  define H_DECL_SERIALISABLE_ENUM(NAME) enum class NAME;
 #endif //!defined(H_DECL_SERIALISABLE_ENUM)
 
 #if !defined(H_DEF_SERIALISABLE_ENUM)
-#define H_SERIALISABLE_ENUM_ENTRY(ENTRY_NAME, ID)                   \
-ENTRY_NAME = ID_TO_INT(#ID)
+#  if !defined(H_ENUM_GET_VAL)
+#    define H_ENUM_GET_VAL(NAME, VAL) VAL
+#  endif //!defined(H_ENUM_GET_VAL)
+#  if !defined(H_SERIALISABLE_ENUM_ENTRY)
+#    define H_SERIALISABLE_ENUM_ENTRY(ENTRY_NAME, ID)               \
+H_ENUM_GET_VAL ENTRY_NAME = ID_TO_INT(#ID)
+#  endif //!defined(H_SERIALISABLE_ENUM_ENTRY)
 
-#define H_DEF_SERIALISABLE_ENUM(NAME, ...)                          \
+#  define H_DEF_SERIALISABLE_ENUM(NAME, ...)                        \
 enum class NAME {                                                   \
     MAP_WITH_ID(H_SERIALISABLE_ENUM_ENTRY, COMMA, __VA_ARGS__),     \
     SENTINEL                                                        \
 };
 #endif //!defined(H_DEF_SERIALISABLE_ENUM)
 
-#if !defined(H_DEF_ENUM_SERIALISATION)
-#define H_ENUM_GET_NAME_STR(NAME, VAL) #NAME
-#define H_ENUM_GET_NAME(NAME, VAL) NAME
-#define H_ENUM_GET_VAL(NAME, VAL) VAL
-#define H_ENUM_NAME(ENTRY) H_ENUM_GET_NAME_STR ENTRY
-#define H_ENUM_VAL(NAMESPACE, ENTRY) { H_ENUM_GET_NAME_STR ENTRY, NAMESPACE :: H_ENUM_GET_VAL ENTRY }
+#if !defined(H_DEF_SERIALISATION_OF_ENUM)
+#  if !defined(H_ENUM_GET_NAME_STR)
+#    define H_ENUM_GET_NAME_STR(NAME, VAL) #NAME
+#  endif //!defined(H_ENUM_GET_NAME_STR)
+#  if !defined(H_ENUM_GET_NAME)
+#    define H_ENUM_GET_NAME(NAME, VAL) NAME
+#  endif //!defined(H_ENUM_GET_NAME)
+#  if !defined(H_ENUM_GET_VAL)
+#    define H_ENUM_GET_VAL(NAME, VAL) VAL
+#  endif //!defined(H_ENUM_GET_VAL)
+#  if !defined(H_ENUM_NAME)
+#    define H_ENUM_NAME(ENTRY) H_ENUM_GET_NAME_STR ENTRY
+#  endif //!defined(H_ENUM_NAME)
+#  if !defined(H_ENUM_VAL)
+#    define H_ENUM_VAL(NAMESPACE, ENTRY) { H_ENUM_GET_NAME_STR ENTRY, NAMESPACE :: H_ENUM_GET_VAL ENTRY }
+#  endif //!defined(H_ENUM_VAL)
 
-#define H_DEF_ENUM_SERIALISATION(NAMESPACE, NAME, ...)                              \
+#  define H_DEF_SERIALISATION_OF_ENUM(NAMESPACE, NAME, ...)                         \
 namespace hemlock {                                                                 \
     namespace io {                                                                  \
         const char* NAME##_Names[] = {                                              \
@@ -62,6 +77,14 @@ namespace hemlock {                                                             
         }                                                                           \
     }                                                                               \
 }
-#endif // !defined(H_DEF_ENUM_SERIALISATION)
+#endif // !defined(H_DEF_SERIALISATION_OF_ENUM)
+
+#if !defined(H_DEF_ENUM_WITH_SERIALISATION)
+#  define H_DEF_ENUM_WITH_SERIALISATION(NAMESPACE, NAME, ...)   \
+namespace NAMESPACE {                                           \
+    H_DEF_SERIALISABLE_ENUM(NAME, __VA_ARGS__)                  \
+}                                                               \
+H_DEF_SERIALISATION_OF_ENUM(NAMESPACE, NAME, __VA_ARGS__)
+#endif //!defined(H_DEF_ENUM_WITH_SERIALISATION)
 
 #endif // __hemlock_io_serialisation_enum_hpp

@@ -58,13 +58,13 @@ namespace YAML {                                                    \
 
 #  define H_STRUCT_ENTRY_TO_FIELD(ENTRY) H_STRUCT_ENTRY_TYPE ENTRY H_STRUCT_ENTRY_FIELD ENTRY
 
-#  define H_DEF_STRUCT_WITH_YAML_CONVERSION(NAMESPACE, TYPE, ...)   \
+#  define H_DEF_STRUCT_WITH_YAML_CONVERSION(NAMESPACE, NAME, ...)   \
 namespace NAMESPACE {                                               \
-    struct TYPE {                                                   \
+    struct NAME {                                                   \
         MAP(H_STRUCT_ENTRY_TO_FIELD, SEMICOLON, __VA_ARGS__);       \
     };                                                              \
 }                                                                   \
-H_DEF_YAML_CONVERSION_OF_STRUCT(NAMESPACE :: TYPE, __VA_ARGS__)
+H_DEF_YAML_CONVERSION_OF_STRUCT(NAMESPACE :: NAME, __VA_ARGS__)
 #endif //!defined(H_DEF_STRUCT_WITH_YAML_CONVERSION)
 
 #endif // __hemlock_io_yaml_converters_struct_hpp

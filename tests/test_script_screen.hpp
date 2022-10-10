@@ -7,30 +7,18 @@
 
 #include "iomanager.hpp"
 
-H_DEF_SERIALISABLE_ENUM(
-    TestEnum,
-    HELLO,
-    WORLD
-)
-H_DEF_ENUM_SERIALISATION(
-    ::,
+H_DEF_ENUM_WITH_SERIALISATION(
+    ,
     TestEnum,
     (hello, HELLO),
     (world, WORLD)
 )
 
-// struct Person {
-//     std::string name;
-// };
 H_DEF_STRUCT_WITH_YAML_CONVERSION(
     ,
     Person,
     (name, std::string)
 );
-// struct TestStruct {
-//     i32v3 pos;
-//     Person person;
-// };
 H_DEF_STRUCT_WITH_YAML_CONVERSION(
     ,
     TestStruct,
