@@ -382,9 +382,9 @@
  *   _MAP_INNER as expanding to itself and thus it will still be expanded in
  *   future productions of itself.
  */
-#define MAP(...) \
-   IF(HAS_ARGS(__VA_ARGS__))(EVAL(MAP_INNER(__VA_ARGS__)))
-#define MAP_INNER(op,sep,cur_val, ...) \
+#define MAP(op,sep,...) \
+   IF(HAS_ARGS(__VA_ARGS__))(EVAL(MAP_INNER(op,sep,__VA_ARGS__)))
+#define MAP_INNER(op,sep,cur_val,...) \
   op(cur_val) \
   IF(HAS_ARGS(__VA_ARGS__))( \
     sep() DEFER2(_MAP_INNER)()(op, sep, ##__VA_ARGS__) \
@@ -395,10 +395,10 @@
  * Like MAP but binds extra state to each call of op. The macro
  * being called as op(binding, arg).
  */
-#define BIND_MAP(binding, ...) \
-   IF(HAS_ARGS(__VA_ARGS__))(EVAL(BIND_MAP_INNER(binding, __VA_ARGS__)))
-#define BIND_MAP_INNER(op, binding, sep, cur_val, ...) \
-  op(binding, cur_val) \
+#define BIND_MAP(op,binding,sep,...) \
+   IF(HAS_ARGS(__VA_ARGS__))(EVAL(BIND_MAP_INNER(op,binding,sep,__VA_ARGS__)))
+#define BIND_MAP_INNER(op,binding,sep,cur_val,...) \
+  op(binding,cur_val) \
   IF(HAS_ARGS(__VA_ARGS__))( \
     sep() DEFER2(_BIND_MAP_INNER)()(op, binding, sep, ##__VA_ARGS__) \
   )
