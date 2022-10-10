@@ -19,18 +19,20 @@ H_DEF_ENUM_SERIALISATION(
     (world, WORLD)
 )
 
-struct Person {
-    std::string name;
-};
-H_DEF_STRUCT_YAML_CONVERSION(
+// struct Person {
+//     std::string name;
+// };
+H_DEF_STRUCT_WITH_YAML_CONVERSION(
+    ,
     Person,
     (name, std::string)
 );
-struct TestStruct {
-    i32v3 pos;
-    Person person;
-};
-H_DEF_STRUCT_YAML_CONVERSION(
+// struct TestStruct {
+//     i32v3 pos;
+//     Person person;
+// };
+H_DEF_STRUCT_WITH_YAML_CONVERSION(
+    ,
     TestStruct,
     (pos, i32v3),
     (person, Person)
