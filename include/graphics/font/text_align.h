@@ -1,25 +1,29 @@
 #ifndef __hemlock_graphics_font_text_align_h
 #define __hemlock_graphics_font_text_align_h
 
+#include "io/serialisation.hpp"
+
+/**
+ * @brief This enum is of the various ways in which text may be aligned within a rectangle.
+ */
+H_DECL_ENUM_WITH_SERIALISATION(
+    hemlock::graphics::font,
+    TextAlign,
+    NONE,
+    CENTER_LEFT,
+    TOP_LEFT,
+    TOP_CENTER,
+    TOP_RIGHT,
+    CENTER_RIGHT,
+    BOTTOM_RIGHT,
+    BOTTOM_CENTER,
+    BOTTOM_LEFT,
+    CENTER_CENTER
+)
+
 namespace hemlock {
     namespace graphics {
         namespace font {
-            /**
-             * @brief This enum is of the various ways in which text may be aligned within a rectangle.
-             */
-            enum class TextAlign {
-                NONE,
-                CENTER_LEFT,
-                TOP_LEFT,
-                TOP_CENTER,
-                TOP_RIGHT,
-                CENTER_RIGHT,
-                BOTTOM_RIGHT,
-                BOTTOM_CENTER,
-                BOTTOM_LEFT,
-                CENTER_CENTER
-            };
-
             /**
              * @brief Calculates the offsets needed for a specific line of text.
              *

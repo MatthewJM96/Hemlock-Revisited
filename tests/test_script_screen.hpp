@@ -7,6 +7,12 @@
 
 #include "iomanager.hpp"
 
+H_DECL_ENUM_WITH_SERIALISATION(
+    ,
+    TestEnum,
+    HELLO,
+    WORLD
+)
 H_DEF_ENUM_WITH_SERIALISATION(
     ,
     TestEnum,

@@ -29,6 +29,26 @@ enum class NAME {                                                   \
 };
 #endif //!defined(H_DEF_SERIALISABLE_ENUM)
 
+#if !defined(H_DECL_SERIALISATION_OF_ENUM)
+#  if !defined(H_ENUM_NAME)
+#    define H_ENUM_NAME(ENTRY) #ENTRY
+#  endif //!defined(H_ENUM_NAME)
+#  if !defined(H_ENUM_VAL)
+#    define H_ENUM_VAL(NAMESPACE, ENTRY) { #ENTRY, NAMESPACE :: ENTRY }
+#  endif //!defined(H_ENUM_VAL)
+
+#  define H_DECL_SERIALISATION_OF_ENUM(NAMESPACE, NAME, ...)                                    \
+namespace hemlock {                                                                             \
+    namespace io {                                                                              \
+        template <>                                                                             \
+        const char* serialisable_enum_name<NAMESPACE :: NAME>(NAMESPACE :: NAME val);           \
+                                                                                                \
+        template <>                                                                             \
+        NAMESPACE :: NAME serialisable_enum_val<NAMESPACE :: NAME>(const std::string& name);    \
+    }                                                                                           \
+}
+#endif // !defined(H_DECL_SERIALISATION_OF_ENUM)
+
 #if !defined(H_DEF_SERIALISATION_OF_ENUM)
 #  if !defined(H_ENUM_NAME)
 #    define H_ENUM_NAME(ENTRY) #ENTRY
@@ -37,41 +57,47 @@ enum class NAME {                                                   \
 #    define H_ENUM_VAL(NAMESPACE, ENTRY) { #ENTRY, NAMESPACE :: ENTRY }
 #  endif //!defined(H_ENUM_VAL)
 
-#  define H_DEF_SERIALISATION_OF_ENUM(NAMESPACE, NAME, ...)                         \
-namespace hemlock {                                                                 \
-    namespace io {                                                                  \
-        const char* NAME##_Names[] = {                                              \
-            MAP(H_ENUM_NAME, COMMA, __VA_ARGS__)                                    \
-        };                                                                          \
-                                                                                    \
-        const std::unordered_map<std::string, NAMESPACE NAME> NAME##_Values = {     \
-            BIND_MAP(H_ENUM_VAL, NAMESPACE NAME, COMMA, __VA_ARGS__)                \
-        };                                                                          \
-                                                                                    \
-        template <>                                                                 \
-        const char* serialisable_enum_name<NAMESPACE NAME>(NAMESPACE NAME val) {    \
-            return NAME##_Names[                                                    \
-                static_cast<size_t>(val)                                            \
-            ];                                                                      \
-        }                                                                           \
-                                                                                    \
-        template <>                                                                 \
-        NAMESPACE NAME serialisable_enum_val<NAME>(const std::string& name) {       \
-            auto it = NAME##_Values.find(name);                                     \
-            if (it != NAME##_Values.end()) {                                        \
-                return it->second;                                                  \
-            }                                                                       \
-            return NAMESPACE NAME::SENTINEL;                                        \
-        }                                                                           \
-    }                                                                               \
+#  define H_DEF_SERIALISATION_OF_ENUM(NAMESPACE, NAME, ...)                                     \
+namespace hemlock {                                                                             \
+    namespace io {                                                                              \
+        const char* NAME##_Names[] = {                                                          \
+            MAP(H_ENUM_NAME, COMMA, __VA_ARGS__)                                                \
+        };                                                                                      \
+                                                                                                \
+        const std::unordered_map<std::string, NAMESPACE :: NAME> NAME##_Values = {              \
+            BIND_MAP(H_ENUM_VAL, NAMESPACE :: NAME, COMMA, __VA_ARGS__)                         \
+        };                                                                                      \
+                                                                                                \
+        template <>                                                                             \
+        const char* serialisable_enum_name<NAMESPACE :: NAME>(NAMESPACE :: NAME val) {          \
+            return NAME##_Names[                                                                \
+                static_cast<size_t>(val)                                                        \
+            ];                                                                                  \
+        }                                                                                       \
+                                                                                                \
+        template <>                                                                             \
+        NAMESPACE :: NAME serialisable_enum_val<NAMESPACE :: NAME>(const std::string& name) {   \
+            auto it = NAME##_Values.find(name);                                                 \
+            if (it != NAME##_Values.end()) {                                                    \
+                return it->second;                                                              \
+            }                                                                                   \
+            return NAMESPACE :: NAME::SENTINEL;                                                 \
+        }                                                                                       \
+    }                                                                                           \
 }
 #endif // !defined(H_DEF_SERIALISATION_OF_ENUM)
 
-#if !defined(H_DEF_ENUM_WITH_SERIALISATION)
-#  define H_DEF_ENUM_WITH_SERIALISATION(NAMESPACE, NAME, ...)   \
+
+#if !defined(H_DECL_ENUM_WITH_SERIALISATION)
+#  define H_DECL_ENUM_WITH_SERIALISATION(NAMESPACE, NAME, ...)  \
 namespace NAMESPACE {                                           \
     H_DEF_SERIALISABLE_ENUM(NAME, __VA_ARGS__)                  \
 }                                                               \
+H_DECL_SERIALISATION_OF_ENUM(NAMESPACE, NAME, __VA_ARGS__)
+#endif //!defined(H_DECL_ENUM_WITH_SERIALISATION)
+
+#if !defined(H_DEF_ENUM_WITH_SERIALISATION)
+#  define H_DEF_ENUM_WITH_SERIALISATION(NAMESPACE, NAME, ...)   \
 H_DEF_SERIALISATION_OF_ENUM(NAMESPACE, NAME, __VA_ARGS__)
 #endif //!defined(H_DEF_ENUM_WITH_SERIALISATION)
 

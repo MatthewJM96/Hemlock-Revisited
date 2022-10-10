@@ -2,6 +2,21 @@
 
 #include "graphics/font/text_align.h"
 
+H_DEF_ENUM_WITH_SERIALISATION(
+    hemlock::graphics::font,
+    TextAlign,
+    NONE,
+    CENTER_LEFT,
+    TOP_LEFT,
+    TOP_CENTER,
+    TOP_RIGHT,
+    CENTER_RIGHT,
+    BOTTOM_RIGHT,
+    BOTTOM_CENTER,
+    BOTTOM_LEFT,
+    CENTER_CENTER
+)
+
 f32v2 hg::f::calculate_align_offset(TextAlign align, f32v4 rect, f32 height, f32 length) {
     switch (align) {
         case TextAlign::NONE:
