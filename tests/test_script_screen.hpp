@@ -13,9 +13,10 @@ H_DEF_SERIALISABLE_ENUM(
     WORLD
 )
 H_DEF_ENUM_SERIALISATION(
+    ::,
     TestEnum,
-    (hello, TestEnum::HELLO),
-    (world, TestEnum::WORLD)
+    (hello, HELLO),
+    (world, WORLD)
 )
 
 struct Person {
