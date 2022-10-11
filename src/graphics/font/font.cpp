@@ -4,6 +4,30 @@
 
 #include "graphics/font/font.h"
 
+
+/**
+ * @brief Enumeration of styles of fonts.
+ */
+H_DEF_ENUM_WITH_SERIALISATION(
+    hemlock::graphics::font,
+    FontStyle,
+    BOLD,
+    ITALIC,
+    UNDERLINE,
+    STRIKETHROUGH,
+    NORMAL
+)
+
+/**
+ * @brief Enumeration of styles of font rendering.
+ */
+H_DEF_ENUM_WITH_SERIALISATION(
+    hemlock::graphics::font,
+    FontRenderStyle,
+    SOLID,
+    BLENDED
+)
+
 /**
  * @brief Determines the next power of 2 after the given value and returns it.
  *
@@ -232,6 +256,10 @@ bool hg::f::Font::generate( FontSize size,
                     break;
                 case FontRenderStyle::BLENDED:
                     glyph_surface = TTF_RenderGlyph_Blended(font, static_cast<ui16>(m_start + char_index), { 255, 255, 255, 255 });
+                    break;
+                case FontRenderStyle::SENTINEL:
+                    debug_printf("Trying to render a font with invalid render style.");
+                    return false;
                     break;
             }
 

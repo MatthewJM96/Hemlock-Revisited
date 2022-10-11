@@ -10,6 +10,7 @@
 H_DECL_ENUM_WITH_SERIALISATION(
     ,
     TestEnum,
+    ui8,
     HELLO,
     WORLD
 )

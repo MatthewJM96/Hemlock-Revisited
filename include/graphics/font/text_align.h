@@ -9,6 +9,7 @@
 H_DECL_ENUM_WITH_SERIALISATION(
     hemlock::graphics::font,
     TextAlign,
+    ui8,
     NONE,
     CENTER_LEFT,
     TOP_LEFT,

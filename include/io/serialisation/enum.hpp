@@ -18,14 +18,14 @@ namespace hio = hemlock::io;
 
 #if !defined(H_DEF_SERIALISABLE_ENUM)
 #  if !defined(H_SERIALISABLE_ENUM_ENTRY)
-#    define H_SERIALISABLE_ENUM_ENTRY(ENTRY_NAME, ID)               \
-ENTRY_NAME = ID_TO_INT(#ID)
+#    define H_SERIALISABLE_ENUM_ENTRY(ENTRY_NAME)       \
+ENTRY_NAME
 #  endif //!defined(H_SERIALISABLE_ENUM_ENTRY)
 
-#  define H_DEF_SERIALISABLE_ENUM(NAME, ...)                        \
-enum class NAME {                                                   \
-    MAP_WITH_ID(H_SERIALISABLE_ENUM_ENTRY, COMMA, __VA_ARGS__),     \
-    SENTINEL                                                        \
+#  define H_DEF_SERIALISABLE_ENUM(NAME, TYPE, ...)      \
+enum class NAME : TYPE {                                \
+    MAP(H_SERIALISABLE_ENUM_ENTRY, COMMA, __VA_ARGS__), \
+    SENTINEL                                            \
 };
 #endif //!defined(H_DEF_SERIALISABLE_ENUM)
 
@@ -89,10 +89,10 @@ namespace hemlock {                                                             
 
 
 #if !defined(H_DECL_ENUM_WITH_SERIALISATION)
-#  define H_DECL_ENUM_WITH_SERIALISATION(NAMESPACE, NAME, ...)  \
-namespace NAMESPACE {                                           \
-    H_DEF_SERIALISABLE_ENUM(NAME, __VA_ARGS__)                  \
-}                                                               \
+#  define H_DECL_ENUM_WITH_SERIALISATION(NAMESPACE, NAME, TYPE, ...)    \
+namespace NAMESPACE {                                                   \
+    H_DEF_SERIALISABLE_ENUM(NAME, TYPE, __VA_ARGS__)                    \
+}                                                                       \
 H_DECL_SERIALISATION_OF_ENUM(NAMESPACE, NAME, __VA_ARGS__)
 #endif //!defined(H_DECL_ENUM_WITH_SERIALISATION)
 
