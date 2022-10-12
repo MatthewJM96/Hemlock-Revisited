@@ -253,7 +253,7 @@ target_include_directories(Hemlock_Revisited
 
 if (UNIX OR MINGW)
     if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-        if(CMAKE_BUILD_TYPE STREQUAL "Release")
+        if(CMAKE_BUILD_TYPE STREQUAL "Release" OR HEMLOCK_FAST_DEBUG)
             target_include_directories(Hemlock_Revisited
                 SYSTEM
                 PUBLIC
@@ -277,7 +277,7 @@ if (UNIX OR MINGW)
             )
         endif()
     elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-        if(CMAKE_BUILD_TYPE STREQUAL "Release")
+        if(CMAKE_BUILD_TYPE STREQUAL "Release" OR HEMLOCK_FAST_DEBUG)
             target_include_directories(Hemlock_Revisited
                 SYSTEM
                 PUBLIC
@@ -343,7 +343,7 @@ target_link_libraries(Hemlock_Revisited
     yaml-cpp
 )
 
-if(CMAKE_BUILD_TYPE STREQUAL "Release")
+if(CMAKE_BUILD_TYPE STREQUAL "Release" OR HEMLOCK_FAST_DEBUG)
     target_link_libraries(Hemlock_Revisited
         FastNoise
     )
