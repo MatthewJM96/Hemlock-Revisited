@@ -318,8 +318,8 @@ public:
         if (countdown < 0.0) countdown = 1000.0;
 #endif
 
-        m_player.ac.position += hvox::EntityWorldPosition{f32v3{delta_pos.x, 0.0f, delta_pos.z} * static_cast<f32>(1ll << 32)};
-        m_camera.offset_position(f32v3{delta_pos.x, 0.0f, delta_pos.z});
+        m_player.ac.position += hvox::EntityWorldPosition{f32v3{delta_pos.x, delta_pos.y, delta_pos.z} * static_cast<f32>(1ll << 32)};
+        m_camera.offset_position(f32v3{delta_pos.x, delta_pos.y, delta_pos.z});
         {
             auto transform = m_player_body->getWorldTransform();
             transform.setOrigin(btVector3(m_camera.position().x, m_camera.position().y, m_camera.position().z));
@@ -582,7 +582,7 @@ public:
         m_chunk_grid->init(
             m_chunk_grid,
             VIEW_DIST * 2 + 1,
-            10,
+            16,
             hvox::ChunkTaskBuilder{[]() {
                 return new hvox::ChunkGenerationTask<TVS_VoxelGenerator>();
             }}, hvox::ChunkTaskBuilder{[]() {
