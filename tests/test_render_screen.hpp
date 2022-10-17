@@ -24,6 +24,8 @@ struct TRS_BlockComparator {
 };
 struct TRS_VoxelGenerator {
     void operator()(hmem::Handle<hvox::Chunk> chunk) const {
+        set_blocks(chunk, hvox::BlockChunkPosition{0}, hvox::BlockChunkPosition{CHUNK_LENGTH - 1}, hvox::Block{0});
+
         // for (auto y = 0; y < CHUNK_LENGTH; y += 2) {
         // for (auto x = 0; x < CHUNK_LENGTH; x += 2) {
         for (auto y = 0; y < 10; y += 1) {
