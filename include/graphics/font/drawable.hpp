@@ -3,17 +3,20 @@
 
 #include "graphics/font/instance.hpp"
 
+/**
+ * @brief Whether the string should be sized (vertically) by a scale factor or target a fixed pixel height.
+ */
+H_DECL_ENUM_WITH_SERIALISATION(
+    hemlock::graphics::font,
+    StringSizingKind,
+    ui8,
+    SCALED,
+    FIXED
+)
+
 namespace hemlock {
     namespace graphics {
         namespace font {
-            /**
-             * @brief Whether the string should be sized (vertically) by a scale factor or target a fixed pixel height.
-             */
-            enum class StringSizingKind {
-                SCALED,
-                FIXED
-            };
-
             /**
              * @brief The properties defining the sizing.
              */
