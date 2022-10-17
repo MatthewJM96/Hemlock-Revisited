@@ -4,7 +4,7 @@ void hmem::Pager<DataType, PageSize, MaxFreePages>::dispose() {
     std::lock_guard<std::mutex> lock(m_free_pages_mutex);
 
     for (auto& free_page : m_free_pages) {
-        delete[] free_page;
+        delete[] reinterpret_cast<ui8*>(free_page);
     }
 
     _Pages().swap(m_free_pages);
@@ -30,6 +30,6 @@ void hmem::Pager<DataType, PageSize, MaxFreePages>::free_page(Page<DataType> pag
     if (m_free_page_count < MaxFreePages) {
         m_free_pages[m_free_page_count++] = page;
     } else {
-        delete[] page;
+        delete[] reinterpret_cast<ui8*>(page);
     }
 }

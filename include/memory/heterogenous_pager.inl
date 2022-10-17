@@ -5,7 +5,7 @@ void hmem::HeterogenousPager<PageSize, MaxFreePages>::dispose() {
 
     for (auto& [type, pages] : m_free_pages) {
         for (auto& page : pages) {
-            delete[] page;
+            delete[] reinterpret_cast<ui8*>(page);
         }
     }
 
@@ -47,6 +47,6 @@ void hmem::HeterogenousPager<PageSize, MaxFreePages>::free_page(Page<DataType> p
     if (m_free_page_counts[page_type] < MaxFreePages) {
         m_free_pages[page_type][m_free_page_counts[page_type]++] = page;
     } else {
-        delete[] page;
+        delete[] reinterpret_cast<ui8*>(page);
     }
 }
