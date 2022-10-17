@@ -8,25 +8,12 @@
 /**
  * @brief Enumeration of styles of fonts.
  */
-H_DEF_ENUM_WITH_SERIALISATION(
-    hemlock::graphics::font,
-    FontStyle,
-    BOLD,
-    ITALIC,
-    UNDERLINE,
-    STRIKETHROUGH,
-    NORMAL
-)
+H_DEF_ENUM_WITH_SERIALISATION(hemlock::graphics::font, FontStyle)
 
 /**
  * @brief Enumeration of styles of font rendering.
  */
-H_DEF_ENUM_WITH_SERIALISATION(
-    hemlock::graphics::font,
-    FontRenderStyle,
-    SOLID,
-    BLENDED
-)
+H_DEF_ENUM_WITH_SERIALISATION(hemlock::graphics::font, FontRenderStyle)
 
 /**
  * @brief Determines the next power of 2 after the given value and returns it.

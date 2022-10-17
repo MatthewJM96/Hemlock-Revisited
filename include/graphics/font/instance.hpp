@@ -7,15 +7,15 @@
 /**
  * @brief Enumeration of styles of fonts.
  */
-H_DECL_ENUM_WITH_SERIALISATION(
+H_DECL_VENUM_WITH_SERIALISATION(
     hemlock::graphics::font,
     FontStyle,
     ui32,
-    BOLD          = TTF_STYLE_BOLD,
-    ITALIC        = TTF_STYLE_ITALIC,
-    UNDERLINE     = TTF_STYLE_UNDERLINE,
-    STRIKETHROUGH = TTF_STYLE_STRIKETHROUGH,
-    NORMAL        = TTF_STYLE_NORMAL
+    (BOLD          , TTF_STYLE_BOLD),
+    (ITALIC        , TTF_STYLE_ITALIC),
+    (UNDERLINE     , TTF_STYLE_UNDERLINE),
+    (STRIKETHROUGH , TTF_STYLE_STRIKETHROUGH),
+    (NORMAL        , TTF_STYLE_NORMAL)
 )
 
 /**
