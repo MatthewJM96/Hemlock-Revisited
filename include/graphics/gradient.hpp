@@ -1,19 +1,22 @@
 #ifndef __hemlock_graphics_gradient_hpp
 #define __hemlock_graphics_gradient_hpp
 
+/**
+ * @brief Provides an enumeration of the possible gradient styles.
+ */
+H_DECL_ENUM_WITH_SERIALISATION(
+    hemlock::graphics,
+    Gradient,
+    ui8,
+    NONE,
+    LEFT_TO_RIGHT,
+    TOP_TO_BOTTOM,
+    TOP_LEFT_TO_BOTTOM_RIGHT,
+    TOP_RIGHT_TO_BOTTOM_LEFT
+)
+
 namespace hemlock {
     namespace graphics {
-        /**
-         * @brief Provides an enumeration of the possible gradient styles.
-         */
-        enum class Gradient {
-            NONE,
-            LEFT_TO_RIGHT,
-            TOP_TO_BOTTOM,
-            TOP_LEFT_TO_BOTTOM_RIGHT,
-            TOP_RIGHT_TO_BOTTOM_LEFT
-        };
-
         /**
          * @brief Provides linear interpolation between two colours to a given mix.
          *

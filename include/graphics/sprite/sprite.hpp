@@ -3,6 +3,42 @@
 
 #include "graphics/gradient.hpp"
 
+// TODO(Matthew): unsorted mode?
+/**
+ * @brief Enumeration of the possible sprite sorting methodologies.
+ */
+H_DECL_ENUM_WITH_SERIALISATION(
+    hemlock::graphics::sprite,
+    SpriteSortMode,
+    ui8,
+    BACK_TO_FRONT,
+    FRONT_TO_BACK,
+    TEXTURE
+)
+
+// TODO(Matthew): define serialisation of function pointers to enable providing
+//                access to builders to fully serialise sprite data? only caveat
+//                is that this would only be runtime serialisable, perhaps we
+//                need to distinguish persistent vs. runtime serialisation
+//                capability
+/**
+ * @brief Information to define a sprite.
+ */
+H_DEF_STRUCT_WITH_SERIALISATION(
+    hemlock::graphics::sprite,
+    SpriteData,
+    (texture, GLuint),
+    (position, f32v2),
+    (size, f32v2),
+    (depth, f32),
+    (uv_rect, f32v4),
+    (c1, colour4),
+    (c2, colour4),
+    (gradient, Gradient)
+    // TODO(Matthew): Offsets, rotations, etc?
+    // TODO(Matthew): Custom gradients? Different blending styles?
+)
+
 namespace hemlock {
     namespace graphics {
         namespace sprite {
@@ -16,28 +52,10 @@ namespace hemlock {
             using QuadBuilder = Delegate<void(const Sprite* sprite, SpriteVertex* vertices)>;
 
             /**
-             * @brief The sorting modes allowed for sorting sprites.
-             */
-            enum class SpriteSortMode {
-                BACK_TO_FRONT,
-                FRONT_TO_BACK,
-                TEXTURE
-            };
-
-            /**
              * @brief The properties that define a sprite.
              */
-            struct Sprite {
+            struct Sprite : public SpriteData {
                 QuadBuilder build;
-                GLuint      texture;
-                f32v2       position;
-                f32v2       size;
-                f32         depth;
-                f32v4       uv_rect;
-                colour4     c1, c2;
-                Gradient    gradient;
-                // TODO(Matthew): Offsets, rotations, etc?
-                // TODO(Matthew): Custom gradients? Different blending styles?
             };
 
             /**

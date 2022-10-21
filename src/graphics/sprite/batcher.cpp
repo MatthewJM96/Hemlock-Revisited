@@ -5,6 +5,9 @@
 
 #include "graphics/sprite/batcher.h"
 
+H_DEF_ENUM_WITH_SERIALISATION(hemlock::graphics, Gradient)
+H_DEF_ENUM_WITH_SERIALISATION(hemlock::graphics::sprite, SpriteSortMode)
+
 using namespace hg::f;
 
 #define VERTICES_PER_QUAD 4

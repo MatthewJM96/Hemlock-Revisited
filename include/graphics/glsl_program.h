@@ -1,50 +1,80 @@
 #ifndef __hemlock_graphics_glsl_program_h
 #define __hemlock_graphics_glsl_program_h
 
+#include "io/serialisation.hpp"
+#include "io/yaml.hpp"
+
+#if defined(HEMLOCK_USING_OPENGL)
+/**
+ * @brief Enumerates the types of shader.
+ */
+H_DECL_VENUM_WITH_SERIALISATION(
+    hemlock::graphics,
+    ShaderType,
+    ui32,
+    (FRAGMENT, GL_FRAGMENT_SHADER),
+    (VERTEX, GL_VERTEX_SHADER)
+)
+#endif // defined(HEMLOCK_USING_OPENGL)
+
+/**
+ * @brief Information needed to compile a shader.
+ */
+H_DEF_STRUCT_WITH_SERIALISATION(
+    hemlock::graphics,
+    ShaderInfo,
+    (type, hemlock::graphics::ShaderType),
+    (filepath, std::string)
+)
+
+/**
+ * @brief Success status of creating a shader.
+ */
+H_DECL_ENUM_WITH_SERIALISATION(
+    hemlock::graphics,
+    ShaderCreationResult,
+    ui8,
+    SUCCESS,
+    NON_EDITABLE,
+    VERTEX_EXISTS,
+    FRAG_EXISTS,
+    INVALID_STAGE,
+    CREATE_FAIL,
+    READ_FAIL,
+    COMPILE_FAIL
+)
+
+/**
+ * @brief Success status of creating a vertex-fragment
+ * shader pair.
+ */
+H_DEF_STRUCT_WITH_SERIALISATION(
+    hemlock::graphics,
+    ShaderCreationResults,
+    (vertex, hemlock::graphics::ShaderCreationResult),
+    (fragment, hemlock::graphics::ShaderCreationResult)
+)
+
+/**
+ * @brief Success status of linking a vertex-fragment
+ * shader pair.
+ */
+H_DECL_ENUM_WITH_SERIALISATION(
+    hemlock::graphics,
+    ShaderLinkResult,
+    ui8,
+    SUCCESS,
+    NON_EDITABLE,
+    VERTEX_MISSING,
+    FRAG_MISSING,
+    LINK_FAIL
+)
+
 namespace hemlock {
     namespace graphics {
-        /**
-         * @brief Enumerates the types of shader.
-         */
-        enum class ShaderType {
-            FRAGMENT = GL_FRAGMENT_SHADER,
-            VERTEX   = GL_VERTEX_SHADER
-        };
-
-        /**
-         * @brief Information needed to compile a shader.
-         */
-        struct ShaderInfo {
-            ShaderType  type;
-            std::string filepath;
-        };
-
         using ShaderAttribute    = std::pair<std::string, GLuint>;
         using ShaderAttributes   = std::vector<ShaderAttribute>;
         using ShaderAttributeMap = std::map<std::string, GLuint>;
-
-        enum class ShaderCreationResult {
-            SUCCESS       =  0,
-            NON_EDITABLE  = -1,
-            VERTEX_EXISTS = -2,
-            FRAG_EXISTS   = -3,
-            INVALID_STAGE = -4,
-            CREATE_FAIL   = -5,
-            READ_FAIL     = -6,
-            COMPILE_FAIL  = -7
-        };
-
-        struct ShaderCreationResults {
-            ShaderCreationResult vertex, fragment;
-        };
-
-        enum class ShaderLinkResult {
-            SUCCESS        =  0,
-            NON_EDITABLE   = -1,
-            VERTEX_MISSING = -2,
-            FRAG_MISSING   = -3,
-            LINK_FAIL      = -4
-        };
 
         class ShaderCache : public hio::Cache<std::string, std::unordered_map<std::string, std::string>> {};
 

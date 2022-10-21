@@ -1,8 +1,6 @@
 #ifndef __hemlock_io_yaml_converters_struct_hpp
 #define __hemlock_io_yaml_converters_struct_hpp
 
-#include "io/serialisation.hpp"
-
 #if !defined(H_DEF_YAML_CONVERSION_OF_STRUCT)
 #  define H_STRUCT_ENTRY_NAME(NAME, TYPE) #NAME
 #  define H_STRUCT_ENTRY_FIELD(NAME, TYPE) NAME

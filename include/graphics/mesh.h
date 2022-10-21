@@ -1,16 +1,22 @@
 #ifndef __hemlock_graphics_mesh_h
 #define __hemlock_graphics_mesh_h
 
+#if defined(HEMLOCK_USING_OPENGL)
+/**
+ * @brief Enumerates the mesh volatility states.
+ */
+H_DECL_VENUM_WITH_SERIALISATION(
+    hemlock::graphics,
+    MeshDataVolatility,
+    ui32,
+    (STATIC, GL_STATIC_DRAW),
+    (DYNAMIC, GL_DYNAMIC_DRAW),
+    (STREAM, GL_STREAM_DRAW)
+)
+#endif // defined(HEMLOCK_USING_OPENGL)
+
 namespace hemlock {
     namespace graphics {
-        enum class MeshDataVolatility {
-#if defined(HEMLOCK_USING_OPENGL)
-            STATIC  = GL_STATIC_DRAW,
-            DYNAMIC = GL_DYNAMIC_DRAW,
-            STREAM  = GL_STREAM_DRAW
-#endif // defined(HEMLOCK_USING_OPENGL)
-        };
-
         struct MeshHandles {
 #if defined(HEMLOCK_USING_OPENGL)
             GLuint vao, vbo;
