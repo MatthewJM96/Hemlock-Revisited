@@ -16,11 +16,6 @@ H_DECL_ENUM_WITH_SERIALISATION(
     TEXTURE
 )
 
-// TODO(Matthew): define serialisation of function pointers to enable providing
-//                access to builders to fully serialise sprite data? only caveat
-//                is that this would only be runtime serialisable, perhaps we
-//                need to distinguish persistent vs. runtime serialisation
-//                capability
 /**
  * @brief Information to define a sprite.
  */
