@@ -9,7 +9,7 @@
  *  * a scale factor, or
  * * target a fixed pixel height.
  */
-H_DEF_UNION_WITH_YAML_CONVERSION(
+H_DEF_UNION_WITH_SERIALISATION(
     hemlock::graphics::font,
     StringSizing,
     ui8,
