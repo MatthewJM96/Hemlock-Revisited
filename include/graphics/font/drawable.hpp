@@ -4,32 +4,29 @@
 #include "graphics/font/instance.hpp"
 
 /**
- * @brief Whether the string should be sized (vertically) by a scale factor or target a fixed pixel height.
+ * @brief Properties defining string sizing, with two different sizing
+ * methods, either the string should be sized (vertically) by:
+ *  * a scale factor, or
+ * * target a fixed pixel height.
  */
-H_DECL_ENUM_WITH_SERIALISATION(
+H_DEF_UNION_WITH_YAML_CONVERSION(
     hemlock::graphics::font,
-    StringSizingKind,
+    StringSizing,
     ui8,
-    SCALED,
-    FIXED
+    (
+        SCALED,
+        (scaling, f32v2)
+    ),
+    (
+        FIXED,
+        (scale_x, f32)
+        (target_height, f32)
+    )
 )
 
 namespace hemlock {
     namespace graphics {
         namespace font {
-            /**
-             * @brief The properties defining the sizing.
-             */
-            struct StringSizing {
-                StringSizingKind kind;
-                union {
-                    f32v2 scaling;
-                    struct {
-                        f32 scale_x;
-                        f32 target_height;
-                    };
-                };
-            };
 
             /**
              * @brief Properties needed to draw a string.
