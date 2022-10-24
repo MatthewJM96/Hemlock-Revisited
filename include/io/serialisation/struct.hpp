@@ -1,7 +1,7 @@
 #ifndef __hemlock_io_serialisation_struct_hpp
 #define __hemlock_io_serialisation_struct_hpp
 
-#include "io/yaml/struct.hpp"
+#include "io/yaml/converters/struct.hpp"
 
 #if !defined(H_DECL_STRUCT_WITH_SERIALISATION)
 #  define H_DECL_STRUCT_WITH_SERIALISATION(NAMESPACE, NAME)

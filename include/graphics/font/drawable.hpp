@@ -2,6 +2,7 @@
 #define __hemlock_graphics_font_drawable_hpp
 
 #include "graphics/font/instance.hpp"
+#include "io/serialisation.hpp"
 
 /**
  * @brief Properties defining string sizing, with two different sizing

@@ -3,5 +3,6 @@
 
 #include "io/serialisation/enum.hpp"
 #include "io/serialisation/struct.hpp"
+#include "io/serialisation/union.hpp"
 
 #endif // __hemlock_io_serialisation_hpp

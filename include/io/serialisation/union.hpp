@@ -1,7 +1,7 @@
 #ifndef __hemlock_io_serialisation_union_hpp
 #define __hemlock_io_serialisation_union_hpp
 
-#include "io/yaml/union.hpp"
+#include "io/yaml/converters/union.hpp"
 
 #if !defined(H_DECL_UNION_WITH_SERIALISATION)
 #  define H_DECL_UNION_WITH_SERIALISATION(NAMESPACE, NAME)

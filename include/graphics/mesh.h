@@ -1,6 +1,8 @@
 #ifndef __hemlock_graphics_mesh_h
 #define __hemlock_graphics_mesh_h
 
+#include "io/serialisation.hpp"
+
 #if defined(HEMLOCK_USING_OPENGL)
 /**
  * @brief Enumerates the mesh volatility states.
