@@ -20,7 +20,7 @@ H_DEF_UNION_WITH_SERIALISATION(
     ),
     (
         FIXED,
-        (scale_x, f32)
+        (scale_x, f32),
         (target_height, f32)
     )
 )
