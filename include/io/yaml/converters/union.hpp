@@ -36,12 +36,12 @@ case UNION_TYPE##Kind :: H_UNION_ENTRY_FIELD ENTRY_INFO :   \
         H_UNION_SUBENTRY_ENCODE,                            \
         SEMICOLON,                                          \
         H_UNION_ENTRY_SUBENTRIES ENTRY_INFO                 \
-    )                                                       \
+    );                                                      \
 }
 #  endif //!defined(H_UNION_ENTRY_ENCODE)
 
 #  if !defined(H_UNION_ENTRY_DECODE)
-#    define H_UNION_ENTRY_DECODE(ENTRY_INFO)                \
+#    define H_UNION_ENTRY_DECODE(UNION_TYPE, ENTRY_INFO)    \
 case UNION_TYPE##Kind :: H_UNION_ENTRY_FIELD ENTRY_INFO :   \
 {                                                           \
     MAP(                                                    \
@@ -142,17 +142,17 @@ struct {                                        \
 #  define H_DEF_UNION_WITH_YAML_CONVERSION(NAMESPACE, NAME, KIND_TYPE, ...) \
 namespace NAMESPACE {                                                       \
     enum class NAME##Kind : KIND_TYPE {                                     \
-        MAP(H_UNION_ENTRY_TO_KIND, COMMA, __VA_ARGS__)                      \
+        MAP(H_UNION_ENTRY_TO_KIND, COMMA, __VA_ARGS__),                     \
         SENTINEL                                                            \
     };                                                                      \
     struct NAME {                                                           \
         NAME##Kind kind;                                                    \
         union {                                                             \
             MAP(H_UNION_ENTRY_TO_SUBENTRIES, SEMICOLON, __VA_ARGS__);       \
-        }                                                                   \
+        };                                                                  \
     };                                                                      \
 }                                                                           \
-H_DEF_YAML_CONVERSION_OF_UNION(NAMESPACE :: NAME, __VA_ARGS__)
+H_DEF_YAML_CONVERSION_OF_UNION(NAMESPACE :: NAME, KIND_TYPE, __VA_ARGS__)
 #endif //!defined(H_DEF_UNION_WITH_YAML_CONVERSION)
 
 #endif // __hemlock_io_yaml_converters_union_hpp
