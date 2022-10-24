@@ -31,6 +31,8 @@ option(HEMLOCK_USING_OPENGL "Whether Hemlock uses OpenGL." ON)
 option(HEMLOCK_USING_VULKAN "Whether Hemlock uses Vulkan." OFF)
 option(HEMLOCK_USING_LUA "Whether Hemlock uses Lua for scripting." ON)
 
+option(HEMLOCK_PREPROC_DEBUG "Whether to emit results of running preprocessor." OFF)
+
 option(HEMLOCK_FAST_DEBUG "Whether to compile debug builds with some optimisation." OFF)
 
 option(HEMLOCK_ENABLE_ADDRESS_SANITIZER "Whether to compile with address sanitizer." OFF)
@@ -40,7 +42,9 @@ option(HEMLOCK_ENABLE_GPERF_PROFILER "Whether to compile with GPerf profiler." O
 
 if (UNIX OR MINGW)
     set(CMAKE_CXX_FLAGS "-pthread")
-    if (HEMLOCK_ENABLE_ADDRESS_SANITIZER)
+    if (HEMLOCK_PREPROC_DEBUG)
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -E")
+    elseif (HEMLOCK_ENABLE_ADDRESS_SANITIZER)
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address -fno-omit-frame-pointer")
         set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fsanitize=address -fno-omit-frame-pointer")
         set(CMAKE_CXX_FLAGS_RELEASE "-g -O3")

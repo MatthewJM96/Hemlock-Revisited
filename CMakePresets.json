@@ -66,6 +66,24 @@
             }
         },
         {
+            "name": "GCC-x64-Preproc",
+            "displayName": "GCC x64 Preproc",
+            "description": "Configuration for GCC x64 preprocessor test build.",
+            "inherits": "base",
+            "generator": "Unix Makefiles",
+            "cacheVariables": {
+                "CMAKE_C_COMPILER": "gcc",
+                "CMAKE_CXX_COMPILER": "g++",
+                "CMAKE_BUILD_TYPE": "Release",
+                "HEMLOCK_PREPROC_DEBUG": "On"
+            },
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Linux"
+            }
+        },
+        {
             "name": "GCC-x64-Asan",
             "displayName": "GCC x64 Address Sanitizer",
             "description": "Configuration for GCC x64 with address sanitizer build.",
@@ -321,6 +339,21 @@
             "displayName": "GCC x64 Release",
             "description": "Configuration for GCC x64 release build.",
             "configurePreset": "GCC-x64-Release",
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Linux"
+            },
+            "targets": [
+                "Hemlock_Revisited"
+            ],
+            "jobs": 10
+        },
+        {
+            "name": "GCC-x64-Preproc",
+            "displayName": "GCC x64 Preproc",
+            "description": "Configuration for GCC x64 preprocessor test build.",
+            "configurePreset": "GCC-x64-Preproc",
             "condition": {
                 "type": "equals",
                 "lhs": "${hostSystemName}",
