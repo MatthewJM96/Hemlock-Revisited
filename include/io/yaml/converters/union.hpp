@@ -1,6 +1,12 @@
 #ifndef __hemlock_io_yaml_converters_union_hpp
 #define __hemlock_io_yaml_converters_union_hpp
 
+// TODO(Matthew): Fix recursion of MAP not working. Note that
+//                MAP - MAP results in interior MAP not being
+//                evaluated, while BIND_MAP - MAP results in
+//                the op of the interior MAP not being
+//                evaluated.
+
 #if !defined(H_DEF_YAML_CONVERSION_OF_UNION)
 #  define H_UNION_SUBENTRY_NAME(NAME, TYPE) #NAME
 #  define H_UNION_SUBENTRY_FIELD(NAME, TYPE) NAME
