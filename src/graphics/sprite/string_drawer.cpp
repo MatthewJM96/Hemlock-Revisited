@@ -9,8 +9,6 @@
 using namespace hg::f;
 using namespace hg::s;
 
-H_DEF_ENUM_WITH_SERIALISATION(hemlock::graphics::font, StringSizingKind)
-
 /******************************************************\
  * No Wrap Draw                                       *
 \******************************************************/

@@ -14,15 +14,11 @@ H_DEF_UNION_WITH_SERIALISATION(
     hemlock::graphics::font,
     StringSizing,
     ui8,
-    (
-        SCALED,
-        (scaling, f32v2)
-    ),
-    (
-        FIXED,
-        (scale_x, f32),
-        (target_height, f32)
-    )
+    ( H_UNION_ENTRY(), SCALED               , H_NEXT_UNION_KIND()    ),
+    ( H_UNION_ENTRY(), (scaling, f32v2)     , H_CONTINUE_UNION_KIND()),
+    ( H_UNION_ENTRY(), FIXED                , H_NEXT_UNION_KIND()    ),
+    ( H_UNION_ENTRY(), (scale_x, f32)       , H_CONTINUE_UNION_KIND()),
+    ( H_UNION_ENTRY(), (target_height, f32) , H_CONTINUE_UNION_KIND())
 )
 
 namespace hemlock {

@@ -143,6 +143,8 @@
 #define EMPTY()
 #define COMMA() ,
 #define SEMICOLON() ;
+#define OPEN_BRACE() {
+#define CLOSE_BRACE() }
 #define PLUS() +
 #define ZERO() 0
 #define ONE() 1

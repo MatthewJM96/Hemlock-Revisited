@@ -204,7 +204,6 @@ void hg::s::SpriteBatcher::add_sprite(
                        f32v4 uv_rect  /*= f32v4(0.0f, 0.0f, 1.0f, 1.0f)*/
 ) {
     m_sprites.emplace_back(Sprite{
-        builder,
         texture,
         position,
         size,
@@ -212,7 +211,8 @@ void hg::s::SpriteBatcher::add_sprite(
         uv_rect,
         c1,
         c2,
-        gradient
+        gradient,
+        builder
     });
 }
 
@@ -227,7 +227,6 @@ void hg::s::SpriteBatcher::add_sprite(
                        f32v4 uv_rect  /*= f32v4(0.0f, 0.0f, 1.0f, 1.0f)*/
 ) {
     m_sprites.emplace_back(Sprite{
-        builder,
         m_default_texture,
         position,
         size,
@@ -235,7 +234,8 @@ void hg::s::SpriteBatcher::add_sprite(
         uv_rect,
         c1,
         c2,
-        gradient
+        gradient,
+        builder
     });
 }
 
@@ -250,7 +250,6 @@ void hg::s::SpriteBatcher::add_sprite(
                   f32v4 uv_rect  /*= f32v4(0.0f, 0.0f, 1.0f, 1.0f)*/
 ) {
     m_sprites.emplace_back(Sprite{
-        { &impl::basic_build_quad },
         texture,
         position,
         size,
@@ -258,7 +257,8 @@ void hg::s::SpriteBatcher::add_sprite(
         uv_rect,
         c1,
         c2,
-        gradient
+        gradient,
+        { &impl::basic_build_quad }
     });
 }
 
@@ -272,7 +272,6 @@ void hg::s::SpriteBatcher::add_sprite(
                  f32v4 uv_rect  /*= f32v4(0.0f, 0.0f, 1.0f, 1.0f)*/
 ) {
     m_sprites.emplace_back(Sprite{
-        { &impl::basic_build_quad },
         m_default_texture,
         position,
         size,
@@ -280,7 +279,8 @@ void hg::s::SpriteBatcher::add_sprite(
         uv_rect,
         c1,
         c2,
-        gradient
+        gradient,
+        { &impl::basic_build_quad }
     });
 }
 
