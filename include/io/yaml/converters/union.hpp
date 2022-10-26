@@ -140,7 +140,7 @@ struct {                                        \
         H_UNION_SUBENTRY_TO_FIELDS,             \
         SEMICOLON,                              \
         H_UNION_ENTRY_SUBENTRIES ENTRY          \
-    )                                           \
+    );                                          \
 }
 
 #  define H_UNION_ENTRY_TO_KIND(ENTRY) H_UNION_ENTRY_FIELD ENTRY
