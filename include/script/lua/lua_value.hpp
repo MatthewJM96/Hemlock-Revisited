@@ -186,11 +186,7 @@ namespace hemlock {
                          * Char *
                         \********/
                     } else if constexpr (std::is_same<Type, char>()) {
-                        // Pops char as string, return character if
-                        // it exists, else default value.
-                        std::string tmp = lua_tostring(state, index);
-
-                        if (tmp.length() > 0) value = tmp.c_str()[0];
+                        value = lua_tostring(state, index)[0];
 
                         /***********\
                          * Integer *
@@ -208,15 +204,20 @@ namespace hemlock {
                          * String *
                         \**********/
                     } else if constexpr (std::is_same<Type, std::string>()) {
-                        value = lua_tostring(state, index);
+                        value = std::string(
+                            lua_tostring(state, index),
+                            lua_strlen(state, index)
+                        );
 
                         /************\
                          * C-String *
                         \************/
                     } else if constexpr (std::is_same<typename std::remove_const<Type>::type, char*>()) {
-                        std::string tmp = lua_tostring(state, index);
-                        
-                        if (tmp.length() > 0) value = const_cast<Type>(tmp.c_str());
+                        auto len = lua_strlen(state, index);
+                        if (len != 0) {
+                            value = new char[len];
+                            std::memcpy(lua_tostring(state, index), value, len);
+                        }
 
                         /********\
                          * Enum *

@@ -51,7 +51,7 @@ ui32 hscript::lua::LuaValue<Type>::push(LuaHandle state, Type value) {
         tmp[0] = value;
         tmp[1] = '\0';
 
-        lua_pushstring(state, tmp);
+        lua_pushlstring(state, tmp, 1);
 
         delete[] tmp;
 
@@ -71,13 +71,13 @@ ui32 hscript::lua::LuaValue<Type>::push(LuaHandle state, Type value) {
          * String *
         \**********/
     } else if constexpr (std::is_same<Type, std::string>()) {
-        lua_pushstring(state, value.c_str());
+        lua_pushlstring(state, value.c_str(), value.size());
 
         /************\
          * C-String *
         \************/
     } else if constexpr (std::is_same<typename std::remove_const<Type>::type, char*>()) {
-        lua_pushstring(state, value);
+        lua_pushlstring(state, value, strlen(value));
 
         /********\
          * Enum *
