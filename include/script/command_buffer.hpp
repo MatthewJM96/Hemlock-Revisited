@@ -103,8 +103,11 @@ namespace hemlock {
 
             std::mutex      m_buffer_lock;
 
-            // Only used if BufferSize > 0.
-            size_t          m_commands_buffered;
+            std::conditional<
+                std::greater<size_t>()(BufferSize, 0),
+                size_t,
+                Empty
+            >::type m_commands_buffered;
         };
     }
 }

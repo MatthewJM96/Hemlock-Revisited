@@ -13,7 +13,7 @@ void hscript::CommandBuffer<BufferSize>::dispose() {
     CommandsData().swap(m_command_data);
 
     m_latest_command_id = 0;
-    m_commands_buffered = 0;
+    if (BufferSize > 0) m_commands_buffered = 0;
 }
 
 template <size_t BufferSize>
