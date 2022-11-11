@@ -21,7 +21,11 @@ namespace hemlock {
         template <typename Environment>
         class EnvironmentRegistry;
 
-        template <typename EnvironmentImpl>
+        template <
+            typename EnvironmentImpl,
+            bool HasCommandBuffer = false,
+            size_t CommandBufferSize = 0
+        >
         class EnvironmentBase {
         public:
             EnvironmentBase()  { /* Empty. */ }
@@ -227,6 +231,12 @@ namespace hemlock {
             }
         protected:
             EnvironmentRegistry<EnvironmentImpl>* m_registry;
+
+            std::conditional<
+                HasCommandBuffer,
+                CommandBuffer<CommandBufferSize>,
+                Empty
+            >::type m_command_buffer;
 
             hio::IOManagerBase* m_io_manager;
             ui32 m_max_script_length;
