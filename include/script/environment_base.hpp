@@ -6,6 +6,7 @@
 #endif // HEMLOCK_DEFAULT_MAX_SCRIPT_LENGTH
 
 #include "script/state.hpp"
+#include "script/command_buffer.hpp"
 
 
 // TODO(Matthew): Create a REPL client that can be used for dev console and so on.
