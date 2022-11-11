@@ -28,6 +28,8 @@ namespace hemlock {
 
             H_NON_COPYABLE(EnvironmentBase);
             H_MOVABLE(EnvironmentBase) {
+                m_registry          = rhs.m_registry;
+                m_io_manager        = rhs.m_io_manager;
                 m_max_script_length = rhs.m_max_script_length;
 
                 return *this;
