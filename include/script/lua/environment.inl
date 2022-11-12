@@ -1,9 +1,240 @@
 #include "c_function.hpp"
+#include "command_buffer.hpp"
 #include "lua_function.hpp"
 #include "lua_value.hpp"
+#include "io/iomanager.h"
 
+template <bool HasCommandBuffer, size_t CommandBufferSize>
+void hscript::lua::Environment<HasCommandBuffer, CommandBufferSize>
+                     ::init(hio::IOManagerBase* io_manager, ui32 max_script_length /*= HEMLOCK_DEFAULT_MAX_SCRIPT_LENGTH*/) {
+    m_io_manager        = io_manager;
+    m_max_script_length = max_script_length;
+
+    // Initialise the Lua environment.
+    m_state = luaL_newstate();
+    luaL_openlibs(m_state);
+
+    // TODO(Matthew): Error handler.
+
+    // Create a table for storing registered functions.
+    lua_newtable(m_state);
+    lua_setfield(m_state, LUA_REGISTRYINDEX, H_LUA_SCRIPT_FUNCTION_TABLE);
+
+    // TODO(Matthew): Revisit namespace handling as it looks like Lua stack
+    //                may keep growing (dangerous) if we don't track and
+    //                pop namespaces.
+
+    // Set global namespace.
+    set_global_namespace();
+
+    // Expose Lua function registration to environment.
+    add_c_function("register_function", &hscript::lua::register_lua_function, this);
+
+    if constexpr (HasCommandBuffer) {
+        set_namespaces("foreign");
+        add_c_function("call",        &call_foreign,             this);
+        add_c_function("query",       &query_foreign_call,       this);
+        add_c_function("get_results", &get_foreign_call_results, this);
+
+        add_c_function("set_manual_command_buffer_pump", &set_manual_command_buffer_pump, this);
+        add_c_function("pump_command_buffer",            &pump_command_buffer,            this);
+        set_global_namespace();
+    }
+
+    // TODO(Matthew): Do stuff like event subscription.
+}
+
+template <bool HasCommandBuffer, size_t CommandBufferSize>
+void hscript::lua::Environment<HasCommandBuffer, CommandBufferSize>
+                     ::init(EnvironmentBase<
+                                    Environment<HasCommandBuffer, CommandBufferSize>,
+                                    HasCommandBuffer,
+                                    CommandBufferSize
+                                >* parent, hio::IOManagerBase* io_manager, ui32 max_script_length /*= HEMLOCK_DEFAULT_MAX_SCRIPT_LENGTH*/) {
+    m_io_manager        = io_manager;
+    m_max_script_length = max_script_length;
+
+    // Cast to Lua environment.
+    Environment* lua_parent = reinterpret_cast<Environment*>(parent);
+
+    // Initialise the Lua environment.
+    m_state = lua_newthread(lua_parent->m_state);
+
+    // Set parent.
+    m_parent = lua_parent;
+
+    // Set global namespace.
+    set_global_namespace();
+
+    // TODO(Matthew): Anything else?
+}
+
+template <bool HasCommandBuffer, size_t CommandBufferSize>
+void hscript::lua::Environment<HasCommandBuffer, CommandBufferSize>
+                     ::dispose() {
+    if (m_state) {
+        lua_close(m_state);
+
+        m_state = nullptr;
+    }
+}
+
+template <bool HasCommandBuffer, size_t CommandBufferSize>
+bool hscript::lua::Environment<HasCommandBuffer, CommandBufferSize>
+                     ::load(const hio::fs::path& filepath) {
+    ui32 length = std::numeric_limits<ui32>::max();
+    const char* script = m_io_manager->read_file_to_string(filepath, &length);
+
+    if (!script || length > m_max_script_length) {
+        return false;
+    }
+
+    bool success = luaL_loadstring(m_state, script) == 0;
+    delete[] script;
+
+    return success;
+}
+
+template <bool HasCommandBuffer, size_t CommandBufferSize>
+bool hscript::lua::Environment<HasCommandBuffer, CommandBufferSize>
+                     ::load(const std::string& script) {
+    // Load script, returning success state.
+    return luaL_loadstring(m_state, script.c_str()) == 0;
+}
+
+template <bool HasCommandBuffer, size_t CommandBufferSize>
+bool hscript::lua::Environment<HasCommandBuffer, CommandBufferSize>
+                     ::run() {
+    // Run Lua function currently on top of Lua state stack, returning success state.
+    return lua_pcall(m_state, 0, LUA_MULTRET, 0) == 0;
+}
+
+template <bool HasCommandBuffer, size_t CommandBufferSize>
+bool hscript::lua::Environment<HasCommandBuffer, CommandBufferSize>
+                     ::run(const hio::fs::path& filepath) {
+    ui32 length = std::numeric_limits<ui32>::max();
+    const char* script = m_io_manager->read_file_to_string(filepath, &length);
+
+    if (!script || length > m_max_script_length) {
+        return false;
+    }
+
+    bool success = luaL_dostring(m_state, script) == 0;
+    delete[] script;
+
+    return success;
+}
+
+template <bool HasCommandBuffer, size_t CommandBufferSize>
+bool hscript::lua::Environment<HasCommandBuffer, CommandBufferSize>
+                     ::run(const std::string& script) {
+    // Load and run script, and return success state.
+    return luaL_dostring(m_state, script.c_str()) == 0;
+}
+
+template <bool HasCommandBuffer, size_t CommandBufferSize>
+void hscript::lua::Environment<HasCommandBuffer, CommandBufferSize>
+                     ::set_global_namespace() {
+    lua_pushglobaltable(m_state);
+}
+
+template <bool HasCommandBuffer, size_t CommandBufferSize>
+void hscript::lua::Environment<HasCommandBuffer, CommandBufferSize>
+                     ::push_namespace(const std::string& _namespace) {
+    // See if a field already exists with the key of this namespace.
+    lua_getfield(m_state, -1, _namespace.c_str());
+    // If it doesn't, we can add it.
+    if (lua_isnil(m_state, -1)) {
+        // Pop the result of looking for the namespace.
+        lua_pop(m_state, 1);
+        // Add a clean table to the stack.
+        lua_newtable(m_state);
+        // Add this clean table to the previous table as a field with key as the namespace.
+        lua_setfield(m_state, -2, _namespace.c_str());
+        // Get the new namespace back on top of the stack (lua_setfield pops the top value on the stack).
+        lua_getfield(m_state, -1, _namespace.c_str());
+    }
+}
+
+template <bool HasCommandBuffer, size_t CommandBufferSize>
+bool hscript::lua::Environment<HasCommandBuffer, CommandBufferSize>
+                     ::register_lua_function(const std::string& name, OUT LuaFunctionState* state/* = nullptr*/) {
+    if (name.length() == 0) return false;
+
+    auto& cache = m_lua_functions;
+    if (m_parent) cache = m_parent->m_lua_functions;
+
+    // Check cache for whether this function is already registered.
+    if (cache.contains(name)) {
+        if (state) *state = m_lua_functions[name];
+
+        return true;
+    }
+
+    /*
+     * The general idea here is that we register a lua function by
+     * creating an entry for it in the script function table we
+     * attached to the Lua registry. This table is only ever appended
+     * to via `luaL_ref` in order that Lua can handle unique
+     * identifiers for all registered functions. To avoid creating
+     * duplicate registry entries for the same function, and to
+     * speed up access to Lua functions we register, we therefore
+     * also keep a cache of the information necessary to create
+     * a C-side callable to invoke registered Lua functions.
+     */
+
+    i32 prior_index = lua_gettop(m_state);
+
+    // Get our script function table in the Lua registry and place
+    // it on the Lua stack.
+    lua_getfield(m_state, LUA_REGISTRYINDEX, H_LUA_SCRIPT_FUNCTION_TABLE);
+
+    // Now put global namespace on the stack, we will be searching
+    // for the Lua function to register from here.
+    set_global_namespace();
+
+    std::stringstream name_stream{name};
+    for (std::string token; std::getline(name_stream, token, '.');) {
+        // Grab the next namespace (or function) from the
+        // previous' table.
+        lua_getfield(m_state, -1, token.c_str());
+        // Check that the object we just retrieved exists.
+        if (lua_isnil(m_state, -1)) return false;
+    }
+
+    // Check that the last object added to the stack
+    // was a valid function, if it wasn't then we have
+    // failed.
+    if (!lua_isfunction(m_state, -1)) return false;
+
+    // Place a reference to the function in the script
+    // function table of the Lua registry, and cache
+    // this.
+    if (state) {
+        *state = {
+            .state = m_state,
+            .index = luaL_ref(m_state, prior_index + 1)
+        };
+        cache[name] = *state;
+    } else {
+        cache[name] = {
+            .state = m_state,
+            .index = luaL_ref(m_state, prior_index + 1)
+        };
+    }
+
+    // Return stack to state prior to function registration.
+    i32 final_index = lua_gettop(m_state);
+    lua_pop(m_state, final_index - prior_index);
+
+    return true;
+}
+
+
+template <bool HasCommandBuffer, size_t CommandBufferSize>
 template <typename ...Strings>
-void hscript::lua::Environment::set_namespaces(Strings... namespaces) {
+void hscript::lua::Environment<HasCommandBuffer, CommandBufferSize>
+                     ::set_namespaces(Strings... namespaces) {
     set_global_namespace();
 
     for (const auto& _namespace : {namespaces...}) {
@@ -11,15 +242,19 @@ void hscript::lua::Environment::set_namespaces(Strings... namespaces) {
     }
 }
 
+template <bool HasCommandBuffer, size_t CommandBufferSize>
 template <typename ...Strings>
-void hscript::lua::Environment::enter_namespaces(Strings... namespaces) {
+void hscript::lua::Environment<HasCommandBuffer, CommandBufferSize>
+                     ::enter_namespaces(Strings... namespaces) {
     for (const auto& _namespace : {namespaces...}) {
         push_namespace(_namespace);
     }
 }
 
+template <bool HasCommandBuffer, size_t CommandBufferSize>
 template <typename Type>
-void hscript::lua::Environment::add_value(const std::string& name, Type val) {
+void hscript::lua::Environment<HasCommandBuffer, CommandBufferSize>
+                     ::add_value(const std::string& name, Type val) {
     if (m_parent) return m_parent->add_value(name, val);
 
     const i32 value_count = static_cast<i32>(LuaValue<Type>::value_count());
@@ -61,8 +296,10 @@ void hscript::lua::Environment::add_value(const std::string& name, Type val) {
     }
 }
 
+template <bool HasCommandBuffer, size_t CommandBufferSize>
 template <typename ReturnType, typename ...Parameters>
-void hscript::lua::Environment::add_c_delegate(const std::string& name, Delegate<ReturnType, Parameters...>* delegate) {
+void hscript::lua::Environment<HasCommandBuffer, CommandBufferSize>
+                     ::add_c_delegate(const std::string& name, Delegate<ReturnType, Parameters...>* delegate) {
     if (m_parent) return m_parent->add_c_delegate(name, delegate);
 
     LuaValue<void*>::push(m_state, reinterpret_cast<void*>(delegate));
@@ -71,8 +308,10 @@ void hscript::lua::Environment::add_c_delegate(const std::string& name, Delegate
     lua_setfield(m_state, -2, name.c_str());
 }
 
+template <bool HasCommandBuffer, size_t CommandBufferSize>
 template <typename ReturnType, typename ...Parameters>
-void hscript::lua::Environment::add_c_function(const std::string& name, ReturnType(*func)(Parameters...)) {
+void hscript::lua::Environment<HasCommandBuffer, CommandBufferSize>
+                     ::add_c_function(const std::string& name, ReturnType(*func)(Parameters...)) {
     if (m_parent) return m_parent->add_c_function(name, func);
 
     LuaValue<void*>::push(m_state, reinterpret_cast<void*>(func));
@@ -81,8 +320,10 @@ void hscript::lua::Environment::add_c_function(const std::string& name, ReturnTy
     lua_setfield(m_state, -2, name.c_str());
 }
 
+template <bool HasCommandBuffer, size_t CommandBufferSize>
 template <typename ...Upvalues>
-void hscript::lua::Environment::add_c_function(const std::string& name, i32(*func)(LuaHandle), Upvalues... upvalues) {
+void hscript::lua::Environment<HasCommandBuffer, CommandBufferSize>
+                     ::add_c_function(const std::string& name, i32(*func)(LuaHandle), Upvalues... upvalues) {
     if (m_parent) return m_parent->add_c_function(name, func, std::forward<Upvalues>(upvalues)...);
 
     (LuaValue<Upvalues>::push(m_state, upvalues), ...);
@@ -94,8 +335,10 @@ void hscript::lua::Environment::add_c_function(const std::string& name, i32(*fun
     lua_setfield(m_state, -2, name.c_str());
 }
 
+template <bool HasCommandBuffer, size_t CommandBufferSize>
 template <std::invocable Closure, typename ReturnType, typename ...Parameters>
-void hscript::lua::Environment::add_c_closure(const std::string& name, Closure* closure, ReturnType(Closure::*func)(Parameters...)) {
+void hscript::lua::Environment<HasCommandBuffer, CommandBufferSize>
+                     ::add_c_closure(const std::string& name, Closure* closure, ReturnType(Closure::*func)(Parameters...)) {
     if (m_parent) return m_parent->add_c_closure(name, closure, func);
 
     LuaValue<void*>::push(m_state, reinterpret_cast<void*>(closure));
@@ -105,8 +348,10 @@ void hscript::lua::Environment::add_c_closure(const std::string& name, Closure* 
     lua_setfield(m_state, -2, name.c_str());
 }
 
+template <bool HasCommandBuffer, size_t CommandBufferSize>
 template <typename ReturnType, typename ...Parameters>
-bool hscript::lua::Environment::get_script_function(const std::string& name, OUT ScriptDelegate<ReturnType, Parameters...>& delegate) {
+bool hscript::lua::Environment<HasCommandBuffer, CommandBufferSize>
+                     ::get_script_function(const std::string& name, OUT ScriptDelegate<ReturnType, Parameters...>& delegate) {
     // Try to obtain the named Lua function, registering it
     // if it was not already registered. If we could not
     // obtain it, report failure.

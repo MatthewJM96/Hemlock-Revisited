@@ -13,7 +13,13 @@ namespace hemlock {
             //                  - verify cache and function registration handling,
             //                  - consider if we can allow parallelism within groups.
 
-            class Environment : EnvironmentBase<Environment> {
+            template <bool HasCommandBuffer = false, size_t CommandBufferSize = 0>
+            class Environment :
+                    public EnvironmentBase<
+                        Environment<HasCommandBuffer, CommandBufferSize>,
+                        HasCommandBuffer,
+                        CommandBufferSize
+                    > {
                 friend i32 register_lua_function(LuaHandle);
             public:
                 Environment() :
@@ -52,7 +58,13 @@ namespace hemlock {
                  * @param max_script_length The maximum length of any
                  * script that this environment will process.
                  */
-                void init(EnvironmentBase* parent, hio::IOManagerBase* io_manager, ui32 max_script_length = HEMLOCK_DEFAULT_MAX_SCRIPT_LENGTH) final;
+                void init( EnvironmentBase<
+                                    Environment<HasCommandBuffer, CommandBufferSize>,
+                                    HasCommandBuffer,
+                                    CommandBufferSize
+                                >* parent,
+               hio::IOManagerBase* io_manager,
+                              ui32 max_script_length = HEMLOCK_DEFAULT_MAX_SCRIPT_LENGTH) final;
                 /**
                  * @brief Dispose the environment.
                  */
