@@ -15,6 +15,7 @@ namespace hemlock {
                  * @return i32 The number of returned parameters to
                  * Lua (will be one, an integer determining success).
                  */
+                template <bool HasCommandBuffer, size_t CommandBufferSize>
                 i32 register_lua_function(LuaHandle state);
 
                 /**

@@ -45,9 +45,9 @@ public:
         m_input_manager = static_cast<happ::SingleWindowApp*>(m_process)->input_manager();
     }
 protected:
-    MyIOManager                  m_iom;
-    hui::InputManager*           m_input_manager;
-    hscript::lua::Environment*   m_lua_env;
+    MyIOManager                    m_iom;
+    hui::InputManager*             m_input_manager;
+    hscript::lua::Environment<>*   m_lua_env;
 };
 
 #endif // __hemlock_tests_test_script_screen_hpp

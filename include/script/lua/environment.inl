@@ -7,8 +7,8 @@
 template <bool HasCommandBuffer, size_t CommandBufferSize>
 void hscript::lua::Environment<HasCommandBuffer, CommandBufferSize>
                      ::init(hio::IOManagerBase* io_manager, ui32 max_script_length /*= HEMLOCK_DEFAULT_MAX_SCRIPT_LENGTH*/) {
-    m_io_manager        = io_manager;
-    m_max_script_length = max_script_length;
+    _Base::m_io_manager        = io_manager;
+    _Base::m_max_script_length = max_script_length;
 
     // Initialise the Lua environment.
     m_state = luaL_newstate();
@@ -28,7 +28,7 @@ void hscript::lua::Environment<HasCommandBuffer, CommandBufferSize>
     set_global_namespace();
 
     // Expose Lua function registration to environment.
-    add_c_function("register_function", &hscript::lua::register_lua_function, this);
+    add_c_function("register_function", &hscript::lua::register_lua_function<HasCommandBuffer, CommandBufferSize>, this);
 
     if constexpr (HasCommandBuffer) {
         set_namespaces("foreign");
@@ -51,8 +51,8 @@ void hscript::lua::Environment<HasCommandBuffer, CommandBufferSize>
                                     HasCommandBuffer,
                                     CommandBufferSize
                                 >* parent, hio::IOManagerBase* io_manager, ui32 max_script_length /*= HEMLOCK_DEFAULT_MAX_SCRIPT_LENGTH*/) {
-    m_io_manager        = io_manager;
-    m_max_script_length = max_script_length;
+    _Base::m_io_manager        = io_manager;
+    _Base::m_max_script_length = max_script_length;
 
     // Cast to Lua environment.
     Environment* lua_parent = reinterpret_cast<Environment*>(parent);
@@ -83,9 +83,9 @@ template <bool HasCommandBuffer, size_t CommandBufferSize>
 bool hscript::lua::Environment<HasCommandBuffer, CommandBufferSize>
                      ::load(const hio::fs::path& filepath) {
     ui32 length = std::numeric_limits<ui32>::max();
-    const char* script = m_io_manager->read_file_to_string(filepath, &length);
+    const char* script = _Base::m_io_manager->read_file_to_string(filepath, &length);
 
-    if (!script || length > m_max_script_length) {
+    if (!script || length > _Base::m_max_script_length) {
         return false;
     }
 
@@ -113,9 +113,9 @@ template <bool HasCommandBuffer, size_t CommandBufferSize>
 bool hscript::lua::Environment<HasCommandBuffer, CommandBufferSize>
                      ::run(const hio::fs::path& filepath) {
     ui32 length = std::numeric_limits<ui32>::max();
-    const char* script = m_io_manager->read_file_to_string(filepath, &length);
+    const char* script = _Base::m_io_manager->read_file_to_string(filepath, &length);
 
-    if (!script || length > m_max_script_length) {
+    if (!script || length > _Base::m_max_script_length) {
         return false;
     }
 

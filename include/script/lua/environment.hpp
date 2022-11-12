@@ -20,7 +20,12 @@ namespace hemlock {
                         HasCommandBuffer,
                         CommandBufferSize
                     > {
-                friend i32 register_lua_function(LuaHandle);
+                friend i32 register_lua_function<HasCommandBuffer, CommandBufferSize>(LuaHandle);
+                using _Base = EnvironmentBase<
+                                Environment<HasCommandBuffer, CommandBufferSize>,
+                                HasCommandBuffer,
+                                CommandBufferSize
+                            >;
             public:
                 Environment() :
                     m_state(nullptr),
@@ -30,11 +35,7 @@ namespace hemlock {
 
                 H_NON_COPYABLE(Environment);
                 H_MOVABLE(Environment) {
-                    this->EnvironmentBase<
-                        Environment<HasCommandBuffer, CommandBufferSize>,
-                        HasCommandBuffer,
-                        CommandBufferSize
-                    >::operator=(std::move(rhs));
+                    this->_Base::operator=(std::move(rhs));
 
                     return *this;
                 }
@@ -62,13 +63,7 @@ namespace hemlock {
                  * @param max_script_length The maximum length of any
                  * script that this environment will process.
                  */
-                void init( EnvironmentBase<
-                                    Environment<HasCommandBuffer, CommandBufferSize>,
-                                    HasCommandBuffer,
-                                    CommandBufferSize
-                                >* parent,
-               hio::IOManagerBase* io_manager,
-                              ui32 max_script_length = HEMLOCK_DEFAULT_MAX_SCRIPT_LENGTH) final;
+                void init(_Base* parent, hio::IOManagerBase* io_manager, ui32 max_script_length = HEMLOCK_DEFAULT_MAX_SCRIPT_LENGTH) final;
                 /**
                  * @brief Dispose the environment.
                  */
