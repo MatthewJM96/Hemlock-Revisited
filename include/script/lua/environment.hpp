@@ -30,7 +30,11 @@ namespace hemlock {
 
                 H_NON_COPYABLE(Environment);
                 H_MOVABLE(Environment) {
-                    this->EnvironmentBase<Environment>::operator=(std::move(rhs));
+                    this->EnvironmentBase<
+                        Environment<HasCommandBuffer, CommandBufferSize>,
+                        HasCommandBuffer,
+                        CommandBufferSize
+                    >::operator=(std::move(rhs));
 
                     return *this;
                 }
