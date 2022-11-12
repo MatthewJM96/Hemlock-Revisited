@@ -13,8 +13,11 @@ namespace hemlock {
              * function.
              *
              * @param state The Lua state to operate within.
+             * @tparam HasCommandBuffer Whether the environment has a command buffer.
+             * @tparam CommandBufferSize The size of the command buffer.
              * @return i32 The number of returned arguments.
              */
+            template <bool HasCommandBuffer, size_t CommandBufferSize>
             i32 call_foreign(LuaHandle state);
 
             /**
@@ -22,8 +25,11 @@ namespace hemlock {
              * a call to a foreign function.
              *
              * @param state The Lua state to operate within.
+             * @tparam HasCommandBuffer Whether the environment has a command buffer.
+             * @tparam CommandBufferSize The size of the command buffer.
              * @return i32 The number of returned arguments.
              */
+            template <bool HasCommandBuffer, size_t CommandBufferSize>
             i32 query_foreign_call(LuaHandle state);
 
             /**
@@ -31,8 +37,11 @@ namespace hemlock {
              * values of a call to a foreign function.
              *
              * @param state The Lua state to operate within.
+             * @tparam HasCommandBuffer Whether the environment has a command buffer.
+             * @tparam CommandBufferSize The size of the command buffer.
              * @return i32 The number of returned arguments.
              */
+            template <bool HasCommandBuffer, size_t CommandBufferSize>
             i32 get_foreign_call_results(LuaHandle state);
 
             /**
@@ -41,8 +50,11 @@ namespace hemlock {
              * manually or automatically.
              *
              * @param state The Lua state to operate within.
+             * @tparam HasCommandBuffer Whether the environment has a command buffer.
+             * @tparam CommandBufferSize The size of the command buffer.
              * @return i32 The number of returned arguments.
              */
+            template <bool HasCommandBuffer, size_t CommandBufferSize>
             i32 set_manual_command_buffer_pump(LuaHandle state);
 
             /**
