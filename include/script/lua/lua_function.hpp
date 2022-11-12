@@ -12,6 +12,8 @@ namespace hemlock {
                  * with the C++ side.
                  *
                  * @param state The Lua state.
+                 * @tparam HasCommandBuffer Whether the environment has a command buffer.
+                 * @tparam CommandBufferSize The size of the command buffer.
                  * @return i32 The number of returned parameters to
                  * Lua (will be one, an integer determining success).
                  */
