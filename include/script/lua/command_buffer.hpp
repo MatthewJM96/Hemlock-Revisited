@@ -64,8 +64,11 @@ namespace hemlock {
              * pumping is turned on.
              *
              * @param state The Lua state to operate within.
+             * @tparam HasCommandBuffer Whether the environment has a command buffer.
+             * @tparam CommandBufferSize The size of the command buffer.
              * @return i32 The number of returned arguments.
              */
+            template <bool HasCommandBuffer, size_t CommandBufferSize>
             i32 pump_command_buffer(LuaHandle state);
         }
     }
