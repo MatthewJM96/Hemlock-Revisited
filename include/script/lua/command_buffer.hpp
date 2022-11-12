@@ -75,4 +75,6 @@ namespace hemlock {
 }
 namespace hscript = hemlock::script;
 
+#include "command_buffer.inl"
+
 #endif // __hemlock_script_lua_command_buffer_hpp
