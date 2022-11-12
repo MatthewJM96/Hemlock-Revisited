@@ -235,7 +235,7 @@ namespace hemlock {
             std::conditional<
                 HasCommandBuffer,
                 CommandBuffer<CommandBufferSize>,
-                Empty
+                std::monostate
             >::type m_command_buffer;
 
             hio::IOManagerBase* m_io_manager;

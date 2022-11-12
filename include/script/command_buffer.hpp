@@ -106,7 +106,7 @@ namespace hemlock {
             std::conditional<
                 std::greater<size_t>()(BufferSize, 0),
                 size_t,
-                Empty
+                std::monostate
             >::type m_commands_buffered;
         };
     }

@@ -116,8 +116,6 @@ using colour3 = ui8v3;
 using colour4 = ui8v4;
 
 namespace hemlock {
-    struct Empty {};
-
     template<typename ReturnType, typename... Args>
     struct Delegate;
 
