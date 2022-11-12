@@ -11,7 +11,7 @@ namespace hemlock {
 
             // TODO(Matthew): Revisit handling of group environments:
             //                  - verify cache and function registration handling,
-            //                  - consider if we can allow parallelism within groups.
+            //                  - within group parallelism with lua_xmove?
 
             template <bool HasCommandBuffer = false, size_t CommandBufferSize = 0>
             class Environment :
