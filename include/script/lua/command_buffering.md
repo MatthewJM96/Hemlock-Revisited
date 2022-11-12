@@ -41,7 +41,7 @@ value serves as ID which can be used in querying.
 ### query_foreign_call
 
 Signature:
-i32 query_foreign_call(i64 id)
+i32 query_foreign_call(string mod_name, i64 id)
 
 Queries the state of a buffered foreign call with ID id. Returned value is -1 if no
 foreign call is buffered with ID id, and otherwise an enumerated state:
@@ -52,7 +52,7 @@ foreign call is buffered with ID id, and otherwise an enumerated state:
 ### get_foreign_call_results
 
 Signature:
-i32, ReturnValues... get_foreign_call_results(i64 id)
+i32, ReturnValues... get_foreign_call_results(string mod_name, i64 id)
 
 Obtains the results of a buffered foreign call with ID id. The first value returned is
 a status, -1 being returned if no foreign call is buffered with ID id, and otherwise an
