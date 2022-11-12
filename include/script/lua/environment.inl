@@ -135,7 +135,11 @@ bool hscript::lua::Environment<HasCommandBuffer, CommandBufferSize>
 template <bool HasCommandBuffer, size_t CommandBufferSize>
 void hscript::lua::Environment<HasCommandBuffer, CommandBufferSize>
                      ::set_global_namespace() {
+    lua_pop(m_state, m_namespace_depth);
+
     lua_pushglobaltable(m_state);
+
+    m_namespace_depth = 1;
 }
 
 template <bool HasCommandBuffer, size_t CommandBufferSize>
@@ -191,7 +195,7 @@ bool hscript::lua::Environment<HasCommandBuffer, CommandBufferSize>
 
     // Now put global namespace on the stack, we will be searching
     // for the Lua function to register from here.
-    set_global_namespace();
+    lua_pushglobaltable(m_state);
 
     std::stringstream name_stream{name};
     for (std::string token; std::getline(name_stream, token, '.');) {

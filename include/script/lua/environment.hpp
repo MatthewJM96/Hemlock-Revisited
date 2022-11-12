@@ -231,6 +231,7 @@ namespace hemlock {
                 LuaHandle       m_state;
                 Environment*    m_parent;
                 LuaFunctions    m_lua_functions;
+                i32             m_namespace_depth;
             };
         }
     }
