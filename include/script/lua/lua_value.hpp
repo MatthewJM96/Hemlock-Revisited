@@ -11,6 +11,7 @@ namespace hemlock {
             template <typename Type>
                 requires (
                     std::is_arithmetic<Type>::value
+                    || std::is_enum<Type>::value
                     || std::is_pointer<Type>::value
                     || std::is_member_function_pointer<Type>::value
                     || is_same_template<std::string, Type>::value
