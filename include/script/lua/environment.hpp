@@ -19,8 +19,15 @@ namespace hemlock {
                         Environment<HasCommandBuffer, CommandBufferSize>,
                         HasCommandBuffer,
                         CommandBufferSize
-                    > {
+                    >
+            {
                 friend i32 register_lua_function<HasCommandBuffer, CommandBufferSize>(LuaHandle);
+                friend i32 call_foreign<HasCommandBuffer, CommandBufferSize>(LuaHandle state);
+                friend i32 query_foreign_call<HasCommandBuffer, CommandBufferSize>(LuaHandle state);
+                friend i32 get_foreign_call_results<HasCommandBuffer, CommandBufferSize>(LuaHandle state);
+                friend i32 set_manual_command_buffer_pump<HasCommandBuffer, CommandBufferSize>(LuaHandle state);
+                friend i32 pump_command_buffer<HasCommandBuffer, CommandBufferSize>(LuaHandle state);
+
                 using _Base = EnvironmentBase<
                                 Environment<HasCommandBuffer, CommandBufferSize>,
                                 HasCommandBuffer,
