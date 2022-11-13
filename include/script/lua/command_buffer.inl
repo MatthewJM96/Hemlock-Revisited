@@ -133,10 +133,40 @@ i32 hscript::lua::get_foreign_call_results(LuaHandle state) {
 
 template <bool HasCommandBuffer, size_t CommandBufferSize>
 i32 hscript::lua::set_manual_command_buffer_pump(LuaHandle state) {
+    using _Environment = Environment<HasCommandBuffer, CommandBufferSize>;
 
+    // Get the captured environment pointer.
+    _Environment* env = LuaValue<_Environment*>::retrieve_upvalue(state, 1);
+
+    // We expect at most one parameter: bool flag indicating if to
+    // manual pump.
+    if (lua_gettop(state) <= 1) {
+        LuaValue<i32>::push(state, -1);
+        return 1;
+    }
+
+    bool manual_pump = true;
+    if (lua_gettop(state) == 1) {
+        // Try to get the bool flag if it exists, if we can't then return.
+        if (!LuaValue<bool>::try_pop(state, manual_pump)) {
+            LuaValue<i32>::push(state, -2);
+            return 1;
+        }
+    }
+
+    env->m_command_buffer_manual_pump = manual_pump;
+
+    LuaValue<i32>::push(state, 0);
+    return 1;
 }
 
 template <bool HasCommandBuffer, size_t CommandBufferSize>
 i32 hscript::lua::pump_command_buffer(LuaHandle state) {
+    using _Environment = Environment<HasCommandBuffer, CommandBufferSize>;
 
+    _Environment* env = LuaValue<_Environment*>::retrieve_upvalue(state, 1);
+
+    env->pump_command_buffer();
+
+    return 0;
 }

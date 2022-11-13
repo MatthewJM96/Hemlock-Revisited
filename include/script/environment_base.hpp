@@ -237,6 +237,11 @@ namespace hemlock {
                 CommandBuffer<CommandBufferSize>,
                 std::monostate
             >::type m_command_buffer;
+            std::conditional<
+                HasCommandBuffer,
+                bool,
+                std::monostate
+            >::type m_command_buffer_manual_pump;
 
             hio::IOManagerBase* m_io_manager;
             ui32 m_max_script_length;
