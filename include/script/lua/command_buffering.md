@@ -64,7 +64,7 @@ the rest of the return values are those returned by the called foreign function.
 ### set_manual_command_buffer_pump
 
 Signature:
-void set_manual_command_buffer_pump(bool use_manual = true)
+i32 set_manual_command_buffer_pump(bool use_manual = true)
 
 Calling set_manual_command_buffer_pump with use_manual set to true (the default), sets
 the calling environment to not automatically pump its command buffer before the update
