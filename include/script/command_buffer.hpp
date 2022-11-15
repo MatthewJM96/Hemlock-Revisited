@@ -39,7 +39,7 @@ namespace hemlock {
         };
         using CommandsData = std::unordered_map<CommandID, CommandData>;
 
-        // TODO(Matthew): Speed? Mutex use if heavy.
+        // TODO(Matthew): Speed? Mutex use is heavy.
         template <size_t BufferSize = 0>
         class CommandBuffer {
         public:
