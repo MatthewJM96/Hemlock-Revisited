@@ -18,24 +18,24 @@ namespace hemlock {
         };
 
         // TODO(Matthew): Can we support arrays? Tables?
-        enum class CommandReturnType {
+        enum class CommandCallType {
             BOOLEAN,
             NUMBER,
             STRING,
             USERDATA
         };
-        using CommandReturnValue   = std::byte[8];
-        using CommandReturnValues  = std::vector<
-                                            std::pair<
-                                                CommandReturnType,
-                                                CommandReturnValue
-                                            >
-                                        >;
+        using CommandCallValue  = std::byte[8];
+        using CommandCallValues = std::vector<
+                                        std::pair<
+                                            CommandCallType,
+                                            CommandCallValue
+                                        >
+                                   >;
 
         struct CommandData {
             size_t              index;
             CommandState        state;
-            CommandReturnValues return_values;
+            CommandCallValues   call_values;
         };
         using CommandsData = std::unordered_map<CommandID, CommandData>;
 

@@ -70,7 +70,7 @@ i32 hscript::CommandBuffer<BufferSize>::command_state(CommandID id, OUT CommandS
 
 template <size_t BufferSize>
 i32 hscript::CommandBuffer<BufferSize>::command_return_values( CommandID id,
-                                                OUT CommandReturnValues& return_values ) {
+                                                  OUT CommandCallValues& return_values ) {
     std::lock_guard<std::mutex> lock(m_buffer_lock);
 
     auto it = m_command_data.find(id);
@@ -79,7 +79,7 @@ i32 hscript::CommandBuffer<BufferSize>::command_return_values( CommandID id,
         return -1;
     }
 
-    return_values = it->second.return_values;
+    return_values = it->second.call_values;
 
     return 0;
 }
