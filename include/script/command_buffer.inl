@@ -79,6 +79,10 @@ i32 hscript::CommandBuffer<BufferSize>::command_return_values( CommandID id,
         return -1;
     }
 
+    if (it->second.state != CommandState::COMPLETE) {
+        return -2;
+    }
+
     return_values = it->second.call_values;
 
     return 0;
