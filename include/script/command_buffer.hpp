@@ -39,26 +39,6 @@ namespace hemlock {
         };
         using CommandsData = std::unordered_map<CommandID, CommandData>;
 
-        class CommandBufferIterator {
-        public:
-            using iterator_category     = std::forward_iterator_tag;
-            using value_type            = CommandData;
-            using difference_type       = std::ptrdiff_t;
-            using pointer               = value_type*;
-            using reference             = value_type&;
-
-            CommandBufferIterator(CommandsData::iterator& it, std::mutex& mutex);
-            ~CommandBufferIterator();
-
-            H_COPYABLE(CommandBufferIterator);
-            H_MOVABLE(CommandBufferIterator);
-
-            CommandBufferIterator& operator++();
-        protected:
-            std::mutex*             m_mutex;
-            CommandsData::iterator  m_data_iterator;
-        };
-
         // TODO(Matthew): Speed? Mutex use is heavy.
         template <size_t BufferSize = 0>
         class CommandBuffer {
@@ -116,14 +96,6 @@ namespace hemlock {
              * ID, otherwise 0.
              */
             i32 remove_command(CommandID id);
-
-            /**
-             * @brief Clears the command buffer, leaving metadata about
-             * status of commands and 
-             */
-
-            CommandBufferIterator begin();
-            CommandBufferIterator end();
         protected:
             CommandID       m_latest_command_id;
             Commands        m_commands;

@@ -88,6 +88,8 @@ i32 hscript::CommandBuffer<BufferSize>::command_return_values( CommandID id,
     return 0;
 }
 
+
+
 template <size_t BufferSize>
 i32 hscript::CommandBuffer<BufferSize>::remove_command(CommandID id) {
     std::lock_guard<std::mutex> lock(m_buffer_lock);
@@ -113,14 +115,4 @@ i32 hscript::CommandBuffer<BufferSize>::remove_command(CommandID id) {
     }
 
     m_command_data.erase(it);
-}
-
-template <size_t BufferSize>
-hscript::CommandBufferIterator hscript::CommandBuffer<BufferSize>::begin() {
-    return CommandBufferIterator(m_command_data.begin(), m_buffer_lock);
-}
-
-template <size_t BufferSize>
-hscript::CommandBufferIterator hscript::CommandBuffer<BufferSize>::end() {
-    return CommandBufferIterator(m_command_data.end(), m_buffer_lock);
 }
