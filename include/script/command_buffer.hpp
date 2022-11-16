@@ -106,7 +106,7 @@ namespace hemlock {
              * ID, otherwise 0.
              */
             i32 command_return_values( CommandID id, 
-                        OUT CommandReturnValues& return_values );
+                          OUT CommandCallValues& return_values );
 
             /**
              * @brief Removes command with the given ID from the buffer.

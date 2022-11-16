@@ -118,7 +118,7 @@ i32 hscript::lua::get_foreign_call_results(LuaHandle state) {
     _Environment* foreign_env = env->m_registry->get_environment(env_name);
 
     // Buffer function call in foreign env.
-    CommandReturnValues cmd_return_values;
+    CommandCallValues cmd_return_values;
     i32 ret = foreign_env->m_command_buffer.command_state(cmd_id, cmd_return_values);
 
     if (ret < 0) {
