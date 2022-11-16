@@ -21,7 +21,7 @@ hscript::CommandID hscript::CommandBuffer<BufferSize>::append_command(std::strin
     std::lock_guard<std::mutex> lock(m_buffer_lock);
 
     CommandID id  = m_latest_command_id++;
-    size_t    idx = 0;
+    i32       idx = -1;
 
     // Handle command buffering differently depending on if we have an uncapped buffer
     // size, or a fixed buffer size.
@@ -109,4 +109,14 @@ i32 hscript::CommandBuffer<BufferSize>::remove_command(CommandID id) {
     }
 
     m_command_data.erase(it);
+}
+
+template <size_t BufferSize>
+hscript::CommandBufferIterator hscript::CommandBuffer<BufferSize>::begin() {
+    return CommandBufferIterator(m_command_data.begin(), m_buffer_lock);
+}
+
+template <size_t BufferSize>
+hscript::CommandBufferIterator hscript::CommandBuffer<BufferSize>::end() {
+    return CommandBufferIterator(m_command_data.end(), m_buffer_lock);
 }
