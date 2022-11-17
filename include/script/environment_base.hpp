@@ -5,8 +5,9 @@
 #define HEMLOCK_DEFAULT_MAX_SCRIPT_LENGTH 50 * 1024 * 1024
 #endif // HEMLOCK_DEFAULT_MAX_SCRIPT_LENGTH
 
+#include "script/environment_base_decl.hpp"
 #include "script/state.hpp"
-#include "script/command_buffer.hpp"
+#include "script/rpc_manager.hpp"
 
 
 // TODO(Matthew): Create a REPL client that can be used for dev console and so on.
@@ -23,8 +24,8 @@ namespace hemlock {
 
         template <
             typename EnvironmentImpl,
-            bool HasCommandBuffer = false,
-            size_t CommandBufferSize = 0
+            bool HasRPCManager /*= false*/,
+            size_t CallBufferSize /*= 0*/
         >
         class EnvironmentBase {
         public:
@@ -233,12 +234,12 @@ namespace hemlock {
             EnvironmentRegistry<EnvironmentImpl>* m_registry;
 
             std::conditional<
-                HasCommandBuffer,
-                CommandBuffer<CommandBufferSize>,
+                HasRPCManager,
+                RPCManager<EnvironmentImpl, CallBufferSize>,
                 std::monostate
             >::type m_command_buffer;
             std::conditional<
-                HasCommandBuffer,
+                HasRPCManager,
                 bool,
                 std::monostate
             >::type m_command_buffer_manual_pump;

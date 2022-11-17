@@ -1,6 +1,6 @@
-template <bool HasCommandBuffer, size_t CommandBufferSize>
+template <bool HasRPCManager, size_t CallBufferSize>
 i32 hscript::lua::call_foreign(LuaHandle state) {
-    using _Environment = Environment<HasCommandBuffer, CommandBufferSize>;
+    using _Environment = Environment<HasRPCManager, CallBufferSize>;
 
     // Get the captured environment pointer.
     _Environment* env = LuaValue<_Environment*>::retrieve_upvalue(state, 1);
@@ -36,16 +36,16 @@ i32 hscript::lua::call_foreign(LuaHandle state) {
     _Environment* foreign_env = env->m_registry->get_environment(env_name);
 
     // Buffer function call in foreign env.
-    CommandID cmd_id = foreign_env->m_command_buffer.append_command(std::move(function_name));
+    CallID call_id = foreign_env->m_command_buffer.append_command(std::move(function_name));
 
     // Pass command ID back to caller.
-    LuaValue<CommandID>::push(state, cmd_id);
+    LuaValue<CallID>::push(state, call_id);
     return 1;
 }
 
-template <bool HasCommandBuffer, size_t CommandBufferSize>
+template <bool HasRPCManager, size_t CallBufferSize>
 i32 hscript::lua::query_foreign_call(LuaHandle state) {
-    using _Environment = Environment<HasCommandBuffer, CommandBufferSize>;
+    using _Environment = Environment<HasRPCManager, CallBufferSize>;
 
     // Get the captured environment pointer.
     _Environment* env = LuaValue<_Environment*>::retrieve_upvalue(state, 1);
@@ -64,8 +64,8 @@ i32 hscript::lua::query_foreign_call(LuaHandle state) {
     }
 
     // Try to get the ID of the command, if we can't then return.
-    CommandID cmd_id;
-    if (!LuaValue<CommandID>::try_pop(state, cmd_id)) {
+    CallID call_id;
+    if (!LuaValue<CallID>::try_pop(state, call_id)) {
         LuaValue<i32>::push(state, -3);
         return 1;
     }
@@ -74,8 +74,8 @@ i32 hscript::lua::query_foreign_call(LuaHandle state) {
     _Environment* foreign_env = env->m_registry->get_environment(env_name);
 
     // Buffer function call in foreign env.
-    CommandState cmd_state;
-    i32 ret = foreign_env->m_command_buffer.command_state(cmd_id, cmd_state);
+    CallState cmd_state;
+    i32 ret = foreign_env->m_command_buffer.command_state(call_id, cmd_state);
 
     if (ret < 0) {
         // Pass command ID back to caller.
@@ -83,13 +83,13 @@ i32 hscript::lua::query_foreign_call(LuaHandle state) {
         return 1;
     }
 
-    LuaValue<CommandState>::push(state, cmd_state);
+    LuaValue<CallState>::push(state, cmd_state);
     return 1;
 }
 
-template <bool HasCommandBuffer, size_t CommandBufferSize>
+template <bool HasRPCManager, size_t CallBufferSize>
 i32 hscript::lua::get_foreign_call_results(LuaHandle state) {
-    using _Environment = Environment<HasCommandBuffer, CommandBufferSize>;
+    using _Environment = Environment<HasRPCManager, CallBufferSize>;
 
     // Get the captured environment pointer.
     _Environment* env = LuaValue<_Environment*>::retrieve_upvalue(state, 1);
@@ -108,8 +108,8 @@ i32 hscript::lua::get_foreign_call_results(LuaHandle state) {
     }
 
     // Try to get the ID of the command, if we can't then return.
-    CommandID cmd_id;
-    if (!LuaValue<CommandID>::try_pop(state, cmd_id)) {
+    CallID call_id;
+    if (!LuaValue<CallID>::try_pop(state, call_id)) {
         LuaValue<i32>::push(state, -3);
         return 1;
     }
@@ -118,8 +118,8 @@ i32 hscript::lua::get_foreign_call_results(LuaHandle state) {
     _Environment* foreign_env = env->m_registry->get_environment(env_name);
 
     // Buffer function call in foreign env.
-    CommandCallValues cmd_return_values;
-    i32 ret = foreign_env->m_command_buffer.command_state(cmd_id, cmd_return_values);
+    CallValues return_values;
+    i32 ret = foreign_env->m_command_buffer.command_state(call_id, return_values);
 
     if (ret < 0) {
         // Pass command ID back to caller.
@@ -128,12 +128,12 @@ i32 hscript::lua::get_foreign_call_results(LuaHandle state) {
     }
 
     // TODO(Matthew): Push return values onto the stack.
-    return cmd_return_values.size();
+    return return_values.size();
 }
 
-template <bool HasCommandBuffer, size_t CommandBufferSize>
+template <bool HasRPCManager, size_t CallBufferSize>
 i32 hscript::lua::set_manual_command_buffer_pump(LuaHandle state) {
-    using _Environment = Environment<HasCommandBuffer, CommandBufferSize>;
+    using _Environment = Environment<HasRPCManager, CallBufferSize>;
 
     // Get the captured environment pointer.
     _Environment* env = LuaValue<_Environment*>::retrieve_upvalue(state, 1);
@@ -160,9 +160,9 @@ i32 hscript::lua::set_manual_command_buffer_pump(LuaHandle state) {
     return 1;
 }
 
-template <bool HasCommandBuffer, size_t CommandBufferSize>
+template <bool HasRPCManager, size_t CallBufferSize>
 i32 hscript::lua::pump_command_buffer(LuaHandle state) {
-    using _Environment = Environment<HasCommandBuffer, CommandBufferSize>;
+    using _Environment = Environment<HasRPCManager, CallBufferSize>;
 
     _Environment* env = LuaValue<_Environment*>::retrieve_upvalue(state, 1);
 

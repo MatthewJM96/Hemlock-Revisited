@@ -1,7 +1,5 @@
-#ifndef __hemlock_script_lua_command_buffer_hpp
-#define __hemlock_script_lua_command_buffer_hpp
-
-#include "script/command_buffer.hpp"
+#ifndef __hemlock_script_lua_rpc_functions_hpp
+#define __hemlock_script_lua_rpc_functions_hpp
 
 #include "state.hpp"
 
@@ -13,11 +11,11 @@ namespace hemlock {
              * function.
              *
              * @param state The Lua state to operate within.
-             * @tparam HasCommandBuffer Whether the environment has a command buffer.
-             * @tparam CommandBufferSize The size of the command buffer.
+             * @tparam HasRPCManager Whether the environment has an RPC manager.
+             * @tparam CallBufferSize The size of the command buffer.
              * @return i32 The number of returned arguments.
              */
-            template <bool HasCommandBuffer, size_t CommandBufferSize>
+            template <bool HasRPCManager, size_t CallBufferSize>
             i32 call_foreign(LuaHandle state);
 
             /**
@@ -25,11 +23,11 @@ namespace hemlock {
              * a call to a foreign function.
              *
              * @param state The Lua state to operate within.
-             * @tparam HasCommandBuffer Whether the environment has a command buffer.
-             * @tparam CommandBufferSize The size of the command buffer.
+             * @tparam HasRPCManager Whether the environment has an RPC manager.
+             * @tparam CallBufferSize The size of the command buffer.
              * @return i32 The number of returned arguments.
              */
-            template <bool HasCommandBuffer, size_t CommandBufferSize>
+            template <bool HasRPCManager, size_t CallBufferSize>
             i32 query_foreign_call(LuaHandle state);
 
             /**
@@ -37,11 +35,11 @@ namespace hemlock {
              * values of a call to a foreign function.
              *
              * @param state The Lua state to operate within.
-             * @tparam HasCommandBuffer Whether the environment has a command buffer.
-             * @tparam CommandBufferSize The size of the command buffer.
+             * @tparam HasRPCManager Whether the environment has an RPC manager.
+             * @tparam CallBufferSize The size of the command buffer.
              * @return i32 The number of returned arguments.
              */
-            template <bool HasCommandBuffer, size_t CommandBufferSize>
+            template <bool HasRPCManager, size_t CallBufferSize>
             i32 get_foreign_call_results(LuaHandle state);
 
             /**
@@ -50,11 +48,11 @@ namespace hemlock {
              * manually or automatically.
              *
              * @param state The Lua state to operate within.
-             * @tparam HasCommandBuffer Whether the environment has a command buffer.
-             * @tparam CommandBufferSize The size of the command buffer.
+             * @tparam HasRPCManager Whether the environment has an RPC manager.
+             * @tparam CallBufferSize The size of the command buffer.
              * @return i32 The number of returned arguments.
              */
-            template <bool HasCommandBuffer, size_t CommandBufferSize>
+            template <bool HasRPCManager, size_t CallBufferSize>
             i32 set_manual_command_buffer_pump(LuaHandle state);
 
             /**
@@ -64,17 +62,17 @@ namespace hemlock {
              * pumping is turned on.
              *
              * @param state The Lua state to operate within.
-             * @tparam HasCommandBuffer Whether the environment has a command buffer.
-             * @tparam CommandBufferSize The size of the command buffer.
+             * @tparam HasRPCManager Whether the environment has an RPC manager.
+             * @tparam CallBufferSize The size of the command buffer.
              * @return i32 The number of returned arguments.
              */
-            template <bool HasCommandBuffer, size_t CommandBufferSize>
+            template <bool HasRPCManager, size_t CallBufferSize>
             i32 pump_command_buffer(LuaHandle state);
         }
     }
 }
 namespace hscript = hemlock::script;
 
-#include "command_buffer.inl"
+#include "rpc_functions.inl"
 
-#endif // __hemlock_script_lua_command_buffer_hpp
+#endif // __hemlock_script_lua_rpc_functions_hpp

@@ -1,8 +1,8 @@
 #include "lua_value.hpp"
 
-template <bool HasCommandBuffer, size_t CommandBufferSize>
+template <bool HasRPCManager, size_t CallBufferSize>
 i32 hscript::lua::register_lua_function(LuaHandle state) {
-    using _Environment = Environment<HasCommandBuffer, CommandBufferSize>;
+    using _Environment = Environment<HasRPCManager, CallBufferSize>;
 
     // Get the captured environment pointer.
     _Environment* env = LuaValue<_Environment*>::retrieve_upvalue(state, 1);
