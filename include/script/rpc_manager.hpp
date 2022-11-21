@@ -75,11 +75,12 @@ namespace hemlock {
              * if the buffer is not already full.
              *
              * @param call The call to append.
+             * @param parameters The parameters to pass to the appended call
              * @return CallID The ID associated with the call,
              * negative if the call was not appended. (Currently
              * -1 is returned solely.)
              */
-            CallID append_call(std::string&& call);
+            CallID append_call(std::string&& call, CallValues&& parameters);
 
             /**
              * @brief Get the state of buffered call with the
