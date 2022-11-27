@@ -152,7 +152,7 @@ namespace hemlock {
              * @param val The value to be added to the environment.
              */
             template <typename Type>
-            void add_value(const std::string& name, Type val) {
+            void add_value(std::string_view name, Type val) {
                 reinterpret_cast<EnvironmentImpl*>(this)->add_value(name, std::forward<Type>(val));
             }
             /**
@@ -166,7 +166,7 @@ namespace hemlock {
              * @param delegate The delegate to be added to the environment.
              */
             template <typename ReturnType, typename ...Parameters>
-            void add_c_delegate(const std::string& name, Delegate<ReturnType, Parameters...>* delegate) {
+            void add_c_delegate(std::string_view name, Delegate<ReturnType, Parameters...>* delegate) {
                 reinterpret_cast<EnvironmentImpl*>(this)->add_c_delegate(name, delegate);
             }
             /**
@@ -180,7 +180,7 @@ namespace hemlock {
              * @param func The function to be added to the environment.
              */
             template <typename ReturnType, typename ...Parameters>
-            void add_c_function(const std::string& name, ReturnType(*func)(Parameters...)) {
+            void add_c_function(std::string_view name, ReturnType(*func)(Parameters...)) {
                 reinterpret_cast<EnvironmentImpl*>(this)->add_c_function(name, func);
             }
             /**
@@ -196,7 +196,7 @@ namespace hemlock {
              * @param func The closure's invocation method.
              */
             template <std::invocable Closure, typename ReturnType, typename ...Parameters>
-            void add_c_closure(const std::string& name, Closure* closure, ReturnType(Closure::*func)(Parameters...)) {
+            void add_c_closure(std::string_view name, Closure* closure, ReturnType(Closure::*func)(Parameters...)) {
                 reinterpret_cast<EnvironmentImpl*>(this)->add_c_closure(name, closure, func);
             }
             /**
@@ -212,7 +212,7 @@ namespace hemlock {
              * @param closure The closure to be added to the environment.
              */
             template <std::invocable Closure>
-            void add_c_closure(const std::string& name, Closure* closure) {
+            void add_c_closure(std::string_view name, Closure* closure) {
                 reinterpret_cast<EnvironmentImpl*>(this)->add_c_closure(name, closure, Closure::operator());
             }
 
@@ -227,7 +227,7 @@ namespace hemlock {
              * @return True if the script function was obtained, false otherwise.
              */
             template <typename ReturnType, typename ...Parameters>
-            bool get_script_function(const std::string& name, OUT ScriptDelegate<ReturnType, Parameters...>& delegate) {
+            bool get_script_function(std::string&& name, OUT ScriptDelegate<ReturnType, Parameters...>& delegate) {
                 return reinterpret_cast<EnvironmentImpl*>(this)->get_script_function(name);
             }
         protected:

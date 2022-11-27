@@ -164,7 +164,7 @@ void hscript::lua::Environment<HasRPCManager, CallBufferSize>
 
 template <bool HasRPCManager, size_t CallBufferSize>
 bool hscript::lua::Environment<HasRPCManager, CallBufferSize>
-                     ::register_lua_function(const std::string& name, OUT LuaFunctionState* state/* = nullptr*/) {
+                     ::register_lua_function(std::string&& name, OUT LuaFunctionState* state/* = nullptr*/) {
     if (name.length() == 0) return false;
 
     auto& cache = m_lua_functions;
@@ -199,13 +199,28 @@ bool hscript::lua::Environment<HasRPCManager, CallBufferSize>
     // for the Lua function to register from here.
     lua_pushglobaltable(m_state);
 
-    std::stringstream name_stream{name};
-    for (std::string token; std::getline(name_stream, token, '.');) {
-        // Grab the next namespace (or function) from the
-        // previous' table.
-        lua_getfield(m_state, -1, token.c_str());
+    // Iterate through namesapces needed to get to the function we
+    // are registering.
+    size_t last_idx = 0;
+    size_t next_idx = name.find('.');
+    while (true) {
+        // Determine the next token in the string naming the function.
+        std::string_view token = std::string_view(name).substr(last_idx, next_idx - last_idx);
+
+        // Push token onto stack, naming the entry in the current table
+        // on the stack that should lead to the function we are registering.
+        lua_pushlstring(m_state, token.data(), token.size());
+        // Grab the next namespace (or function) from the previous' table.
+        lua_gettable(m_state, -2);
         // Check that the object we just retrieved exists.
         if (lua_isnil(m_state, -1)) return false;
+
+        // Break out if we just handled the last token in the function
+        // name.
+        if (next_idx == std::string::npos) break;
+
+        last_idx = next_idx + 1;
+        next_idx = name.find('.', last_idx);
     }
 
     // Check that the last object added to the stack
@@ -221,9 +236,9 @@ bool hscript::lua::Environment<HasRPCManager, CallBufferSize>
             .state = m_state,
             .index = luaL_ref(m_state, prior_index + 1)
         };
-        cache[name] = *state;
+        cache[std::move(name)] = *state;
     } else {
-        cache[name] = {
+        cache[std::move(name)] = {
             .state = m_state,
             .index = luaL_ref(m_state, prior_index + 1)
         };
@@ -260,7 +275,7 @@ void hscript::lua::Environment<HasRPCManager, CallBufferSize>
 template <bool HasRPCManager, size_t CallBufferSize>
 template <typename Type>
 void hscript::lua::Environment<HasRPCManager, CallBufferSize>
-                     ::add_value(const std::string& name, Type val) {
+                     ::add_value(std::string_view name, Type val) {
     if (m_parent) return m_parent->add_value(name, val);
 
     const i32 value_count = static_cast<i32>(LuaValue<Type>::value_count());
@@ -276,8 +291,9 @@ void hscript::lua::Environment<HasRPCManager, CallBufferSize>
         // In case of adding one value only, just push it onto the
         // Lua stack and then set it as a value under the field below
         // it on the stack, the namespace it will sit in.
+        lua_pushlstring(m_state, name.data(), name.size());
         LuaValue<Type>::push(m_state, val);
-        lua_setfield(m_state, -1, name.c_str());
+        lua_settable(m_state, -3);
     } else {
         // In case of adding multiple values, we first push the name
         // to give the value as a namespace, then push the value onto
@@ -305,64 +321,75 @@ void hscript::lua::Environment<HasRPCManager, CallBufferSize>
 template <bool HasRPCManager, size_t CallBufferSize>
 template <typename ReturnType, typename ...Parameters>
 void hscript::lua::Environment<HasRPCManager, CallBufferSize>
-                     ::add_c_delegate(const std::string& name, Delegate<ReturnType, Parameters...>* delegate) {
+                     ::add_c_delegate(std::string_view name, Delegate<ReturnType, Parameters...>* delegate) {
     if (m_parent) return m_parent->add_c_delegate(name, delegate);
+
+    lua_pushlstring(m_state, name.data(), name.size());
 
     LuaValue<void*>::push(m_state, reinterpret_cast<void*>(delegate));
 
     lua_pushcclosure(m_state, invoke_delegate<ReturnType, Parameters...>, 1);
-    lua_setfield(m_state, -2, name.c_str());
+
+    lua_settable(m_state, -3);
 }
 
 template <bool HasRPCManager, size_t CallBufferSize>
 template <typename ReturnType, typename ...Parameters>
 void hscript::lua::Environment<HasRPCManager, CallBufferSize>
-                     ::add_c_function(const std::string& name, ReturnType(*func)(Parameters...)) {
+                     ::add_c_function(std::string_view name, ReturnType(*func)(Parameters...)) {
     if (m_parent) return m_parent->add_c_function(name, func);
+
+    lua_pushlstring(m_state, name.data(), name.size());
 
     LuaValue<void*>::push(m_state, reinterpret_cast<void*>(func));
 
     lua_pushcclosure(m_state, invoke_function<ReturnType, Parameters...>, 1);
-    lua_setfield(m_state, -2, name.c_str());
+
+    lua_settable(m_state, -3);
 }
 
 template <bool HasRPCManager, size_t CallBufferSize>
 template <typename ...Upvalues>
 void hscript::lua::Environment<HasRPCManager, CallBufferSize>
-                     ::add_c_function(const std::string& name, i32(*func)(LuaHandle), Upvalues... upvalues) {
+                     ::add_c_function(std::string_view name, i32(*func)(LuaHandle), Upvalues... upvalues) {
     if (m_parent) return m_parent->add_c_function(name, func, std::forward<Upvalues>(upvalues)...);
+
+    lua_pushlstring(m_state, name.data(), name.size());
 
     (LuaValue<Upvalues>::push(m_state, upvalues), ...);
     LuaValue<void*>::push(m_state, reinterpret_cast<void*>(func));
 
     i32 value_count = 1 + total_value_count<Upvalues...>();
-
     lua_pushcclosure(m_state, func, value_count);
-    lua_setfield(m_state, -2, name.c_str());
+
+    lua_settable(m_state, -3);
 }
 
 template <bool HasRPCManager, size_t CallBufferSize>
 template <std::invocable Closure, typename ReturnType, typename ...Parameters>
 void hscript::lua::Environment<HasRPCManager, CallBufferSize>
-                     ::add_c_closure(const std::string& name, Closure* closure, ReturnType(Closure::*func)(Parameters...)) {
+                     ::add_c_closure(std::string_view name, Closure* closure, ReturnType(Closure::*func)(Parameters...)) {
     if (m_parent) return m_parent->add_c_closure(name, closure, func);
+
+    lua_pushlstring(m_state, name.data(), name.size());
 
     LuaValue<void*>::push(m_state, reinterpret_cast<void*>(closure));
     LuaValue<decltype(func)>::push(m_state, func);
 
     lua_pushcclosure(m_state, invoke_closure<Closure, ReturnType, Parameters...>, 2);
-    lua_setfield(m_state, -2, name.c_str());
+
+    lua_settable(m_state, -3);
 }
 
 template <bool HasRPCManager, size_t CallBufferSize>
 template <typename ReturnType, typename ...Parameters>
 bool hscript::lua::Environment<HasRPCManager, CallBufferSize>
-                     ::get_script_function(const std::string& name, OUT ScriptDelegate<ReturnType, Parameters...>& delegate) {
+                     ::get_script_function(std::string&& name, OUT ScriptDelegate<ReturnType, Parameters...>& delegate) {
     // Try to obtain the named Lua function, registering it
     // if it was not already registered. If we could not
     // obtain it, report failure.
     LuaFunctionState lua_func_state;
-    if (!register_lua_function(name, &lua_func_state)) {
+    if (!register_lua_function(std::move(name), &lua_func_state)) {
         return false;
     }
 

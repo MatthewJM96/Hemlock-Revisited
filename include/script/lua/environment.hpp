@@ -154,7 +154,7 @@ namespace hemlock {
                  * @param val The value to be added to the environment.
                  */
                 template <typename Type>
-                void add_value(const std::string& name, Type val);
+                void add_value(std::string_view name, Type val);
                 /**
                  * @brief Add a delegate to the environment, exposed to the
                  * scripts ran within.
@@ -166,7 +166,7 @@ namespace hemlock {
                  * @param delegate The delegate to be added to the environment.
                  */
                 template <typename ReturnType, typename ...Parameters>
-                void add_c_delegate(const std::string& name, Delegate<ReturnType, Parameters...>* delegate);
+                void add_c_delegate(std::string_view name, Delegate<ReturnType, Parameters...>* delegate);
                 /**
                  * @brief Add a function to the environment, exposed to the
                  * scripts ran within.
@@ -177,7 +177,7 @@ namespace hemlock {
                  * @param func The function to be added to the environment.
                  */
                 template <typename ReturnType, typename ...Parameters>
-                void add_c_function(const std::string& name, ReturnType(*func)(Parameters...));
+                void add_c_function(std::string_view name, ReturnType(*func)(Parameters...));
                 /**
                  * @brief Add a function to the environment that matches the
                  * lua_CFunction signature, with optional upvalues.
@@ -188,7 +188,7 @@ namespace hemlock {
                  * @param upvalues The optional upvalues to bind.
                  */
                 template <typename ...Upvalues>
-                void add_c_function(const std::string& name, i32(*func)(LuaHandle), Upvalues... upvalues);
+                void add_c_function(std::string_view name, i32(*func)(LuaHandle), Upvalues... upvalues);
                 /**
                  * @brief Add a closure to the environment, exposed to the
                  * scripts ran within.
@@ -199,7 +199,7 @@ namespace hemlock {
                  * @param closure The closure to be added to the environment.
                  */
                 template <std::invocable Closure, typename ReturnType, typename ...Parameters>
-                void add_c_closure(const std::string& name, Closure* closure, ReturnType(Closure::*func)(Parameters...));
+                void add_c_closure(std::string_view name, Closure* closure, ReturnType(Closure::*func)(Parameters...));
                 /**
                  * @brief Get a script function from the environment, allowing
                  * calls within C++ into the script. Name can specify namespacing
@@ -212,7 +212,7 @@ namespace hemlock {
                  * @return True if the script function was obtained, false otherwise.
                  */
                 template <typename ReturnType, typename ...Parameters>
-                bool get_script_function(const std::string& name, OUT ScriptDelegate<ReturnType, Parameters...>& delegate);
+                bool get_script_function(std::string&& name, OUT ScriptDelegate<ReturnType, Parameters...>& delegate);
             protected:
                 /**
                  * @brief Pushes namespaces onto the Lua stack. Last
@@ -233,7 +233,7 @@ namespace hemlock {
                  * @return True if the Lua function was registered, false
                  * if it was not already registered and could not be registered.
                  */
-                bool register_lua_function(const std::string& name, OUT LuaFunctionState* state = nullptr);
+                bool register_lua_function(std::string&& name, OUT LuaFunctionState* state = nullptr);
 
                 LuaHandle       m_state;
                 Environment*    m_parent;

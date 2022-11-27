@@ -23,7 +23,7 @@ i32 hscript::lua::register_lua_function(LuaHandle state) {
     // Retrieve the Lua function from the environment, registering
     // it if it has not yet been registered. False return indicates
     // we failed to register the function, report failure.
-    if (!env->register_lua_function(name)) {
+    if (!env->register_lua_function(std::move(name))) {
         LuaValue<i32>::push(state, -3);
         return 1;
     }
