@@ -25,7 +25,7 @@ namespace hemlock {
             BOOLEAN,
             NUMBER,
             STRING,
-            USERDATA
+            POINTER
         };
         using CallValue  = std::byte[8];
         using CallValues = std::vector<

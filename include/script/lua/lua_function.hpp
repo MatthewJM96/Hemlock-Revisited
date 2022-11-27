@@ -46,6 +46,23 @@ namespace hemlock {
                  */
                 template <typename ReturnType, typename ...Parameters>
                 ScriptDelegate<ReturnType, Parameters...> make_lua_delegate(LuaFunctionState lua_func_state);
+
+                // TODO(Matthew): figure out the actual signature, will require some parameter
+                //                to be passed and something returned that contain the scalars
+                //                on both ends.
+                /**
+                 * @brief Creates a delegate for calling the given
+                 * Lua function with arbitrary scalar parameters and
+                 * returns, handling errors and value passing.
+                 *
+                 * Note that the delegate itself returns a bool indicating
+                 * if the Lua function was successfully called.
+                 *
+                 * @param lua_func_state The Lua function.
+                 * @return ScriptDelegate<void> The
+                 * delegate providing call access to the Lua function.
+                 */
+                ScriptDelegate<void> make_arbitrary_scalars_lua_delegate(LuaFunctionState lua_func_state);
         }
     }
 }
