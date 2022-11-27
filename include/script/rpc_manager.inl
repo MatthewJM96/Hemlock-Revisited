@@ -123,3 +123,15 @@ i32 hscript::RPCManager<EnvironmentImpl, BufferSize>::remove_call(CallID id) {
 
     m_call_data.erase(it);
 }
+
+template <typename EnvironmentImpl, size_t BufferSize>
+void hscript::RPCManager<EnvironmentImpl, BufferSize>::pump_calls() {
+    // Reorganise a bit to allow for only running so many calls based on demand?
+    for (auto& call : m_calls) {
+        std::string& cmd = call.second;
+
+        // Run command, update state, get & store results if completed.
+    }
+
+    // Clear call buffer.
+}
