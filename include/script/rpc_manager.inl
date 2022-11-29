@@ -22,7 +22,7 @@ void hscript::RPCManager<EnvironmentImpl, BufferSize>::dispose() {
 }
 
 template <typename EnvironmentImpl, size_t BufferSize>
-hscript::CallID hscript::RPCManager<EnvironmentImpl, BufferSize>::append_call(std::string&& call, CallValues&& parameters) {
+hscript::CallID hscript::RPCManager<EnvironmentImpl, BufferSize>::append_call(std::string&& call, CallParameters&& parameters) {
     std::lock_guard<std::mutex> lock(m_buffer_lock);
 
     CallID id  = m_latest_call_id++;
@@ -76,7 +76,7 @@ i32 hscript::RPCManager<EnvironmentImpl, BufferSize>::call_state(CallID id, OUT 
 template <typename EnvironmentImpl, size_t BufferSize>
 i32 hscript::RPCManager<EnvironmentImpl, BufferSize>::call_return_values(
              CallID id,
-    OUT CallValues& return_values
+    OUT CallParameters& return_values
 ) {
     std::lock_guard<std::mutex> lock(m_buffer_lock);
 

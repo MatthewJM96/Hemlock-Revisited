@@ -2,6 +2,7 @@
 #define __hemlock_script_rpc_manager_hpp
 
 #include "script/environment_base_decl.hpp"
+#include "script/call_state.hpp"
 
 namespace hemlock {
     namespace script {
@@ -9,38 +10,6 @@ namespace hemlock {
         //                call limits. Try to remove use of std::string for calls,
         //                but not sure how to do that just yet.
         // TODO(Matthew): Single RPC manager per environment, or per environment group?
-
-        using CallID = i64;
-
-        using Calls = std::vector<std::pair<CallID, std::string>>;
-
-        enum class CallState : ui8 {
-            COMPLETE = 0,
-            RUNNING  = 1,
-            PENDING  = 2
-        };
-
-        // TODO(Matthew): Can we support arrays? Tables?
-        enum class CallType {
-            BOOLEAN,
-            NUMBER,
-            STRING,
-            POINTER
-        };
-        using CallValue  = std::byte[8];
-        using CallValues = std::vector<
-                                std::pair<
-                                    CallType,
-                                    CallValue
-                                >
-                            >;
-
-        struct CallData {
-            i32         index;
-            CallState   state;
-            CallValues  call_values;
-        };
-        using CallsData = std::unordered_map<CallID, CallData>;
 
         // TODO(Matthew): Automatic deqeueing of continuable calls that don't
         //                complete after some number of pumps? Likewise deletion
@@ -80,7 +49,7 @@ namespace hemlock {
              * negative if the call was not appended. (Currently
              * -1 is returned solely.)
              */
-            CallID append_call(std::string&& call, CallValues&& parameters);
+            CallID append_call(std::string&& call, CallParameters&& parameters);
 
             /**
              * @brief Get the state of buffered call with the
@@ -105,7 +74,7 @@ namespace hemlock {
              * @return i32 -1 if no call is buffered with given
              * ID, otherwise 0.
              */
-            i32 call_return_values(CallID id, OUT CallValues& return_values);
+            i32 call_return_values(CallID id, OUT CallParameters& return_values);
 
             /**
              * @brief Removes call with the given ID from the buffer.

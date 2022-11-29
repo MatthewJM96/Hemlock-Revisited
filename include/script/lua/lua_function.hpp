@@ -1,6 +1,7 @@
 #ifndef __hemlock_script_lua_lua_function_hpp
 #define __hemlock_script_lua_lua_function_hpp
 
+#include "script/call_state.hpp"
 #include "script/lua/state.hpp"
 
 namespace hemlock {
@@ -62,7 +63,7 @@ namespace hemlock {
                  * @return ScriptDelegate<void> The
                  * delegate providing call access to the Lua function.
                  */
-                ScriptDelegate<void> make_arbitrary_scalars_lua_delegate(LuaFunctionState lua_func_state);
+                ScriptDelegate<CallParameters, CallParameters> make_arbitrary_scalars_lua_delegate(LuaFunctionState lua_func_state, i32 expected_return_count);
         }
     }
 }
