@@ -393,7 +393,17 @@ bool hscript::lua::Environment<HasRPCManager, CallBufferSize>
         return false;
     }
 
-    delegate = make_lua_delegate<ReturnType, Parameters...>(lua_func_state);
+    // Call correct delegate builder depending on if we ware allowing arbitrary
+    // parameters or return types.
+    if constexpr (
+        std::is_same_v<ReturnType, CallParameters>
+            && std::equal_to<size_t>()(sizeof...(Parameters), 1ul)
+            && (std::is_same_v<Parameters, CallParameters> || ...)
+    ) {
+        delegate = make_arbitrary_scalars_lua_delegate(lua_func_state, H_MAX_ARBITRARY_LUA_RETURNS);
+    } else {
+        delegate = make_lua_delegate<ReturnType, Parameters...>(lua_func_state);
+    }
 
     return true;
 }

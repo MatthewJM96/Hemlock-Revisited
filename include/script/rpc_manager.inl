@@ -128,10 +128,20 @@ template <typename EnvironmentImpl, size_t BufferSize>
 void hscript::RPCManager<EnvironmentImpl, BufferSize>::pump_calls() {
     // Reorganise a bit to allow for only running so many calls based on demand?
     for (auto& call : m_calls) {
-        std::string& cmd = call.second;
+        CallID id = call.first;
+        std::string cmd = call.second;
 
-        // Run command, update state, get & store results if completed.
+        auto delegate = {};
+        m_environment->template get_script_function<CallParameters, CallParameters>(cmd, delegate);
+
+        CallData& call_data = m_call_data[id];
+
+        CallParameters return_values = delegate(m_call_data[id].call_values);
+
+        call_data.state = CallState::COMPLETE;
+        call_data.call_values = std::move(return_values);
     }
 
     // Clear call buffer.
+    Calls().swap(m_calls);
 }
