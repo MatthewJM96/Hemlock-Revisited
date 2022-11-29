@@ -4,6 +4,10 @@
 #include "script/call_state.hpp"
 #include "script/lua/state.hpp"
 
+#if !defined(H_MAX_ARBITRARY_LUA_RETURNS)
+#define H_MAX_ARBITRARY_LUA_RETURNS 10
+#endif // defined(H_MAX_ARBITRARY_LUA_RETURNS)
+
 namespace hemlock {
     namespace script {
         namespace lua {

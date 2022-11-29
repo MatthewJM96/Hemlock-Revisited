@@ -84,35 +84,3 @@ hscript::ScriptDelegate<ReturnType, Parameters...> hscript::lua::make_lua_delega
         }
     };
 }
-
-hscript::ScriptDelegate<void> hscript::lua::make_arbitrary_scalars_lua_delegate(LuaFunctionState lua_func_state) {
-    return ScriptDelegate<void>{
-        [lua_func_state](Parameters... params) {
-            LuaHandle state = lua_func_state.state;
-
-            // Get stack height before preparing & calling the Lua function.
-            i32 prior_index = lua_gettop(state);
-
-            // Put the script function table in the lua registry on to the top of the lua stack.
-            lua_getfield(state, LUA_REGISTRYINDEX, H_LUA_SCRIPT_FUNCTION_TABLE);
-            // Get a raw accessor to the wrapped script function.
-            lua_rawgeti(state, -1, lua_func_state.index);
-
-            // TODO(Matthew): push scalar parameters onto the stack and track how many were pushed.
-
-            // Call the function with the provided parameters.
-            if (lua_pcall(state, number_params, number_returns, 0) != 0) {
-                debug_printf("Error calling Lua function: %s.\n", LuaValue<const char*>::pop(state));
-
-                return { false, {} };
-            }
-
-            // TODO(Matthew): pop return scalars off stack.
-
-            // Restore stack to prior state and return.
-            lua_pop(state, lua_gettop(state) - prior_index);
-
-            return { true, return_values };
-        }
-    };
-}
