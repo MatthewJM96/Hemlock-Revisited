@@ -224,7 +224,8 @@ i32 hscript::lua::pump_command_buffer(LuaHandle state) {
 
     _Environment* env = LuaValue<_Environment*>::retrieve_upvalue(state, 1);
 
-    env->pump_command_buffer();
+    // env->pump_command_buffer();
+    env->rpc.pump_calls();
 
     return 0;
 }
