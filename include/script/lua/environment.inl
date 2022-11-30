@@ -34,6 +34,8 @@ void hscript::lua::Environment<HasRPCManager, CallBufferSize>
     add_c_function("register_function", &hscript::lua::register_lua_function<HasRPCManager, CallBufferSize>, this);
 
     if constexpr (HasRPCManager) {
+        _Base::rpc.init(this);
+
         set_namespaces("foreign");
         add_c_function("call",        &call_foreign<HasRPCManager, CallBufferSize>,             this);
         add_c_function("query",       &query_foreign_call<HasRPCManager, CallBufferSize>,       this);
@@ -69,6 +71,10 @@ void hscript::lua::Environment<HasRPCManager, CallBufferSize>
 
     // Set global namespace.
     set_global_namespace();
+
+    if constexpr (HasRPCManager) {
+        _Base::rpc.init(this);
+    }
 
     // TODO(Matthew): Anything else?
 }
