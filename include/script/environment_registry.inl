@@ -61,7 +61,7 @@ Environment* hscript::EnvironmentRegistry<Environment>::create_environment(std::
     env->init(m_io_manager, m_max_script_length);
 
     if (builder != nullptr) {
-        builder(env);
+        (*builder)(env);
     }
 
     m_register[name] = env;
