@@ -166,7 +166,26 @@ i32 hscript::lua::get_foreign_call_results(LuaHandle state) {
         return 1;
     }
 
-    // TODO(Matthew): Push return values onto the stack.
+    for (auto& return_value : return_values) {
+        switch (return_value.type) {
+            case CallType::BOOLEAN:
+                lua_pushboolean(state, std::get<bool>(return_value.value));
+                break;
+            case CallType::NUMBER:
+                lua_pushnumber(state, std::get<f64>(return_value.value));
+                break;
+            case CallType::POINTER:
+                lua_pushlightuserdata(state, std::get<void*>(return_value.value));
+                break;
+            case CallType::STRING:
+                lua_pushstring(state, std::get<const char*>(return_value.value));
+                break;
+            default:
+                lua_pushnil(state);
+                break;
+        }
+    }
+
     return return_values.size();
 }
 
