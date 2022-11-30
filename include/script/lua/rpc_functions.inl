@@ -91,17 +91,17 @@ i32 hscript::lua::query_foreign_call(LuaHandle state) {
         return 1;
     }
 
-    // Try to get the name of the environment, if we can't then return.
-    std::string env_name;
-    if (!LuaValue<std::string>::try_pop(state, env_name)) {
-        LuaValue<i32>::push(state, -2);
-        return 1;
-    }
-
     // Try to get the ID of the command, if we can't then return.
     CallID call_id;
     if (!LuaValue<CallID>::try_pop(state, call_id)) {
         LuaValue<i32>::push(state, -3);
+        return 1;
+    }
+
+    // Try to get the name of the environment, if we can't then return.
+    std::string env_name;
+    if (!LuaValue<std::string>::try_pop(state, env_name)) {
+        LuaValue<i32>::push(state, -2);
         return 1;
     }
 
@@ -135,17 +135,17 @@ i32 hscript::lua::get_foreign_call_results(LuaHandle state) {
         return 1;
     }
 
-    // Try to get the name of the environment, if we can't then return.
-    std::string env_name;
-    if (!LuaValue<std::string>::try_pop(state, env_name)) {
-        LuaValue<i32>::push(state, -2);
-        return 1;
-    }
-
     // Try to get the ID of the command, if we can't then return.
     CallID call_id;
     if (!LuaValue<CallID>::try_pop(state, call_id)) {
         LuaValue<i32>::push(state, -3);
+        return 1;
+    }
+
+    // Try to get the name of the environment, if we can't then return.
+    std::string env_name;
+    if (!LuaValue<std::string>::try_pop(state, env_name)) {
+        LuaValue<i32>::push(state, -2);
         return 1;
     }
 
