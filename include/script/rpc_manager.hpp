@@ -100,7 +100,7 @@ namespace hemlock {
              *
              * @param is_public Whether the environment is public or not.
              */
-            void set_is_public_env(bool is_public);
+            void set_is_public_env(bool is_public = true);
 
             /**
              * @brief Registers a function within the associated

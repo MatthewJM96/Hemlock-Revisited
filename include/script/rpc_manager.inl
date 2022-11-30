@@ -145,3 +145,18 @@ void hscript::RPCManager<EnvironmentImpl, BufferSize>::pump_calls() {
     // Clear call buffer.
     Calls().swap(m_calls);
 }
+
+template <typename EnvironmentImpl, size_t BufferSize>
+void hscript::RPCManager<EnvironmentImpl, BufferSize>::set_is_public_env(bool is_public /*= true*/) {
+    m_is_public_env = is_public;
+}
+
+template <typename EnvironmentImpl, size_t BufferSize>
+void hscript::RPCManager<EnvironmentImpl, BufferSize>::register_public_function(std::string&& function) {
+    m_public_functions.emplace(std::move(function));
+}
+
+template <typename EnvironmentImpl, size_t BufferSize>
+void hscript::RPCManager<EnvironmentImpl, BufferSize>::register_continuable_function(std::string&& function) {
+    m_continuable_functions.emplace(std::move(function));
+}
