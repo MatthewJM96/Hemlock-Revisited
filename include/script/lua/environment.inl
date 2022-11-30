@@ -35,12 +35,12 @@ void hscript::lua::Environment<HasRPCManager, CallBufferSize>
 
     if constexpr (HasRPCManager) {
         set_namespaces("foreign");
-        add_c_function("call",        &call_foreign,             this);
-        add_c_function("query",       &query_foreign_call,       this);
-        add_c_function("get_results", &get_foreign_call_results, this);
+        add_c_function("call",        &call_foreign<HasRPCManager, CallBufferSize>,             this);
+        add_c_function("query",       &query_foreign_call<HasRPCManager, CallBufferSize>,       this);
+        add_c_function("get_results", &get_foreign_call_results<HasRPCManager, CallBufferSize>, this);
 
-        add_c_function("set_manual_command_buffer_pump", &set_manual_command_buffer_pump, this);
-        add_c_function("pump_command_buffer",            &pump_command_buffer,            this);
+        add_c_function("set_manual_command_buffer_pump", &set_manual_command_buffer_pump<HasRPCManager, CallBufferSize>, this);
+        add_c_function("pump_command_buffer",            &pump_command_buffer<HasRPCManager, CallBufferSize>,            this);
         set_global_namespace();
     }
 
