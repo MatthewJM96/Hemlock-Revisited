@@ -85,7 +85,9 @@ i32 hscript::lua::query_foreign_call(LuaHandle state) {
     // Get the captured environment pointer.
     _Environment* env = LuaValue<_Environment*>::retrieve_upvalue(state, 1);
 
-    // We expect one parameter: the command ID.
+    // We expect at two parameters:
+    //   string - environment name
+    //   integer - call ID
     if (lua_gettop(state) != 2) {
         LuaValue<i32>::push(state, -1);
         return 1;
@@ -110,7 +112,7 @@ i32 hscript::lua::query_foreign_call(LuaHandle state) {
 
     // Buffer function call in foreign env.
     CallState cmd_state;
-    i32 ret = foreign_env->m_command_buffer.command_state(call_id, cmd_state);
+    i32 ret = foreign_env->rpc.call_state(call_id, cmd_state);
 
     if (ret < 0) {
         // Pass command ID back to caller.
@@ -129,8 +131,10 @@ i32 hscript::lua::get_foreign_call_results(LuaHandle state) {
     // Get the captured environment pointer.
     _Environment* env = LuaValue<_Environment*>::retrieve_upvalue(state, 1);
 
-    // We expect one parameter: the command ID.
-    if (lua_gettop(state) != 1) {
+    // We expect at two parameters:
+    //   string - environment name
+    //   integer - call ID
+    if (lua_gettop(state) != 2) {
         LuaValue<i32>::push(state, -1);
         return 1;
     }
@@ -154,7 +158,7 @@ i32 hscript::lua::get_foreign_call_results(LuaHandle state) {
 
     // Buffer function call in foreign env.
     CallParameters return_values;
-    i32 ret = foreign_env->m_command_buffer.command_state(call_id, return_values);
+    i32 ret = foreign_env->rpc.call_return_values(call_id, return_values);
 
     if (ret < 0) {
         // Pass command ID back to caller.
