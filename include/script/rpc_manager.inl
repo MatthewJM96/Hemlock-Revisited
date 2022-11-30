@@ -33,12 +33,12 @@ hscript::CallID hscript::RPCManager<EnvironmentImpl, BufferSize>::append_call(st
     if constexpr (BufferSize == 0) {
         idx = m_calls.size();
 
-        m_calls.emplace_back(std::make_pair(id, std::move(call)));
+        m_calls.emplace_back(std::make_pair(id, call));
     } else {
         if (m_calls_buffered < BufferSize) {
             idx = m_calls_buffered;
 
-            m_calls[m_calls_buffered++] = std::make_pair(id, std::move(call));
+            m_calls[m_calls_buffered++] = std::make_pair(id, call);
         } else {
             return -1;
         }
@@ -126,24 +126,38 @@ i32 hscript::RPCManager<EnvironmentImpl, BufferSize>::remove_call(CallID id) {
 
 template <typename EnvironmentImpl, size_t BufferSize>
 void hscript::RPCManager<EnvironmentImpl, BufferSize>::pump_calls() {
-    // Reorganise a bit to allow for only running so many calls based on demand?
-    for (auto& call : m_calls) {
-        CallID id = call.first;
-        std::string cmd = call.second;
-
-        auto delegate = {};
-        m_environment->template get_script_function<CallParameters, CallParameters>(cmd, delegate);
+    auto do_call = [&](CallID id, std::string cmd) {
+        ScriptDelegate<CallParameters, CallParameters> delegate;
+        m_environment->template get_script_function<CallParameters, CallParameters>(std::move(cmd), delegate);
 
         CallData& call_data = m_call_data[id];
 
-        CallParameters return_values = delegate(m_call_data[id].call_values);
+        auto [success, return_values] = delegate(call_data.call_values);
 
         call_data.state = CallState::COMPLETE;
         call_data.call_values = std::move(return_values);
-    }
+    };
 
-    // Clear call buffer.
-    Calls().swap(m_calls);
+    // Reorganise a bit to allow for only running so many calls based on demand?
+    if constexpr (BufferSize == 0) {
+        for (auto& call : m_calls) {
+            CallID       id = call.first;
+            std::string cmd = call.second;
+
+            do_call(id, cmd);
+        }
+
+        Calls().swap(m_calls);
+    } else {
+        for (size_t call_idx = 0; call_idx < m_calls_buffered; ++call_idx) {
+            CallID       id = m_calls[call_idx].first;
+            std::string cmd = m_calls[call_idx].second;
+
+            do_call(id, cmd);
+        }
+
+        m_calls_buffered = 0;
+    }
 }
 
 template <typename EnvironmentImpl, size_t BufferSize>
