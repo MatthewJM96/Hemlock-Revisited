@@ -50,7 +50,7 @@ hscript::ScriptDelegate<hscript::CallParameters, hscript::CallParameters> hscrip
                         lua_pushstring(state, std::get<const char*>(param.value));
                         break;
                     default:
-                        debug_printf("Lua Delegate with unsupported parameter type: %i", param.type);
+                        debug_printf("Lua Delegate with unsupported parameter type: %i", static_cast<i32>(param.type));
                         lua_pop(state, lua_gettop(state) - prior_index);
                         return ReturnType{ false, {} };
                 }
