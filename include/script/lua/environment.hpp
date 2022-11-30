@@ -28,8 +28,9 @@ namespace hemlock {
                 friend i32 set_manual_command_buffer_pump<HasRPCManager, CallBufferSize>(LuaHandle state);
                 friend i32 pump_command_buffer<HasRPCManager, CallBufferSize>(LuaHandle state);
 
+                using _Environment = Environment<HasRPCManager, CallBufferSize>;
                 using _Base = EnvironmentBase<
-                                Environment<HasRPCManager, CallBufferSize>,
+                                _Environment,
                                 HasRPCManager,
                                 CallBufferSize
                             >;
@@ -54,10 +55,16 @@ namespace hemlock {
                  * @param io_manager The IO manager with which the
                  * environment discovers scripts in load and run
                  * functions.
+                 * @param registry Optionally the registry in which
+                 * this environment is registered.
                  * @param max_script_length The maximum length of any
                  * script that this environment will process.
                  */
-                void init(hio::IOManagerBase* io_manager, ui32 max_script_length = HEMLOCK_DEFAULT_MAX_SCRIPT_LENGTH) final;
+                void init(
+                                hio::IOManagerBase* io_manager,
+                 EnvironmentRegistry<_Environment>* registry          = nullptr,
+                                               ui32 max_script_length = HEMLOCK_DEFAULT_MAX_SCRIPT_LENGTH
+                ) final;
                 /**
                  * @brief Initialise the environment as a child of a
                  * parent environment. All children of the same parent
@@ -67,10 +74,17 @@ namespace hemlock {
                  * @param io_manager The IO manager with which the
                  * environment discovers scripts in load and run
                  * functions.
+                 * @param registry Optionally the registry in which
+                 * this environment is registered.
                  * @param max_script_length The maximum length of any
                  * script that this environment will process.
                  */
-                void init(_Base* parent, hio::IOManagerBase* io_manager, ui32 max_script_length = HEMLOCK_DEFAULT_MAX_SCRIPT_LENGTH) final;
+                void init(
+                                             _Base* parent,
+                                hio::IOManagerBase* io_manager,
+                 EnvironmentRegistry<_Environment>* registry          = nullptr,
+                                               ui32 max_script_length = HEMLOCK_DEFAULT_MAX_SCRIPT_LENGTH
+                ) final;
                 /**
                  * @brief Dispose the environment.
                  */

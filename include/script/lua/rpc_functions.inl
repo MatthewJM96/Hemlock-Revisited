@@ -189,7 +189,7 @@ i32 hscript::lua::set_manual_command_buffer_pump(LuaHandle state) {
         }
     }
 
-    env->m_command_buffer_manual_pump = manual_pump;
+    env->m_rpc_manual_pump = manual_pump;
 
     LuaValue<i32>::push(state, 0);
     return 1;

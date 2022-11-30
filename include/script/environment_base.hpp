@@ -48,10 +48,16 @@ namespace hemlock {
              * @param io_manager The IO manager with which the
              * environment discovers scripts in load and run
              * functions.
+             * @param registry Optionally the registry in which
+             * this environment is registered.
              * @param max_script_length The maximum length of any
              * script that this environment will process.
              */
-            virtual void init(hio::IOManagerBase* io_manager, ui32 max_script_length = HEMLOCK_DEFAULT_MAX_SCRIPT_LENGTH) = 0;
+            virtual void init(
+                                hio::IOManagerBase* io_manager,
+              EnvironmentRegistry<EnvironmentImpl>* registry          = nullptr,
+                                               ui32 max_script_length = HEMLOCK_DEFAULT_MAX_SCRIPT_LENGTH
+            ) = 0;
             /**
              * @brief Initialise the environment as a child of a
              * parent environment. All children of the same parent
@@ -61,10 +67,17 @@ namespace hemlock {
              * @param io_manager The IO manager with which the
              * environment discovers scripts in load and run
              * functions.
+             * @param registry Optionally the registry in which
+             * this environment is registered.
              * @param max_script_length The maximum length of any
              * script that this environment will process.
              */
-            virtual void init(EnvironmentBase* parent, hio::IOManagerBase* io_manager, ui32 max_script_length = HEMLOCK_DEFAULT_MAX_SCRIPT_LENGTH) = 0;
+            virtual void init(
+                                   EnvironmentBase* parent,
+                                hio::IOManagerBase* io_manager,
+              EnvironmentRegistry<EnvironmentImpl>* registry          = nullptr,
+                                               ui32 max_script_length = HEMLOCK_DEFAULT_MAX_SCRIPT_LENGTH
+            ) = 0;
             /**
              * @brief Dispose the environment.
              */
@@ -228,21 +241,22 @@ namespace hemlock {
              */
             template <typename ReturnType, typename ...Parameters>
             bool get_script_function(std::string&& name, OUT ScriptDelegate<ReturnType, Parameters...>& delegate) {
-                return reinterpret_cast<EnvironmentImpl*>(this)->get_script_function(name);
+                return reinterpret_cast<EnvironmentImpl*>(this)->template get_script_function<ReturnType, Parameters...>(std::move(name), delegate);
             }
-        protected:
-            EnvironmentRegistry<EnvironmentImpl>* m_registry;
 
             std::conditional<
                 HasRPCManager,
                 RPCManager<EnvironmentImpl, CallBufferSize>,
                 std::monostate
-            >::type m_command_buffer;
+            >::type rpc = {};
+        protected:
+            EnvironmentRegistry<EnvironmentImpl>* m_registry;
+
             std::conditional<
                 HasRPCManager,
                 bool,
                 std::monostate
-            >::type m_command_buffer_manual_pump;
+            >::type m_rpc_manual_pump = {};
 
             hio::IOManagerBase* m_io_manager;
             ui32 m_max_script_length;

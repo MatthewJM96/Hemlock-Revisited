@@ -8,8 +8,9 @@
 
 template <bool HasRPCManager, size_t CallBufferSize>
 void hscript::lua::Environment<HasRPCManager, CallBufferSize>
-                     ::init(hio::IOManagerBase* io_manager, ui32 max_script_length /*= HEMLOCK_DEFAULT_MAX_SCRIPT_LENGTH*/) {
+                     ::init(hio::IOManagerBase* io_manager, EnvironmentRegistry<_Environment>* registry /*= nullptr*/, ui32 max_script_length /*= HEMLOCK_DEFAULT_MAX_SCRIPT_LENGTH*/) {
     _Base::m_io_manager        = io_manager;
+    _Base::m_registry          = registry;
     _Base::m_max_script_length = max_script_length;
 
     // Initialise the Lua environment.
@@ -52,8 +53,9 @@ void hscript::lua::Environment<HasRPCManager, CallBufferSize>
                                     Environment<HasRPCManager, CallBufferSize>,
                                     HasRPCManager,
                                     CallBufferSize
-                                >* parent, hio::IOManagerBase* io_manager, ui32 max_script_length /*= HEMLOCK_DEFAULT_MAX_SCRIPT_LENGTH*/) {
+                                >* parent, hio::IOManagerBase* io_manager, EnvironmentRegistry<_Environment>* registry /*= nullptr*/, ui32 max_script_length /*= HEMLOCK_DEFAULT_MAX_SCRIPT_LENGTH*/) {
     _Base::m_io_manager        = io_manager;
+    _Base::m_registry          = registry;
     _Base::m_max_script_length = max_script_length;
 
     // Cast to Lua environment.
