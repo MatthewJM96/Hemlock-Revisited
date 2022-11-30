@@ -16,7 +16,7 @@ namespace hemlock {
         template <typename Environment>
         using EnvironmentGroups  = std::unordered_map<EnvironmentGroupID, EnvironmentGroup<Environment>>;
         template <typename Environment>
-        using EnvironmentBuilder = Delegate<void, Environment*>;
+        using EnvironmentBuilder = Delegate<void(Environment*)>;
 
         template <typename Environment>
         using EnvironmentRegister = std::unordered_map<std::string, Environment*>;
