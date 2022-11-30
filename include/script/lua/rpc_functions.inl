@@ -9,7 +9,7 @@ i32 hscript::lua::call_foreign(LuaHandle state) {
     //   string - environment name
     //   string - function name (namespaced with dot separation)
     //   mixed  - parameters to pass to the foreign function
-    if (lua_gettop(state) >= 2) {
+    if (lua_gettop(state) < 2) {
         LuaValue<i32>::push(state, -1);
         return 1;
     }
@@ -51,7 +51,7 @@ i32 hscript::lua::query_foreign_call(LuaHandle state) {
     _Environment* env = LuaValue<_Environment*>::retrieve_upvalue(state, 1);
 
     // We expect one parameter: the command ID.
-    if (lua_gettop(state) == 2) {
+    if (lua_gettop(state) != 2) {
         LuaValue<i32>::push(state, -1);
         return 1;
     }
@@ -95,7 +95,7 @@ i32 hscript::lua::get_foreign_call_results(LuaHandle state) {
     _Environment* env = LuaValue<_Environment*>::retrieve_upvalue(state, 1);
 
     // We expect one parameter: the command ID.
-    if (lua_gettop(state) == 2) {
+    if (lua_gettop(state) != 1) {
         LuaValue<i32>::push(state, -1);
         return 1;
     }
@@ -140,7 +140,7 @@ i32 hscript::lua::set_manual_command_buffer_pump(LuaHandle state) {
 
     // We expect at most one parameter: bool flag indicating if to
     // manual pump.
-    if (lua_gettop(state) <= 1) {
+    if (lua_gettop(state) > 1) {
         LuaValue<i32>::push(state, -1);
         return 1;
     }
