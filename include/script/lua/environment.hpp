@@ -11,10 +11,29 @@ namespace hemlock {
 
             // TODO(Matthew): Revisit handling of group environments:
             //                  - verify cache and function registration handling,
-            //                  - consider if we can allow parallelism within groups.
+            //                  - within group parallelism with lua_xmove?
 
-            class Environment : EnvironmentBase<Environment> {
-                friend i32 register_lua_function(LuaHandle);
+            template <bool HasRPCManager = false, size_t CallBufferSize = 0>
+            class Environment :
+                    public EnvironmentBase<
+                        Environment<HasRPCManager, CallBufferSize>,
+                        HasRPCManager,
+                        CallBufferSize
+                    >
+            {
+                friend i32 register_lua_function<HasRPCManager, CallBufferSize>(LuaHandle);
+                friend i32 call_foreign<HasRPCManager, CallBufferSize>(LuaHandle state);
+                friend i32 query_foreign_call<HasRPCManager, CallBufferSize>(LuaHandle state);
+                friend i32 get_foreign_call_results<HasRPCManager, CallBufferSize>(LuaHandle state);
+                friend i32 set_manual_command_buffer_pump<HasRPCManager, CallBufferSize>(LuaHandle state);
+                friend i32 pump_command_buffer<HasRPCManager, CallBufferSize>(LuaHandle state);
+
+                using _Environment = Environment<HasRPCManager, CallBufferSize>;
+                using _Base = EnvironmentBase<
+                                _Environment,
+                                HasRPCManager,
+                                CallBufferSize
+                            >;
             public:
                 Environment() :
                     m_state(nullptr),
@@ -24,7 +43,7 @@ namespace hemlock {
 
                 H_NON_COPYABLE(Environment);
                 H_MOVABLE(Environment) {
-                    this->EnvironmentBase<Environment>::operator=(std::move(rhs));
+                    this->_Base::operator=(std::move(rhs));
 
                     return *this;
                 }
@@ -36,10 +55,16 @@ namespace hemlock {
                  * @param io_manager The IO manager with which the
                  * environment discovers scripts in load and run
                  * functions.
+                 * @param registry Optionally the registry in which
+                 * this environment is registered.
                  * @param max_script_length The maximum length of any
                  * script that this environment will process.
                  */
-                void init(hio::IOManagerBase* io_manager, ui32 max_script_length = HEMLOCK_DEFAULT_MAX_SCRIPT_LENGTH) final;
+                void init(
+                                hio::IOManagerBase* io_manager,
+                 EnvironmentRegistry<_Environment>* registry          = nullptr,
+                                               ui32 max_script_length = HEMLOCK_DEFAULT_MAX_SCRIPT_LENGTH
+                ) final;
                 /**
                  * @brief Initialise the environment as a child of a
                  * parent environment. All children of the same parent
@@ -49,10 +74,17 @@ namespace hemlock {
                  * @param io_manager The IO manager with which the
                  * environment discovers scripts in load and run
                  * functions.
+                 * @param registry Optionally the registry in which
+                 * this environment is registered.
                  * @param max_script_length The maximum length of any
                  * script that this environment will process.
                  */
-                void init(EnvironmentBase* parent, hio::IOManagerBase* io_manager, ui32 max_script_length = HEMLOCK_DEFAULT_MAX_SCRIPT_LENGTH) final;
+                void init(
+                                             _Base* parent,
+                                hio::IOManagerBase* io_manager,
+                 EnvironmentRegistry<_Environment>* registry          = nullptr,
+                                               ui32 max_script_length = HEMLOCK_DEFAULT_MAX_SCRIPT_LENGTH
+                ) final;
                 /**
                  * @brief Dispose the environment.
                  */
@@ -136,7 +168,7 @@ namespace hemlock {
                  * @param val The value to be added to the environment.
                  */
                 template <typename Type>
-                void add_value(const std::string& name, Type val);
+                void add_value(std::string_view name, Type val);
                 /**
                  * @brief Add a delegate to the environment, exposed to the
                  * scripts ran within.
@@ -148,7 +180,7 @@ namespace hemlock {
                  * @param delegate The delegate to be added to the environment.
                  */
                 template <typename ReturnType, typename ...Parameters>
-                void add_c_delegate(const std::string& name, Delegate<ReturnType, Parameters...>* delegate);
+                void add_c_delegate(std::string_view name, Delegate<ReturnType, Parameters...>* delegate);
                 /**
                  * @brief Add a function to the environment, exposed to the
                  * scripts ran within.
@@ -159,7 +191,7 @@ namespace hemlock {
                  * @param func The function to be added to the environment.
                  */
                 template <typename ReturnType, typename ...Parameters>
-                void add_c_function(const std::string& name, ReturnType(*func)(Parameters...));
+                void add_c_function(std::string_view name, ReturnType(*func)(Parameters...));
                 /**
                  * @brief Add a function to the environment that matches the
                  * lua_CFunction signature, with optional upvalues.
@@ -170,7 +202,7 @@ namespace hemlock {
                  * @param upvalues The optional upvalues to bind.
                  */
                 template <typename ...Upvalues>
-                void add_c_function(const std::string& name, i32(*func)(LuaHandle), Upvalues... upvalues);
+                void add_c_function(std::string_view name, i32(*func)(LuaHandle), Upvalues... upvalues);
                 /**
                  * @brief Add a closure to the environment, exposed to the
                  * scripts ran within.
@@ -181,7 +213,7 @@ namespace hemlock {
                  * @param closure The closure to be added to the environment.
                  */
                 template <std::invocable Closure, typename ReturnType, typename ...Parameters>
-                void add_c_closure(const std::string& name, Closure* closure, ReturnType(Closure::*func)(Parameters...));
+                void add_c_closure(std::string_view name, Closure* closure, ReturnType(Closure::*func)(Parameters...));
                 /**
                  * @brief Get a script function from the environment, allowing
                  * calls within C++ into the script. Name can specify namespacing
@@ -194,7 +226,7 @@ namespace hemlock {
                  * @return True if the script function was obtained, false otherwise.
                  */
                 template <typename ReturnType, typename ...Parameters>
-                bool get_script_function(const std::string& name, OUT ScriptDelegate<ReturnType, Parameters...>& delegate);
+                bool get_script_function(std::string&& name, OUT ScriptDelegate<ReturnType, Parameters...>& delegate);
             protected:
                 /**
                  * @brief Pushes namespaces onto the Lua stack. Last
@@ -215,11 +247,12 @@ namespace hemlock {
                  * @return True if the Lua function was registered, false
                  * if it was not already registered and could not be registered.
                  */
-                bool register_lua_function(const std::string& name, OUT LuaFunctionState* state = nullptr);
+                bool register_lua_function(std::string&& name, OUT LuaFunctionState* state = nullptr);
 
                 LuaHandle       m_state;
                 Environment*    m_parent;
                 LuaFunctions    m_lua_functions;
+                i32             m_namespace_depth;
             };
         }
     }

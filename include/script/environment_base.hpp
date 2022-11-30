@@ -5,7 +5,9 @@
 #define HEMLOCK_DEFAULT_MAX_SCRIPT_LENGTH 50 * 1024 * 1024
 #endif // HEMLOCK_DEFAULT_MAX_SCRIPT_LENGTH
 
+#include "script/environment_base_decl.hpp"
 #include "script/state.hpp"
+#include "script/rpc_manager.hpp"
 
 
 // TODO(Matthew): Create a REPL client that can be used for dev console and so on.
@@ -20,7 +22,11 @@ namespace hemlock {
         template <typename Environment>
         class EnvironmentRegistry;
 
-        template <typename EnvironmentImpl>
+        template <
+            typename EnvironmentImpl,
+            bool HasRPCManager /*= false*/,
+            size_t CallBufferSize /*= 0*/
+        >
         class EnvironmentBase {
         public:
             EnvironmentBase()  { /* Empty. */ }
@@ -28,6 +34,8 @@ namespace hemlock {
 
             H_NON_COPYABLE(EnvironmentBase);
             H_MOVABLE(EnvironmentBase) {
+                m_registry          = rhs.m_registry;
+                m_io_manager        = rhs.m_io_manager;
                 m_max_script_length = rhs.m_max_script_length;
 
                 return *this;
@@ -40,10 +48,16 @@ namespace hemlock {
              * @param io_manager The IO manager with which the
              * environment discovers scripts in load and run
              * functions.
+             * @param registry Optionally the registry in which
+             * this environment is registered.
              * @param max_script_length The maximum length of any
              * script that this environment will process.
              */
-            virtual void init(hio::IOManagerBase* io_manager, ui32 max_script_length = HEMLOCK_DEFAULT_MAX_SCRIPT_LENGTH) = 0;
+            virtual void init(
+                                hio::IOManagerBase* io_manager,
+              EnvironmentRegistry<EnvironmentImpl>* registry          = nullptr,
+                                               ui32 max_script_length = HEMLOCK_DEFAULT_MAX_SCRIPT_LENGTH
+            ) = 0;
             /**
              * @brief Initialise the environment as a child of a
              * parent environment. All children of the same parent
@@ -53,10 +67,17 @@ namespace hemlock {
              * @param io_manager The IO manager with which the
              * environment discovers scripts in load and run
              * functions.
+             * @param registry Optionally the registry in which
+             * this environment is registered.
              * @param max_script_length The maximum length of any
              * script that this environment will process.
              */
-            virtual void init(EnvironmentBase* parent, hio::IOManagerBase* io_manager, ui32 max_script_length = HEMLOCK_DEFAULT_MAX_SCRIPT_LENGTH) = 0;
+            virtual void init(
+                                   EnvironmentBase* parent,
+                                hio::IOManagerBase* io_manager,
+              EnvironmentRegistry<EnvironmentImpl>* registry          = nullptr,
+                                               ui32 max_script_length = HEMLOCK_DEFAULT_MAX_SCRIPT_LENGTH
+            ) = 0;
             /**
              * @brief Dispose the environment.
              */
@@ -144,7 +165,7 @@ namespace hemlock {
              * @param val The value to be added to the environment.
              */
             template <typename Type>
-            void add_value(const std::string& name, Type val) {
+            void add_value(std::string_view name, Type val) {
                 reinterpret_cast<EnvironmentImpl*>(this)->add_value(name, std::forward<Type>(val));
             }
             /**
@@ -158,7 +179,7 @@ namespace hemlock {
              * @param delegate The delegate to be added to the environment.
              */
             template <typename ReturnType, typename ...Parameters>
-            void add_c_delegate(const std::string& name, Delegate<ReturnType, Parameters...>* delegate) {
+            void add_c_delegate(std::string_view name, Delegate<ReturnType, Parameters...>* delegate) {
                 reinterpret_cast<EnvironmentImpl*>(this)->add_c_delegate(name, delegate);
             }
             /**
@@ -172,7 +193,7 @@ namespace hemlock {
              * @param func The function to be added to the environment.
              */
             template <typename ReturnType, typename ...Parameters>
-            void add_c_function(const std::string& name, ReturnType(*func)(Parameters...)) {
+            void add_c_function(std::string_view name, ReturnType(*func)(Parameters...)) {
                 reinterpret_cast<EnvironmentImpl*>(this)->add_c_function(name, func);
             }
             /**
@@ -188,7 +209,7 @@ namespace hemlock {
              * @param func The closure's invocation method.
              */
             template <std::invocable Closure, typename ReturnType, typename ...Parameters>
-            void add_c_closure(const std::string& name, Closure* closure, ReturnType(Closure::*func)(Parameters...)) {
+            void add_c_closure(std::string_view name, Closure* closure, ReturnType(Closure::*func)(Parameters...)) {
                 reinterpret_cast<EnvironmentImpl*>(this)->add_c_closure(name, closure, func);
             }
             /**
@@ -204,7 +225,7 @@ namespace hemlock {
              * @param closure The closure to be added to the environment.
              */
             template <std::invocable Closure>
-            void add_c_closure(const std::string& name, Closure* closure) {
+            void add_c_closure(std::string_view name, Closure* closure) {
                 reinterpret_cast<EnvironmentImpl*>(this)->add_c_closure(name, closure, Closure::operator());
             }
 
@@ -219,11 +240,23 @@ namespace hemlock {
              * @return True if the script function was obtained, false otherwise.
              */
             template <typename ReturnType, typename ...Parameters>
-            bool get_script_function(const std::string& name, OUT ScriptDelegate<ReturnType, Parameters...>& delegate) {
-                return reinterpret_cast<EnvironmentImpl*>(this)->get_script_function(name);
+            bool get_script_function(std::string&& name, OUT ScriptDelegate<ReturnType, Parameters...>& delegate) {
+                return reinterpret_cast<EnvironmentImpl*>(this)->template get_script_function<ReturnType, Parameters...>(std::move(name), delegate);
             }
+
+            std::conditional<
+                HasRPCManager,
+                RPCManager<EnvironmentImpl, CallBufferSize>,
+                std::monostate
+            >::type rpc = {};
         protected:
             EnvironmentRegistry<EnvironmentImpl>* m_registry;
+
+            std::conditional<
+                HasRPCManager,
+                bool,
+                std::monostate
+            >::type m_rpc_manual_pump = {};
 
             hio::IOManagerBase* m_io_manager;
             ui32 m_max_script_length;

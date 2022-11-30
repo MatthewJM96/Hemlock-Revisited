@@ -51,7 +51,7 @@ ui32 hscript::lua::LuaValue<Type>::push(LuaHandle state, Type value) {
         tmp[0] = value;
         tmp[1] = '\0';
 
-        lua_pushstring(state, tmp);
+        lua_pushlstring(state, tmp, 1);
 
         delete[] tmp;
 
@@ -71,13 +71,13 @@ ui32 hscript::lua::LuaValue<Type>::push(LuaHandle state, Type value) {
          * String *
         \**********/
     } else if constexpr (std::is_same<Type, std::string>()) {
-        lua_pushstring(state, value.c_str());
+        lua_pushlstring(state, value.c_str(), value.size());
 
         /************\
          * C-String *
         \************/
     } else if constexpr (std::is_same<typename std::remove_const<Type>::type, char*>()) {
-        lua_pushstring(state, value);
+        lua_pushlstring(state, value, strlen(value));
 
         /********\
          * Enum *
@@ -124,7 +124,7 @@ template <typename Type>
             || hscript::lua::is_multiple_lua_type<Type>::value
     )
 Type hscript::lua::LuaValue<Type>::pop(LuaHandle state) {
-    return retrieve(state, -1);
+    return retrieve<true>(state, -1);
 }
 
 template <typename Type>
@@ -133,7 +133,7 @@ template <typename Type>
             || hscript::lua::is_multiple_lua_type<Type>::value
     )
 bool hscript::lua::LuaValue<Type>::try_pop(LuaHandle state, OUT Type& value) {
-    return try_retrieve(state, -1, value);
+    return try_retrieve<true>(state, -1, value);
 }
 
 template <typename Type>
@@ -141,8 +141,9 @@ template <typename Type>
         hscript::lua::is_single_lua_type<Type>::value
             || hscript::lua::is_multiple_lua_type<Type>::value
     )
+template <bool RemoveValue>
 Type hscript::lua::LuaValue<Type>::retrieve(LuaHandle state, i32 index) {
-    return __do_retrieve<true>(state, index);
+    return __do_retrieve<RemoveValue>(state, index);
 }
 
 template <typename Type>
@@ -150,6 +151,7 @@ template <typename Type>
         hscript::lua::is_single_lua_type<Type>::value
             || hscript::lua::is_multiple_lua_type<Type>::value
     )
+template <bool RemoveValue>
 bool hscript::lua::LuaValue<Type>::try_retrieve(LuaHandle state, i32 index, OUT Type& value) {
     if constexpr (is_multiple_lua_type<Type>()) {
         // For each index in type, test it has a
@@ -158,7 +160,7 @@ bool hscript::lua::LuaValue<Type>::try_retrieve(LuaHandle state, i32 index, OUT 
             if (!test_index<decltype(Type{}[0])>(state, index - idx)) return false;
         }
         // We can pop the compound type!
-        value = retrieve(state, index);
+        value = retrieve<RemoveValue>(state, index);
         return true;
     }
 
@@ -166,7 +168,7 @@ bool hscript::lua::LuaValue<Type>::try_retrieve(LuaHandle state, i32 index, OUT 
     // only if the test succeeds.
     if (!test_index(state, index)) return false;
 
-    value = retrieve(state, index);
+    value = retrieve<RemoveValue>(state, index);
     return true;
 }
 

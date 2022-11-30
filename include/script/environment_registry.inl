@@ -1,5 +1,6 @@
 template <typename Environment>
 hscript::EnvironmentRegistry<Environment>& hscript::EnvironmentRegistry<Environment>::operator=(hscript::EnvironmentRegistry<Environment>&& rhs) {
+    m_register       = std::move(rhs.m_register);
     m_ungrouped_envs = std::move(rhs.m_ungrouped_envs);
     m_next_group_id  = rhs.m_next_group_id;
     m_groups         = std::move(rhs.m_groups);
@@ -52,21 +53,28 @@ hscript::EnvironmentGroupID hscript::EnvironmentRegistry<Environment>::create_gr
 }
 
 template <typename Environment>
-Environment* hscript::EnvironmentRegistry<Environment>::create_environment(EnvironmentBuilder<Environment>* builder/* = nullptr*/) {
+Environment* hscript::EnvironmentRegistry<Environment>::create_environment(std::string name, EnvironmentBuilder<Environment>* builder/* = nullptr*/) {
+    if (m_register.find(name) != m_register.end())
+        return nullptr;
+
     Environment* env = new Environment();
-    env->init(m_io_manager, m_max_script_length);
+    env->init(m_io_manager, this, m_max_script_length);
 
     if (builder != nullptr) {
-        builder(env);
+        (*builder)(env);
     }
 
+    m_register[name] = env;
     m_ungrouped_envs.push_back(env);
 
     return env;
 }
 
 template <typename Environment>
-Environment* hscript::EnvironmentRegistry<Environment>::create_environment(EnvironmentGroupID group_id) {
+Environment* hscript::EnvironmentRegistry<Environment>::create_environment(std::string name, EnvironmentGroupID group_id) {
+    if (m_register.find(name) != m_register.end())
+        return nullptr;
+
     EnvironmentGroup<Environment>& group;
     try {
         group = m_groups.at(group_id);
@@ -77,13 +85,19 @@ Environment* hscript::EnvironmentRegistry<Environment>::create_environment(Envir
     Environment* env = new Environment();
     env->init(group.parent, m_io_manager, m_max_script_length);
 
+    m_register[name] = env;
     group.children.push_back(env);
 
     return env;
 }
 
 template <typename Environment>
-Environment* hscript::EnvironmentRegistry<Environment>::create_environments(ui32 num, EnvironmentBuilder<Environment>* builder/* = nullptr*/) {
+Environment* hscript::EnvironmentRegistry<Environment>::create_environments(ui32 num, std::string* names, EnvironmentBuilder<Environment>* builder/* = nullptr*/) {
+    for (ui32 env_idx = 0; env_idx != num; ++env_idx) {
+        if (m_register.find(names[env_idx]) != m_register.end())
+            return nullptr;
+    }
+
     Environment* envs = new Environment[num]();
 
     m_ungrouped_envs.reserve(m_ungrouped_envs.size() + num);
@@ -97,6 +111,7 @@ Environment* hscript::EnvironmentRegistry<Environment>::create_environments(ui32
             builder(env);
         }
 
+        m_register[names[env_idx]] = env;
         m_ungrouped_envs.push_back(env);
     }
 
@@ -104,7 +119,12 @@ Environment* hscript::EnvironmentRegistry<Environment>::create_environments(ui32
 }
 
 template <typename Environment>
-Environment* hscript::EnvironmentRegistry<Environment>::create_environments(ui32 num, EnvironmentGroupID group_id) {
+Environment* hscript::EnvironmentRegistry<Environment>::create_environments(ui32 num, std::string* names, EnvironmentGroupID group_id) {
+    for (ui32 env_idx = 0; env_idx != num; ++env_idx) {
+        if (m_register.find(names[env_idx]) != m_register.end())
+            return nullptr;
+    }
+
     EnvironmentGroup<Environment>& group;
     try {
         group = m_groups.at(group_id);
@@ -121,8 +141,17 @@ Environment* hscript::EnvironmentRegistry<Environment>::create_environments(ui32
 
         env->init(group.parent, m_io_manager, m_max_script_length);
 
+        m_register[names[env_idx]] = env;
         group.children.push_back(env);
     }
 
     return envs;
+}
+
+template <typename Environment>
+Environment* hscript::EnvironmentRegistry<Environment>::get_environment(std::string name) {
+    auto it = m_register.find(name);
+    if (it == m_register.end()) return nullptr;
+
+    return it->second;
 }

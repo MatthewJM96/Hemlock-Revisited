@@ -11,6 +11,7 @@ namespace hemlock {
             template <typename Type>
                 requires (
                     std::is_arithmetic<Type>::value
+                    || std::is_enum<Type>::value
                     || std::is_pointer<Type>::value
                     || std::is_member_function_pointer<Type>::value
                     || is_same_template<std::string, Type>::value
@@ -94,14 +95,16 @@ namespace hemlock {
                 /**
                  * @brief Retrieve a value of type Type
                  * from the Lua stack at the index
-                 * specified. The value is removed from
-                 * the Lua stack.
+                 * specified.
                  *
+                 * @tparam bool Whether to remove the retrieved
+                 * value from the stack or not.
                  * @param state The Lua state.
                  * @param index The index into the Lua
                  * stack to retrieve from.
                  * @return Type The value retrieved.
                  */
+                template <bool RemoveValue>
                 static Type retrieve(LuaHandle state, i32 index);
                 /**
                  * @brief Try to retrieve a value of type
@@ -109,6 +112,8 @@ namespace hemlock {
                  * specified. The value is removed from
                  * the Lua stack.
                  *
+                 * @tparam bool Whether to remove the retrieved
+                 * value from the stack or not.
                  * @param state The Lua state.
                  * @param index The index into the Lua
                  * stack to retrieve from.
@@ -117,6 +122,7 @@ namespace hemlock {
                  * @return True if the value was
                  * retrieved, false otherwise.
                  */
+                template <bool RemoveValue>
                 static bool try_retrieve(LuaHandle state, i32 index, OUT Type& value);
                 /**
                  * @brief Retrieve a value of type Type
@@ -186,11 +192,7 @@ namespace hemlock {
                          * Char *
                         \********/
                     } else if constexpr (std::is_same<Type, char>()) {
-                        // Pops char as string, return character if
-                        // it exists, else default value.
-                        std::string tmp = lua_tostring(state, index);
-
-                        if (tmp.length() > 0) value = tmp.c_str()[0];
+                        value = lua_tostring(state, index)[0];
 
                         /***********\
                          * Integer *
@@ -208,15 +210,20 @@ namespace hemlock {
                          * String *
                         \**********/
                     } else if constexpr (std::is_same<Type, std::string>()) {
-                        value = lua_tostring(state, index);
+                        value = std::string(
+                            lua_tostring(state, index),
+                            lua_strlen(state, index)
+                        );
 
                         /************\
                          * C-String *
                         \************/
                     } else if constexpr (std::is_same<typename std::remove_const<Type>::type, char*>()) {
-                        std::string tmp = lua_tostring(state, index);
-                        
-                        if (tmp.length() > 0) value = const_cast<Type>(tmp.c_str());
+                        auto len = lua_strlen(state, index);
+                        if (len != 0) {
+                            value = new char[len];
+                            std::memcpy(lua_tostring(state, index), value, len);
+                        }
 
                         /********\
                          * Enum *

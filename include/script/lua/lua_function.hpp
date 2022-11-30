@@ -1,7 +1,12 @@
 #ifndef __hemlock_script_lua_lua_function_hpp
 #define __hemlock_script_lua_lua_function_hpp
 
+#include "script/call_state.hpp"
 #include "script/lua/state.hpp"
+
+#if !defined(H_MAX_ARBITRARY_LUA_RETURNS)
+#define H_MAX_ARBITRARY_LUA_RETURNS 10
+#endif // defined(H_MAX_ARBITRARY_LUA_RETURNS)
 
 namespace hemlock {
     namespace script {
@@ -12,9 +17,12 @@ namespace hemlock {
                  * with the C++ side.
                  *
                  * @param state The Lua state.
+                 * @tparam HasRPCManager Whether the environment has a command buffer.
+                 * @tparam CallBufferSize The size of the command buffer.
                  * @return i32 The number of returned parameters to
                  * Lua (will be one, an integer determining success).
                  */
+                template <bool HasRPCManager, size_t CallBufferSize>
                 i32 register_lua_function(LuaHandle state);
 
                 /**
@@ -43,6 +51,23 @@ namespace hemlock {
                  */
                 template <typename ReturnType, typename ...Parameters>
                 ScriptDelegate<ReturnType, Parameters...> make_lua_delegate(LuaFunctionState lua_func_state);
+
+                // TODO(Matthew): figure out the actual signature, will require some parameter
+                //                to be passed and something returned that contain the scalars
+                //                on both ends.
+                /**
+                 * @brief Creates a delegate for calling the given
+                 * Lua function with arbitrary scalar parameters and
+                 * returns, handling errors and value passing.
+                 *
+                 * Note that the delegate itself returns a bool indicating
+                 * if the Lua function was successfully called.
+                 *
+                 * @param lua_func_state The Lua function.
+                 * @return ScriptDelegate<void> The
+                 * delegate providing call access to the Lua function.
+                 */
+                ScriptDelegate<CallParameters, CallParameters> make_arbitrary_scalars_lua_delegate(LuaFunctionState lua_func_state, i32 expected_return_count);
         }
     }
 }
