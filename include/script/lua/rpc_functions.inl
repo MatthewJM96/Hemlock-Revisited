@@ -10,35 +10,70 @@ i32 hscript::lua::call_foreign(LuaHandle state) {
     //   string - function name (namespaced with dot separation)
     //   mixed  - parameters to pass to the foreign function
     if (lua_gettop(state) < 2) {
+        lua_settop(state, 0);
         LuaValue<i32>::push(state, -1);
         return 1;
     }
 
     // Try to get the name of the environment, if we can't then return.
     std::string env_name;
-    if (!LuaValue<std::string>::try_pop(state, env_name)) {
+    if (!LuaValue<std::string>::try_retrieve<false>(state, 1, env_name)) {
+        lua_settop(state, 0);
         LuaValue<i32>::push(state, -2);
         return 1;
     }
 
     // Try to get the name of the function, if we can't then return.
     std::string function_name;
-    if (!LuaValue<std::string>::try_pop(state, function_name)) {
+    if (!LuaValue<std::string>::try_retrieve<false>(state, 2, function_name)) {
+        lua_settop(state, 0);
         LuaValue<i32>::push(state, -3);
         return 1;
     }
 
-    // TODO(Matthew): obtain parameters, determining their type
-    //                and encoding value as bytes. Command buffer
-    //                needs to be extended to support this too.
+    i32 param_count = lua_gettop(state) - 2;
+    CallParameters parameters(static_cast<size_t>(param_count));
+
+    for (i32 i = -param_count; i < 0; ++i) {
+        if (lua_isboolean(state, i)) {
+            parameters[param_count + i] = {
+                .type = CallType::BOOLEAN,
+                .value = static_cast<bool>(lua_toboolean(state, i))
+            };
+        } else if (lua_isnumber(state, i)) {
+            parameters[param_count + i] = {
+                .type = CallType::NUMBER,
+                .value = lua_tonumber(state, i)
+            };
+        } else if (lua_islightuserdata(state, i)) {
+            parameters[param_count + i] = {
+                .type = CallType::POINTER,
+                .value = lua_touserdata(state, i)
+            };
+        } else if (lua_isstring(state, i)) {
+            parameters[param_count + i] = {
+                .type = CallType::STRING,
+                .value = lua_tostring(state, i)
+            };
+        } else {
+            parameters[param_count + i] = {
+                .type = CallType::NIL,
+                .value = {}
+            };
+        }
+    }
 
     // Get foreign environment.
     _Environment* foreign_env = env->m_registry->get_environment(env_name);
 
     // Buffer function call in foreign env.
-    CallID call_id = foreign_env->m_command_buffer.append_command(std::move(function_name));
+    CallID call_id = foreign_env->m_command_buffer.append_call(
+        std::move(function_name),
+        std::move(parameters)
+    );
 
     // Pass command ID back to caller.
+    lua_settop(state, 0);
     LuaValue<CallID>::push(state, call_id);
     return 1;
 }
