@@ -18,6 +18,7 @@
 #include <tuple>
 #include <unordered_map>
 #include <unordered_set>
+#include <variant>
 #include <vector>
 
 // Views
@@ -79,6 +80,15 @@
 
 // Image Libs
 #include <png.h>
+
+// Scripting Libs
+#if defined(HEMLOCK_USING_LUA)
+#include <lua.hpp>
+
+#ifndef lua_pushglobaltable
+#define lua_pushglobaltable(L) lua_pushvalue(L,LUA_GLOBALSINDEX)
+#endif // lua_pushglobaltable
+#endif //defined(HELOCK_USING_LUA)
 
 // Our generic preprocessor macros.
 #include "preprocessor.hpp"

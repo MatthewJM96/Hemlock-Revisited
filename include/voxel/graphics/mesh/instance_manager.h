@@ -14,9 +14,9 @@ namespace hemlock {
             ui32                count;
         };
 
-        // TODO(Matthew): Maybe we want to make this even smaller pages and expand on demand.
-        using ChunkInstanceDataPager = hmem::Pager<ChunkInstanceData, CHUNK_VOLUME / 2, 3>;
-        using ChunkBlockPager        = hmem::Pager<            Block, CHUNK_VOLUME    , 3>;
+        // TODO(Matthew): Maybe we want to make instances out of smaller pages and expand on demand.
+        using ChunkInstanceDataPager = hmem::Pager<ChunkInstanceData, CHUNK_VOLUME, 3>;
+        using ChunkBlockPager        = hmem::Pager<            Block, CHUNK_VOLUME, 3>;
 
         class ChunkInstanceManager {
         public:

@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.22)
 
 message(STATUS "Downloading conan.cmake from https://github.com/conan-io/cmake-conan")
-file(DOWNLOAD "https://raw.githubusercontent.com/conan-io/cmake-conan/0.17.0/conan.cmake"
+file(DOWNLOAD "https://raw.githubusercontent.com/conan-io/cmake-conan/0.18.1/conan.cmake"
             "${CMAKE_BINARY_DIR}/cmake/conan.cmake"
-            EXPECTED_HASH SHA256=3bef79da16c2e031dc429e1dac87a08b9226418b300ce004cc125a82687baeef
+            EXPECTED_HASH SHA256=5cdb3042632da3efff558924eecefd580a0e786863a857ca097c3d1d43df5dcd
             TLS_VERIFY ON
             STATUS DOWNLOAD_STATUS)
 
@@ -29,6 +29,7 @@ option(HEMLOCK_USING_SDL "Whether Hemlock uses the SDL library." ON)
 option(HEMLOCK_USING_SDL_TTF "Whether Hemlock uses the SDL TTF library." ON)
 option(HEMLOCK_USING_OPENGL "Whether Hemlock uses OpenGL." ON)
 option(HEMLOCK_USING_VULKAN "Whether Hemlock uses Vulkan." OFF)
+option(HEMLOCK_USING_LUA "Whether Hemlock uses Lua for scripting." ON)
 
 option(HEMLOCK_FAST_DEBUG "Whether to compile debug builds with some optimisation." OFF)
 
@@ -107,6 +108,13 @@ if (HEMLOCK_USING_OPENGL)
     )
 endif()
 
+if (HEMLOCK_USING_LUA)
+    set(Hemlock_Requirements
+        ${Hemlock_Requirements}
+        luajit/2.0.5
+    )
+endif()
+
 conan_cmake_configure(REQUIRES ${Hemlock_Requirements}
                       GENERATORS cmake_find_package)
 
@@ -131,6 +139,9 @@ find_package(concurrentqueue REQUIRED)
 find_package(Boost COMPONENTS iostreams REQUIRED)
 find_package(Bullet REQUIRED)
 find_package(EnTT REQUIRED)
+if (HEMLOCK_USING_LUA)
+    find_package(luajit REQUIRED)
+endif()
 
 if (HEMLOCK_USING_SDL)
     add_compile_definitions(HEMLOCK_USING_SDL=1)
@@ -146,6 +157,10 @@ endif()
 
 if (HEMLOCK_USING_VULKAN)
     add_compile_definitions(HEMLOCK_USING_VULKAN=1)
+endif()
+
+if (HEMLOCK_USING_LUA)
+    add_compile_definitions(HEMLOCK_USING_LUA=1)
 endif()
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
@@ -174,6 +189,7 @@ add_executable(Hemlock_Revisited
     "${PROJECT_SOURCE_DIR}/src/io/glob.cpp"
     "${PROJECT_SOURCE_DIR}/src/io/image.cpp"
     "${PROJECT_SOURCE_DIR}/src/io/iomanager.cpp"
+    "${PROJECT_SOURCE_DIR}/src/script/lua/lua_function.cpp"
     "${PROJECT_SOURCE_DIR}/src/thread/thread_workflow_builder.cpp"
     "${PROJECT_SOURCE_DIR}/src/ui/input/dispatcher.cpp"
     "${PROJECT_SOURCE_DIR}/src/ui/input/manager.cpp"
@@ -194,7 +210,6 @@ target_precompile_headers(Hemlock_Revisited
         include/stdafx.h
 )
 
-
 set(Hemlock_Include_Dirs
     ${glm_INCLUDE_DIRS}
     ${SDL2_INCLUDE_DIRS}
@@ -210,6 +225,13 @@ if (HEMLOCK_USING_OPENGL)
     set(Hemlock_Include_Dirs
         ${Hemlock_Include_Dirs}
         ${glew_INCLUDE_DIRS}
+    )
+endif()
+
+if (HEMLOCK_USING_LUA)
+    set(Hemlock_Include_Dirs
+        ${Hemlock_Include_Dirs}
+        ${luajit_Include_Dirs}
     )
 endif()
 
@@ -229,7 +251,7 @@ target_include_directories(Hemlock_Revisited
 
 if (UNIX OR MINGW)
     if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-        if(CMAKE_BUILD_TYPE STREQUAL "Release")
+        if(CMAKE_BUILD_TYPE STREQUAL "Release" OR HEMLOCK_FAST_DEBUG)
             target_include_directories(Hemlock_Revisited
                 SYSTEM
                 PUBLIC
@@ -253,7 +275,7 @@ if (UNIX OR MINGW)
             )
         endif()
     elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-        if(CMAKE_BUILD_TYPE STREQUAL "Release")
+        if(CMAKE_BUILD_TYPE STREQUAL "Release" OR HEMLOCK_FAST_DEBUG)
             target_include_directories(Hemlock_Revisited
                 SYSTEM
                 PUBLIC
@@ -290,7 +312,6 @@ else()
     )
 endif()
 
-
 if (HEMLOCK_USING_OPENGL)
     target_link_libraries(Hemlock_Revisited GLEW::GLEW)
     if (UNIX OR MINGW)
@@ -302,10 +323,12 @@ elseif (HEMLOCK_USING_VULKAN)
     target_link_libraries(Hemlock_Revisited vulkan)
 endif()
 
+if (HEMLOCK_USING_LUA)
+    target_link_libraries(Hemlock_Revisited luajit::luajit)
+endif()
+
 if(HEMLOCK_ENABLE_GPERF_PROFILER)
-    target_link_libraries(Hemlock_Revisited
-        profiler
-    )
+    target_link_libraries(Hemlock_Revisited profiler)
 endif()
 
 target_link_libraries(Hemlock_Revisited
@@ -317,7 +340,7 @@ target_link_libraries(Hemlock_Revisited
     Bullet::Bullet
 )
 
-if(CMAKE_BUILD_TYPE STREQUAL "Release")
+if(CMAKE_BUILD_TYPE STREQUAL "Release" OR HEMLOCK_FAST_DEBUG)
     target_link_libraries(Hemlock_Revisited
         FastNoise
     )

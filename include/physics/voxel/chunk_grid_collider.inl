@@ -13,6 +13,9 @@ bool hphys::ChunkGridCollider::determine_candidate_colliding_voxels(
     if (chunk_grid == nullptr)
         return false;
 
+    // TODO(Matthew): Can we somehow take advantage of greedy meshing for these calculations?
+    //                  => Consider fewer objects in each chunk.
+
     // TODO(Matthew): This should be set somehow to reflect a reasonable amount
     //                of time a physics collision handling will occur over
     //                before returning to this function.
@@ -61,34 +64,30 @@ bool hphys::ChunkGridCollider::determine_candidate_colliding_voxels(
         (static_cast<btScalar>(max_world_block_coord.z) - static_cast<btScalar>(min_world_block_coord.z)) / 2.0f
     };
 
-    auto new_chunk_coord = hvox::chunk_grid_position(
-        hvox::BlockWorldPosition{
-            min_world_block_coord.x,
-            min_world_block_coord.y,
-            min_world_block_coord.z
-        }
-    );
+    auto new_chunk_coord = hvox::chunk_grid_position(min_world_block_coord);
     auto old_chunk_coord = new_chunk_coord;
 
     bool any_collidable = false;
 
-    auto chunk = chunk_grid->chunk(new_chunk_coord);
-    // TODO(Matthew): we don't want to fall through unloaded chunks.
-    if (chunk == nullptr)
-        return false;
-
-    std::shared_lock lock(chunk->blocks_mutex);
+    hmem::Handle<hvox::Chunk> chunk;
+    std::shared_lock<std::shared_mutex> lock;
     for (auto x = min_world_block_coord.x; x < max_world_block_coord.x; ++x) {
         for (auto y = min_world_block_coord.y; y < max_world_block_coord.y; ++y) {
             for (auto z = min_world_block_coord.z; z < max_world_block_coord.z; ++z) {
                 new_chunk_coord = hvox::chunk_grid_position({x,y,z});
 
-                if (old_chunk_coord != new_chunk_coord) {
-                    chunk           = chunk_grid->chunk(new_chunk_coord);
-                    lock            = std::shared_lock(chunk->blocks_mutex);
+                if (chunk == nullptr || (old_chunk_coord != new_chunk_coord)) {
+                    // TODO(Matthew): should query that a chunk isn't just in existence,
+                    //                but that it also has generated.
+                    // Considering block in new chunk, get handle on that new
+                    // chunk and check it at least exists.
+                    chunk = chunk_grid->chunk(new_chunk_coord);
+                    if (chunk == nullptr) continue;
+                    // Chunk exists, get lock on blocks.
+                    lock = std::shared_lock(chunk->blocks_mutex);
                     old_chunk_coord = new_chunk_coord;
                 }
-                
+
                 auto block_idx = hvox::block_index(hvox::block_chunk_position({x,y,z}));
                 auto block     = chunk->blocks[block_idx];
 

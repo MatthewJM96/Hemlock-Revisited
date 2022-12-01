@@ -16,6 +16,8 @@ namespace hemlock {
 
             GLsizei max_mipmaps = 1 + static_cast<GLsizei>(glm::log2(static_cast<f32>(glm::max(dims.x, dims.y))));
 
+            // TODO(Matthew): use format to correctly store sub image.
+
             glTextureStorage2D(tex_id, max_mipmaps, GL_RGBA8, dims.x, dims.y);
             glTextureSubImage2D(tex_id, 0, 0, 0, dims.x, dims.y, GL_RGBA, GL_UNSIGNED_BYTE, data);
 
