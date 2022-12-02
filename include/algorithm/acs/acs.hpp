@@ -63,7 +63,7 @@ namespace hemlock {
             void find_path(GraphMap<VertexData>& map, VertexData source, VertexData destination, VertexData*& path, size_t& path_length);
         protected:
             size_t  m_max_iterations;               //< The maximum number of iterations to perform.
-            f32     m_break_on_path_change;         //< The degree of path change that is satisfactory.
+            size_t  m_break_on_path_change;         //< The degree of path change that is satisfactory.
             size_t  m_break_on_iterations;          //< The number of iterations in which satisfactory path
                                                     //  change occurs on which to break the path search.
             // size_t  m_max_steps;                    //< The maximum number of steps to allow any one ant to take.
