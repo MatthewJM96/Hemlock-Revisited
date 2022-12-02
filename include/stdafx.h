@@ -129,9 +129,4 @@
 // Our common components.
 #include "physics/common_components.hpp"
 
-
-// REMOVE ME
-#include "algorithm/acs/acs.hpp"
-
-
 #endif // __hemlock_stdafx_h
