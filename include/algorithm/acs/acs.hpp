@@ -24,6 +24,7 @@ namespace hemlock {
             size_t  size = 0;
         };
 
+        // TODO(Matthew): Differentiate edge weight and edge pheromone...
         // TODO(Matthew): Don't necessarily want to provide a graph map - scenarios exist where
         //                no sharing can or will occur and thus it may be faster to deal simply
         //                with VertexData.
@@ -34,6 +35,8 @@ namespace hemlock {
         //                we will need to allow providing an optional metric for determining
         //                distance, and where not given the algorithm will have to disable some
         //                components.
+        // TODO(Matthew): Implement backtracking, it's the only sane option! Track groups by path
+        //                length & current vertex.
         template <typename VertexData, typename NextActionFinder = NextActionFromGraphFinder<VertexData>, typename VertexChoiceStrategy = DefaultChoiceStrategy<VertexData>>
         class BasicACS {
         public:
