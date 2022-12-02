@@ -91,10 +91,13 @@ namespace hemlock {
                  */
                 f32 choice_val = rand(0.0f, total_score);
                 for (size_t choice_idx = 0; choice_idx < num_candidates; ++choice_idx) {
-                    if (choice_val <= cumulative_scores[choice_idx]) return {true, boost::target(action_finder.begin() + choice_idx, map.graph)};
+                    if (choice_val <= cumulative_scores[choice_idx])
+                        return {true, boost::target(*(action_finder.begin() + choice_idx), map.graph)};
                 }
 
                 debug_printf("Error: could not decide where to send ant, check maths of DefaultChoiceStrategy!");
+
+                return { false, {} };
             }
         };
     }
