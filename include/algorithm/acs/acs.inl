@@ -367,14 +367,15 @@ void halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>
                 map.edge_weight_map[edge] *= (1.0f - m_global_evaporation);
         }
 
-        for (size_t step_idx = 0; step_idx < shortest_path.length - 1; ++step_idx) {
-            _VertexDescriptor source_vertex         = shortest_path.steps[step_idx];
-            _VertexDescriptor destination_vertex    = shortest_path.steps[step_idx + 1];
-            _EdgeDescriptor   edge                  = boost::edge(source_vertex, destination_vertex, map.graph);
+        if (shortest_path.found) {
+            for (size_t step_idx = 0; step_idx < shortest_path.length - 1; ++step_idx) {
+                // TODO(Matthew): edge may not exist.
+                auto [edge, _] = boost::edge(shortest_path.steps[step_idx], shortest_path.steps[step_idx + 1], map.graph);
 
-            map.edge_weight_map[edge] +=
-                m_global_evaporation
-                    * (m_global_increment / static_cast<f32>(shortest_path.length));
+                map.edge_weight_map[edge] +=
+                    m_global_evaporation
+                        * (m_global_increment / static_cast<f32>(shortest_path.length));
+            }
         }
 
         if (
