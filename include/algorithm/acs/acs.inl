@@ -229,7 +229,11 @@ void halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>
                 if (!found) {
                     // TODO(Matthew): does this have consequences for entropy calculation?
                     ant.alive = false;
-                    continue;
+                    // continue;
+                } else {
+                    // Update ant's vertex info.
+                    ant.previous_vertices[step] = next_vertex;
+                    ant.current_vertex          = next_vertex;
                 }
 
                 bool need_new_group = false;
@@ -241,6 +245,9 @@ void halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>
 
                 for (size_t cursor = 0; cursor < ant_group_cursors[ant.group] - 1; ++cursor) {
                     _Ant& companion_ant = *ant_groups_old.groups[ant.group].ants[cursor];
+
+                    // Don't consider putting in a group with a dead ant.
+                    if (!companion_ant.alive) continue;
 
                     /**
                      * If we find an ant from this ant's previous path group who has moved to a new path group
@@ -304,9 +311,6 @@ void halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>
                     auto& new_group = ant_groups_new.groups[ant.group];
                     new_group.ants[new_group.size++] = &ant;
                 }
-
-                ant.previous_vertices[step] = next_vertex;
-                ant.current_vertex          = next_vertex;
 
                 if (next_vertex == destination_vertex) {
                     ant.found_food  = true;
