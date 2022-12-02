@@ -190,8 +190,8 @@ void halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>
      * Do Iterations *
     \*****************/
 
-    // Start off assuming maximal entropy, causes
-    f32 entropy = 1.0f;
+    // Start off assuming minimal entropy, causes more exploration.
+    f32 entropy = 0.0f;
 
     for (size_t iteration = 0; iteration < m_max_iterations; ++iteration) {
         std::memcpy(&ants[0], &nil_ants[0], AntCount * sizeof(_Ant));
