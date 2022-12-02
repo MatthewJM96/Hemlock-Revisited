@@ -60,7 +60,7 @@ namespace hemlock {
             BasicACS& set_global_evaporation(f32 global_evaporation);
 
             template <size_t AntCount, size_t MaxSteps>
-            void find_path(GraphMap<VertexData>& map, VertexData source, VertexData destination, ui64 seed);
+            void find_path(GraphMap<VertexData>& map, VertexData source, VertexData destination, VertexData*& path, size_t& path_length);
         protected:
             size_t  m_max_iterations;               //< The maximum number of iterations to perform.
             f32     m_break_on_path_change;         //< The degree of path change that is satisfactory.

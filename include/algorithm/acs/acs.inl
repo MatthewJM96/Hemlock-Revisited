@@ -360,4 +360,14 @@ void halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>
             satisfactory_change_its = 0;
         }
     }
+
+    // TODO(Matthew): better...
+    if (shortest_path.found) {
+        path_length = shortest_path.length;
+        path = new VertexData[path_length];
+
+        for (size_t idx = 0; idx < path_length; ++idx) {
+            path[idx] = map.vertex_coord_map[shortest_path.steps[idx]];
+        }
+    }
 }
