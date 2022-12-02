@@ -34,6 +34,9 @@ public:
         handle_key_down = hemlock::Subscriber<hui::KeyboardButtonEvent>{
             [&](hemlock::Sender, hui::KeyboardButtonEvent ev) {
                 switch (ev.physical_key) {
+                case hui::PhysicalKey::H_A:
+                    m_process->go_to_screen("test_ai_screen", m_process->timer()->frame_times().back());
+                    return;
                 case hui::PhysicalKey::H_R:
                     m_process->go_to_screen("test_render_screen", m_process->timer()->frame_times().back());
                     return;
@@ -103,6 +106,16 @@ public:
             "Test script screen (S)",
             f32v4{30.0f, 90.0f, 1000.0f, 100.0f},
             f32v4{25.0f, 85.0f, 1010.0f, 110.0f},
+            hg::f::StringSizing{hg::f::StringSizingKind::SCALED, {f32v2{1.0f}}},
+            colour4{0, 0, 0, 255},
+            "fonts/Orbitron-Regular.ttf",
+            hg::f::TextAlign::TOP_LEFT,
+            hg::f::WordWrap::NONE
+        );
+        m_sprite_batcher.add_string(
+            "Test AI screen (A)",
+            f32v4{30.0f, 120.0f, 1000.0f, 100.0f},
+            f32v4{25.0f, 115.0f, 1010.0f, 110.0f},
             hg::f::StringSizing{hg::f::StringSizingKind::SCALED, {f32v2{1.0f}}},
             colour4{0, 0, 0, 255},
             "fonts/Orbitron-Regular.ttf",

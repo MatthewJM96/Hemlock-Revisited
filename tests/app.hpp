@@ -6,6 +6,7 @@
 #include "app/window/state.hpp"
 #include "app/window/window_base.h"
 
+#include "ai_screen/ai_screen.hpp"
 #include "test_entry_screen.hpp"
 #include "test_render_screen.hpp"
 #include "voxel_screen/voxel_screen.hpp"
@@ -16,6 +17,8 @@ public:
     virtual ~MyApp() { /* Empty */ };
 protected:
     virtual void prepare_screens() override {
+        happ::ScreenBase* test_ai_screen = new TestAIScreen();
+        test_ai_screen->init("test_ai_screen", this);
         happ::ScreenBase* test_entry_screen = new TestEntryScreen();
         test_entry_screen->init("test_entry_screen", this);
         happ::ScreenBase* test_render_screen = new TestRenderScreen();
@@ -25,6 +28,7 @@ protected:
         happ::ScreenBase* test_script_screen = new TestScriptScreen();
         test_script_screen->init("test_script_screen", this);
 
+        m_screens.insert({ "test_ai_screen",      test_ai_screen   });
         m_screens.insert({ "test_entry_screen",   test_entry_screen   });
         m_screens.insert({ "test_render_screen",  test_render_screen  });
         m_screens.insert({ "test_voxel_screen",   test_voxel_screen   });
