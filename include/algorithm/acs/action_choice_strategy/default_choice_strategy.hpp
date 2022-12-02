@@ -6,10 +6,10 @@
 namespace hemlock {
     namespace algorithm {
         template <typename ActionType>
-        class DefaultChoiceStrategy : public ActionChoiceStrategyBase<ActionType> {
-        protected:
+        class DefaultChoiceStrategy : public ActionChoiceStrategyBase<ActionType, DefaultChoiceStrategy<ActionType>> {
+        public:
             template <typename NextActionFinder>
-            std::pair<bool, VertexDescriptor<ActionType>> do_choose(
+            std::pair<bool, VertexDescriptor<ActionType>> choose(
                 Ant<VertexDescriptor<ActionType>>& ant,
                                                f32 exploitation_factor,
                       VertexDescriptor<ActionType> current_vertex,

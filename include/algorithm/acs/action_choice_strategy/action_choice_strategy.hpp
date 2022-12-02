@@ -8,7 +8,7 @@ namespace hemlock {
         template <typename VertexDescriptor>
         struct Ant;
 
-        template <typename ActionType>
+        template <typename ActionType, typename DerivedType>
         class ActionChoiceStrategyBase {
         public:
             template <typename NextActionFinder>
@@ -16,7 +16,7 @@ namespace hemlock {
                                                                                                     f32 exploitation_factor,
                                                                            VertexDescriptor<ActionType> current_vertex,
                                                                             const GraphMap<ActionType>& map      ) {
-                return do_choose<NextActionFinder>(ant, exploitation_factor, current_vertex, map);
+                return reinterpret_cast<DerivedType*>(this)->template choose<NextActionFinder>(ant, exploitation_factor, current_vertex, map);
             }
         };
 
