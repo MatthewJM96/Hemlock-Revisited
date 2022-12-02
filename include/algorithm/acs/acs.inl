@@ -336,8 +336,8 @@ void halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>
             _VertexDescriptor step_start, step_end;
             step_start = source_vertex;
 
-            for (size_t step_idx = 0; step_idx < ant_groups_new.groups[ant_group_idx].ants[0].steps_taken; ++step_idx) {
-                step_end = ant_groups_new.groups[ant_group_idx].ants[0].previous_vertices[step_idx];
+            for (size_t step_idx = 0; step_idx < ant_groups_new.groups[ant_group_idx].ants[0]->steps_taken; ++step_idx) {
+                step_end = ant_groups_new.groups[ant_group_idx].ants[0]->previous_vertices[step_idx];
 
                 auto [edge, _] = boost::edge(step_start, step_end, map.graph);
 
