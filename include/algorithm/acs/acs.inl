@@ -1,4 +1,24 @@
 template <typename VertexData, typename NextActionFinder, typename VertexChoiceStrategy>
+halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>::BasicACS() :
+    m_max_iterations(100),
+    m_break_on_path_change(0.0f),
+    m_break_on_iterations(2),
+    m_exploitation_base(0.6f),
+    m_exploitation_coeff(0.4f),
+    m_exploitation_exponent(2.0f),
+    m_do_mean_filtering(false),
+    m_mean_filtering_order(0),
+    m_mean_filtering_trigger(0.0f),
+    m_local_increment(0.01f),
+    m_local_evaporation(0.1f),
+    m_global_increment(1.0f),
+    m_global_evaporation(0.1f)
+{
+    // Empty.
+}
+
+
+template <typename VertexData, typename NextActionFinder, typename VertexChoiceStrategy>
 halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>&
 halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>::set_max_iterations(size_t max_iterations) {
     m_max_iterations = max_iterations;
