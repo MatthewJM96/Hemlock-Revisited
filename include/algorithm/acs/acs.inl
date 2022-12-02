@@ -390,6 +390,8 @@ void halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>
         } else {
             satisfactory_change_its = 0;
         }
+
+        last_shortest_path = shortest_path.length;
     }
 
     // TODO(Matthew): better...
