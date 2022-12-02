@@ -45,6 +45,11 @@ namespace hemlock {
 
         template <typename VertexData>
         struct GraphMap {
+            GraphMap() {
+                edge_weight_map = boost::get(boost::edge_weight, graph);
+                vertex_coord_map = boost::get(vertex_data, graph);
+            }
+
             Graph<VertexData>           graph;
             EdgeWeightMap<VertexData>   edge_weight_map;
             VertexCoordMap<VertexData>  vertex_coord_map;
