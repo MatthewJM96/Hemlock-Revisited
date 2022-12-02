@@ -24,10 +24,10 @@ namespace hemlock {
         template <typename Iterator>
         class INextActionFinder {
         public:
-                  Iterator begin()       = 0;
-            const Iterator begin() const = 0;
-                  Iterator end()         = 0;
-            const Iterator end()   const = 0;
+            virtual       Iterator begin()       = 0;
+            virtual const Iterator begin() const = 0;
+            virtual       Iterator end()         = 0;
+            virtual const Iterator end()   const = 0;
         };
 
         // template <typename ActionType, typename ...ConcreteStepFinders>
