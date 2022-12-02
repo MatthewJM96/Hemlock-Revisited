@@ -303,9 +303,9 @@ void halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>
                     auto& new_group = ant_groups_new.groups[ant_groups_new.count];
                     new_group.ants[new_group.size++] = &ant;
 
-                    ant_groups_new.count += 1;
+                    ant.group = ant_groups_new.count;
 
-                    ant.group = new_group;
+                    ant_groups_new.count += 1;
                 } else if (!changed_group) {
                     // Place ant in group is was in on last step, it hasn't moved.
                     auto& new_group = ant_groups_new.groups[ant.group];
