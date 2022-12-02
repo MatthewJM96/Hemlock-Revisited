@@ -382,7 +382,7 @@ void halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>
             shortest_path.found
                 && glm::max(last_shortest_path, shortest_path.length)
                     - glm::min(last_shortest_path, shortest_path.length)
-                        < m_break_on_path_change
+                        <= m_break_on_path_change
         ) {
             satisfactory_change_its += 1;
 
