@@ -168,7 +168,12 @@ void halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>
     _VertexDescriptor visited_vertices[AntCount * MaxSteps] = {};
 
     // The actual ants.
+    const _Ant nil_ants[AntCount] = {};
     _Ant ants[AntCount] = {};
+
+    for (size_t ant_idx = 0; ant_idx < AntCount; ++ant_idx) {
+        ants[ant_idx].current_vertex = source_vertex;
+    }
 
     // TODO(Matthew): Do we want to handle large AntCount? This isn't okay for that.
     // The ant groups used for calculating entropy.
@@ -189,7 +194,7 @@ void halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>
     f32 entropy = 1.0f;
 
     for (size_t iteration = 0; iteration < m_max_iterations; ++iteration) {
-        ants            = {};
+        std::memcpy(&ants[0], &nil_ants[0], AntCount * sizeof(_Ant));
         ant_groups_old  = {};
         for (size_t ant_idx = 0; ant_idx < AntCount; ++ant_idx) {
             ants[ant_idx].current_vertex = source_vertex;
