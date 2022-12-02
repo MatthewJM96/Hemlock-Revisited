@@ -6,10 +6,15 @@
 namespace hemlock {
     namespace algorithm {
         template <typename ActionType>
-        class INextActionIterator :
-            public std::iterator<std::input_iterator_tag, ActionType>
+        class INextActionIterator
         {
         public:
+            using iterator_category = std::input_iterator_tag;
+            using value_type = ActionType;
+            using difference_type = ptrdiff_t;
+            using pointer = ActionType*;
+            using reference = ActionType&;
+
             virtual INextActionIterator<ActionType>& operator++()    = 0;
             virtual INextActionIterator<ActionType>& operator++(i32) = 0;
         };
