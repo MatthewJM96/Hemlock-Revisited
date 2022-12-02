@@ -339,6 +339,7 @@ void halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>
             for (size_t step_idx = 0; step_idx < ant_groups_new.groups[ant_group_idx].ants[0]->steps_taken; ++step_idx) {
                 step_end = ant_groups_new.groups[ant_group_idx].ants[0]->previous_vertices[step_idx];
 
+                // TODO(Matthew): edge may not exist.
                 auto [edge, _] = boost::edge(step_start, step_end, map.graph);
 
                 // TODO(Matthew): Do we need to apply evaporation per ant? Also, do we
