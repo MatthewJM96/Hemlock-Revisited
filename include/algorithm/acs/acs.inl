@@ -177,7 +177,7 @@ void halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>
 
     // TODO(Matthew): Do we want to handle large AntCount? This isn't okay for that.
     // The ant groups used for calculating entropy.
-    struct {
+    struct _AntGroups {
         _AntGroup groups[AntCount]  = {};
         size_t    count             = 0;
     } ant_groups_new, ant_groups_old;
@@ -322,11 +322,11 @@ void halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>
                 }
             }
 
+            // TODO(Matthew): remove by referring to groups by reference only.
+            std::memcpy(&ant_groups_old, &ant_groups_new, sizeof(_AntGroups));
+
             if (ants_found_food == AntCount) break;
         }
-
-        // TODO(Matthew): remove by referring to groups by reference only.
-        std::memcpy(&ant_groups_old, &ant_groups_new, AntCount * sizeof(_AntGroup));
 
         for (size_t ant_group_idx = 0; ant_group_idx < ant_groups_new.count; ++ant_group_idx) {
             _VertexDescriptor step_start, step_end;
