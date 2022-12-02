@@ -141,9 +141,9 @@ halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>::set_global_
 template <typename VertexData, typename NextActionFinder, typename VertexChoiceStrategy>
 template <size_t AntCount, size_t MaxSteps>
 void halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>
-        ::find_path(GraphMap<VertexData>& map, VertexData source, VertexData destination, ui64 seed) {
+        ::find_path(GraphMap<VertexData>& map, VertexData source, VertexData destination, VertexData*& path, size_t& path_length) {
     using _VertexDescriptor = VertexDescriptor<VertexData>;
-    using _EdgeDescriptor   = EdgeDescriptor<VertexData>;
+    // using _EdgeDescriptor   = EdgeDescriptor<VertexData>;
     using _Ant              = Ant<_VertexDescriptor>;
     using _AntGroup         = AntGroup<_VertexDescriptor, AntCount>;
 
