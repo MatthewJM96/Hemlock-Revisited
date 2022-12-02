@@ -35,9 +35,7 @@ namespace hemlock {
                      */
                     if (ant.steps_taken > 0 && ant.previous_vertices[ant.steps_taken - 1] == candidate_vertex) continue;
 
-                    // TODO(Matthew): 1000.0f arbitrary, just want more possible values to work with.
-                    //                Is there a better solution?
-                    f32 score = 1000.0f / map.edge_weight_map[edge];
+                    f32 score = map.edge_weight_map[edge];
 
                     /**
                      * If this vertex has the best score so far, set it as best option.
