@@ -3,8 +3,8 @@ halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>::BasicACS() 
     m_max_iterations(100),
     m_break_on_path_change(0.0f),
     m_break_on_iterations(2),
-    m_exploitation_base(0.6f),
-    m_exploitation_coeff(0.4f),
+    m_exploitation_base(0.4f),
+    m_exploitation_coeff(0.6f),
     m_exploitation_exponent(2.0f),
     m_do_mean_filtering(false),
     m_mean_filtering_order(0),
@@ -220,7 +220,7 @@ void halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>
                 // TODO(Matthew): does this have consequences for entropy calculation?
                 if (!ant.alive || ant.found_food) continue;
 
-                f32 exploitation_factor = m_exploitation_base + m_exploitation_coeff * std::pow((1.0f - entropy), m_exploitation_exponent);
+                f32 exploitation_factor = m_exploitation_base + m_exploitation_coeff * std::pow(entropy, m_exploitation_exponent);
 
                 // TODO(Matthew): Reimplement back-stepping? Could be more performant than
                 //                simply doing more iterations to compensate for not doing this.
