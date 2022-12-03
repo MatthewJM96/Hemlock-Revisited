@@ -234,6 +234,7 @@ void halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>
                     // Update ant's vertex info.
                     ant.previous_vertices[step] = next_vertex;
                     ant.current_vertex          = next_vertex;
+                    ant.steps_taken            += 1;
                 }
 
                 bool need_new_group = false;
