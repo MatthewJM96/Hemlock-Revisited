@@ -217,8 +217,13 @@ void halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>
             for (size_t ant_idx = 0; ant_idx < AntCount; ++ant_idx) {
                 _Ant& ant = ants[ant_idx];
 
-                // TODO(Matthew): does this have consequences for entropy calculation?
-                if (!ant.alive || ant.found_food) continue;
+                if (!ant.alive || ant.found_food) {
+                    // This group never changes for future steps.
+                    _AntGroup& group = ant_groups_new.groups[ant.group];
+                    group.ants[group.size++] = &ant;
+
+                    continue;
+                }
 
                 f32 exploitation_factor = m_exploitation_base + m_exploitation_coeff * std::pow(entropy, m_exploitation_exponent);
 
@@ -227,9 +232,7 @@ void halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>
 
                 auto [found, next_vertex] = VertexChoiceStrategy().template choose<NextActionFinder>(ant, exploitation_factor, ant.current_vertex, map);
                 if (!found) {
-                    // TODO(Matthew): does this have consequences for entropy calculation?
                     ant.alive = false;
-                    // continue;
                 } else {
                     // Update ant's vertex info.
                     ant.previous_vertices[step] = next_vertex;
