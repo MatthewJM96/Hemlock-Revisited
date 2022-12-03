@@ -1,7 +1,7 @@
 template <typename VertexData, typename NextActionFinder, typename VertexChoiceStrategy>
 halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>::BasicACS() :
     m_max_iterations(100),
-    m_break_on_path_change(0.0f),
+    m_break_on_path_change(0),
     m_break_on_iterations(2),
     m_exploitation_base(0.4f),
     m_exploitation_coeff(0.6f),
