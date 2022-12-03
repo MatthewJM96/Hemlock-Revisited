@@ -28,6 +28,8 @@ void __do_maze_graph_test(size_t map_dim, size_t count) {
 }
 
 void do_maze_graph_test() {
+    __do_maze_graph_test(15, 10);
+
     __do_maze_graph_test(31, 10);
 
     __do_maze_graph_test(61, 10);
