@@ -93,9 +93,8 @@ bool hio::IOManagerBase::memory_map_read_only_file(
     return true;
 }
 
-bool hio::IOManagerBase::read_file_to_string(
-    const fs::path& path, std::string& buffer
-) const {
+bool hio::IOManagerBase::read_file_to_string(const fs::path& path, std::string& buffer)
+    const {
     fs::path abs_path{};
     if (!resolve_path(path, abs_path)) return false;
 
@@ -189,8 +188,7 @@ bool hio::IOManagerBase::read_file_to_binary(
     return true;
 }
 
-ui8* hio::IOManagerBase::read_file_to_binary(const fs::path& path, ui32& length)
-    const {
+ui8* hio::IOManagerBase::read_file_to_binary(const fs::path& path, ui32& length) const {
     fs::path abs_path{};
     if (!resolve_path(path, abs_path)) return nullptr;
 

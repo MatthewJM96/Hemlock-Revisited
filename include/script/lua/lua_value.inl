@@ -76,8 +76,7 @@ ui32 hscript::lua::LuaValue<Type>::push(LuaHandle state, Type value) {
         /************\
          * C-String *
         \************/
-    } else if constexpr (std::is_same<typename std::remove_const<Type>::type, char*>(
-                         ))
+    } else if constexpr (std::is_same<typename std::remove_const<Type>::type, char*>())
     {
         lua_pushlstring(state, value, strlen(value));
 

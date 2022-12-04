@@ -38,16 +38,16 @@ namespace hemlock {
 
                 delta_pos = {};
                 if (input_manager->is_pressed(hui::PhysicalKey::H_W)) {
-                    delta_pos += glm::normalize(camera.direction()) * frame_time
-                                 * 0.01f * speed_mult;
+                    delta_pos += glm::normalize(camera.direction()) * frame_time * 0.01f
+                                 * speed_mult;
                 }
                 if (input_manager->is_pressed(hui::PhysicalKey::H_A)) {
                     delta_pos -= glm::normalize(camera.right()) * frame_time * 0.01f
                                  * speed_mult;
                 }
                 if (input_manager->is_pressed(hui::PhysicalKey::H_S)) {
-                    delta_pos -= glm::normalize(camera.direction()) * frame_time
-                                 * 0.01f * speed_mult;
+                    delta_pos -= glm::normalize(camera.direction()) * frame_time * 0.01f
+                                 * speed_mult;
                 }
                 if (input_manager->is_pressed(hui::PhysicalKey::H_D)) {
                     delta_pos += glm::normalize(camera.right()) * frame_time * 0.01f

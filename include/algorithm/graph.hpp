@@ -37,8 +37,7 @@ namespace hemlock {
         using VertexDescriptor
             = boost::graph_traits<Graph<VertexData>>::vertex_descriptor;
         template <typename VertexData>
-        using EdgeDescriptor
-            = boost::graph_traits<Graph<VertexData>>::edge_descriptor;
+        using EdgeDescriptor = boost::graph_traits<Graph<VertexData>>::edge_descriptor;
 
         template <typename VertexData>
         using EdgeWeightMap

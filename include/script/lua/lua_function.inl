@@ -57,8 +57,7 @@ hscript::lua::make_lua_delegate(LuaFunctionState lua_func_state) {
         i32 number_items = static_cast<i32>(total_value_count<Parameters...>());
 
         // Call the function with the provided parameters.
-        if (lua_pcall(state, number_items, LuaValue<ReturnType>::value_count(), 0)
-            != 0)
+        if (lua_pcall(state, number_items, LuaValue<ReturnType>::value_count(), 0) != 0)
         {
             debug_printf(
                 "Error calling Lua function: %s.\n", LuaValue<const char*>::pop(state)

@@ -246,13 +246,13 @@ public:
         // &my_iom) << std::endl << std::endl;
         m_shader_cache.init(
             &m_iom,
-            hg::ShaderCache::Parser{ [](const hio::fs::path& path,
-                                        hio::IOManagerBase*  iom) -> std::string {
-                std::string buffer;
-                if (!iom->read_file_to_string(path, buffer)) return "";
+            hg::ShaderCache::Parser{
+                [](const hio::fs::path& path, hio::IOManagerBase* iom) -> std::string {
+                    std::string buffer;
+                    if (!iom->read_file_to_string(path, buffer)) return "";
 
-                return buffer;
-            } }
+                    return buffer;
+                } }
         );
 
         m_shader.init(&m_shader_cache);
@@ -282,34 +282,33 @@ public:
             } }
         );
 
-        handle_mouse_move
-            = hemlock::Subscriber<hui::MouseMoveEvent>{ [&](hemlock::Sender,
-                                                            hui::MouseMoveEvent ev) {
-                  if (m_input_manager->is_pressed(
-                          static_cast<ui8>(hui::MouseButton::LEFT)
-                      )) {
-                      m_camera.rotate_from_mouse_with_absolute_up(
-                          -1.0f * static_cast<f32>(ev.dx),
-                          -1.0f * static_cast<f32>(ev.dy),
-                          0.005f
-                      );
-                  }
-              } };
+        handle_mouse_move = hemlock::Subscriber<hui::MouseMoveEvent>{
+            [&](hemlock::Sender, hui::MouseMoveEvent ev) {
+                if (m_input_manager->is_pressed(static_cast<ui8>(hui::MouseButton::LEFT)
+                    )) {
+                    m_camera.rotate_from_mouse_with_absolute_up(
+                        -1.0f * static_cast<f32>(ev.dx),
+                        -1.0f * static_cast<f32>(ev.dy),
+                        0.005f
+                    );
+                }
+            }
+        };
 
         hui::InputDispatcher::instance()->on_mouse.move += &handle_mouse_move;
 
         m_font_cache.init(
             &m_iom,
-            hg::f::FontCache::Parser{ [](const hio::fs::path& path,
-                                         hio::IOManagerBase*  iom) -> hg::f::Font {
-                hio::fs::path actual_path;
-                if (!iom->resolve_path(path, actual_path)) return hg::f::Font{};
+            hg::f::FontCache::Parser{
+                [](const hio::fs::path& path, hio::IOManagerBase* iom) -> hg::f::Font {
+                    hio::fs::path actual_path;
+                    if (!iom->resolve_path(path, actual_path)) return hg::f::Font{};
 
-                hg::f::Font font;
-                font.init(actual_path.string());
+                    hg::f::Font font;
+                    font.init(actual_path.string());
 
-                return font;
-            } }
+                    return font;
+                } }
         );
 
         auto font = m_font_cache.fetch("fonts/Orbitron-Regular.ttf");

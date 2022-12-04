@@ -52,10 +52,7 @@ namespace hemlock {
                     };
 
                     glNamedBufferSubData(
-                        m_vbo,
-                        0,
-                        2 * sizeof(f32v3),
-                        reinterpret_cast<void*>(&points[0])
+                        m_vbo, 0, 2 * sizeof(f32v3), reinterpret_cast<void*>(&points[0])
                     );
 
                     f32v3 _colour = f32v3{ 1.0f, 1.0f, 0.0f };

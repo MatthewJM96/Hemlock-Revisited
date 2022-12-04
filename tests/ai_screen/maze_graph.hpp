@@ -13,8 +13,8 @@ void __do_maze_graph_test(size_t map_dim, size_t count) {
         );
 
         std::cout << "Map " << map_idx + 1 << " of dim " << half_dim
-                  << " maps, with ideal solution length " << map.solution_length
-                  << ":" << std::endl;
+                  << " maps, with ideal solution length " << map.solution_length << ":"
+                  << std::endl;
 
         // map::maze2d::print_map(map);
 

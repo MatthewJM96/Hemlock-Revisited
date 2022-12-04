@@ -72,8 +72,8 @@ namespace hemlock {
                          decltype(*i++)&&,
                          typename std::indirectly_readable_traits<
                              Iterator>::value_type&>;
-                     requires std::signed_integral<typename std::incrementable_traits<
-                         Iterator>::difference_type>;
+                     requires std::signed_integral<
+                         typename std::incrementable_traits<Iterator>::difference_type>;
                  };
 
         template <typename Iterator, typename IsBitPacked>
@@ -82,11 +82,9 @@ namespace hemlock {
               && ((std::is_lvalue_reference_v<std::iter_reference_t<Iterator>>
                    && std::same_as<
                        std::remove_cvref_t<std::iter_reference_t<Iterator>>,
-                       typename std::indirectly_readable_traits<
-                           Iterator>::value_type>)
+                       typename std::indirectly_readable_traits<Iterator>::value_type>)
                   || (std::same_as<IsBitPacked, typename std::true_type>
-                      && impl::BitReference<typename std::iter_reference_t<Iterator>>)
-              )
+                      && impl::BitReference<typename std::iter_reference_t<Iterator>>))
               && requires (Iterator i) {
                      {
                          i++
@@ -357,9 +355,10 @@ namespace hemlock {
           && BooleanTestable<typename std::tuple_element<
               0,
               std::invoke_result_t<Invocable, Args...>>::type>
-          && requires (typename std::tuple_element<
-                       0,
-                       std::invoke_result_t<Invocable, Args...>>::type&& ret) {
+          && requires (
+              typename std::tuple_element<0, std::invoke_result_t<Invocable, Args...>>::
+                  type&& ret
+          ) {
                  {
                      !static_cast<typename std::tuple_element<
                          0,

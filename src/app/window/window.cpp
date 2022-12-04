@@ -84,9 +84,7 @@ happ::WindowError happ::Window::init(WindowSettings settings /*= {}*/) {
     if (error != GLEW_OK) {
         debug_printf("Couldn't initialise Glew.\n");
 
-        debug_printf(
-            "%s\n", reinterpret_cast<const char*>(glewGetErrorString(error))
-        );
+        debug_printf("%s\n", reinterpret_cast<const char*>(glewGetErrorString(error)));
 
         return WindowError::GLEW_INIT;
     }

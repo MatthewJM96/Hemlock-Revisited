@@ -53,8 +53,8 @@ namespace hemlock {
             virtual void set_is_borderless(bool is_borderless) override;
             virtual void set_is_maximised(bool is_maximised) override;
             virtual void set_swap_interval(SwapInterval swap_interval) override;
-            virtual void
-            set_allowed_resolutions(WindowDimensionMap allowed_resolutions) override;
+            virtual void set_allowed_resolutions(WindowDimensionMap allowed_resolutions
+            ) override;
             virtual void set_fullscreen_mode(FullscreenMode fullscreen_mode) override;
 
             virtual void sync() override;

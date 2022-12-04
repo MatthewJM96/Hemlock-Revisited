@@ -94,8 +94,8 @@ namespace hemlock {
          * @return BlockChunkPosition The position of the block within the chunk's
          * space.
          */
-        BlockChunkPosition
-        block_chunk_position(BlockWorldPosition block_world_position);
+        BlockChunkPosition block_chunk_position(BlockWorldPosition block_world_position
+        );
 
         /**
          * @brief Converts a block's index into the chunk's block array into its chunk
@@ -148,8 +148,7 @@ namespace hemlock {
          * @param block_world_position The world position of the block.
          * @return ChunkGridPosition The grid position of the enclosing chunk.
          */
-        ChunkGridPosition chunk_grid_position(BlockWorldPosition block_world_position
-        );
+        ChunkGridPosition chunk_grid_position(BlockWorldPosition block_world_position);
     }  // namespace voxel
 }  // namespace hemlock
 namespace hvox = hemlock::voxel;

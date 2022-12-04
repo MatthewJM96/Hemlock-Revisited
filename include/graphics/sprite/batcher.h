@@ -231,11 +231,11 @@ namespace hemlock {
                     colour4                   tint,
                     const std::string&        font_name,
                     f::FontSize               font_size,
-                    f::TextAlign              align = f::TextAlign::TOP_LEFT,
-                    f::WordWrap               wrap  = f::WordWrap::NONE,
-                    f32                       depth = 0.0f,
-                    f::FontStyle              style = f::FontStyle::NORMAL,
-                    f::FontRenderStyle render_style = f::FontRenderStyle::BLENDED
+                    f::TextAlign              align        = f::TextAlign::TOP_LEFT,
+                    f::WordWrap               wrap         = f::WordWrap::NONE,
+                    f32                       depth        = 0.0f,
+                    f::FontStyle              style        = f::FontStyle::NORMAL,
+                    f::FontRenderStyle        render_style = f::FontRenderStyle::BLENDED
                 );
                 /**
                  * @brief Draw a string with the given properties. Font
@@ -262,11 +262,11 @@ namespace hemlock {
                     f::StringSizing           sizing,
                     colour4                   tint,
                     const std::string&        font_name,
-                    f::TextAlign              align = f::TextAlign::TOP_LEFT,
-                    f::WordWrap               wrap  = f::WordWrap::NONE,
-                    f32                       depth = 0.0f,
-                    f::FontStyle              style = f::FontStyle::NORMAL,
-                    f::FontRenderStyle render_style = f::FontRenderStyle::BLENDED
+                    f::TextAlign              align        = f::TextAlign::TOP_LEFT,
+                    f::WordWrap               wrap         = f::WordWrap::NONE,
+                    f32                       depth        = 0.0f,
+                    f::FontStyle              style        = f::FontStyle::NORMAL,
+                    f::FontRenderStyle        render_style = f::FontRenderStyle::BLENDED
                 );
                 /**
                  * @brief Draw a string with the given properties. Font

@@ -24,10 +24,7 @@ namespace hemlock {
                 phys.dispatcher = new btCollisionDispatcher(phys.collision_config);
                 phys.solver     = new btSequentialImpulseConstraintSolver();
                 phys.world      = new btDiscreteDynamicsWorld(
-                    phys.dispatcher,
-                    phys.broadphase,
-                    phys.solver,
-                    phys.collision_config
+                    phys.dispatcher, phys.broadphase, phys.solver, phys.collision_config
                 );
                 phys.world->setGravity(btVector3(0, 0, 0));
 

@@ -46,15 +46,12 @@ namespace hemlock {
                 using other = PagedAllocator<OtherDataType, PageSize, MaxFreePages>;
             };
         protected:
-            using _Page = Page<DataType>;
-            using _Pager =
-                typename PagedAllocatorState<PageSize, MaxFreePages>::_Pager;
-            using _Items =
-                typename PagedAllocatorState<PageSize, MaxFreePages>::_Items;
+            using _Page  = Page<DataType>;
+            using _Pager = typename PagedAllocatorState<PageSize, MaxFreePages>::_Pager;
+            using _Items = typename PagedAllocatorState<PageSize, MaxFreePages>::_Items;
         public:
             PagedAllocator();
-            PagedAllocator(
-                const PagedAllocator<DataType, PageSize, MaxFreePages>& alloc
+            PagedAllocator(const PagedAllocator<DataType, PageSize, MaxFreePages>& alloc
             );
             template <typename OtherDataType>
             PagedAllocator(

@@ -38,9 +38,7 @@ public:
         m_lua_env_1->rpc.pump_calls();
 
         hscript::ScriptDelegate<void> check_hello_world;
-        m_lua_env_2->get_script_function<void>(
-            "check_hello_world", check_hello_world
-        );
+        m_lua_env_2->get_script_function<void>("check_hello_world", check_hello_world);
         check_hello_world();
     }
 

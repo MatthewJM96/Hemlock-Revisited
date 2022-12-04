@@ -357,9 +357,8 @@ hvox::QueriedChunkState hvox::ChunkGrid::query_all_neighbour_states(
 
         ChunkState actual_state = neighbour->state.load(std::memory_order_acquire);
 
-        all_neighbours_satisfy_constraint
-            = all_neighbours_satisfy_constraint
-              && (actual_state >= required_minimum_state);
+        all_neighbours_satisfy_constraint = all_neighbours_satisfy_constraint
+                                            && (actual_state >= required_minimum_state);
     }
 
     return { true, all_neighbours_satisfy_constraint };

@@ -96,21 +96,16 @@ void happ::WindowBase::validate_fullscreen_mode() {
 
         // Do the tests and worst case fallback to the first mode SDL supports.
         if (!try_res_width(1920) && !try_res_width(1280) && !try_res_width(800)) {
-            m_settings.fullscreen_mode
-                = m_fullscreen_modes[m_settings.display_idx][0];
+            m_settings.fullscreen_mode = m_fullscreen_modes[m_settings.display_idx][0];
         }
     }
 }
 
-bool operator==(
-    const happ::WindowDimensions& lhs, const happ::WindowDimensions& rhs
-) {
+bool operator==(const happ::WindowDimensions& lhs, const happ::WindowDimensions& rhs) {
     return lhs.width == rhs.width && lhs.height == rhs.height;
 }
 
-bool operator!=(
-    const happ::WindowDimensions& lhs, const happ::WindowDimensions& rhs
-) {
+bool operator!=(const happ::WindowDimensions& lhs, const happ::WindowDimensions& rhs) {
     return !(lhs == rhs);
 }
 

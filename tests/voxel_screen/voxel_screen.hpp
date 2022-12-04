@@ -234,12 +234,10 @@ public:
                 auto chunk = handle.lock();
 
                 if ((chunk->position.x < static_cast<i32>(current_pos.x) - VIEW_DIST)
-                    || (chunk->position.x
-                        > static_cast<i32>(current_pos.x) - VIEW_DIST)
-                    || (chunk->position.z
-                        < static_cast<i32>(current_pos.z) - VIEW_DIST)
-                    || (chunk->position.z
-                        > static_cast<i32>(current_pos.z) - VIEW_DIST))
+                    || (chunk->position.x > static_cast<i32>(current_pos.x) - VIEW_DIST)
+                    || (chunk->position.z < static_cast<i32>(current_pos.z) - VIEW_DIST)
+                    || (chunk->position.z > static_cast<i32>(current_pos.z) - VIEW_DIST
+                    ))
                 {
                     debug_printf(
                         "    (%d, %d, %d)\n",
@@ -280,14 +278,14 @@ public:
 
         auto               dims = m_process->window()->dimensions();
         std::vector<f32v3> lines;
-        lines.emplace_back(f32v3{
-            dims.width / 2.0f - 20.0f, dims.height / 2.0f, 0.0f });
-        lines.emplace_back(f32v3{
-            dims.width / 2.0f + 20.0f, dims.height / 2.0f, 0.0f });
-        lines.emplace_back(f32v3{
-            dims.width / 2.0f, dims.height / 2.0f - 20.0f, 0.0f });
-        lines.emplace_back(f32v3{
-            dims.width / 2.0f, dims.height / 2.0f + 20.0f, 0.0f });
+        lines.emplace_back(f32v3{ dims.width / 2.0f - 20.0f, dims.height / 2.0f, 0.0f }
+        );
+        lines.emplace_back(f32v3{ dims.width / 2.0f + 20.0f, dims.height / 2.0f, 0.0f }
+        );
+        lines.emplace_back(f32v3{ dims.width / 2.0f, dims.height / 2.0f - 20.0f, 0.0f }
+        );
+        lines.emplace_back(f32v3{ dims.width / 2.0f, dims.height / 2.0f + 20.0f, 0.0f }
+        );
 
         glNamedBufferSubData(
             m_crosshair_vbo,
@@ -343,13 +341,13 @@ public:
 
         m_shader_cache.init(
             &m_iom,
-            hg::ShaderCache::Parser{ [](const hio::fs::path& path,
-                                        hio::IOManagerBase*  iom) -> std::string {
-                std::string buffer;
-                if (!iom->read_file_to_string(path, buffer)) return "";
+            hg::ShaderCache::Parser{
+                [](const hio::fs::path& path, hio::IOManagerBase* iom) -> std::string {
+                    std::string buffer;
+                    if (!iom->read_file_to_string(path, buffer)) return "";
 
-                return buffer;
-            } }
+                    return buffer;
+                } }
         );
 
         m_shader.init(&m_shader_cache);
@@ -433,8 +431,7 @@ public:
                         ))
                     {
                         auto chunk
-                            = m_chunk_grid->chunk(hvox::chunk_grid_position(position)
-                            );
+                            = m_chunk_grid->chunk(hvox::chunk_grid_position(position));
 
                         if (chunk != nullptr) {
                             hvox::set_block(
@@ -447,22 +444,20 @@ public:
                 }
             }
         };
-        hui::InputDispatcher::instance()->on_mouse.button_down
-            += &handle_mouse_button;
+        hui::InputDispatcher::instance()->on_mouse.button_down += &handle_mouse_button;
 
-        handle_mouse_move
-            = hemlock::Subscriber<hui::MouseMoveEvent>{ [&](hemlock::Sender,
-                                                            hui::MouseMoveEvent ev) {
-                  if (m_input_manager->is_pressed(
-                          static_cast<ui8>(hui::MouseButton::LEFT)
-                      )) {
-                      m_camera.rotate_from_mouse_with_absolute_up(
-                          -1.0f * static_cast<f32>(ev.dx),
-                          -1.0f * static_cast<f32>(ev.dy),
-                          0.005f
-                      );
-                  }
-              } };
+        handle_mouse_move = hemlock::Subscriber<hui::MouseMoveEvent>{
+            [&](hemlock::Sender, hui::MouseMoveEvent ev) {
+                if (m_input_manager->is_pressed(static_cast<ui8>(hui::MouseButton::LEFT)
+                    )) {
+                    m_camera.rotate_from_mouse_with_absolute_up(
+                        -1.0f * static_cast<f32>(ev.dx),
+                        -1.0f * static_cast<f32>(ev.dy),
+                        0.005f
+                    );
+                }
+            }
+        };
 
         hui::InputDispatcher::instance()->on_mouse.move += &handle_mouse_move;
     }
@@ -482,8 +477,7 @@ protected:
     htest::voxel_screen::PlayerData  m_player;
     htest::voxel_screen::PhysicsData m_phys;
 
-    hvox::ConditionalChunkOutlineRenderer<TVS_ChunkOutlinePredicate>
-         m_outline_renderer;
+    hvox::ConditionalChunkOutlineRenderer<TVS_ChunkOutlinePredicate> m_outline_renderer;
     bool m_draw_chunk_outlines;
 
     GLuint m_crosshair_vao, m_crosshair_vbo;

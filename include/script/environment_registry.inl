@@ -45,8 +45,9 @@ void hscript::EnvironmentRegistry<Environment>::dispose() {
 }
 
 template <typename Environment>
-hscript::EnvironmentGroupID hscript::EnvironmentRegistry<Environment>::
-    create_group(EnvironmentBuilder<Environment>* builder /* = nullptr*/) {
+hscript::EnvironmentGroupID
+hscript::EnvironmentRegistry<Environment>::create_group(EnvironmentBuilder<Environment>*
+                                                            builder /* = nullptr*/) {
     Environment* group_env = new Environment();
     group_env->init(m_io_manager, m_max_script_length);
 
@@ -162,8 +163,8 @@ Environment* hscript::EnvironmentRegistry<Environment>::create_environments(
 }
 
 template <typename Environment>
-Environment*
-hscript::EnvironmentRegistry<Environment>::get_environment(std::string name) {
+Environment* hscript::EnvironmentRegistry<Environment>::get_environment(std::string name
+) {
     auto it = m_register.find(name);
     if (it == m_register.end()) return nullptr;
 

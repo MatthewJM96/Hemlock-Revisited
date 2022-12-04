@@ -2,8 +2,7 @@
 
 #include "thread/thread_workflow_builder.h"
 
-hthread::ThreadWorkflowBuilder::ThreadWorkflowBuilder() :
-    m_dag(nullptr) { /* Empty. */
+hthread::ThreadWorkflowBuilder::ThreadWorkflowBuilder() : m_dag(nullptr) { /* Empty. */
 }
 
 void hthread::ThreadWorkflowBuilder::init(ThreadWorkflowDAG* dag) {
@@ -53,8 +52,7 @@ hthread::ThreadWorkflowTaskID hthread::ThreadWorkflowBuilder::chain_task() {
     return new_id;
 }
 
-hthread::ThreadWorkflowTaskID hthread::ThreadWorkflowBuilder::chain_tasks(ui32 count
-) {
+hthread::ThreadWorkflowTaskID hthread::ThreadWorkflowBuilder::chain_tasks(ui32 count) {
     ThreadWorkflowTaskID first_new_id = m_dag->task_count;
 
     ThreadWorkflowTaskID new_id  = first_new_id;
@@ -173,8 +171,7 @@ bool hthread::ThreadWorkflowBuilder::set_task_depends(
     if (first_task >= next_valid_id || second_task >= next_valid_id) return false;
 
     // Second task is no longer an entry task if it was until now.
-    if (auto it = m_dag->entry_tasks.find(second_task);
-        it != m_dag->entry_tasks.end())
+    if (auto it = m_dag->entry_tasks.find(second_task); it != m_dag->entry_tasks.end())
         m_dag->entry_tasks.erase(it);
 
     m_dag->into_counts[second_task] += 1;

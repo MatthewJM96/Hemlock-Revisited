@@ -250,8 +250,7 @@ static_cast<i32>(current_pos.x) + VIEW_DIST,
                                  y, z_step < 0 ?
  static_cast<i32>(current_pos.z) - VIEW_DIST :
  static_cast<i32>(current_pos.z) + VIEW_DIST}
-                            }
-                            );
+                            });
                         }
                     }
                     for (auto x = static_cast<i32>(current_pos.x) - VIEW_DIST;
@@ -264,8 +263,7 @@ static_cast<i32>(current_pos.x) + VIEW_DIST,
                                  y, z_step < 0 ?
  static_cast<i32>(current_pos.z) - VIEW_DIST :
  static_cast<i32>(current_pos.z) + VIEW_DIST}
-                            }
-                            );
+                            });
                         }
                     }
                 }

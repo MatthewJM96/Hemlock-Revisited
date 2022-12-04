@@ -14,9 +14,8 @@ namespace hemlock {
         class BaseCamera {
         public:
             BaseCamera(Subscriber<happ::ResizeEvent>&& handler) :
-                handle_window_resize(
-                    std::forward<Subscriber<happ::ResizeEvent>>(handler)
-                ),
+                handle_window_resize(std::forward<Subscriber<happ::ResizeEvent>>(handler
+                )),
                 m_view_changed(false),
                 m_projection_changed(false){ /* Empty. */ };
 
@@ -41,9 +40,7 @@ namespace hemlock {
 
             const f32v3& up() const { return m_state.up; }
 
-            const f32m4& projection_matrix() const {
-                return m_state.projection_matrix;
-            }
+            const f32m4& projection_matrix() const { return m_state.projection_matrix; }
 
             const f32m4& view_matrix() const { return m_state.view_matrix; }
 

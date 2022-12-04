@@ -275,9 +275,7 @@ bool hg::f::Font::generate(
                     p::convert_sdl_indexed_to_rgba_8888(glyph_surface, actual_pixels);
                     break;
                 case 4:
-                    p::convert_sdl_xxxx_8888_to_rgba_8888(
-                        glyph_surface, actual_pixels
-                    );
+                    p::convert_sdl_xxxx_8888_to_rgba_8888(glyph_surface, actual_pixels);
                     break;
             }
             if (actual_pixels == nullptr) return false;
@@ -310,8 +308,7 @@ bool hg::f::Font::generate(
             font_instance.glyphs[char_index].uv_rect.z
                 = (static_cast<f32>(glyph_surface->w) / static_cast<f32>(best_width));
             font_instance.glyphs[char_index].uv_rect.w
-                = (static_cast<f32>(glyph_surface->h) / static_cast<f32>(best_height)
-                );
+                = (static_cast<f32>(glyph_surface->h) / static_cast<f32>(best_height));
 
             // Update current_u.
             current_u += glyph_surface->w + padding;

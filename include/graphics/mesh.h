@@ -54,92 +54,92 @@ namespace hemlock {
             ui32  index_count;
         };
 
-#define VERTEX_FIELD_TYPE(                                                           \
-    FIELD_TYPE, FIELD_NAME, ENUM_NAME, ELEM_COUNT, PRECISION, NORMALISED             \
-)                                                                                    \
+#define VERTEX_FIELD_TYPE(                                                             \
+    FIELD_TYPE, FIELD_NAME, ENUM_NAME, ELEM_COUNT, PRECISION, NORMALISED               \
+)                                                                                      \
   FIELD_TYPE
-#define VERTEX_FIELD_NAME(                                                           \
-    FIELD_TYPE, FIELD_NAME, ENUM_NAME, ELEM_COUNT, PRECISION, NORMALISED             \
-)                                                                                    \
+#define VERTEX_FIELD_NAME(                                                             \
+    FIELD_TYPE, FIELD_NAME, ENUM_NAME, ELEM_COUNT, PRECISION, NORMALISED               \
+)                                                                                      \
   FIELD_NAME
-#define VERTEX_ENUM_NAME(                                                            \
-    FIELD_TYPE, FIELD_NAME, ENUM_NAME, ELEM_COUNT, PRECISION, NORMALISED             \
-)                                                                                    \
+#define VERTEX_ENUM_NAME(                                                              \
+    FIELD_TYPE, FIELD_NAME, ENUM_NAME, ELEM_COUNT, PRECISION, NORMALISED               \
+)                                                                                      \
   ENUM_NAME
-#define VERTEX_ELEM_COUNT(                                                           \
-    FIELD_TYPE, FIELD_NAME, ENUM_NAME, ELEM_COUNT, PRECISION, NORMALISED             \
-)                                                                                    \
+#define VERTEX_ELEM_COUNT(                                                             \
+    FIELD_TYPE, FIELD_NAME, ENUM_NAME, ELEM_COUNT, PRECISION, NORMALISED               \
+)                                                                                      \
   ELEM_COUNT
-#define VERTEX_PRECISION(                                                            \
-    FIELD_TYPE, FIELD_NAME, ENUM_NAME, ELEM_COUNT, PRECISION, NORMALISED             \
-)                                                                                    \
+#define VERTEX_PRECISION(                                                              \
+    FIELD_TYPE, FIELD_NAME, ENUM_NAME, ELEM_COUNT, PRECISION, NORMALISED               \
+)                                                                                      \
   PRECISION
-#define VERTEX_NORMALISED(                                                           \
-    FIELD_TYPE, FIELD_NAME, ENUM_NAME, ELEM_COUNT, PRECISION, NORMALISED             \
-)                                                                                    \
+#define VERTEX_NORMALISED(                                                             \
+    FIELD_TYPE, FIELD_NAME, ENUM_NAME, ELEM_COUNT, PRECISION, NORMALISED               \
+)                                                                                      \
   NORMALISED
 
-#define GEN_MESH_ATTRIB_ENUM_FIELD(VERTEX_INFO, ID)                                  \
+#define GEN_MESH_ATTRIB_ENUM_FIELD(VERTEX_INFO, ID)                                    \
   VERTEX_ENUM_NAME VERTEX_INFO = ID_TO_INT(#ID)
 
-#define GEN_MESH_ATTRIB_ENUM_DEF(PREFIX, ...)                                        \
-  enum class PREFIX##_MeshAttribID{                                                  \
-      MAP_WITH_ID(GEN_MESH_ATTRIB_ENUM_FIELD, COMMA, __VA_ARGS__), SENTINEL          \
+#define GEN_MESH_ATTRIB_ENUM_DEF(PREFIX, ...)                                          \
+  enum class PREFIX##_MeshAttribID{                                                    \
+      MAP_WITH_ID(GEN_MESH_ATTRIB_ENUM_FIELD, COMMA, __VA_ARGS__), SENTINEL            \
   };
 
-#define GEN_VERTEX_STRUCT_FIELD(VERTEX_INFO)                                         \
+#define GEN_VERTEX_STRUCT_FIELD(VERTEX_INFO)                                           \
   VERTEX_FIELD_TYPE VERTEX_INFO VERTEX_FIELD_NAME VERTEX_INFO;
 
-#define GEN_VERTEX_STRUCT_DEF(PREFIX, ...)                                           \
-  struct PREFIX##_Vertex {                                                           \
-    MAP(GEN_VERTEX_STRUCT_FIELD, EMPTY, __VA_ARGS__)                                 \
+#define GEN_VERTEX_STRUCT_DEF(PREFIX, ...)                                             \
+  struct PREFIX##_Vertex {                                                             \
+    MAP(GEN_VERTEX_STRUCT_FIELD, EMPTY, __VA_ARGS__)                                   \
   };
 
-#define GEN_UNINDEXED_MESH_DATA_STRUCT(PREFIX)                                       \
-  struct PREFIX##_MeshData {                                                         \
-    PREFIX##_Vertex* vertices;                                                       \
-    ui32             vertex_count;                                                   \
+#define GEN_UNINDEXED_MESH_DATA_STRUCT(PREFIX)                                         \
+  struct PREFIX##_MeshData {                                                           \
+    PREFIX##_Vertex* vertices;                                                         \
+    ui32             vertex_count;                                                     \
   };
 
-#define GEN_INDEXED_MESH_DATA_STRUCT(PREFIX)                                         \
-  struct PREFIX##_IndexedMeshData :                                                  \
-      public PREFIX##_MeshData,                                                      \
-      public IndexData { /* Empty. */                                                \
+#define GEN_INDEXED_MESH_DATA_STRUCT(PREFIX)                                           \
+  struct PREFIX##_IndexedMeshData :                                                    \
+      public PREFIX##_MeshData,                                                        \
+      public IndexData { /* Empty. */                                                  \
   };
 
-#define GEN_MESH_DATA_STRUCT_DEFS(PREFIX)                                            \
-  GEN_UNINDEXED_MESH_DATA_STRUCT(PREFIX)                                             \
+#define GEN_MESH_DATA_STRUCT_DEFS(PREFIX)                                              \
+  GEN_UNINDEXED_MESH_DATA_STRUCT(PREFIX)                                               \
   GEN_INDEXED_MESH_DATA_STRUCT(PREFIX)
 
-#define GEN_UNINDEXED_MESH_UPLOADER_DECL(PREFIX)                                     \
-  bool upload_mesh(                                                                  \
-      const PREFIX##_MeshData& mesh_data,                                            \
-      OUT MeshHandles&         handles,                                              \
-      MeshDataVolatility       volatility = MeshDataVolatility::DYNAMIC              \
+#define GEN_UNINDEXED_MESH_UPLOADER_DECL(PREFIX)                                       \
+  bool upload_mesh(                                                                    \
+      const PREFIX##_MeshData& mesh_data,                                              \
+      OUT MeshHandles&         handles,                                                \
+      MeshDataVolatility       volatility = MeshDataVolatility::DYNAMIC                \
   );
 
-#define GEN_INDEXED_MESH_UPLOADER_DECL(PREFIX)                                       \
-  bool upload_mesh(                                                                  \
-      const PREFIX##_IndexedMeshData& mesh_data,                                     \
-      OUT IndexedMeshHandles&         handles,                                       \
-      MeshDataVolatility              volatility = MeshDataVolatility::DYNAMIC       \
+#define GEN_INDEXED_MESH_UPLOADER_DECL(PREFIX)                                         \
+  bool upload_mesh(                                                                    \
+      const PREFIX##_IndexedMeshData& mesh_data,                                       \
+      OUT IndexedMeshHandles&         handles,                                         \
+      MeshDataVolatility              volatility = MeshDataVolatility::DYNAMIC         \
   );
 
-#define GEN_MESH_UPLOADER_DEFS(PREFIX, ...)                                          \
-  GEN_MESH_UPLOADER_DEF(PREFIX, 0, __VA_ARGS__)                                      \
+#define GEN_MESH_UPLOADER_DEFS(PREFIX, ...)                                            \
+  GEN_MESH_UPLOADER_DEF(PREFIX, 0, __VA_ARGS__)                                        \
   GEN_MESH_UPLOADER_DEF(PREFIX, 1, __VA_ARGS__)
 
-#define GEN_MESH_UPLOADER_DECLS(PREFIX)                                              \
-  GEN_UNINDEXED_MESH_UPLOADER_DECL(PREFIX)                                           \
+#define GEN_MESH_UPLOADER_DECLS(PREFIX)                                                \
+  GEN_UNINDEXED_MESH_UPLOADER_DECL(PREFIX)                                             \
   GEN_INDEXED_MESH_UPLOADER_DECL(PREFIX)
 
-#define GEN_MESH_CASE_STRUCT_DEFS(PREFIX, ...)                                       \
-  GEN_MESH_ATTRIB_ENUM_DEF(PREFIX, __VA_ARGS__)                                      \
-  GEN_VERTEX_STRUCT_DEF(PREFIX, __VA_ARGS__)                                         \
+#define GEN_MESH_CASE_STRUCT_DEFS(PREFIX, ...)                                         \
+  GEN_MESH_ATTRIB_ENUM_DEF(PREFIX, __VA_ARGS__)                                        \
+  GEN_VERTEX_STRUCT_DEF(PREFIX, __VA_ARGS__)                                           \
   GEN_MESH_DATA_STRUCT_DEFS(PREFIX)
 
-#define GEN_MESH_CASE_STRUCT_DEFS_AND_FUNC_DECLS(PREFIX, ...)                        \
-  GEN_MESH_CASE_STRUCT_DEFS(PREFIX, __VA_ARGS__)                                     \
+#define GEN_MESH_CASE_STRUCT_DEFS_AND_FUNC_DECLS(PREFIX, ...)                          \
+  GEN_MESH_CASE_STRUCT_DEFS(PREFIX, __VA_ARGS__)                                       \
   GEN_MESH_UPLOADER_DECLS(PREFIX)
 
 #include "graphics/mesh/common_vertices_def.hpp"

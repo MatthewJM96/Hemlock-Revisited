@@ -87,8 +87,7 @@ namespace hemlock {
                 return range / 2.0f * alpha2 * alpha2 + startVal;
             }
             std::floating_point auto alpha2Minus1 = alpha2 - 1.0f;
-            return -1.0f * range / 2.0f
-                       * (alpha2Minus1 * (alpha2Minus1 - 2.0f) - 1.0f)
+            return -1.0f * range / 2.0f * (alpha2Minus1 * (alpha2Minus1 - 2.0f) - 1.0f)
                    + startVal;
         }
 
@@ -136,8 +135,7 @@ namespace hemlock {
         ) {
             auto                     range       = finalVal - startVal;
             std::floating_point auto alphaMinus1 = alpha - 1.0f;
-            return range * (alphaMinus1 * alphaMinus1 * alphaMinus1 + 1.0f)
-                   + startVal;
+            return range * (alphaMinus1 * alphaMinus1 * alphaMinus1 + 1.0f) + startVal;
         }
 
         template <std::floating_point FXX>
@@ -213,8 +211,7 @@ namespace hemlock {
             auto                     range       = finalVal - startVal;
             std::floating_point auto alphaMinus1 = alpha - 1.0f;
             return -1.0f * range
-                       * (alphaMinus1 * alphaMinus1 * alphaMinus1 * alphaMinus1 - 1.0f
-                       )
+                       * (alphaMinus1 * alphaMinus1 * alphaMinus1 * alphaMinus1 - 1.0f)
                    + startVal;
         }
 
@@ -498,8 +495,7 @@ namespace hemlock {
             std::floating_point auto alpha
         ) {
             auto range = finalVal - startVal;
-            return -1.0f * range * (glm::sqrt(1.0f - alpha * alpha) - 1.0f)
-                   + startVal;
+            return -1.0f * range * (glm::sqrt(1.0f - alpha * alpha) - 1.0f) + startVal;
         }
 
         template <std::floating_point FXX>
@@ -548,13 +544,11 @@ namespace hemlock {
             auto                     range  = finalVal - startVal;
             std::floating_point auto alpha2 = alpha * 2.0f;
             if (alpha2 < 1.0f) {
-                return -1.0f * range / 2.0f
-                           * (glm::sqrt(1.0f - alpha2 * alpha2) - 1.0f)
+                return -1.0f * range / 2.0f * (glm::sqrt(1.0f - alpha2 * alpha2) - 1.0f)
                        + startVal;
             }
             std::floating_point auto alpha2Minus2 = alpha2 - 2.0f;
-            return range / 2.0f
-                       * (glm::sqrt(1.0f - alpha2Minus2 * alpha2Minus2) + 1.0f)
+            return range / 2.0f * (glm::sqrt(1.0f - alpha2Minus2 * alpha2Minus2) + 1.0f)
                    + startVal;
         }
 
@@ -798,8 +792,7 @@ namespace hemlock {
                 return range * (7.5625f * alphaPrime * alphaPrime * 0.75f) + startVal;
             } else if (alpha < 2.5f / 2.75f) {
                 std::floating_point auto alphaPrime = alpha - (2.25f / 2.75f);
-                return range * (7.5625f * alphaPrime * alphaPrime * 0.9375f)
-                       + startVal;
+                return range * (7.5625f * alphaPrime * alphaPrime * 0.9375f) + startVal;
             } else {
                 std::floating_point auto alphaPrime = alpha - (2.625f / 2.75f);
                 return range * (7.5625f * alphaPrime * alphaPrime * 0.984375f)
@@ -831,8 +824,8 @@ namespace hemlock {
                 return ease_in_bounce(0, finalVal - startVal, 2.0f * alpha) * 0.5f
                        + startVal;
             }
-            return ease_out_bounce(0, finalVal - startVal, 2.0f * alpha - 1.0f)
-                       * range * 0.25f
+            return ease_out_bounce(0, finalVal - startVal, 2.0f * alpha - 1.0f) * range
+                       * 0.25f
                    + startVal;
         }
 

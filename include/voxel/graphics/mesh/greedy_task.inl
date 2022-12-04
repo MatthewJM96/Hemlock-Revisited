@@ -152,9 +152,7 @@ process_new_source:
                 if (!found_instanceable) {
                     // Found a instanceable source block that hasn't already
                     // been visited.
-                    if (are_same_instanceable(
-                            target, target, target_pos, raw_chunk_ptr
-                        )
+                    if (are_same_instanceable(target, target, target_pos, raw_chunk_ptr)
                         && !visited[target_idx])
                     {
                         add_border_blocks_to_queue(start, target_pos);

@@ -69,16 +69,13 @@ hvox::ChunkGridPosition
 hvox::chunk_grid_position(BlockWorldPosition block_world_position) {
     return {
         {static_cast<i64>(glm::floor(
-static_cast<f32>(block_world_position.x)
-/ static_cast<f32>(CHUNK_LENGTH)
+static_cast<f32>(block_world_position.x) / static_cast<f32>(CHUNK_LENGTH)
 )),
          static_cast<i64>(glm::floor(
-         static_cast<f32>(block_world_position.y)
-         / static_cast<f32>(CHUNK_LENGTH)
+         static_cast<f32>(block_world_position.y) / static_cast<f32>(CHUNK_LENGTH)
          )),
          static_cast<i64>(glm::floor(
-         static_cast<f32>(block_world_position.z)
-         / static_cast<f32>(CHUNK_LENGTH)
+         static_cast<f32>(block_world_position.z) / static_cast<f32>(CHUNK_LENGTH)
          ))}
     };
 }

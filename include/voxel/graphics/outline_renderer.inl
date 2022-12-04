@@ -56,9 +56,7 @@ void hvox::ConditionalChunkOutlineRenderer<Pred>::init(
         );
 
         glEnableVertexArrayAttrib(chunk_mesh_handles.vao, 1);
-        glVertexArrayAttribFormat(
-            chunk_mesh_handles.vao, 1, 3, GL_FLOAT, GL_FALSE, 0
-        );
+        glVertexArrayAttribFormat(chunk_mesh_handles.vao, 1, 3, GL_FLOAT, GL_FALSE, 0);
         glVertexArrayAttribBinding(chunk_mesh_handles.vao, 1, 1);
 
         glEnableVertexArrayAttrib(chunk_mesh_handles.vao, 2);

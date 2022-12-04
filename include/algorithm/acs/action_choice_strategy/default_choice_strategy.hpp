@@ -18,12 +18,11 @@ namespace hemlock {
                 VertexDescriptor<ActionType>       current_vertex,
                 const GraphMap<ActionType>&        map
             ) {
-                NextActionFinder action_finder
-                    = NextActionFinder(current_vertex, map);
+                NextActionFinder action_finder = NextActionFinder(current_vertex, map);
 
-                size_t total_candidates = action_finder.end() - action_finder.begin();
-                size_t num_candidates   = 0;
-                f32    total_score      = 0.0f;
+                size_t total_candidates  = action_finder.end() - action_finder.begin();
+                size_t num_candidates    = 0;
+                f32    total_score       = 0.0f;
                 f32*   cumulative_scores = new f32[total_candidates]{};
 
                 struct {
@@ -104,8 +103,7 @@ namespace hemlock {
                  * somehow can't make a choice.
                  */
                 f32 choice_val = rand(0.0f, total_score);
-                for (size_t choice_idx = 0; choice_idx < num_candidates; ++choice_idx)
-                {
+                for (size_t choice_idx = 0; choice_idx < num_candidates; ++choice_idx) {
                     if (choice_val <= cumulative_scores[choice_idx])
                         return { true,
                                  boost::target(
