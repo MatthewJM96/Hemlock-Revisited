@@ -5,10 +5,7 @@
 #include "app/process/manager_base.h"
 
 happ::ProcessManagerBase::ProcessManagerBase() :
-    m_initialised(false),
-    m_main_process(nullptr),
-    m_app(nullptr)
-{ /* Empty. */ };
+    m_initialised(false), m_main_process(nullptr), m_app(nullptr){ /* Empty. */ };
 
 void happ::ProcessManagerBase::init(AppBase* app) {
     if (m_initialised) return;

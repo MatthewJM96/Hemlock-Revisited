@@ -96,16 +96,16 @@ AlignOperands: Align
 SpaceBeforeAssignmentOperators: true
 AlignConsecutiveAssignments:
   Enabled: true
-  AcrossEmptyLines: true
+  AcrossEmptyLines: false
   AcrossComments: false
   AlignCompound: true
   PadOperators: true
 
 BitFieldColonSpacing: Both
-AlignConsecutiveBitFields: AcrossEmptyLines
+AlignConsecutiveBitFields: Consecutive
 
-AlignConsecutiveDeclarations: AcrossEmptyLines
-AlignConsecutiveMacros: AcrossEmptyLines
+AlignConsecutiveDeclarations: Consecutive
+AlignConsecutiveMacros: Consecutive
 
 AllowShortBlocksOnASingleLine: Empty
 AllowShortCaseLabelsOnASingleLine: false
@@ -121,6 +121,7 @@ AlignArrayOfStructures: Right
 BreakStringLiterals: true
 AlwaysBreakBeforeMultilineStrings: true
 
+IfMacros: ['IF']
 BreakBeforeBraces: Custom
 BraceWrapping:
   AfterEnum: false

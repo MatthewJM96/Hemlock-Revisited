@@ -11,39 +11,39 @@
 #include <glm/gtx/quaternion.hpp>
 
 // Integral types.
-using   i8 = int8_t; ///< 8-bit signed integer
-using  i16 = int16_t; ///< 16-bit signed integer
-using  i32 = int32_t; ///< 32-bit signed integer
-using  i64 = int64_t; ///< 64-bit signed integer
-using  ui8 = uint8_t; ///< 8-bit unsigned integer
-using ui16 = uint16_t; ///< 16-bit unsigned integer
-using ui32 = uint32_t; ///< 32-bit unsigned integer
-using ui64 = uint64_t; ///< 64-bit unsigned integer
+using i8   = int8_t;    ///< 8-bit signed integer
+using i16  = int16_t;   ///< 16-bit signed integer
+using i32  = int32_t;   ///< 32-bit signed integer
+using i64  = int64_t;   ///< 64-bit signed integer
+using ui8  = uint8_t;   ///< 8-bit unsigned integer
+using ui16 = uint16_t;  ///< 16-bit unsigned integer
+using ui32 = uint32_t;  ///< 32-bit unsigned integer
+using ui64 = uint64_t;  ///< 64-bit unsigned integer
 
 // Floating-point types.
-using f32 = float; ///< 32-bit floating point value (single)
-using f64 = double; ///< 64-bit floating point value (double)
+using f32 = float;   ///< 32-bit floating point value (single)
+using f64 = double;  ///< 64-bit floating point value (double)
 
 // Integral vector types.
-using   i8v2 = glm::i8vec2;
-using   i8v3 = glm::i8vec3;
-using   i8v4 = glm::i8vec4;
+using i8v2 = glm::i8vec2;
+using i8v3 = glm::i8vec3;
+using i8v4 = glm::i8vec4;
 
-using  i16v2 = glm::i16vec2;
-using  i16v3 = glm::i16vec3;
-using  i16v4 = glm::i16vec4;
+using i16v2 = glm::i16vec2;
+using i16v3 = glm::i16vec3;
+using i16v4 = glm::i16vec4;
 
-using  i32v2 = glm::i32vec2;
-using  i32v3 = glm::i32vec3;
-using  i32v4 = glm::i32vec4;
+using i32v2 = glm::i32vec2;
+using i32v3 = glm::i32vec3;
+using i32v4 = glm::i32vec4;
 
-using  i64v2 = glm::i64vec2;
-using  i64v3 = glm::i64vec3;
-using  i64v4 = glm::i64vec4;
+using i64v2 = glm::i64vec2;
+using i64v3 = glm::i64vec3;
+using i64v4 = glm::i64vec4;
 
-using  ui8v2 = glm::u8vec2;
-using  ui8v3 = glm::u8vec3;
-using  ui8v4 = glm::u8vec4;
+using ui8v2 = glm::u8vec2;
+using ui8v3 = glm::u8vec3;
+using ui8v4 = glm::u8vec4;
 
 using ui16v2 = glm::u16vec2;
 using ui16v3 = glm::u16vec3;
@@ -116,11 +116,13 @@ using colour3 = ui8v3;
 using colour4 = ui8v4;
 
 namespace hemlock {
-    template<typename ReturnType, typename... Args>
+    template <typename ReturnType, typename... Args>
     struct Delegate;
 
-    template<typename ReturnType, typename... Args>
-    struct Delegate<ReturnType(Args...)> : public std::function<ReturnType(Args...)> { /* Empty. */ };
-}
+    template <typename ReturnType, typename... Args>
+    struct Delegate<ReturnType(Args...)> :
+        public std::function<ReturnType(Args...)> { /* Empty. */
+    };
+}  // namespace hemlock
 
-#endif // __hemlock_types_h
+#endif  // __hemlock_types_h

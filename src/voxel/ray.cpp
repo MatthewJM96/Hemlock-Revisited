@@ -21,8 +21,7 @@ static i32 sign(f32 num) {
  * such that adding the result to s returns an integer.
  */
 static f32 min_coeff_to_int(f32 s, f32 ds) {
-    if (ds < 0.0f)
-        return min_coeff_to_int(-s, -ds);
+    if (ds < 0.0f) return min_coeff_to_int(-s, -ds);
 
     // E.g. where ' refers to sign handling above,
     // and '' refers to fmod below.
@@ -55,15 +54,14 @@ static f32 min_coeff_to_int(f32 s, f32 ds) {
  * @param direction The direction of the ray.
  * @param distance The distance the ray travelled in the step.
  */
-inline static
-void step_to_next_block_position(
-    IN OUT                      f32v3& position,
-    IN OUT   hvox::BlockWorldPosition& block_coord,
-    IN OUT                      f32v3& steps_to_next,
-       const hvox::BlockWorldPosition& step,
-                          const f32v3& delta,
-                                 f32v3 direction,
-    IN OUT                        f32& distance
+inline static void step_to_next_block_position(
+    IN OUT f32v3& position,
+    IN OUT hvox::BlockWorldPosition& block_coord,
+    IN OUT f32v3&                    steps_to_next,
+    const hvox::BlockWorldPosition&  step,
+    const f32v3&                     delta,
+    f32v3                            direction,
+    IN OUT f32&                      distance
 ) {
     // Assume direction here is normalised.
 
@@ -75,7 +73,7 @@ void step_to_next_block_position(
                 position += steps_to_next.x * direction;
                 distance += steps_to_next.x;
             } else {
-                position += delta.x  * direction;
+                position += delta.x * direction;
                 distance += delta.x;
             }
 
@@ -86,7 +84,7 @@ void step_to_next_block_position(
                 position += steps_to_next.z * direction;
                 distance += steps_to_next.z;
             } else {
-                position += delta.z  * direction;
+                position += delta.z * direction;
                 distance += delta.z;
             }
 
@@ -99,7 +97,7 @@ void step_to_next_block_position(
                 position += steps_to_next.y * direction;
                 distance += steps_to_next.y;
             } else {
-                position += delta.y  * direction;
+                position += delta.y * direction;
                 distance += delta.y;
             }
 
@@ -110,7 +108,7 @@ void step_to_next_block_position(
                 position += steps_to_next.z * direction;
                 distance += steps_to_next.z;
             } else {
-                position += delta.z  * direction;
+                position += delta.z * direction;
                 distance += delta.z;
             }
 
@@ -120,54 +118,56 @@ void step_to_next_block_position(
     }
 }
 
-bool hvox::Ray::cast_to_block(      f32v3 start, 
-                                    f32v3 direction,
-              hmem::WeakHandle<ChunkGrid> chunk_handle,
-                                    Block target_block,
-                                     ui32 max_steps,
-                  OUT BlockWorldPosition& position,
-                                 OUT f32& distance      )
-{
+bool hvox::Ray::cast_to_block(
+    f32v3                       start,
+    f32v3                       direction,
+    hmem::WeakHandle<ChunkGrid> chunk_handle,
+    Block                       target_block,
+    ui32                        max_steps,
+    OUT BlockWorldPosition&     position,
+    OUT f32&                    distance
+) {
     return cast_to_block(
         start,
         direction,
         chunk_handle,
-        {[target_block](const Block& test) { return target_block == test; }},
+        { [target_block](const Block& test) {
+            return target_block == test;
+        } },
         max_steps,
         position,
         distance
     );
 }
 
-bool hvox::Ray::cast_to_block(      f32v3 start,
-                                    f32v3 direction,
-              hmem::WeakHandle<ChunkGrid> chunk_handle,
-                                BlockTest block_is_target,
-                                     ui32 max_steps,
-                  OUT BlockWorldPosition& position,
-                                 OUT f32& distance      )
-{
+bool hvox::Ray::cast_to_block(
+    f32v3                       start,
+    f32v3                       direction,
+    hmem::WeakHandle<ChunkGrid> chunk_handle,
+    BlockTest                   block_is_target,
+    ui32                        max_steps,
+    OUT BlockWorldPosition&     position,
+    OUT f32&                    distance
+) {
     auto chunk_grid = chunk_handle.lock();
 
     if (chunk_grid == nullptr) return false;
 
-    BlockWorldPosition step = BlockWorldPosition{
-        sign(direction.x), sign(direction.y), sign(direction.z)
-    };
-    f32v3 delta = f32v3{
+    BlockWorldPosition step  = BlockWorldPosition{ sign(direction.x),
+                                                  sign(direction.y),
+                                                  sign(direction.z) };
+    f32v3              delta = f32v3{
         static_cast<f32>(step.x) / direction.x,
         static_cast<f32>(step.y) / direction.y,
         static_cast<f32>(step.z) / direction.z,
     };
-    f32v3 steps_to_next = f32v3{
-        min_coeff_to_int(start.x, direction.x),
-        min_coeff_to_int(start.y, direction.y),
-        min_coeff_to_int(start.z, direction.z)
-    };
-    position = block_world_position(start);
-    distance = 0.0f;
+    f32v3 steps_to_next = f32v3{ min_coeff_to_int(start.x, direction.x),
+                                 min_coeff_to_int(start.y, direction.y),
+                                 min_coeff_to_int(start.z, direction.z) };
+    position            = block_world_position(start);
+    distance            = 0.0f;
 
-    ui32 steps = 0;
+    ui32  steps = 0;
     Block block{};
 
     ChunkGridPosition old_chunk_pos = chunk_grid_position(position);
@@ -177,7 +177,9 @@ bool hvox::Ray::cast_to_block(      f32v3 start,
     if (chunk == nullptr) return false;
 
     do {
-        step_to_next_block_position(start, position, steps_to_next, step, delta, direction, distance);
+        step_to_next_block_position(
+            start, position, steps_to_next, step, delta, direction, distance
+        );
 
         ChunkGridPosition new_chunk_pos = chunk_grid_position(position);
 
@@ -192,9 +194,7 @@ bool hvox::Ray::cast_to_block(      f32v3 start,
 
         std::shared_lock lock(chunk->blocks_mutex);
 
-        auto idx = block_index(
-            block_chunk_position(position)
-        );
+        auto idx = block_index(block_chunk_position(position));
 
         block = chunk->blocks[idx];
 
@@ -204,55 +204,57 @@ bool hvox::Ray::cast_to_block(      f32v3 start,
     return false;
 }
 
-bool hvox::Ray::cast_to_block_before( f32v3 start, 
-                                      f32v3 direction,
-                hmem::WeakHandle<ChunkGrid> chunk_handle,
-                                      Block target_block,
-                                       ui32 max_steps,
-                    OUT BlockWorldPosition& position,
-                                   OUT f32& distance      )
-{
+bool hvox::Ray::cast_to_block_before(
+    f32v3                       start,
+    f32v3                       direction,
+    hmem::WeakHandle<ChunkGrid> chunk_handle,
+    Block                       target_block,
+    ui32                        max_steps,
+    OUT BlockWorldPosition&     position,
+    OUT f32&                    distance
+) {
     return cast_to_block_before(
         start,
         direction,
         chunk_handle,
-        {[target_block](const Block& test) { return target_block == test; }},
+        { [target_block](const Block& test) {
+            return target_block == test;
+        } },
         max_steps,
         position,
         distance
     );
 }
 
-bool hvox::Ray::cast_to_block_before( f32v3 start,
-                                      f32v3 direction,
-                hmem::WeakHandle<ChunkGrid> chunk_handle,
-                                  BlockTest block_is_target,
-                                       ui32 max_steps,
-                    OUT BlockWorldPosition& position,
-                                   OUT f32& distance      )
-{
+bool hvox::Ray::cast_to_block_before(
+    f32v3                       start,
+    f32v3                       direction,
+    hmem::WeakHandle<ChunkGrid> chunk_handle,
+    BlockTest                   block_is_target,
+    ui32                        max_steps,
+    OUT BlockWorldPosition&     position,
+    OUT f32&                    distance
+) {
     auto chunk_grid = chunk_handle.lock();
 
     if (chunk_grid == nullptr) return false;
 
-    BlockWorldPosition step = BlockWorldPosition{
-        sign(direction.x), sign(direction.y), sign(direction.z)
-    };
-    f32v3 delta = f32v3{
+    BlockWorldPosition step  = BlockWorldPosition{ sign(direction.x),
+                                                  sign(direction.y),
+                                                  sign(direction.z) };
+    f32v3              delta = f32v3{
         static_cast<f32>(step.x) / direction.x,
         static_cast<f32>(step.y) / direction.y,
         static_cast<f32>(step.z) / direction.z,
     };
-    f32v3 steps_to_next = f32v3{
-        min_coeff_to_int(start.x, direction.x),
-        min_coeff_to_int(start.y, direction.y),
-        min_coeff_to_int(start.z, direction.z)
-    };
+    f32v3              steps_to_next  = f32v3{ min_coeff_to_int(start.x, direction.x),
+                                 min_coeff_to_int(start.y, direction.y),
+                                 min_coeff_to_int(start.z, direction.z) };
     BlockWorldPosition block_position = block_world_position(start);
-    position = block_position;
-    distance = 0.0f;
+    position                          = block_position;
+    distance                          = 0.0f;
 
-    ui32 steps = 0;
+    ui32  steps = 0;
     Block block{};
 
     ChunkGridPosition old_chunk_pos = chunk_grid_position(block_position);
@@ -263,7 +265,15 @@ bool hvox::Ray::cast_to_block_before( f32v3 start,
 
     do {
         f32 step_distance = 0.0f;
-        step_to_next_block_position(start, block_position, steps_to_next, step, delta, direction, step_distance);
+        step_to_next_block_position(
+            start,
+            block_position,
+            steps_to_next,
+            step,
+            delta,
+            direction,
+            step_distance
+        );
 
         ChunkGridPosition new_chunk_pos = chunk_grid_position(block_position);
 
@@ -278,16 +288,14 @@ bool hvox::Ray::cast_to_block_before( f32v3 start,
 
         std::shared_lock lock(chunk->blocks_mutex);
 
-        auto idx = block_index(
-            block_chunk_position(block_position)
-        );
+        auto idx = block_index(block_chunk_position(block_position));
 
         block = chunk->blocks[idx];
 
         if (block_is_target(block)) return true;
 
         distance += step_distance;
-        position  = block_position;
+        position = block_position;
     } while (++steps < max_steps);
 
     return false;

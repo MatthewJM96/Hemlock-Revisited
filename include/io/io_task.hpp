@@ -10,14 +10,12 @@ namespace hemlock {
 
         class IOTask : public thread::IThreadTask<thread::BasicThreadContext> {
         public:
-            void init(IOManagerBase* iomanager) {
-                m_iomanager = iomanager;
-            }
+            void init(IOManagerBase* iomanager) { m_iomanager = iomanager; }
         protected:
             IOManagerBase* m_iomanager;
         };
-    }
-}
+    }  // namespace io
+}  // namespace hemlock
 namespace hio = hemlock::io;
 
-#endif // __hemlock_io_io_task_hpp
+#endif  // __hemlock_io_io_task_hpp

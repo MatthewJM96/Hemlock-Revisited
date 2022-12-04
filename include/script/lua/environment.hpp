@@ -15,33 +15,38 @@ namespace hemlock {
 
             template <bool HasRPCManager = false, size_t CallBufferSize = 0>
             class Environment :
-                    public EnvironmentBase<
-                        Environment<HasRPCManager, CallBufferSize>,
-                        HasRPCManager,
-                        CallBufferSize
-                    >
-            {
-                friend i32 register_lua_function<HasRPCManager, CallBufferSize>(LuaHandle);
-                friend i32 call_foreign<HasRPCManager, CallBufferSize>(LuaHandle state);
-                friend i32 query_foreign_call<HasRPCManager, CallBufferSize>(LuaHandle state);
-                friend i32 get_foreign_call_results<HasRPCManager, CallBufferSize>(LuaHandle state);
-                friend i32 set_manual_command_buffer_pump<HasRPCManager, CallBufferSize>(LuaHandle state);
-                friend i32 pump_command_buffer<HasRPCManager, CallBufferSize>(LuaHandle state);
+                public EnvironmentBase<
+                    Environment<HasRPCManager, CallBufferSize>,
+                    HasRPCManager,
+                    CallBufferSize> {
+                friend i32
+                    register_lua_function<HasRPCManager, CallBufferSize>(LuaHandle);
+                friend i32 call_foreign<HasRPCManager, CallBufferSize>(LuaHandle state
+                );
+                friend i32
+                query_foreign_call<HasRPCManager, CallBufferSize>(LuaHandle state);
+                friend i32 get_foreign_call_results<HasRPCManager, CallBufferSize>(
+                    LuaHandle state
+                );
+                friend i32
+                set_manual_command_buffer_pump<HasRPCManager, CallBufferSize>(
+                    LuaHandle state
+                );
+                friend i32
+                pump_command_buffer<HasRPCManager, CallBufferSize>(LuaHandle state);
 
                 using _Environment = Environment<HasRPCManager, CallBufferSize>;
-                using _Base = EnvironmentBase<
-                                _Environment,
-                                HasRPCManager,
-                                CallBufferSize
-                            >;
+                using _Base
+                    = EnvironmentBase<_Environment, HasRPCManager, CallBufferSize>;
             public:
-                Environment() :
-                    m_state(nullptr),
-                    m_parent(nullptr)
-                { /* Empty. */ }
-                ~Environment() { /* Empty. */ }
+                Environment() : m_state(nullptr), m_parent(nullptr) { /* Empty. */
+                }
+
+                ~Environment() { /* Empty. */
+                }
 
                 H_NON_COPYABLE(Environment);
+
                 H_MOVABLE(Environment) {
                     this->_Base::operator=(std::move(rhs));
 
@@ -61,9 +66,9 @@ namespace hemlock {
                  * script that this environment will process.
                  */
                 void init(
-                                hio::IOManagerBase* io_manager,
-                 EnvironmentRegistry<_Environment>* registry          = nullptr,
-                                               ui32 max_script_length = HEMLOCK_DEFAULT_MAX_SCRIPT_LENGTH
+                    hio::IOManagerBase*                io_manager,
+                    EnvironmentRegistry<_Environment>* registry = nullptr,
+                    ui32 max_script_length = HEMLOCK_DEFAULT_MAX_SCRIPT_LENGTH
                 ) final;
                 /**
                  * @brief Initialise the environment as a child of a
@@ -80,10 +85,10 @@ namespace hemlock {
                  * script that this environment will process.
                  */
                 void init(
-                                             _Base* parent,
-                                hio::IOManagerBase* io_manager,
-                 EnvironmentRegistry<_Environment>* registry          = nullptr,
-                                               ui32 max_script_length = HEMLOCK_DEFAULT_MAX_SCRIPT_LENGTH
+                    _Base*                             parent,
+                    hio::IOManagerBase*                io_manager,
+                    EnvironmentRegistry<_Environment>* registry = nullptr,
+                    ui32 max_script_length = HEMLOCK_DEFAULT_MAX_SCRIPT_LENGTH
                 ) final;
                 /**
                  * @brief Dispose the environment.
@@ -99,7 +104,8 @@ namespace hemlock {
                 /**
                  * @brief Load in the provided script string.
                  *
-                 * @param script A string of script to load into the script environment.
+                 * @param script A string of script to load into the script
+                 * environment.
                  */
                 bool load(const std::string& script) final;
 
@@ -110,7 +116,8 @@ namespace hemlock {
                 /**
                  * @brief Loads in the script at the provided filepath, then runs it.
                  *
-                 * Anything loaded in before this call will also be ran if no other calls to run have been made since.
+                 * Anything loaded in before this call will also be ran if no other
+                 * calls to run have been made since.
                  *
                  * @param filepath The filepath from which to load the script.
                  */
@@ -118,9 +125,11 @@ namespace hemlock {
                 /**
                  * @brief Loads in the provided script string, then runs it.
                  *
-                 * Anything loaded in before this call will also be ran if no other calls to run have been made since.
+                 * Anything loaded in before this call will also be ran if no other
+                 * calls to run have been made since.
                  *
-                 * @param script A string of script to load into the script environment.
+                 * @param script A string of script to load into the script
+                 * environment.
                  */
                 bool run(const std::string& script) final;
 
@@ -141,7 +150,7 @@ namespace hemlock {
                  * namespaces at arbitrary depth.
                  * @param namespaces The namespaces to set.
                  */
-                template <typename ...Strings>
+                template <typename... Strings>
                 void set_namespaces(Strings... namespaces);
                 /**
                  * @brief From this environment's current namespace
@@ -155,7 +164,7 @@ namespace hemlock {
                  * namespaces at arbitrary depth.
                  * @param namespaces The namespaces to enter.
                  */
-                template <typename ...Strings>
+                template <typename... Strings>
                 void enter_namespaces(Strings... namespaces);
 
                 /**
@@ -179,8 +188,11 @@ namespace hemlock {
                  * environment.
                  * @param delegate The delegate to be added to the environment.
                  */
-                template <typename ReturnType, typename ...Parameters>
-                void add_c_delegate(std::string_view name, Delegate<ReturnType, Parameters...>* delegate);
+                template <typename ReturnType, typename... Parameters>
+                void add_c_delegate(
+                    std::string_view                     name,
+                    Delegate<ReturnType, Parameters...>* delegate
+                );
                 /**
                  * @brief Add a function to the environment, exposed to the
                  * scripts ran within.
@@ -190,8 +202,10 @@ namespace hemlock {
                  * environment.
                  * @param func The function to be added to the environment.
                  */
-                template <typename ReturnType, typename ...Parameters>
-                void add_c_function(std::string_view name, ReturnType(*func)(Parameters...));
+                template <typename ReturnType, typename... Parameters>
+                void add_c_function(
+                    std::string_view name, ReturnType (*func)(Parameters...)
+                );
                 /**
                  * @brief Add a function to the environment that matches the
                  * lua_CFunction signature, with optional upvalues.
@@ -201,8 +215,12 @@ namespace hemlock {
                  * @param func The function to expose.
                  * @param upvalues The optional upvalues to bind.
                  */
-                template <typename ...Upvalues>
-                void add_c_function(std::string_view name, i32(*func)(LuaHandle), Upvalues... upvalues);
+                template <typename... Upvalues>
+                void add_c_function(
+                    std::string_view name,
+                    i32 (*func)(LuaHandle),
+                    Upvalues... upvalues
+                );
                 /**
                  * @brief Add a closure to the environment, exposed to the
                  * scripts ran within.
@@ -212,8 +230,15 @@ namespace hemlock {
                  * environment.
                  * @param closure The closure to be added to the environment.
                  */
-                template <std::invocable Closure, typename ReturnType, typename ...Parameters>
-                void add_c_closure(std::string_view name, Closure* closure, ReturnType(Closure::*func)(Parameters...));
+                template <
+                    std::invocable Closure,
+                    typename ReturnType,
+                    typename... Parameters>
+                void add_c_closure(
+                    std::string_view name,
+                    Closure*         closure,
+                    ReturnType (Closure::*func)(Parameters...)
+                );
                 /**
                  * @brief Get a script function from the environment, allowing
                  * calls within C++ into the script. Name can specify namespacing
@@ -222,11 +247,15 @@ namespace hemlock {
                  * @tparam ReturnType The return type of the script function.
                  * @tparam Parameters The parameters accepted by the script function.
                  * @param name The name of the script function to obtain.
-                 * @param delegate Delegate providing means to call the script function.
+                 * @param delegate Delegate providing means to call the script
+                 * function.
                  * @return True if the script function was obtained, false otherwise.
                  */
-                template <typename ReturnType, typename ...Parameters>
-                bool get_script_function(std::string&& name, OUT ScriptDelegate<ReturnType, Parameters...>& delegate);
+                template <typename ReturnType, typename... Parameters>
+                bool get_script_function(
+                    std::string&& name,
+                    OUT ScriptDelegate<ReturnType, Parameters...>& delegate
+                );
             protected:
                 /**
                  * @brief Pushes namespaces onto the Lua stack. Last
@@ -247,18 +276,20 @@ namespace hemlock {
                  * @return True if the Lua function was registered, false
                  * if it was not already registered and could not be registered.
                  */
-                bool register_lua_function(std::string&& name, OUT LuaFunctionState* state = nullptr);
+                bool register_lua_function(
+                    std::string&& name, OUT LuaFunctionState* state = nullptr
+                );
 
-                LuaHandle       m_state;
-                Environment*    m_parent;
-                LuaFunctions    m_lua_functions;
-                i32             m_namespace_depth;
+                LuaHandle    m_state;
+                Environment* m_parent;
+                LuaFunctions m_lua_functions;
+                i32          m_namespace_depth;
             };
-        }
-    }
-}
+        }  // namespace lua
+    }      // namespace script
+}  // namespace hemlock
 namespace hscript = hemlock::script;
 
 #include "environment.inl"
 
-#endif // __hemlock_script_lua_environment_h
+#endif  // __hemlock_script_lua_environment_h

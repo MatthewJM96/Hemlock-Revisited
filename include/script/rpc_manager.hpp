@@ -1,15 +1,16 @@
 #ifndef __hemlock_script_rpc_manager_hpp
 #define __hemlock_script_rpc_manager_hpp
 
-#include "script/environment_base_decl.hpp"
 #include "script/call_state.hpp"
+#include "script/environment_base_decl.hpp"
 
 namespace hemlock {
     namespace script {
         // TODO(Matthew): Reduce new calls as much as possible, introduce pageing and
         //                call limits. Try to remove use of std::string for calls,
         //                but not sure how to do that just yet.
-        // TODO(Matthew): Single RPC manager per environment, or per environment group?
+        // TODO(Matthew): Single RPC manager per environment, or per environment
+        // group?
 
         // TODO(Matthew): Automatic deqeueing of continuable calls that don't
         //                complete after some number of pumps? Likewise deletion
@@ -21,8 +22,11 @@ namespace hemlock {
             using _Environment = EnvironmentBase<EnvironmentImpl, true, BufferSize>;
         public:
             RPCManager() :
-                m_environment(nullptr), m_latest_call_id(0), m_calls_buffered(0)
-            { /* Empty. */ }
+                m_environment(nullptr),
+                m_latest_call_id(0),
+                m_calls_buffered(0) { /* Empty. */
+            }
+
             ~RPCManager() { dispose(); }
 
             /**
@@ -129,13 +133,13 @@ namespace hemlock {
              */
             void register_continuable_function(std::string&& function);
         protected:
-            _Environment*   m_environment;
+            _Environment* m_environment;
 
-            CallID       m_latest_call_id;
-            Calls        m_calls;
-            CallsData    m_call_data;
+            CallID    m_latest_call_id;
+            Calls     m_calls;
+            CallsData m_call_data;
 
-            std::mutex      m_buffer_lock;
+            std::mutex m_buffer_lock;
 
             bool                            m_is_public_env;
             std::unordered_set<std::string> m_public_functions;
@@ -145,13 +149,12 @@ namespace hemlock {
             std::conditional<
                 std::greater<size_t>()(BufferSize, 0),
                 size_t,
-                std::monostate
-            >::type m_calls_buffered;
+                std::monostate>::type m_calls_buffered;
         };
-    }
-}
+    }  // namespace script
+}  // namespace hemlock
 namespace hscript = hemlock::script;
 
 #include "rpc_manager.inl"
 
-#endif // __hemlock_script_rpc_manager_hpp
+#endif  // __hemlock_script_rpc_manager_hpp

@@ -1,5 +1,8 @@
 template <typename Environment>
-hscript::EnvironmentRegistry<Environment>& hscript::EnvironmentRegistry<Environment>::operator=(hscript::EnvironmentRegistry<Environment>&& rhs) {
+hscript::EnvironmentRegistry<Environment>&
+hscript::EnvironmentRegistry<Environment>::operator=(
+    hscript::EnvironmentRegistry<Environment>&& rhs
+) {
     m_register       = std::move(rhs.m_register);
     m_ungrouped_envs = std::move(rhs.m_ungrouped_envs);
     m_next_group_id  = rhs.m_next_group_id;
@@ -9,7 +12,10 @@ hscript::EnvironmentRegistry<Environment>& hscript::EnvironmentRegistry<Environm
 }
 
 template <typename Environment>
-void hscript::EnvironmentRegistry<Environment>::init(hio::IOManagerBase* io_manager, i32 max_script_length/* = HEMLOCK_DEFAULT_MAX_SCRIPT_LENGTH*/) {
+void hscript::EnvironmentRegistry<Environment>::init(
+    hio::IOManagerBase* io_manager,
+    i32                 max_script_length /* = HEMLOCK_DEFAULT_MAX_SCRIPT_LENGTH*/
+) {
     m_io_manager = io_manager;
 
     m_max_script_length = max_script_length;
@@ -39,7 +45,8 @@ void hscript::EnvironmentRegistry<Environment>::dispose() {
 }
 
 template <typename Environment>
-hscript::EnvironmentGroupID hscript::EnvironmentRegistry<Environment>::create_group(EnvironmentBuilder<Environment>* builder/* = nullptr*/) {
+hscript::EnvironmentGroupID hscript::EnvironmentRegistry<Environment>::
+    create_group(EnvironmentBuilder<Environment>* builder /* = nullptr*/) {
     Environment* group_env = new Environment();
     group_env->init(m_io_manager, m_max_script_length);
 
@@ -53,9 +60,10 @@ hscript::EnvironmentGroupID hscript::EnvironmentRegistry<Environment>::create_gr
 }
 
 template <typename Environment>
-Environment* hscript::EnvironmentRegistry<Environment>::create_environment(std::string name, EnvironmentBuilder<Environment>* builder/* = nullptr*/) {
-    if (m_register.find(name) != m_register.end())
-        return nullptr;
+Environment* hscript::EnvironmentRegistry<Environment>::create_environment(
+    std::string name, EnvironmentBuilder<Environment>* builder /* = nullptr*/
+) {
+    if (m_register.find(name) != m_register.end()) return nullptr;
 
     Environment* env = new Environment();
     env->init(m_io_manager, this, m_max_script_length);
@@ -71,9 +79,10 @@ Environment* hscript::EnvironmentRegistry<Environment>::create_environment(std::
 }
 
 template <typename Environment>
-Environment* hscript::EnvironmentRegistry<Environment>::create_environment(std::string name, EnvironmentGroupID group_id) {
-    if (m_register.find(name) != m_register.end())
-        return nullptr;
+Environment* hscript::EnvironmentRegistry<Environment>::create_environment(
+    std::string name, EnvironmentGroupID group_id
+) {
+    if (m_register.find(name) != m_register.end()) return nullptr;
 
     EnvironmentGroup<Environment>& group;
     try {
@@ -92,10 +101,13 @@ Environment* hscript::EnvironmentRegistry<Environment>::create_environment(std::
 }
 
 template <typename Environment>
-Environment* hscript::EnvironmentRegistry<Environment>::create_environments(ui32 num, std::string* names, EnvironmentBuilder<Environment>* builder/* = nullptr*/) {
+Environment* hscript::EnvironmentRegistry<Environment>::create_environments(
+    ui32                             num,
+    std::string*                     names,
+    EnvironmentBuilder<Environment>* builder /* = nullptr*/
+) {
     for (ui32 env_idx = 0; env_idx != num; ++env_idx) {
-        if (m_register.find(names[env_idx]) != m_register.end())
-            return nullptr;
+        if (m_register.find(names[env_idx]) != m_register.end()) return nullptr;
     }
 
     Environment* envs = new Environment[num]();
@@ -119,10 +131,11 @@ Environment* hscript::EnvironmentRegistry<Environment>::create_environments(ui32
 }
 
 template <typename Environment>
-Environment* hscript::EnvironmentRegistry<Environment>::create_environments(ui32 num, std::string* names, EnvironmentGroupID group_id) {
+Environment* hscript::EnvironmentRegistry<Environment>::create_environments(
+    ui32 num, std::string* names, EnvironmentGroupID group_id
+) {
     for (ui32 env_idx = 0; env_idx != num; ++env_idx) {
-        if (m_register.find(names[env_idx]) != m_register.end())
-            return nullptr;
+        if (m_register.find(names[env_idx]) != m_register.end()) return nullptr;
     }
 
     EnvironmentGroup<Environment>& group;
@@ -149,7 +162,8 @@ Environment* hscript::EnvironmentRegistry<Environment>::create_environments(ui32
 }
 
 template <typename Environment>
-Environment* hscript::EnvironmentRegistry<Environment>::get_environment(std::string name) {
+Environment*
+hscript::EnvironmentRegistry<Environment>::get_environment(std::string name) {
     auto it = m_register.find(name);
     if (it == m_register.end()) return nullptr;
 

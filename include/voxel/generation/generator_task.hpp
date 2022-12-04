@@ -11,24 +11,26 @@ namespace hemlock {
          * @brief Defines a struct whose opeartor() sets the blocks of a chunk.
          */
         template <typename StrategyCandidate>
-        concept ChunkGenerationStrategy = requires (
-             StrategyCandidate s,
-           hmem::Handle<Chunk> c
-        ) {
-            { s.operator()(c) } -> std::same_as<void>;
-        };
+        concept ChunkGenerationStrategy
+            = requires (StrategyCandidate s, hmem::Handle<Chunk> c) {
+                  {
+                      s.operator()(c)
+                      } -> std::same_as<void>;
+              };
 
         template <hvox::ChunkGenerationStrategy GenerationStrategy>
         class ChunkGenerationTask : public ChunkTask {
         public:
-            virtual ~ChunkGenerationTask() { /* Empty. */ }
+            virtual ~ChunkGenerationTask() { /* Empty. */
+            }
 
-            virtual void execute(ChunkLoadThreadState* state, ChunkTaskQueue* task_queue) override;
+            virtual void
+            execute(ChunkLoadThreadState* state, ChunkTaskQueue* task_queue) override;
         };
-    }
-}
+    }  // namespace voxel
+}  // namespace hemlock
 namespace hvox = hemlock::voxel;
 
 #include "voxel/generation/generator_task.inl"
 
-#endif // __hemlock_voxel_generation_generator_task_hpp
+#endif  // __hemlock_voxel_generation_generator_task_hpp

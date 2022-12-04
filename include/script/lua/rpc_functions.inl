@@ -31,35 +31,25 @@ i32 hscript::lua::call_foreign(LuaHandle state) {
         return 1;
     }
 
-    i32 param_count = lua_gettop(state) - 2;
+    i32            param_count = lua_gettop(state) - 2;
     CallParameters parameters(static_cast<size_t>(param_count));
 
     for (i32 i = -param_count; i < 0; ++i) {
         if (lua_isboolean(state, i)) {
-            parameters[param_count + i] = {
-                .type = CallType::BOOLEAN,
-                .value = static_cast<bool>(lua_toboolean(state, i))
-            };
+            parameters[param_count + i]
+                = { .type  = CallType::BOOLEAN,
+                    .value = static_cast<bool>(lua_toboolean(state, i)) };
         } else if (lua_isnumber(state, i)) {
-            parameters[param_count + i] = {
-                .type = CallType::NUMBER,
-                .value = lua_tonumber(state, i)
-            };
+            parameters[param_count + i]
+                = { .type = CallType::NUMBER, .value = lua_tonumber(state, i) };
         } else if (lua_islightuserdata(state, i)) {
-            parameters[param_count + i] = {
-                .type = CallType::POINTER,
-                .value = lua_touserdata(state, i)
-            };
+            parameters[param_count + i]
+                = { .type = CallType::POINTER, .value = lua_touserdata(state, i) };
         } else if (lua_isstring(state, i)) {
-            parameters[param_count + i] = {
-                .type = CallType::STRING,
-                .value = lua_tostring(state, i)
-            };
+            parameters[param_count + i]
+                = { .type = CallType::STRING, .value = lua_tostring(state, i) };
         } else {
-            parameters[param_count + i] = {
-                .type = CallType::NIL,
-                .value = {}
-            };
+            parameters[param_count + i] = { .type = CallType::NIL, .value = {} };
         }
     }
 
@@ -68,8 +58,7 @@ i32 hscript::lua::call_foreign(LuaHandle state) {
 
     // Buffer function call in foreign env.
     CallID call_id = foreign_env->rpc.append_call(
-        std::move(function_name),
-        std::move(parameters)
+        std::move(function_name), std::move(parameters)
     );
 
     // Pass command ID back to caller.
@@ -112,7 +101,7 @@ i32 hscript::lua::query_foreign_call(LuaHandle state) {
 
     // Buffer function call in foreign env.
     CallState cmd_state;
-    i32 ret = foreign_env->rpc.call_state(call_id, cmd_state);
+    i32       ret = foreign_env->rpc.call_state(call_id, cmd_state);
 
     if (ret < 0) {
         // Pass command ID back to caller.
@@ -158,7 +147,7 @@ i32 hscript::lua::get_foreign_call_results(LuaHandle state) {
 
     // Buffer function call in foreign env.
     CallParameters return_values;
-    i32 ret = foreign_env->rpc.call_return_values(call_id, return_values);
+    i32            ret = foreign_env->rpc.call_return_values(call_id, return_values);
 
     if (ret < 0) {
         // Pass command ID back to caller.

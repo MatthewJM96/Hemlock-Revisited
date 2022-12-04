@@ -4,11 +4,11 @@
 namespace hemlock {
     namespace thread {
         template <typename ThreadState>
-        concept InterruptibleState = requires(ThreadState state)
-        {
-            std::is_same_v<decltype(state.stop),    bool>;
-            std::is_same_v<decltype(state.suspend), bool>;
-        };
+        concept InterruptibleState
+            = requires (ThreadState state) {
+                  std::is_same_v<decltype(state.stop), bool>;
+                  std::is_same_v<decltype(state.suspend), bool>;
+              };
 
         struct BasicThreadContext {
             volatile bool stop;
@@ -21,7 +21,7 @@ namespace hemlock {
         template <InterruptibleState ThreadState>
         struct HeldTask {
             IThreadTask<ThreadState>* task;
-            bool should_delete;
+            bool                      should_delete;
         };
 
         template <InterruptibleState ThreadState>
@@ -30,26 +30,32 @@ namespace hemlock {
         template <InterruptibleState ThreadState>
         struct Thread {
             std::thread thread;
+
             struct State {
-                ThreadState context = {};
+                ThreadState               context = {};
                 moodycamel::ConsumerToken consumer_token;
                 moodycamel::ProducerToken producer_token;
             } state;
         };
+
         template <InterruptibleState ThreadState>
         using Threads = std::vector<Thread<ThreadState>>;
 
         template <InterruptibleState ThreadState>
         class IThreadTask {
         public:
-            IThreadTask() { /* Empty. */ }
-            virtual ~IThreadTask() { /* Empty. */ }
+            IThreadTask() { /* Empty. */
+            }
+
+            virtual ~IThreadTask() { /* Empty. */
+            }
 
             /**
              * @brief If any special handling is needed to clean
              * up task, override this.
              */
-            virtual void dispose() { /* Empty */ }
+            virtual void dispose() { /* Empty */
+            }
 
             /**
              * @brief Executes the task, this must be implemented
@@ -61,7 +67,10 @@ namespace hemlock {
              * @param task_queue The task queue, can be interacted with
              * for example if a task needs to chain a follow-up task.
              */
-            virtual void execute(typename Thread<ThreadState>::State* state, TaskQueue<ThreadState>* task_queue) = 0;
+            virtual void execute(
+                typename Thread<ThreadState>::State* state,
+                TaskQueue<ThreadState>*              task_queue
+            ) = 0;
 
             /**
              * @brief Tracks completion state of the task.
@@ -73,11 +82,12 @@ namespace hemlock {
         class ThreadPool;
 
         template <InterruptibleState ThreadState>
-        using ThreadMainFunc = Delegate<void(typename Thread<ThreadState>::State*, TaskQueue<ThreadState>*)>;
+        using ThreadMainFunc = Delegate<
+            void(typename Thread<ThreadState>::State*, TaskQueue<ThreadState>*)>;
 
         /**
          * @brief A basic main function of threads.
-         * 
+         *
          * @param state The thread state, including tokens for
          * interacting with task queue, and thread pool specific
          * context.
@@ -85,16 +95,21 @@ namespace hemlock {
          * for example if a task needs to chain a follow-up task.
          */
         template <InterruptibleState ThreadState>
-        void basic_thread_main(typename Thread<ThreadState>::State* state, TaskQueue<ThreadState>* task_queue);
+        void basic_thread_main(
+            typename Thread<ThreadState>::State* state,
+            TaskQueue<ThreadState>*              task_queue
+        );
 
         template <InterruptibleState ThreadState>
         class ThreadPool {
         public:
             ThreadPool() :
                 m_is_initialised(false),
-                m_producer_token(moodycamel::ProducerToken(m_tasks))
-            { /* Empty. */ }
-            ~ThreadPool() { /* Empty. */ }
+                m_producer_token(moodycamel::ProducerToken(m_tasks)) { /* Empty. */
+            }
+
+            ~ThreadPool() { /* Empty. */
+            }
 
             /**
              * @brief Initialises the thread pool with the specified
@@ -103,7 +118,11 @@ namespace hemlock {
              * @param thread_count The number of threads the pool shall
              * possess.
              */
-            void init(ui32 thread_count, ThreadMainFunc<ThreadState> thread_main_func = ThreadMainFunc<ThreadState>{basic_thread_main<ThreadState>});
+            void init(
+                ui32                        thread_count,
+                ThreadMainFunc<ThreadState> thread_main_func
+                = ThreadMainFunc<ThreadState>{ basic_thread_main<ThreadState> }
+            );
             /**
              * @brief Cleans up the thread pool, bringing all threads
              * to a stop.
@@ -161,18 +180,19 @@ namespace hemlock {
              *
              * @param task The tasks to add.
              */
-            void threadsafe_add_tasks(HeldTask<ThreadState> tasks[], size_t task_count);
+            void
+            threadsafe_add_tasks(HeldTask<ThreadState> tasks[], size_t task_count);
 
             /**
              * @brief The number of threads held by the thread pool.
              */
             void num_threads() { return m_threads.size(); }
+
             /**
              * @brief The approximate number of tasks held by the thread pool.
              */
             void approx_num_tasks() { return m_tasks.size_approx(); }
         protected:
-
             bool m_is_initialised;
 
             ThreadMainFunc<ThreadState> m_thread_main_func;
@@ -180,10 +200,10 @@ namespace hemlock {
             TaskQueue<ThreadState>      m_tasks;
             moodycamel::ProducerToken   m_producer_token;
         };
-    }
-}
+    }  // namespace thread
+}  // namespace hemlock
 namespace hthread = hemlock::thread;
 
 #include "thread/thread_pool.inl"
 
-#endif // __hemlock_threading_thread_pool_hpp
+#endif  // __hemlock_threading_thread_pool_hpp

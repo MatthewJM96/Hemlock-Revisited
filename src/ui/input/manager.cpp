@@ -27,9 +27,10 @@ void hui::InputManager::dispose() {
 hui::CommonMouseState hui::InputManager::common_mouse_state() {
     CommonMouseState cms;
 
-    cms.left   = m_mouse_button_state[static_cast<ui8>(MouseButton::LEFT)].is_pressed;
-    cms.right  = m_mouse_button_state[static_cast<ui8>(MouseButton::RIGHT)].is_pressed;
-    cms.middle = m_mouse_button_state[static_cast<ui8>(MouseButton::MIDDLE)].is_pressed;
+    cms.left  = m_mouse_button_state[static_cast<ui8>(MouseButton::LEFT)].is_pressed;
+    cms.right = m_mouse_button_state[static_cast<ui8>(MouseButton::RIGHT)].is_pressed;
+    cms.middle
+        = m_mouse_button_state[static_cast<ui8>(MouseButton::MIDDLE)].is_pressed;
 
     return cms;
 }
@@ -48,7 +49,7 @@ bool hui::InputManager::is_pressed(PhysicalKey key) {
 
 void hui::InputManager::press(ui8 button) {
     m_mouse_button_state[button].is_pressed           = true;
-    m_mouse_button_state[button].press_count         += 1;
+    m_mouse_button_state[button].press_count          += 1;
     m_mouse_button_state[button].last_press.time      = SDL_GetTicks();
     m_mouse_button_state[button].last_press.modifiers = m_key_modifier_state;
 }
@@ -103,19 +104,14 @@ void hui::InputManager::press(PhysicalKey key) {
         ButtonState key_state;
         key_state.is_pressed  = true;
         key_state.press_count = 1;
-        key_state.last_press  = {
-            .time      = SDL_GetTicks(),
-            .modifiers = m_key_modifier_state
-        };
-        key_state.last_release = {
-            .time      = 0,
-            .modifiers = {}
-        };
+        key_state.last_press
+            = { .time = SDL_GetTicks(), .modifiers = m_key_modifier_state };
+        key_state.last_release    = { .time = 0, .modifiers = {} };
         m_keyboard_key_state[key] = key_state;
     } else {
-        ButtonState& key_state = (*it).second;
+        ButtonState& key_state         = (*it).second;
         key_state.is_pressed           = true;
-        key_state.press_count         += 1;
+        key_state.press_count          += 1;
         key_state.last_press.time      = SDL_GetTicks();
         key_state.last_press.modifiers = m_key_modifier_state;
     }
@@ -156,17 +152,12 @@ void hui::InputManager::release(PhysicalKey key) {
         ButtonState key_state;
         key_state.is_pressed  = false;
         key_state.press_count = 0;
-        key_state.last_press  = {
-            .time      = 0,
-            .modifiers = {}
-        };
-        key_state.last_release = {
-            .time      = SDL_GetTicks(),
-            .modifiers = m_key_modifier_state
-        };
+        key_state.last_press  = { .time = 0, .modifiers = {} };
+        key_state.last_release
+            = { .time = SDL_GetTicks(), .modifiers = m_key_modifier_state };
         m_keyboard_key_state[key] = key_state;
     } else {
-        ButtonState& key_state = (*it).second;
+        ButtonState& key_state           = (*it).second;
         key_state.is_pressed             = false;
         key_state.last_release.time      = SDL_GetTicks();
         key_state.last_release.modifiers = m_key_modifier_state;

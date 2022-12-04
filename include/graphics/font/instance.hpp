@@ -12,8 +12,9 @@ namespace hemlock {
             /**
              * @brief Type used for font size in exposed APIs.
              *
-             * Note that this is deliberately smaller than the ui32 used by SDL_ttf as it lets us create unique hashes of 
-             * the font render style, font style and font size for unordered map storage.
+             * Note that this is deliberately smaller than the ui32 used by SDL_ttf as
+             * it lets us create unique hashes of the font render style, font style
+             * and font size for unordered map storage.
              */
             using FontSize = ui16;
 
@@ -32,12 +33,13 @@ namespace hemlock {
              * @brief Enumeration of styles of font rendering.
              */
             enum class FontRenderStyle : ui8 {
-                SOLID, // -> No anti-aliasing, glyph edges will look jagged.
-                BLENDED // -> Anti-aliased, glyph edges will look smooth.
+                SOLID,   // -> No anti-aliasing, glyph edges will look jagged.
+                BLENDED  // -> Anti-aliased, glyph edges will look smooth.
             };
 
             using FontInstanceHash = ui64;
-            FontInstanceHash hash(FontSize size, FontStyle style, FontRenderStyle renderStyle);
+            FontInstanceHash
+            hash(FontSize size, FontStyle style, FontRenderStyle renderStyle);
 
             /**
              * @brief Data for each glyph.
@@ -53,15 +55,16 @@ namespace hemlock {
             class Font;
 
             /**
-             * @brief Data for an instance of a font with specific render style, and font style and size.
+             * @brief Data for an instance of a font with specific render style, and
+             * font style and size.
              *
-             * Each font instance consists of a texture which contains each glyph (character) in
-             * the font drawn in the size, style and render style specified for the instance. In
-             * addition to this texture, it contains a parameter defining the height of the
-             * tallest character, as well as an array of metadata for each glyph.
-             *     The metadata, Glyph, stores the character, the UV coordinates withing the
-             *     texture of the glyph the metadata represents, and the size of the glyph in
-             *     pixels.
+             * Each font instance consists of a texture which contains each glyph
+             * (character) in the font drawn in the size, style and render style
+             * specified for the instance. In addition to this texture, it contains a
+             * parameter defining the height of the tallest character, as well as an
+             * array of metadata for each glyph. The metadata, Glyph, stores the
+             * character, the UV coordinates withing the texture of the glyph the
+             * metadata represents, and the size of the glyph in pixels.
              */
             struct FontInstance {
                 GLuint texture;
@@ -72,11 +75,13 @@ namespace hemlock {
 
                 bool save(std::string filepath, hio::image::Saver save);
             };
-            const FontInstance NIL_FONT_INSTANCE = { 0, 0, nullptr, nullptr, ui32v2(0) };
-        }
+
+            const FontInstance NIL_FONT_INSTANCE
+                = { 0, 0, nullptr, nullptr, ui32v2(0) };
+        }  // namespace font
         namespace f = font;
-    }
-}
+    }  // namespace graphics
+}  // namespace hemlock
 namespace hg = hemlock::graphics;
 
-#endif // __hemlock_graphics_font_instance_hpp
+#endif  // __hemlock_graphics_font_instance_hpp

@@ -2,20 +2,18 @@
 #define __hemlock_script_environment_base_hpp
 
 #ifndef HEMLOCK_DEFAULT_MAX_SCRIPT_LENGTH
-#define HEMLOCK_DEFAULT_MAX_SCRIPT_LENGTH 50 * 1024 * 1024
-#endif // HEMLOCK_DEFAULT_MAX_SCRIPT_LENGTH
+#  define HEMLOCK_DEFAULT_MAX_SCRIPT_LENGTH 50 * 1024 * 1024
+#endif  // HEMLOCK_DEFAULT_MAX_SCRIPT_LENGTH
 
 #include "script/environment_base_decl.hpp"
-#include "script/state.hpp"
 #include "script/rpc_manager.hpp"
-
+#include "script/state.hpp"
 
 // TODO(Matthew): Create a REPL client that can be used for dev console and so on.
 // TODO(Matthew): Create a comms environment/plug-in that attaches to groups and
 //                standalone environments to allow them to communicate with each
 //                other. Acts as a command buffer taking up commands from other
 //                groups/envs and running them asynchronously.
-
 
 namespace hemlock {
     namespace script {
@@ -24,15 +22,19 @@ namespace hemlock {
 
         template <
             typename EnvironmentImpl,
-            bool HasRPCManager /*= false*/,
+            bool   HasRPCManager /*= false*/,
             size_t CallBufferSize /*= 0*/
-        >
+            >
         class EnvironmentBase {
         public:
-            EnvironmentBase()  { /* Empty. */ }
-            ~EnvironmentBase() { /* Empty. */ }
+            EnvironmentBase() { /* Empty. */
+            }
+
+            ~EnvironmentBase() { /* Empty. */
+            }
 
             H_NON_COPYABLE(EnvironmentBase);
+
             H_MOVABLE(EnvironmentBase) {
                 m_registry          = rhs.m_registry;
                 m_io_manager        = rhs.m_io_manager;
@@ -54,9 +56,9 @@ namespace hemlock {
              * script that this environment will process.
              */
             virtual void init(
-                                hio::IOManagerBase* io_manager,
-              EnvironmentRegistry<EnvironmentImpl>* registry          = nullptr,
-                                               ui32 max_script_length = HEMLOCK_DEFAULT_MAX_SCRIPT_LENGTH
+                hio::IOManagerBase*                   io_manager,
+                EnvironmentRegistry<EnvironmentImpl>* registry = nullptr,
+                ui32 max_script_length = HEMLOCK_DEFAULT_MAX_SCRIPT_LENGTH
             ) = 0;
             /**
              * @brief Initialise the environment as a child of a
@@ -73,10 +75,10 @@ namespace hemlock {
              * script that this environment will process.
              */
             virtual void init(
-                                   EnvironmentBase* parent,
-                                hio::IOManagerBase* io_manager,
-              EnvironmentRegistry<EnvironmentImpl>* registry          = nullptr,
-                                               ui32 max_script_length = HEMLOCK_DEFAULT_MAX_SCRIPT_LENGTH
+                EnvironmentBase*                      parent,
+                hio::IOManagerBase*                   io_manager,
+                EnvironmentRegistry<EnvironmentImpl>* registry = nullptr,
+                ui32 max_script_length = HEMLOCK_DEFAULT_MAX_SCRIPT_LENGTH
             ) = 0;
             /**
              * @brief Dispose the environment.
@@ -103,7 +105,8 @@ namespace hemlock {
             /**
              * @brief Loads in the script at the provided filepath, then runs it.
              *
-             * Anything loaded in before this call will also be ran if no other calls to run have been made since.
+             * Anything loaded in before this call will also be ran if no other calls
+             * to run have been made since.
              *
              * @param filepath The filepath from which to load the script.
              */
@@ -111,7 +114,8 @@ namespace hemlock {
             /**
              * @brief Loads in the provided script string, then runs it.
              *
-             * Anything loaded in before this call will also be ran if no other calls to run have been made since.
+             * Anything loaded in before this call will also be ran if no other calls
+             * to run have been made since.
              *
              * @param script A string of script to load into the script environment.
              */
@@ -122,6 +126,7 @@ namespace hemlock {
              * the global namespace.
              */
             virtual void set_global_namespace() = 0;
+
             /**
              * @brief Set this environment's current namespace to
              * the global namespace then enter into the specified
@@ -134,10 +139,12 @@ namespace hemlock {
              * namespaces at arbitrary depth.
              * @param namespaces The namespaces to set.
              */
-            template <typename ...Strings>
+            template <typename... Strings>
             void set_namespaces(Strings... namespaces) {
-                reinterpret_cast<EnvironmentImpl*>(this)->set_namespaces(namespaces...);
+                reinterpret_cast<EnvironmentImpl*>(this)->set_namespaces(namespaces...
+                );
             }
+
             /**
              * @brief From this environment's current namespace
              * enter into the specified namespaces. I.e. if
@@ -150,9 +157,11 @@ namespace hemlock {
              * namespaces at arbitrary depth.
              * @param namespaces The namespaces to enter.
              */
-            template <typename ...Strings>
+            template <typename... Strings>
             void enter_namespaces(Strings... namespaces) {
-                reinterpret_cast<EnvironmentImpl*>(this)->enter_namespaces(namespaces...);
+                reinterpret_cast<EnvironmentImpl*>(this)->enter_namespaces(
+                    namespaces...
+                );
             }
 
             /**
@@ -166,8 +175,11 @@ namespace hemlock {
              */
             template <typename Type>
             void add_value(std::string_view name, Type val) {
-                reinterpret_cast<EnvironmentImpl*>(this)->add_value(name, std::forward<Type>(val));
+                reinterpret_cast<EnvironmentImpl*>(this)->add_value(
+                    name, std::forward<Type>(val)
+                );
             }
+
             /**
              * @brief Add a delegate to the environment, exposed to the
              * scripts ran within.
@@ -178,10 +190,15 @@ namespace hemlock {
              * environment.
              * @param delegate The delegate to be added to the environment.
              */
-            template <typename ReturnType, typename ...Parameters>
-            void add_c_delegate(std::string_view name, Delegate<ReturnType, Parameters...>* delegate) {
-                reinterpret_cast<EnvironmentImpl*>(this)->add_c_delegate(name, delegate);
+            template <typename ReturnType, typename... Parameters>
+            void add_c_delegate(
+                std::string_view name, Delegate<ReturnType, Parameters...>* delegate
+            ) {
+                reinterpret_cast<EnvironmentImpl*>(this)->add_c_delegate(
+                    name, delegate
+                );
             }
+
             /**
              * @brief Add a function to the environment, exposed to the
              * scripts ran within.
@@ -192,10 +209,12 @@ namespace hemlock {
              * environment.
              * @param func The function to be added to the environment.
              */
-            template <typename ReturnType, typename ...Parameters>
-            void add_c_function(std::string_view name, ReturnType(*func)(Parameters...)) {
+            template <typename ReturnType, typename... Parameters>
+            void
+            add_c_function(std::string_view name, ReturnType (*func)(Parameters...)) {
                 reinterpret_cast<EnvironmentImpl*>(this)->add_c_function(name, func);
             }
+
             /**
              * @brief Add a closure to the environment, exposed to the
              * scripts ran within.
@@ -208,10 +227,20 @@ namespace hemlock {
              * @param closure The closure to be added to the environment.
              * @param func The closure's invocation method.
              */
-            template <std::invocable Closure, typename ReturnType, typename ...Parameters>
-            void add_c_closure(std::string_view name, Closure* closure, ReturnType(Closure::*func)(Parameters...)) {
-                reinterpret_cast<EnvironmentImpl*>(this)->add_c_closure(name, closure, func);
+            template <
+                std::invocable Closure,
+                typename ReturnType,
+                typename... Parameters>
+            void add_c_closure(
+                std::string_view name,
+                Closure*         closure,
+                ReturnType (Closure::*func)(Parameters...)
+            ) {
+                reinterpret_cast<EnvironmentImpl*>(this)->add_c_closure(
+                    name, closure, func
+                );
             }
+
             /**
              * @brief Add a closure to the environment, exposed to the
              * scripts ran within. This provides a default expecation
@@ -226,7 +255,9 @@ namespace hemlock {
              */
             template <std::invocable Closure>
             void add_c_closure(std::string_view name, Closure* closure) {
-                reinterpret_cast<EnvironmentImpl*>(this)->add_c_closure(name, closure, Closure::operator());
+                reinterpret_cast<EnvironmentImpl*>(this)->add_c_closure(
+                    name, closure, Closure::operator()
+                );
             }
 
             /**
@@ -239,30 +270,34 @@ namespace hemlock {
              * @param delegate Delegate providing means to call the script function.
              * @return True if the script function was obtained, false otherwise.
              */
-            template <typename ReturnType, typename ...Parameters>
-            bool get_script_function(std::string&& name, OUT ScriptDelegate<ReturnType, Parameters...>& delegate) {
-                return reinterpret_cast<EnvironmentImpl*>(this)->template get_script_function<ReturnType, Parameters...>(std::move(name), delegate);
+            template <typename ReturnType, typename... Parameters>
+            bool get_script_function(
+                std::string&& name,
+                OUT ScriptDelegate<ReturnType, Parameters...>& delegate
+            ) {
+                return reinterpret_cast<EnvironmentImpl*>(this)
+                    ->template get_script_function<ReturnType, Parameters...>(
+                        std::move(name), delegate
+                    );
             }
 
             std::conditional<
                 HasRPCManager,
                 RPCManager<EnvironmentImpl, CallBufferSize>,
-                std::monostate
-            >::type rpc = {};
+                std::monostate>::type rpc
+                = {};
         protected:
             EnvironmentRegistry<EnvironmentImpl>* m_registry;
 
-            std::conditional<
-                HasRPCManager,
-                bool,
-                std::monostate
-            >::type m_rpc_manual_pump = {};
+            std::conditional<HasRPCManager, bool, std::monostate>::type
+                m_rpc_manual_pump
+                = {};
 
             hio::IOManagerBase* m_io_manager;
-            ui32 m_max_script_length;
+            ui32                m_max_script_length;
         };
-    }
-}
+    }  // namespace script
+}  // namespace hemlock
 namespace hscript = hemlock::script;
 
-#endif // __hemlock_script_environment_base_hpp
+#endif  // __hemlock_script_environment_base_hpp

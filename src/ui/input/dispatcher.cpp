@@ -28,11 +28,13 @@ void hui::InputDispatcher::init(hui::InputManager* manager) {
 
     m_manager = manager;
 
-    SDL_SetEventFilter(hui::InputDispatcher::handle_event, reinterpret_cast<void*>(this));
-    SDL_EventState(SDL_DROPFILE,     SDL_ENABLE);
-    SDL_EventState(SDL_DROPBEGIN,    SDL_ENABLE);
+    SDL_SetEventFilter(
+        hui::InputDispatcher::handle_event, reinterpret_cast<void*>(this)
+    );
+    SDL_EventState(SDL_DROPFILE, SDL_ENABLE);
+    SDL_EventState(SDL_DROPBEGIN, SDL_ENABLE);
     SDL_EventState(SDL_DROPCOMPLETE, SDL_ENABLE);
-    SDL_EventState(SDL_DROPTEXT,     SDL_ENABLE);
+    SDL_EventState(SDL_DROPTEXT, SDL_ENABLE);
 }
 
 void hui::InputDispatcher::dispose() {
@@ -106,11 +108,13 @@ i32 hui::InputDispatcher::handle_event(void* data, SDL_Event* event) {
             kbe.modifiers    = dispatcher->m_manager->key_modifier_state();
             if (event->key.type == SDL_KEYDOWN) {
                 dispatcher->m_manager->press(kbe.physical_key);
-                kbe.state = dispatcher->m_manager->keyboard_key_state(kbe.physical_key);
+                kbe.state
+                    = dispatcher->m_manager->keyboard_key_state(kbe.physical_key);
                 dispatcher->on_keyboard.button_down(kbe);
             } else {
                 dispatcher->m_manager->release(kbe.physical_key);
-                kbe.state = dispatcher->m_manager->keyboard_key_state(kbe.physical_key);
+                kbe.state
+                    = dispatcher->m_manager->keyboard_key_state(kbe.physical_key);
                 dispatcher->on_keyboard.button_up(kbe);
             }
             break;
@@ -120,29 +124,29 @@ i32 hui::InputDispatcher::handle_event(void* data, SDL_Event* event) {
         case SDL_WINDOWEVENT:
             switch (event->window.event) {
                 case SDL_WINDOWEVENT_CLOSE:
-                    dispatcher->on_window.close({event->window.windowID});
+                    dispatcher->on_window.close({ event->window.windowID });
                     break;
                 case SDL_WINDOWEVENT_ENTER:
-                    dispatcher->on_window.mouse_enter({event->window.windowID});
+                    dispatcher->on_window.mouse_enter({ event->window.windowID });
                     dispatcher->m_manager->set_mouse_focus(event->window.windowID);
                     break;
                 case SDL_WINDOWEVENT_LEAVE:
-                    dispatcher->on_window.mouse_exit({event->window.windowID});
+                    dispatcher->on_window.mouse_exit({ event->window.windowID });
                     dispatcher->m_manager->set_mouse_focus(-1);
                     break;
                 case SDL_WINDOWEVENT_FOCUS_GAINED:
-                    dispatcher->on_window.focus_gained({event->window.windowID});
+                    dispatcher->on_window.focus_gained({ event->window.windowID });
                     dispatcher->m_manager->set_keyboard_focus(event->window.windowID);
                     break;
                 case SDL_WINDOWEVENT_FOCUS_LOST:
-                    dispatcher->on_window.focus_lost({event->window.windowID});
+                    dispatcher->on_window.focus_lost({ event->window.windowID });
                     dispatcher->m_manager->set_keyboard_focus(-1);
                     break;
                 case SDL_WINDOWEVENT_MOVED:
                     WindowMoveEvent mve;
                     mve.window_id = event->window.windowID;
-                    mve.dx     = event->window.data1;
-                    mve.dy    = event->window.data2;
+                    mve.dx        = event->window.data1;
+                    mve.dy        = event->window.data2;
                     dispatcher->on_window.move(mve);
                     break;
                 case SDL_WINDOWEVENT_RESIZED:
@@ -179,21 +183,19 @@ i32 hui::InputDispatcher::handle_event(void* data, SDL_Event* event) {
             dispatcher->on_drop.complete();
             break;
         case SDL_DROPFILE:
-            {
-                FileDropEvent fde;
-                fde.filename = event->drop.file;
-                dispatcher->on_drop.file(fde);
-                SDL_free(event->drop.file);
-            }
-            break;
+        {
+            FileDropEvent fde;
+            fde.filename = event->drop.file;
+            dispatcher->on_drop.file(fde);
+            SDL_free(event->drop.file);
+        } break;
         case SDL_DROPTEXT:
-            {
-                TextDropEvent tde;
-                tde.text = event->drop.file;
-                dispatcher->on_drop.text(tde);
-                SDL_free(event->drop.file);
-            }
-            break;
+        {
+            TextDropEvent tde;
+            tde.text = event->drop.file;
+            dispatcher->on_drop.text(tde);
+            SDL_free(event->drop.file);
+        } break;
         default:
             return 1;
     }

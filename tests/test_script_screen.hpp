@@ -7,16 +7,15 @@
 
 #include "iomanager.hpp"
 
-using TSS_Env       = hscript::lua::Environment<true, 10>;
-using TSS_EnvReg    = hscript::EnvironmentRegistry<TSS_Env>;
+using TSS_Env    = hscript::lua::Environment<true, 10>;
+using TSS_EnvReg = hscript::EnvironmentRegistry<TSS_Env>;
 
 class TestScriptScreen : public happ::ScreenBase {
 public:
-    TestScriptScreen() :
-        happ::ScreenBase(),
-        m_input_manager(nullptr)
-    { /* Empty. */ }
-    virtual ~TestScriptScreen() { /* Empty */ };
+    TestScriptScreen() : happ::ScreenBase(), m_input_manager(nullptr) { /* Empty. */
+    }
+
+    virtual ~TestScriptScreen(){ /* Empty */ };
 
     virtual void start(hemlock::FrameTime time) override {
         happ::ScreenBase::start(time);
@@ -39,13 +38,16 @@ public:
         m_lua_env_1->rpc.pump_calls();
 
         hscript::ScriptDelegate<void> check_hello_world;
-        m_lua_env_2->get_script_function<void>("check_hello_world", check_hello_world);
+        m_lua_env_2->get_script_function<void>(
+            "check_hello_world", check_hello_world
+        );
         check_hello_world();
     }
 
     virtual void update(hemlock::FrameTime) override {
         // Empty.
     }
+
     virtual void draw(hemlock::FrameTime) override {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -57,13 +59,14 @@ public:
 
         m_state = happ::ScreenState::RUNNING;
 
-        m_input_manager = static_cast<happ::SingleWindowApp*>(m_process)->input_manager();
+        m_input_manager
+            = static_cast<happ::SingleWindowApp*>(m_process)->input_manager();
     }
 protected:
-    MyIOManager         m_iom;
-    hui::InputManager   *m_input_manager;
-    TSS_EnvReg          *m_lua_env_reg;
-    TSS_Env             *m_lua_env_1, *m_lua_env_2;
+    MyIOManager        m_iom;
+    hui::InputManager* m_input_manager;
+    TSS_EnvReg*        m_lua_env_reg;
+    TSS_Env *          m_lua_env_1, *m_lua_env_2;
 };
 
-#endif // __hemlock_tests_test_script_screen_hpp
+#endif  // __hemlock_tests_test_script_screen_hpp

@@ -3,6 +3,7 @@
 
 namespace hemlock {
     class FpsLimiter;
+
     namespace ui {
         class InputManager;
     }
@@ -13,11 +14,12 @@ namespace hemlock {
         class AppBase {
         public:
             AppBase();
-            virtual ~AppBase() { /* Empty */ };
+            virtual ~AppBase(){ /* Empty */ };
 
             virtual void run() = 0;
 
             bool should_quit() { return m_should_quit; }
+
             void set_should_quit(bool should_quit = true);
 
             ProcessManagerBase* process_manager() const { return m_process_manager; }
@@ -34,8 +36,8 @@ namespace hemlock {
 
             ProcessManagerBase* m_process_manager;
         };
-    }
-}
+    }  // namespace app
+}  // namespace hemlock
 namespace happ = hemlock::app;
 
-#endif // __hemlock_app_app_base_h
+#endif  // __hemlock_app_app_base_h
