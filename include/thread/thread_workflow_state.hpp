@@ -11,26 +11,28 @@ namespace hemlock {
         template <InterruptibleState ThreadState>
         struct HeldWorkflowTask {
             IThreadWorkflowTask<ThreadState>* task;
-            bool should_delete;
+            bool                              should_delete;
         };
 
         using ThreadWorkflowTaskID = i32;
 
         template <InterruptibleState ThreadState>
         struct ThreadWorkflowTasksView {
-            hmem::Handle<HeldWorkflowTask<ThreadState>[]>   tasks;
-            ui32                                            count;
+            hmem::Handle<HeldWorkflowTask<ThreadState>[]> tasks;
+            ui32                                          count;
         };
 
         using ThreadWorkflowTaskCompletion = std::atomic<ui32>;
+
         struct ThreadWorkflowTaskCompletionView {
-            hmem::Handle<ThreadWorkflowTaskCompletion[]>    completion_states;
-            ui32                                            count;
+            hmem::Handle<ThreadWorkflowTaskCompletion[]> completion_states;
+            ui32                                         count;
         };
 
         using ThreadWorkflowTaskIntoCount = std::vector<ThreadWorkflowTaskID>;
         using ThreadWorkflowTaskIndexList = std::unordered_set<ThreadWorkflowTaskID>;
-        using ThreadWorkflowTaskGraph     = std::unordered_multimap<ThreadWorkflowTaskID, ThreadWorkflowTaskID>;
+        using ThreadWorkflowTaskGraph
+            = std::unordered_multimap<ThreadWorkflowTaskID, ThreadWorkflowTaskID>;
 
         struct ThreadWorkflowDAG {
             ui32                        task_count = 0;
@@ -38,8 +40,8 @@ namespace hemlock {
             ThreadWorkflowTaskIndexList entry_tasks;
             ThreadWorkflowTaskGraph     graph;
         };
-    }
-}
+    }  // namespace thread
+}  // namespace hemlock
 namespace hthread = hemlock::thread;
 
-#endif // __hemlock_thread_thread_workflow_state_hpp
+#endif  // __hemlock_thread_thread_workflow_state_hpp

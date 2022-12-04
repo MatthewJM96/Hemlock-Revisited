@@ -1,6 +1,7 @@
 template <hthread::InterruptibleState ThreadState>
-void hthread::basic_thread_main( typename Thread<ThreadState>::State* state,
-                                              TaskQueue<ThreadState>* task_queue  ) {
+void hthread::basic_thread_main(
+    typename Thread<ThreadState>::State* state, TaskQueue<ThreadState>* task_queue
+) {
     state->context.stop    = false;
     state->context.suspend = false;
 
@@ -14,12 +15,10 @@ void hthread::basic_thread_main( typename Thread<ThreadState>::State* state,
     //                  spin pattern used in lightweight semaphore is
     //                  doing anything bad to us. This is doubtful.
 
-    HeldTask<ThreadState> held = {nullptr, false};
+    HeldTask<ThreadState> held = { nullptr, false };
     while (!state->context.stop) {
         task_queue->wait_dequeue_timed(
-            state->consumer_token,
-            held,
-            std::chrono::seconds(1)
+            state->consumer_token, held, std::chrono::seconds(1)
         );
 
         while (state->context.suspend)
@@ -39,9 +38,10 @@ void hthread::basic_thread_main( typename Thread<ThreadState>::State* state,
 }
 
 template <hthread::InterruptibleState ThreadState>
-void hthread::ThreadPool<ThreadState>::init(           ui32 thread_count,
-                                ThreadMainFunc<ThreadState> thread_main_func /*= {basic_thread_main}*/  )
-{
+void hthread::ThreadPool<ThreadState>::init(
+    ui32                        thread_count,
+    ThreadMainFunc<ThreadState> thread_main_func /*= {basic_thread_main}*/
+) {
     if (m_is_initialised) return;
     m_is_initialised = true;
 
@@ -55,14 +55,13 @@ void hthread::ThreadPool<ThreadState>::init(           ui32 thread_count,
             .thread = std::thread(
                 m_thread_main_func,
                 reinterpret_cast<typename Thread<ThreadState>::State*>(
-                    reinterpret_cast<ui8*>(&m_threads.data()[i]) + offsetof(Thread<ThreadState>, state)
+                    reinterpret_cast<ui8*>(&m_threads.data()[i])
+                    + offsetof(Thread<ThreadState>, state)
                 ),
                 &m_tasks
             ),
-            .state {
-                .consumer_token = moodycamel::ConsumerToken(m_tasks),
-                .producer_token = moodycamel::ProducerToken(m_tasks)
-            }
+            .state{.consumer_token = moodycamel::ConsumerToken(m_tasks),
+                   .producer_token = moodycamel::ProducerToken(m_tasks)}
         });
     }
 }
@@ -73,14 +72,13 @@ void hthread::ThreadPool<ThreadState>::dispose() {
     m_is_initialised = false;
 
     for (auto& thread : m_threads) {
-        thread.state.context.stop    = true;
+        thread.state.context.stop = true;
         // Necessary to let threads come to an end of
         // execution.
         thread.state.context.suspend = false;
     }
 
-    for (auto& thread : m_threads)
-        thread.thread.join();
+    for (auto& thread : m_threads) thread.thread.join();
 
     TaskQueue<ThreadState>().swap(m_tasks);
 
@@ -89,14 +87,12 @@ void hthread::ThreadPool<ThreadState>::dispose() {
 
 template <hthread::InterruptibleState ThreadState>
 void hthread::ThreadPool<ThreadState>::suspend() {
-    for (auto& thread : m_threads)
-        thread.state.context.suspend = true;
+    for (auto& thread : m_threads) thread.state.context.suspend = true;
 }
 
 template <hthread::InterruptibleState ThreadState>
 void hthread::ThreadPool<ThreadState>::resume() {
-    for (auto& thread : m_threads)
-        thread.state.context.suspend = false;
+    for (auto& thread : m_threads) thread.state.context.suspend = false;
 }
 
 template <hthread::InterruptibleState ThreadState>
@@ -105,16 +101,21 @@ void hthread::ThreadPool<ThreadState>::add_task(HeldTask<ThreadState> task) {
 }
 
 template <hthread::InterruptibleState ThreadState>
-void hthread::ThreadPool<ThreadState>::add_tasks(HeldTask<ThreadState> tasks[], size_t task_count) {
+void hthread::ThreadPool<ThreadState>::add_tasks(
+    HeldTask<ThreadState> tasks[], size_t task_count
+) {
     m_tasks.enqueue_bulk(m_producer_token, tasks, task_count);
 }
 
 template <hthread::InterruptibleState ThreadState>
-void hthread::ThreadPool<ThreadState>::threadsafe_add_task(HeldTask<ThreadState> task) {
+void hthread::ThreadPool<ThreadState>::threadsafe_add_task(HeldTask<ThreadState> task
+) {
     m_tasks.enqueue(task);
 }
 
 template <hthread::InterruptibleState ThreadState>
-void hthread::ThreadPool<ThreadState>::threadsafe_add_tasks(HeldTask<ThreadState> tasks[], size_t task_count) {
+void hthread::ThreadPool<ThreadState>::threadsafe_add_tasks(
+    HeldTask<ThreadState> tasks[], size_t task_count
+) {
     m_tasks.enqueue_bulk(tasks, task_count);
 }

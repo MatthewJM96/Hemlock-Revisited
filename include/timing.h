@@ -10,7 +10,7 @@ namespace hemlock {
     Precision frame_time_to_floating(FrameTime frame_time) {
         const Precision old_units = static_cast<Precision>(FrameTime::period::den);
         const Precision new_units = static_cast<Precision>(Units::period::den);
-              Precision numerator = static_cast<Precision>(frame_time.count());
+        Precision       numerator = static_cast<Precision>(frame_time.count());
 
         return (numerator / old_units) * new_units;
     }
@@ -18,28 +18,33 @@ namespace hemlock {
     class FrameTimer {
     public:
         FrameTimer(size_t frames_count = 5) :
-            m_frame_times(FrameTimes(frames_count))
-        { /* Empty. */ }
-        virtual ~FrameTimer() { /* Empty. */ }
+            m_frame_times(FrameTimes(frames_count)) { /* Empty. */
+        }
+
+        virtual ~FrameTimer() { /* Empty. */
+        }
 
         virtual void start();
         virtual void frame_end();
 
-        const FrameTimes& frame_times()         { return m_frame_times;         }
-                FrameTime latest_frame_time()   { return m_frame_times.back();  }
+        const FrameTimes& frame_times() { return m_frame_times; }
+
+        FrameTime latest_frame_time() { return m_frame_times.back(); }
 
         f32 fps();
     protected:
-        FramePoint  m_last_frame_point;
-        FrameTimes  m_frame_times;
+        FramePoint m_last_frame_point;
+        FrameTimes m_frame_times;
     };
 
     class FrameLimiter : public FrameTimer {
     public:
         FrameLimiter(size_t frames_count, f32 target_fps) :
-            FrameTimer(frames_count), m_target_fps(target_fps)
-        { /* Empty. */ }
-        virtual ~FrameLimiter() { /* Empty. */ }
+            FrameTimer(frames_count), m_target_fps(target_fps) { /* Empty. */
+        }
+
+        virtual ~FrameLimiter() { /* Empty. */
+        }
 
         f32 target_fps() { return m_target_fps; }
 
@@ -49,6 +54,6 @@ namespace hemlock {
     private:
         f32 m_target_fps;
     };
-}
+}  // namespace hemlock
 
-#endif // __hemlock_timing_h
+#endif  // __hemlock_timing_h

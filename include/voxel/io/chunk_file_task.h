@@ -21,8 +21,8 @@ namespace hemlock {
             hmem::WeakHandle<Chunk> m_chunk;
             // static hio::fs::mapped_file chunk_data_file;
         };
-    }
-}
+    }  // namespace voxel
+}  // namespace hemlock
 namespace hvox = hemlock::voxel;
 
-#endif // __hemlock_voxel_io_chunk_file_task_hpp
+#endif  // __hemlock_voxel_io_chunk_file_task_hpp

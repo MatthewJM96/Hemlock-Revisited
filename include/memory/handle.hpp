@@ -11,7 +11,9 @@ namespace hemlock {
 
         template <typename DataType, typename Allocator, class... Args>
         Handle<DataType> allocate_handle(const Allocator& allocator, Args&&... args) {
-            return std::allocate_shared<DataType>(allocator, std::forward<Args...>(args...));
+            return std::allocate_shared<DataType>(
+                allocator, std::forward<Args...>(args...)
+            );
         }
 
         template <typename DataType, typename Allocator>
@@ -25,14 +27,18 @@ namespace hemlock {
         }
 
         template <typename DataType, typename Allocator>
-        Handle<DataType> allocate_handle(const Allocator& allocator, std::size_t N,
-                                    const std::remove_extent_t<DataType>& u) {
+        Handle<DataType> allocate_handle(
+            const Allocator&                      allocator,
+            std::size_t                           N,
+            const std::remove_extent_t<DataType>& u
+        ) {
             return std::allocate_shared<DataType>(allocator, N, u);
         }
 
         template <typename DataType, typename Allocator>
-        Handle<DataType> allocate_handle(const Allocator& allocator,
-                                    const std::remove_extent_t<DataType>& u) {
+        Handle<DataType> allocate_handle(
+            const Allocator& allocator, const std::remove_extent_t<DataType>& u
+        ) {
             return std::allocate_shared<DataType>(allocator, u);
         }
 
@@ -42,13 +48,15 @@ namespace hemlock {
         }
 
         template <typename DataType, typename Allocator>
-        Handle<DataType> allocate_handle_for_overwrite(const Allocator& allocator, std::size_t N) {
+        Handle<DataType>
+        allocate_handle_for_overwrite(const Allocator& allocator, std::size_t N) {
             return std::allocate_shared_for_overwrite<DataType>(allocator, N);
         }
 
         template <typename DataType, class... Args>
         Handle<DataType> make_handle(Args&&... args) {
-            return std::make_shared<DataType, Args...>(std::forward<Args...>(args...));
+            return std::make_shared<DataType, Args...>(std::forward<Args...>(args...)
+            );
         }
 
         template <typename DataType>
@@ -62,8 +70,8 @@ namespace hemlock {
         }
 
         template <typename DataType>
-        Handle<DataType> make_handle(std::size_t N,
-                                    const std::remove_extent_t<DataType>& u) {
+        Handle<DataType>
+        make_handle(std::size_t N, const std::remove_extent_t<DataType>& u) {
             return std::make_shared<DataType>(N, u);
         }
 
@@ -81,8 +89,8 @@ namespace hemlock {
         Handle<DataType> make_handle_for_overwrite(std::size_t N) {
             return std::make_shared_for_overwrite<DataType>(N);
         }
-    }
-}
+    }  // namespace memory
+}  // namespace hemlock
 namespace hmem = hemlock::memory;
 
-#endif // __hemlock_memory_handle_hpp
+#endif  // __hemlock_memory_handle_hpp

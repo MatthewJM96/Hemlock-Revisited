@@ -29,8 +29,8 @@ namespace hemlock {
             BlockChunkPosition  start_position;
             BlockChunkPosition  end_position;
         };
-    }
-}
+    }  // namespace voxel
+}  // namespace hemlock
 namespace hvox = hemlock::voxel;
 
-#endif // __hemlock_voxel_chunk_events_hpp
+#endif  // __hemlock_voxel_chunk_events_hpp

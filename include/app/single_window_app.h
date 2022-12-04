@@ -11,10 +11,8 @@ namespace hemlock {
 
         class SingleWindowApp : public AppBase, public ProcessBase {
         public:
-            SingleWindowApp() :
-                AppBase(), ProcessBase()
-            { /* Empty */ };
-            virtual ~SingleWindowApp() { /* Empty */ };
+            SingleWindowApp() : AppBase(), ProcessBase(){ /* Empty */ };
+            virtual ~SingleWindowApp(){ /* Empty */ };
 
             virtual void init() override;
             virtual void init(CALLEE_DELETE FrameTimer* timer);
@@ -23,7 +21,9 @@ namespace hemlock {
 
             virtual void run() override;
 
-            hui::InputManager* input_manager() const { return const_cast<hui::InputManager*>(&m_input_manager); }
+            hui::InputManager* input_manager() const {
+                return const_cast<hui::InputManager*>(&m_input_manager);
+            }
         protected:
             virtual void prepare_window() override;
 
@@ -31,8 +31,8 @@ namespace hemlock {
 
             hui::InputManager m_input_manager;
         };
-    }
-}
+    }  // namespace app
+}  // namespace hemlock
 namespace happ = hemlock::app;
 
-#endif // __hemlock_app_single_window_app_h
+#endif  // __hemlock_app_single_window_app_h

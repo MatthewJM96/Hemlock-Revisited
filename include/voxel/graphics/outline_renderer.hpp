@@ -6,17 +6,21 @@
 namespace hemlock {
     namespace voxel {
         struct Chunk;
-        class  ChunkGrid;
+        class ChunkGrid;
 
         template <typename Type>
-        concept ChunkOutlinePredicate = RPredicate<std::tuple<bool, colour4>, Type, hmem::Handle<Chunk>>;
+        concept ChunkOutlinePredicate
+            = RPredicate<std::tuple<bool, colour4>, Type, hmem::Handle<Chunk>>;
 
-        // TODO(Matthew): Add bit more niceness to rendering, thicker extremity edges and some cross-hatching thinner lines on faces.
+        // TODO(Matthew): Add bit more niceness to rendering, thicker extremity edges
+        // and some cross-hatching thinner lines on faces.
         template <ChunkOutlinePredicate Pred>
         class ConditionalChunkOutlineRenderer {
         public:
             ConditionalChunkOutlineRenderer();
-            ~ConditionalChunkOutlineRenderer() { /* Empty. */ }
+
+            ~ConditionalChunkOutlineRenderer() { /* Empty. */
+            }
 
             /**
              * @brief Initialises voxel outline renderer.
@@ -35,13 +39,16 @@ namespace hemlock {
              */
             void dispose();
 
-            void update(FrameTime) { /* Empty. */ }
+            void update(FrameTime) { /* Empty. */
+            }
+
             void draw(FrameTime time);
         protected:
             static hg::MeshHandles   chunk_mesh_handles;
             static std::atomic<ui32> ref_count;
 
-            Delegate<void(Sender, RenderDistanceChangeEvent)> handle_render_distance_change;
+            Delegate<void(Sender, RenderDistanceChangeEvent)>
+                handle_render_distance_change;
 
             Pred m_predicate;
 
@@ -51,6 +58,7 @@ namespace hemlock {
                 f32v3   position;
                 colour4 colour;
             };
+
             ChunkOutlineCondition* m_chunk_outline_conditions;
             ui32                   m_chunk_outline_condition_count;
 
@@ -62,38 +70,40 @@ namespace hemlock {
         using ChunkOutlineVertex   = hg::Point_3D_32_Vertex;
         using ChunkOutlineMeshData = hg::Point_3D_32_MeshData;
 
-        static ChunkOutlineVertex* const CHUNK_OUTLINE_VERTICES = new ChunkOutlineVertex[CHUNK_OUTLINE_VERTEX_COUNT] {
-            { {          0.0f,           0.0f,           0.0f} },
-            { {          0.0f, CHUNK_LENGTH_F,           0.0f} },
-            { {          0.0f,           0.0f,           0.0f} },
-            { {          0.0f,           0.0f, CHUNK_LENGTH_F} },
-            { {          0.0f,           0.0f,           0.0f} },
-            { {CHUNK_LENGTH_F,           0.0f,           0.0f} },
-            { {CHUNK_LENGTH_F, CHUNK_LENGTH_F, CHUNK_LENGTH_F} },
-            { {          0.0f, CHUNK_LENGTH_F, CHUNK_LENGTH_F} },
-            { {CHUNK_LENGTH_F, CHUNK_LENGTH_F, CHUNK_LENGTH_F} },
-            { {CHUNK_LENGTH_F,           0.0f, CHUNK_LENGTH_F} },
-            { {CHUNK_LENGTH_F, CHUNK_LENGTH_F, CHUNK_LENGTH_F} },
-            { {CHUNK_LENGTH_F, CHUNK_LENGTH_F,           0.0f} },
-            { {          0.0f, CHUNK_LENGTH_F,           0.0f} },
-            { {          0.0f, CHUNK_LENGTH_F, CHUNK_LENGTH_F} },
-            { {          0.0f, CHUNK_LENGTH_F,           0.0f} },
-            { {CHUNK_LENGTH_F, CHUNK_LENGTH_F,           0.0f} },
-            { {CHUNK_LENGTH_F,           0.0f, CHUNK_LENGTH_F} },
-            { {CHUNK_LENGTH_F,           0.0f,           0.0f} },
-            { {CHUNK_LENGTH_F,           0.0f, CHUNK_LENGTH_F} },
-            { {          0.0f,           0.0f, CHUNK_LENGTH_F} },
-            { {          0.0f, CHUNK_LENGTH_F, CHUNK_LENGTH_F} },
-            { {          0.0f,           0.0f, CHUNK_LENGTH_F} },
-            { {CHUNK_LENGTH_F,           0.0f,           0.0f} },
-            { {CHUNK_LENGTH_F, CHUNK_LENGTH_F,           0.0f} }
-        };
+        static ChunkOutlineVertex* const CHUNK_OUTLINE_VERTICES
+            = new ChunkOutlineVertex[CHUNK_OUTLINE_VERTEX_COUNT]{
+                  { { 0.0f, 0.0f, 0.0f } },
+                  { { 0.0f, CHUNK_LENGTH_F, 0.0f } },
+                  { { 0.0f, 0.0f, 0.0f } },
+                  { { 0.0f, 0.0f, CHUNK_LENGTH_F } },
+                  { { 0.0f, 0.0f, 0.0f } },
+                  { { CHUNK_LENGTH_F, 0.0f, 0.0f } },
+                  { { CHUNK_LENGTH_F, CHUNK_LENGTH_F, CHUNK_LENGTH_F } },
+                  { { 0.0f, CHUNK_LENGTH_F, CHUNK_LENGTH_F } },
+                  { { CHUNK_LENGTH_F, CHUNK_LENGTH_F, CHUNK_LENGTH_F } },
+                  { { CHUNK_LENGTH_F, 0.0f, CHUNK_LENGTH_F } },
+                  { { CHUNK_LENGTH_F, CHUNK_LENGTH_F, CHUNK_LENGTH_F } },
+                  { { CHUNK_LENGTH_F, CHUNK_LENGTH_F, 0.0f } },
+                  { { 0.0f, CHUNK_LENGTH_F, 0.0f } },
+                  { { 0.0f, CHUNK_LENGTH_F, CHUNK_LENGTH_F } },
+                  { { 0.0f, CHUNK_LENGTH_F, 0.0f } },
+                  { { CHUNK_LENGTH_F, CHUNK_LENGTH_F, 0.0f } },
+                  { { CHUNK_LENGTH_F, 0.0f, CHUNK_LENGTH_F } },
+                  { { CHUNK_LENGTH_F, 0.0f, 0.0f } },
+                  { { CHUNK_LENGTH_F, 0.0f, CHUNK_LENGTH_F } },
+                  { { 0.0f, 0.0f, CHUNK_LENGTH_F } },
+                  { { 0.0f, CHUNK_LENGTH_F, CHUNK_LENGTH_F } },
+                  { { 0.0f, 0.0f, CHUNK_LENGTH_F } },
+                  { { CHUNK_LENGTH_F, 0.0f, 0.0f } },
+                  { { CHUNK_LENGTH_F, CHUNK_LENGTH_F, 0.0f } }
+              };
 
-        const ChunkOutlineMeshData CHUNK_OUTLINE_MESH = { CHUNK_OUTLINE_VERTICES, CHUNK_OUTLINE_VERTEX_COUNT };
-    }
-}
+        const ChunkOutlineMeshData CHUNK_OUTLINE_MESH
+            = { CHUNK_OUTLINE_VERTICES, CHUNK_OUTLINE_VERTEX_COUNT };
+    }  // namespace voxel
+}  // namespace hemlock
 namespace hvox = hemlock::voxel;
 
 #include "voxel/graphics/outline_renderer.inl"
 
-#endif // __hemlock_voxel_graphics_outline_renderer_hpp
+#endif  // __hemlock_voxel_graphics_outline_renderer_hpp

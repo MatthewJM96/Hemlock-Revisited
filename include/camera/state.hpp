@@ -3,7 +3,7 @@
 
 namespace hemlock {
     namespace camera {
-        const f32v3 ABSOLUTE_UP = f32v3{0.0f, 1.0f, 0.0f};
+        const f32v3 ABSOLUTE_UP = f32v3{ 0.0f, 1.0f, 0.0f };
 
         struct ClampAxis {
             bool enabled;
@@ -14,10 +14,10 @@ namespace hemlock {
             f32 near_clipping = 0.1f;
             f32 far_clipping  = 10000.0f;
 
-            f32v3 position  = f32v3{0.0f};
-            f32v3 direction = f32v3{0.0f, 0.0f, 1.0f};
-            f32v3 right     = f32v3{1.0f, 0.0f, 0.0f};
-            f32v3 up        = f32v3{0.0f, 1.0f, 0.0f};
+            f32v3 position  = f32v3{ 0.0f };
+            f32v3 direction = f32v3{ 0.0f, 0.0f, 1.0f };
+            f32v3 right     = f32v3{ 1.0f, 0.0f, 0.0f };
+            f32v3 up        = f32v3{ 0.0f, 1.0f, 0.0f };
 
             f32m4 view_matrix;
             f32m4 projection_matrix;
@@ -35,8 +35,8 @@ namespace hemlock {
             f32 aspect_ratio = 4.0f / 3.0f;
             f32 fov          = 60.0f;
         };
-    }
-}
+    }  // namespace camera
+}  // namespace hemlock
 namespace hcam = hemlock::camera;
 
-#endif // __hemlock_camera_state_hpp
+#endif  // __hemlock_camera_state_hpp

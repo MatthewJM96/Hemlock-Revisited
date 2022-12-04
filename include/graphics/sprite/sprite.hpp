@@ -11,9 +11,11 @@ namespace hemlock {
             struct SpriteVertex;
 
             /**
-             * @brief Defines invokable type for building a quad from a sprite and vertex information.
+             * @brief Defines invokable type for building a quad from a sprite and
+             * vertex information.
              */
-            using QuadBuilder = Delegate<void(const Sprite* sprite, SpriteVertex* vertices)>;
+            using QuadBuilder
+                = Delegate<void(const Sprite* sprite, SpriteVertex* vertices)>;
 
             /**
              * @brief The sorting modes allowed for sorting sprites.
@@ -74,10 +76,10 @@ namespace hemlock {
                 COLOUR,
                 SENTINEL
             };
-        }
+        }  // namespace sprite
         namespace s = sprite;
-    }
-}
-namespace hg  = hemlock::graphics;
+    }  // namespace graphics
+}  // namespace hemlock
+namespace hg = hemlock::graphics;
 
-#endif // __hemlock_graphics_sprite_sprite_hpp
+#endif  // __hemlock_graphics_sprite_sprite_hpp

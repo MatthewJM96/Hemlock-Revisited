@@ -68,11 +68,11 @@ namespace hemlock {
              */
             template <bool HasRPCManager, size_t CallBufferSize>
             i32 pump_command_buffer(LuaHandle state);
-        }
-    }
-}
+        }  // namespace lua
+    }      // namespace script
+}  // namespace hemlock
 namespace hscript = hemlock::script;
 
 #include "rpc_functions.inl"
 
-#endif // __hemlock_script_lua_rpc_functions_hpp
+#endif  // __hemlock_script_lua_rpc_functions_hpp

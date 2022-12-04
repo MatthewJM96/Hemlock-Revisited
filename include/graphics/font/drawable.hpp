@@ -7,7 +7,8 @@ namespace hemlock {
     namespace graphics {
         namespace font {
             /**
-             * @brief Whether the string should be sized (vertically) by a scale factor or target a fixed pixel height.
+             * @brief Whether the string should be sized (vertically) by a scale
+             * factor or target a fixed pixel height.
              */
             enum class StringSizingKind {
                 SCALED,
@@ -19,8 +20,10 @@ namespace hemlock {
              */
             struct StringSizing {
                 StringSizingKind kind;
+
                 union {
                     f32v2 scaling;
+
                     struct {
                         f32 scale_x;
                         f32 target_height;
@@ -44,6 +47,7 @@ namespace hemlock {
                 const char*          str;
                 StringDrawProperties props;
             };
+
             using DrawableStringComponents = DrawableStringComponent*;
 
             /**
@@ -61,21 +65,25 @@ namespace hemlock {
              * @brief The data needed to draw a line.
              */
             struct DrawableLine {
-                f32 length;
-                f32 height;
+                f32                        length;
+                f32                        height;
                 std::vector<DrawableGlyph> drawables;
             };
+
             using DrawableLines = std::vector<DrawableLine>;
 
             /**
              * @brief This enum is of the various ways in which text may be wrapped.
              *
-             * QUICK is the quickest of the wrap modes, where it breaks immediately before the first character to exceed the rectangle.
+             * QUICK is the quickest of the wrap modes, where it breaks immediately
+             * before the first character to exceed the rectangle.
              *
-             * GREEDY only breaks on whitespace or '\\n' characters. While quicker than MINIMUM_RAGGEDNESS, it has the less uniformity of line lengths.
+             * GREEDY only breaks on whitespace or '\\n' characters. While quicker
+             * than MINIMUM_RAGGEDNESS, it has the less uniformity of line lengths.
              *
-             * MINIMUM_RAGGEDNESS breaks on the same characters as GREEDY but seeks to minimise the difference in line lengths rather than time taken
-             *     to calculate.
+             * MINIMUM_RAGGEDNESS breaks on the same characters as GREEDY but seeks to
+             * minimise the difference in line lengths rather than time taken to
+             * calculate.
              */
             enum class WordWrap {
                 NONE,
@@ -83,10 +91,10 @@ namespace hemlock {
                 GREEDY,
                 MINIMUM_RAGGEDNESS
             };
-        }
+        }  // namespace font
         namespace f = font;
-    }
-}
+    }  // namespace graphics
+}  // namespace hemlock
 namespace hg = hemlock::graphics;
 
-#endif // __hemlock_graphics_font_drawable_hpp
+#endif  // __hemlock_graphics_font_drawable_hpp

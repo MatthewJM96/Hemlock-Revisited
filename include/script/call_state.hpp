@@ -15,7 +15,8 @@ namespace hemlock {
             PENDING  = 2
         };
 
-        struct NilType { /* Empty. */ };
+        struct NilType { /* Empty. */
+        };
 
         // TODO(Matthew): Can we support arrays? Tables?
         enum class CallType {
@@ -26,21 +27,24 @@ namespace hemlock {
             STRING,
             POINTER
         };
-        using CallValue  = std::variant<NilType, bool, f64, const char*, void*>;
+        using CallValue = std::variant<NilType, bool, f64, const char*, void*>;
+
         struct CallParameter {
-            CallType type;
+            CallType  type;
             CallValue value;
         };
+
         using CallParameters = std::vector<CallParameter>;
 
         struct CallData {
-            i32             index;
-            CallState       state;
-            CallParameters  call_values;
+            i32            index;
+            CallState      state;
+            CallParameters call_values;
         };
+
         using CallsData = std::unordered_map<CallID, CallData>;
-    }
-}
+    }  // namespace script
+}  // namespace hemlock
 namespace hscript = hemlock::script;
 
-#endif // __hemlock_script_call_state_hpp
+#endif  // __hemlock_script_call_state_hpp

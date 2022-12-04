@@ -19,7 +19,7 @@ namespace hemlock {
             bool right;
             bool middle;
         };
-        
+
         struct KeyModifiers {
             union {
                 struct {
@@ -32,6 +32,7 @@ namespace hemlock {
                     bool lcmd   : 1;
                     bool rcmd   : 1;
                 };
+
                 struct {
                     bool shift : 2;
                     bool ctrl  : 2;
@@ -39,23 +40,24 @@ namespace hemlock {
                     bool cmd   : 2;
                 };
             };
+
             bool numlck;
             bool capslck;
             bool scrllck;
         };
 
         struct ActionState {
-            ui32 time;
+            ui32         time;
             KeyModifiers modifiers;
         };
 
         struct ButtonState {
-            bool is_pressed;
-            ui32 press_count;
+            bool        is_pressed;
+            ui32        press_count;
             ActionState last_press, last_release;
         };
-    }
-}
+    }  // namespace ui
+}  // namespace hemlock
 namespace hui = hemlock::ui;
 
-#endif // __hemlock_ui_input_state_hpp
+#endif  // __hemlock_ui_input_state_hpp

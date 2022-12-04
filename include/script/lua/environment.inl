@@ -2,13 +2,16 @@
 #include "script/rpc_manager.hpp"
 
 #include "c_function.hpp"
-#include "rpc_functions.hpp"
 #include "lua_function.hpp"
 #include "lua_value.hpp"
+#include "rpc_functions.hpp"
 
 template <bool HasRPCManager, size_t CallBufferSize>
-void hscript::lua::Environment<HasRPCManager, CallBufferSize>
-                     ::init(hio::IOManagerBase* io_manager, EnvironmentRegistry<_Environment>* registry /*= nullptr*/, ui32 max_script_length /*= HEMLOCK_DEFAULT_MAX_SCRIPT_LENGTH*/) {
+void hscript::lua::Environment<HasRPCManager, CallBufferSize>::init(
+    hio::IOManagerBase*                io_manager,
+    EnvironmentRegistry<_Environment>* registry /*= nullptr*/,
+    ui32 max_script_length /*= HEMLOCK_DEFAULT_MAX_SCRIPT_LENGTH*/
+) {
     _Base::m_io_manager        = io_manager;
     _Base::m_registry          = registry;
     _Base::m_max_script_length = max_script_length;
@@ -31,18 +34,36 @@ void hscript::lua::Environment<HasRPCManager, CallBufferSize>
     set_global_namespace();
 
     // Expose Lua function registration to environment.
-    add_c_function("register_function", &hscript::lua::register_lua_function<HasRPCManager, CallBufferSize>, this);
+    add_c_function(
+        "register_function",
+        &hscript::lua::register_lua_function<HasRPCManager, CallBufferSize>,
+        this
+    );
 
     if constexpr (HasRPCManager) {
         _Base::rpc.init(this);
 
         set_namespaces("foreign");
-        add_c_function("call",        &call_foreign<HasRPCManager, CallBufferSize>,             this);
-        add_c_function("query",       &query_foreign_call<HasRPCManager, CallBufferSize>,       this);
-        add_c_function("get_results", &get_foreign_call_results<HasRPCManager, CallBufferSize>, this);
+        add_c_function("call", &call_foreign<HasRPCManager, CallBufferSize>, this);
+        add_c_function(
+            "query", &query_foreign_call<HasRPCManager, CallBufferSize>, this
+        );
+        add_c_function(
+            "get_results",
+            &get_foreign_call_results<HasRPCManager, CallBufferSize>,
+            this
+        );
 
-        add_c_function("set_manual_command_buffer_pump", &set_manual_command_buffer_pump<HasRPCManager, CallBufferSize>, this);
-        add_c_function("pump_command_buffer",            &pump_command_buffer<HasRPCManager, CallBufferSize>,            this);
+        add_c_function(
+            "set_manual_command_buffer_pump",
+            &set_manual_command_buffer_pump<HasRPCManager, CallBufferSize>,
+            this
+        );
+        add_c_function(
+            "pump_command_buffer",
+            &pump_command_buffer<HasRPCManager, CallBufferSize>,
+            this
+        );
         set_global_namespace();
     }
 
@@ -50,12 +71,15 @@ void hscript::lua::Environment<HasRPCManager, CallBufferSize>
 }
 
 template <bool HasRPCManager, size_t CallBufferSize>
-void hscript::lua::Environment<HasRPCManager, CallBufferSize>
-                     ::init(EnvironmentBase<
-                                    Environment<HasRPCManager, CallBufferSize>,
-                                    HasRPCManager,
-                                    CallBufferSize
-                                >* parent, hio::IOManagerBase* io_manager, EnvironmentRegistry<_Environment>* registry /*= nullptr*/, ui32 max_script_length /*= HEMLOCK_DEFAULT_MAX_SCRIPT_LENGTH*/) {
+void hscript::lua::Environment<HasRPCManager, CallBufferSize>::init(
+    EnvironmentBase<
+        Environment<HasRPCManager, CallBufferSize>,
+        HasRPCManager,
+        CallBufferSize>*               parent,
+    hio::IOManagerBase*                io_manager,
+    EnvironmentRegistry<_Environment>* registry /*= nullptr*/,
+    ui32 max_script_length /*= HEMLOCK_DEFAULT_MAX_SCRIPT_LENGTH*/
+) {
     _Base::m_io_manager        = io_manager;
     _Base::m_registry          = registry;
     _Base::m_max_script_length = max_script_length;
@@ -80,8 +104,7 @@ void hscript::lua::Environment<HasRPCManager, CallBufferSize>
 }
 
 template <bool HasRPCManager, size_t CallBufferSize>
-void hscript::lua::Environment<HasRPCManager, CallBufferSize>
-                     ::dispose() {
+void hscript::lua::Environment<HasRPCManager, CallBufferSize>::dispose() {
     if (m_state) {
         lua_close(m_state);
 
@@ -90,9 +113,10 @@ void hscript::lua::Environment<HasRPCManager, CallBufferSize>
 }
 
 template <bool HasRPCManager, size_t CallBufferSize>
-bool hscript::lua::Environment<HasRPCManager, CallBufferSize>
-                     ::load(const hio::fs::path& filepath) {
-    ui32 length = std::numeric_limits<ui32>::max();
+bool hscript::lua::Environment<HasRPCManager, CallBufferSize>::load(
+    const hio::fs::path& filepath
+) {
+    ui32        length = std::numeric_limits<ui32>::max();
     const char* script = _Base::m_io_manager->read_file_to_string(filepath, &length);
 
     if (!script || length > _Base::m_max_script_length) {
@@ -106,23 +130,24 @@ bool hscript::lua::Environment<HasRPCManager, CallBufferSize>
 }
 
 template <bool HasRPCManager, size_t CallBufferSize>
-bool hscript::lua::Environment<HasRPCManager, CallBufferSize>
-                     ::load(const std::string& script) {
+bool hscript::lua::Environment<HasRPCManager, CallBufferSize>::load(
+    const std::string& script
+) {
     // Load script, returning success state.
     return luaL_loadstring(m_state, script.c_str()) == 0;
 }
 
 template <bool HasRPCManager, size_t CallBufferSize>
-bool hscript::lua::Environment<HasRPCManager, CallBufferSize>
-                     ::run() {
+bool hscript::lua::Environment<HasRPCManager, CallBufferSize>::run() {
     // Run Lua function currently on top of Lua state stack, returning success state.
     return lua_pcall(m_state, 0, LUA_MULTRET, 0) == 0;
 }
 
 template <bool HasRPCManager, size_t CallBufferSize>
-bool hscript::lua::Environment<HasRPCManager, CallBufferSize>
-                     ::run(const hio::fs::path& filepath) {
-    ui32 length = std::numeric_limits<ui32>::max();
+bool hscript::lua::Environment<HasRPCManager, CallBufferSize>::run(
+    const hio::fs::path& filepath
+) {
+    ui32        length = std::numeric_limits<ui32>::max();
     const char* script = _Base::m_io_manager->read_file_to_string(filepath, &length);
 
     if (!script || length > _Base::m_max_script_length) {
@@ -136,15 +161,16 @@ bool hscript::lua::Environment<HasRPCManager, CallBufferSize>
 }
 
 template <bool HasRPCManager, size_t CallBufferSize>
-bool hscript::lua::Environment<HasRPCManager, CallBufferSize>
-                     ::run(const std::string& script) {
+bool hscript::lua::Environment<HasRPCManager, CallBufferSize>::run(
+    const std::string& script
+) {
     // Load and run script, and return success state.
     return luaL_dostring(m_state, script.c_str()) == 0;
 }
 
 template <bool HasRPCManager, size_t CallBufferSize>
-void hscript::lua::Environment<HasRPCManager, CallBufferSize>
-                     ::set_global_namespace() {
+void hscript::lua::Environment<HasRPCManager, CallBufferSize>::set_global_namespace(
+) {
     lua_pop(m_state, m_namespace_depth);
 
     lua_pushglobaltable(m_state);
@@ -153,8 +179,9 @@ void hscript::lua::Environment<HasRPCManager, CallBufferSize>
 }
 
 template <bool HasRPCManager, size_t CallBufferSize>
-void hscript::lua::Environment<HasRPCManager, CallBufferSize>
-                     ::push_namespace(const std::string& _namespace) {
+void hscript::lua::Environment<HasRPCManager, CallBufferSize>::push_namespace(
+    const std::string& _namespace
+) {
     // See if a field already exists with the key of this namespace.
     lua_getfield(m_state, -1, _namespace.c_str());
     // If it doesn't, we can add it.
@@ -163,16 +190,19 @@ void hscript::lua::Environment<HasRPCManager, CallBufferSize>
         lua_pop(m_state, 1);
         // Add a clean table to the stack.
         lua_newtable(m_state);
-        // Add this clean table to the previous table as a field with key as the namespace.
+        // Add this clean table to the previous table as a field with key as the
+        // namespace.
         lua_setfield(m_state, -2, _namespace.c_str());
-        // Get the new namespace back on top of the stack (lua_setfield pops the top value on the stack).
+        // Get the new namespace back on top of the stack (lua_setfield pops the top
+        // value on the stack).
         lua_getfield(m_state, -1, _namespace.c_str());
     }
 }
 
 template <bool HasRPCManager, size_t CallBufferSize>
-bool hscript::lua::Environment<HasRPCManager, CallBufferSize>
-                     ::register_lua_function(std::string&& name, OUT LuaFunctionState* state/* = nullptr*/) {
+bool hscript::lua::Environment<HasRPCManager, CallBufferSize>::register_lua_function(
+    std::string&& name, OUT LuaFunctionState* state /* = nullptr*/
+) {
     if (name.length() == 0) return false;
 
     auto& cache = m_lua_functions;
@@ -213,7 +243,8 @@ bool hscript::lua::Environment<HasRPCManager, CallBufferSize>
     size_t next_idx = name.find('.');
     while (true) {
         // Determine the next token in the string naming the function.
-        std::string_view token = std::string_view(name).substr(last_idx, next_idx - last_idx);
+        std::string_view token
+            = std::string_view(name).substr(last_idx, next_idx - last_idx);
 
         // Push token onto stack, naming the entry in the current table
         // on the stack that should lead to the function we are registering.
@@ -240,16 +271,11 @@ bool hscript::lua::Environment<HasRPCManager, CallBufferSize>
     // function table of the Lua registry, and cache
     // this.
     if (state) {
-        *state = {
-            .state = m_state,
-            .index = luaL_ref(m_state, prior_index + 1)
-        };
+        *state = { .state = m_state, .index = luaL_ref(m_state, prior_index + 1) };
         cache[std::move(name)] = *state;
     } else {
-        cache[std::move(name)] = {
-            .state = m_state,
-            .index = luaL_ref(m_state, prior_index + 1)
-        };
+        cache[std::move(name)]
+            = { .state = m_state, .index = luaL_ref(m_state, prior_index + 1) };
     }
 
     // Return stack to state prior to function registration.
@@ -259,31 +285,33 @@ bool hscript::lua::Environment<HasRPCManager, CallBufferSize>
     return true;
 }
 
-
 template <bool HasRPCManager, size_t CallBufferSize>
-template <typename ...Strings>
-void hscript::lua::Environment<HasRPCManager, CallBufferSize>
-                     ::set_namespaces(Strings... namespaces) {
+template <typename... Strings>
+void hscript::lua::Environment<HasRPCManager, CallBufferSize>::set_namespaces(
+    Strings... namespaces
+) {
     set_global_namespace();
 
-    for (const auto& _namespace : {namespaces...}) {
+    for (const auto& _namespace : { namespaces... }) {
         push_namespace(_namespace);
     }
 }
 
 template <bool HasRPCManager, size_t CallBufferSize>
-template <typename ...Strings>
-void hscript::lua::Environment<HasRPCManager, CallBufferSize>
-                     ::enter_namespaces(Strings... namespaces) {
-    for (const auto& _namespace : {namespaces...}) {
+template <typename... Strings>
+void hscript::lua::Environment<HasRPCManager, CallBufferSize>::enter_namespaces(
+    Strings... namespaces
+) {
+    for (const auto& _namespace : { namespaces... }) {
         push_namespace(_namespace);
     }
 }
 
 template <bool HasRPCManager, size_t CallBufferSize>
 template <typename Type>
-void hscript::lua::Environment<HasRPCManager, CallBufferSize>
-                     ::add_value(std::string_view name, Type val) {
+void hscript::lua::Environment<HasRPCManager, CallBufferSize>::add_value(
+    std::string_view name, Type val
+) {
     if (m_parent) return m_parent->add_value(name, val);
 
     const i32 value_count = static_cast<i32>(LuaValue<Type>::value_count());
@@ -327,9 +355,10 @@ void hscript::lua::Environment<HasRPCManager, CallBufferSize>
 }
 
 template <bool HasRPCManager, size_t CallBufferSize>
-template <typename ReturnType, typename ...Parameters>
-void hscript::lua::Environment<HasRPCManager, CallBufferSize>
-                     ::add_c_delegate(std::string_view name, Delegate<ReturnType, Parameters...>* delegate) {
+template <typename ReturnType, typename... Parameters>
+void hscript::lua::Environment<HasRPCManager, CallBufferSize>::add_c_delegate(
+    std::string_view name, Delegate<ReturnType, Parameters...>* delegate
+) {
     if (m_parent) return m_parent->add_c_delegate(name, delegate);
 
     lua_pushlstring(m_state, name.data(), name.size());
@@ -342,9 +371,10 @@ void hscript::lua::Environment<HasRPCManager, CallBufferSize>
 }
 
 template <bool HasRPCManager, size_t CallBufferSize>
-template <typename ReturnType, typename ...Parameters>
-void hscript::lua::Environment<HasRPCManager, CallBufferSize>
-                     ::add_c_function(std::string_view name, ReturnType(*func)(Parameters...)) {
+template <typename ReturnType, typename... Parameters>
+void hscript::lua::Environment<HasRPCManager, CallBufferSize>::add_c_function(
+    std::string_view name, ReturnType (*func)(Parameters...)
+) {
     if (m_parent) return m_parent->add_c_function(name, func);
 
     lua_pushlstring(m_state, name.data(), name.size());
@@ -357,10 +387,14 @@ void hscript::lua::Environment<HasRPCManager, CallBufferSize>
 }
 
 template <bool HasRPCManager, size_t CallBufferSize>
-template <typename ...Upvalues>
-void hscript::lua::Environment<HasRPCManager, CallBufferSize>
-                     ::add_c_function(std::string_view name, i32(*func)(LuaHandle), Upvalues... upvalues) {
-    if (m_parent) return m_parent->add_c_function(name, func, std::forward<Upvalues>(upvalues)...);
+template <typename... Upvalues>
+void hscript::lua::Environment<HasRPCManager, CallBufferSize>::add_c_function(
+    std::string_view name, i32 (*func)(LuaHandle), Upvalues... upvalues
+) {
+    if (m_parent)
+        return m_parent->add_c_function(
+            name, func, std::forward<Upvalues>(upvalues)...
+        );
 
     lua_pushlstring(m_state, name.data(), name.size());
 
@@ -374,9 +408,12 @@ void hscript::lua::Environment<HasRPCManager, CallBufferSize>
 }
 
 template <bool HasRPCManager, size_t CallBufferSize>
-template <std::invocable Closure, typename ReturnType, typename ...Parameters>
-void hscript::lua::Environment<HasRPCManager, CallBufferSize>
-                     ::add_c_closure(std::string_view name, Closure* closure, ReturnType(Closure::*func)(Parameters...)) {
+template <std::invocable Closure, typename ReturnType, typename... Parameters>
+void hscript::lua::Environment<HasRPCManager, CallBufferSize>::add_c_closure(
+    std::string_view name,
+    Closure*         closure,
+    ReturnType (Closure::*func)(Parameters...)
+) {
     if (m_parent) return m_parent->add_c_closure(name, closure, func);
 
     lua_pushlstring(m_state, name.data(), name.size());
@@ -390,9 +427,10 @@ void hscript::lua::Environment<HasRPCManager, CallBufferSize>
 }
 
 template <bool HasRPCManager, size_t CallBufferSize>
-template <typename ReturnType, typename ...Parameters>
-bool hscript::lua::Environment<HasRPCManager, CallBufferSize>
-                     ::get_script_function(std::string&& name, OUT ScriptDelegate<ReturnType, Parameters...>& delegate) {
+template <typename ReturnType, typename... Parameters>
+bool hscript::lua::Environment<HasRPCManager, CallBufferSize>::get_script_function(
+    std::string&& name, OUT ScriptDelegate<ReturnType, Parameters...>& delegate
+) {
     // Try to obtain the named Lua function, registering it
     // if it was not already registered. If we could not
     // obtain it, report failure.
@@ -403,12 +441,11 @@ bool hscript::lua::Environment<HasRPCManager, CallBufferSize>
 
     // Call correct delegate builder depending on if we ware allowing arbitrary
     // parameters or return types.
-    if constexpr (
-        std::is_same_v<ReturnType, CallParameters>
-            && std::equal_to<size_t>()(sizeof...(Parameters), 1ul)
-            && (std::is_same_v<Parameters, CallParameters> || ...)
-    ) {
-        delegate = make_arbitrary_scalars_lua_delegate(lua_func_state, H_MAX_ARBITRARY_LUA_RETURNS);
+    if constexpr (std::is_same_v<ReturnType, CallParameters> && std::equal_to<size_t>()(sizeof...(Parameters), 1ul) && (std::is_same_v<Parameters, CallParameters> || ...))
+    {
+        delegate = make_arbitrary_scalars_lua_delegate(
+            lua_func_state, H_MAX_ARBITRARY_LUA_RETURNS
+        );
     } else {
         delegate = make_lua_delegate<ReturnType, Parameters...>(lua_func_state);
     }

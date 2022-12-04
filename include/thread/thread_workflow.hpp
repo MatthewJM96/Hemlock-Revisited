@@ -8,11 +8,12 @@ namespace hemlock {
         template <InterruptibleState ThreadState>
         class IThreadWorkflowTask : public IThreadTask<ThreadState> {
         public:
-            IThreadWorkflowTask() :
-                m_task_idx(0),
-                m_dag(nullptr)
-            { /* Empty. */ }
-            virtual ~IThreadWorkflowTask() { /* Empty. */ }
+            IThreadWorkflowTask() : m_task_idx(0), m_dag(nullptr) { /* Empty. */
+            }
+
+            virtual ~IThreadWorkflowTask() { /* Empty. */
+            }
+
             /**
              * @brief If any special handling is needed to clean
              * up task, override this.
@@ -30,10 +31,10 @@ namespace hemlock {
              * tasks feeding into each task.
              */
             void set_workflow_metadata(
-                 ThreadWorkflowTasksView<ThreadState> tasks,
-                                 ThreadWorkflowTaskID task_idx,
-                                   ThreadWorkflowDAG* dag,
-                     ThreadWorkflowTaskCompletionView task_completion_states
+                ThreadWorkflowTasksView<ThreadState> tasks,
+                ThreadWorkflowTaskID                 task_idx,
+                ThreadWorkflowDAG*                   dag,
+                ThreadWorkflowTaskCompletionView     task_completion_states
             );
 
             /**
@@ -46,12 +47,15 @@ namespace hemlock {
              * @param task_queue The task queue, can be interacted with
              * for example if a task needs to chain a follow-up task.
              */
-            void execute(typename Thread<ThreadState>::State* state, TaskQueue<ThreadState>* task_queue) final;
+            void execute(
+                typename Thread<ThreadState>::State* state,
+                TaskQueue<ThreadState>*              task_queue
+            ) final;
 
             /**
              * @brief Executes the task, this must be implemented
              * by inheriting tasks.
-             * 
+             *
              * @param state The thread state, including tokens for
              * interacting with task queue, and thread pool specific
              * context.
@@ -60,32 +64,38 @@ namespace hemlock {
              * @return True if the next tasks in the workflow should fire,
              * false otherwise.
              */
-            virtual bool run_task(typename Thread<ThreadState>::State* state, TaskQueue<ThreadState>* task_queue) = 0;
+            virtual bool run_task(
+                typename Thread<ThreadState>::State* state,
+                TaskQueue<ThreadState>*              task_queue
+            ) = 0;
         protected:
-            ThreadWorkflowTasksView<ThreadState>    m_tasks;
-            ThreadWorkflowTaskID                    m_task_idx;
-            ThreadWorkflowDAG*                      m_dag;
-            ThreadWorkflowTaskCompletionView        m_task_completion_states;
+            ThreadWorkflowTasksView<ThreadState> m_tasks;
+            ThreadWorkflowTaskID                 m_task_idx;
+            ThreadWorkflowDAG*                   m_dag;
+            ThreadWorkflowTaskCompletionView     m_task_completion_states;
         };
 
         template <InterruptibleState ThreadState>
         class ThreadWorkflow {
         public:
-            ThreadWorkflow()  { /* Empty. */ }
-            ~ThreadWorkflow() { /* Empty. */ }
+            ThreadWorkflow() { /* Empty. */
+            }
+
+            ~ThreadWorkflow() { /* Empty. */
+            }
 
             void init(ThreadWorkflowDAG* dag, ThreadPool<ThreadState>* thread_pool);
             void dispose();
 
             void run(ThreadWorkflowTasksView<ThreadState> tasks);
         protected:
-            ThreadWorkflowDAG*          m_dag;
-            ThreadPool<ThreadState>*    m_thread_pool;
+            ThreadWorkflowDAG*       m_dag;
+            ThreadPool<ThreadState>* m_thread_pool;
         };
-    }
-}
+    }  // namespace thread
+}  // namespace hemlock
 namespace hthread = hemlock::thread;
 
 #include "thread/thread_workflow.inl"
 
-#endif // __hemlock_thread_thread_workflow_hpp
+#endif  // __hemlock_thread_thread_workflow_hpp

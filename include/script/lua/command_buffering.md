@@ -1,4 +1,4 @@
-# Command Buffering for Multithreaded Connected Script Environments
+#Command Buffering for Multithreaded Connected Script Environments
 
 ## Foreign Function
 
@@ -68,16 +68,20 @@ i32 set_manual_command_buffer_pump(bool use_manual = true)
 
 Calling set_manual_command_buffer_pump with use_manual set to true (the default), sets
 the calling environment to not automatically pump its command buffer before the update
-function(s) of that environment is(are) called. Instead, it is assumed that the
-pump_command_buffer function will be called manually at an appropriate point in the
-execution of the update function(s) of the environment. Calls without setting this to
-true, or else subsequent calls in the same update after the first will do nothing.
+function(s)
+of that environment is(are) called.Instead, it is assumed that the
+    pump_command_buffer function will be called manually at an
+    appropriate point in the execution of the update function(s)
+of the environment.Calls without                                setting this to true,
+    or else subsequent calls in the same update after the first will do nothing.
 
-### pump_command_buffer
+        ## #pump_command_buffer
 
-Signature:
-void pump_command_buffer()
+        Signature :
+    void
+    pump_command_buffer()
 
-On first call in the update of an environment which has enabled manual command buffer
-pumping, this will cause all commands buffered since the previous update to be
-executed in turn.
+        On first call in the update of an
+    environment which has enabled manual command buffer pumping,
+    this will cause all commands buffered since the previous update to be executed in
+    turn.

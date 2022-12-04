@@ -1,5 +1,8 @@
+#include "state.hpp"
+
 template <typename EnvironmentImpl, size_t BufferSize>
-void hscript::RPCManager<EnvironmentImpl, BufferSize>::init(_Environment* env, bool is_public /*= true*/) {
+void hscript::RPCManager<EnvironmentImpl, BufferSize>::
+    init(_Environment* env, bool is_public /*= true*/) {
     if constexpr (BufferSize > 0) {
         m_calls.resize(BufferSize);
     }
@@ -22,7 +25,9 @@ void hscript::RPCManager<EnvironmentImpl, BufferSize>::dispose() {
 }
 
 template <typename EnvironmentImpl, size_t BufferSize>
-hscript::CallID hscript::RPCManager<EnvironmentImpl, BufferSize>::append_call(std::string&& call, CallParameters&& parameters) {
+hscript::CallID hscript::RPCManager<EnvironmentImpl, BufferSize>::append_call(
+    std::string&& call, CallParameters&& parameters
+) {
     std::lock_guard<std::mutex> lock(m_buffer_lock);
 
     CallID id  = m_latest_call_id++;
@@ -45,21 +50,16 @@ hscript::CallID hscript::RPCManager<EnvironmentImpl, BufferSize>::append_call(st
     }
 
     m_call_data.insert(
-        std::make_pair(
-            id,
-            CallData{
-                idx,
-                CallState::PENDING,
-                std::move(parameters)
-            }
-        )
+        std::make_pair(id, CallData{ idx, CallState::PENDING, std::move(parameters) })
     );
 
     return id;
 }
 
 template <typename EnvironmentImpl, size_t BufferSize>
-i32 hscript::RPCManager<EnvironmentImpl, BufferSize>::call_state(CallID id, OUT CallState& state) {
+i32 hscript::RPCManager<EnvironmentImpl, BufferSize>::call_state(
+    CallID id, OUT CallState& state
+) {
     std::lock_guard<std::mutex> lock(m_buffer_lock);
 
     auto it = m_call_data.find(id);
@@ -75,8 +75,7 @@ i32 hscript::RPCManager<EnvironmentImpl, BufferSize>::call_state(CallID id, OUT 
 
 template <typename EnvironmentImpl, size_t BufferSize>
 i32 hscript::RPCManager<EnvironmentImpl, BufferSize>::call_return_values(
-             CallID id,
-    OUT CallParameters& return_values
+    CallID id, OUT CallParameters& return_values
 ) {
     std::lock_guard<std::mutex> lock(m_buffer_lock);
 
@@ -94,8 +93,6 @@ i32 hscript::RPCManager<EnvironmentImpl, BufferSize>::call_return_values(
 
     return 0;
 }
-
-
 
 template <typename EnvironmentImpl, size_t BufferSize>
 i32 hscript::RPCManager<EnvironmentImpl, BufferSize>::remove_call(CallID id) {
@@ -128,20 +125,22 @@ template <typename EnvironmentImpl, size_t BufferSize>
 void hscript::RPCManager<EnvironmentImpl, BufferSize>::pump_calls() {
     auto do_call = [&](CallID id, std::string cmd) {
         ScriptDelegate<CallParameters, CallParameters> delegate;
-        m_environment->template get_script_function<CallParameters, CallParameters>(std::move(cmd), delegate);
+        m_environment->template get_script_function<CallParameters, CallParameters>(
+            std::move(cmd), delegate
+        );
 
         CallData& call_data = m_call_data[id];
 
         auto [success, return_values] = delegate(call_data.call_values);
 
-        call_data.state = CallState::COMPLETE;
+        call_data.state       = CallState::COMPLETE;
         call_data.call_values = std::move(return_values);
     };
 
     // Reorganise a bit to allow for only running so many calls based on demand?
     if constexpr (BufferSize == 0) {
         for (auto& call : m_calls) {
-            CallID       id = call.first;
+            CallID      id  = call.first;
             std::string cmd = call.second;
 
             do_call(id, cmd);
@@ -150,7 +149,7 @@ void hscript::RPCManager<EnvironmentImpl, BufferSize>::pump_calls() {
         Calls().swap(m_calls);
     } else {
         for (size_t call_idx = 0; call_idx < m_calls_buffered; ++call_idx) {
-            CallID       id = m_calls[call_idx].first;
+            CallID      id  = m_calls[call_idx].first;
             std::string cmd = m_calls[call_idx].second;
 
             do_call(id, cmd);
@@ -161,16 +160,21 @@ void hscript::RPCManager<EnvironmentImpl, BufferSize>::pump_calls() {
 }
 
 template <typename EnvironmentImpl, size_t BufferSize>
-void hscript::RPCManager<EnvironmentImpl, BufferSize>::set_is_public_env(bool is_public /*= true*/) {
+void hscript::RPCManager<EnvironmentImpl, BufferSize>::
+    set_is_public_env(bool is_public /*= true*/) {
     m_is_public_env = is_public;
 }
 
 template <typename EnvironmentImpl, size_t BufferSize>
-void hscript::RPCManager<EnvironmentImpl, BufferSize>::register_public_function(std::string&& function) {
+void hscript::RPCManager<EnvironmentImpl, BufferSize>::register_public_function(
+    std::string&& function
+) {
     m_public_functions.emplace(std::move(function));
 }
 
 template <typename EnvironmentImpl, size_t BufferSize>
-void hscript::RPCManager<EnvironmentImpl, BufferSize>::register_continuable_function(std::string&& function) {
+void hscript::RPCManager<EnvironmentImpl, BufferSize>::register_continuable_function(
+    std::string&& function
+) {
     m_continuable_functions.emplace(std::move(function));
 }

@@ -2,7 +2,8 @@
 
 #include "io/image.h"
 
-hio::img::bin::InternalPixelFormat hio::img::bin::convert_pixel_format(PixelFormat format) {
+hio::img::bin::InternalPixelFormat
+hio::img::bin::convert_pixel_format(PixelFormat format) {
     switch (format) {
         case PixelFormat::RGB_UI8:
             return { 3, 1 };
@@ -18,7 +19,9 @@ hio::img::bin::InternalPixelFormat hio::img::bin::convert_pixel_format(PixelForm
     }
 }
 
-bool hio::img::bin::load(std::string filepath, ui8*& data, ui32v2& dimensions, PixelFormat& format) {
+bool hio::img::bin::load(
+    std::string filepath, ui8*& data, ui32v2& dimensions, PixelFormat& format
+) {
     // Open file, if we can't then fail.
     FILE* file = fopen(filepath.data(), "rb");
     if (file == nullptr) return false;
@@ -36,8 +39,8 @@ bool hio::img::bin::load(std::string filepath, ui8*& data, ui32v2& dimensions, P
     if (read != sizeof(BinFileHeader)) return false;
 
     // Fail if file type doesn't match our binary type.
-    if (fileHeader.type[0] != BIN_TYPE_1
-        || fileHeader.type[1] != BIN_TYPE_2) return false;
+    if (fileHeader.type[0] != BIN_TYPE_1 || fileHeader.type[1] != BIN_TYPE_2)
+        return false;
 
     // Fail if the file version doesn't match the version we support.
     if (fileHeader.version != BIN_VERSION) return false;
@@ -54,15 +57,18 @@ bool hio::img::bin::load(std::string filepath, ui8*& data, ui32v2& dimensions, P
     // If we didn't manage to read in the entire header's worth of information, fail.
     if (read != sizeof(BinImageHeader)) return false;
 
-    // If image header size isn't equal to image header struct, leave - our struct may be malformed.
+    // If image header size isn't equal to image header struct, leave - our struct may
+    // be malformed.
     if (imgHeader.size != sizeof(BinImageHeader)) return false;
 
     /**************************************************\
      * Extract Image Information                      *
     \**************************************************/
 
-    // If state pixel format is not of a value less than the PixelFormat sentinel, then it is invalid - leave.
-    if (imgHeader.pixelFormat >= static_cast<ui32>(PixelFormat::SENTINEL)) return false;
+    // If state pixel format is not of a value less than the PixelFormat sentinel,
+    // then it is invalid - leave.
+    if (imgHeader.pixelFormat >= static_cast<ui32>(PixelFormat::SENTINEL))
+        return false;
 
     // Obtain pixel format.
     format = static_cast<PixelFormat>(imgHeader.pixelFormat);
@@ -79,12 +85,13 @@ bool hio::img::bin::load(std::string filepath, ui8*& data, ui32v2& dimensions, P
 
     // Determine size of needed pixel buffer and create that buffer.
     ui32 imageSize = imgHeader.width * imgHeader.height * channels * bytesPerChannel;
-    data = new ui8[imageSize];
+    data           = new ui8[imageSize];
 
     // Read pixel data into a buffer.
     read = fread(data, 1, imageSize, file);
 
-    // If we didn't manage to read in the entire pixel data's worth of information, fail.
+    // If we didn't manage to read in the entire pixel data's worth of information,
+    // fail.
     if (read != imageSize) return false;
 
     // Close file and return.
@@ -93,7 +100,9 @@ bool hio::img::bin::load(std::string filepath, ui8*& data, ui32v2& dimensions, P
     return true;
 }
 
-bool hio::img::bin::save(std::string filepath, const ui8* data, ui32v2 dimensions, PixelFormat format) {
+bool hio::img::bin::save(
+    std::string filepath, const ui8* data, ui32v2 dimensions, PixelFormat format
+) {
     // Extract pixel information from format.
     auto [channels, bytesPerChannel] = convert_pixel_format(format);
 
@@ -114,10 +123,11 @@ bool hio::img::bin::save(std::string filepath, const ui8* data, ui32v2 dimension
     // Set up the file header.
     BinFileHeader fileHeader;
 
-    fileHeader.type[0]  = BIN_TYPE_1;
-    fileHeader.type[1]  = BIN_TYPE_2;
-    fileHeader.version  = BIN_VERSION;
-    fileHeader.size     = sizeof(BinFileHeader) + sizeof(BinImageHeader) + imgHeader.imageSize;
+    fileHeader.type[0] = BIN_TYPE_1;
+    fileHeader.type[1] = BIN_TYPE_2;
+    fileHeader.version = BIN_VERSION;
+    fileHeader.size
+        = sizeof(BinFileHeader) + sizeof(BinImageHeader) + imgHeader.imageSize;
     fileHeader.offset   = sizeof(BinFileHeader) + sizeof(BinImageHeader);
     fileHeader.reserved = 0;
 
@@ -143,7 +153,8 @@ bool hio::img::bin::save(std::string filepath, const ui8* data, ui32v2 dimension
     return true;
 }
 
-hio::img::png::InternalPixelFormat hio::img::png::convert_pixel_format(PixelFormat format) {
+hio::img::png::InternalPixelFormat
+hio::img::png::convert_pixel_format(PixelFormat format) {
     switch (format) {
         case PixelFormat::RGB_UI8:
             return { PNG_COLOR_TYPE_RGB, 8 };
@@ -158,7 +169,8 @@ hio::img::png::InternalPixelFormat hio::img::png::convert_pixel_format(PixelForm
     }
 }
 
-hio::img::PixelFormat hio::img::png::convert_internal_pixel_format(InternalPixelFormat format) {
+hio::img::PixelFormat
+hio::img::png::convert_internal_pixel_format(InternalPixelFormat format) {
     switch (format.first) {
         case PNG_COLOR_TYPE_RGB:
             switch (format.second) {
@@ -180,7 +192,9 @@ hio::img::PixelFormat hio::img::png::convert_internal_pixel_format(InternalPixel
     return PixelFormat::SENTINEL;
 }
 
-bool hio::img::png::load(std::string filepath, ui8*& data, ui32v2& dimensions, PixelFormat& format) {
+bool hio::img::png::load(
+    std::string filepath, ui8*& data, ui32v2& dimensions, PixelFormat& format
+) {
     // Open the image file we will save to.
     FILE* file = fopen(filepath.data(), "rb");
     // Check we successfully opened the file.
@@ -192,16 +206,19 @@ bool hio::img::png::load(std::string filepath, ui8*& data, ui32v2& dimensions, P
     if (png_sig_cmp(header, 0, 8)) return false;
 
     // Set up handler that will be used to read the data.
-    png_structp png = png_create_read_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
+    png_structp png
+        = png_create_read_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
     // Check the handler was set up correctly, if not close file and return.
     if (!png) {
         fclose(file);
         return false;
     }
 
-    // This will contain the header information about the image (things like width, height, compression type).
+    // This will contain the header information about the image (things like width,
+    // height, compression type).
     png_infop info = png_create_info_struct(png);
-    // Check we got a valid info struct, if not close file, clean up handler and return.
+    // Check we got a valid info struct, if not close file, clean up handler and
+    // return.
     if (!info) {
         fclose(file);
         // Note that png_infopp_NULL is because the info struct is null!
@@ -209,7 +226,8 @@ bool hio::img::png::load(std::string filepath, ui8*& data, ui32v2& dimensions, P
         return false;
     }
 
-    // Set up an error handler for PNG reading. If that fails, close file, clean up handler and return.
+    // Set up an error handler for PNG reading. If that fails, close file, clean up
+    // handler and return.
     if (setjmp(png_jmpbuf(png))) {
         fclose(file);
         png_destroy_write_struct(&png, &info);
@@ -225,16 +243,12 @@ bool hio::img::png::load(std::string filepath, ui8*& data, ui32v2& dimensions, P
     png_read_info(png, info);
 
     // Write out dimensions of the image.
-    dimensions = ui32v2{
-        png_get_image_width(png, info),
-        png_get_image_height(png, info)
-    };
+    dimensions
+        = ui32v2{ png_get_image_width(png, info), png_get_image_height(png, info) };
 
     // Write out pixel format of the image.
-    format = convert_internal_pixel_format({
-        png_get_color_type(png, info),
-        png_get_bit_depth(png, info)
-    });
+    format = convert_internal_pixel_format({ png_get_color_type(png, info),
+                                             png_get_bit_depth(png, info) });
 
     // Unsure how useful these two lines are.
     // Presumably sets interlacing state, but given
@@ -245,9 +259,7 @@ bool hio::img::png::load(std::string filepath, ui8*& data, ui32v2& dimensions, P
     png_read_update_info(png, info);
 
     // Get number of bytes per row of the image.
-    ui32 row_size = static_cast<ui32>(
-                        png_get_rowbytes(png, info)
-                    );
+    ui32 row_size = static_cast<ui32>(png_get_rowbytes(png, info));
 
     // Allocate the buffer we'll be reading into.
     data = new ui8[dimensions.y * row_size];
@@ -255,7 +267,7 @@ bool hio::img::png::load(std::string filepath, ui8*& data, ui32v2& dimensions, P
     png_bytep* rows = new png_bytep[dimensions.y];
     for (ui32 y = 0; y < dimensions.y; ++y) {
         ui32 row_idx = y * row_size;
-        rows[y] = &data[row_idx];
+        rows[y]      = &data[row_idx];
     }
 
     // Read the PNG.
@@ -273,23 +285,28 @@ bool hio::img::png::load(std::string filepath, ui8*& data, ui32v2& dimensions, P
     return true;
 }
 
-bool hio::img::png::save(std::string filepath, const ui8* data, ui32v2 dimensions, PixelFormat format) {
+bool hio::img::png::save(
+    std::string filepath, const ui8* data, ui32v2 dimensions, PixelFormat format
+) {
     // Open the image file we will save to.
     FILE* file = fopen(filepath.data(), "wb");
     // Check we successfully opened the file.
     if (!file) return false;
 
     // Set up handler that will be used to write the data.
-    png_structp png = png_create_write_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
+    png_structp png
+        = png_create_write_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
     // Check the handler was set up correctly, if not close file and return.
     if (!png) {
         fclose(file);
         return false;
     }
 
-    // This will contain the header information about the image (things like width, height, compression type).
+    // This will contain the header information about the image (things like width,
+    // height, compression type).
     png_infop info = png_create_info_struct(png);
-    // Check we got a valid info struct, if not close file, clean up handler and return.
+    // Check we got a valid info struct, if not close file, clean up handler and
+    // return.
     if (!info) {
         fclose(file);
         // Note that png_infopp_NULL is because the info struct is null!
@@ -297,7 +314,8 @@ bool hio::img::png::save(std::string filepath, const ui8* data, ui32v2 dimension
         return false;
     }
 
-    // Set up an error handler for PNG reading. If that fails, close file, clean up handler and return.
+    // Set up an error handler for PNG reading. If that fails, close file, clean up
+    // handler and return.
     if (setjmp(png_jmpbuf(png))) {
         fclose(file);
         png_destroy_write_struct(&png, &info);
@@ -318,7 +336,8 @@ bool hio::img::png::save(std::string filepath, const ui8* data, ui32v2 dimension
         dimensions.y,
         bit_depth,
         colour_type,
-        // Note these next three are set to the most default possible, we don't really care about them.
+        // Note these next three are set to the most default possible, we don't really
+        // care about them.
         PNG_INTERLACE_NONE,
         PNG_COMPRESSION_TYPE_DEFAULT,
         PNG_FILTER_TYPE_DEFAULT
@@ -329,7 +348,8 @@ bool hio::img::png::save(std::string filepath, const ui8* data, ui32v2 dimension
     // Determine the depth of the image in bytes.
     ui8 depth = bit_depth / 8;
 
-    // Determine the number of colour channels we have (e.g. RGB has 3, one for red, for green and for blue).
+    // Determine the number of colour channels we have (e.g. RGB has 3, one for red,
+    // for green and for blue).
     ui8 channels = 0;
     switch (colour_type) {
         case PNG_COLOR_TYPE_GRAY:
@@ -347,23 +367,22 @@ bool hio::img::png::save(std::string filepath, const ui8* data, ui32v2 dimension
     }
 
     // Begin preparing data for writing.
-    png_bytep* rows  = new png_bytep[dimensions.y];
-    png_byte*  image = static_cast<png_byte*>(
-        const_cast<void*>(
-            reinterpret_cast<const void*>(data)
-        )
-    );
+    png_bytep* rows = new png_bytep[dimensions.y];
+    png_byte*  image
+        = static_cast<png_byte*>(const_cast<void*>(reinterpret_cast<const void*>(data)
+        ));
 
     // The position were at in the data.
-    size_t pos    = 0;
+    size_t pos = 0;
     // The amount position should be incremented by per pixel row processed.
-    //     This is determined by considering that we have channels many bits of data per pixel,
-    //     and each channel is depth bytes large. The number of bytes wide a row is is then just
-    //     the number of pixels in a row multiplied by these two numbers.
+    //     This is determined by considering that we have channels many bits of data
+    //     per pixel, and each channel is depth bytes large. The number of bytes wide
+    //     a row is is then just the number of pixels in a row multiplied by these two
+    //     numbers.
     size_t stride = dimensions.x * channels * depth;
 
-    // Iterate over each row, setting the corresponding row in our array "rows" to point
-    // to the start of that row inside the image data "image".
+    // Iterate over each row, setting the corresponding row in our array "rows" to
+    // point to the start of that row inside the image data "image".
     for (size_t row = 0; row < dimensions.y; ++row) {
         rows[row] = &image[pos];
 

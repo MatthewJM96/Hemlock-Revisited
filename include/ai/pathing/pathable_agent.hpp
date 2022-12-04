@@ -6,12 +6,14 @@
 namespace hemlock {
     namespace ai {
         namespace pathing {
-            // TODO(Matthew): Probably this isn't a specific component, but rather a component group
-            //                composed of AgentComponent and DynamicComponent (ExtendedComponent by necessity?).
+            // TODO(Matthew): Probably this isn't a specific component, but rather a
+            // component group
+            //                composed of AgentComponent and DynamicComponent
+            //                (ExtendedComponent by necessity?).
             struct PathableAgenta
-        }
-    }
-}
+        }  // namespace pathing
+    }      // namespace ai
+}  // namespace hemlock
 namespace hai = hemlock::ai;
 
-#endif // __hemlock_ai_pathing_voxel_h
+#endif  // __hemlock_ai_pathing_voxel_h

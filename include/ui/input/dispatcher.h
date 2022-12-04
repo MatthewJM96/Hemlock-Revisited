@@ -1,8 +1,8 @@
 #ifndef __hemlock_ui_input_dispatcher_h
 #define __hemlock_ui_input_dispatcher_h
 
-#include "ui/input/keys.hpp"
 #include "ui/input/events.hpp"
+#include "ui/input/keys.hpp"
 
 namespace hemlock {
     namespace ui {
@@ -16,9 +16,10 @@ namespace hemlock {
                 }
                 return m_instance;
             }
+
             InputDispatcher(const InputDispatcher&) = delete;
             void operator=(const InputDispatcher&)  = delete;
-            ~InputDispatcher() { /* Empty. */ };
+            ~InputDispatcher(){ /* Empty. */ };
 
             void init(InputManager* manager);
             void dispose();
@@ -35,8 +36,7 @@ namespace hemlock {
             Event<>        on_quit;
         private:
             InputDispatcher() :
-                m_initialised(false), m_manager(nullptr)
-            { /* Empty. */ };
+                m_initialised(false), m_manager(nullptr){ /* Empty. */ };
 
             static InputDispatcher* m_instance;
 
@@ -44,8 +44,8 @@ namespace hemlock {
 
             InputManager* m_manager;
         };
-    }
-}
+    }  // namespace ui
+}  // namespace hemlock
 namespace hui = hemlock::ui;
 
-#endif // __hemlock_ui_input_dispatcher_h
+#endif  // __hemlock_ui_input_dispatcher_h
