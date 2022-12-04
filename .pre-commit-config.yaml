@@ -3,3 +3,4 @@ repos:
   rev: v15.0.4
   hooks:
   - id: clang-format
+    exclude: "preprocessor.hpp"
