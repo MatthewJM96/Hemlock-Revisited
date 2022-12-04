@@ -3,8 +3,8 @@
 
 #include "app/screen_base.h"
 
-#include "algorithm/graph.hpp"
 #include "algorithm/acs/acs.hpp"
+#include "algorithm/graph.hpp"
 
 #include "../iomanager.hpp"
 
@@ -13,29 +13,32 @@
 
 class TestAIScreen : public happ::ScreenBase {
 public:
-    TestAIScreen() :
-        happ::ScreenBase(),
-        m_input_manager(nullptr)
-    { /* Empty. */ }
-    virtual ~TestAIScreen() { /* Empty */ };
+    TestAIScreen() : happ::ScreenBase(), m_input_manager(nullptr) { /* Empty. */
+    }
+
+    virtual ~TestAIScreen(){ /* Empty */ };
 
     virtual void start(hemlock::FrameTime time) override {
         happ::ScreenBase::start(time);
 
-        std::cout << "********************\n* Basic Graph Test *\n********************" << std::endl << std::endl;
+        std::cout
+            << "********************\n* Basic Graph Test *\n********************"
+            << std::endl
+            << std::endl;
 
         do_basic_graph_test();
 
         std::cout << std::endl << std::endl;
 
-        std::cout << "*******************\n* Maze Graph Test *\n*******************" << std::endl << std::endl;
+        std::cout << "*******************\n* Maze Graph Test *\n*******************"
+                  << std::endl
+                  << std::endl;
 
         do_maze_graph_test();
     }
 
-    virtual void update(hemlock::FrameTime) override {
-        
-    }
+    virtual void update(hemlock::FrameTime) override { }
+
     virtual void draw(hemlock::FrameTime) override {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
@@ -45,10 +48,11 @@ public:
 
         m_state = happ::ScreenState::RUNNING;
 
-        m_input_manager = static_cast<happ::SingleWindowApp*>(m_process)->input_manager();
+        m_input_manager
+            = static_cast<happ::SingleWindowApp*>(m_process)->input_manager();
     }
 protected:
     hui::InputManager* m_input_manager;
 };
 
-#endif // __hemlock_tests_ai_screen_ai_screen_hpp
+#endif  // __hemlock_tests_ai_screen_ai_screen_hpp

@@ -5,15 +5,15 @@ namespace hemlock {
     namespace test {
         namespace voxel_screen {
             void handle_simple_user_inputs(
-                hui::InputManager* input_manager,
+                hui::InputManager*            input_manager,
                 hcam::BasicFirstPersonCamera& camera,
-                btDiscreteDynamicsWorld* world,
-                f32 frame_time,
-                OUT bool& flip_chunk_check,
-                OUT bool& draw_chunk_outlines,
-                OUT bool& do_unloads,
-                OUT f32& speed_mult,
-                OUT f32v3& delta_pos
+                btDiscreteDynamicsWorld*      world,
+                f32                           frame_time,
+                OUT bool&                     flip_chunk_check,
+                OUT bool&                     draw_chunk_outlines,
+                OUT bool&                     do_unloads,
+                OUT f32&                      speed_mult,
+                OUT f32v3&                    delta_pos
             ) {
                 flip_chunk_check = false;
                 if (input_manager->is_pressed(hui::PhysicalKey::H_J)) {
@@ -38,22 +38,28 @@ namespace hemlock {
 
                 delta_pos = {};
                 if (input_manager->is_pressed(hui::PhysicalKey::H_W)) {
-                    delta_pos += glm::normalize(camera.direction()) * frame_time * 0.01f * speed_mult;
+                    delta_pos += glm::normalize(camera.direction()) * frame_time
+                                 * 0.01f * speed_mult;
                 }
                 if (input_manager->is_pressed(hui::PhysicalKey::H_A)) {
-                    delta_pos -= glm::normalize(camera.right()) * frame_time * 0.01f * speed_mult;
+                    delta_pos -= glm::normalize(camera.right()) * frame_time * 0.01f
+                                 * speed_mult;
                 }
                 if (input_manager->is_pressed(hui::PhysicalKey::H_S)) {
-                    delta_pos -= glm::normalize(camera.direction()) * frame_time * 0.01f * speed_mult;
+                    delta_pos -= glm::normalize(camera.direction()) * frame_time
+                                 * 0.01f * speed_mult;
                 }
                 if (input_manager->is_pressed(hui::PhysicalKey::H_D)) {
-                    delta_pos += glm::normalize(camera.right()) * frame_time * 0.01f * speed_mult;
+                    delta_pos += glm::normalize(camera.right()) * frame_time * 0.01f
+                                 * speed_mult;
                 }
                 if (input_manager->is_pressed(hui::PhysicalKey::H_Q)) {
-                    delta_pos += glm::normalize(camera.up()) * frame_time * 0.01f * speed_mult;
+                    delta_pos += glm::normalize(camera.up()) * frame_time * 0.01f
+                                 * speed_mult;
                 }
                 if (input_manager->is_pressed(hui::PhysicalKey::H_E)) {
-                    delta_pos -= glm::normalize(camera.up()) * frame_time * 0.01f * speed_mult;
+                    delta_pos -= glm::normalize(camera.up()) * frame_time * 0.01f
+                                 * speed_mult;
                 }
 
                 if (input_manager->is_pressed(hui::PhysicalKey::H_G)) {
@@ -61,9 +67,9 @@ namespace hemlock {
                     debug_printf("Turning on gravity.\n");
                 }
             }
-        }
-    }
-}
+        }  // namespace voxel_screen
+    }      // namespace test
+}  // namespace hemlock
 namespace htest = hemlock::test;
 
-#endif // __hemlock_tests_voxel_screen_io_hpp
+#endif  // __hemlock_tests_voxel_screen_io_hpp

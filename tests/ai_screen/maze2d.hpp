@@ -20,9 +20,9 @@ namespace map {
         void print_map(const Map& map);
 
         halgo::GraphMap<size_t> map_to_graph(Map map, float initial_weight);
-    };
-};
+    };  // namespace maze2d
+};      // namespace map
 
 #include "maze2d.inl"
 
-#endif // __hemlock_tests_ai_screen_maze2d_hpp
+#endif  // __hemlock_tests_ai_screen_maze2d_hpp

@@ -6,14 +6,13 @@
 namespace hemlock {
     namespace algorithm {
         template <typename ActionType>
-        class INextActionIterator
-        {
+        class INextActionIterator {
         public:
             using iterator_category = std::input_iterator_tag;
-            using value_type = ActionType;
-            using difference_type = ptrdiff_t;
-            using pointer = ActionType*;
-            using reference = ActionType&;
+            using value_type        = ActionType;
+            using difference_type   = ptrdiff_t;
+            using pointer           = ActionType*;
+            using reference         = ActionType&;
 
             virtual INextActionIterator<ActionType>& operator++()    = 0;
             virtual INextActionIterator<ActionType>& operator++(i32) = 0;
@@ -24,10 +23,10 @@ namespace hemlock {
         template <typename Iterator>
         class INextActionFinder {
         public:
-            virtual       Iterator begin()       = 0;
+            virtual Iterator       begin()       = 0;
             virtual const Iterator begin() const = 0;
-            virtual       Iterator end()         = 0;
-            virtual const Iterator end()   const = 0;
+            virtual Iterator       end()         = 0;
+            virtual const Iterator end() const   = 0;
         };
 
         // template <typename ActionType, typename ...ConcreteStepFinders>
@@ -47,44 +46,50 @@ namespace hemlock {
 
         // template <typename ActionType, typename ...ConcreteStepFinders>
         // class NextActionMultiFinder :
-        //     public INextActionFinder<NextActionMultiIterator<ActionType, ConcreteStepFinders...>>
+        //     public INextActionFinder<NextActionMultiIterator<ActionType,
+        //     ConcreteStepFinders...>>
         // {
         // public:
-        //           NextActionMultiIterator<ActionType, ConcreteStepFinders...> begin()       final;
-        //     const NextActionMultiIterator<ActionType, ConcreteStepFinders...> begin() const final;
-        //           NextActionMultiIterator<ActionType, ConcreteStepFinders...> end()         final;
-        //     const NextActionMultiIterator<ActionType, ConcreteStepFinders...> end()   const final;
+        //           NextActionMultiIterator<ActionType, ConcreteStepFinders...>
+        //           begin()       final;
+        //     const NextActionMultiIterator<ActionType, ConcreteStepFinders...>
+        //     begin() const final;
+        //           NextActionMultiIterator<ActionType, ConcreteStepFinders...> end()
+        //           final;
+        //     const NextActionMultiIterator<ActionType, ConcreteStepFinders...> end()
+        //     const final;
         // };
 
         template <typename ActionType>
-        using NextActionFromGraphIterator = boost::graph_traits<Graph<ActionType>>::out_edge_iterator;
+        using NextActionFromGraphIterator
+            = boost::graph_traits<Graph<ActionType>>::out_edge_iterator;
 
         template <typename ActionType>
         class NextActionFromGraphFinder :
-            public INextActionFinder<NextActionFromGraphIterator<ActionType>>
-        {
+            public INextActionFinder<NextActionFromGraphIterator<ActionType>> {
         public:
             NextActionFromGraphFinder(
                 VertexDescriptor<ActionType> vertex,
                 const GraphMap<ActionType>&  graph_map
             ) :
-                m_iterator_pair(boost::out_edges(vertex, graph_map.graph))
-            { /* Empty. */ }
+                m_iterator_pair(boost::out_edges(vertex, graph_map.graph)
+                ) { /* Empty. */
+            }
 
-                  NextActionFromGraphIterator<ActionType> begin()       final;
+            NextActionFromGraphIterator<ActionType>       begin() final;
             const NextActionFromGraphIterator<ActionType> begin() const final;
-                  NextActionFromGraphIterator<ActionType> end()         final;
-            const NextActionFromGraphIterator<ActionType> end()   const final;
+            NextActionFromGraphIterator<ActionType>       end() final;
+            const NextActionFromGraphIterator<ActionType> end() const final;
         protected:
             std::pair<
                 typename boost::graph_traits<Graph<ActionType>>::out_edge_iterator,
-                typename boost::graph_traits<Graph<ActionType>>::out_edge_iterator
-            > m_iterator_pair;
+                typename boost::graph_traits<Graph<ActionType>>::out_edge_iterator>
+                m_iterator_pair;
         };
-    }
-}
+    }  // namespace algorithm
+}  // namespace hemlock
 namespace halgo = hemlock::algorithm;
 
 #include "algorithm/next_action_finder.inl"
 
-#endif // __hemlock_algorithm_next_action_finder_hpp
+#endif  // __hemlock_algorithm_next_action_finder_hpp

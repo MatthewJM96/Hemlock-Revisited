@@ -6,9 +6,15 @@ void __do_maze_graph_test(size_t map_dim, size_t count) {
     for (size_t map_idx = 0; map_idx < count; ++map_idx) {
         map::maze2d::Map map;
 
-        map = map::maze2d::load_map("maze/" + std::to_string(half_dim) + "." + std::to_string(map_idx) + ".solved.map", {map_dim, map_dim});
+        map = map::maze2d::load_map(
+            "maze/" + std::to_string(half_dim) + "." + std::to_string(map_idx)
+                + ".solved.map",
+            { map_dim, map_dim }
+        );
 
-        std::cout << "Map " << map_idx + 1 << " of dim " << half_dim << " maps, with ideal solution length " << map.solution_length << ":" << std::endl;
+        std::cout << "Map " << map_idx + 1 << " of dim " << half_dim
+                  << " maps, with ideal solution length " << map.solution_length
+                  << ":" << std::endl;
 
         // map::maze2d::print_map(map);
 
@@ -21,9 +27,12 @@ void __do_maze_graph_test(size_t map_dim, size_t count) {
 
         size_t* path        = nullptr;
         size_t  path_length = 0;
-        acs.find_path<100, 2000>(graph_map, map.start_idx, map.finish_idx, path, path_length);
+        acs.find_path<100, 2000>(
+            graph_map, map.start_idx, map.finish_idx, path, path_length
+        );
 
-        std::cout << "  solution found with length: " << path_length << std::endl << std::endl;
+        std::cout << "  solution found with length: " << path_length << std::endl
+                  << std::endl;
     }
 }
 
