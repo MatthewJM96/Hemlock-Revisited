@@ -1,8 +1,10 @@
-template <
-    typename VertexData,
-    typename NextActionFinder,
-    typename VertexChoiceStrategy>
+template <typename VertexData, typename NextActionFinder, typename VertexChoiceStrategy>
 halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>::BasicACS() :
+#if defined(DEBUG)
+    m_protoheatmap(nullptr),
+    m_pheromone_heatmaps(nullptr),
+    m_ant_count_heatmaps(nullptr),
+#endif  // defined(DEBUG)
     m_max_iterations(100),
     m_break_on_path_change(0),
     m_break_on_iterations(2),
@@ -19,22 +21,17 @@ halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>::BasicACS() 
     // Empty.
 }
 
-template <
-    typename VertexData,
-    typename NextActionFinder,
-    typename VertexChoiceStrategy>
+template <typename VertexData, typename NextActionFinder, typename VertexChoiceStrategy>
 halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>&
-halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>::
-    set_max_iterations(size_t max_iterations) {
+halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>::set_max_iterations(
+    size_t max_iterations
+) {
     m_max_iterations = max_iterations;
 
     return *this;
 }
 
-template <
-    typename VertexData,
-    typename NextActionFinder,
-    typename VertexChoiceStrategy>
+template <typename VertexData, typename NextActionFinder, typename VertexChoiceStrategy>
 halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>&
 halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>::
     set_break_on_path_change(f32 break_on_path_change) {
@@ -43,10 +40,7 @@ halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>::
     return *this;
 }
 
-template <
-    typename VertexData,
-    typename NextActionFinder,
-    typename VertexChoiceStrategy>
+template <typename VertexData, typename NextActionFinder, typename VertexChoiceStrategy>
 halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>&
 halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>::
     set_break_on_iterations(size_t break_on_iterations) {
@@ -73,10 +67,7 @@ halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>::
 //     return *this;
 // }
 
-template <
-    typename VertexData,
-    typename NextActionFinder,
-    typename VertexChoiceStrategy>
+template <typename VertexData, typename NextActionFinder, typename VertexChoiceStrategy>
 halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>&
 halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>::
     set_exploitation_base(f32 exploitation_base) {
@@ -85,10 +76,7 @@ halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>::
     return *this;
 }
 
-template <
-    typename VertexData,
-    typename NextActionFinder,
-    typename VertexChoiceStrategy>
+template <typename VertexData, typename NextActionFinder, typename VertexChoiceStrategy>
 halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>&
 halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>::
     set_exploitation_coeff(f32 exploitation_coeff) {
@@ -97,10 +85,7 @@ halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>::
     return *this;
 }
 
-template <
-    typename VertexData,
-    typename NextActionFinder,
-    typename VertexChoiceStrategy>
+template <typename VertexData, typename NextActionFinder, typename VertexChoiceStrategy>
 halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>&
 halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>::
     set_exploitation_exponent(f32 exploitation_exponent) {
@@ -109,10 +94,7 @@ halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>::
     return *this;
 }
 
-template <
-    typename VertexData,
-    typename NextActionFinder,
-    typename VertexChoiceStrategy>
+template <typename VertexData, typename NextActionFinder, typename VertexChoiceStrategy>
 halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>&
 halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>::
     set_do_mean_filtering(bool do_mean_filtering) {
@@ -121,10 +103,7 @@ halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>::
     return *this;
 }
 
-template <
-    typename VertexData,
-    typename NextActionFinder,
-    typename VertexChoiceStrategy>
+template <typename VertexData, typename NextActionFinder, typename VertexChoiceStrategy>
 halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>&
 halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>::
     set_mean_filtering_order(size_t mean_filtering_order) {
@@ -133,10 +112,7 @@ halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>::
     return *this;
 }
 
-template <
-    typename VertexData,
-    typename NextActionFinder,
-    typename VertexChoiceStrategy>
+template <typename VertexData, typename NextActionFinder, typename VertexChoiceStrategy>
 halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>&
 halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>::
     set_mean_filtering_trigger(f32 mean_filtering_trigger) {
@@ -145,10 +121,7 @@ halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>::
     return *this;
 }
 
-template <
-    typename VertexData,
-    typename NextActionFinder,
-    typename VertexChoiceStrategy>
+template <typename VertexData, typename NextActionFinder, typename VertexChoiceStrategy>
 halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>&
 halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>::
     set_local_increment(f32 local_increment) {
@@ -157,10 +130,7 @@ halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>::
     return *this;
 }
 
-template <
-    typename VertexData,
-    typename NextActionFinder,
-    typename VertexChoiceStrategy>
+template <typename VertexData, typename NextActionFinder, typename VertexChoiceStrategy>
 halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>&
 halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>::
     set_local_evaporation(f32 local_evaporation) {
@@ -169,10 +139,7 @@ halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>::
     return *this;
 }
 
-template <
-    typename VertexData,
-    typename NextActionFinder,
-    typename VertexChoiceStrategy>
+template <typename VertexData, typename NextActionFinder, typename VertexChoiceStrategy>
 halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>&
 halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>::
     set_global_increment(f32 global_increment) {
@@ -181,10 +148,7 @@ halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>::
     return *this;
 }
 
-template <
-    typename VertexData,
-    typename NextActionFinder,
-    typename VertexChoiceStrategy>
+template <typename VertexData, typename NextActionFinder, typename VertexChoiceStrategy>
 halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>&
 halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>::
     set_global_evaporation(f32 global_evaporation) {
@@ -193,10 +157,7 @@ halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>::
     return *this;
 }
 
-template <
-    typename VertexData,
-    typename NextActionFinder,
-    typename VertexChoiceStrategy>
+template <typename VertexData, typename NextActionFinder, typename VertexChoiceStrategy>
 template <size_t AntCount, size_t MaxSteps>
 void halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>::find_path(
     GraphMap<VertexData>& map,
@@ -205,6 +166,10 @@ void halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>::find_p
     VertexData*&          path,
     size_t&               path_length
 ) {
+#if defined(DEBUG)
+    initialise_heatmaps<MaxSteps>();
+#endif  // defined(DEBUG)
+
     using _VertexDescriptor = VertexDescriptor<VertexData>;
     // using _EdgeDescriptor   = EdgeDescriptor<VertexData>;
     using _Ant      = Ant<_VertexDescriptor>;
@@ -398,7 +363,7 @@ void halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>::find_p
                     ant_groups_new.count += 1;
                 } else if (!changed_group) {
                     // Place ant in group is was in on last step, it hasn't moved.
-                    auto& new_group = ant_groups_new.groups[ant.group];
+                    auto& new_group                  = ant_groups_new.groups[ant.group];
                     new_group.ants[new_group.size++] = &ant;
                 }
 
@@ -420,6 +385,18 @@ void halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>::find_p
 
             // TODO(Matthew): remove by referring to groups by reference only.
             std::memcpy(&ant_groups_old, &ant_groups_new, sizeof(_AntGroups));
+
+#if defined(DEBUG)
+            size_t heatmap_idx = iteration * MaxSteps + step;
+
+            create_pheromone_heatmap_frame<MaxSteps>(
+                &m_pheromone_heatmaps[heatmap_idx], map
+            );
+
+            create_ant_count_heatmap_frame<AntCount, MaxSteps>(
+                &m_ant_count_heatmaps[heatmap_idx], map, &ants[0]
+            );
+#endif  // defined(DEBUG)
 
             if (ants_found_food == AntCount) break;
         }
@@ -447,8 +424,7 @@ void halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>::find_p
                 map.edge_weight_map[edge]
                     = (1.0f - m_local_evaporation) * map.edge_weight_map[edge]
                       + m_local_evaporation * m_local_increment
-                            * static_cast<f32>(
-                                ant_groups_new.groups[ant_group_idx].size
+                            * static_cast<f32>(ant_groups_new.groups[ant_group_idx].size
                             );
 
                 step_start = step_end;
@@ -460,9 +436,8 @@ void halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>::find_p
         for (size_t ant_group_idx = 0; ant_group_idx < ant_groups_new.count;
              ++ant_group_idx)
         {
-            f32 popularity
-                = static_cast<f32>(ant_groups_new.groups[ant_group_idx].size)
-                  / static_cast<f32>(AntCount);
+            f32 popularity = static_cast<f32>(ant_groups_new.groups[ant_group_idx].size)
+                             / static_cast<f32>(AntCount);
             entropy += popularity * log(popularity);
         }
         entropy /= log(1.0f / static_cast<f32>(AntCount));
@@ -474,8 +449,7 @@ void halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>::find_p
         }
 
         if (shortest_path.found) {
-            for (size_t step_idx = 0; step_idx < shortest_path.length - 1; ++step_idx)
-            {
+            for (size_t step_idx = 0; step_idx < shortest_path.length - 1; ++step_idx) {
                 // TODO(Matthew): edge may not exist.
                 auto [edge, _] = boost::edge(
                     shortest_path.steps[step_idx],
@@ -485,8 +459,7 @@ void halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>::find_p
 
                 map.edge_weight_map[edge]
                     += m_global_evaporation
-                       * (m_global_increment / static_cast<f32>(shortest_path.length)
-                       );
+                       * (m_global_increment / static_cast<f32>(shortest_path.length));
             }
         }
 
@@ -515,3 +488,111 @@ void halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>::find_p
         }
     }
 }
+
+#if defined(DEBUG)
+template <typename VertexData, typename NextActionFinder, typename VertexChoiceStrategy>
+halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>&
+halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>::set_protoheatmap(
+    heatmap_t* protoheatmap
+) {
+    m_protoheatmap = protoheatmap;
+
+    return *this;
+}
+
+template <typename VertexData, typename NextActionFinder, typename VertexChoiceStrategy>
+halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>&
+halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>::
+    set_vertex_to_2d_coord(VertexDataTo2DCoord<VertexData> get_2d_coord) {
+    m_get_2d_coord = get_2d_coord;
+
+    return *this;
+}
+
+template <typename VertexData, typename NextActionFinder, typename VertexChoiceStrategy>
+template <size_t MaxSteps>
+void halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>::
+    initialise_heatmaps() {
+    if (m_protoheatmap == nullptr) return;
+
+    f32* buffers = new f32
+        [MaxSteps * m_max_iterations * 2 * m_protoheatmap->w * m_protoheatmap->h];
+
+    heatmap_t* heatmaps = new heatmap_t[MaxSteps * m_max_iterations * 2];
+
+    for (size_t heatmap_idx = 0; heatmap_idx < MaxSteps * m_max_iterations * 2;
+         heatmap_idx++)
+    {
+        heatmaps[heatmap_idx].w = m_protoheatmap->w;
+        heatmaps[heatmap_idx].h = m_protoheatmap->h;
+        heatmaps[heatmap_idx].buf
+            = &buffers[heatmap_idx * m_protoheatmap->w * m_protoheatmap->h];
+    }
+
+    m_pheromone_heatmaps = &heatmaps[0];
+    m_ant_count_heatmaps = &heatmaps[MaxSteps * m_max_iterations];
+}
+
+template <typename VertexData, typename NextActionFinder, typename VertexChoiceStrategy>
+void halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>::
+    dispose_heatmaps() {
+    if (m_pheromone_heatmaps == nullptr) return;
+
+    delete[] m_pheromone_heatmaps[0].buf;
+    delete[] m_pheromone_heatmaps;
+
+    m_pheromone_heatmaps = nullptr;
+    m_ant_count_heatmaps = nullptr;
+}
+
+template <typename VertexData, typename NextActionFinder, typename VertexChoiceStrategy>
+template <size_t MaxSteps>
+void halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>::
+    create_pheromone_heatmap_frame(heatmap_t* heatmap, GraphMap<VertexData>& map) {
+    if (m_protoheatmap == nullptr) return;
+
+    // For each vertex in graph, sum up pheromone on edges leading into it and add
+    // a point weighted by this to the heatmap.
+    for (auto vertex : boost::make_iterator_range(boost::vertices(map.graph))) {
+        f32 net_pheromone_into_vertex = 0.0f;
+        for (auto edge : boost::make_iterator_range(boost::in_edges(vertex, map.graph)))
+            net_pheromone_into_vertex += map.edge_weight_map[edge];
+
+        auto [x, y] = m_get_2d_coord(map.vertex_coord_map[vertex]);
+
+        heatmap_add_weighted_point(heatmap, x, y, net_pheromone_into_vertex);
+    }
+
+    // Apply protoheatmap to this heatmap frame factoring in strongest pheromone signal.
+    size_t pixel_count = m_protoheatmap->w * m_protoheatmap->h;
+    for (size_t pixel_idx = 0; pixel_idx < pixel_count; ++pixel_idx) {
+        heatmap->buf[pixel_idx] = m_protoheatmap->buf[pixel_idx] * heatmap->max;
+    }
+}
+
+template <typename VertexData, typename NextActionFinder, typename VertexChoiceStrategy>
+template <size_t AntCount, size_t MaxSteps>
+void halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>::
+    create_ant_count_heatmap_frame(
+        heatmap_t*                         heatmap,
+        GraphMap<VertexData>&              map,
+        Ant<VertexDescriptor<VertexData>>* ants
+    ) {
+    if (m_protoheatmap == nullptr) return;
+
+    // For each ant add point to heatmap for its current location on the graph.
+    for (size_t ant_idx = 0; ant_idx < AntCount; ++ant_idx) {
+        auto& ant = ants[ant_idx];
+
+        auto [x, y] = m_get_2d_coord(map.vertex_coord_map[ant.current_vertex]);
+
+        heatmap_add_point(heatmap, x, y);
+    }
+
+    // Apply protoheatmap to this heatmap frame.
+    size_t pixel_count = m_protoheatmap->w * m_protoheatmap->h;
+    for (size_t pixel_idx = 0; pixel_idx < pixel_count; ++pixel_idx) {
+        heatmap->buf[pixel_idx] = m_protoheatmap->buf[pixel_idx] * heatmap->max;
+    }
+}
+#endif  // defined(DEBUG)

@@ -5,6 +5,13 @@
 #include "algorithm/graph.hpp"
 #include "algorithm/next_action_finder.hpp"
 
+#if defined(DEBUG)
+#  include "debug/heatmap.h"
+
+template <typename VertexData>
+using VertexDataTo2DCoord = std::tuple<size_t, size_t> (*)(VertexData);
+#endif  // defined(DEBUG)
+
 namespace hemlock {
     namespace algorithm {
         template <typename VertexDescriptor>
@@ -67,6 +74,12 @@ namespace hemlock {
             BasicACS& set_global_increment(f32 global_increment);
             BasicACS& set_global_evaporation(f32 global_evaporation);
 
+#if defined(DEBUG)
+            BasicACS&
+            set_vertex_to_2d_coord(VertexDataTo2DCoord<VertexData> get_2d_coord);
+            BasicACS& set_protoheatmap(heatmap_t* protoheatmap);
+#endif  // defined(DEBUG)
+
             template <size_t AntCount, size_t MaxSteps>
             void find_path(
                 GraphMap<VertexData>& map,
@@ -76,6 +89,31 @@ namespace hemlock {
                 size_t&               path_length
             );
         protected:
+#if defined(DEBUG)
+            template <size_t MaxSteps>
+            void initialise_heatmaps();
+
+            void dispose_heatmaps();
+
+            template <size_t MaxSteps>
+            void create_pheromone_heatmap_frame(
+                heatmap_t* heatmap, GraphMap<VertexData>& map
+            );
+
+            template <size_t AntCount, size_t MaxSteps>
+            void create_ant_count_heatmap_frame(
+                heatmap_t*                         heatmap,
+                GraphMap<VertexData>&              map,
+                Ant<VertexDescriptor<VertexData>>* ants
+            );
+
+            VertexDataTo2DCoord<VertexData> m_get_2d_coord;
+
+            heatmap_t* m_protoheatmap;
+            heatmap_t* m_pheromone_heatmaps;
+            heatmap_t* m_ant_count_heatmaps;
+#endif  // defined(DEBUG)
+
             size_t m_max_iterations;  //< The maximum number of iterations to perform.
             size_t m_break_on_path_change;  //< The degree of path change that is
                                             // satisfactory.
@@ -86,15 +124,15 @@ namespace hemlock {
             // size_t  m_max_steps;                    //< The maximum number of steps
             // to allow any one ant to take. size_t  m_ant_count; //< The number of
             // ants to use in path finding.
-            f32 m_exploitation_base;   //< The base exploitation factor.
-            f32 m_exploitation_coeff;  //< The coefficient used in applying
-                                       // entropy-based dynamic exploitation factor.
-                                       //  Setting this to zero turns off dynamic
-                                       //  exploitation factor.
-            f32 m_exploitation_exponent;    //< The exponent used in applying
-                                            // entropy-based dynamic exploitation
-                                            // factor.
-            bool   m_do_mean_filtering;     //< Whether to do mean filtering at all.
+            f32 m_exploitation_base;      //< The base exploitation factor.
+            f32 m_exploitation_coeff;     //< The coefficient used in applying
+                                          // entropy-based dynamic exploitation factor.
+                                          //  Setting this to zero turns off dynamic
+                                          //  exploitation factor.
+            f32 m_exploitation_exponent;  //< The exponent used in applying
+                                          // entropy-based dynamic exploitation
+                                          // factor.
+            bool   m_do_mean_filtering;   //< Whether to do mean filtering at all.
             size_t m_mean_filtering_order;  //< The "neighbour of" order to go out to
                                             // to calculate mean.
             // TODO(Matthew): More intelligent use of mean filtering versus dynamic
@@ -102,8 +140,8 @@ namespace hemlock {
             //                local increase of exploration where second is global).
             f32 m_mean_filtering_trigger;  //< The entropy value for which to trigger
                                            // mean filtering.
-            f32 m_local_increment;     //< The increment applied in local pheromone
-                                       // update.
+            f32 m_local_increment;         //< The increment applied in local pheromone
+                                           // update.
             f32 m_local_evaporation;   //< The evaporation applied in local pheromone
                                        // update.
             f32 m_global_increment;    //< The increment applied in global pheromone
