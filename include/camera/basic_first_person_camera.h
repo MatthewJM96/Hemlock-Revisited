@@ -20,15 +20,15 @@ namespace hemlock {
 
             void update();
 
-            f32 aspect_ratio() { return m_state.aspect_ratio; }
+            f32 aspect_ratio() const { return m_state.aspect_ratio; }
 
-            f32 fov() { return m_state.fov; }
+            f32 fov() const { return m_state.fov; }
 
-            bool clamp_up_enabled() { return m_clamp_up.enabled; }
+            bool clamp_up_enabled() const { return m_clamp_up.enabled; }
 
-            f32 clamp_up_angle() { return m_clamp_up.angle; }
+            f32 clamp_up_angle() const { return m_clamp_up.angle; }
 
-            ClampAxis clamp_up() { return m_clamp_up; }
+            ClampAxis clamp_up() const { return m_clamp_up; }
 
             void set_aspect_ratio(f32 aspect_ratio);
             void set_fov(f32 fov);
