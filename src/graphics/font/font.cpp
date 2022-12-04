@@ -14,7 +14,7 @@
 static ui32 next_power_2(ui32 value) {
     // This is a rather lovely bit manipulation function.
     // Essentially, all we're doing in this is up until the return
-    // statement we take a value like 0110110000110101101 and change 
+    // statement we take a value like 0110110000110101101 and change
     // it to become 0111111111111111111 so that when we add 1 (i.e.
     // 0000000000000000001) it becomes 1000000000000000000 -> the
     // next power of 2!
@@ -27,34 +27,41 @@ static ui32 next_power_2(ui32 value) {
     return ++value;
 }
 
-hg::f::FontInstanceHash hg::f::hash(FontSize size, FontStyle style, FontRenderStyle render_style) {
+hg::f::FontInstanceHash
+hg::f::hash(FontSize size, FontStyle style, FontRenderStyle render_style) {
     FontInstanceHash hash = 0;
 
     // By ensuring FontInstanceHash has more bits that the sum of all three of the
     // provided values we can generate the hash simply by shifting the bits of style
     // and render style such that none of the three overlap.
     hash += static_cast<FontInstanceHash>(size);
-    hash += static_cast<FontInstanceHash>(style)       << (sizeof(FontSize) * 8);
-    hash += static_cast<FontInstanceHash>(render_style) << ((sizeof(FontSize) + sizeof(FontStyle)) * 8);
+    hash += static_cast<FontInstanceHash>(style) << (sizeof(FontSize) * 8);
+    hash += static_cast<FontInstanceHash>(render_style)
+            << ((sizeof(FontSize) + sizeof(FontStyle)) * 8);
 
     return hash;
 }
 
 bool hg::f::FontInstance::save(std::string filepath, hio::image::Saver save) {
-        // Prepare the pixel buffer.
-        ui8* pixels = new ui8[texture_size.x * texture_size.y * 4];
+    // Prepare the pixel buffer.
+    ui8* pixels = new ui8[texture_size.x * texture_size.y * 4];
 
-        // Bind the texture, load it into our buffer, and then unbind it.
-        glGetTextureImage(texture, 0, GL_RGBA, GL_UNSIGNED_BYTE, texture_size.x * texture_size.y * 4, pixels);
+    // Bind the texture, load it into our buffer, and then unbind it.
+    glGetTextureImage(
+        texture,
+        0,
+        GL_RGBA,
+        GL_UNSIGNED_BYTE,
+        texture_size.x * texture_size.y * 4,
+        pixels
+    );
 
-        return save(filepath, pixels, texture_size, hio::image::PixelFormat::RGBA_UI8);
+    return save(filepath, pixels, texture_size, hio::image::PixelFormat::RGBA_UI8);
 }
 
 hg::f::Font::Font() :
-    m_filepath(""),
-    m_start(0), m_end(0),
-    m_default_size(0)
-{ /* Empty. */ }
+    m_filepath(""), m_start(0), m_end(0), m_default_size(0) { /* Empty. */
+}
 
 void hg::f::Font::init(std::string filepath, char start, char end) {
     m_filepath = filepath;
@@ -75,10 +82,12 @@ void hg::f::Font::dispose() {
     FontInstanceMap().swap(m_font_instances);
 }
 
-bool hg::f::Font::generate( FontSize size,
-                            FontSize padding,
-                           FontStyle style       /*= FontStyle::NORMAL*/,
-                     FontRenderStyle render_style /*= FontRenderStyle::BLENDED*/ ) {
+bool hg::f::Font::generate(
+    FontSize        size,
+    FontSize        padding,
+    FontStyle       style /*= FontStyle::NORMAL*/,
+    FontRenderStyle render_style /*= FontRenderStyle::BLENDED*/
+) {
     // Make sure this is a new instance we are generating.
     if (get_instance(size, style, render_style) != NIL_FONT_INSTANCE) return false;
 
@@ -122,8 +131,9 @@ bool hg::f::Font::generate( FontSize size,
             //     metrics.z & metrics.w correspond to min & max Y respectively.
             i32v4 metrics;
 
-            TTF_GlyphMetrics(font, c, &metrics.x, &metrics.y,
-                                    &metrics.z, &metrics.w, nullptr);
+            TTF_GlyphMetrics(
+                font, c, &metrics.x, &metrics.y, &metrics.z, &metrics.w, nullptr
+            );
 
             // Calculate the glyph's sizes from the metric.
             font_instance.glyphs[i].size.x = static_cast<f32>(metrics.y - metrics.x);
@@ -145,34 +155,37 @@ bool hg::f::Font::generate( FontSize size,
     ui32 best_height    = 0;
     ui32 best_area      = std::numeric_limits<ui32>::max();
     ui32 best_row_count = 0;
-    Row* best_rows = nullptr;
+    Row* best_rows      = nullptr;
     while (row_count <= static_cast<ui32>(m_end - m_start)) {
-        // WARNING: We may be packing too tightly here. The reported height of glyphs from TTF_GlyphMetrics
+        // WARNING: We may be packing too tightly here. The reported height of glyphs
+        // from TTF_GlyphMetrics
         //          is not always accurate to the rendered dimensions.
 
-        // Generate rows for the current row count, getting the width and height of the rectangle
-        // they form.
+        // Generate rows for the current row count, getting the width and height of
+        // the rectangle they form.
         ui32 current_width, current_height;
-        Row* current_rows = generate_rows(font_instance.glyphs, row_count, padding, current_width, current_height);
+        Row* current_rows = generate_rows(
+            font_instance.glyphs, row_count, padding, current_width, current_height
+        );
 
-        // There are benefits of making the texture larger to match power of 2 boundaries on
-        // width and height.
+        // There are benefits of making the texture larger to match power of 2
+        // boundaries on width and height.
         current_width  = next_power_2(current_width);
         current_height = next_power_2(current_height);
 
-        // If the area of the rectangle drawn out by the rows generated is less than the previous
-        // best area, then we have a new candidate!
+        // If the area of the rectangle drawn out by the rows generated is less than
+        // the previous best area, then we have a new candidate!
         if (current_width * current_height < best_area) {
             if (best_rows) delete[] best_rows;
-            best_rows     = current_rows;
-            best_width    = current_width;
-            best_height   = current_height;
+            best_rows      = current_rows;
+            best_width     = current_width;
+            best_height    = current_height;
             best_row_count = row_count;
-            best_area     = best_width * best_height;
+            best_area      = best_width * best_height;
             ++row_count;
         } else {
-            // Area has increased, break out as going forwards it's likely area will only continue
-            // to increase.
+            // Area has increased, break out as going forwards it's likely area will
+            // only continue to increase.
             delete[] current_rows;
             break;
         }
@@ -181,13 +194,17 @@ bool hg::f::Font::generate( FontSize size,
     // Make sure we actually have rows to use.
     if (best_rows == nullptr) return false;
 
-    // TODO(Matthew): Don't wanna be calling glGet every font gen... determine and store somewhere at initialisation.
-    // Get maximum texture size allowed by implementation.
+    // TODO(Matthew): Don't wanna be calling glGet every font gen... determine and
+    // store somewhere at initialisation. Get maximum texture size allowed by
+    // implementation.
     GLint max_texture_size;
     glGetIntegerv(GL_MAX_TEXTURE_SIZE, &max_texture_size);
 
-    // If the best size texture we could get exceeds the largest texture area permitted by the GPU... fail.
-    if (best_width * best_height > static_cast<ui32>(max_texture_size * max_texture_size)) {
+    // If the best size texture we could get exceeds the largest texture area
+    // permitted by the GPU... fail.
+    if (best_width * best_height
+        > static_cast<ui32>(max_texture_size * max_texture_size))
+    {
         delete[] best_rows;
         return false;
     }
@@ -206,19 +223,22 @@ bool hg::f::Font::generate( FontSize size,
     // OpenGL to treat pixels all as RGBA{0,0,0,255}.
     glTextureParameteri(font_instance.texture, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTextureParameteri(font_instance.texture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTextureParameteri(font_instance.texture, GL_TEXTURE_WRAP_S,     GL_REPEAT);
-    glTextureParameteri(font_instance.texture, GL_TEXTURE_WRAP_T,     GL_REPEAT);
-    glTextureParameteri(font_instance.texture, GL_TEXTURE_WRAP_R,     GL_REPEAT);
+    glTextureParameteri(font_instance.texture, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTextureParameteri(font_instance.texture, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTextureParameteri(font_instance.texture, GL_TEXTURE_WRAP_R, GL_REPEAT);
 
     // This represents the current V-coordinate we are into the texture.
-    //    UV are the coordinates we use for textures (i.e. the X & Y coords of the pixels).
+    //    UV are the coordinates we use for textures (i.e. the X & Y coords of the
+    //    pixels).
     ui32 current_v = padding;
     // Loop over all of the rows, for each going through and drawing each glyph,
     // adding it to our texture.
     for (size_t row_index = 0; row_index < best_row_count; ++row_index) {
         // This represents the current U-coordinate we are into the texture.
         ui32 current_u = padding;
-        for (size_t glyph_index = 0; glyph_index < best_rows[row_index].second.size(); ++glyph_index) {
+        for (size_t glyph_index = 0; glyph_index < best_rows[row_index].second.size();
+             ++glyph_index)
+        {
             ui32 char_index = best_rows[row_index].second[glyph_index];
 
             // If the glyph is unsupported, skip it!
@@ -226,19 +246,28 @@ bool hg::f::Font::generate( FontSize size,
 
             // Determine which render style we are to use and draw the glyph.
             SDL_Surface* glyph_surface = nullptr;
-            switch(render_style) {
+            switch (render_style) {
                 case FontRenderStyle::SOLID:
-                    glyph_surface = TTF_RenderGlyph_Solid(font, static_cast<ui16>(m_start + char_index), { 255, 255, 255, 255 });
+                    glyph_surface = TTF_RenderGlyph_Solid(
+                        font,
+                        static_cast<ui16>(m_start + char_index),
+                        { 255, 255, 255, 255 }
+                    );
                     break;
                 case FontRenderStyle::BLENDED:
-                    glyph_surface = TTF_RenderGlyph_Blended(font, static_cast<ui16>(m_start + char_index), { 255, 255, 255, 255 });
+                    glyph_surface = TTF_RenderGlyph_Blended(
+                        font,
+                        static_cast<ui16>(m_start + char_index),
+                        { 255, 255, 255, 255 }
+                    );
                     break;
             }
 
             /*
-             * SDL_ttf produces SDL_Surfaces with indexing into a colour palette for solid case,
-             * and.ARGB8888 for blended case now. Let's handle both indexed colour palette and
-             * general 4-byte cases and hope that covers us.
+             * SDL_ttf produces SDL_Surfaces with indexing into a colour palette for
+             * solid case, and.ARGB8888 for blended case now. Let's handle both
+             * indexed colour palette and general 4-byte cases and hope that covers
+             * us.
              */
             ui8* actual_pixels = nullptr;
             switch (glyph_surface->format->BytesPerPixel) {
@@ -246,24 +275,43 @@ bool hg::f::Font::generate( FontSize size,
                     p::convert_sdl_indexed_to_rgba_8888(glyph_surface, actual_pixels);
                     break;
                 case 4:
-                    p::convert_sdl_xxxx_8888_to_rgba_8888(glyph_surface, actual_pixels);
+                    p::convert_sdl_xxxx_8888_to_rgba_8888(
+                        glyph_surface, actual_pixels
+                    );
                     break;
             }
             if (actual_pixels == nullptr) return false;
 
             // Stitch the glyph we just generated into our texture.
-            glTextureSubImage2D(font_instance.texture, 0, current_u, current_v, glyph_surface->w, glyph_surface->h, GL_RGBA, GL_UNSIGNED_BYTE, actual_pixels);
+            glTextureSubImage2D(
+                font_instance.texture,
+                0,
+                current_u,
+                current_v,
+                glyph_surface->w,
+                glyph_surface->h,
+                GL_RGBA,
+                GL_UNSIGNED_BYTE,
+                actual_pixels
+            );
 
-            // Update the size of the glyph with what we rendered - there can be variance between this and what we obtained
-            // in the glyph metric stage!
-            font_instance.glyphs[char_index].size.x = static_cast<f32>(glyph_surface->w);
-            font_instance.glyphs[char_index].size.y = static_cast<f32>(glyph_surface->h);
+            // Update the size of the glyph with what we rendered - there can be
+            // variance between this and what we obtained in the glyph metric stage!
+            font_instance.glyphs[char_index].size.x
+                = static_cast<f32>(glyph_surface->w);
+            font_instance.glyphs[char_index].size.y
+                = static_cast<f32>(glyph_surface->h);
 
             // Build the UV dimensions for the glyph.
-            font_instance.glyphs[char_index].uv_rect.x =        (static_cast<f32>(current_u) / static_cast<f32>(best_width));
-            font_instance.glyphs[char_index].uv_rect.y =        (static_cast<f32>(current_v) / static_cast<f32>(best_height));
-            font_instance.glyphs[char_index].uv_rect.z = (static_cast<f32>(glyph_surface->w) / static_cast<f32>(best_width));
-            font_instance.glyphs[char_index].uv_rect.w = (static_cast<f32>(glyph_surface->h) / static_cast<f32>(best_height));
+            font_instance.glyphs[char_index].uv_rect.x
+                = (static_cast<f32>(current_u) / static_cast<f32>(best_width));
+            font_instance.glyphs[char_index].uv_rect.y
+                = (static_cast<f32>(current_v) / static_cast<f32>(best_height));
+            font_instance.glyphs[char_index].uv_rect.z
+                = (static_cast<f32>(glyph_surface->w) / static_cast<f32>(best_width));
+            font_instance.glyphs[char_index].uv_rect.w
+                = (static_cast<f32>(glyph_surface->h) / static_cast<f32>(best_height)
+                );
 
             // Update current_u.
             current_u += glyph_surface->w + padding;
@@ -281,18 +329,23 @@ bool hg::f::Font::generate( FontSize size,
     delete[] best_rows;
 
     // Note that this can fail for seemingly little reason.
-    //     For example, if one tries to get glyph metrics for a character not provided.
+    //     For example, if one tries to get glyph metrics for a character not
+    //     provided.
     TTF_CloseFont(font);
 
     // Insert our font instance.
-    m_font_instances.emplace(std::make_pair(hash(size, style, render_style), font_instance));
+    m_font_instances.emplace(
+        std::make_pair(hash(size, style, render_style), font_instance)
+    );
 
     return true;
 }
 
-hg::f::FontInstance hg::f::Font::get_instance( FontSize size,
-                                              FontStyle style       /*= FontStyle::NORMAL*/,
-                                        FontRenderStyle render_style /*= FontRenderStyle::BLENDED*/ ) {
+hg::f::FontInstance hg::f::Font::get_instance(
+    FontSize        size,
+    FontStyle       style /*= FontStyle::NORMAL*/,
+    FontRenderStyle render_style /*= FontRenderStyle::BLENDED*/
+) {
     try {
         return m_font_instances.at(hash(size, style, render_style));
     } catch (std::out_of_range&) {
@@ -316,10 +369,14 @@ bool hg::f::Font::dispose_instance(FontInstanceHash font_instance_hash) {
     return static_cast<bool>(m_font_instances.erase(font_instance_hash));
 }
 
-hg::f::Font::Row* hg::f::Font::generate_rows(Glyph* glyphs, ui32 row_count, FontSize padding, ui32& width, ui32& height) {
-    // Create some arrays for the rows, their widths and max height of a glyph within each of them.
-    //    Max heights are stored inside Row - it is a pair of max height and a vector of glyph indices.
-    Row*  rows          = new Row[row_count]();
+hg::f::Font::Row* hg::f::Font::generate_rows(
+    Glyph* glyphs, ui32 row_count, FontSize padding, ui32& width, ui32& height
+) {
+    // Create some arrays for the rows, their widths and max height of a glyph within
+    // each of them.
+    //    Max heights are stored inside Row - it is a pair of max height and a vector
+    //    of glyph indices.
+    Row*  rows           = new Row[row_count]();
     ui32* current_widths = new ui32[row_count]();
 
     width  = padding;
@@ -327,21 +384,21 @@ hg::f::Font::Row* hg::f::Font::generate_rows(Glyph* glyphs, ui32 row_count, Font
     // Initialise our arrays of widths and max heights.
     for (size_t i = 0; i < row_count; ++i) {
         current_widths[i] = padding;
-        rows[i].first    = 0;
+        rows[i].first     = 0;
     }
 
-    // For each character, we now determine which row to put it in, updating the width and
-    // height variables as we go.
+    // For each character, we now determine which row to put it in, updating the width
+    // and height variables as we go.
     for (ui32 i = 0; i < static_cast<ui32>(m_end - m_start); ++i) {
         // Skip unsupported glyphs.
         if (!glyphs[i].supported) continue;
 
-        // Determine which row currently has the least width: this is the row we will add
-        // the currently considered glyph to.
+        // Determine which row currently has the least width: this is the row we will
+        // add the currently considered glyph to.
         size_t bestRow = 0;
         for (size_t j = 1; j < row_count; ++j) {
-            // If row with index j is not as wide as the current least-wide row then it becomes
-            // the new least-wide row!
+            // If row with index j is not as wide as the current least-wide row then
+            // it becomes the new least-wide row!
             if (current_widths[bestRow] > current_widths[j]) bestRow = j;
         }
 
@@ -355,8 +412,8 @@ hg::f::Font::Row* hg::f::Font::generate_rows(Glyph* glyphs, ui32 row_count, Font
         // Update the max height of our row if the new glyph exceeds it, and update
         // the height of the rectange the rows form.
         if (rows[bestRow].first < glyphs[i].size.y) {
-            height -= rows[bestRow].first;
-            height += static_cast<ui32>(glyphs[i].size.y);
+            height              -= rows[bestRow].first;
+            height              += static_cast<ui32>(glyphs[i].size.y);
             rows[bestRow].first = static_cast<ui32>(glyphs[i].size.y);
         }
 
@@ -371,10 +428,12 @@ hg::f::Font::Row* hg::f::Font::generate_rows(Glyph* glyphs, ui32 row_count, Font
 }
 
 bool operator==(const hg::f::FontInstance& lhs, const hg::f::FontInstance& rhs) {
-    return (lhs.texture == rhs.texture &&
-            lhs.height  == rhs.height  &&
-            lhs.glyphs  == rhs.glyphs);
+    return (
+        lhs.texture == rhs.texture && lhs.height == rhs.height
+        && lhs.glyphs == rhs.glyphs
+    );
 }
+
 bool operator!=(const hg::f::FontInstance& lhs, const hg::f::FontInstance& rhs) {
     return !(lhs == rhs);
 }
@@ -383,49 +442,55 @@ bool operator!=(const hg::f::FontInstance& lhs, const hg::f::FontInstance& rhs) 
 //     That is to say, we can do things like:
 //         FontStyle::BOLD | FontStyle::ITALIC
 //     in order to specify we want a font instance that is bold AND italic!
-hg::f::FontStyle operator~ (hg::f::FontStyle rhs) {
+hg::f::FontStyle operator~(hg::f::FontStyle rhs) {
     return static_cast<hg::f::FontStyle>(
         ~static_cast<std::underlying_type<hg::f::FontStyle>::type>(rhs)
     );
 }
-hg::f::FontStyle operator| (hg::f::FontStyle lhs, hg::f::FontStyle rhs) {
+
+hg::f::FontStyle operator|(hg::f::FontStyle lhs, hg::f::FontStyle rhs) {
     return static_cast<hg::f::FontStyle>(
-        static_cast<std::underlying_type<hg::f::FontStyle>::type>(lhs) |
-        static_cast<std::underlying_type<hg::f::FontStyle>::type>(rhs)
+        static_cast<std::underlying_type<hg::f::FontStyle>::type>(lhs)
+        | static_cast<std::underlying_type<hg::f::FontStyle>::type>(rhs)
     );
 }
-hg::f::FontStyle operator& (hg::f::FontStyle lhs, hg::f::FontStyle rhs) {
+
+hg::f::FontStyle operator&(hg::f::FontStyle lhs, hg::f::FontStyle rhs) {
     return static_cast<hg::f::FontStyle>(
-        static_cast<std::underlying_type<hg::f::FontStyle>::type>(lhs) &
-        static_cast<std::underlying_type<hg::f::FontStyle>::type>(rhs)
+        static_cast<std::underlying_type<hg::f::FontStyle>::type>(lhs)
+        & static_cast<std::underlying_type<hg::f::FontStyle>::type>(rhs)
     );
 }
-hg::f::FontStyle operator^ (hg::f::FontStyle lhs, hg::f::FontStyle rhs) {
+
+hg::f::FontStyle operator^(hg::f::FontStyle lhs, hg::f::FontStyle rhs) {
     return static_cast<hg::f::FontStyle>(
-        static_cast<std::underlying_type<hg::f::FontStyle>::type>(lhs) ^
-        static_cast<std::underlying_type<hg::f::FontStyle>::type>(rhs)
+        static_cast<std::underlying_type<hg::f::FontStyle>::type>(lhs)
+        ^ static_cast<std::underlying_type<hg::f::FontStyle>::type>(rhs)
     );
 }
-hg::f::FontStyle& operator|= (hg::f::FontStyle& lhs, hg::f::FontStyle rhs) {
+
+hg::f::FontStyle& operator|=(hg::f::FontStyle& lhs, hg::f::FontStyle rhs) {
     lhs = static_cast<hg::f::FontStyle>(
-        static_cast<std::underlying_type<hg::f::FontStyle>::type>(lhs) |
-        static_cast<std::underlying_type<hg::f::FontStyle>::type>(rhs)
+        static_cast<std::underlying_type<hg::f::FontStyle>::type>(lhs)
+        | static_cast<std::underlying_type<hg::f::FontStyle>::type>(rhs)
     );
 
     return lhs;
 }
-hg::f::FontStyle& operator&= (hg::f::FontStyle& lhs, hg::f::FontStyle rhs) {
+
+hg::f::FontStyle& operator&=(hg::f::FontStyle& lhs, hg::f::FontStyle rhs) {
     lhs = static_cast<hg::f::FontStyle>(
-        static_cast<std::underlying_type<hg::f::FontStyle>::type>(lhs) &
-        static_cast<std::underlying_type<hg::f::FontStyle>::type>(rhs)
+        static_cast<std::underlying_type<hg::f::FontStyle>::type>(lhs)
+        & static_cast<std::underlying_type<hg::f::FontStyle>::type>(rhs)
     );
 
     return lhs;
 }
-hg::f::FontStyle& operator^= (hg::f::FontStyle& lhs, hg::f::FontStyle rhs) {
+
+hg::f::FontStyle& operator^=(hg::f::FontStyle& lhs, hg::f::FontStyle rhs) {
     lhs = static_cast<hg::f::FontStyle>(
-        static_cast<std::underlying_type<hg::f::FontStyle>::type>(lhs) ^
-        static_cast<std::underlying_type<hg::f::FontStyle>::type>(rhs)
+        static_cast<std::underlying_type<hg::f::FontStyle>::type>(lhs)
+        ^ static_cast<std::underlying_type<hg::f::FontStyle>::type>(rhs)
     );
 
     return lhs;

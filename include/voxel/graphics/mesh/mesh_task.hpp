@@ -13,15 +13,14 @@ namespace hemlock {
          */
         template <typename ComparatorCandidate>
         concept ChunkMeshComparator = requires (
-             ComparatorCandidate s,
-                    const Block* b,
-              BlockChunkPosition p,
-                          Chunk* c
+            ComparatorCandidate s, const Block* b, BlockChunkPosition p, Chunk* c
         ) {
-            { s.operator()(b, b, p, c) } -> std::same_as<bool>;
-        };
-    }
-}
+                                          {
+                                              s.operator()(b, b, p, c)
+                                              } -> std::same_as<bool>;
+                                      };
+    }  // namespace voxel
+}  // namespace hemlock
 namespace hvox = hemlock::voxel;
 
-#endif // __hemlock_voxel_graphics_mesh_mesh_task_hpp
+#endif  // __hemlock_voxel_graphics_mesh_mesh_task_hpp

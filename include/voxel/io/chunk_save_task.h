@@ -7,10 +7,11 @@ namespace hemlock {
     namespace voxel {
         // class ChunkSaveTask : public ChunkFileTask {
         // public:
-        //     virtual void execute(ChunkFileTaskThreadState* state, ChunkFileTaskTaskQueue* task_queue) override;
+        //     virtual void execute(ChunkFileTaskThreadState* state,
+        //     ChunkFileTaskTaskQueue* task_queue) override;
         // };
     }
-}
+}  // namespace hemlock
 namespace hvox = hemlock::voxel;
 
-#endif // __hemlock_voxel_io_chunk_save_task_h
+#endif  // __hemlock_voxel_io_chunk_save_task_h

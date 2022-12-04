@@ -3,8 +3,8 @@
 #include "thread/thread_workflow_builder.h"
 
 hthread::ThreadWorkflowBuilder::ThreadWorkflowBuilder() :
-    m_dag(nullptr)
-{ /* Empty. */ }
+    m_dag(nullptr) { /* Empty. */
+}
 
 void hthread::ThreadWorkflowBuilder::init(ThreadWorkflowDAG* dag) {
     m_dag = dag;
@@ -32,8 +32,7 @@ hthread::ThreadWorkflowTaskID hthread::ThreadWorkflowBuilder::add_tasks(ui32 cou
 
     m_dag->task_count += count;
     m_dag->into_counts.reserve(count);
-    for (ui32 i = 0; i < count; ++i)
-        m_dag->into_counts.emplace_back(0);
+    for (ui32 i = 0; i < count; ++i) m_dag->into_counts.emplace_back(0);
 
     return first_new_id;
 }
@@ -45,7 +44,7 @@ hthread::ThreadWorkflowTaskID hthread::ThreadWorkflowBuilder::chain_task() {
     m_dag->task_count += 1;
     if (new_id > 0) {
         m_dag->into_counts.emplace_back(1);
-        m_dag->graph.insert({prev_id, new_id});
+        m_dag->graph.insert({ prev_id, new_id });
     } else {
         m_dag->into_counts.emplace_back(0);
         m_dag->entry_tasks.insert(new_id);
@@ -54,7 +53,8 @@ hthread::ThreadWorkflowTaskID hthread::ThreadWorkflowBuilder::chain_task() {
     return new_id;
 }
 
-hthread::ThreadWorkflowTaskID hthread::ThreadWorkflowBuilder::chain_tasks(ui32 count) {
+hthread::ThreadWorkflowTaskID hthread::ThreadWorkflowBuilder::chain_tasks(ui32 count
+) {
     ThreadWorkflowTaskID first_new_id = m_dag->task_count;
 
     ThreadWorkflowTaskID new_id  = first_new_id;
@@ -65,7 +65,7 @@ hthread::ThreadWorkflowTaskID hthread::ThreadWorkflowBuilder::chain_tasks(ui32 c
     for (ui32 i = 0; i < count; ++i) {
         if (new_id > 0) {
             m_dag->into_counts.emplace_back(1);
-            m_dag->graph.insert({prev_id, new_id});
+            m_dag->graph.insert({ prev_id, new_id });
         } else {
             // Can only reach here if i == 0 and we had
             // not yet added any tasks to the workflow.
@@ -79,7 +79,8 @@ hthread::ThreadWorkflowTaskID hthread::ThreadWorkflowBuilder::chain_tasks(ui32 c
     return first_new_id;
 }
 
-hthread::ThreadWorkflowTaskID hthread::ThreadWorkflowBuilder::chain_tasks_parallel(ui32 count) {
+hthread::ThreadWorkflowTaskID
+hthread::ThreadWorkflowBuilder::chain_tasks_parallel(ui32 count) {
     ThreadWorkflowTaskID first_new_id = m_dag->task_count;
 
     ThreadWorkflowTaskID new_id  = first_new_id;
@@ -90,7 +91,7 @@ hthread::ThreadWorkflowTaskID hthread::ThreadWorkflowBuilder::chain_tasks_parall
     for (ui32 i = 0; i < count; ++i) {
         if (first_new_id > 0) {
             m_dag->into_counts.emplace_back(1);
-            m_dag->graph.insert({prev_id, new_id});
+            m_dag->graph.insert({ prev_id, new_id });
         } else {
             // Can only reach here if we had not yet
             // added any tasks to the workflow.
@@ -107,89 +108,83 @@ hthread::ThreadWorkflowTaskID hthread::ThreadWorkflowBuilder::chain_tasks_parall
 std::tuple<bool, hthread::ThreadWorkflowTaskID>
 hthread::ThreadWorkflowBuilder::chain_task(ThreadWorkflowTaskID from_task) {
     ThreadWorkflowTaskID new_id = m_dag->task_count;
-    if (from_task >= new_id)
-        return {false, 0};
+    if (from_task >= new_id) return { false, 0 };
 
     m_dag->task_count += 1;
     m_dag->into_counts.emplace_back(1);
-    m_dag->graph.insert({from_task, new_id});
+    m_dag->graph.insert({ from_task, new_id });
 
-    return {true, new_id};
+    return { true, new_id };
 }
 
 std::tuple<bool, hthread::ThreadWorkflowTaskID>
-hthread::ThreadWorkflowBuilder::chain_tasks( ThreadWorkflowTaskID from_task,
-                                                             ui32 count) {
+hthread::ThreadWorkflowBuilder::chain_tasks(
+    ThreadWorkflowTaskID from_task, ui32 count
+) {
     ThreadWorkflowTaskID first_new_id = m_dag->task_count;
-    if (from_task >= first_new_id)
-        return {false, 0};
+    if (from_task >= first_new_id) return { false, 0 };
 
     m_dag->task_count += count;
     m_dag->into_counts.reserve(count);
 
-    ThreadWorkflowTaskID new_id  = first_new_id;
+    ThreadWorkflowTaskID new_id = first_new_id;
 
     m_dag->into_counts.emplace_back(1);
-    m_dag->graph.insert({from_task, new_id});
+    m_dag->graph.insert({ from_task, new_id });
 
     ThreadWorkflowTaskID prev_id = new_id++;
 
     for (ui32 i = 1; i < count; ++i) {
         m_dag->into_counts.emplace_back(1);
-        m_dag->graph.insert({prev_id, new_id});
+        m_dag->graph.insert({ prev_id, new_id });
 
         prev_id = new_id++;
     }
 
-    return {true, first_new_id};
+    return { true, first_new_id };
 }
 
 std::tuple<bool, hthread::ThreadWorkflowTaskID>
-hthread::ThreadWorkflowBuilder::chain_tasks_parallel( ThreadWorkflowTaskID from_task,
-                                                                      ui32 count ) {
+hthread::ThreadWorkflowBuilder::chain_tasks_parallel(
+    ThreadWorkflowTaskID from_task, ui32 count
+) {
     ThreadWorkflowTaskID first_new_id = m_dag->task_count;
-    if (from_task >= first_new_id)
-        return {false, 0};
+    if (from_task >= first_new_id) return { false, 0 };
 
     m_dag->task_count += count;
     m_dag->into_counts.reserve(count);
 
-    ThreadWorkflowTaskID new_id  = first_new_id;
+    ThreadWorkflowTaskID new_id = first_new_id;
 
     for (ui32 i = 0; i < count; ++i) {
         m_dag->into_counts.emplace_back(1);
-        m_dag->graph.insert({from_task, new_id});
+        m_dag->graph.insert({ from_task, new_id });
 
         ++new_id;
     }
 
-    return {true, first_new_id};
+    return { true, first_new_id };
 }
 
 bool hthread::ThreadWorkflowBuilder::set_task_depends(
-    ThreadWorkflowTaskID first_task,
-    ThreadWorkflowTaskID second_task
+    ThreadWorkflowTaskID first_task, ThreadWorkflowTaskID second_task
 ) {
     hthread::ThreadWorkflowTaskID next_valid_id = m_dag->task_count;
-    if (first_task >= next_valid_id || second_task >= next_valid_id)
-        return false;
+    if (first_task >= next_valid_id || second_task >= next_valid_id) return false;
 
     // Second task is no longer an entry task if it was until now.
-    if (auto it = m_dag->entry_tasks.find(second_task); it != m_dag->entry_tasks.end())
+    if (auto it = m_dag->entry_tasks.find(second_task);
+        it != m_dag->entry_tasks.end())
         m_dag->entry_tasks.erase(it);
 
     m_dag->into_counts[second_task] += 1;
-    m_dag->graph.insert({first_task, second_task});
+    m_dag->graph.insert({ first_task, second_task });
 
     return true;
 }
 
 bool hthread::ThreadWorkflowBuilder::set_tasks_depend(
-                        std::pair<
-                            ThreadWorkflowTaskID,
-                            ThreadWorkflowTaskID
-                          >* task_pairs,
-                        ui32 count
+    std::pair<ThreadWorkflowTaskID, ThreadWorkflowTaskID>* task_pairs, ui32 count
 ) {
     hthread::ThreadWorkflowTaskID next_valid_id = m_dag->task_count;
 
@@ -206,11 +201,12 @@ bool hthread::ThreadWorkflowBuilder::set_tasks_depend(
         }
 
         // Second task is no longer an entry task if it was until now.
-        if (auto it = m_dag->entry_tasks.find(second_task); it != m_dag->entry_tasks.end())
+        if (auto it = m_dag->entry_tasks.find(second_task);
+            it != m_dag->entry_tasks.end())
             m_dag->entry_tasks.erase(it);
 
         m_dag->into_counts[second_task] += 1;
-        m_dag->graph.insert({first_task, second_task});
+        m_dag->graph.insert({ first_task, second_task });
     }
 
     return all_valid;

@@ -29,14 +29,15 @@ namespace hemlock {
              * @return True if the ray was incident on a block matching the
              * target within max_steps, false otherwise.
              */
-            bool cast_to_block(           f32v3 start, 
-                                          f32v3 direction,
-                    hmem::WeakHandle<ChunkGrid> grid_handle,
-                                          Block target_block,
-                                           ui32 max_steps,
-                        OUT BlockWorldPosition& position,
-                                       OUT f32& distance    );
-
+            bool cast_to_block(
+                f32v3                       start,
+                f32v3                       direction,
+                hmem::WeakHandle<ChunkGrid> grid_handle,
+                Block                       target_block,
+                ui32                        max_steps,
+                OUT BlockWorldPosition&     position,
+                OUT f32&                    distance
+            );
 
             /**
              * @brief Steps the ray along its direction until the
@@ -57,13 +58,15 @@ namespace hemlock {
              * @return True if the ray was incident on a block matching the
              * target within max_steps, false otherwise.
              */
-            bool cast_to_block(           f32v3 start,
-                                          f32v3 direction,
-                    hmem::WeakHandle<ChunkGrid> grid_handle,
-                                      BlockTest block_is_target,
-                                           ui32 max_steps,
-                        OUT BlockWorldPosition& position,
-                                       OUT f32& distance    );
+            bool cast_to_block(
+                f32v3                       start,
+                f32v3                       direction,
+                hmem::WeakHandle<ChunkGrid> grid_handle,
+                BlockTest                   block_is_target,
+                ui32                        max_steps,
+                OUT BlockWorldPosition&     position,
+                OUT f32&                    distance
+            );
 
             /**
              * @brief Steps the ray along its direction until the
@@ -85,14 +88,15 @@ namespace hemlock {
              * @return True if the ray was incident on a block matching the
              * target within max_steps, false otherwise.
              */
-            bool cast_to_block_before(    f32v3 start,
-                                          f32v3 direction,
-                    hmem::WeakHandle<ChunkGrid> grid_handle,
-                                          Block target_block,
-                                           ui32 max_steps,
-                        OUT BlockWorldPosition& position,
-                                       OUT f32& distance    );
-
+            bool cast_to_block_before(
+                f32v3                       start,
+                f32v3                       direction,
+                hmem::WeakHandle<ChunkGrid> grid_handle,
+                Block                       target_block,
+                ui32                        max_steps,
+                OUT BlockWorldPosition&     position,
+                OUT f32&                    distance
+            );
 
             /**
              * @brief Steps the ray along its direction until the
@@ -114,16 +118,18 @@ namespace hemlock {
              * @return True if the ray was incident on a block matching the
              * target within max_steps, false otherwise.
              */
-            bool cast_to_block_before(    f32v3 start,
-                                          f32v3 direction,
-                    hmem::WeakHandle<ChunkGrid> grid_handle,
-                                      BlockTest block_is_target,
-                                           ui32 max_steps,
-                        OUT BlockWorldPosition& position,
-                                       OUT f32& distance    );
-        }
-    }
-}
+            bool cast_to_block_before(
+                f32v3                       start,
+                f32v3                       direction,
+                hmem::WeakHandle<ChunkGrid> grid_handle,
+                BlockTest                   block_is_target,
+                ui32                        max_steps,
+                OUT BlockWorldPosition&     position,
+                OUT f32&                    distance
+            );
+        }  // namespace Ray
+    }      // namespace voxel
+}  // namespace hemlock
 namespace hvox = hemlock::voxel;
 
-#endif // __hemlock_voxel_ray_h
+#endif  // __hemlock_voxel_ray_h

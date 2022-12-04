@@ -28,10 +28,9 @@ void hemlock::FrameLimiter::frame_end() {
 
     if (m_target_fps <= 0.0f) return;
 
-    while (
-        (std::chrono::steady_clock::now() - m_last_frame_point).count()
-            < static_cast<i64>(NANOSECONDS / m_target_fps)
-    ) {
+    while ((std::chrono::steady_clock::now() - m_last_frame_point).count()
+           < static_cast<i64>(NANOSECONDS / m_target_fps))
+    {
         std::this_thread::sleep_for(std::chrono::microseconds(1));
     }
 }

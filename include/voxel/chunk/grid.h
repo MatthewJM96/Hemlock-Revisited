@@ -2,10 +2,10 @@
 #define __hemlock_voxel_chunk_grid_h
 
 #include "timing.h"
-#include "voxel/coordinate_system.h"
 #include "voxel/chunk.h"
-#include "voxel/task.hpp"
+#include "voxel/coordinate_system.h"
 #include "voxel/graphics/renderer.h"
+#include "voxel/task.hpp"
 
 namespace hemlock {
     namespace voxel {
@@ -23,7 +23,9 @@ namespace hemlock {
         class ChunkGrid {
         public:
             ChunkGrid();
-            ~ChunkGrid() { /* Empty. */ }
+
+            ~ChunkGrid() { /* Empty. */
+            }
 
             /**
              * @brief Initialises the chunk grid and the
@@ -39,11 +41,13 @@ namespace hemlock {
              * @param build_mesh_task Builder that returns a valid
              * task to mesh a chunk.
              */
-            void init( hmem::WeakHandle<ChunkGrid> self,
-                                              ui32 render_distance,
-                                              ui32 thread_count,
-                                  ChunkTaskBuilder build_load_or_generate_task,
-                                  ChunkTaskBuilder build_mesh_task );
+            void init(
+                hmem::WeakHandle<ChunkGrid> self,
+                ui32                        render_distance,
+                ui32                        thread_count,
+                ChunkTaskBuilder            build_load_or_generate_task,
+                ChunkTaskBuilder            build_mesh_task
+            );
             /**
              * @brief Disposes of the chunk grid, ending
              * the tasks on the thread pool and unloading
@@ -66,8 +70,11 @@ namespace hemlock {
 
             void set_render_distance(ui32 render_distance);
 
-            ui32 render_distance()           const { return m_render_distance;           }
-            ui32 chunks_in_render_distance() const { return m_chunks_in_render_distance; }
+            ui32 render_distance() const { return m_render_distance; }
+
+            ui32 chunks_in_render_distance() const {
+                return m_chunks_in_render_distance;
+            }
 
             /**
              * @brief Suspends chunk tasks. This is a hammer, but
@@ -75,11 +82,12 @@ namespace hemlock {
              * don't ever call this in practise.
              */
             void suspend_chunk_tasks() { m_thread_pool.suspend(); }
+
             /**
              * @brief Resumes chunk tasks. No consequences for
              * calling this when not already suspended.
              */
-            void resume_chunk_tasks()  { m_thread_pool.resume();  }
+            void resume_chunk_tasks() { m_thread_pool.resume(); }
 
             ChunkRenderer* renderer() { return &m_renderer; }
 
@@ -97,8 +105,9 @@ namespace hemlock {
              * load tasks being queued in a valid state, false if any single
              * chunk did not.
              */
-            bool load_from_scratch_chunks( ChunkGridPosition* chunk_positions,
-                                                         ui32 chunk_count );
+            bool load_from_scratch_chunks(
+                ChunkGridPosition* chunk_positions, ui32 chunk_count
+            );
 
             /**
              * @brief Preloads a chunk, this entails saying it exists
@@ -151,7 +160,10 @@ namespace hemlock {
              * existent, as if it is in any existing state some degree
              * of work will be done to unload it.
              */
-            bool unload_chunk_at(ChunkGridPosition chunk_position, hmem::WeakHandle<Chunk>* handle = nullptr);
+            bool unload_chunk_at(
+                ChunkGridPosition        chunk_position,
+                hmem::WeakHandle<Chunk>* handle = nullptr
+            );
 
             /**
              * @brief Queries the state of the chunk at the given
@@ -171,7 +183,9 @@ namespace hemlock {
              * [false, true] should never occur and represents
              * invalid query processing.
              */
-            QueriedChunkState query_chunk_state(ChunkGridPosition chunk_position, ChunkState required_minimum_state);
+            QueriedChunkState query_chunk_state(
+                ChunkGridPosition chunk_position, ChunkState required_minimum_state
+            );
             /**
              * @brief Queries the state of the chunk. The
              * requirement verified here is that the chunk is
@@ -189,7 +203,9 @@ namespace hemlock {
              * [false, true] should never occur and represents
              * invalid query processing.
              */
-            QueriedChunkState query_chunk_state(hmem::Handle<Chunk> chunk, ChunkState required_minimum_state);
+            QueriedChunkState query_chunk_state(
+                hmem::Handle<Chunk> chunk, ChunkState required_minimum_state
+            );
 
             /**
              * @brief Queries the pending task of the chunk
@@ -212,7 +228,10 @@ namespace hemlock {
              * never occur and represents invalid query
              * processing.
              */
-            QueriedChunkPendingTask query_chunk_pending_task(ChunkGridPosition chunk_position, ChunkTaskKind required_minimum_pending_task);
+            QueriedChunkPendingTask query_chunk_pending_task(
+                ChunkGridPosition chunk_position,
+                ChunkTaskKind     required_minimum_pending_task
+            );
             /**
              * @brief Queries the pending task of the chunk
              *  The requirement verified here is that the
@@ -232,7 +251,9 @@ namespace hemlock {
              * never occur and represents invalid query
              * processing.
              */
-            QueriedChunkPendingTask query_chunk_pending_task(hmem::Handle<Chunk> chunk, ChunkTaskKind required_minimum_pending_task);
+            QueriedChunkPendingTask query_chunk_pending_task(
+                hmem::Handle<Chunk> chunk, ChunkTaskKind required_minimum_pending_task
+            );
 
             /**
              * @brief Queries the state of the neighbours of
@@ -254,7 +275,9 @@ namespace hemlock {
              * not exist. Note: [false, true] should never occur
              * and represents invalid query processing.
              */
-            QueriedChunkState query_all_neighbour_states(ChunkGridPosition chunk_position, ChunkState required_minimum_state);
+            QueriedChunkState query_all_neighbour_states(
+                ChunkGridPosition chunk_position, ChunkState required_minimum_state
+            );
             /**
              * @brief Queries the state of the neighbours of
              * the chunk. The requirement verified here is
@@ -274,7 +297,9 @@ namespace hemlock {
              * not exist. Note: [false, true] should never occur
              * and represents invalid query processing.
              */
-            QueriedChunkState query_all_neighbour_states(hmem::Handle<Chunk> chunk, ChunkState required_minimum_state);
+            QueriedChunkState query_all_neighbour_states(
+                hmem::Handle<Chunk> chunk, ChunkState required_minimum_state
+            );
 
             /**
              * @brief Queries the state of the chunk at the given
@@ -294,7 +319,9 @@ namespace hemlock {
              * should never occur and represents invalid query
              * processing.
              */
-            QueriedChunkState query_chunk_exact_state(ChunkGridPosition chunk_position, ChunkState required_state);
+            QueriedChunkState query_chunk_exact_state(
+                ChunkGridPosition chunk_position, ChunkState required_state
+            );
             /**
              * @brief Queries the state of the chunk. The
              * requirement verified here is that the chunk
@@ -312,7 +339,9 @@ namespace hemlock {
              * [false, true] should never occur and represents
              * invalid query processing.
              */
-            QueriedChunkState query_chunk_exact_state(hmem::Handle<Chunk> chunk, ChunkState required_state);
+            QueriedChunkState query_chunk_exact_state(
+                hmem::Handle<Chunk> chunk, ChunkState required_state
+            );
 
             /**
              * @brief Queries the pending task of the chunk
@@ -332,7 +361,9 @@ namespace hemlock {
              * not exist. Note: [false, true] should never
              * occur and represents invalid query processing.
              */
-            QueriedChunkPendingTask query_chunk_exact_pending_task(ChunkGridPosition chunk_position, ChunkTaskKind required_pending_task);
+            QueriedChunkPendingTask query_chunk_exact_pending_task(
+                ChunkGridPosition chunk_position, ChunkTaskKind required_pending_task
+            );
             /**
              * @brief Queries the pending task of the chunk
              * The requirement verified here is that the
@@ -350,7 +381,9 @@ namespace hemlock {
              * not exist. Note: [false, true] should never
              * occur and represents invalid query processing.
              */
-            QueriedChunkPendingTask query_chunk_exact_pending_task(hmem::Handle<Chunk> chunk, ChunkTaskKind required_pending_task);
+            QueriedChunkPendingTask query_chunk_exact_pending_task(
+                hmem::Handle<Chunk> chunk, ChunkTaskKind required_pending_task
+            );
 
             /**
              * @brief Queries the state of the neighbours of
@@ -372,7 +405,9 @@ namespace hemlock {
              * querying does not exist. Note: [false, true] should
              * never occur and represents invalid query processing.
              */
-            QueriedChunkState query_all_neighbour_exact_states(ChunkGridPosition chunk_position, ChunkState required_state);
+            QueriedChunkState query_all_neighbour_exact_states(
+                ChunkGridPosition chunk_position, ChunkState required_state
+            );
             /**
              * @brief Queries the state of the neighbours of
              * the chunk. The requirement verified here is
@@ -392,7 +427,9 @@ namespace hemlock {
              * querying does not exist. Note: [false, true] should
              * never occur and represents invalid query processing.
              */
-            QueriedChunkState query_all_neighbour_exact_states(hmem::Handle<Chunk> chunk, ChunkState required_state);
+            QueriedChunkState query_all_neighbour_exact_states(
+                hmem::Handle<Chunk> chunk, ChunkState required_state
+            );
 
             /**
              * @brief Returns a handle on the identified chunk
@@ -403,6 +440,7 @@ namespace hemlock {
              * requested chunk, nullptr otherwise.
              */
             hmem::Handle<Chunk> chunk(ChunkID id);
+
             /**
              * @brief Returns a handle on the identified chunk
              * if it is held by the chunk grid.
@@ -411,7 +449,9 @@ namespace hemlock {
              * @return hmem::Handle<Chunk> Handle on the
              * requested chunk, nullptr otherwise.
              */
-            hmem::Handle<Chunk> chunk(ChunkGridPosition position) { return chunk(position.id); }
+            hmem::Handle<Chunk> chunk(ChunkGridPosition position) {
+                return chunk(position.id);
+            }
 
             const Chunks& chunks() const { return m_chunks; }
 
@@ -423,19 +463,19 @@ namespace hemlock {
         protected:
             void establish_chunk_neighbours(hmem::Handle<Chunk> chunk);
 
-            Delegate<void(Sender)>                      handle_chunk_load;
-            Delegate<bool(Sender, BlockChangeEvent)>    handle_block_change;
+            Delegate<void(Sender)>                   handle_chunk_load;
+            Delegate<bool(Sender, BlockChangeEvent)> handle_block_change;
 
             ChunkTaskBuilder m_build_load_or_generate_task, m_build_mesh_task;
             thread::ThreadPool<ChunkTaskContext> m_thread_pool;
 
             ChunkAllocator m_chunk_allocator;
 
-            hmem::Handle<ChunkBlockPager>           m_block_pager;
-            hmem::Handle<ChunkInstanceDataPager>    m_instance_data_pager;
+            hmem::Handle<ChunkBlockPager>        m_block_pager;
+            hmem::Handle<ChunkInstanceDataPager> m_instance_data_pager;
 
-            ChunkRenderer   m_renderer;
-            ui32            m_render_distance, m_chunks_in_render_distance;
+            ChunkRenderer m_renderer;
+            ui32          m_render_distance, m_chunks_in_render_distance;
 
             Chunks m_chunks;
 
@@ -444,8 +484,8 @@ namespace hemlock {
             // TODO(Matthew): MOVE IT
             GLuint m_grid_vao, m_grid_vbo;
         };
-    }
-}
+    }  // namespace voxel
+}  // namespace hemlock
 namespace hvox = hemlock::voxel;
 
-#endif // __hemlock_voxel_chunk_grid_h
+#endif  // __hemlock_voxel_chunk_grid_h

@@ -7,8 +7,8 @@
 
 // Containers
 #include <boost/circular_buffer.hpp>
-#include <boost/graph/graph_traits.hpp>
 #include <boost/graph/adjacency_list.hpp>
+#include <boost/graph/graph_traits.hpp>
 #include <map>
 #include <moodycamel/blockingconcurrentqueue.h>
 #include <moodycamel/concurrentqueue.h>
@@ -22,13 +22,13 @@
 #include <vector>
 
 // Views
-#include <ranges>
 #include <iterator>
+#include <ranges>
 
 // Strings
 #include <cstring>
-#include <string>
 #include <regex>
+#include <string>
 
 // Generics
 #include <algorithm>
@@ -51,27 +51,27 @@
 #include <filesystem>
 
 // Streams
-#include <iostream>
-#include <fstream>
-#include <sstream>
 #include <boost/iostreams/device/mapped_file.hpp>
+#include <fstream>
+#include <iostream>
+#include <sstream>
 
 // SDL2
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
 #if defined(HEMLOCK_USING_VULKAN)
-#include <SDL2/SDL_vulkan.h>
-#endif // defined(HEMLOCK_USING_VULKAN)
+#  include <SDL2/SDL_vulkan.h>
+#endif  // defined(HEMLOCK_USING_VULKAN)
 
 #if defined(HEMLOCK_USING_OPENGL)
 // OpenGL SDK
-#include <GL/glew.h>
-#endif // defined(HEMLOCK_USING_OPENGL)
+#  include <GL/glew.h>
+#endif  // defined(HEMLOCK_USING_OPENGL)
 
 #if defined(HEMLOCK_USING_VULKAN)
 // Vulkan SDK
-#include <vulkan/vulkan.h>
-#endif // defined(HEMLOCK_USING_VULKAN)
+#  include <vulkan/vulkan.h>
+#endif  // defined(HEMLOCK_USING_VULKAN)
 
 // GL Maths
 #define GLM_FORCE_SWIZZLE
@@ -83,20 +83,20 @@
 
 // Scripting Libs
 #if defined(HEMLOCK_USING_LUA)
-#include <lua.hpp>
+#  include <lua.hpp>
 
-#ifndef lua_pushglobaltable
-#define lua_pushglobaltable(L) lua_pushvalue(L,LUA_GLOBALSINDEX)
-#endif // lua_pushglobaltable
-#endif //defined(HELOCK_USING_LUA)
+#  ifndef lua_pushglobaltable
+#    define lua_pushglobaltable(L) lua_pushvalue(L, LUA_GLOBALSINDEX)
+#  endif  // lua_pushglobaltable
+#endif    // defined(HELOCK_USING_LUA)
 
 // Our generic preprocessor macros.
 #include "preprocessor.hpp"
 
 // Our constants.
 #include "constants.hpp"
-#include "decorators.hpp"
 #include "debug.hpp"
+#include "decorators.hpp"
 
 // Our Types and Other Hints
 #include "basic_concepts.hpp"
@@ -107,14 +107,14 @@
 
 // Our Containers
 #include "memory/handle.hpp"
-#include "memory/pager.hpp"
 #include "memory/heterogenous_pager.hpp"
 #include "memory/paged_allocator.hpp"
+#include "memory/pager.hpp"
 
 // Our Thread Handling
 #include "thread/thread_pool.hpp"
-#include "thread/thread_workflow_builder.h"
 #include "thread/thread_workflow.hpp"
+#include "thread/thread_workflow_builder.h"
 
 // Our File Handling Interface
 #include "io/filesystem.hpp"
@@ -129,4 +129,4 @@
 // Our common components.
 #include "physics/common_components.hpp"
 
-#endif // __hemlock_stdafx_h
+#endif  // __hemlock_stdafx_h

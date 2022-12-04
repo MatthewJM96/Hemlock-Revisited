@@ -6,8 +6,8 @@ namespace hemlock {
         using Path = fs::path;
 
         using PathBuilder = std::vector<Path>;
-    }
-}
+    }  // namespace io
+}  // namespace hemlock
 namespace hio = hemlock::io;
 
-#endif // __hemlock_io_path_hpp
+#endif  // __hemlock_io_path_hpp

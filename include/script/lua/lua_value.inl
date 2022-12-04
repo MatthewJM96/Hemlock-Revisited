@@ -1,7 +1,7 @@
 template <typename Type>
     requires (
         hscript::lua::is_single_lua_type<Type>::value
-            || hscript::lua::is_multiple_lua_type<Type>::value
+        || hscript::lua::is_multiple_lua_type<Type>::value
     )
 constexpr Type hscript::lua::LuaValue<Type>::default_value() {
     return Type{};
@@ -10,7 +10,7 @@ constexpr Type hscript::lua::LuaValue<Type>::default_value() {
 template <typename Type>
     requires (
         hscript::lua::is_single_lua_type<Type>::value
-            || hscript::lua::is_multiple_lua_type<Type>::value
+        || hscript::lua::is_multiple_lua_type<Type>::value
     )
 constexpr ui32 hscript::lua::LuaValue<Type>::value_count() {
     if constexpr (is_multiple_lua_type<Type>()) {
@@ -25,7 +25,7 @@ constexpr ui32 hscript::lua::LuaValue<Type>::value_count() {
 template <typename Type>
     requires (
         hscript::lua::is_single_lua_type<Type>::value
-            || hscript::lua::is_multiple_lua_type<Type>::value
+        || hscript::lua::is_multiple_lua_type<Type>::value
     )
 ui32 hscript::lua::LuaValue<Type>::push(LuaHandle state, Type value) {
     if constexpr (is_multiple_lua_type<Type>()) {
@@ -37,9 +37,9 @@ ui32 hscript::lua::LuaValue<Type>::push(LuaHandle state, Type value) {
         return value_count();
     }
 
-        /********\
-         * Bool *
-        \********/
+    /********\
+     * Bool *
+    \********/
     if constexpr (std::is_same<Type, bool>()) {
         lua_pushboolean(state, value);
 
@@ -48,8 +48,8 @@ ui32 hscript::lua::LuaValue<Type>::push(LuaHandle state, Type value) {
         \********/
     } else if constexpr (std::is_same<Type, char>()) {
         char* tmp = new char[2];
-        tmp[0] = value;
-        tmp[1] = '\0';
+        tmp[0]    = value;
+        tmp[1]    = '\0';
 
         lua_pushlstring(state, tmp, 1);
 
@@ -76,7 +76,9 @@ ui32 hscript::lua::LuaValue<Type>::push(LuaHandle state, Type value) {
         /************\
          * C-String *
         \************/
-    } else if constexpr (std::is_same<typename std::remove_const<Type>::type, char*>()) {
+    } else if constexpr (std::is_same<typename std::remove_const<Type>::type, char*>(
+                         ))
+    {
         lua_pushlstring(state, value, strlen(value));
 
         /********\
@@ -99,9 +101,7 @@ ui32 hscript::lua::LuaValue<Type>::push(LuaHandle state, Type value) {
     } else if constexpr (std::is_pointer<Type>()) {
         LuaValue<void*>::push(
             state,
-            reinterpret_cast<void*>(
-                const_cast<std::remove_const<Type>::type>(value)
-            )
+            reinterpret_cast<void*>(const_cast<std::remove_const<Type>::type>(value))
         );
 
         /****************\
@@ -121,7 +121,7 @@ ui32 hscript::lua::LuaValue<Type>::push(LuaHandle state, Type value) {
 template <typename Type>
     requires (
         hscript::lua::is_single_lua_type<Type>::value
-            || hscript::lua::is_multiple_lua_type<Type>::value
+        || hscript::lua::is_multiple_lua_type<Type>::value
     )
 Type hscript::lua::LuaValue<Type>::pop(LuaHandle state) {
     return retrieve<true>(state, -1);
@@ -130,16 +130,16 @@ Type hscript::lua::LuaValue<Type>::pop(LuaHandle state) {
 template <typename Type>
     requires (
         hscript::lua::is_single_lua_type<Type>::value
-            || hscript::lua::is_multiple_lua_type<Type>::value
-    )
-bool hscript::lua::LuaValue<Type>::try_pop(LuaHandle state, OUT Type& value) {
+        || hscript::lua::is_multiple_lua_type<Type>::value
+    ) bool
+hscript::lua::LuaValue<Type>::try_pop(LuaHandle state, OUT Type& value) {
     return try_retrieve<true>(state, -1, value);
 }
 
 template <typename Type>
     requires (
         hscript::lua::is_single_lua_type<Type>::value
-            || hscript::lua::is_multiple_lua_type<Type>::value
+        || hscript::lua::is_multiple_lua_type<Type>::value
     )
 template <bool RemoveValue>
 Type hscript::lua::LuaValue<Type>::retrieve(LuaHandle state, i32 index) {
@@ -149,10 +149,12 @@ Type hscript::lua::LuaValue<Type>::retrieve(LuaHandle state, i32 index) {
 template <typename Type>
     requires (
         hscript::lua::is_single_lua_type<Type>::value
-            || hscript::lua::is_multiple_lua_type<Type>::value
+        || hscript::lua::is_multiple_lua_type<Type>::value
     )
 template <bool RemoveValue>
-bool hscript::lua::LuaValue<Type>::try_retrieve(LuaHandle state, i32 index, OUT Type& value) {
+bool hscript::lua::LuaValue<Type>::try_retrieve(
+    LuaHandle state, i32 index, OUT Type& value
+) {
     if constexpr (is_multiple_lua_type<Type>()) {
         // For each index in type, test it has a
         // corresponding value on the Lua stack.
@@ -175,7 +177,7 @@ bool hscript::lua::LuaValue<Type>::try_retrieve(LuaHandle state, i32 index, OUT 
 template <typename Type>
     requires (
         hscript::lua::is_single_lua_type<Type>::value
-            || hscript::lua::is_multiple_lua_type<Type>::value
+        || hscript::lua::is_multiple_lua_type<Type>::value
     )
 Type hscript::lua::LuaValue<Type>::retrieve_upvalue(LuaHandle state, i32 index) {
     return __do_retrieve<false>(state, lua_upvalueindex(index));
@@ -184,12 +186,12 @@ Type hscript::lua::LuaValue<Type>::retrieve_upvalue(LuaHandle state, i32 index) 
 template <typename Type>
     requires (
         hscript::lua::is_single_lua_type<Type>::value
-            || hscript::lua::is_multiple_lua_type<Type>::value
-    )
-bool hscript::lua::LuaValue<Type>::test_index(LuaHandle state, i32 index) {
-        /********\
-         * Bool *
-        \********/
+        || hscript::lua::is_multiple_lua_type<Type>::value
+    ) bool
+hscript::lua::LuaValue<Type>::test_index(LuaHandle state, i32 index) {
+    /********\
+     * Bool *
+    \********/
     if constexpr (std::is_same<Type, bool>()) {
         return lua_isboolean(state, index);
 
@@ -198,18 +200,15 @@ bool hscript::lua::LuaValue<Type>::test_index(LuaHandle state, i32 index) {
          *   String *
          * C-String *
         \************/
-    } else if constexpr (std::is_same<Type, char>()
-                        || std::is_same<Type, std::string>()
-                        || std::is_same<typename std::remove_const<Type>::type, char*>()
-    ) {
+    } else if constexpr (std::is_same<Type, char>() || std::is_same<Type, std::string>() || std::is_same<typename std::remove_const<Type>::type, char*>())
+    {
         return lua_isstring(state, index);
 
         /***********\
          * Integer *
          *   Float *
         \***********/
-    } else if constexpr (std::is_integral<Type>()
-                        || std::is_floating_point<Type>()) {
+    } else if constexpr (std::is_integral<Type>() || std::is_floating_point<Type>()) {
         return lua_isnumber(state, index);
 
         /********\
@@ -242,7 +241,7 @@ bool hscript::lua::LuaValue<Type>::test_index(LuaHandle state, i32 index) {
     }
 }
 
-template <typename ...Types>
+template <typename... Types>
 constexpr ui32 hscript::lua::total_value_count() {
     return (0 + ... + LuaValue<Types>::value_count());
 }

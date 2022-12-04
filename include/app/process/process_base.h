@@ -16,7 +16,9 @@ namespace hemlock {
         class ProcessBase {
         public:
             ProcessBase();
-            virtual ~ProcessBase() { /* Empty. */ }
+
+            virtual ~ProcessBase() { /* Empty. */
+            }
 
             virtual void init();
             virtual void dispose();
@@ -32,11 +34,14 @@ namespace hemlock {
 
             bool go_to_screen(const std::string& name, FrameTime time);
 
-            WindowBase* window()         { return m_window;         }
+            WindowBase* window() { return m_window; }
+
             ScreenBase* current_screen() { return m_current_screen; }
-            FrameTimer* timer()          { return m_timer;          }
+
+            FrameTimer* timer() { return m_timer; }
 
             bool should_end_process() { return m_should_end_process; }
+
             void set_should_end_process(bool should_end_process = true);
 
             Event<>                  on_process_end;
@@ -70,8 +75,8 @@ namespace hemlock {
             WindowBase* m_window;
             FrameTimer* m_timer;
         };
-    }
-}
+    }  // namespace app
+}  // namespace hemlock
 namespace happ = hemlock::app;
 
-#endif // __hemlock_app_process_process_h
+#endif  // __hemlock_app_process_process_h

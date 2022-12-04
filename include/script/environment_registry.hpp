@@ -6,15 +6,18 @@
 namespace hemlock {
     namespace script {
         template <typename Environment>
-        using Environments = std::vector<Environment*>;
+        using Environments       = std::vector<Environment*>;
         using EnvironmentGroupID = ui32;
+
         template <typename Environment>
         struct EnvironmentGroup {
-            Environment*                parent;
-            Environments<Environment>   children;
+            Environment*              parent;
+            Environments<Environment> children;
         };
+
         template <typename Environment>
-        using EnvironmentGroups  = std::unordered_map<EnvironmentGroupID, EnvironmentGroup<Environment>>;
+        using EnvironmentGroups
+            = std::unordered_map<EnvironmentGroupID, EnvironmentGroup<Environment>>;
         template <typename Environment>
         using EnvironmentBuilder = Delegate<void(Environment*)>;
 
@@ -24,8 +27,11 @@ namespace hemlock {
         template <typename Environment>
         class EnvironmentRegistry {
         public:
-            EnvironmentRegistry()  { /* Empty. */ }
-            ~EnvironmentRegistry() { /* Empty. */ }
+            EnvironmentRegistry() { /* Empty. */
+            }
+
+            ~EnvironmentRegistry() { /* Empty. */
+            }
 
             H_NON_COPYABLE(EnvironmentRegistry);
             H_MOVABLE(EnvironmentRegistry);
@@ -40,7 +46,10 @@ namespace hemlock {
              * @param max_script_length The maximum length of any
              * script that this environment will process.
              */
-            void init(hio::IOManagerBase* io_manager, i32 max_script_length = HEMLOCK_DEFAULT_MAX_SCRIPT_LENGTH);
+            void init(
+                hio::IOManagerBase* io_manager,
+                i32 max_script_length = HEMLOCK_DEFAULT_MAX_SCRIPT_LENGTH
+            );
             /**
              * @brief Dispose the environment registry.
              */
@@ -55,7 +64,8 @@ namespace hemlock {
              * for example functions exposed to the child environments of the group.
              * @return ui32 The ID of the group created.
              */
-            EnvironmentGroupID create_group(EnvironmentBuilder<Environment>* builder = nullptr);
+            EnvironmentGroupID
+            create_group(EnvironmentBuilder<Environment>* builder = nullptr);
 
             /**
              * @brief Create an environment optionally using a builder. This
@@ -66,7 +76,9 @@ namespace hemlock {
              * @param builder Optional builder to use in creating environment.
              * @return Environment* Pointer to the created environment.
              */
-            Environment* create_environment(std::string name, EnvironmentBuilder<Environment>* builder = nullptr);
+            Environment* create_environment(
+                std::string name, EnvironmentBuilder<Environment>* builder = nullptr
+            );
             /**
              * @brief Create an environment within a group, this environment
              * sharing globals with all others in the group.
@@ -76,7 +88,8 @@ namespace hemlock {
              * within.
              * @return Environment* Pointer to the created environment.
              */
-            Environment* create_environment(std::string name, EnvironmentGroupID group_id);
+            Environment*
+            create_environment(std::string name, EnvironmentGroupID group_id);
 
             /**
              * @brief Create environments optionally using a builder. This
@@ -88,7 +101,11 @@ namespace hemlock {
              * @param builder Optional builder to use in creating environment.
              * @return Environment* Pointer to the created environments.
              */
-            Environment* create_environments(ui32 num, std::string* names, EnvironmentBuilder<Environment>* builder = nullptr);
+            Environment* create_environments(
+                ui32                             num,
+                std::string*                     names,
+                EnvironmentBuilder<Environment>* builder = nullptr
+            );
             /**
              * @brief Create environments within a group, this environment
              * sharing globals with all others in the group.
@@ -99,7 +116,9 @@ namespace hemlock {
              * within.
              * @return Environment* Pointer to the created environments.
              */
-            Environment* create_environments(ui32 num, std::string* names, EnvironmentGroupID group_id);
+            Environment* create_environments(
+                ui32 num, std::string* names, EnvironmentGroupID group_id
+            );
 
             /**
              * Searches through the registry returning an environment with the given
@@ -113,17 +132,17 @@ namespace hemlock {
         protected:
             EnvironmentRegister<Environment> m_register;
 
-            ui32 m_next_group_id = 0;
+            ui32                           m_next_group_id = 0;
             EnvironmentGroups<Environment> m_groups;
             Environments<Environment>      m_ungrouped_envs;
 
             hio::IOManagerBase* m_io_manager;
-            i32 m_max_script_length;
+            i32                 m_max_script_length;
         };
-    }
-}
+    }  // namespace script
+}  // namespace hemlock
 namespace hscript = hemlock::script;
 
 #include "environment_registry.inl"
 
-#endif // __hemlock_script_environment_registry_hpp
+#endif  // __hemlock_script_environment_registry_hpp

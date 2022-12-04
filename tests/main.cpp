@@ -2,7 +2,7 @@
 
 #include "app.hpp"
 
-int main(int, char *[]) {
+int main(int, char*[]) {
     MyApp app;
     app.init();
     app.run();

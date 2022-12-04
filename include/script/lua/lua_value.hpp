@@ -8,10 +8,10 @@ namespace hemlock {
         namespace lua {
             template <typename>
             struct is_single_lua_type : public std::false_type { };
+
             template <typename Type>
                 requires (
-                    std::is_arithmetic<Type>::value
-                    || std::is_enum<Type>::value
+                    std::is_arithmetic<Type>::value || std::is_enum<Type>::value
                     || std::is_pointer<Type>::value
                     || std::is_member_function_pointer<Type>::value
                     || is_same_template<std::string, Type>::value
@@ -20,6 +20,7 @@ namespace hemlock {
 
             template <typename>
             struct is_multiple_lua_type : public std::false_type { };
+
             template <typename Type>
                 requires (
                     std::is_bounded_array<Type>::value
@@ -36,15 +37,17 @@ namespace hemlock {
              */
             template <typename>
             struct LuaValue { };
+
             template <typename Type>
-                requires ( std::is_same<Type, void>::value )
+                requires (std::is_same<Type, void>::value)
             struct LuaValue<Type> {
                 static constexpr ui32 value_count() { return 0; }
             };
+
             template <typename Type>
                 requires (
                     is_single_lua_type<Type>::value
-                        || is_multiple_lua_type<Type>::value
+                    || is_multiple_lua_type<Type>::value
                 )
             struct LuaValue<Type> {
                 /**
@@ -148,6 +151,7 @@ namespace hemlock {
                  * Type, false otherwise.
                  */
                 static bool test_index(LuaHandle state, i32 index);
+
                 /**
                  * @brief Retrieve a value of type Type
                  * from the Lua stack at the index
@@ -168,7 +172,11 @@ namespace hemlock {
                         // For each index in type, in reverse order, pop
                         // that element and store in tmp for return.
                         for (ui32 idx = value_count(); idx != 0; --idx) {
-                            tmp[idx - 1] = LuaValue<decltype(Type{}[0])>::template __do_retrieve<RemoveValue>(state, index + static_cast<i32>(idx) - value_count());
+                            tmp[idx - 1] = LuaValue<decltype(Type{}[0])>::
+                                template __do_retrieve<RemoveValue>(
+                                    state,
+                                    index + static_cast<i32>(idx) - value_count()
+                                );
                         }
                         return tmp;
                     }
@@ -181,9 +189,9 @@ namespace hemlock {
 
                     Type value = default_value();
 
-                        /********\
-                         * Bool *
-                        \********/
+                    /********\
+                     * Bool *
+                    \********/
                     if constexpr (std::is_same<Type, bool>()) {
                         // Pops bool as integer and converts.
                         value = lua_toboolean(state, index) != 0;
@@ -211,14 +219,16 @@ namespace hemlock {
                         \**********/
                     } else if constexpr (std::is_same<Type, std::string>()) {
                         value = std::string(
-                            lua_tostring(state, index),
-                            lua_strlen(state, index)
+                            lua_tostring(state, index), lua_strlen(state, index)
                         );
 
                         /************\
                          * C-String *
                         \************/
-                    } else if constexpr (std::is_same<typename std::remove_const<Type>::type, char*>()) {
+                    } else if constexpr (std::is_same<
+                                             typename std::remove_const<Type>::type,
+                                             char*>())
+                    {
                         auto len = lua_strlen(state, index);
                         if (len != 0) {
                             value = new char[len];
@@ -231,7 +241,11 @@ namespace hemlock {
                     } else if constexpr (std::is_enum<Type>()) {
                         using Underlying = typename std::underlying_type<Type>::type;
 
-                        value = static_cast<Type>(LuaValue<Underlying>::template __do_retrieve<false>(state, index));
+                        value = static_cast<Type>(
+                            LuaValue<Underlying>::template __do_retrieve<false>(
+                                state, index
+                            )
+                        );
 
                         /*********\
                          * void* *
@@ -243,18 +257,24 @@ namespace hemlock {
                          * T* *
                         \******/
                     } else if constexpr (std::is_pointer<Type>()) {
-                        value = reinterpret_cast<Type>(LuaValue<void*>::template __do_retrieve<false>(state, index));
+                        value = reinterpret_cast<Type>(
+                            LuaValue<void*>::template __do_retrieve<false>(
+                                state, index
+                            )
+                        );
 
                         /****************\
                          * U(V::*)(...) *
                         \****************/
                     } else if constexpr (std::is_member_function_pointer<Type>()) {
-                        value = *reinterpret_cast<Type*>(lua_touserdata(state, index));
+                        value
+                            = *reinterpret_cast<Type*>(lua_touserdata(state, index));
                     } else {
                         debug_printf("Trying to retrieve with an unsupported type.");
                     }
 
-                    if constexpr (RemoveValue && !is_multiple_lua_type<Type>()) lua_remove(state, index);
+                    if constexpr (RemoveValue && !is_multiple_lua_type<Type>())
+                        lua_remove(state, index);
 
                     return value;
                 }
@@ -271,13 +291,13 @@ namespace hemlock {
              * represent these types on the Lua
              * stack.
              */
-            template <typename ...Types>
+            template <typename... Types>
             constexpr ui32 total_value_count();
-        }
-    }
-}
+        }  // namespace lua
+    }      // namespace script
+}  // namespace hemlock
 namespace hscript = hemlock::script;
 
 #include "lua_value.inl"
 
-#endif // __hemlock_script_lua_lua_value_hpp
+#endif  // __hemlock_script_lua_lua_value_hpp

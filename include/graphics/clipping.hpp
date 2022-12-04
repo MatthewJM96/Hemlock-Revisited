@@ -4,21 +4,23 @@
 namespace hemlock {
     namespace graphics {
         /**
-         * @brief Clips an object with the given position, size and UV coordinates & size, such that
-         * it entirely fits within the given clip rectangle.
+         * @brief Clips an object with the given position, size and UV coordinates &
+         * size, such that it entirely fits within the given clip rectangle.
          *
          * @param clip The clip rectangle to clip to.
          * @param position The position of the object to clip.
          * @param size The size of the object to clip.
          * @param uv_rect The UV coordinates & size of the object to clip.
          *
-         * @return True if any of the properties of the object were changed, false otherwise.
+         * @return True if any of the properties of the object were changed, false
+         * otherwise.
          */
         bool clip(const f32v4& clip, f32v2& position, f32v2& size, f32v4& uv_rect) {
             // Flag of if anything has changed.
             bool changed = false;
 
-            // Check if the object we are clipping extends to the left of the clip rectangle.
+            // Check if the object we are clipping extends to the left of the clip
+            // rectangle.
             if (position.x < clip.x) {
                 // Work out by how much the object extends.
                 f32 delta = clip.x - position.x;
@@ -30,13 +32,14 @@ namespace hemlock {
 
                 // Update the position and size of the object.
                 position.x = clip.x;
-                size.x    -= delta;
+                size.x     -= delta;
 
                 // Something has changed.
                 changed = true;
             }
 
-            // Check if the object we are clipping extends to the right of the clip rectangle.
+            // Check if the object we are clipping extends to the right of the clip
+            // rectangle.
             if (position.x + size.x > clip.x + clip.z) {
                 // Work out by how much the object extends.
                 f32 delta = position.x + size.x - (clip.x + clip.z);
@@ -64,7 +67,7 @@ namespace hemlock {
 
                 // Update the position and size of the object.
                 position.y = clip.y;
-                size.y    -= delta;
+                size.y     -= delta;
 
                 // Something has changed.
                 changed = true;
@@ -88,8 +91,8 @@ namespace hemlock {
 
             return changed;
         }
-    }
-}
-namespace hg  = hemlock::graphics;
+    }  // namespace graphics
+}  // namespace hemlock
+namespace hg = hemlock::graphics;
 
-#endif // __hemlock_graphics_clipping_hpp
+#endif  // __hemlock_graphics_clipping_hpp
