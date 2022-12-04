@@ -28,18 +28,11 @@ protected:
         happ::ScreenBase* test_script_screen = new TestScriptScreen();
         test_script_screen->init("test_script_screen", this);
 
-<<<<<<< HEAD
         m_screens.insert({ "test_ai_screen", test_ai_screen });
         m_screens.insert({ "test_entry_screen", test_entry_screen });
         m_screens.insert({ "test_render_screen", test_render_screen });
         m_screens.insert({ "test_voxel_screen", test_voxel_screen });
         m_screens.insert({ "test_script_screen", test_script_screen });
-=======
-        m_screens.insert({ "test_entry_screen", test_entry_screen });
-        m_screens.insert({ "test_render_screen", test_render_screen });
-        m_screens.insert({ "test_voxel_screen", test_voxel_screen });
-        m_screens.insert({ "test_script_screen", test_script_screen });
->>>>>>> dev_v1
 
         m_current_screen = test_entry_screen;
     }
