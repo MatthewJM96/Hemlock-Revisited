@@ -179,6 +179,7 @@ add_executable(Hemlock_Revisited
     "${PROJECT_SOURCE_DIR}/src/app/window/window.cpp"
     "${PROJECT_SOURCE_DIR}/src/camera/basic_first_person_camera.cpp"
     "${PROJECT_SOURCE_DIR}/src/camera/basic_orthographic_camera.cpp"
+    "${PROJECT_SOURCE_DIR}/src/debug/heatmap.cpp"
     "${PROJECT_SOURCE_DIR}/src/graphics/font/font.cpp"
     "${PROJECT_SOURCE_DIR}/src/graphics/font/text_align.cpp"
     "${PROJECT_SOURCE_DIR}/src/graphics/glsl_program.cpp"
@@ -340,12 +341,18 @@ target_link_libraries(Hemlock_Revisited
     Bullet::Bullet
 )
 
-if(CMAKE_BUILD_TYPE STREQUAL "Release" OR HEMLOCK_FAST_DEBUG)
+if(CMAKE_BUILD_TYPE STREQUAL "Release")
     target_link_libraries(Hemlock_Revisited
         FastNoise
+    )
+elseif(HEMLOCK_FAST_DEBUG)
+    target_link_libraries(Hemlock_Revisited
+        FastNoise
+        heatmap
     )
 else()
     target_link_libraries(Hemlock_Revisited
         FastNoiseD
+        heatmap
     )
 endif()
