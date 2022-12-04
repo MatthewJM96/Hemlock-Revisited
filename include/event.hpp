@@ -180,8 +180,7 @@ namespace hemlock {
         = Returnable<ReturnType>
           && requires (Functor f) {
                  {
-                     new RSubscriber<ReturnType, Parameters...>(
-                         std::forward<Functor>(f)
+                     new RSubscriber<ReturnType, Parameters...>(std::forward<Functor>(f)
                      )
                      } -> std::same_as<RSubscriber<ReturnType, Parameters...>*>;
              };
@@ -361,8 +360,7 @@ namespace hemlock {
                 // mid-trigger.
                 m_triggering = true;
                 for (auto& subscriber : m_subscribers) {
-                    ReturnType partial_result
-                        = (*subscriber)(m_sender, parameters...);
+                    ReturnType partial_result = (*subscriber)(m_sender, parameters...);
                     result.insert(
                         result.end(),
                         std::make_move_iterator(partial_result.begin()),

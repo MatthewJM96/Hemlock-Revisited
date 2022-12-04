@@ -46,8 +46,7 @@ namespace hemlock {
 
             template <typename Type>
                 requires (
-                    is_single_lua_type<Type>::value
-                    || is_multiple_lua_type<Type>::value
+                    is_single_lua_type<Type>::value || is_multiple_lua_type<Type>::value
                 )
             struct LuaValue<Type> {
                 /**
@@ -172,10 +171,10 @@ namespace hemlock {
                         // For each index in type, in reverse order, pop
                         // that element and store in tmp for return.
                         for (ui32 idx = value_count(); idx != 0; --idx) {
-                            tmp[idx - 1] = LuaValue<decltype(Type{}[0])>::
-                                template __do_retrieve<RemoveValue>(
-                                    state,
-                                    index + static_cast<i32>(idx) - value_count()
+                            tmp[idx - 1]
+                                = LuaValue<decltype(Type{}[0])>::template __do_retrieve<
+                                    RemoveValue>(
+                                    state, index + static_cast<i32>(idx) - value_count()
                                 );
                         }
                         return tmp;
@@ -258,17 +257,14 @@ namespace hemlock {
                         \******/
                     } else if constexpr (std::is_pointer<Type>()) {
                         value = reinterpret_cast<Type>(
-                            LuaValue<void*>::template __do_retrieve<false>(
-                                state, index
-                            )
+                            LuaValue<void*>::template __do_retrieve<false>(state, index)
                         );
 
                         /****************\
                          * U(V::*)(...) *
                         \****************/
                     } else if constexpr (std::is_member_function_pointer<Type>()) {
-                        value
-                            = *reinterpret_cast<Type*>(lua_touserdata(state, index));
+                        value = *reinterpret_cast<Type*>(lua_touserdata(state, index));
                     } else {
                         debug_printf("Trying to retrieve with an unsupported type.");
                     }

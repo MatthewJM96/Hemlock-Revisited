@@ -67,8 +67,7 @@ bool hio::img::bin::load(
 
     // If state pixel format is not of a value less than the PixelFormat sentinel,
     // then it is invalid - leave.
-    if (imgHeader.pixelFormat >= static_cast<ui32>(PixelFormat::SENTINEL))
-        return false;
+    if (imgHeader.pixelFormat >= static_cast<ui32>(PixelFormat::SENTINEL)) return false;
 
     // Obtain pixel format.
     format = static_cast<PixelFormat>(imgHeader.pixelFormat);
@@ -369,8 +368,8 @@ bool hio::img::png::save(
     // Begin preparing data for writing.
     png_bytep* rows = new png_bytep[dimensions.y];
     png_byte*  image
-        = static_cast<png_byte*>(const_cast<void*>(reinterpret_cast<const void*>(data)
-        ));
+        = static_cast<png_byte*>(const_cast<void*>(reinterpret_cast<const void*>(data))
+        );
 
     // The position were at in the data.
     size_t pos = 0;

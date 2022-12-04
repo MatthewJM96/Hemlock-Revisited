@@ -64,27 +64,27 @@ public:
 
         m_shader_cache.init(
             &m_iom,
-            hg::ShaderCache::Parser{ [](const hio::fs::path& path,
-                                        hio::IOManagerBase*  iom) -> std::string {
-                std::string buffer;
-                if (!iom->read_file_to_string(path, buffer)) return "";
+            hg::ShaderCache::Parser{
+                [](const hio::fs::path& path, hio::IOManagerBase* iom) -> std::string {
+                    std::string buffer;
+                    if (!iom->read_file_to_string(path, buffer)) return "";
 
-                return buffer;
-            } }
+                    return buffer;
+                } }
         );
 
         m_font_cache.init(
             &m_iom,
-            hg::f::FontCache::Parser{ [](const hio::fs::path& path,
-                                         hio::IOManagerBase*  iom) -> hg::f::Font {
-                hio::fs::path actual_path;
-                if (!iom->resolve_path(path, actual_path)) return hg::f::Font{};
+            hg::f::FontCache::Parser{
+                [](const hio::fs::path& path, hio::IOManagerBase* iom) -> hg::f::Font {
+                    hio::fs::path actual_path;
+                    if (!iom->resolve_path(path, actual_path)) return hg::f::Font{};
 
-                hg::f::Font font;
-                font.init(actual_path.string());
+                    hg::f::Font font;
+                    font.init(actual_path.string());
 
-                return font;
-            } }
+                    return font;
+                } }
         );
 
         auto font = m_font_cache.fetch("fonts/Orbitron-Regular.ttf");

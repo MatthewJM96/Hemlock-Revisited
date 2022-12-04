@@ -37,8 +37,7 @@ public:
         return !bad;
     }
 
-    virtual bool assure_paths(IN OUT std::vector<hio::fs::path>& paths
-    ) const override {
+    virtual bool assure_paths(IN OUT std::vector<hio::fs::path>& paths) const override {
         bool bad = false;
         for (auto& path : paths) {
             hio::fs::path tmp{};

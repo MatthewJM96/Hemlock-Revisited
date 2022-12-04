@@ -32,9 +32,8 @@ namespace hemlock {
              *
              * @return The offset calculated.
              */
-            f32v2 calculate_align_offset(
-                TextAlign align, f32v4 rect, f32 height, f32 length
-            );
+            f32v2
+            calculate_align_offset(TextAlign align, f32v4 rect, f32 height, f32 length);
         }  // namespace font
         namespace f = font;
     }  // namespace graphics

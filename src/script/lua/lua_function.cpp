@@ -21,8 +21,8 @@ hscript::ScriptDelegate<hscript::CallParameters, hscript::CallParameters>
 hscript::lua::make_arbitrary_scalars_lua_delegate(
     LuaFunctionState lua_func_state, i32 expected_return_count
 ) {
-    using ReturnType = decltype(ScriptDelegate<CallParameters, CallParameters>(
-    )(CallParameters{}));
+    using ReturnType
+        = decltype(ScriptDelegate<CallParameters, CallParameters>()(CallParameters{}));
 
     return ScriptDelegate<CallParameters, CallParameters>{
         [lua_func_state, expected_return_count](CallParameters parameters) {
@@ -90,16 +90,14 @@ hscript::lua::make_arbitrary_scalars_lua_delegate(
                             .value = static_cast<bool>(lua_toboolean(state, i)) };
                 } else if (lua_isnumber(state, i)) {
                     return_values[return_count + i]
-                        = { .type  = CallType::NUMBER,
-                            .value = lua_tonumber(state, i) };
+                        = { .type = CallType::NUMBER, .value = lua_tonumber(state, i) };
                 } else if (lua_islightuserdata(state, i)) {
                     return_values[return_count + i]
                         = { .type  = CallType::POINTER,
                             .value = lua_touserdata(state, i) };
                 } else if (lua_isstring(state, i)) {
                     return_values[return_count + i]
-                        = { .type  = CallType::STRING,
-                            .value = lua_tostring(state, i) };
+                        = { .type = CallType::STRING, .value = lua_tostring(state, i) };
                 } else {
                     return_values[return_count + i]
                         = { .type = CallType::NIL, .value = {} };

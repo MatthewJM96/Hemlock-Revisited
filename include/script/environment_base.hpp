@@ -141,8 +141,7 @@ namespace hemlock {
              */
             template <typename... Strings>
             void set_namespaces(Strings... namespaces) {
-                reinterpret_cast<EnvironmentImpl*>(this)->set_namespaces(namespaces...
-                );
+                reinterpret_cast<EnvironmentImpl*>(this)->set_namespaces(namespaces...);
             }
 
             /**
@@ -159,8 +158,7 @@ namespace hemlock {
              */
             template <typename... Strings>
             void enter_namespaces(Strings... namespaces) {
-                reinterpret_cast<EnvironmentImpl*>(this)->enter_namespaces(
-                    namespaces...
+                reinterpret_cast<EnvironmentImpl*>(this)->enter_namespaces(namespaces...
                 );
             }
 

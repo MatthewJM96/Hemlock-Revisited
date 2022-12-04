@@ -69,9 +69,8 @@ void hvox::set_per_block_data(
          */
     } else if (start_block_position.xy() == BlockChunkPosition2D{0} && end_block_position.xy() == BlockChunkPosition2D{CHUNK_LENGTH})
     {
-        auto batch_size
-            = CHUNK_AREA * (end_block_position.z - start_block_position.z);
-        auto start_idx = block_index({ 0, 0, start_block_position.z });
+        auto batch_size = CHUNK_AREA * (end_block_position.z - start_block_position.z);
+        auto start_idx  = block_index({ 0, 0, start_block_position.z });
         std::memcpy(&(buffer[start_idx]), data, batch_size);
         /*
          * If we span the X line, then we copy squares in XY plane one at a time.
@@ -80,9 +79,8 @@ void hvox::set_per_block_data(
         auto batch_size
             = CHUNK_LENGTH * (end_block_position.y - start_block_position.y);
         for (auto z = start_block_position.z; z < end_block_position.z; ++z) {
-            auto chunk_blocks_start_idx
-                = block_index({ 0, start_block_position.y, z });
-            auto new_blocks_start_idx = batch_size * (z - start_block_position.z);
+            auto chunk_blocks_start_idx = block_index({ 0, start_block_position.y, z });
+            auto new_blocks_start_idx   = batch_size * (z - start_block_position.z);
             std::memcpy(
                 &(buffer[chunk_blocks_start_idx]),
                 &(data[new_blocks_start_idx]),

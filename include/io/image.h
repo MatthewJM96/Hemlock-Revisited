@@ -16,8 +16,7 @@ namespace hemlock {
             };
 
             using Loader = Delegate<bool(std::string, ui8*&, ui32v2&, PixelFormat&)>;
-            using Saver
-                = Delegate<bool(std::string, const ui8*, ui32v2, PixelFormat)>;
+            using Saver  = Delegate<bool(std::string, const ui8*, ui32v2, PixelFormat)>;
 
             namespace binary {
                 const ui8  BIN_TYPE_1  = 'S';

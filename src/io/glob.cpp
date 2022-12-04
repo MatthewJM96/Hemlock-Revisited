@@ -59,16 +59,13 @@ void hio::glob::impl::handle_recursive_directory_match(PathBuilder& builder) {
 }
 
 bool hio::glob::impl::contains_glob_char(const fs::path& part) {
-    const std::regex glob_chars_pattern(
-        "([^\\\\]\\*|[^\\\\]\\?|[^\\\\]\\[.*[^\\\\]\\])"
+    const std::regex glob_chars_pattern("([^\\\\]\\*|[^\\\\]\\?|[^\\\\]\\[.*[^\\\\]\\])"
     );
 
     return std::regex_search(part.string(), glob_chars_pattern);
 }
 
-void hio::glob::impl::handle_partial_glob(
-    const fs::path& part, PathBuilder& builder
-) {
+void hio::glob::impl::handle_partial_glob(const fs::path& part, PathBuilder& builder) {
     // Define our regex strings for glob patterns.
     const std::regex asterisk("([^\\\\]\\*|^\\*)");
     const std::regex question_mark("([^\\\\]\\?)");
@@ -116,8 +113,7 @@ void hio::glob::impl::handle_partial_glob(
     new_builder.swap(builder);
 }
 
-hio::PathBuilder
-hio::glob::glob(const fs::path& globpath, bool recursive /*= false*/) {
+hio::PathBuilder hio::glob::glob(const fs::path& globpath, bool recursive /*= false*/) {
     PathBuilder builder;
 
     bool offset = false;

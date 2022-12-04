@@ -165,9 +165,7 @@ void hg::add_string_quick_wrap(
     TextAlign               align,
     f32                     depth
 ) {
-    add_string_quick_wrap(
-        batcher, &component, 1, target_rect, clip_rect, align, depth
-    );
+    add_string_quick_wrap(batcher, &component, 1, target_rect, clip_rect, align, depth);
 }
 
 void hg::add_string_quick_wrap(

@@ -7,8 +7,7 @@ namespace hemlock {
     namespace memory {
         template <size_t MaxFreePages>
             requires (MaxFreePages > 0)
-        using HeterogenousPages
-            = std::unordered_map<size_t, Pages<void, MaxFreePages>>;
+        using HeterogenousPages = std::unordered_map<size_t, Pages<void, MaxFreePages>>;
 
         using HeterogenousFreePageCounts = std::unordered_map<size_t, size_t>;
 

@@ -64,16 +64,15 @@ bool hphys::ChunkGridCollider::determine_candidate_colliding_voxels(
         static_cast<hvox::BlockWorldPositionCoord>(max_world_entity_coord.z >> 32)
     };
 
-    btVector3 half_range
-        = btVector3{ (static_cast<btScalar>(max_world_block_coord.x)
-                      - static_cast<btScalar>(min_world_block_coord.x))
-                         / 2.0f,
-                     (static_cast<btScalar>(max_world_block_coord.y)
-                      - static_cast<btScalar>(min_world_block_coord.y))
-                         / 2.0f,
-                     (static_cast<btScalar>(max_world_block_coord.z)
-                      - static_cast<btScalar>(min_world_block_coord.z))
-                         / 2.0f };
+    btVector3 half_range = btVector3{ (static_cast<btScalar>(max_world_block_coord.x)
+                                       - static_cast<btScalar>(min_world_block_coord.x))
+                                          / 2.0f,
+                                      (static_cast<btScalar>(max_world_block_coord.y)
+                                       - static_cast<btScalar>(min_world_block_coord.y))
+                                          / 2.0f,
+                                      (static_cast<btScalar>(max_world_block_coord.z)
+                                       - static_cast<btScalar>(min_world_block_coord.z))
+                                          / 2.0f };
 
     auto new_chunk_coord = hvox::chunk_grid_position(min_world_block_coord);
     auto old_chunk_coord = new_chunk_coord;

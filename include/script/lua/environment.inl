@@ -169,8 +169,7 @@ bool hscript::lua::Environment<HasRPCManager, CallBufferSize>::run(
 }
 
 template <bool HasRPCManager, size_t CallBufferSize>
-void hscript::lua::Environment<HasRPCManager, CallBufferSize>::set_global_namespace(
-) {
+void hscript::lua::Environment<HasRPCManager, CallBufferSize>::set_global_namespace() {
     lua_pop(m_state, m_namespace_depth);
 
     lua_pushglobaltable(m_state);
@@ -410,9 +409,7 @@ void hscript::lua::Environment<HasRPCManager, CallBufferSize>::add_c_function(
 template <bool HasRPCManager, size_t CallBufferSize>
 template <std::invocable Closure, typename ReturnType, typename... Parameters>
 void hscript::lua::Environment<HasRPCManager, CallBufferSize>::add_c_closure(
-    std::string_view name,
-    Closure*         closure,
-    ReturnType (Closure::*func)(Parameters...)
+    std::string_view name, Closure* closure, ReturnType (Closure::*func)(Parameters...)
 ) {
     if (m_parent) return m_parent->add_c_closure(name, closure, func);
 

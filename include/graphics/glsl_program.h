@@ -135,10 +135,8 @@ namespace hemlock {
 
             void enable_vertex_attrib_arrays(GLuint vao) const;
             void disable_vertex_attrib_arrays(GLuint vao) const;
-            bool
-            enable_vertex_attrib_array(GLuint vao, const std::string& name) const;
-            bool
-            disable_vertex_attrib_array(GLuint vao, const std::string& name) const;
+            bool enable_vertex_attrib_array(GLuint vao, const std::string& name) const;
+            bool disable_vertex_attrib_array(GLuint vao, const std::string& name) const;
 
             /**
              * @brief Uses this shader program.

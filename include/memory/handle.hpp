@@ -55,8 +55,7 @@ namespace hemlock {
 
         template <typename DataType, class... Args>
         Handle<DataType> make_handle(Args&&... args) {
-            return std::make_shared<DataType, Args...>(std::forward<Args...>(args...)
-            );
+            return std::make_shared<DataType, Args...>(std::forward<Args...>(args...));
         }
 
         template <typename DataType>

@@ -57,9 +57,8 @@ i32 hscript::lua::call_foreign(LuaHandle state) {
     _Environment* foreign_env = env->m_registry->get_environment(env_name);
 
     // Buffer function call in foreign env.
-    CallID call_id = foreign_env->rpc.append_call(
-        std::move(function_name), std::move(parameters)
-    );
+    CallID call_id
+        = foreign_env->rpc.append_call(std::move(function_name), std::move(parameters));
 
     // Pass command ID back to caller.
     lua_settop(state, 0);

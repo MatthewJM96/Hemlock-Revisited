@@ -21,12 +21,11 @@ namespace hemlock {
                     CallBufferSize> {
                 friend i32
                     register_lua_function<HasRPCManager, CallBufferSize>(LuaHandle);
-                friend i32 call_foreign<HasRPCManager, CallBufferSize>(LuaHandle state
-                );
+                friend i32 call_foreign<HasRPCManager, CallBufferSize>(LuaHandle state);
                 friend i32
                 query_foreign_call<HasRPCManager, CallBufferSize>(LuaHandle state);
-                friend i32 get_foreign_call_results<HasRPCManager, CallBufferSize>(
-                    LuaHandle state
+                friend i32
+                get_foreign_call_results<HasRPCManager, CallBufferSize>(LuaHandle state
                 );
                 friend i32
                 set_manual_command_buffer_pump<HasRPCManager, CallBufferSize>(
@@ -190,8 +189,7 @@ namespace hemlock {
                  */
                 template <typename ReturnType, typename... Parameters>
                 void add_c_delegate(
-                    std::string_view                     name,
-                    Delegate<ReturnType, Parameters...>* delegate
+                    std::string_view name, Delegate<ReturnType, Parameters...>* delegate
                 );
                 /**
                  * @brief Add a function to the environment, exposed to the
@@ -217,9 +215,7 @@ namespace hemlock {
                  */
                 template <typename... Upvalues>
                 void add_c_function(
-                    std::string_view name,
-                    i32 (*func)(LuaHandle),
-                    Upvalues... upvalues
+                    std::string_view name, i32 (*func)(LuaHandle), Upvalues... upvalues
                 );
                 /**
                  * @brief Add a closure to the environment, exposed to the

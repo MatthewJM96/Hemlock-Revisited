@@ -35,14 +35,10 @@ hvox::ChunkRenderer::ChunkRenderer() :
 
 void hvox::ChunkRenderer::init(ui32 page_size, ui32 max_unused_pages) {
     if (block_mesh_handles.vao == 0) {
-        hg::upload_mesh(
-            BLOCK_MESH, block_mesh_handles, hg::MeshDataVolatility::STATIC
-        );
+        hg::upload_mesh(BLOCK_MESH, block_mesh_handles, hg::MeshDataVolatility::STATIC);
 
         glEnableVertexArrayAttrib(block_mesh_handles.vao, 3);
-        glVertexArrayAttribFormat(
-            block_mesh_handles.vao, 3, 3, GL_FLOAT, GL_FALSE, 0
-        );
+        glVertexArrayAttribFormat(block_mesh_handles.vao, 3, 3, GL_FLOAT, GL_FALSE, 0);
         glVertexArrayAttribBinding(block_mesh_handles.vao, 3, 1);
 
         glEnableVertexArrayAttrib(block_mesh_handles.vao, 4);
@@ -175,8 +171,7 @@ void hvox::ChunkRenderer::put_chunk_in_page(
     ui32             page_idx = first_page_idx;
     ChunkRenderPage* page     = nullptr;
     for (; page_idx < m_chunk_pages.size(); ++page_idx) {
-        if (m_chunk_pages[page_idx]->voxel_count + instance_count
-            <= block_page_size())
+        if (m_chunk_pages[page_idx]->voxel_count + instance_count <= block_page_size())
         {
             page = m_chunk_pages[page_idx];
             break;
@@ -324,8 +319,7 @@ void hvox::ChunkRenderer::process_pages() {
         );
 
         ui32 voxels_instanced = 0;
-        for (ui32 chunk_idx = 0; chunk_idx < page.first_dirtied_chunk_idx;
-             ++chunk_idx)
+        for (ui32 chunk_idx = 0; chunk_idx < page.first_dirtied_chunk_idx; ++chunk_idx)
         {
             voxels_instanced
                 += m_chunk_metadata[page.chunks[chunk_idx]].on_gpu_voxel_count;

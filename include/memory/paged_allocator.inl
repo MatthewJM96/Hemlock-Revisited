@@ -42,8 +42,7 @@ typename hmem::PagedAllocator<DataType, PageSize, MaxFreePages>::pointer
     m_state->free_items.try_emplace(page_type, std::vector<void*>{});
 
     if (m_state->free_items[page_type].size() > 0) {
-        pointer item
-            = reinterpret_cast<pointer>(m_state->free_items[page_type].back());
+        pointer item = reinterpret_cast<pointer>(m_state->free_items[page_type].back());
         m_state->free_items[page_type].pop_back();
         return item;
     }

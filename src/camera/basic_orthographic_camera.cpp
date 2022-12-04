@@ -7,13 +7,12 @@
 hcam::BasicOrthographicCamera::BasicOrthographicCamera() :
     BaseCamera<OrthographicCameraState>(Subscriber<happ::ResizeEvent>{
         [&](Sender, happ::ResizeEvent ev) {
-            f32 dx
-                = static_cast<f32>(ev.now.width) / static_cast<f32>(ev.before.width);
-            f32 dy = static_cast<f32>(ev.now.height)
-                     / static_cast<f32>(ev.before.height);
+            f32 dx = static_cast<f32>(ev.now.width) / static_cast<f32>(ev.before.width);
+            f32 dy
+                = static_cast<f32>(ev.now.height) / static_cast<f32>(ev.before.height);
 
             if (dx != 1.0f) {
-                f32 lr_com = (m_state.left_clipping + m_state.right_clipping) / 2.0f;
+                f32 lr_com   = (m_state.left_clipping + m_state.right_clipping) / 2.0f;
                 f32 lr_range = m_state.right_clipping - m_state.left_clipping;
 
                 f32 new_lr_range_2 = (lr_range * dy) / 2.0f;
@@ -42,18 +41,17 @@ void hcam::BasicOrthographicCamera::update() {
         f32 lr_scale_component
             = 2.0f / (m_state.right_clipping - m_state.left_clipping);
         f32 du_scale_component = 2.0f / (m_state.up_clipping - m_state.down_clipping);
-        f32 nf_scale_component
-            = 2.0f / (m_state.far_clipping - m_state.near_clipping);
+        f32 nf_scale_component = 2.0f / (m_state.far_clipping - m_state.near_clipping);
 
         f32 lr_translation_component
             = -1.0f * (m_state.right_clipping + m_state.left_clipping)
               / (m_state.right_clipping - m_state.left_clipping);
-        f32 du_translation_component
-            = -1.0f * (m_state.up_clipping + m_state.down_clipping)
-              / (m_state.up_clipping - m_state.down_clipping);
-        f32 nf_translation_component
-            = -1.0f * (m_state.far_clipping + m_state.near_clipping)
-              / (m_state.far_clipping - m_state.near_clipping);
+        f32 du_translation_component = -1.0f
+                                       * (m_state.up_clipping + m_state.down_clipping)
+                                       / (m_state.up_clipping - m_state.down_clipping);
+        f32 nf_translation_component = -1.0f
+                                       * (m_state.far_clipping + m_state.near_clipping)
+                                       / (m_state.far_clipping - m_state.near_clipping);
 
         m_state.projection_matrix = f32m4{ lr_scale_component,
                                            0.0f,

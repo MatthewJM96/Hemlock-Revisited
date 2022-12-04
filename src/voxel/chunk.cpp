@@ -97,9 +97,7 @@ bool hvox::set_blocks(
 
     std::lock_guard lock(chunk->blocks_mutex);
 
-    set_per_block_data(
-        chunk->blocks, start_block_position, end_block_position, block
-    );
+    set_per_block_data(chunk->blocks, start_block_position, end_block_position, block);
 
     return true;
 }
@@ -124,9 +122,7 @@ bool hvox::set_blocks(
 
     std::lock_guard lock(chunk->blocks_mutex);
 
-    set_per_block_data(
-        chunk->blocks, start_block_position, end_block_position, blocks
-    );
+    set_per_block_data(chunk->blocks, start_block_position, end_block_position, blocks);
 
     return true;
 }

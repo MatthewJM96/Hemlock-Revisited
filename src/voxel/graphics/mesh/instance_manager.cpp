@@ -5,8 +5,7 @@ hvox::ChunkInstanceManager::ChunkInstanceManager() :
     m_instance({ nullptr, 0 }) { /* Empty. */
 }
 
-void hvox::ChunkInstanceManager::init(hmem::Handle<ChunkInstanceDataPager> data_pager
-) {
+void hvox::ChunkInstanceManager::init(hmem::Handle<ChunkInstanceDataPager> data_pager) {
     m_data_pager = data_pager;
 }
 

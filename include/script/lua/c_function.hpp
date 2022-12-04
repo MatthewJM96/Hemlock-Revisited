@@ -17,10 +17,7 @@ namespace hemlock {
                     LuaHandle state, ReturnType (*func)(Parameters...)
                 );
 
-                template <
-                    typename Closure,
-                    typename ReturnType,
-                    typename... Parameters>
+                template <typename Closure, typename ReturnType, typename... Parameters>
                 i32 handle_closure_invocation(
                     LuaHandle state,
                     Closure*  closure,

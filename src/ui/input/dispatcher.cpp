@@ -108,13 +108,11 @@ i32 hui::InputDispatcher::handle_event(void* data, SDL_Event* event) {
             kbe.modifiers    = dispatcher->m_manager->key_modifier_state();
             if (event->key.type == SDL_KEYDOWN) {
                 dispatcher->m_manager->press(kbe.physical_key);
-                kbe.state
-                    = dispatcher->m_manager->keyboard_key_state(kbe.physical_key);
+                kbe.state = dispatcher->m_manager->keyboard_key_state(kbe.physical_key);
                 dispatcher->on_keyboard.button_down(kbe);
             } else {
                 dispatcher->m_manager->release(kbe.physical_key);
-                kbe.state
-                    = dispatcher->m_manager->keyboard_key_state(kbe.physical_key);
+                kbe.state = dispatcher->m_manager->keyboard_key_state(kbe.physical_key);
                 dispatcher->on_keyboard.button_up(kbe);
             }
             break;

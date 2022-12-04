@@ -26,8 +26,7 @@ void happ::SingleWindowApp::init(FrameTimer* timer) {
     ProcessBase::init();
 }
 
-void happ::SingleWindowApp::
-    init(f32 target_fps, size_t tracked_frames_count /*= 5*/) {
+void happ::SingleWindowApp::init(f32 target_fps, size_t tracked_frames_count /*= 5*/) {
     init(new FrameLimiter(tracked_frames_count, target_fps));
 }
 

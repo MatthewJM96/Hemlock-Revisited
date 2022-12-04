@@ -12,8 +12,7 @@ hcam::BasicFirstPersonCamera::BasicFirstPersonCamera() :
             if (m_state.aspect_ratio != new_aspect_ratio)
                 set_aspect_ratio(new_aspect_ratio);
         } }),
-    m_clamp_up({ true, 60.0f / 360.0f * 2.0f * static_cast<f32>(M_PI) }
-    ) { /* Empty. */
+    m_clamp_up({ true, 60.0f / 360.0f * 2.0f * static_cast<f32>(M_PI) }) { /* Empty. */
 }
 
 void hcam::BasicFirstPersonCamera::update() {

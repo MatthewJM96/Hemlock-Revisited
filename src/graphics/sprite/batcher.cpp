@@ -206,8 +206,7 @@ void hg::s::SpriteBatcher::begin() {
     m_batches.clear();
 }
 
-void hg::s::SpriteBatcher::end(SpriteSortMode
-                                   sort_mode /*= SpriteSortMode::TEXTURE*/) {
+void hg::s::SpriteBatcher::end(SpriteSortMode sort_mode /*= SpriteSortMode::TEXTURE*/) {
     // Reserve the right amount of space to then assign a pointer for each sprite.
     if (m_sprite_ptrs.size() != m_sprites.size()) {
         m_sprite_ptrs.resize(m_sprites.size());
@@ -264,8 +263,7 @@ void hg::s::SpriteBatcher::add_sprite(
     f32v4       uv_rect /*= f32v4(0.0f, 0.0f, 1.0f, 1.0f)*/
 ) {
     m_sprites.emplace_back(Sprite{
-        builder, m_default_texture, position, size, depth, uv_rect, c1, c2, gradient }
-    );
+        builder, m_default_texture, position, size, depth, uv_rect, c1, c2, gradient });
 }
 
 void hg::s::SpriteBatcher::add_sprite(
@@ -477,9 +475,7 @@ bool hg::s::SpriteBatcher::set_shader(GLSLProgram* shader /*= nullptr*/) {
             shader->set_attribute(
                 "vRelativePosition", SpriteShaderAttribID::RELATIVE_POSITION
             );
-            shader->set_attribute(
-                "vUVDimensions", SpriteShaderAttribID::UV_DIMENSIONS
-            );
+            shader->set_attribute("vUVDimensions", SpriteShaderAttribID::UV_DIMENSIONS);
             shader->set_attribute("vColour", SpriteShaderAttribID::COLOUR);
 
             if (shader->link() != ShaderLinkResult::SUCCESS) return false;
@@ -613,8 +609,7 @@ void hg::s::SpriteBatcher::generate_batches() {
     }
 
     // Create a buffer of vertices to be populated and sent to the GPU.
-    SpriteVertex* vertices
-        = new SpriteVertex[VERTICES_PER_QUAD * m_sprite_ptrs.size()];
+    SpriteVertex* vertices = new SpriteVertex[VERTICES_PER_QUAD * m_sprite_ptrs.size()];
 
     // Some counts to help us know where we're at with populating the vertices.
     ui32 vertex_count = 0;
@@ -635,8 +630,7 @@ void hg::s::SpriteBatcher::generate_batches() {
         if (sprite->texture != m_batches.back().texture) {
             // Now we are making a new batch, we can set the number of indices in
             // the previous batch.
-            m_batches.back().index_count
-                = index_count - m_batches.back().index_offset;
+            m_batches.back().index_count = index_count - m_batches.back().index_offset;
             m_batches.emplace_back();
 
             m_batches.back().index_offset = index_count;

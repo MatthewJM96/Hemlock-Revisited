@@ -153,10 +153,9 @@ bool hvox::Ray::cast_to_block(
 
     if (chunk_grid == nullptr) return false;
 
-    BlockWorldPosition step  = BlockWorldPosition{ sign(direction.x),
-                                                  sign(direction.y),
-                                                  sign(direction.z) };
-    f32v3              delta = f32v3{
+    BlockWorldPosition step
+        = BlockWorldPosition{ sign(direction.x), sign(direction.y), sign(direction.z) };
+    f32v3 delta = f32v3{
         static_cast<f32>(step.x) / direction.x,
         static_cast<f32>(step.y) / direction.y,
         static_cast<f32>(step.z) / direction.z,
@@ -239,10 +238,9 @@ bool hvox::Ray::cast_to_block_before(
 
     if (chunk_grid == nullptr) return false;
 
-    BlockWorldPosition step  = BlockWorldPosition{ sign(direction.x),
-                                                  sign(direction.y),
-                                                  sign(direction.z) };
-    f32v3              delta = f32v3{
+    BlockWorldPosition step
+        = BlockWorldPosition{ sign(direction.x), sign(direction.y), sign(direction.z) };
+    f32v3 delta = f32v3{
         static_cast<f32>(step.x) / direction.x,
         static_cast<f32>(step.y) / direction.y,
         static_cast<f32>(step.z) / direction.z,
@@ -266,13 +264,7 @@ bool hvox::Ray::cast_to_block_before(
     do {
         f32 step_distance = 0.0f;
         step_to_next_block_position(
-            start,
-            block_position,
-            steps_to_next,
-            step,
-            delta,
-            direction,
-            step_distance
+            start, block_position, steps_to_next, step, delta, direction, step_distance
         );
 
         ChunkGridPosition new_chunk_pos = chunk_grid_position(block_position);

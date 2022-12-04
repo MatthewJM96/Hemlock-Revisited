@@ -4,11 +4,10 @@
 namespace hemlock {
     namespace thread {
         template <typename ThreadState>
-        concept InterruptibleState
-            = requires (ThreadState state) {
-                  std::is_same_v<decltype(state.stop), bool>;
-                  std::is_same_v<decltype(state.suspend), bool>;
-              };
+        concept InterruptibleState = requires (ThreadState state) {
+                                         std::is_same_v<decltype(state.stop), bool>;
+                                         std::is_same_v<decltype(state.suspend), bool>;
+                                     };
 
         struct BasicThreadContext {
             volatile bool stop;
@@ -180,8 +179,7 @@ namespace hemlock {
              *
              * @param task The tasks to add.
              */
-            void
-            threadsafe_add_tasks(HeldTask<ThreadState> tasks[], size_t task_count);
+            void threadsafe_add_tasks(HeldTask<ThreadState> tasks[], size_t task_count);
 
             /**
              * @brief The number of threads held by the thread pool.

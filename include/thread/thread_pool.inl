@@ -108,8 +108,7 @@ void hthread::ThreadPool<ThreadState>::add_tasks(
 }
 
 template <hthread::InterruptibleState ThreadState>
-void hthread::ThreadPool<ThreadState>::threadsafe_add_task(HeldTask<ThreadState> task
-) {
+void hthread::ThreadPool<ThreadState>::threadsafe_add_task(HeldTask<ThreadState> task) {
     m_tasks.enqueue(task);
 }
 

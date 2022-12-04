@@ -14,9 +14,8 @@ namespace hemlock {
         class BaseCamera {
         public:
             BaseCamera(Subscriber<happ::ResizeEvent>&& handler) :
-                handle_window_resize(
-                    std::forward<Subscriber<happ::ResizeEvent>>(handler)
-                ),
+                handle_window_resize(std::forward<Subscriber<happ::ResizeEvent>>(handler
+                )),
                 m_view_changed(false),
                 m_projection_changed(false){ /* Empty. */ };
 
