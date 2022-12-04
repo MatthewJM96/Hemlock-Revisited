@@ -29,7 +29,7 @@ namespace hemlock {
                 for (auto edge : action_finder) {
                     VertexDescriptor<ActionType> candidate_vertex = boost::target(edge, map.graph);
 
-                    // TODO(Matthew): do we want to reject all cases of a vertex revisited?
+                    // TODO(Matthew): simplify if by adding a "-1"th step to previous_vertices?
                     /**
                      * If ant has just visited the candidate vertex, then reject it as a candidate.
                      */
@@ -61,7 +61,7 @@ namespace hemlock {
                  * If no candidates are found, then just send the ant back to where it came from.
                  */
                 if (num_candidates == 0) {
-                    return {false, 0};
+                    return { false, {} };
                 }
 
                 auto rand = [](f32 min, f32 max) {

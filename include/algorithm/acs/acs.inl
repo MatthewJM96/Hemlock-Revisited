@@ -155,9 +155,9 @@ void halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>
     _VertexDescriptor destination_vertex    = map.coord_vertex_map[destination];
 
     struct {
-        _VertexDescriptor steps[MaxSteps]   = {};
-        size_t            length            = std::numeric_limits<size_t>::max();
-        bool              found             = false;
+        _VertexDescriptor steps[MaxSteps + 1] = {};
+        size_t            length              = std::numeric_limits<size_t>::max();
+        bool              found               = false;
     } shortest_path;
     size_t last_shortest_path = std::numeric_limits<size_t>::max();
     size_t satisfactory_change_its = 0;
@@ -165,7 +165,7 @@ void halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>
     // TODO(Matthew): Heap allocation (paged?) at least for large number of ants & max steps?
     // Bucket of visited vertices for all ants.
     // Vertices visited by each ant so far on its path for an iteration.
-    _VertexDescriptor visited_vertices[AntCount * MaxSteps] = {};
+    _VertexDescriptor visited_vertices[AntCount * (MaxSteps + 1)] = {};
 
     // The actual ants.
     const _Ant nil_ants[AntCount] = {};
@@ -197,8 +197,9 @@ void halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>
         std::memcpy(&ants[0], &nil_ants[0], AntCount * sizeof(_Ant));
         ant_groups_old  = {};
         for (size_t ant_idx = 0; ant_idx < AntCount; ++ant_idx) {
-            ants[ant_idx].current_vertex = source_vertex;
-            ants[ant_idx].previous_vertices = &visited_vertices[ant_idx * MaxSteps];
+            ants[ant_idx].current_vertex       = source_vertex;
+            ants[ant_idx].previous_vertices    = &visited_vertices[ant_idx * (MaxSteps + 1)];
+            ants[ant_idx].previous_vertices[0] = source_vertex;
             ant_groups_old.groups[0].ants[ant_idx] = &ants[ant_idx];
         }
         ant_groups_old.groups[0].size = AntCount;
@@ -217,7 +218,7 @@ void halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>
             for (size_t ant_idx = 0; ant_idx < AntCount; ++ant_idx) {
                 _Ant& ant = ants[ant_idx];
 
-                if (!ant.alive || ant.found_food) {
+                if (!ant.found_food) {
                     // This group never changes for future steps.
                     _AntGroup& group = ant_groups_new.groups[ant.group];
                     group.ants[group.size++] = &ant;
@@ -230,14 +231,20 @@ void halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>
                 // TODO(Matthew): Reimplement back-stepping? Could be more performant than
                 //                simply doing more iterations to compensate for not doing this.
 
-                auto [found, next_vertex] = VertexChoiceStrategy().template choose<NextActionFinder>(ant, exploitation_factor, ant.current_vertex, map);
-                if (!found) {
-                    ant.alive = false;
+                auto [forward, next_vertex] = VertexChoiceStrategy().template choose<NextActionFinder>(ant, exploitation_factor, ant.current_vertex, map);
+                if (!forward) {
+                    if (ant.steps_taken == 0) {
+                        debug_printf("Could not step ant forward from initial vertex in BasicACS::find_path.");
+                        return;
+                    }
+
+                    ant.steps_taken   -= 1;
+                    ant.current_vertex = ant.previous_vertices[ant.steps_taken];
                 } else {
                     // Update ant's vertex info.
-                    ant.previous_vertices[step] = next_vertex;
-                    ant.current_vertex          = next_vertex;
-                    ant.steps_taken            += 1;
+                    ant.steps_taken                       += 1;
+                    ant.previous_vertices[ant.steps_taken] = next_vertex;
+                    ant.current_vertex                     = next_vertex;
                 }
 
                 bool need_new_group = false;
@@ -249,9 +256,6 @@ void halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>
 
                 for (size_t cursor = 0; cursor < ant_group_cursors[ant.group] - 1; ++cursor) {
                     _Ant& companion_ant = *ant_groups_old.groups[ant.group].ants[cursor];
-
-                    // Don't consider putting in a group with a dead ant.
-                    if (!companion_ant.alive) continue;
 
                     /**
                      * If we find an ant from this ant's previous path group who has moved to a new path group
@@ -317,13 +321,11 @@ void halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>
                 }
 
                 if (next_vertex == destination_vertex) {
-                    ant.found_food  = true;
-                    ant.steps_taken = step + 1;
-
+                    ant.found_food   = true;
                     ants_found_food += 1;
 
-                    if (ant.steps_taken < shortest_path.length) {
-                        shortest_path.length = ant.steps_taken;
+                    if (ant.steps_taken + 1 < shortest_path.length) {
+                        shortest_path.length = ant.steps_taken + 1;
                         shortest_path.found  = true;
                         std::memcpy(&shortest_path.steps[0], ant.previous_vertices, sizeof(_VertexDescriptor) * ant.steps_taken);
                     }
@@ -341,7 +343,7 @@ void halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>
             step_start = source_vertex;
 
             for (size_t step_idx = 0; step_idx < ant_groups_new.groups[ant_group_idx].ants[0]->steps_taken; ++step_idx) {
-                step_end = ant_groups_new.groups[ant_group_idx].ants[0]->previous_vertices[step_idx];
+                step_end = ant_groups_new.groups[ant_group_idx].ants[0]->previous_vertices[step_idx + 1];
 
                 // TODO(Matthew): edge may not exist.
                 auto [edge, _] = boost::edge(step_start, step_end, map.graph);
