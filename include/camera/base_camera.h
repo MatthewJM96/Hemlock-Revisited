@@ -25,35 +25,6 @@ namespace hemlock {
 
             void attach_to_window(app::WindowBase* window);
 
-<<<<<<< HEAD
-
-            f32 near_clipping() const { return m_state.near_clipping; }
-
-            f32 far_clipping() const { return m_state.far_clipping; }
-
-            f32v2 nf_clipping() const {
-                return { m_state.near_clipping, m_state.far_clipping };
-            }
-
-            const f32v3& position() const { return m_state.position; }
-
-            const f32v3& direction() const { return m_state.direction; }
-
-            const f32v3& right() const { return m_state.right; }
-
-            const f32v3& up() const { return m_state.up; }
-
-            const f32m4& projection_matrix() const {
-                return m_state.projection_matrix;
-            }
-
-            const f32m4& view_matrix() const { return m_state.view_matrix; }
-
-            const f32m4& view_projection_matrix() const {
-                return m_state.view_projection_matrix;
-            }
-=======
-
             f32 near_clipping() { return m_state.near_clipping; }
 
             f32 far_clipping() { return m_state.far_clipping; }
@@ -77,7 +48,6 @@ namespace hemlock {
             const f32m4& view_projection_matrix() {
                 return m_state.view_projection_matrix;
             }
->>>>>>> dev_v1
 
             void set_near_clipping(f32 near_clipping);
             void set_far_clipping(f32 far_clipping);
