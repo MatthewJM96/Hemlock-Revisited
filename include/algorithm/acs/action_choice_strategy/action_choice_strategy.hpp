@@ -2,6 +2,7 @@
 #define __hemlock_algorithm_acs_action_choice_strategy_action_choice_strategy_hpp
 
 #include "algorithm/acs/acs.hpp"
+#include "algorithm/graph.hpp"
 
 namespace hemlock {
     namespace algorithm {
