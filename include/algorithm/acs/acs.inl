@@ -327,7 +327,7 @@ void halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>
                     if (ant.steps_taken + 1 < shortest_path.length) {
                         shortest_path.length = ant.steps_taken + 1;
                         shortest_path.found  = true;
-                        std::memcpy(&shortest_path.steps[0], ant.previous_vertices, sizeof(_VertexDescriptor) * ant.steps_taken);
+                        std::memcpy(&shortest_path.steps[0], ant.previous_vertices, sizeof(_VertexDescriptor) * (ant.steps_taken + 1));
                     }
                 }
             }
