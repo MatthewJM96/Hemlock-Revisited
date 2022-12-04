@@ -218,7 +218,7 @@ void halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>
             for (size_t ant_idx = 0; ant_idx < AntCount; ++ant_idx) {
                 _Ant& ant = ants[ant_idx];
 
-                if (!ant.found_food) {
+                if (ant.found_food) {
                     // This group never changes for future steps.
                     _AntGroup& group = ant_groups_new.groups[ant.group];
                     group.ants[group.size++] = &ant;
