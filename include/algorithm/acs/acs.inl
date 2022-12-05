@@ -517,10 +517,11 @@ void halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>::
     initialise_heatmaps() {
     if (m_protoheatmap == nullptr) return;
 
+    // Allocate all heatmap buffers and the heatmaps themselves as blocks and divy out.
     f32* buffers = new f32
-        [MaxSteps * m_max_iterations * 2 * m_protoheatmap->w * m_protoheatmap->h];
+        [MaxSteps * m_max_iterations * 2 * m_protoheatmap->w * m_protoheatmap->h]();
 
-    heatmap_t* heatmaps = new heatmap_t[MaxSteps * m_max_iterations * 2];
+    heatmap_t* heatmaps = new heatmap_t[MaxSteps * m_max_iterations * 2]();
 
     for (size_t heatmap_idx = 0; heatmap_idx < MaxSteps * m_max_iterations * 2;
          heatmap_idx++)
