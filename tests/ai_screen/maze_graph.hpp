@@ -34,6 +34,7 @@ void __do_maze_graph_test(size_t map_dim, size_t count) {
         acs.find_path<20, 100>(
             graph_map, map.start_idx, map.finish_idx, path, path_length
         );
+        delete[] path;
 
         acs.print_heatmap_frames<100>(tag);
 

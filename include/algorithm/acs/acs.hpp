@@ -61,9 +61,7 @@ namespace hemlock {
         class BasicACS {
         public:
             BasicACS();
-
-            ~BasicACS() { /* Empty. */
-            }
+            ~BasicACS();
 
             BasicACS& set_max_iterations(size_t max_iterations);
             BasicACS& set_break_on_path_change(f32 break_on_path_change);

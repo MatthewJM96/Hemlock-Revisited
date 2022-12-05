@@ -24,6 +24,13 @@ halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>::BasicACS() 
 }
 
 template <typename VertexData, typename NextActionFinder, typename VertexChoiceStrategy>
+halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>::~BasicACS() {
+#if defined(HEMLOCK_DEBUG_ACS)
+    dispose_heatmaps();
+#endif  // defined(HEMLOCK_DEBUG_ACS)
+}
+
+template <typename VertexData, typename NextActionFinder, typename VertexChoiceStrategy>
 halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>&
 halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>::set_max_iterations(
     size_t max_iterations

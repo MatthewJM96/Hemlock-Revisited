@@ -25,8 +25,9 @@ namespace hemlock {
                 size_t total_candidates = action_finder.end() - action_finder.begin();
                 size_t num_surviving_candidates = 0;
                 f32    total_score              = 0.0f;
-                f32*   cumulative_scores        = new f32[total_candidates]{};
-                _Vert* candidate_vertices       = new _Vert[total_candidates];
+                // TODO(Matthew): remove these new calls...
+                f32*   cumulative_scores  = new f32[total_candidates]{};
+                _Vert* candidate_vertices = new _Vert[total_candidates];
 
                 struct {
                     _Vert vertex = 0;
@@ -82,6 +83,9 @@ namespace hemlock {
                  * came from.
                  */
                 if (num_surviving_candidates == 0) {
+                    delete[] cumulative_scores;
+                    delete[] candidate_vertices;
+
                     return { false, {} };
                 }
 
@@ -101,6 +105,9 @@ namespace hemlock {
                  */
                 f32 exploitation_val = rand(0.0f, 1.0f);
                 if (exploitation_val < exploitation_factor) {
+                    delete[] cumulative_scores;
+                    delete[] candidate_vertices;
+
                     return { true, best_option.vertex };
                 }
 
@@ -115,14 +122,23 @@ namespace hemlock {
                 for (size_t choice_idx = 0; choice_idx < num_surviving_candidates;
                      ++choice_idx)
                 {
-                    if (choice_val <= cumulative_scores[choice_idx])
-                        return { true, candidate_vertices[choice_idx] };
+                    if (choice_val <= cumulative_scores[choice_idx]) {
+                        auto ret = candidate_vertices[choice_idx];
+
+                        delete[] cumulative_scores;
+                        delete[] candidate_vertices;
+
+                        return { true, ret };
+                    }
                 }
 
                 debug_printf(
                     "Error: could not decide where to send ant, check maths of "
                     "DefaultChoiceStrategy!"
                 );
+
+                delete[] cumulative_scores;
+                delete[] candidate_vertices;
 
                 return { false, {} };
             }
