@@ -18,21 +18,23 @@ namespace hemlock {
                 VertexDescriptor<ActionType>       current_vertex,
                 const GraphMap<ActionType>&        map
             ) {
+                using _Vert = VertexDescriptor<ActionType>;
+
                 NextActionFinder action_finder = NextActionFinder(current_vertex, map);
 
                 size_t total_candidates = action_finder.end() - action_finder.begin();
                 size_t num_surviving_candidates = 0;
                 f32    total_score              = 0.0f;
                 f32*   cumulative_scores        = new f32[total_candidates]{};
+                _Vert* candidate_vertices       = new _Vert[total_candidates];
 
                 struct {
-                    VertexDescriptor<ActionType> vertex = 0;
-                    f32 score = std::numeric_limits<f32>::lowest();
+                    _Vert vertex = 0;
+                    f32   score  = std::numeric_limits<f32>::lowest();
                 } best_option;
 
                 for (auto edge : action_finder) {
-                    VertexDescriptor<ActionType> candidate_vertex
-                        = boost::target(edge, map.graph);
+                    _Vert candidate_vertex = boost::target(edge, map.graph);
 
                     // TODO(Matthew): simplify if by adding a "-1"th step to
                     // previous_vertices?
@@ -59,8 +61,10 @@ namespace hemlock {
                     /**
                      * Increment total score of all candidates and add new cumulative.
                      */
-                    total_score                                 += score;
-                    cumulative_scores[num_surviving_candidates] = total_score;
+                    total_score += score;
+
+                    cumulative_scores[num_surviving_candidates]  = total_score;
+                    candidate_vertices[num_surviving_candidates] = candidate_vertex;
 
                     /**
                      * We have found a new candidate, increment count.
@@ -107,10 +111,7 @@ namespace hemlock {
                      ++choice_idx)
                 {
                     if (choice_val <= cumulative_scores[choice_idx])
-                        return { true,
-                                 boost::target(
-                                     *(action_finder.begin() + choice_idx), map.graph
-                                 ) };
+                        return { true, candidate_vertices[choice_idx] };
                 }
 
                 debug_printf(
