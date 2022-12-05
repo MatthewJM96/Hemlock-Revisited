@@ -9,7 +9,7 @@
 #  include "debug/heatmap.h"
 
 template <typename VertexData>
-using VertexDataTo2DCoord = std::tuple<size_t, size_t> (*)(VertexData);
+using VertexDataTo2DCoord = std::function<std::tuple<size_t, size_t>(VertexData)>;
 #endif  // defined(DEBUG)
 
 namespace hemlock {
