@@ -1,6 +1,8 @@
 template <typename VertexData, typename NextActionFinder, typename VertexChoiceStrategy>
 halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>::BasicACS() :
 #if defined(DEBUG)
+    m_get_2d_coord(nullptr),
+    m_heatmap_frame_count(0),
     m_protoheatmap(nullptr),
     m_pheromone_heatmaps(nullptr),
     m_ant_count_heatmaps(nullptr),
@@ -387,15 +389,15 @@ void halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>::find_p
             std::memcpy(&ant_groups_old, &ant_groups_new, sizeof(_AntGroups));
 
 #if defined(DEBUG)
-            size_t heatmap_idx = iteration * MaxSteps + step;
-
             create_pheromone_heatmap_frame<MaxSteps>(
-                &m_pheromone_heatmaps[heatmap_idx], map
+                &m_pheromone_heatmaps[m_heatmap_frame_count], map
             );
 
             create_ant_count_heatmap_frame<AntCount, MaxSteps>(
-                &m_ant_count_heatmaps[heatmap_idx], map, &ants[0]
+                &m_ant_count_heatmaps[m_heatmap_frame_count], map, &ants[0]
             );
+
+            m_heatmap_frame_count += 1;
 #endif  // defined(DEBUG)
 
             if (ants_found_food == AntCount) break;

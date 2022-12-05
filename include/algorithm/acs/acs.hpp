@@ -106,8 +106,28 @@ namespace hemlock {
                 GraphMap<VertexData>&              map,
                 Ant<VertexDescriptor<VertexData>>* ants
             );
+        public:
+            template <size_t MaxSteps>
+            void print_heatmap_frames(const std::string& tag) {
+                hdeb::print_heatmaps(
+                    m_pheromone_heatmaps,
+                    m_heatmap_frame_count,
+                    "maze/results",
+                    tag + ".pheromone"
+                );
 
+                hdeb::print_heatmaps(
+                    m_ant_count_heatmaps,
+                    m_heatmap_frame_count,
+                    "maze/results",
+                    tag + ".ant_count"
+                );
+            }
+        protected:
+            // TODO(Matthew): this state shouldn't be stored in the ACS object.
             VertexDataTo2DCoord<VertexData> m_get_2d_coord;
+
+            size_t m_heatmap_frame_count;
 
             heatmap_t* m_protoheatmap;
             heatmap_t* m_pheromone_heatmaps;
