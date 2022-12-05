@@ -295,6 +295,7 @@ void halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>::find_p
 
                     // Update ant's vertex info.
                     ant.steps_taken                        += 1;
+                    ant.did_backstep                       = false;
                     ant.previous_vertices[ant.steps_taken] = next_vertex;
                     ant.current_vertex                     = next_vertex;
                 }
