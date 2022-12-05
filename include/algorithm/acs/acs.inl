@@ -1,12 +1,12 @@
 template <typename VertexData, typename NextActionFinder, typename VertexChoiceStrategy>
 halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>::BasicACS() :
-#if defined(DEBUG)
+#if defined(HEMLOCK_DEBUG_ACS)
     m_get_2d_coord(nullptr),
     m_heatmap_frame_count(0),
     m_protoheatmap(nullptr),
     m_pheromone_heatmaps(nullptr),
     m_ant_count_heatmaps(nullptr),
-#endif  // defined(DEBUG)
+#endif  // defined(HEMLOCK_DEBUG_ACS)
     m_max_iterations(100),
     m_break_on_path_change(0),
     m_break_on_iterations(2),
@@ -168,9 +168,9 @@ void halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>::find_p
     VertexData*&          path,
     size_t&               path_length
 ) {
-#if defined(DEBUG)
+#if defined(HEMLOCK_DEBUG_ACS)
     initialise_heatmaps<MaxSteps>();
-#endif  // defined(DEBUG)
+#endif  // defined(HEMLOCK_DEBUG_ACS)
 
     using _VertexDescriptor = VertexDescriptor<VertexData>;
     // using _EdgeDescriptor   = EdgeDescriptor<VertexData>;
@@ -397,7 +397,7 @@ void halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>::find_p
             // TODO(Matthew): remove by referring to groups by reference only.
             std::memcpy(&ant_groups_old, &ant_groups_new, sizeof(_AntGroups));
 
-#if defined(DEBUG)
+#if defined(HEMLOCK_DEBUG_ACS)
             create_pheromone_heatmap_frame<MaxSteps>(
                 &m_pheromone_heatmaps[m_heatmap_frame_count], map
             );
@@ -407,7 +407,7 @@ void halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>::find_p
             );
 
             m_heatmap_frame_count += 1;
-#endif  // defined(DEBUG)
+#endif  // defined(HEMLOCK_DEBUG_ACS)
 
             if (ants_found_food == AntCount) break;
         }
@@ -469,7 +469,7 @@ void halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>::find_p
     }
 }
 
-#if defined(DEBUG)
+#if defined(HEMLOCK_DEBUG_ACS)
 template <typename VertexData, typename NextActionFinder, typename VertexChoiceStrategy>
 halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>&
 halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>::set_protoheatmap(
@@ -576,4 +576,4 @@ void halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>::
         heatmap->buf[pixel_idx] += m_protoheatmap->buf[pixel_idx] * heatmap->max;
     }
 }
-#endif  // defined(DEBUG)
+#endif  // defined(HEMLOCK_DEBUG_ACS)

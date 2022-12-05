@@ -1,6 +1,8 @@
 #ifndef __hemlock_tests_ai_screen_ai_screen_hpp
 #define __hemlock_tests_ai_screen_ai_screen_hpp
 
+#define HEMLOCK_DEBUG_ACS
+
 #include "app/screen_base.h"
 
 #include "algorithm/acs/acs.hpp"

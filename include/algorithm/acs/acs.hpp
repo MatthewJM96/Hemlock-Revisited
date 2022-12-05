@@ -6,11 +6,17 @@
 #include "algorithm/next_action_finder.hpp"
 
 #if defined(DEBUG)
+#  if !defined(HEMLOCK_DEBUG_ACS)
+#    define HEMLOCK_DEBUG_ACS
+#  endif  // !defined(HEMLOCK_DEBUG_ACS)
+#endif    // defined(DEBUG)
+
+#if defined(HEMLOCK_DEBUG_ACS)
 #  include "debug/heatmap.h"
 
 template <typename VertexData>
 using VertexDataTo2DCoord = std::function<std::tuple<size_t, size_t>(VertexData)>;
-#endif  // defined(DEBUG)
+#endif  // defined(HEMLOCK_DEBUG_ACS)
 
 namespace hemlock {
     namespace algorithm {
@@ -75,11 +81,11 @@ namespace hemlock {
             BasicACS& set_global_increment(f32 global_increment);
             BasicACS& set_global_evaporation(f32 global_evaporation);
 
-#if defined(DEBUG)
+#if defined(HEMLOCK_DEBUG_ACS)
             BasicACS&
             set_vertex_to_2d_coord(VertexDataTo2DCoord<VertexData> get_2d_coord);
             BasicACS& set_protoheatmap(heatmap_t* protoheatmap);
-#endif  // defined(DEBUG)
+#endif  // defined(HEMLOCK_DEBUG_ACS)
 
             template <size_t AntCount, size_t MaxSteps>
             void find_path(
@@ -90,7 +96,7 @@ namespace hemlock {
                 size_t&               path_length
             );
         protected:
-#if defined(DEBUG)
+#if defined(HEMLOCK_DEBUG_ACS)
             template <size_t MaxSteps>
             void initialise_heatmaps();
 
@@ -133,7 +139,7 @@ namespace hemlock {
             heatmap_t* m_protoheatmap;
             heatmap_t* m_pheromone_heatmaps;
             heatmap_t* m_ant_count_heatmaps;
-#endif  // defined(DEBUG)
+#endif  // defined(HEMLOCK_DEBUG_ACS)
 
             size_t m_max_iterations;  //< The maximum number of iterations to perform.
             size_t m_break_on_path_change;  //< The degree of path change that is

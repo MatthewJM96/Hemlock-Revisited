@@ -16,9 +16,7 @@ namespace map {
             size_t          finish_idx;
             size_t          solution_length;
             IndexCoordMap   index_coord_map;
-#if defined(DEBUG)
-            heatmap_t* protoheatmap;
-#endif  // defined(DEBUG)
+            heatmap_t*      protoheatmap;
         };
 
         Map load_map(std::string map_filepath, Map2DDimensions dimensions);

@@ -14,21 +14,17 @@ map::maze2d::load_map(std::string map_filepath, Map2DDimensions dimensions) {
     map.solution_length = 0;
     map.map             = new char[map.dims.x * map.dims.y];
 
-#if defined(DEBUG)
     map.protoheatmap = heatmap_new(10 * map.dims.x, 10 * map.dims.y);
-#endif  // defined(DEBUG)
 
     // Initialise first and last row of halo map.
     for (size_t i = 0; i < padded_dim_x; ++i) {
         map.map[i]                                     = '#';
         map.map[padded_dim_x * (padded_dim_y - 1) + i] = '#';
 
-#if defined(DEBUG)
         heatmap_add_point_with_stamp(map.protoheatmap, i * 10, 0, &hdeb::SQUARE_STAMP);
         heatmap_add_point_with_stamp(
             map.protoheatmap, i * 10, (map.dims.y - 1) * 10, &hdeb::SQUARE_STAMP
         );
-#endif  // defined(DEBUG)
     }
 
     std::ifstream map_file(map_filepath);
@@ -41,14 +37,12 @@ map::maze2d::load_map(std::string map_filepath, Map2DDimensions dimensions) {
         map.map[(row + 1) * padded_dim_x]     = WALL_TILE;
         map.map[(row + 2) * padded_dim_x - 1] = WALL_TILE;
 
-#if defined(DEBUG)
         heatmap_add_point_with_stamp(
             map.protoheatmap, 0, (row + 1) * 10, &hdeb::SQUARE_STAMP
         );
         heatmap_add_point_with_stamp(
             map.protoheatmap, (map.dims.x - 1) * 10, (row + 1) * 10, &hdeb::SQUARE_STAMP
         );
-#endif  // defined(DEBUG)
 
         // Iterate over the "inner" (non-halo) width - that is,
         // the part we actually load from the map file.
@@ -65,7 +59,6 @@ map::maze2d::load_map(std::string map_filepath, Map2DDimensions dimensions) {
                 map.solution_length += 1;
             }
 
-#if defined(DEBUG)
             if (line[col] == WALL_TILE) {
                 heatmap_add_point_with_stamp(
                     map.protoheatmap,
@@ -83,7 +76,6 @@ map::maze2d::load_map(std::string map_filepath, Map2DDimensions dimensions) {
             }
 
             map.index_coord_map[halo_idx] = { (col + 1) * 10, (row + 1) * 10 };
-#endif  // defined(DEBUG)
         }
 
         ++row;

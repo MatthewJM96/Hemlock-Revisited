@@ -23,13 +23,11 @@ void __do_maze_graph_test(size_t map_dim, size_t count) {
 
         halgo::BasicACS<size_t> acs;
 
-#if defined(DEBUG)
         acs.set_protoheatmap(map.protoheatmap);
 
         acs.set_vertex_to_2d_coord([&](size_t coord) -> std::tuple<size_t, size_t> {
             return map.index_coord_map[coord];
         });
-#endif  // defined(DEBUG)
 
         size_t* path        = nullptr;
         size_t  path_length = 0;
@@ -37,9 +35,7 @@ void __do_maze_graph_test(size_t map_dim, size_t count) {
             graph_map, map.start_idx, map.finish_idx, path, path_length
         );
 
-#if defined(DEBUG)
         acs.print_heatmap_frames<100>(tag);
-#endif  // defined(DEBUG)
 
         std::cout << "  solution found with length: " << path_length << std::endl
                   << std::endl;
