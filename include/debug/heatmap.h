@@ -17,6 +17,18 @@ namespace hemlock {
         static heatmap_stamp_t SQUARE_STAMP [[maybe_unused]]
         = { SQUARE_STAMP_DATA, 9, 9 };
 
+        static float TRIANGLE_STAMP_DATA[]
+            = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+                0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+                0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+                0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+                1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+                1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+                0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
+
+        static heatmap_stamp_t TRIANGLE_STAMP [[maybe_unused]]
+        = { TRIANGLE_STAMP_DATA, 9, 9 };
+
         void print_heatmaps(
             heatmap_t*         heatmaps,
             size_t             heatmap_count,

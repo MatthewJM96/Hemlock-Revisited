@@ -73,6 +73,13 @@ map::maze2d::load_map(std::string map_filepath, Map2DDimensions dimensions) {
                     (row + 1) * 10,
                     &hdeb::SQUARE_STAMP
                 );
+            } else if (line[col] == START_TILE || line[col] == END_TILE) {
+                heatmap_add_point_with_stamp(
+                    map.protoheatmap,
+                    (col + 1) * 10,
+                    (row + 1) * 10,
+                    &hdeb::TRIANGLE_STAMP
+                );
             }
 
             map.index_coord_map[halo_idx] = { (col + 1) * 10, (row + 1) * 10 };
