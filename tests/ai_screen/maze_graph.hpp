@@ -16,7 +16,7 @@ void __do_maze_graph_test(size_t map_dim, size_t count) {
                   << " maps, with ideal solution length " << map.solution_length << ":"
                   << std::endl;
 
-        halgo::GraphMap<size_t> graph_map = map::maze2d::map_to_graph(map, 1.0f);
+        halgo::GraphMap<size_t> graph_map = map::maze2d::map_to_graph(map, 0.01f);
 
         // size_t num_vertices = boost::num_vertices(graph_map.graph);
         // std::cout << "Num Vertices: " << num_vertices << std::endl;
