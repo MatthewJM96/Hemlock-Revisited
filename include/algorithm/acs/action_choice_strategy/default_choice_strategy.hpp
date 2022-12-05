@@ -36,14 +36,15 @@ namespace hemlock {
                 for (auto edge : action_finder) {
                     _Vert candidate_vertex = boost::target(edge, map.graph);
 
-                    // TODO(Matthew): simplify if by adding a "-1"th step to
-                    // previous_vertices?
                     /**
                      * If ant has just visited the candidate vertex, then reject it as
-                     * a candidate.
+                     * a candidate. "Just visited" is the step earlier in
+                     * previous_vertices if the ant has been stepping forwards, or the
+                     * step after if the ant has been stepping backwards.
                      */
                     if (ant.steps_taken > 0
-                        && ant.previous_vertices[ant.steps_taken - 1]
+                        && ant.previous_vertices
+                                   [ant.steps_taken + (ant.did_backstep ? 1 : -1)]
                                == candidate_vertex)
                         continue;
 

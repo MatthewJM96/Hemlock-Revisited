@@ -16,9 +16,10 @@ namespace hemlock {
     namespace algorithm {
         template <typename VertexDescriptor>
         struct Ant {
-            bool   found_food  = false;
-            size_t steps_taken = 0;
-            size_t group       = 0;
+            bool   found_food   = false;
+            bool   did_backstep = false;
+            size_t steps_taken  = 0;
+            size_t group        = 0;
 
             VertexDescriptor* previous_vertices;
             VertexDescriptor  current_vertex;
