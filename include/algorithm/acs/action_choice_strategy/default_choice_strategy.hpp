@@ -38,13 +38,17 @@ namespace hemlock {
 
                     /**
                      * If ant has just visited the candidate vertex, then reject it as
-                     * a candidate. "Just visited" is the step earlier in
-                     * previous_vertices if the ant has been stepping forwards, or the
-                     * step after if the ant has been stepping backwards.
+                     * a candidate. "Just visited" is the step earlier in all cases,
+                     * but if the ant has just stepped backwards this also includes the
+                     * next in previous_vertices from the current step.
                      */
                     if (ant.steps_taken > 0
-                        && ant.previous_vertices
-                                   [ant.steps_taken + (ant.did_backstep ? 1 : -1)]
+                        && ant.previous_vertices[ant.steps_taken - 1]
+                               == candidate_vertex)
+                        continue;
+
+                    if (ant.did_backstep && ant.steps_taken > 0
+                        && ant.previous_vertices[ant.steps_taken + 1]
                                == candidate_vertex)
                         continue;
 
