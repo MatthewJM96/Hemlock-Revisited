@@ -569,7 +569,7 @@ void halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>::
     // Apply protoheatmap to this heatmap frame factoring in strongest pheromone signal.
     size_t pixel_count = m_protoheatmap->w * m_protoheatmap->h;
     for (size_t pixel_idx = 0; pixel_idx < pixel_count; ++pixel_idx) {
-        heatmap->buf[pixel_idx] = m_protoheatmap->buf[pixel_idx] * heatmap->max;
+        heatmap->buf[pixel_idx] += m_protoheatmap->buf[pixel_idx] * heatmap->max;
     }
 }
 
@@ -595,7 +595,7 @@ void halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>::
     // Apply protoheatmap to this heatmap frame.
     size_t pixel_count = m_protoheatmap->w * m_protoheatmap->h;
     for (size_t pixel_idx = 0; pixel_idx < pixel_count; ++pixel_idx) {
-        heatmap->buf[pixel_idx] = m_protoheatmap->buf[pixel_idx] * heatmap->max;
+        heatmap->buf[pixel_idx] += m_protoheatmap->buf[pixel_idx] * heatmap->max;
     }
 }
 #endif  // defined(DEBUG)
