@@ -18,7 +18,7 @@ halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>::BasicACS() 
     m_mean_filtering_trigger(0.0f),
     m_local_increment(0.01f),
     m_local_evaporation(0.1f),
-    m_global_increment(1.0f),
+    m_global_increment(10.0f),
     m_global_evaporation(0.1f) {
     // Empty.
 }
@@ -285,6 +285,14 @@ void halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>::find_p
                     ant.did_backstep   = true;
                     ant.current_vertex = ant.previous_vertices[ant.steps_taken];
                 } else {
+                    // Do local pheromone update.
+                    auto [edge, _]
+                        = boost::edge(ant.current_vertex, next_vertex, map.graph);
+
+                    map.edge_weight_map[edge]
+                        = (1.0f - m_local_evaporation) * map.edge_weight_map[edge]
+                          + m_local_evaporation * m_local_increment;
+
                     // Update ant's vertex info.
                     ant.steps_taken                        += 1;
                     ant.previous_vertices[ant.steps_taken] = next_vertex;
@@ -404,36 +412,6 @@ void halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>::find_p
             if (ants_found_food == AntCount) break;
         }
 
-        for (size_t ant_group_idx = 0; ant_group_idx < ant_groups_new.count;
-             ++ant_group_idx)
-        {
-            _VertexDescriptor step_start, step_end;
-            step_start = source_vertex;
-
-            for (size_t step_idx = 0;
-                 step_idx < ant_groups_new.groups[ant_group_idx].ants[0]->steps_taken;
-                 ++step_idx)
-            {
-                step_end = ant_groups_new.groups[ant_group_idx]
-                               .ants[0]
-                               ->previous_vertices[step_idx + 1];
-
-                // TODO(Matthew): edge may not exist.
-                auto [edge, _] = boost::edge(step_start, step_end, map.graph);
-
-                // TODO(Matthew): Do we need to apply evaporation per ant? Also, do we
-                //                need to apply evaporation to every edge or just
-                //                those that the ants walk over?
-                map.edge_weight_map[edge]
-                    = (1.0f - m_local_evaporation) * map.edge_weight_map[edge]
-                      + m_local_evaporation * m_local_increment
-                            * static_cast<f32>(ant_groups_new.groups[ant_group_idx].size
-                            );
-
-                step_start = step_end;
-            }
-        }
-
         // Calculate entropy of iteration.
         entropy = 0.0f;
         for (size_t ant_group_idx = 0; ant_group_idx < ant_groups_new.count;
@@ -453,7 +431,6 @@ void halgo::BasicACS<VertexData, NextActionFinder, VertexChoiceStrategy>::find_p
 
         if (shortest_path.found) {
             for (size_t step_idx = 0; step_idx < shortest_path.length - 1; ++step_idx) {
-                // TODO(Matthew): edge may not exist.
                 auto [edge, _] = boost::edge(
                     shortest_path.steps[step_idx],
                     shortest_path.steps[step_idx + 1],
