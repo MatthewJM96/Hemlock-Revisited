@@ -339,20 +339,15 @@ target_link_libraries(Hemlock_Revisited
     SDL2_ttf::SDL2_ttf
     Boost::iostreams
     Bullet::Bullet
+    heatmap
 )
 
-if(CMAKE_BUILD_TYPE STREQUAL "Release")
+if(CMAKE_BUILD_TYPE STREQUAL "Release" OR HEMLOCK_FAST_DEBUG)
     target_link_libraries(Hemlock_Revisited
         FastNoise
-    )
-elseif(HEMLOCK_FAST_DEBUG)
-    target_link_libraries(Hemlock_Revisited
-        FastNoise
-        heatmap
     )
 else()
     target_link_libraries(Hemlock_Revisited
         FastNoiseD
-        heatmap
     )
 endif()
