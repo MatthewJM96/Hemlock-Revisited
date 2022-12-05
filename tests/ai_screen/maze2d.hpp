@@ -7,12 +7,18 @@ namespace map {
     namespace maze2d {
         using namespace dimension;
 
+        using IndexCoordMap = std::unordered_map<size_t, std::tuple<size_t, size_t>>;
+
         struct Map {
             char*           map;
             Map2DDimensions dims;
             size_t          start_idx;
             size_t          finish_idx;
             size_t          solution_length;
+            IndexCoordMap   index_coord_map;
+#if defined(DEBUG)
+            heatmap_t* protoheatmap;
+#endif  // defined(DEBUG)
         };
 
         Map load_map(std::string map_filepath, Map2DDimensions dimensions);
