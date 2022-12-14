@@ -23,7 +23,7 @@ void __do_maze_graph_test(size_t map_dim, size_t count) {
         // size_t num_vertices = boost::num_vertices(graph_map.graph);
         // std::cout << "Num Vertices: " << num_vertices << std::endl;
 
-        constexpr halgo::ACSConfig Config = { .debug = { .on = true } };
+        constexpr halgo::ACSConfig Config = { .debug = { .on = false } };
 
         halgo::deb::ACSHeatmap2D<size_t, false> debugger;
 

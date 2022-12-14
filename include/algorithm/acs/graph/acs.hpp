@@ -486,6 +486,4 @@ namespace hemlock {
 }  // namespace hemlock
 namespace halgo = hemlock::algorithm;
 
-#include "acs.inl"
-
 #endif  // __hemlock_algorithm_acs_graph_acs_hpp

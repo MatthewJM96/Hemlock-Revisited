@@ -35,7 +35,7 @@ void do_basic_graph_test() {
     graph_map.pheromone_map[edge_three_to_two] = 1.0f;
     graph_map.pheromone_map[edge_four_to_one]  = 1.0f;
 
-    constexpr halgo::ACSConfig Config = { .debug = { .on = true } };
+    constexpr halgo::ACSConfig Config = { .debug = { .on = false } };
 
     int*   path        = nullptr;
     size_t path_length = 0;
