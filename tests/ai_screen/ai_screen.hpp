@@ -22,19 +22,20 @@ public:
     virtual void start(hemlock::FrameTime time) override {
         happ::ScreenBase::start(time);
 
-        std::cout << "********************\n* Basic Graph Test *\n********************"
-                  << std::endl
-                  << std::endl;
+        // std::cout << "********************\n* Basic Graph Test
+        // *\n********************"
+        //           << std::endl
+        //           << std::endl;
 
-        do_basic_graph_test();
+        // do_basic_graph_test();
 
-        std::cout << std::endl << std::endl;
+        // std::cout << std::endl << std::endl;
 
-        std::cout << "*******************\n* Maze Graph Test *\n*******************"
-                  << std::endl
-                  << std::endl;
+        // std::cout << "*******************\n* Maze Graph Test *\n*******************"
+        //           << std::endl
+        //           << std::endl;
 
-        do_maze_graph_test();
+        // do_maze_graph_test();
 
         std::cout << std::endl << std::endl;
 
@@ -43,7 +44,7 @@ public:
                   << std::endl
                   << std::endl;
 
-        do_maze_graph_timing_test(10000);
+        do_maze_graph_timing_test(40000);
     }
 
     virtual void update(hemlock::FrameTime) override { }
