@@ -208,8 +208,8 @@ namespace hemlock {
                                 auto rand = [](f32 min, f32 max) {
                                     // TODO(Matthew): don't be setting this up every
                                     // time.
-                                    std::random_device rand_dev;
-                                    std::mt19937       generator(rand_dev());
+                                    static std::random_device rand_dev;
+                                    static std::mt19937       generator(rand_dev());
                                     std::uniform_real_distribution<f32> distribution(
                                         min, max
                                     );
