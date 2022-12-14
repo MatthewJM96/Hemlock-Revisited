@@ -451,6 +451,7 @@ namespace hemlock {
                         }
                     }
 
+                    // TODO(Matthew): does this work?
                     if (shortest_path.found
                         && glm::max(last_shortest_path, shortest_path.length)
                                    - glm::min(last_shortest_path, shortest_path.length)
