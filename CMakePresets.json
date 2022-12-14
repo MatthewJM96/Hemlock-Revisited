@@ -49,6 +49,42 @@
             }
         },
         {
+            "name": "GCC-x64-Super-Fast-Debug",
+            "displayName": "GCC x64 Super Fast Debug",
+            "description": "Configuration for GCC x64 debug build.",
+            "inherits": "base",
+            "generator": "Unix Makefiles",
+            "cacheVariables": {
+                "CMAKE_C_COMPILER": "gcc",
+                "CMAKE_CXX_COMPILER": "g++",
+                "CMAKE_BUILD_TYPE": "Debug",
+                "HEMLOCK_SUPER_FAST_DEBUG": "On"
+            },
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Linux"
+            }
+        },
+        {
+            "name": "GCC-x64-Hyper-Fast-Debug",
+            "displayName": "GCC x64 Hyper Fast Debug",
+            "description": "Configuration for GCC x64 debug build.",
+            "inherits": "base",
+            "generator": "Unix Makefiles",
+            "cacheVariables": {
+                "CMAKE_C_COMPILER": "gcc",
+                "CMAKE_CXX_COMPILER": "g++",
+                "CMAKE_BUILD_TYPE": "Debug",
+                "HEMLOCK_HYPER_FAST_DEBUG": "On"
+            },
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Linux"
+            }
+        },
+        {
             "name": "GCC-x64-Release",
             "displayName": "GCC x64 Release",
             "description": "Configuration for GCC x64 release build.",
@@ -304,8 +340,41 @@
         {
             "name": "GCC-x64-Fast-Debug",
             "displayName": "GCC x64 Fast Debug",
-            "description": "Configuration for GCC x64 debug build with some optimisation.",
+            "description":
+                "Configuration for GCC x64 debug build with some optimisation.",
             "configurePreset": "GCC-x64-Fast-Debug",
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Linux"
+            },
+            "targets": [
+                "Hemlock_Revisited"
+            ],
+            "jobs": 10
+        },
+        {
+            "name": "GCC-x64-Super-Fast-Debug",
+            "displayName": "GCC x64 Super Fast Debug",
+            "description":
+                "Configuration for GCC x64 debug build with some optimisation.",
+            "configurePreset": "GCC-x64-Super-Fast-Debug",
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Linux"
+            },
+            "targets": [
+                "Hemlock_Revisited"
+            ],
+            "jobs": 10
+        },
+        {
+            "name": "GCC-x64-Hyper-Fast-Debug",
+            "displayName": "GCC x64 Hyper Fast Debug",
+            "description":
+                "Configuration for GCC x64 debug build with some optimisation.",
+            "configurePreset": "GCC-x64-Hyper-Fast-Debug",
             "condition": {
                 "type": "equals",
                 "lhs": "${hostSystemName}",
@@ -364,7 +433,8 @@
         {
             "name": "Clang-x64-Fast-Debug",
             "displayName": "Clang x64 Fast Debug",
-            "description": "Configuration for Clang x64 debug build with some optimisation.",
+            "description":
+                "Configuration for Clang x64 debug build with some optimisation.",
             "configurePreset": "Clang-x64-Fast-Debug",
             "condition": {
                 "type": "equals",

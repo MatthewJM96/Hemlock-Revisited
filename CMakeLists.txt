@@ -66,6 +66,10 @@ if (UNIX OR MINGW)
 
     if (HEMLOCK_FAST_DEBUG)
         set(CMAKE_CXX_FLAGS_DEBUG "-g -O1")
+    elseif (HEMLOCK_SUPER_FAST_DEBUG)
+        set(CMAKE_CXX_FLAGS_DEBUG "-g -O2")
+    elseif (HEMLOCK_HYPER_FAST_DEBUG)
+        set(CMAKE_CXX_FLAGS_DEBUG "-g -O3")
     endif()
 
     if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
