@@ -132,79 +132,6 @@ namespace hemlock {
                                     boost::out_edges(ant.current_vertex, map.graph)
                                 );
 
-                                size_t total_candidates = edges.end() - edges.begin();
-                                size_t num_surviving_candidates = 0;
-                                f32    total_score              = 0.0f;
-                                // TODO(Matthew): remove these new calls...
-                                f32* cumulative_scores = new f32[total_candidates]{};
-                                _VertexDescriptor* candidate_vertices
-                                    = new _VertexDescriptor[total_candidates];
-
-                                struct {
-                                    _VertexDescriptor vertex = 0;
-                                    f32 score = std::numeric_limits<f32>::lowest();
-                                } best_option;
-
-                                for (auto edge : edges) {
-                                    _VertexDescriptor candidate_vertex
-                                        = boost::target(edge, map.graph);
-
-                                    /**
-                                     * If ant has just visited the candidate vertex,
-                                     * then reject it as a candidate. "Just visited" is
-                                     * the step earlier in all cases, but if the ant has
-                                     * just stepped backwards this also includes the
-                                     * next in previous_vertices from the current step.
-                                     */
-                                    if (ant.steps_taken > 0
-                                        && ant.previous_vertices[ant.steps_taken - 1]
-                                               == candidate_vertex)
-                                        continue;
-
-                                    if (ant.did_backstep && ant.steps_taken > 0
-                                        && ant.previous_vertices[ant.steps_taken + 1]
-                                               == candidate_vertex)
-                                        continue;
-
-                                    f32 score = map.pheromone_map[edge];
-
-                                    /**
-                                     * If this vertex has the best score so far, set it
-                                     * as best option.
-                                     */
-                                    if (score > best_option.score) {
-                                        best_option.vertex = candidate_vertex;
-                                        best_option.score  = score;
-                                    }
-
-                                    /**
-                                     * Increment total score of all candidates and add
-                                     * new cumulative.
-                                     */
-                                    total_score += score;
-
-                                    cumulative_scores[num_surviving_candidates]
-                                        = total_score;
-                                    candidate_vertices[num_surviving_candidates]
-                                        = candidate_vertex;
-
-                                    /**
-                                     * We have found a new candidate, increment count.
-                                     */
-                                    num_surviving_candidates += 1;
-                                }
-
-                                /**
-                                 * If no candidates are found, then just send the ant
-                                 * back to where it came from.
-                                 */
-                                if (num_surviving_candidates == 0) {
-                                    delete[] cumulative_scores;
-                                    delete[] candidate_vertices;
-
-                                    return { false, {} };
-                                }
-
                                 auto rand = [](f32 min, f32 max) {
                                     // TODO(Matthew): don't be setting this up every
                                     // time.
@@ -217,50 +144,119 @@ namespace hemlock {
                                     return distribution(generator);
                                 };
 
-                                /**
-                                 * Decide if we should "exploit" (i.e., take best
-                                 * possible path according to scores of edges).
-                                 *
-                                 * Note that on first iteration we do no exploitation.
-                                 */
                                 f32 exploitation_val = rand(0.0f, 1.0f);
                                 if (exploitation_val < exploitation_factor) {
-                                    delete[] cumulative_scores;
-                                    delete[] candidate_vertices;
+                                    bool              found_best     = false;
+                                    _VertexDescriptor best_candidate = 0;
+                                    f32 best_score = std::numeric_limits<f32>::lowest();
+                                    for (auto edge : edges) {
+                                        _VertexDescriptor candidate_vertex
+                                            = boost::target(edge, map.graph);
 
-                                    return { true, best_option.vertex };
-                                }
+                                        /**
+                                         * If ant has just visited the candidate vertex,
+                                         * then reject it as a candidate. "Just visited"
+                                         * is the step earlier in all cases, but if the
+                                         * ant has just stepped backwards this also
+                                         * includes the next in previous_vertices from
+                                         * the current step.
+                                         */
+                                        if (ant.steps_taken > 0
+                                            && ant.previous_vertices
+                                                       [ant.steps_taken - 1]
+                                                   == candidate_vertex)
+                                            continue;
 
-                                // If we get here, then this ant is exploring.
+                                        if (ant.did_backstep && ant.steps_taken > 0
+                                            && ant.previous_vertices
+                                                       [ant.steps_taken + 1]
+                                                   == candidate_vertex)
+                                            continue;
 
-                                /**
-                                 * Choose which of the candidates to send ant to with
-                                 * probability in proportion to the score of each of the
-                                 * candidates. Bug if we somehow can't make a choice.
-                                 */
-                                f32 choice_val = rand(0.0f, total_score);
-                                for (size_t choice_idx = 0;
-                                     choice_idx < num_surviving_candidates;
-                                     ++choice_idx)
-                                {
-                                    if (choice_val <= cumulative_scores[choice_idx]) {
-                                        auto ret = candidate_vertices[choice_idx];
+                                        f32 score = map.pheromone_map[edge];
 
-                                        delete[] cumulative_scores;
-                                        delete[] candidate_vertices;
+                                        if (score > best_score) {
+                                            found_best     = true;
+                                            best_score     = score;
+                                            best_candidate = candidate_vertex;
+                                        }
+                                    }
 
-                                        return { true, ret };
+                                    if (found_best) {
+                                        return { true, best_candidate };
+                                    } else {
+                                        return { false, {} };
+                                    }
+                                } else {
+                                    f32 total_score = 0.0f;
+                                    for (auto edge : edges) {
+                                        _VertexDescriptor candidate_vertex
+                                            = boost::target(edge, map.graph);
+
+                                        /**
+                                         * If ant has just visited the candidate vertex,
+                                         * then reject it as a candidate. "Just visited"
+                                         * is the step earlier in all cases, but if the
+                                         * ant has just stepped backwards this also
+                                         * includes the next in previous_vertices from
+                                         * the current step.
+                                         */
+                                        if (ant.steps_taken > 0
+                                            && ant.previous_vertices
+                                                       [ant.steps_taken - 1]
+                                                   == candidate_vertex)
+                                            continue;
+
+                                        if (ant.did_backstep && ant.steps_taken > 0
+                                            && ant.previous_vertices
+                                                       [ant.steps_taken + 1]
+                                                   == candidate_vertex)
+                                            continue;
+
+                                        total_score += map.pheromone_map[edge];
+                                    }
+
+                                    if (total_score == 0.0f) {
+                                        return { false, {} };
+                                    }
+
+                                    f32 choice_val = rand(0.0f, total_score);
+                                    for (auto edge : edges) {
+                                        _VertexDescriptor candidate_vertex
+                                            = boost::target(edge, map.graph);
+
+                                        /**
+                                         * If ant has just visited the candidate vertex,
+                                         * then reject it as a candidate. "Just visited"
+                                         * is the step earlier in all cases, but if the
+                                         * ant has just stepped backwards this also
+                                         * includes the next in previous_vertices from
+                                         * the current step.
+                                         */
+                                        if (ant.steps_taken > 0
+                                            && ant.previous_vertices
+                                                       [ant.steps_taken - 1]
+                                                   == candidate_vertex)
+                                            continue;
+
+                                        if (ant.did_backstep && ant.steps_taken > 0
+                                            && ant.previous_vertices
+                                                       [ant.steps_taken + 1]
+                                                   == candidate_vertex)
+                                            continue;
+
+                                        choice_val -= map.pheromone_map[edge];
+
+                                        if (choice_val <= 0.0f) {
+                                            return { true, candidate_vertex };
+                                        }
                                     }
                                 }
 
                                 debug_printf(
                                     "Error: could not decide where to send ant, check "
-                                    "maths of "
-                                    "DefaultChoiceStrategy!"
+                                    "maths!"
                                 );
-
-                                delete[] cumulative_scores;
-                                delete[] candidate_vertices;
 
                                 return { false, {} };
                             };
