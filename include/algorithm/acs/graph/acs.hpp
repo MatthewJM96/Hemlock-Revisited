@@ -100,11 +100,9 @@ namespace hemlock {
                     ant_groups_old.groups[0].size = Config.ant_count;
                     ant_groups_old.count          = 1;
 
-                    // 2 * Config.max_steps for return journey.
-                    //      TODO(Matthew): Do we just do one-way and apply pheromone
-                    //                     in separate subsequent pass?
                     size_t ants_found_food = 0;
                     for (size_t step = 0; step < /*2 **/ Config.max_steps; ++step) {
+                        // TODO(Matthew): can we lazily reset ants?
                         ant_groups_new       = {};
                         ant_groups_new.count = ant_groups_old.count;
 
@@ -428,6 +426,7 @@ namespace hemlock {
 
                     // Global pheromone update.
 
+                    // TODO(Matthew): can we do lazy evaluation of this?
                     for (auto edge :
                          boost::make_iterator_range(boost::edges(map.graph)))
                     {
