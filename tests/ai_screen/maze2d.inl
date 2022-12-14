@@ -100,10 +100,11 @@ void map::maze2d::print_map(const Map& map) {
     std::cout << "\n";
 }
 
-halgo::GraphMap<size_t> map::maze2d::map_to_graph(Map map, float initial_weight) {
-    using _VertexDescriptor = halgo::VertexDescriptor<size_t>;
+halgo::GraphMap<size_t, false>
+map::maze2d::map_to_graph(Map map, float initial_weight) {
+    using _VertexDescriptor = halgo::VertexDescriptor<size_t, false>;
 
-    halgo::GraphMap<size_t> graph_map;
+    halgo::GraphMap<size_t, false> graph_map;
 
     std::unordered_map<size_t, bool> nodes_visited;
 
@@ -134,8 +135,8 @@ halgo::GraphMap<size_t> map::maze2d::map_to_graph(Map map, float initial_weight)
 
         // Bool flags should always be true, better check would fail
         // graph building on a false.
-        if (e_o_to_t_made) graph_map.edge_weight_map[e_o_to_t] = initial_weight;
-        if (e_t_to_o_made) graph_map.edge_weight_map[e_t_to_o] = initial_weight;
+        if (e_o_to_t_made) graph_map.pheromone_map[e_o_to_t] = initial_weight;
+        if (e_t_to_o_made) graph_map.pheromone_map[e_t_to_o] = initial_weight;
 
         graph_map.vertex_coord_map[v_target]    = target_node;
         graph_map.coord_vertex_map[target_node] = v_target;

@@ -6,7 +6,6 @@
 #include "app/screen_base.h"
 
 #include "algorithm/acs/acs.hpp"
-#include "algorithm/graph.hpp"
 
 #include "../iomanager.hpp"
 

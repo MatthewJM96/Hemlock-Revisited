@@ -23,7 +23,7 @@ namespace map {
 
         void print_map(const Map& map);
 
-        halgo::GraphMap<size_t> map_to_graph(Map map, float initial_weight);
+        halgo::GraphMap<size_t, false> map_to_graph(Map map, float initial_weight);
     };  // namespace maze2d
 };      // namespace map
 
