@@ -38,7 +38,8 @@ public:
 
         std::cout << std::endl << std::endl;
 
-        std::cout << "****************\n* Maze Graph Timing Test *\n****************"
+        std::cout << "**************************\n* Maze Graph Timing Test "
+                     "*\n**************************"
                   << std::endl
                   << std::endl;
 
