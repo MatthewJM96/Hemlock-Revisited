@@ -35,6 +35,14 @@ public:
                   << std::endl;
 
         do_maze_graph_test();
+
+        std::cout << std::endl << std::endl;
+
+        std::cout << "****************\n* Maze Graph Timing Test *\n****************"
+                  << std::endl
+                  << std::endl;
+
+        do_maze_graph_timing_test(1000);
     }
 
     virtual void update(hemlock::FrameTime) override { }
