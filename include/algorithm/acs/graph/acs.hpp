@@ -130,20 +130,14 @@ namespace hemlock {
                                     boost::out_edges(ant.current_vertex, map.graph)
                                 );
 
-                                auto rand = [](f32 min, f32 max) {
-                                    // TODO(Matthew): don't be setting this up every
-                                    // time.
-                                    static std::random_device rand_dev;
-                                    static std::mt19937       generator(rand_dev());
-                                    std::uniform_real_distribution<f32> distribution(
-                                        min, max
-                                    );
+                                static std::random_device rand_dev;
+                                static std::mt19937       generator(rand_dev());
+                                static std::uniform_real_distribution<f32> distribution(
+                                    0.0f, 1.0f
+                                );
 
-                                    return distribution(generator);
-                                };
-
-                                f32 exploitation_val = rand(0.0f, 1.0f);
-                                if (exploitation_val < exploitation_factor) {
+                                f32 rand_val = distribution(generator);
+                                if (rand_val < exploitation_factor) {
                                     bool              found_best     = false;
                                     _VertexDescriptor best_candidate = 0;
                                     f32 best_score = std::numeric_limits<f32>::lowest();
@@ -218,7 +212,8 @@ namespace hemlock {
                                         return { false, {} };
                                     }
 
-                                    f32 choice_val = rand(0.0f, total_score);
+                                    f32 choice_val = (rand_val - exploitation_factor)
+                                                     * total_score;
                                     for (auto edge : edges) {
                                         _VertexDescriptor candidate_vertex
                                             = boost::target(edge, map.graph);
