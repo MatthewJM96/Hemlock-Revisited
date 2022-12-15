@@ -114,7 +114,7 @@ void do_maze_graph_timing_test(size_t iterations, size_t map_idx = 0) {
 
     __do_maze_graph_timing_test(iterations, 31, map_idx);
 
-    std::cout << "\n****************\n* Maze Size 60 *\n****************\n\n";
+    // std::cout << "\n****************\n* Maze Size 60 *\n****************\n\n";
 
-    __do_maze_graph_timing_test(iterations, 61, map_idx);
+    // __do_maze_graph_timing_test(iterations, 61, map_idx);
 }
