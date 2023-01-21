@@ -111,14 +111,10 @@ void hvox::ChunkGrid::set_render_distance(ui32 render_distance) {
     m_chunks_in_render_distance = chunks_in_render_distance;
 }
 
-bool hvox::ChunkGrid::load_from_scratch_chunks(
+bool hvox::ChunkGrid::load_chunks(
     ChunkGridPosition* chunk_positions, ui32 chunk_count
 ) {
     bool any_chunk_failed = false;
-
-    for (ui32 i = 0; i < chunk_count; ++i) {
-        any_chunk_failed = any_chunk_failed || preload_chunk_at(chunk_positions[i]);
-    }
 
     for (ui32 i = 0; i < chunk_count; ++i) {
         any_chunk_failed = any_chunk_failed || load_chunk_at(chunk_positions[i]);
@@ -148,52 +144,25 @@ bool hvox::ChunkGrid::preload_chunk_at(ChunkGridPosition chunk_position) {
 }
 
 bool hvox::ChunkGrid::load_chunk_at(ChunkGridPosition chunk_position) {
+    preload_chunk_at(chunk_position);
+
     auto it = m_chunks.find(chunk_position.id);
     if (it == m_chunks.end()) return false;
 
     hmem::Handle<Chunk> chunk = (*it).second;
 
-    // Note the order of these checks is probably important.
-    // I have guessed for now but expect if we queried pending
-    // after actual state we could encounter race conditions
-    // where the chunk was generated just as we were going
-    // from the first to the second query.
-    //   In this order, we should get no race condition
-    //   as submitting generation tasks should be only
-    //   done from the main thread. That said, we have
-    //   to be careful that we also appropriately update
-    //   these states in the tasks.
-
     // If chunk is in the process of being generated, we don't
     // need to add it to the queue again.
-    auto [_1, chunk_pending_generation]
-        = query_chunk_pending_task(chunk, ChunkTaskKind::GENERATION);
-    if (chunk_pending_generation) return false;
-
-    // If chunk is already generated, we don't need to try
-    // to generate it again.
-    auto [_2, chunk_already_generated]
-        = query_chunk_state(chunk, ChunkState::GENERATED);
-    if (chunk_already_generated) return false;
-
-    // If chunk is not yet preloaded, we can't try to
-    // generate it.
-    auto [_3, chunk_preloaded] = query_chunk_state(chunk, ChunkState::PRELOADED);
-    if (!chunk_preloaded) return false;
-
-    chunk->pending_task.store(ChunkTaskKind::GENERATION, std::memory_order_release);
+    ChunkState chunk_state = ChunkState::NONE;
+    if (!chunk->generation.compare_exchange_strong(chunk_state, ChunkState::PENDING)) {
+        return false;
+    }
 
     auto task = m_build_load_or_generate_task();
     task->set_state(chunk, m_self);
     m_thread_pool.add_task({ task, true });
 
     return true;
-}
-
-bool hvox::ChunkGrid::load_from_scratch_chunk_at(ChunkGridPosition chunk_position) {
-    preload_chunk_at(chunk_position);
-
-    return load_chunk_at(chunk_position);
 }
 
 bool hvox::ChunkGrid::unload_chunk_at(
@@ -295,138 +264,4 @@ void hvox::ChunkGrid::establish_chunk_neighbours(hmem::Handle<Chunk> chunk) {
     } else {
         chunk->neighbours.one.back = hmem::WeakHandle<Chunk>();
     }
-}
-
-hvox::QueriedChunkState hvox::ChunkGrid::query_chunk_state(
-    ChunkGridPosition chunk_position, ChunkState required_minimum_state
-) {
-    auto it = m_chunks.find(chunk_position.id);
-    if (it == m_chunks.end()) return { false, false };
-
-    return query_chunk_state((*it).second, required_minimum_state);
-}
-
-hvox::QueriedChunkState hvox::ChunkGrid::query_chunk_state(
-    hmem::Handle<Chunk> chunk, ChunkState required_minimum_state
-) {
-    if (chunk == nullptr) return { false, false };
-
-    ChunkState actual_state = chunk->state.load(std::memory_order_acquire);
-
-    return { true, actual_state >= required_minimum_state };
-}
-
-hvox::QueriedChunkPendingTask hvox::ChunkGrid::query_chunk_pending_task(
-    ChunkGridPosition chunk_position, ChunkTaskKind required_minimum_pending_task
-) {
-    auto it = m_chunks.find(chunk_position.id);
-    if (it == m_chunks.end()) return { false, false };
-
-    return query_chunk_pending_task((*it).second, required_minimum_pending_task);
-}
-
-hvox::QueriedChunkPendingTask hvox::ChunkGrid::query_chunk_pending_task(
-    hmem::Handle<Chunk> chunk, ChunkTaskKind required_minimum_pending_task
-) {
-    if (chunk == nullptr) return { false, false };
-
-    ChunkTaskKind actual_pending_task
-        = chunk->pending_task.load(std::memory_order_acquire);
-
-    return { true, actual_pending_task >= required_minimum_pending_task };
-}
-
-hvox::QueriedChunkState hvox::ChunkGrid::query_all_neighbour_states(
-    ChunkGridPosition chunk_position, ChunkState required_minimum_state
-) {
-    auto it = m_chunks.find(chunk_position.id);
-    if (it == m_chunks.end()) return { false, false };
-
-    return query_all_neighbour_states((*it).second, required_minimum_state);
-}
-
-hvox::QueriedChunkState hvox::ChunkGrid::query_all_neighbour_states(
-    hmem::Handle<Chunk> chunk, ChunkState required_minimum_state
-) {
-    if (chunk == nullptr) return { false, false };
-
-    bool all_neighbours_satisfy_constraint = true;
-    for (ui32 i = 0; i < 8; ++i) {
-        auto neighbour = chunk->neighbours.all[i].lock();
-        if (neighbour == nullptr) continue;
-
-        ChunkState actual_state = neighbour->state.load(std::memory_order_acquire);
-
-        all_neighbours_satisfy_constraint = all_neighbours_satisfy_constraint
-                                            && (actual_state >= required_minimum_state);
-    }
-
-    return { true, all_neighbours_satisfy_constraint };
-}
-
-hvox::QueriedChunkState hvox::ChunkGrid::query_chunk_exact_state(
-    ChunkGridPosition chunk_position, ChunkState required_state
-) {
-    auto it = m_chunks.find(chunk_position.id);
-    if (it == m_chunks.end()) return { false, false };
-
-    return query_chunk_exact_state((*it).second, required_state);
-}
-
-hvox::QueriedChunkState hvox::ChunkGrid::query_chunk_exact_state(
-    hmem::Handle<Chunk> chunk, ChunkState required_state
-) {
-    if (chunk == nullptr) return { false, false };
-
-    ChunkState actual_state = chunk->state.load(std::memory_order_acquire);
-
-    return { true, actual_state == required_state };
-}
-
-hvox::QueriedChunkPendingTask hvox::ChunkGrid::query_chunk_exact_pending_task(
-    ChunkGridPosition chunk_position, ChunkTaskKind required_pending_task
-) {
-    auto it = m_chunks.find(chunk_position.id);
-    if (it == m_chunks.end()) return { false, false };
-
-    return query_chunk_exact_pending_task((*it).second, required_pending_task);
-}
-
-hvox::QueriedChunkPendingTask hvox::ChunkGrid::query_chunk_exact_pending_task(
-    hmem::Handle<Chunk> chunk, ChunkTaskKind required_pending_task
-) {
-    if (chunk == nullptr) return { false, false };
-
-    ChunkTaskKind actual_pending_task
-        = chunk->pending_task.load(std::memory_order_acquire);
-
-    return { true, actual_pending_task == required_pending_task };
-}
-
-hvox::QueriedChunkState hvox::ChunkGrid::query_all_neighbour_exact_states(
-    ChunkGridPosition chunk_position, ChunkState required_state
-) {
-    auto it = m_chunks.find(chunk_position.id);
-    if (it == m_chunks.end()) return { false, false };
-
-    return query_all_neighbour_exact_states((*it).second, required_state);
-}
-
-hvox::QueriedChunkState hvox::ChunkGrid::query_all_neighbour_exact_states(
-    hmem::Handle<Chunk> chunk, ChunkState required_state
-) {
-    if (chunk == nullptr) return { false, false };
-
-    bool all_neighbours_satisfy_constraint = true;
-    for (ui32 i = 0; i < 8; ++i) {
-        auto neighbour = chunk->neighbours.all[i].lock();
-        if (neighbour == nullptr) continue;
-
-        ChunkState actual_state = neighbour->state.load(std::memory_order_acquire);
-
-        all_neighbours_satisfy_constraint
-            = all_neighbours_satisfy_constraint && (actual_state == required_state);
-    }
-
-    return { true, all_neighbours_satisfy_constraint };
 }

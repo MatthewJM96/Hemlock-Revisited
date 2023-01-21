@@ -6,6 +6,7 @@
 #include "voxel/block.hpp"
 #include "voxel/chunk/constants.hpp"
 #include "voxel/chunk/events.hpp"
+#include "voxel/chunk/navmesh.hpp"
 #include "voxel/chunk/state.hpp"
 #include "voxel/coordinate_system.h"
 #include "voxel/graphics/mesh/instance_manager.h"
@@ -36,13 +37,18 @@ namespace hemlock {
             std::shared_mutex blocks_mutex;
             Block*            blocks;
 
-            RenderState render_state;
+            std::shared_mutex navmesh_mutex;
+            ChunkNavmesh      navmesh;
 
             ChunkInstanceManager instance;
 
-            std::atomic<ChunkState>    state;
-            std::atomic<ChunkTaskKind> pending_task;
-            std::atomic<bool>          gen_task_active, mesh_task_active;
+            std::atomic<LODLevel>   lod_level;
+            std::atomic<ChunkState> generation, meshing, mesh_uploading,
+                bulk_navmeshing, navmeshing;
+
+            struct {
+                std::atomic<ChunkState> right, top, front;
+            } navmesh_stitch;
 
             CancellableEvent<BlockChangeEvent>     on_block_change;
             CancellableEvent<BulkBlockChangeEvent> on_bulk_block_change;
@@ -56,10 +62,11 @@ namespace hemlock {
             //                chunk at any point in time. If this fails
             //                to hold up, then we could easily get race
             //                conditions inside the events.
-            Event<>            on_load;
-            Event<>            on_mesh_change;
-            Event<RenderState> on_render_state_change;
-            Event<>            on_unload;
+            Event<>               on_load;
+            Event<>               on_mesh_change;
+            Event<>               on_navmesh_change;
+            Event<LODChangeEvent> on_lod_change;
+            Event<>               on_unload;
         protected:
             void init_events(hmem::WeakHandle<Chunk> self);
 
