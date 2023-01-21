@@ -11,7 +11,7 @@ void hvox::ChunkGreedyMeshTask<
     auto chunk = m_chunk.lock();
     if (chunk == nullptr) return;
 
-    chunk->mesh_task_active.store(true, std::memory_order_release);
+    chunk->meshing.store(ChunkState::ACTIVE, std::memory_order_release);
 
     // TODO(Matthew): Better guess work should be possible and expand only when
     // needed.
@@ -309,14 +309,7 @@ process_new_source:
 
     delete[] visited;
 
-    chunk->state.store(ChunkState::MESHED, std::memory_order_release);
-
-    chunk->mesh_task_active.store(false, std::memory_order_release);
+    chunk->meshing.store(ChunkState::COMPLETE, std::memory_order_release);
 
     chunk->on_mesh_change();
-
-    // TODO(Matthew): Set next task if chunk unload is false? Or else set that
-    //                between this task and next, but would need adjusting
-    //                workflow.
-    chunk->pending_task.store(ChunkTaskKind::NONE, std::memory_order_release);
 }

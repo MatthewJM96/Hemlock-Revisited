@@ -11,8 +11,6 @@ void hvox::ChunkNaiveMeshTask<MeshComparator>::execute(
 
     if (chunk == nullptr) return;
 
-    chunk->mesh_task_active.store(true, std::memory_order_release);
-
     {
         auto chunk_grid = m_chunk_grid.lock();
 
@@ -24,17 +22,16 @@ void hvox::ChunkNaiveMeshTask<MeshComparator>::execute(
             = chunk_grid->query_all_neighbour_states(chunk, ChunkState::GENERATED);
 
         if (!neighbours_in_required_state) {
-            // Mark as no longer engaging in this meshing task.
-            chunk->mesh_task_active.store(false, std::memory_order_release);
             // Put copy of this mesh task back onto the load task queue.
             ChunkNaiveMeshTask<MeshComparator>* mesh_task
                 = new ChunkNaiveMeshTask<MeshComparator>();
             mesh_task->set_state(m_chunk, m_chunk_grid);
             task_queue->enqueue(state->producer_token, { mesh_task, true });
-            chunk->pending_task.store(ChunkTaskKind::MESH, std::memory_order_release);
             return;
         }
     }
+
+    chunk->meshing.store(ChunkState::ACTIVE, std::memory_order_release);
 
     // TODO(Matthew): Better guess work should be possible and expand only when
     // needed.
@@ -224,14 +221,7 @@ void hvox::ChunkNaiveMeshTask<MeshComparator>::execute(
         }
     }
 
-    chunk->state.store(ChunkState::MESHED, std::memory_order_release);
-
-    chunk->mesh_task_active.store(false, std::memory_order_release);
+    chunk->meshing.store(ChunkState::COMPLETE, std::memory_order_release);
 
     chunk->on_mesh_change();
-
-    // TODO(Matthew): Set next task if chunk unload is false? Or else set that
-    //                between this task and next, but would need adjusting
-    //                workflow.
-    chunk->pending_task.store(ChunkTaskKind::NONE, std::memory_order_release);
 }
