@@ -47,7 +47,7 @@ namespace hemlock {
                 bulk_navmeshing, navmeshing;
 
             struct {
-                std::atomic<ChunkState> right, top, front;
+                std::atomic<ChunkState> right, top, front, above_left, above_right, above_front, above_back;
             } navmesh_stitch;
 
             CancellableEvent<BlockChangeEvent>     on_block_change;
