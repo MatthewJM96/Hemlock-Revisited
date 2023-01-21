@@ -52,9 +52,9 @@ void hvox::ChunkNavmeshTask<IsSolid>::execute(
     // Navmesh within this chunk.
     //----------------------------------------------------------------------------------
 
-    // NOTE(Matthew): We don't navmesh up to the very top face of the chunk, as this is
-    //                handled in stitching phase. To step onto "top face" is to step
-    //                into the above neighbouring chunk.
+    // We don't navmesh up to the very top face of the chunk, as this is handled in
+    // stitching phase. To step onto "top face" is to step into the above-neighbouring
+    // chunk.
 
     /*****************************\
      * In-chunk navigable check. *
