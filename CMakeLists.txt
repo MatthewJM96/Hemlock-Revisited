@@ -173,6 +173,7 @@ endif()
 
 add_executable(Hemlock_Revisited
     "${PROJECT_SOURCE_DIR}/src/stdafx.cpp"
+    "${PROJECT_SOURCE_DIR}/src/rand.cpp"
     "${PROJECT_SOURCE_DIR}/src/timing.cpp"
     "${PROJECT_SOURCE_DIR}/src/app/app_base.cpp"
     "${PROJECT_SOURCE_DIR}/src/app/screen_base.cpp"
