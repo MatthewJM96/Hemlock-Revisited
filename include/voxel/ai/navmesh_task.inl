@@ -62,6 +62,7 @@ void hvox::ChunkNavmeshTask<IsSolid>::execute(
 
     // TODO(Matthew): Is this optimised well by compiler?
     auto do_navigable_check = [&](const ChunkNavmeshVertexDescriptor& block_vertex,
+                                  BlockChunkPosition                  start_offset,
                                   BlockChunkPosition                  offset,
                                   size_t                              start,
                                   size_t                              end) {
@@ -75,6 +76,25 @@ void hvox::ChunkNavmeshTask<IsSolid>::execute(
             Block* candidate_block = &chunk->blocks[candidate_index];
 
             if (is_solid(candidate_block) && !is_solid(above_candidate_block)) {
+                // TODO(Matthew): Put this in to make up for forgetting to ask if air
+                //                gap exists to allow step up or down.
+                //                  / _   _ /
+                //                  _|     |_
+                //                I.e. the slashed blocks in these two examples.
+                //                Hardcoded for one step as that is all we're doing for
+                //                now.
+                if (y_off - 1 == 1) {
+                    BlockIndex twice_above_start_index = hvox::block_index(start_offset + BlockChunkPosition{0, 2, 0});
+                    Block* twice_above_start_block = &chunk->blocks[twice_above_start_index];
+
+                    if (is_solid(twice_above_start_block)) continue;
+                } else if (y_off - 1 == -1) {
+                    BlockIndex twice_above_candidate_index = hvox::block_index(offset + BlockChunkPosition{0, 1, 0});
+                    Block* twice_above_candidate_block = &chunk->blocks[twice_above_candidate_index];
+
+                    if (is_solid(twice_above_candidate_block)) continue;
+                }
+
                 ChunkNavmeshNode candidate_block_coord = {
                     offset + BlockChunkPosition{0, y_off - 1, 0},
                       chunk_pos
@@ -135,16 +155,16 @@ void hvox::ChunkNavmeshTask<IsSolid>::execute(
                 }
 
                 // Left
-                do_navigable_check(block_vertex, { x - 1, y, z }, 2, -1);
+                do_navigable_check(block_vertex, {x, y, z}, { x - 1, y, z }, 2, -1);
 
                 // Right
-                do_navigable_check(block_vertex, { x + 1, y, z }, 2, -1);
+                do_navigable_check(block_vertex, {x, y, z}, { x + 1, y, z }, 2, -1);
 
                 // Front
-                do_navigable_check(block_vertex, { x, y, z + 1 }, 2, -1);
+                do_navigable_check(block_vertex, {x, y, z}, { x, y, z + 1 }, 2, -1);
 
                 // Back
-                do_navigable_check(block_vertex, { x, y, z - 1 }, 2, -1);
+                do_navigable_check(block_vertex, {x, y, z}, { x, y, z - 1 }, 2, -1);
             }
 
             // Second-to-top case.
@@ -175,16 +195,16 @@ void hvox::ChunkNavmeshTask<IsSolid>::execute(
                 }
 
                 // Left
-                do_navigable_check(block_vertex, { x - 1, CHUNK_LENGTH - 2, z }, 1, -1);
+                do_navigable_check(block_vertex, {x, CHUNK_LENGTH - 2, z}, { x - 1, CHUNK_LENGTH - 2, z }, 1, -1);
 
                 // Right
-                do_navigable_check(block_vertex, { x + 1, CHUNK_LENGTH - 2, z }, 1, -1);
+                do_navigable_check(block_vertex, {x, CHUNK_LENGTH - 2, z}, { x + 1, CHUNK_LENGTH - 2, z }, 1, -1);
 
                 // Front
-                do_navigable_check(block_vertex, { x, CHUNK_LENGTH - 2, z + 1 }, 1, -1);
+                do_navigable_check(block_vertex, {x, CHUNK_LENGTH - 2, z}, { x, CHUNK_LENGTH - 2, z + 1 }, 1, -1);
 
                 // Back
-                do_navigable_check(block_vertex, { x, CHUNK_LENGTH - 2, z - 1 }, 1, -1);
+                do_navigable_check(block_vertex, {x, CHUNK_LENGTH - 2, z}, { x, CHUNK_LENGTH - 2, z - 1 }, 1, -1);
             }
         }
     }
@@ -224,13 +244,13 @@ void hvox::ChunkNavmeshTask<IsSolid>::execute(
                 }
 
                 // Right
-                do_navigable_check(block_vertex, { 1, y, z }, 2, -1);
+                do_navigable_check(block_vertex, {0, y, z}, { 1, y, z }, 2, -1);
 
                 // Front
-                do_navigable_check(block_vertex, { 0, y, z + 1 }, 2, -1);
+                do_navigable_check(block_vertex, {0, y, z}, { 0, y, z + 1 }, 2, -1);
 
                 // Back
-                do_navigable_check(block_vertex, { 0, y, z - 1 }, 2, -1);
+                do_navigable_check(block_vertex, {0, y, z}, { 0, y, z - 1 }, 2, -1);
             }
 
             // Right Face
@@ -262,13 +282,13 @@ void hvox::ChunkNavmeshTask<IsSolid>::execute(
                 }
 
                 // Left
-                do_navigable_check(block_vertex, { CHUNK_LENGTH - 2, y, z }, 2, -1);
+                do_navigable_check(block_vertex, {CHUNK_LENGTH - 1, y, z }, { CHUNK_LENGTH - 2, y, z }, 2, -1);
 
                 // Front
-                do_navigable_check(block_vertex, { CHUNK_LENGTH - 1, y, z + 1 }, 2, -1);
+                do_navigable_check(block_vertex, {CHUNK_LENGTH - 1, y, z }, { CHUNK_LENGTH - 1, y, z + 1 }, 2, -1);
 
                 // Back
-                do_navigable_check(block_vertex, { CHUNK_LENGTH - 1, y, z - 1 }, 2, -1);
+                do_navigable_check(block_vertex, {CHUNK_LENGTH - 1, y, z }, { CHUNK_LENGTH - 1, y, z - 1 }, 2, -1);
             }
         }
 
@@ -302,13 +322,13 @@ void hvox::ChunkNavmeshTask<IsSolid>::execute(
                 }
 
                 // Right
-                do_navigable_check(block_vertex, { 1, CHUNK_LENGTH - 2, z }, 1, -1);
+                do_navigable_check(block_vertex, {0, CHUNK_LENGTH - 2, z }, { 1, CHUNK_LENGTH - 2, z }, 1, -1);
 
                 // Front
-                do_navigable_check(block_vertex, { 0, CHUNK_LENGTH - 2, z + 1 }, 1, -1);
+                do_navigable_check(block_vertex, {0, CHUNK_LENGTH - 2, z }, { 0, CHUNK_LENGTH - 2, z + 1 }, 1, -1);
 
                 // Back
-                do_navigable_check(block_vertex, { 0, CHUNK_LENGTH - 2, z - 1 }, 1, -1);
+                do_navigable_check(block_vertex, {0, CHUNK_LENGTH - 2, z }, { 0, CHUNK_LENGTH - 2, z - 1 }, 1, -1);
             }
 
             // Right Face
@@ -340,13 +360,13 @@ void hvox::ChunkNavmeshTask<IsSolid>::execute(
                 }
 
                 // Left
-                do_navigable_check(block_vertex, { CHUNK_LENGTH - 2, CHUNK_LENGTH - 2, z }, 1, -1);
+                do_navigable_check(block_vertex, {CHUNK_LENGTH - 1, CHUNK_LENGTH - 2, z }, { CHUNK_LENGTH - 2, CHUNK_LENGTH - 2, z }, 1, -1);
 
                 // Front
-                do_navigable_check(block_vertex, { CHUNK_LENGTH - 1, CHUNK_LENGTH - 2, z + 1 }, 1, -1);
+                do_navigable_check(block_vertex, {CHUNK_LENGTH - 1, CHUNK_LENGTH - 2, z }, { CHUNK_LENGTH - 1, CHUNK_LENGTH - 2, z + 1 }, 1, -1);
 
                 // Back
-                do_navigable_check(block_vertex, { CHUNK_LENGTH - 1, CHUNK_LENGTH - 2, z - 1 }, 1, -1);
+                do_navigable_check(block_vertex, {CHUNK_LENGTH - 1, CHUNK_LENGTH - 2, z }, { CHUNK_LENGTH - 1, CHUNK_LENGTH - 2, z - 1 }, 1, -1);
             }
         }
     }
@@ -387,13 +407,13 @@ void hvox::ChunkNavmeshTask<IsSolid>::execute(
                 }
 
                 // Left
-                do_navigable_check(block_vertex, { x - 1, y, CHUNK_LENGTH - 1 }, 2, -1);
+                do_navigable_check(block_vertex, {x, y, CHUNK_LENGTH - 1}, { x - 1, y, CHUNK_LENGTH - 1 }, 2, -1);
 
                 // Right
-                do_navigable_check(block_vertex, { x + 1, y, CHUNK_LENGTH - 1 }, 2, -1);
+                do_navigable_check(block_vertex, {x, y, CHUNK_LENGTH - 1}, { x + 1, y, CHUNK_LENGTH - 1 }, 2, -1);
 
                 // Back
-                do_navigable_check(block_vertex, { x, y, CHUNK_LENGTH - 2 }, 2, -1);
+                do_navigable_check(block_vertex, {x, y, CHUNK_LENGTH - 1}, { x, y, CHUNK_LENGTH - 2 }, 2, -1);
             }
 
             // Back Face
@@ -424,13 +444,13 @@ void hvox::ChunkNavmeshTask<IsSolid>::execute(
                 }
 
                 // Left
-                do_navigable_check(block_vertex, { x - 1, y, 0 }, 2, -1);
+                do_navigable_check(block_vertex, {x, y, 0}, { x - 1, y, 0 }, 2, -1);
 
                 // Right
-                do_navigable_check(block_vertex, { x + 1, y, 0 }, 2, -1);
+                do_navigable_check(block_vertex, {x, y, 0}, { x + 1, y, 0 }, 2, -1);
 
                 // Front
-                do_navigable_check(block_vertex, { x, y, 1 }, 2, -1);
+                do_navigable_check(block_vertex, {x, y, 0}, { x, y, 1 }, 2, -1);
             }
         }
 
@@ -465,13 +485,13 @@ void hvox::ChunkNavmeshTask<IsSolid>::execute(
                 }
 
                 // Left
-                do_navigable_check(block_vertex, { x - 1, CHUNK_LENGTH - 2, CHUNK_LENGTH - 1 }, 1, -1);
+                do_navigable_check(block_vertex, {x, CHUNK_LENGTH - 2, CHUNK_LENGTH - 1}, { x - 1, CHUNK_LENGTH - 2, CHUNK_LENGTH - 1 }, 1, -1);
 
                 // Right
-                do_navigable_check(block_vertex, { x + 1, CHUNK_LENGTH - 2, CHUNK_LENGTH - 1 }, 1, -1);
+                do_navigable_check(block_vertex, {x, CHUNK_LENGTH - 2, CHUNK_LENGTH - 1}, { x + 1, CHUNK_LENGTH - 2, CHUNK_LENGTH - 1 }, 1, -1);
 
                 // Back
-                do_navigable_check(block_vertex, { x, CHUNK_LENGTH - 2, CHUNK_LENGTH - 2 }, 1, -1);
+                do_navigable_check(block_vertex, {x, CHUNK_LENGTH - 2, CHUNK_LENGTH - 1}, { x, CHUNK_LENGTH - 2, CHUNK_LENGTH - 2 }, 1, -1);
             }
 
             // Back Face
@@ -502,13 +522,13 @@ void hvox::ChunkNavmeshTask<IsSolid>::execute(
                 }
 
                 // Left
-                do_navigable_check(block_vertex, { x - 1, CHUNK_LENGTH - 2, 0 }, 1, -1);
+                do_navigable_check(block_vertex, {x, CHUNK_LENGTH - 2, 0}, { x - 1, CHUNK_LENGTH - 2, 0 }, 1, -1);
 
                 // Right
-                do_navigable_check(block_vertex, { x + 1, CHUNK_LENGTH - 2, 0 }, 1, -1);
+                do_navigable_check(block_vertex, {x, CHUNK_LENGTH - 2, 0}, { x + 1, CHUNK_LENGTH - 2, 0 }, 1, -1);
 
                 // Front
-                do_navigable_check(block_vertex, { x, CHUNK_LENGTH - 2, 1 }, 1, -1);
+                do_navigable_check(block_vertex, {x, CHUNK_LENGTH - 2, 0}, { x, CHUNK_LENGTH - 2, 1 }, 1, -1);
             }
         }
     }
@@ -548,16 +568,16 @@ void hvox::ChunkNavmeshTask<IsSolid>::execute(
                 }
 
                 // Left
-                do_navigable_check(block_vertex, { x - 1, 0, z }, 2, 0);
+                do_navigable_check(block_vertex, {x, 0, z}, { x - 1, 0, z }, 2, 0);
 
                 // Right
-                do_navigable_check(block_vertex, { x + 1, 0, z }, 2, 0);
+                do_navigable_check(block_vertex, {x, 0, z}, { x + 1, 0, z }, 2, 0);
 
                 // Front
-                do_navigable_check(block_vertex, { x, 0, z + 1 }, 2, 0);
+                do_navigable_check(block_vertex, {x, 0, z}, { x, 0, z + 1 }, 2, 0);
 
                 // Back
-                do_navigable_check(block_vertex, { x, 0, z - 1 }, 2, 0);
+                do_navigable_check(block_vertex, {x, 0, z}, { x, 0, z - 1 }, 2, 0);
             }
         }
     }
@@ -593,10 +613,10 @@ void hvox::ChunkNavmeshTask<IsSolid>::execute(
             }
 
             // Right
-            do_navigable_check(block_vertex, { 1, y, CHUNK_LENGTH - 1 }, 2, -1);
+            do_navigable_check(block_vertex, {0, y, CHUNK_LENGTH - 1}, { 1, y, CHUNK_LENGTH - 1 }, 2, -1);
 
             // Back
-            do_navigable_check(block_vertex, { 0, y, CHUNK_LENGTH - 2 }, 2, -1);
+            do_navigable_check(block_vertex, {0, y, CHUNK_LENGTH - 1}, { 0, y, CHUNK_LENGTH - 2 }, 2, -1);
         }
 
         // Front-Right Edge
@@ -624,10 +644,10 @@ void hvox::ChunkNavmeshTask<IsSolid>::execute(
             }
 
             // Left
-            do_navigable_check(block_vertex, { CHUNK_LENGTH - 2, y, CHUNK_LENGTH - 1 }, 2, -1);
+            do_navigable_check(block_vertex, {CHUNK_LENGTH - 1, y, CHUNK_LENGTH - 1}, { CHUNK_LENGTH - 2, y, CHUNK_LENGTH - 1 }, 2, -1);
 
             // Back
-            do_navigable_check(block_vertex, { CHUNK_LENGTH - 1, y, CHUNK_LENGTH - 2 }, 2, -1);
+            do_navigable_check(block_vertex, {CHUNK_LENGTH - 1, y, CHUNK_LENGTH - 1}, { CHUNK_LENGTH - 1, y, CHUNK_LENGTH - 2 }, 2, -1);
         }
 
         // Back-Left Edge
@@ -658,10 +678,10 @@ void hvox::ChunkNavmeshTask<IsSolid>::execute(
             }
 
             // Right
-            do_navigable_check(block_vertex, { 1, y, 0 }, 2, -1);
+            do_navigable_check(block_vertex, {0, y, 0}, { 1, y, 0 }, 2, -1);
 
             // Front
-            do_navigable_check(block_vertex, { 0, y, 1 }, 2, -1);
+            do_navigable_check(block_vertex, {0, y, 0}, { 0, y, 1 }, 2, -1);
         }
 
         // Back-Right Edge
@@ -692,10 +712,10 @@ void hvox::ChunkNavmeshTask<IsSolid>::execute(
             }
 
             // Left
-            do_navigable_check(block_vertex, { CHUNK_LENGTH - 2, y, 0 }, 2, -1);
+            do_navigable_check(block_vertex, {CHUNK_LENGTH - 1, y, 0}, { CHUNK_LENGTH - 2, y, 0 }, 2, -1);
 
             // Front
-            do_navigable_check(block_vertex, { CHUNK_LENGTH - 1, y, 1 }, 2, -1);
+            do_navigable_check(block_vertex, {CHUNK_LENGTH - 1, y, 0}, { CHUNK_LENGTH - 1, y, 1 }, 2, -1);
         }
     }
 
@@ -725,10 +745,10 @@ void hvox::ChunkNavmeshTask<IsSolid>::execute(
         }
 
         // Right
-        do_navigable_check(block_vertex, { 1, CHUNK_LENGTH - 2, CHUNK_LENGTH - 1 }, 1, -1);
+        do_navigable_check(block_vertex, {0, CHUNK_LENGTH - 2, CHUNK_LENGTH - 1}, { 1, CHUNK_LENGTH - 2, CHUNK_LENGTH - 1 }, 1, -1);
 
         // Back
-        do_navigable_check(block_vertex, { 0, CHUNK_LENGTH - 2, CHUNK_LENGTH - 2 }, 1, -1);
+        do_navigable_check(block_vertex, {0, CHUNK_LENGTH - 2, CHUNK_LENGTH - 1}, { 0, CHUNK_LENGTH - 2, CHUNK_LENGTH - 2 }, 1, -1);
     }
 
     // Front-Right Edge
@@ -756,10 +776,10 @@ void hvox::ChunkNavmeshTask<IsSolid>::execute(
         }
 
         // Left
-        do_navigable_check(block_vertex, { CHUNK_LENGTH - 2, CHUNK_LENGTH - 2, CHUNK_LENGTH - 1 }, 1, -1);
+        do_navigable_check(block_vertex, {CHUNK_LENGTH - 1, CHUNK_LENGTH - 2, CHUNK_LENGTH - 1}, { CHUNK_LENGTH - 2, CHUNK_LENGTH - 2, CHUNK_LENGTH - 1 }, 1, -1);
 
         // Back
-        do_navigable_check(block_vertex, { CHUNK_LENGTH - 1, CHUNK_LENGTH - 2, CHUNK_LENGTH - 2 }, 1, -1);
+        do_navigable_check(block_vertex, {CHUNK_LENGTH - 1, CHUNK_LENGTH - 2, CHUNK_LENGTH - 1}, { CHUNK_LENGTH - 1, CHUNK_LENGTH - 2, CHUNK_LENGTH - 2 }, 1, -1);
     }
 
     // Back-Left Edge
@@ -790,10 +810,10 @@ void hvox::ChunkNavmeshTask<IsSolid>::execute(
         }
 
         // Right
-        do_navigable_check(block_vertex, { 1, CHUNK_LENGTH - 2, 0 }, 1, -1);
+        do_navigable_check(block_vertex, {0, CHUNK_LENGTH - 2, 0}, { 1, CHUNK_LENGTH - 2, 0 }, 1, -1);
 
         // Front
-        do_navigable_check(block_vertex, { 0, CHUNK_LENGTH - 2, 1 }, 1, -1);
+        do_navigable_check(block_vertex, {0, CHUNK_LENGTH - 2, 0}, { 0, CHUNK_LENGTH - 2, 1 }, 1, -1);
     }
 
     // Back-Right Edge
@@ -824,10 +844,10 @@ void hvox::ChunkNavmeshTask<IsSolid>::execute(
         }
 
         // Left
-        do_navigable_check(block_vertex, { CHUNK_LENGTH - 2, CHUNK_LENGTH - 2, 0 }, 1, -1);
+        do_navigable_check(block_vertex, {CHUNK_LENGTH - 1, CHUNK_LENGTH - 2, 0}, { CHUNK_LENGTH - 2, CHUNK_LENGTH - 2, 0 }, 1, -1);
 
         // Front
-        do_navigable_check(block_vertex, { CHUNK_LENGTH - 1, CHUNK_LENGTH - 2, 1 }, 1, -1);
+        do_navigable_check(block_vertex, {CHUNK_LENGTH - 1, CHUNK_LENGTH - 2, 0}, { CHUNK_LENGTH - 1, CHUNK_LENGTH - 2, 1 }, 1, -1);
     }
 
     /****************************\
@@ -862,13 +882,13 @@ void hvox::ChunkNavmeshTask<IsSolid>::execute(
             }
 
             // Left
-            do_navigable_check(block_vertex, { x - 1, 0, CHUNK_LENGTH - 1 }, 2, -1);
+            do_navigable_check(block_vertex, {x, 0, CHUNK_LENGTH - 1}, { x - 1, 0, CHUNK_LENGTH - 1 }, 2, -1);
 
             // Right
-            do_navigable_check(block_vertex, { x + 1, 0, CHUNK_LENGTH - 1 }, 2, -1);
+            do_navigable_check(block_vertex, {x, 0, CHUNK_LENGTH - 1}, { x + 1, 0, CHUNK_LENGTH - 1 }, 2, -1);
 
             // Back
-            do_navigable_check(block_vertex, { x, 0, CHUNK_LENGTH - 2 }, 2, -1);
+            do_navigable_check(block_vertex, {x, 0, CHUNK_LENGTH - 1}, { x, 0, CHUNK_LENGTH - 2 }, 2, -1);
         }
 
         // Back-Bottom Edge
@@ -896,13 +916,13 @@ void hvox::ChunkNavmeshTask<IsSolid>::execute(
             }
 
             // Left
-            do_navigable_check(block_vertex, { x - 1, 0, 0 }, 2, -1);
+            do_navigable_check(block_vertex, {x, 0, 0}, { x - 1, 0, 0 }, 2, -1);
 
             // Right
-            do_navigable_check(block_vertex, { x + 1, 0, 0 }, 2, -1);
+            do_navigable_check(block_vertex, {x, 0, 0}, { x + 1, 0, 0 }, 2, -1);
 
             // Front
-            do_navigable_check(block_vertex, { x, 0, 1 }, 2, -1);
+            do_navigable_check(block_vertex, {x, 0, 0}, { x, 0, 1 }, 2, -1);
         }
     }
 
@@ -936,13 +956,13 @@ void hvox::ChunkNavmeshTask<IsSolid>::execute(
             }
 
             // Right
-            do_navigable_check(block_vertex, { 1, 0, z }, 2, -1);
+            do_navigable_check(block_vertex, {0, 0, z}, { 1, 0, z }, 2, -1);
 
             // Front
-            do_navigable_check(block_vertex, { 0, 0, z + 1 }, 2, -1);
+            do_navigable_check(block_vertex, {0, 0, z}, { 0, 0, z + 1 }, 2, -1);
 
             // Back
-            do_navigable_check(block_vertex, { 0, 0, z - 1 }, 2, -1);
+            do_navigable_check(block_vertex, {0, 0, z}, { 0, 0, z - 1 }, 2, -1);
         }
 
         // Right-Bottom Edge
@@ -973,13 +993,13 @@ void hvox::ChunkNavmeshTask<IsSolid>::execute(
             }
 
             // Left
-            do_navigable_check(block_vertex, { CHUNK_LENGTH - 2, 0, z }, 2, -1);
+            do_navigable_check(block_vertex, {CHUNK_LENGTH - 1, 0, z}, { CHUNK_LENGTH - 2, 0, z }, 2, -1);
 
             // Front
-            do_navigable_check(block_vertex, { CHUNK_LENGTH - 1, 0, z + 1 }, 2, -1);
+            do_navigable_check(block_vertex, {CHUNK_LENGTH - 1, 0, z}, { CHUNK_LENGTH - 1, 0, z + 1 }, 2, -1);
 
             // Back
-            do_navigable_check(block_vertex, { CHUNK_LENGTH - 1, 0, z - 1 }, 2, -1);
+            do_navigable_check(block_vertex, {CHUNK_LENGTH - 1, 0, z}, { CHUNK_LENGTH - 1, 0, z - 1 }, 2, -1);
         }
     }
 
@@ -1018,10 +1038,10 @@ void hvox::ChunkNavmeshTask<IsSolid>::execute(
         }
 
         // Right
-        do_navigable_check(block_vertex, { 1, 0, CHUNK_LENGTH - 1 }, 2, 0);
+        do_navigable_check(block_vertex, {0, 0, CHUNK_LENGTH - 1}, { 1, 0, CHUNK_LENGTH - 1 }, 2, 0);
 
         // Back
-        do_navigable_check(block_vertex, { 0, 0, CHUNK_LENGTH - 2 }, 2, 0);
+        do_navigable_check(block_vertex, {0, 0, CHUNK_LENGTH - 1}, { 0, 0, CHUNK_LENGTH - 2 }, 2, 0);
     }
     // Left-Bottom-Back
     {
@@ -1051,10 +1071,10 @@ void hvox::ChunkNavmeshTask<IsSolid>::execute(
         }
 
         // Right
-        do_navigable_check(block_vertex, { 1, 0, 0 }, 2, 0);
+        do_navigable_check(block_vertex, {0, 0, 0}, { 1, 0, 0 }, 2, 0);
 
         // Front
-        do_navigable_check(block_vertex, { 0, 0, 1 }, 2, 0);
+        do_navigable_check(block_vertex, {0, 0, 0}, { 0, 0, 1 }, 2, 0);
 
     }
     // Right-Bottom-Front
@@ -1085,10 +1105,10 @@ void hvox::ChunkNavmeshTask<IsSolid>::execute(
         }
 
         // Left
-        do_navigable_check(block_vertex, { CHUNK_LENGTH - 2, 0, CHUNK_LENGTH - 1 }, 2, 0);
+        do_navigable_check(block_vertex, {CHUNK_LENGTH - 1, 0, CHUNK_LENGTH - 1}, { CHUNK_LENGTH - 2, 0, CHUNK_LENGTH - 1 }, 2, 0);
 
         // Back
-        do_navigable_check(block_vertex, { CHUNK_LENGTH - 1, 0, CHUNK_LENGTH - 2 }, 2, 0);
+        do_navigable_check(block_vertex, {CHUNK_LENGTH - 1, 0, CHUNK_LENGTH - 1}, { CHUNK_LENGTH - 1, 0, CHUNK_LENGTH - 2 }, 2, 0);
     }
     // Right-Bottom-Back
     {
@@ -1118,10 +1138,10 @@ void hvox::ChunkNavmeshTask<IsSolid>::execute(
         }
 
         // Left
-        do_navigable_check(block_vertex, { CHUNK_LENGTH - 2, 0, 0 }, 2, 0);
+        do_navigable_check(block_vertex, {CHUNK_LENGTH - 1, 0, 0}, { CHUNK_LENGTH - 2, 0, 0 }, 2, 0);
 
         // Front
-        do_navigable_check(block_vertex, { CHUNK_LENGTH - 1, 0, 1 }, 2, 0);
+        do_navigable_check(block_vertex, {CHUNK_LENGTH - 1, 0, 0}, { CHUNK_LENGTH - 1, 0, 1 }, 2, 0);
     }
 
     chunk->bulk_navmeshing.store(ChunkState::COMPLETE, std::memory_order_release);
