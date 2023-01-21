@@ -3,7 +3,7 @@
 #include "voxel/chunk.h"
 #include "voxel/chunk/grid.h"
 
-template <hvox::ChunkMeshComparator MeshComparator>
+template <hvox::IdealBlockComparator MeshComparator>
 void hvox::ChunkGreedyMeshTask<
     MeshComparator>::execute(ChunkLoadThreadState*, ChunkTaskQueue*) {
     auto chunk_grid = m_chunk_grid.lock();

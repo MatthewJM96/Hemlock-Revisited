@@ -3,7 +3,7 @@
 #include "voxel/chunk/grid.h"
 #include "voxel/face_check.hpp"
 
-template <hvox::ChunkMeshComparator MeshComparator>
+template <hvox::IdealBlockComparator MeshComparator>
 void hvox::ChunkNaiveMeshTask<MeshComparator>::execute(
     ChunkLoadThreadState* state, ChunkTaskQueue* task_queue
 ) {
