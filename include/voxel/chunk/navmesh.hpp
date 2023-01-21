@@ -22,6 +22,11 @@ namespace std {
     template <>
     struct hash<hvox::ChunkNavmeshNode> {
         size_t operator()(const hvox::ChunkNavmeshNode& node) const {
+            // TODO(Matthew): Here and elsewhere, is packing done portably? We can
+            //                likely not directly serialise bit-fields due to endian
+            //                concerns, but at least within runtime does it achieve
+            //                the same as explicit bit masking/shifting across
+            //                platforms?
             union {
                 struct {
                     i64 block_x : 5;
