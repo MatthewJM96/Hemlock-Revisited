@@ -72,7 +72,7 @@ namespace hemlock {
                 i64 x : 24;  // 16777216 * CHUNK_WIDTH  blocks supported.
                 i64 y : 16;  //    65536 * CHUNK_HEIGHT blocks supported.
                 i64 z : 24;  // 16777216 * CHUNK_WIDTH  blocks supported.
-            };
+            } __attribute__((packed));
 
             ChunkID id;
         };
