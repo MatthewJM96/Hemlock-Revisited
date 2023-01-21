@@ -1180,11 +1180,11 @@ void hvox::ChunkNavmeshTask<IsSolid>::execute(
         for (size_t y_off = start; y_off > end; --y_off) {
             BlockIndex above_candidate_index
                 = hvox::block_index(neighbour_offset + BlockChunkPosition{ 0, y_off, 0 });
-            Block* above_candidate_block = &chunk->blocks[above_candidate_index];
+            Block* above_candidate_block = &neighbour->blocks[above_candidate_index];
 
             BlockIndex candidate_index
                 = hvox::block_index(neighbour_offset + BlockChunkPosition{ 0, y_off - 1, 0 });
-            Block* candidate_block = &chunk->blocks[candidate_index];
+            Block* candidate_block = &neighbour->blocks[candidate_index];
 
             if (is_solid(candidate_block) && !is_solid(above_candidate_block)) {
                 struct {
