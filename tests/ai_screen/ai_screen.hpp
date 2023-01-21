@@ -44,11 +44,11 @@ public:
                   << std::endl
                   << std::endl;
 
-        do_maze_graph_timing_test(40000);
+        do_maze_graph_timing_test(4000000);
 
-        do_maze_graph_timing_test(40000, 3);
+        // do_maze_graph_timing_test(40000, 3);
 
-        do_maze_graph_timing_test(40000, 7);
+        // do_maze_graph_timing_test(40000, 7);
     }
 
     virtual void update(hemlock::FrameTime) override { }
