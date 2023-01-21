@@ -105,6 +105,9 @@
 // Our Timers.
 #include "timing.h"
 
+// Our Maths.
+#include "maths/powers.hpp"
+
 // Our Containers
 #include "memory/handle.hpp"
 #include "memory/heterogenous_pager.hpp"
