@@ -1126,9 +1126,17 @@ void hvox::ChunkNavmeshTask<IsSolid>::execute(
 
     chunk->bulk_navmeshing.store(ChunkState::COMPLETE, std::memory_order_release);
 
-    /***********************************\
-     * Determine neighbours to stitch. *
-    \***********************************/
+
+    //----------------------------------------------------------------------------------
+    //
+    // Navmesh between this chunk neighbours (stitch).
+    //----------------------------------------------------------------------------------
+
+    // Recall that the top face of the below neighbour is part of the stitching process.
+
+    /*****************************************\
+     * Betwee-chunk off-edge navigable check. *
+    \******************************************/
 
     // TODO(Matthew): Is this optimised well by compiler?
     auto do_side_stitch_navigable_check = [&](memory::Handle<Chunk>& neighbour,
@@ -1488,7 +1496,10 @@ void hvox::ChunkNavmeshTask<IsSolid>::execute(
         }
     };
 
-    // Left Neighbour
+    /*********************************\
+     * Try to stitch left neighbour. *
+    \*********************************/
+
     {
         auto       neighbour    = chunk->neighbours.one.left.lock();
         ChunkState stitch_state = ChunkState::NONE;
@@ -1539,7 +1550,10 @@ void hvox::ChunkNavmeshTask<IsSolid>::execute(
         }
     }
 
-    // Right Neighbour
+    /**********************************\
+     * Try to stitch right neighbour. *
+    \**********************************/
+
     {
         auto       neighbour    = chunk->neighbours.one.right.lock();
         ChunkState stitch_state = ChunkState::NONE;
@@ -1590,7 +1604,10 @@ void hvox::ChunkNavmeshTask<IsSolid>::execute(
         }
     }
 
-    // Front Neighbour
+    /**********************************\
+     * Try to stitch front neighbour. *
+    \**********************************/
+
     {
         auto       neighbour    = chunk->neighbours.one.front.lock();
         ChunkState stitch_state = ChunkState::NONE;
@@ -1641,7 +1658,10 @@ void hvox::ChunkNavmeshTask<IsSolid>::execute(
         }
     }
 
-    // Back Neighbour
+    /*********************************\
+     * Try to stitch back neighbour. *
+    \*********************************/
+
     {
         auto       neighbour    = chunk->neighbours.one.back.lock();
         ChunkState stitch_state = ChunkState::NONE;
@@ -1692,7 +1712,10 @@ void hvox::ChunkNavmeshTask<IsSolid>::execute(
         }
     }
 
-    // Top Neighbour
+    /********************************\
+     * Try to stitch top neighbour. *
+    \********************************/
+
     {
         auto       neighbour    = chunk->neighbours.one.top.lock();
         ChunkState stitch_state = ChunkState::NONE;
@@ -2074,7 +2097,10 @@ void hvox::ChunkNavmeshTask<IsSolid>::execute(
         }
     }
 
-    // Bottom Neighbour
+    /***********************************\
+     * Try to stitch bottom neighbour. *
+    \***********************************/
+
     {
         auto       neighbour    = chunk->neighbours.one.bottom.lock();
         ChunkState stitch_state = ChunkState::NONE;
