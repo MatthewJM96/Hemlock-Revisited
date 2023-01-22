@@ -1294,7 +1294,7 @@ void hvox::ChunkNavmeshTask<IsSolid>::execute(
 
     /*********************************\
      * Try to stitch left neighbour. *
-     *   except alone top edge.      *
+     *   except along top edge.      *
     \*********************************/
 
     {
@@ -1463,7 +1463,7 @@ void hvox::ChunkNavmeshTask<IsSolid>::execute(
 
     /**********************************\
      * Try to stitch right neighbour. *
-     *   except alone top edge.       *
+     *   except along top edge.       *
     \**********************************/
 
     {
@@ -1802,7 +1802,7 @@ void hvox::ChunkNavmeshTask<IsSolid>::execute(
 
     /*********************************\
      * Try to stitch back neighbour. *
-     *   except alone top edge.      *
+     *   except along top edge.      *
     \*********************************/
 
     {
