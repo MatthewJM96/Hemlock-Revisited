@@ -2341,13 +2341,28 @@ void hvox::ChunkNavmeshTask<IsSolid>::execute(
             // Special handling for
             //      x == 0, CHUNK_LENGTH - 1
             // where chunks diagonal need to be loaded too.
-            for (BlockChunkPositionCoord z = 0; z < CHUNK_LENGTH; ++z) {
+
+            // Check internal steps (step up into above neighbour, step across into
+            // self, and so on).
+            for (BlockChunkPositionCoord z = 1; z < CHUNK_LENGTH - 1; ++z) {
+            }
+
+            // Check step up into neighbour adjacent to left edge.
+            {
+                auto       neighbour         = chunk->neighbours.one.left.lock();
+                ChunkState left_stitch_state = ChunkState::NONE;
+                if (neighbour != nullptr
+                    && neighbour->bulk_navmeshing.load() == ChunkState::COMPLETE
+                    && chunk->navmesh_stitch.left_diag.compare_exchange_strong(
+                        left_stitch_state, ChunkState::ACTIVE
+                    ))
+                { }
             }
 
             // Special handling for
             //      z == 0, CHUNK_LENGTH - 1
             // where chunks diagonal need to be loaded too.
-            for (BlockChunkPositionCoord x = 0; x < CHUNK_LENGTH; ++x) {
+            for (BlockChunkPositionCoord x = 1; x < CHUNK_LENGTH - 1; ++x) {
             }
 
             chunk->navmesh_stitch.top.store(ChunkState::COMPLETE);
