@@ -1290,7 +1290,7 @@ void hvox::ChunkNavmeshTask<IsSolid>::execute(
                     neighbour, { 0, 0, z }, { CHUNK_LENGTH - 1, 0, z }, 2, 0
                 );
 
-                // y == CHUNK_LENGTH - 2
+                // y == CHUNK_LENGTH - 2 - step down or across
                 do_side_stitch_navigable_check(
                     neighbour,
                     { 0, CHUNK_LENGTH - 2, z },
@@ -1459,7 +1459,7 @@ void hvox::ChunkNavmeshTask<IsSolid>::execute(
                     neighbour, { CHUNK_LENGTH - 1, 0, z }, { 0, 0, z }, 2, 0
                 );
 
-                // y == CHUNK_LENGTH - 2
+                // y == CHUNK_LENGTH - 2 - step down or across
                 do_side_stitch_navigable_check(
                     neighbour,
                     { CHUNK_LENGTH - 1, CHUNK_LENGTH - 2, z },
@@ -1628,7 +1628,7 @@ void hvox::ChunkNavmeshTask<IsSolid>::execute(
                     neighbour, { x, 0, CHUNK_LENGTH - 1 }, { x, 0, 0 }, 2, 0
                 );
 
-                // y == CHUNK_LENGTH - 2
+                // y == CHUNK_LENGTH - 2 - step down or across
                 do_side_stitch_navigable_check(
                     neighbour,
                     { x, CHUNK_LENGTH - 2, CHUNK_LENGTH - 1 },
@@ -1798,7 +1798,7 @@ void hvox::ChunkNavmeshTask<IsSolid>::execute(
                     neighbour, { x, 0, 0 }, { x, 0, CHUNK_LENGTH - 1 }, 2, 0
                 );
 
-                // y == CHUNK_LENGTH - 2
+                // y == CHUNK_LENGTH - 2 - step down or across
                 do_side_stitch_navigable_check(
                     neighbour,
                     { x, CHUNK_LENGTH - 2, 0 },
@@ -2649,15 +2649,6 @@ void hvox::ChunkNavmeshTask<IsSolid>::execute(
             // Note only one of top or bottom stitch will ever be done for any pair of
             // chunks, so we must do this next part in both cases.
 
-            // Special handling for
-            //      x == 0, CHUNK_LENGTH - 1
-            // where chunks diagonal need to be loaded too.
-
-            // Check internal steps (step up into above neighbour, step across into
-            // self, and so on).
-            for (BlockChunkPositionCoord z = 1; z < CHUNK_LENGTH - 1; ++z) {
-            }
-
             // Check step up into neighbour adjacent to left edge.
             {
                 auto       neighbour         = chunk->neighbours.one.left.lock();
@@ -2668,6 +2659,15 @@ void hvox::ChunkNavmeshTask<IsSolid>::execute(
                         left_stitch_state, ChunkState::ACTIVE
                     ))
                 { }
+            }
+
+            // Special handling for
+            //      x == 0, CHUNK_LENGTH - 1
+            // where chunks diagonal need to be loaded too.
+
+            // Check internal steps (step up into above neighbour, step across into
+            // self, and so on).
+            for (BlockChunkPositionCoord z = 1; z < CHUNK_LENGTH - 1; ++z) {
             }
 
             // Special handling for
