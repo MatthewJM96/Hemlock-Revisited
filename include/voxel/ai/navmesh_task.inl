@@ -1419,6 +1419,8 @@ void hvox::ChunkNavmeshTask<IsSolid>::execute(
                         );
                     }
                 }
+
+                below_neighbour->navmesh_stitch.above_right.store(ChunkState::COMPLETE);
             }
 
             neighbour->navmesh_stitch.right.store(ChunkState::COMPLETE);
@@ -1589,6 +1591,8 @@ void hvox::ChunkNavmeshTask<IsSolid>::execute(
                         );
                     }
                 }
+
+                below_neighbour->navmesh_stitch.above_left.store(ChunkState::COMPLETE);
             }
 
             chunk->navmesh_stitch.right.store(ChunkState::COMPLETE);
@@ -1758,6 +1762,8 @@ void hvox::ChunkNavmeshTask<IsSolid>::execute(
                         );
                     }
                 }
+
+                below_neighbour->navmesh_stitch.above_back.store(ChunkState::COMPLETE);
             }
 
             chunk->navmesh_stitch.front.store(ChunkState::COMPLETE);
@@ -1927,6 +1933,8 @@ void hvox::ChunkNavmeshTask<IsSolid>::execute(
                         );
                     }
                 }
+
+                below_neighbour->navmesh_stitch.above_front.store(ChunkState::COMPLETE);
             }
 
             neighbour->navmesh_stitch.front.store(ChunkState::COMPLETE);
