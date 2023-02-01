@@ -1352,6 +1352,10 @@ void hvox::ChunkNavmeshTask<IsSolid>::execute(
                             = this_block_vertex.in_below_neighbour;
                     }
 
+                    BlockIndex twice_above_candidate_index = hvox::block_index({ CHUNK_LENGTH - 1, 1, z });
+                    Block*     twice_above_candidate_block
+                        = &neighbour->blocks[twice_above_candidate_index];
+
                     BlockIndex above_candidate_index
                         = hvox::block_index({ CHUNK_LENGTH - 1, 0, z });
                     Block* above_candidate_block
@@ -1361,7 +1365,7 @@ void hvox::ChunkNavmeshTask<IsSolid>::execute(
                         = hvox::block_index({ CHUNK_LENGTH - 1, CHUNK_LENGTH - 1, z });
                     Block* candidate_block = &below_neighbour->blocks[candidate_index];
 
-                    if (is_solid(candidate_block) && !is_solid(above_candidate_block)) {
+                    if (is_solid(candidate_block) && !is_solid(above_candidate_block) && !is_solid(twice_above_candidate_block)) {
                         struct {
                             ChunkNavmeshVertexDescriptor here, in_below_neighbour;
                         } candidate_block_vertex = {};
@@ -1525,6 +1529,10 @@ void hvox::ChunkNavmeshTask<IsSolid>::execute(
                             = this_block_vertex.in_below_neighbour;
                     }
 
+                    BlockIndex twice_above_candidate_index = hvox::block_index({ 0, 1, z });
+                    Block*     twice_above_candidate_block
+                        = &neighbour->blocks[twice_above_candidate_index];
+
                     BlockIndex above_candidate_index = hvox::block_index({ 0, 0, z });
                     Block*     above_candidate_block
                         = &neighbour->blocks[above_candidate_index];
@@ -1533,7 +1541,7 @@ void hvox::ChunkNavmeshTask<IsSolid>::execute(
                         = hvox::block_index({ 0, CHUNK_LENGTH - 1, z });
                     Block* candidate_block = &below_neighbour->blocks[candidate_index];
 
-                    if (is_solid(candidate_block) && !is_solid(above_candidate_block)) {
+                    if (is_solid(candidate_block) && !is_solid(above_candidate_block) && !is_solid(twice_above_candidate_block)) {
                         struct {
                             ChunkNavmeshVertexDescriptor here, in_below_neighbour;
                         } candidate_block_vertex = {};
@@ -1696,6 +1704,10 @@ void hvox::ChunkNavmeshTask<IsSolid>::execute(
                             = this_block_vertex.in_below_neighbour;
                     }
 
+                    BlockIndex twice_above_candidate_index = hvox::block_index({ x, 1, 0 });
+                    Block*     twice_above_candidate_block
+                        = &neighbour->blocks[twice_above_candidate_index];
+
                     BlockIndex above_candidate_index = hvox::block_index({ x, 0, 0 });
                     Block*     above_candidate_block
                         = &neighbour->blocks[above_candidate_index];
@@ -1704,7 +1716,7 @@ void hvox::ChunkNavmeshTask<IsSolid>::execute(
                         = hvox::block_index({ x, CHUNK_LENGTH - 1, 0 });
                     Block* candidate_block = &below_neighbour->blocks[candidate_index];
 
-                    if (is_solid(candidate_block) && !is_solid(above_candidate_block)) {
+                    if (is_solid(candidate_block) && !is_solid(above_candidate_block) && !is_solid(twice_above_candidate_block)) {
                         struct {
                             ChunkNavmeshVertexDescriptor here, in_below_neighbour;
                         } candidate_block_vertex = {};
@@ -1866,6 +1878,10 @@ void hvox::ChunkNavmeshTask<IsSolid>::execute(
                             = this_block_vertex.in_below_neighbour;
                     }
 
+                    BlockIndex twice_above_candidate_index = hvox::block_index({ x, 1, CHUNK_LENGTH - 1 });
+                    Block*     twice_above_candidate_block
+                        = &neighbour->blocks[twice_above_candidate_index];
+
                     BlockIndex above_candidate_index
                         = hvox::block_index({ x, 0, CHUNK_LENGTH - 1 });
                     Block* above_candidate_block
@@ -1875,7 +1891,7 @@ void hvox::ChunkNavmeshTask<IsSolid>::execute(
                         = hvox::block_index({ x, CHUNK_LENGTH - 1, CHUNK_LENGTH - 1 });
                     Block* candidate_block = &below_neighbour->blocks[candidate_index];
 
-                    if (is_solid(candidate_block) && !is_solid(above_candidate_block)) {
+                    if (is_solid(candidate_block) && !is_solid(above_candidate_block) && !is_solid(twice_above_candidate_block)) {
                         struct {
                             ChunkNavmeshVertexDescriptor here, in_below_neighbour;
                         } candidate_block_vertex = {};
