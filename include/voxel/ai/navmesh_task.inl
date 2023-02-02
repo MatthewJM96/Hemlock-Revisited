@@ -3194,9 +3194,573 @@ void hvox::ChunkNavmeshTask<IsSolid>::execute(
                     below_neighbour->navmesh_stitch.above_back.store(ChunkState::COMPLETE);
                 }
             }
+
+            // Check step up from second-to-top layer of chunk to each adjacent neighbour of above chunk,
+            // and check step across and down from top layer of chunk to each adjacent neighbour of this and above chunk.
+
+            // Left
+            {
+                auto       left_neighbour                    = chunk->neighbours.one.left.lock();
+                ChunkState left_neighbour_stitch_state       = ChunkState::NONE;
+                auto       above_left_neighbour              = neighbour->neighbours.one.left.lock();
+                ChunkState above_left_neighbour_stitch_state = ChunkState::NONE;
+                if (left_neighbour != nullptr
+                    && above_left_neighbour != nullptr
+                    && left_neighbour->bulk_navmeshing.load() == ChunkState::COMPLETE
+                    && above_left_neighbour->bulk_navmeshing.load() == ChunkState::COMPLETE
+                    && chunk->navmesh_stitch.above_and_across_left.compare_exchange_strong(
+                        left_of_neighbour_stitch_state, ChunkState::ACTIVE
+                    ))
+                {
+                    auto left_neighbour_lock
+                        = std::shared_lock(left_neighbour->blocks_mutex);
+                    auto above_left_neighbour_lock
+                        = std::shared_lock(above_left_neighbour->blocks_mutex);
+
+                    // Step up from y == CHUNK_LENGTH - 2
+                    for (BlockChunkPositionCoord z = 0; z < CHUNK_LENGTH; ++z) {
+                        BlockIndex this_block_index
+                            = hvox::block_index({ 0, CHUNK_LENGTH - 2, z });
+                        Block* this_block = &chunk->blocks[this_block_index];
+
+                        BlockIndex above_this_block_index
+                            = hvox::block_index({ 0, CHUNK_LENGTH - 1, z });
+                        Block* above_this_block = &chunk->blocks[above_this_block_index];
+
+                        BlockIndex twice_above_this_block_index
+                            = hvox::block_index({ 0, 0, z });
+                        Block* twice_above_this_block = &neighbour->blocks[twice_above_this_block_index];
+
+                        if (!is_solid(this_block) || is_solid(above_this_block) || is_solid(twice_above_this_block)) continue;
+
+                        struct {
+                            ChunkNavmeshVertexDescriptor here, in_left_neighbour;
+                        } this_block_vertex = {};
+
+                        ChunkNavmeshNode this_block_coord = {
+                            { 0, CHUNK_LENGTH - 2, z },
+                            chunk_pos
+                        };
+
+                        try {
+                            this_block_vertex.here
+                                = chunk->navmesh.coord_vertex_map.at(this_block_coord);
+                        } catch (std::out_of_range) {
+                            this_block_vertex.here
+                                = boost::add_vertex(chunk->navmesh.graph);
+                            chunk->navmesh.coord_vertex_map[this_block_coord]
+                                = this_block_vertex.here;
+                        }
+
+                        try {
+                            this_block_vertex.in_left_neighbour
+                                = left_neighbour->navmesh.coord_vertex_map.at(
+                                    this_block_coord
+                                );
+                        } catch (std::out_of_range) {
+                            this_block_vertex.in_left_neighbour
+                                = boost::add_vertex(neighbour->navmesh.graph);
+                            left_neighbour->navmesh.coord_vertex_map[this_block_coord]
+                                = this_block_vertex.in_left_neighbour;
+                        }
+
+                        BlockIndex above_candidate_index = hvox::block_index({ CHUNK_LENGTH - 1, 0, z });
+                        Block*     above_candidate_block = &above_left_neighbour->blocks[above_candidate_index];
+
+                        BlockIndex candidate_index = hvox::block_index({ CHUNK_LENGTH - 1, CHUNK_LENGTH - 1, z });
+                        Block* candidate_block     = &left_neighbour->blocks[candidate_index];
+
+                        if (!is_solid(candidate_block) || is_solid(above_candidate_block)) continue;
+
+                        struct {
+                            ChunkNavmeshVertexDescriptor here, in_left_neighbour;
+                        } candidate_block_vertex = {};
+
+                        ChunkNavmeshNode candidate_block_coord = {
+                            { CHUNK_LENGTH - 1, CHUNK_LENGTH - 1, z },
+                            left_neighbour->position
+                        };
+
+                        try {
+                            candidate_block_vertex.here
+                                = chunk->navmesh.coord_vertex_map.at(
+                                    candidate_block_coord
+                                );
+                        } catch (std::out_of_range) {
+                            candidate_block_vertex.here
+                                = boost::add_vertex(chunk->navmesh.graph);
+                            chunk->navmesh.coord_vertex_map[candidate_block_coord]
+                                = candidate_block_vertex.here;
+                        }
+
+                        try {
+                            candidate_block_vertex.in_left_neighbour
+                                = left_neighbour->navmesh.coord_vertex_map.at(
+                                    candidate_block_coord
+                                );
+                        } catch (std::out_of_range) {
+                            candidate_block_vertex.in_left_neighbour
+                                = boost::add_vertex(left_neighbour->navmesh.graph);
+                            left_neighbour->navmesh
+                                .coord_vertex_map[candidate_block_coord]
+                                = candidate_block_vertex.in_left_neighbour;
+                        }
+
+                        boost::add_edge(
+                            this_block_vertex.here,
+                            candidate_block_vertex.here,
+                            chunk->navmesh.graph
+                        );
+                        boost::add_edge(
+                            candidate_block_vertex.here,
+                            this_block_vertex.here,
+                            chunk->navmesh.graph
+                        );
+
+                        boost::add_edge(
+                            this_block_vertex.in_left_neighbour,
+                            candidate_block_vertex.in_left_neighbour,
+                            left_neighbour->navmesh.graph
+                        );
+                        boost::add_edge(
+                            candidate_block_vertex.in_left_neighbour,
+                            this_block_vertex.in_left_neighbour,
+                            left_neighbour->navmesh.graph
+                        );
+                    }
+
+                    // Step across and down from y == CHUNK_LENGTH - 1
+
+                    ////////////////////////////////////////////////////
+                    // TODO(Matthew): HERE
+                    ////////////////////////////////////////////////////
+
+                    chunk->navmesh_stitch.above_and_across_left.store(ChunkState::COMPLETE);
+                }
             }
 
-            chunk->navmesh_stitch.top.store(ChunkState::COMPLETE);
+            // Right
+            {
+                auto       right_neighbour                    = chunk->neighbours.one.right.lock();
+                ChunkState right_neighbour_stitch_state       = ChunkState::NONE;
+                auto       above_right_neighbour              = neighbour->neighbours.one.right.lock();
+                ChunkState above_right_neighbour_stitch_state = ChunkState::NONE;
+                if (right_neighbour != nullptr
+                    && above_right_neighbour != nullptr
+                    && right_neighbour->bulk_navmeshing.load() == ChunkState::COMPLETE
+                    && above_right_neighbour->bulk_navmeshing.load() == ChunkState::COMPLETE
+                    && chunk->navmesh_stitch.above_and_across_right.compare_exchange_strong(
+                        right_of_neighbour_stitch_state, ChunkState::ACTIVE
+                    ))
+                {
+                    auto right_neighbour_lock
+                        = std::shared_lock(right_neighbour->blocks_mutex);
+                    auto above_right_neighbour_lock
+                        = std::shared_lock(above_right_neighbour->blocks_mutex);
+
+                    // Step up from y == CHUNK_LENGTH - 2
+                    for (BlockChunkPositionCoord z = 0; z < CHUNK_LENGTH; ++z) {
+                        BlockIndex this_block_index
+                            = hvox::block_index({ CHUNK_LENGTH - 1, CHUNK_LENGTH - 2, z });
+                        Block* this_block = &chunk->blocks[this_block_index];
+
+                        BlockIndex above_this_block_index
+                            = hvox::block_index({ CHUNK_LENGTH - 1, CHUNK_LENGTH - 1, z });
+                        Block* above_this_block = &chunk->blocks[above_this_block_index];
+
+                        BlockIndex twice_above_this_block_index
+                            = hvox::block_index({ CHUNK_LENGTH - 1, 0, z });
+                        Block* twice_above_this_block = &neighbour->blocks[twice_above_this_block_index];
+
+                        if (!is_solid(this_block) || is_solid(above_this_block) || is_solid(twice_above_this_block)) continue;
+
+                        struct {
+                            ChunkNavmeshVertexDescriptor here, in_right_neighbour;
+                        } this_block_vertex = {};
+
+                        ChunkNavmeshNode this_block_coord = {
+                            { CHUNK_LENGTH - 1, CHUNK_LENGTH - 2, z },
+                            chunk_pos
+                        };
+
+                        try {
+                            this_block_vertex.here
+                                = chunk->navmesh.coord_vertex_map.at(this_block_coord);
+                        } catch (std::out_of_range) {
+                            this_block_vertex.here
+                                = boost::add_vertex(chunk->navmesh.graph);
+                            chunk->navmesh.coord_vertex_map[this_block_coord]
+                                = this_block_vertex.here;
+                        }
+
+                        try {
+                            this_block_vertex.in_right_neighbour
+                                = right_neighbour->navmesh.coord_vertex_map.at(
+                                    this_block_coord
+                                );
+                        } catch (std::out_of_range) {
+                            this_block_vertex.in_right_neighbour
+                                = boost::add_vertex(neighbour->navmesh.graph);
+                            right_neighbour->navmesh.coord_vertex_map[this_block_coord]
+                                = this_block_vertex.in_right_neighbour;
+                        }
+
+                        BlockIndex above_candidate_index = hvox::block_index({ 0, 0, z });
+                        Block*     above_candidate_block = &above_right_neighbour->blocks[above_candidate_index];
+
+                        BlockIndex candidate_index = hvox::block_index({ 0, CHUNK_LENGTH - 1, z });
+                        Block* candidate_block     = &right_neighbour->blocks[candidate_index];
+
+                        if (!is_solid(candidate_block) || is_solid(above_candidate_block)) continue;
+
+                        struct {
+                            ChunkNavmeshVertexDescriptor here, in_right_neighbour;
+                        } candidate_block_vertex = {};
+
+                        ChunkNavmeshNode candidate_block_coord = {
+                            { 0, CHUNK_LENGTH - 1, z },
+                            right_neighbour->position
+                        };
+
+                        try {
+                            candidate_block_vertex.here
+                                = chunk->navmesh.coord_vertex_map.at(
+                                    candidate_block_coord
+                                );
+                        } catch (std::out_of_range) {
+                            candidate_block_vertex.here
+                                = boost::add_vertex(chunk->navmesh.graph);
+                            chunk->navmesh.coord_vertex_map[candidate_block_coord]
+                                = candidate_block_vertex.here;
+                        }
+
+                        try {
+                            candidate_block_vertex.in_right_neighbour
+                                = right_neighbour->navmesh.coord_vertex_map.at(
+                                    candidate_block_coord
+                                );
+                        } catch (std::out_of_range) {
+                            candidate_block_vertex.in_right_neighbour
+                                = boost::add_vertex(right_neighbour->navmesh.graph);
+                            right_neighbour->navmesh
+                                .coord_vertex_map[candidate_block_coord]
+                                = candidate_block_vertex.in_right_neighbour;
+                        }
+
+                        boost::add_edge(
+                            this_block_vertex.here,
+                            candidate_block_vertex.here,
+                            chunk->navmesh.graph
+                        );
+                        boost::add_edge(
+                            candidate_block_vertex.here,
+                            this_block_vertex.here,
+                            chunk->navmesh.graph
+                        );
+
+                        boost::add_edge(
+                            this_block_vertex.in_right_neighbour,
+                            candidate_block_vertex.in_right_neighbour,
+                            right_neighbour->navmesh.graph
+                        );
+                        boost::add_edge(
+                            candidate_block_vertex.in_right_neighbour,
+                            this_block_vertex.in_right_neighbour,
+                            right_neighbour->navmesh.graph
+                        );
+                    }
+
+                    // Step across and down from y == CHUNK_LENGTH - 1
+
+                    ////////////////////////////////////////////////////
+                    // TODO(Matthew): HERE
+                    ////////////////////////////////////////////////////
+
+                    chunk->navmesh_stitch.above_and_across_right.store(ChunkState::COMPLETE);
+                }
+            }
+
+            // Front
+            {
+                auto       front_neighbour                    = chunk->neighbours.one.front.lock();
+                ChunkState front_neighbour_stitch_state       = ChunkState::NONE;
+                auto       above_front_neighbour              = neighbour->neighbours.one.front.lock();
+                ChunkState above_front_neighbour_stitch_state = ChunkState::NONE;
+                if (front_neighbour != nullptr
+                    && above_front_neighbour != nullptr
+                    && front_neighbour->bulk_navmeshing.load() == ChunkState::COMPLETE
+                    && above_front_neighbour->bulk_navmeshing.load() == ChunkState::COMPLETE
+                    && chunk->navmesh_stitch.above_and_across_front.compare_exchange_strong(
+                        front_of_neighbour_stitch_state, ChunkState::ACTIVE
+                    ))
+                {
+                    auto front_neighbour_lock
+                        = std::shared_lock(front_neighbour->blocks_mutex);
+                    auto above_front_neighbour_lock
+                        = std::shared_lock(above_front_neighbour->blocks_mutex);
+
+                    // Step up from y == CHUNK_LENGTH - 2
+                    for (BlockChunkPositionCoord x = 0; x < CHUNK_LENGTH; ++x) {
+                        BlockIndex this_block_index
+                            = hvox::block_index({ x, CHUNK_LENGTH - 2, CHUNK_LENGTH - 1 });
+                        Block* this_block = &chunk->blocks[this_block_index];
+
+                        BlockIndex above_this_block_index
+                            = hvox::block_index({ x, CHUNK_LENGTH - 1, CHUNK_LENGTH - 1 });
+                        Block* above_this_block = &chunk->blocks[above_this_block_index];
+
+                        BlockIndex twice_above_this_block_index
+                            = hvox::block_index({ x, 0, CHUNK_LENGTH - 1 });
+                        Block* twice_above_this_block = &neighbour->blocks[twice_above_this_block_index];
+
+                        if (!is_solid(this_block) || is_solid(above_this_block) || is_solid(twice_above_this_block)) continue;
+
+                        struct {
+                            ChunkNavmeshVertexDescriptor here, in_front_neighbour;
+                        } this_block_vertex = {};
+
+                        ChunkNavmeshNode this_block_coord = {
+                            { CHUNK_LENGTH - 1, CHUNK_LENGTH - 2, z },
+                            chunk_pos
+                        };
+
+                        try {
+                            this_block_vertex.here
+                                = chunk->navmesh.coord_vertex_map.at(this_block_coord);
+                        } catch (std::out_of_range) {
+                            this_block_vertex.here
+                                = boost::add_vertex(chunk->navmesh.graph);
+                            chunk->navmesh.coord_vertex_map[this_block_coord]
+                                = this_block_vertex.here;
+                        }
+
+                        try {
+                            this_block_vertex.in_front_neighbour
+                                = front_neighbour->navmesh.coord_vertex_map.at(
+                                    this_block_coord
+                                );
+                        } catch (std::out_of_range) {
+                            this_block_vertex.in_front_neighbour
+                                = boost::add_vertex(neighbour->navmesh.graph);
+                            front_neighbour->navmesh.coord_vertex_map[this_block_coord]
+                                = this_block_vertex.in_front_neighbour;
+                        }
+
+                        BlockIndex above_candidate_index = hvox::block_index({ x, 0, 0 });
+                        Block*     above_candidate_block = &above_front_neighbour->blocks[above_candidate_index];
+
+                        BlockIndex candidate_index = hvox::block_index({ x, CHUNK_LENGTH - 1, 0 });
+                        Block* candidate_block     = &front_neighbour->blocks[candidate_index];
+
+                        if (!is_solid(candidate_block) || is_solid(above_candidate_block)) continue;
+
+                        struct {
+                            ChunkNavmeshVertexDescriptor here, in_front_neighbour;
+                        } candidate_block_vertex = {};
+
+                        ChunkNavmeshNode candidate_block_coord = {
+                            { x, CHUNK_LENGTH - 1, 0 },
+                            front_neighbour->position
+                        };
+
+                        try {
+                            candidate_block_vertex.here
+                                = chunk->navmesh.coord_vertex_map.at(
+                                    candidate_block_coord
+                                );
+                        } catch (std::out_of_range) {
+                            candidate_block_vertex.here
+                                = boost::add_vertex(chunk->navmesh.graph);
+                            chunk->navmesh.coord_vertex_map[candidate_block_coord]
+                                = candidate_block_vertex.here;
+                        }
+
+                        try {
+                            candidate_block_vertex.in_front_neighbour
+                                = front_neighbour->navmesh.coord_vertex_map.at(
+                                    candidate_block_coord
+                                );
+                        } catch (std::out_of_range) {
+                            candidate_block_vertex.in_front_neighbour
+                                = boost::add_vertex(front_neighbour->navmesh.graph);
+                            front_neighbour->navmesh
+                                .coord_vertex_map[candidate_block_coord]
+                                = candidate_block_vertex.in_front_neighbour;
+                        }
+
+                        boost::add_edge(
+                            this_block_vertex.here,
+                            candidate_block_vertex.here,
+                            chunk->navmesh.graph
+                        );
+                        boost::add_edge(
+                            candidate_block_vertex.here,
+                            this_block_vertex.here,
+                            chunk->navmesh.graph
+                        );
+
+                        boost::add_edge(
+                            this_block_vertex.in_front_neighbour,
+                            candidate_block_vertex.in_front_neighbour,
+                            front_neighbour->navmesh.graph
+                        );
+                        boost::add_edge(
+                            candidate_block_vertex.in_front_neighbour,
+                            this_block_vertex.in_front_neighbour,
+                            front_neighbour->navmesh.graph
+                        );
+                    }
+
+                    // Step across and down from y == CHUNK_LENGTH - 1
+
+                    ////////////////////////////////////////////////////
+                    // TODO(Matthew): HERE
+                    ////////////////////////////////////////////////////
+
+                    chunk->navmesh_stitch.above_and_across_front.store(ChunkState::COMPLETE);
+                }
+            }
+
+            // Back
+            {
+                auto       back_neighbour                    = chunk->neighbours.one.back.lock();
+                ChunkState back_neighbour_stitch_state       = ChunkState::NONE;
+                auto       above_back_neighbour              = neighbour->neighbours.one.back.lock();
+                ChunkState above_back_neighbour_stitch_state = ChunkState::NONE;
+                if (back_neighbour != nullptr
+                    && above_back_neighbour != nullptr
+                    && back_neighbour->bulk_navmeshing.load() == ChunkState::COMPLETE
+                    && above_back_neighbour->bulk_navmeshing.load() == ChunkState::COMPLETE
+                    && chunk->navmesh_stitch.above_and_across_back.compare_exchange_strong(
+                        back_of_neighbour_stitch_state, ChunkState::ACTIVE
+                    ))
+                {
+                    auto back_neighbour_lock
+                        = std::shared_lock(back_neighbour->blocks_mutex);
+                    auto above_back_neighbour_lock
+                        = std::shared_lock(above_back_neighbour->blocks_mutex);
+
+                    // Step up from y == CHUNK_LENGTH - 2
+                    for (BlockChunkPositionCoord x = 0; x < CHUNK_LENGTH; ++x) {
+                        BlockIndex this_block_index
+                            = hvox::block_index({ x, CHUNK_LENGTH - 2, 0 });
+                        Block* this_block = &chunk->blocks[this_block_index];
+
+                        BlockIndex above_this_block_index
+                            = hvox::block_index({ x, CHUNK_LENGTH - 1, 0 });
+                        Block* above_this_block = &chunk->blocks[above_this_block_index];
+
+                        BlockIndex twice_above_this_block_index
+                            = hvox::block_index({ CHUNK_LENGTH - 1, 0, 0 });
+                        Block* twice_above_this_block = &neighbour->blocks[twice_above_this_block_index];
+
+                        if (!is_solid(this_block) || is_solid(above_this_block) || is_solid(twice_above_this_block)) continue;
+
+                        struct {
+                            ChunkNavmeshVertexDescriptor here, in_back_neighbour;
+                        } this_block_vertex = {};
+
+                        ChunkNavmeshNode this_block_coord = {
+                            { x, CHUNK_LENGTH - 2, 0 },
+                            chunk_pos
+                        };
+
+                        try {
+                            this_block_vertex.here
+                                = chunk->navmesh.coord_vertex_map.at(this_block_coord);
+                        } catch (std::out_of_range) {
+                            this_block_vertex.here
+                                = boost::add_vertex(chunk->navmesh.graph);
+                            chunk->navmesh.coord_vertex_map[this_block_coord]
+                                = this_block_vertex.here;
+                        }
+
+                        try {
+                            this_block_vertex.in_back_neighbour
+                                = back_neighbour->navmesh.coord_vertex_map.at(
+                                    this_block_coord
+                                );
+                        } catch (std::out_of_range) {
+                            this_block_vertex.in_back_neighbour
+                                = boost::add_vertex(neighbour->navmesh.graph);
+                            back_neighbour->navmesh.coord_vertex_map[this_block_coord]
+                                = this_block_vertex.in_back_neighbour;
+                        }
+
+                        BlockIndex above_candidate_index = hvox::block_index({ x, 0, CHUNK_LENGTH - 1 });
+                        Block*     above_candidate_block = &above_back_neighbour->blocks[above_candidate_index];
+
+                        BlockIndex candidate_index = hvox::block_index({ x, CHUNK_LENGTH - 1, CHUNK_LENGTH - 1 });
+                        Block* candidate_block     = &back_neighbour->blocks[candidate_index];
+
+                        if (!is_solid(candidate_block) || is_solid(above_candidate_block)) continue;
+
+                        struct {
+                            ChunkNavmeshVertexDescriptor here, in_back_neighbour;
+                        } candidate_block_vertex = {};
+
+                        ChunkNavmeshNode candidate_block_coord = {
+                            { x, CHUNK_LENGTH - 1, CHUNK_LENGTH - 1 },
+                            back_neighbour->position
+                        };
+
+                        try {
+                            candidate_block_vertex.here
+                                = chunk->navmesh.coord_vertex_map.at(
+                                    candidate_block_coord
+                                );
+                        } catch (std::out_of_range) {
+                            candidate_block_vertex.here
+                                = boost::add_vertex(chunk->navmesh.graph);
+                            chunk->navmesh.coord_vertex_map[candidate_block_coord]
+                                = candidate_block_vertex.here;
+                        }
+
+                        try {
+                            candidate_block_vertex.in_back_neighbour
+                                = back_neighbour->navmesh.coord_vertex_map.at(
+                                    candidate_block_coord
+                                );
+                        } catch (std::out_of_range) {
+                            candidate_block_vertex.in_back_neighbour
+                                = boost::add_vertex(back_neighbour->navmesh.graph);
+                            back_neighbour->navmesh
+                                .coord_vertex_map[candidate_block_coord]
+                                = candidate_block_vertex.in_back_neighbour;
+                        }
+
+                        boost::add_edge(
+                            this_block_vertex.here,
+                            candidate_block_vertex.here,
+                            chunk->navmesh.graph
+                        );
+                        boost::add_edge(
+                            candidate_block_vertex.here,
+                            this_block_vertex.here,
+                            chunk->navmesh.graph
+                        );
+
+                        boost::add_edge(
+                            this_block_vertex.in_back_neighbour,
+                            candidate_block_vertex.in_back_neighbour,
+                            back_neighbour->navmesh.graph
+                        );
+                        boost::add_edge(
+                            candidate_block_vertex.in_back_neighbour,
+                            this_block_vertex.in_back_neighbour,
+                            back_neighbour->navmesh.graph
+                        );
+                    }
+
+                    // Step across and down from y == CHUNK_LENGTH - 1
+
+                    ////////////////////////////////////////////////////
+                    // TODO(Matthew): HERE
+                    ////////////////////////////////////////////////////
+
+                    chunk->navmesh_stitch.above_and_across_back.store(ChunkState::COMPLETE);
+                }
+            }
         }
     }
 
