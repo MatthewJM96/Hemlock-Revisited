@@ -11,6 +11,7 @@
 //                of height of the gap. Do we want different implementations? As part of
 //                the above provide each as optionals with a default?
 // TODO(Matthew): features to consider support for:
+//                  - diagnonal movement
 //                  - liquids
 //                  - jumping with horizontal distance as well as vertical,
 //                  - climbing (ladders, or generally),
