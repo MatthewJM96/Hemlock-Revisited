@@ -12,8 +12,13 @@ hvox::Chunk::Chunk() :
     meshing(ChunkState::NONE),
     mesh_uploading(ChunkState::NONE),
     navmeshing(ChunkState::NONE),
-    navmesh_stitch({ ChunkState::NONE, ChunkState::NONE, ChunkState::NONE, ChunkState::NONE, ChunkState::NONE, ChunkState::NONE, ChunkState::NONE }
-    ) { /* Empty. */
+    navmesh_stitch({ ChunkState::NONE,
+                     ChunkState::NONE,
+                     ChunkState::NONE,
+                     ChunkState::NONE,
+                     ChunkState::NONE,
+                     ChunkState::NONE,
+                     ChunkState::NONE }) { /* Empty. */
 }
 
 hvox::Chunk::~Chunk() {

@@ -158,7 +158,8 @@ bool hscript::lua::LuaValue<Type>::try_retrieve(
         // For each index in type, test it has a
         // corresponding value on the Lua stack.
         for (ui32 idx = 0; idx < -value_count(); ++idx) {
-            if (!LuaValue<decltype(Type{}[0])>::test_index(state, index - idx)) return false;
+            if (!LuaValue<decltype(Type{}[0])>::test_index(state, index - idx))
+                return false;
         }
         // We can pop the compound type!
         value = retrieve<RemoveValue>(state, index);
