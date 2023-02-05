@@ -1525,7 +1525,7 @@ void hvox::ChunkNavmeshTask<IsSolid>::execute(
                             );
                     } catch (std::out_of_range) {
                         this_block_vertex.in_below_neighbour
-                            = boost::add_vertex(neighbour->navmesh.graph);
+                            = boost::add_vertex(below_neighbour->navmesh.graph);
                         below_neighbour->navmesh.coord_vertex_map[this_block_coord]
                             = this_block_vertex.in_below_neighbour;
                     }
@@ -1700,7 +1700,7 @@ void hvox::ChunkNavmeshTask<IsSolid>::execute(
                             );
                     } catch (std::out_of_range) {
                         this_block_vertex.in_below_neighbour
-                            = boost::add_vertex(neighbour->navmesh.graph);
+                            = boost::add_vertex(below_neighbour->navmesh.graph);
                         below_neighbour->navmesh.coord_vertex_map[this_block_coord]
                             = this_block_vertex.in_below_neighbour;
                     }
@@ -1874,7 +1874,7 @@ void hvox::ChunkNavmeshTask<IsSolid>::execute(
                             );
                     } catch (std::out_of_range) {
                         this_block_vertex.in_below_neighbour
-                            = boost::add_vertex(neighbour->navmesh.graph);
+                            = boost::add_vertex(below_neighbour->navmesh.graph);
                         below_neighbour->navmesh.coord_vertex_map[this_block_coord]
                             = this_block_vertex.in_below_neighbour;
                     }
@@ -2348,13 +2348,13 @@ void hvox::ChunkNavmeshTask<IsSolid>::execute(
                                 try {
                                     left_of_this_block_vertex
                                         = chunk->navmesh.coord_vertex_map.at(
-                                            left_of_neighbour_block_coord
+                                            left_of_this_block_coord
                                         );
                                 } catch (std::out_of_range) {
                                     left_of_this_block_vertex
                                         = boost::add_vertex(chunk->navmesh.graph);
                                     chunk->navmesh
-                                        .coord_vertex_map[left_of_neighbour_block_coord]
+                                        .coord_vertex_map[left_of_this_block_coord]
                                         = left_of_this_block_vertex;
                                 }
 
@@ -2384,13 +2384,13 @@ void hvox::ChunkNavmeshTask<IsSolid>::execute(
                                 try {
                                     left_of_and_below_this_block_vertex
                                         = chunk->navmesh.coord_vertex_map.at(
-                                            left_of_and_below_neighbour_block_coord
+                                            left_of_and_below_this_block_coord
                                         );
                                 } catch (std::out_of_range) {
                                     left_of_and_below_this_block_vertex
                                         = boost::add_vertex(chunk->navmesh.graph);
                                     chunk->navmesh
-                                        .coord_vertex_map[left_of_and_below_neighbour_block_coord]
+                                        .coord_vertex_map[left_of_and_below_this_block_coord]
                                         = left_of_and_below_this_block_vertex;
                                 }
 
@@ -2435,13 +2435,13 @@ void hvox::ChunkNavmeshTask<IsSolid>::execute(
                                 try {
                                     right_of_this_block_vertex
                                         = chunk->navmesh.coord_vertex_map.at(
-                                            right_of_neighbour_block_coord
+                                            right_of_this_block_coord
                                         );
                                 } catch (std::out_of_range) {
                                     right_of_this_block_vertex
                                         = boost::add_vertex(chunk->navmesh.graph);
                                     chunk->navmesh
-                                        .coord_vertex_map[right_of_neighbour_block_coord]
+                                        .coord_vertex_map[right_of_this_block_coord]
                                         = right_of_this_block_vertex;
                                 }
 
@@ -2471,13 +2471,13 @@ void hvox::ChunkNavmeshTask<IsSolid>::execute(
                                 try {
                                     right_of_and_below_this_block_vertex
                                         = chunk->navmesh.coord_vertex_map.at(
-                                            right_of_and_below_neighbour_block_coord
+                                            right_of_and_below_this_block_coord
                                         );
                                 } catch (std::out_of_range) {
                                     right_of_and_below_this_block_vertex
                                         = boost::add_vertex(chunk->navmesh.graph);
                                     chunk->navmesh
-                                        .coord_vertex_map[right_of_and_below_neighbour_block_coord]
+                                        .coord_vertex_map[right_of_and_below_this_block_coord]
                                         = right_of_and_below_this_block_vertex;
                                 }
 
@@ -2522,13 +2522,13 @@ void hvox::ChunkNavmeshTask<IsSolid>::execute(
                                 try {
                                     front_of_this_block_vertex
                                         = chunk->navmesh.coord_vertex_map.at(
-                                            front_of_neighbour_block_coord
+                                            front_of_this_block_coord
                                         );
                                 } catch (std::out_of_range) {
                                     front_of_this_block_vertex
                                         = boost::add_vertex(chunk->navmesh.graph);
                                     chunk->navmesh
-                                        .coord_vertex_map[front_of_neighbour_block_coord]
+                                        .coord_vertex_map[front_of_this_block_coord]
                                         = front_of_this_block_vertex;
                                 }
 
@@ -2558,13 +2558,13 @@ void hvox::ChunkNavmeshTask<IsSolid>::execute(
                                 try {
                                     front_of_and_below_this_block_vertex
                                         = chunk->navmesh.coord_vertex_map.at(
-                                            front_of_and_below_neighbour_block_coord
+                                            front_of_and_below_this_block_coord
                                         );
                                 } catch (std::out_of_range) {
                                     front_of_and_below_this_block_vertex
                                         = boost::add_vertex(chunk->navmesh.graph);
                                     chunk->navmesh
-                                        .coord_vertex_map[front_of_and_below_neighbour_block_coord]
+                                        .coord_vertex_map[front_of_and_below_this_block_coord]
                                         = front_of_and_below_this_block_vertex;
                                 }
 
@@ -2609,13 +2609,13 @@ void hvox::ChunkNavmeshTask<IsSolid>::execute(
                                 try {
                                     back_of_this_block_vertex
                                         = chunk->navmesh.coord_vertex_map.at(
-                                            back_of_neighbour_block_coord
+                                            back_of_this_block_coord
                                         );
                                 } catch (std::out_of_range) {
                                     back_of_this_block_vertex
                                         = boost::add_vertex(chunk->navmesh.graph);
                                     chunk->navmesh
-                                        .coord_vertex_map[back_of_neighbour_block_coord]
+                                        .coord_vertex_map[back_of_this_block_coord]
                                         = back_of_this_block_vertex;
                                 }
 
@@ -2645,13 +2645,13 @@ void hvox::ChunkNavmeshTask<IsSolid>::execute(
                                 try {
                                     back_of_and_below_this_block_vertex
                                         = chunk->navmesh.coord_vertex_map.at(
-                                            back_of_and_below_neighbour_block_coord
+                                            back_of_and_below_this_block_coord
                                         );
                                 } catch (std::out_of_range) {
                                     back_of_and_below_this_block_vertex
                                         = boost::add_vertex(chunk->navmesh.graph);
                                     chunk->navmesh
-                                        .coord_vertex_map[back_of_and_below_neighbour_block_coord]
+                                        .coord_vertex_map[back_of_and_below_this_block_coord]
                                         = back_of_and_below_this_block_vertex;
                                 }
 
@@ -2726,7 +2726,7 @@ void hvox::ChunkNavmeshTask<IsSolid>::execute(
                                 );
                         } catch (std::out_of_range) {
                             left_of_neighbour_block_vertex.in_left_of_neighbour
-                                = boost::add_vertex(neighbour->navmesh.graph);
+                                = boost::add_vertex(left_of_neighbour->navmesh.graph);
                             left_of_neighbour->navmesh.coord_vertex_map[left_of_neighbour_block_coord]
                                 = left_of_neighbour_block_vertex.in_left_of_neighbour;
                         }
@@ -2856,7 +2856,7 @@ void hvox::ChunkNavmeshTask<IsSolid>::execute(
                                 );
                         } catch (std::out_of_range) {
                             right_of_neighbour_block_vertex.in_right_of_neighbour
-                                = boost::add_vertex(neighbour->navmesh.graph);
+                                = boost::add_vertex(right_of_neighbour->navmesh.graph);
                             right_of_neighbour->navmesh.coord_vertex_map[right_of_neighbour_block_coord]
                                 = right_of_neighbour_block_vertex.in_right_of_neighbour;
                         }
@@ -2986,7 +2986,7 @@ void hvox::ChunkNavmeshTask<IsSolid>::execute(
                                 );
                         } catch (std::out_of_range) {
                             front_of_neighbour_block_vertex.in_front_of_neighbour
-                                = boost::add_vertex(neighbour->navmesh.graph);
+                                = boost::add_vertex(front_of_neighbour->navmesh.graph);
                             front_of_neighbour->navmesh.coord_vertex_map[front_of_neighbour_block_coord]
                                 = front_of_neighbour_block_vertex.in_front_of_neighbour;
                         }
@@ -3116,7 +3116,7 @@ void hvox::ChunkNavmeshTask<IsSolid>::execute(
                                 );
                         } catch (std::out_of_range) {
                             back_of_neighbour_block_vertex.in_back_of_neighbour
-                                = boost::add_vertex(neighbour->navmesh.graph);
+                                = boost::add_vertex(back_of_neighbour->navmesh.graph);
                             back_of_neighbour->navmesh.coord_vertex_map[back_of_neighbour_block_coord]
                                 = back_of_neighbour_block_vertex.in_back_of_neighbour;
                         }
@@ -3260,7 +3260,7 @@ void hvox::ChunkNavmeshTask<IsSolid>::execute(
                                 );
                         } catch (std::out_of_range) {
                             this_block_vertex.in_left_neighbour
-                                = boost::add_vertex(neighbour->navmesh.graph);
+                                = boost::add_vertex(left_neighbour->navmesh.graph);
                             left_neighbour->navmesh.coord_vertex_map[this_block_coord]
                                 = this_block_vertex.in_left_neighbour;
                         }
@@ -3401,7 +3401,7 @@ void hvox::ChunkNavmeshTask<IsSolid>::execute(
                                 );
                         } catch (std::out_of_range) {
                             this_block_vertex.in_right_neighbour
-                                = boost::add_vertex(neighbour->navmesh.graph);
+                                = boost::add_vertex(right_neighbour->navmesh.graph);
                             right_neighbour->navmesh.coord_vertex_map[this_block_coord]
                                 = this_block_vertex.in_right_neighbour;
                         }
@@ -3542,7 +3542,7 @@ void hvox::ChunkNavmeshTask<IsSolid>::execute(
                                 );
                         } catch (std::out_of_range) {
                             this_block_vertex.in_front_neighbour
-                                = boost::add_vertex(neighbour->navmesh.graph);
+                                = boost::add_vertex(front_neighbour->navmesh.graph);
                             front_neighbour->navmesh.coord_vertex_map[this_block_coord]
                                 = this_block_vertex.in_front_neighbour;
                         }
@@ -3683,7 +3683,7 @@ void hvox::ChunkNavmeshTask<IsSolid>::execute(
                                 );
                         } catch (std::out_of_range) {
                             this_block_vertex.in_back_neighbour
-                                = boost::add_vertex(neighbour->navmesh.graph);
+                                = boost::add_vertex(back_neighbour->navmesh.graph);
                             back_neighbour->navmesh.coord_vertex_map[this_block_coord]
                                 = this_block_vertex.in_back_neighbour;
                         }
