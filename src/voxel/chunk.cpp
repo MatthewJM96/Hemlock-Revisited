@@ -18,6 +18,10 @@ hvox::Chunk::Chunk() :
                      ChunkState::NONE,
                      ChunkState::NONE,
                      ChunkState::NONE,
+                     ChunkState::NONE,
+                     ChunkState::NONE,
+                     ChunkState::NONE,
+                     ChunkState::NONE,
                      ChunkState::NONE }) { /* Empty. */
 }
 
