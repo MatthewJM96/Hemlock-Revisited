@@ -6,22 +6,24 @@
 
 namespace hemlock {
     namespace voxel {
-        struct ChunkNavmeshNode {
-            BlockChunkPosition block_pos;
-            ChunkGridPosition  chunk_pos;
-        };
+        namespace ai {
+            struct ChunkNavmeshNode {
+                BlockChunkPosition block_pos;
+                ChunkGridPosition  chunk_pos;
+            };
 
-        using ChunkNavmesh = algorithm::GraphMap<ChunkNavmeshNode, false>;
-        using ChunkNavmeshVertexDescriptor
-            = algorithm::VertexDescriptor<ChunkNavmeshNode, false>;
-    }  // namespace voxel
+            using ChunkNavmesh = algorithm::GraphMap<ChunkNavmeshNode, false>;
+            using ChunkNavmeshVertexDescriptor
+                = algorithm::VertexDescriptor<ChunkNavmeshNode, false>;
+        }  // namespace ai
+    }      // namespace voxel
 }  // namespace hemlock
 namespace hvox = hemlock::voxel;
 
 namespace std {
     template <>
-    struct hash<hvox::ChunkNavmeshNode> {
-        size_t operator()(const hvox::ChunkNavmeshNode& node) const {
+    struct hash<hvox::ai::ChunkNavmeshNode> {
+        size_t operator()(const hvox::ai::ChunkNavmeshNode& node) const {
             // TODO(Matthew): Here and elsewhere, is packing done portably? We can
             //                likely not directly serialise bit-fields due to endian
             //                concerns, but at least within runtime does it achieve

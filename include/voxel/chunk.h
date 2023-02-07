@@ -3,10 +3,10 @@
 
 #include "graphics/mesh.h"
 #include "timing.h"
+#include "voxel/ai/navmesh.hpp"
 #include "voxel/block.hpp"
 #include "voxel/chunk/constants.hpp"
 #include "voxel/chunk/events.hpp"
-#include "voxel/chunk/navmesh.hpp"
 #include "voxel/chunk/state.hpp"
 #include "voxel/coordinate_system.h"
 #include "voxel/graphics/mesh/instance_manager.h"
@@ -38,7 +38,7 @@ namespace hemlock {
             Block*            blocks;
 
             std::shared_mutex navmesh_mutex;
-            ChunkNavmesh      navmesh;
+            ai::ChunkNavmesh  navmesh;
 
             ChunkInstanceManager instance;
 
