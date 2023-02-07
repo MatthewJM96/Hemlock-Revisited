@@ -8,16 +8,19 @@ namespace hemlock {
     namespace voxel {
         struct Chunk;
 
-        template <hvox::IdealBlockConstraint IsSolid>
-        class ChunkNavmeshTask : public ChunkTask {
-        public:
-            virtual ~ChunkNavmeshTask() { /* Empty. */
-            }
+        namespace ai {
+            template <hvox::IdealBlockConstraint IsSolid>
+            class ChunkNavmeshTask : public ChunkTask {
+            public:
+                virtual ~ChunkNavmeshTask() { /* Empty. */
+                }
 
-            virtual void
-            execute(ChunkLoadThreadState* state, ChunkTaskQueue* task_queue) override;
-        };
-    }  // namespace voxel
+                virtual void execute(
+                    ChunkLoadThreadState* state, ChunkTaskQueue* task_queue
+                ) override;
+            };
+        }  // namespace ai
+    }      // namespace voxel
 }  // namespace hemlock
 namespace hvox = hemlock::voxel;
 

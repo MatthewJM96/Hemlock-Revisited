@@ -28,7 +28,7 @@
 //                navmeshing, implement an on_X_face_change event in chunks?
 
 template <hvox::IdealBlockConstraint IsSolid>
-void hvox::ChunkNavmeshTask<IsSolid>::execute(
+void hvox::ai::ChunkNavmeshTask<IsSolid>::execute(
     ChunkLoadThreadState* state, ChunkTaskQueue* task_queue
 ) {
     auto chunk_grid = m_chunk_grid.lock();
