@@ -10,6 +10,10 @@ namespace hemlock {
             struct ChunkNavmeshNode {
                 BlockChunkPosition block_pos;
                 ChunkGridPosition  chunk_pos;
+
+                bool operator==(const ChunkNavmeshNode& rhs) const {
+                    return block_pos == rhs.block_pos && chunk_pos == rhs.chunk_pos;
+                }
             };
 
             using ChunkNavmesh = algorithm::GraphMap<ChunkNavmeshNode, false>;
