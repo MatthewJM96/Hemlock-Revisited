@@ -30,3 +30,9 @@
 #define H_MOVABLE(TYPE)                                                                \
   TYPE(TYPE&& rhs) { *this = std::forward<TYPE>(rhs); }                                \
   TYPE& operator=(TYPE&& rhs)
+
+#if defined(HEMLOCK_COMPILER_GCC) || defined(HEMLOCK_COMPILER_CLANG)
+#   define HEMLOCK_PACKED_STRUCT(DECL) DECL __attribute__((packed))
+#else // defined(HEMLOCK_COMPILER_GCC) || defined(HEMLOCK_COMPILER_CLANG)
+#   define HEMLOCK_PACKED_STRUCT(DECL) __pragma( pack(push, 1) ) DECL __pragma( pack(pop))
+#endif
