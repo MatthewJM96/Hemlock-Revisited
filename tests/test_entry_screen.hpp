@@ -34,6 +34,8 @@ public:
 
         handle_key_down = hemlock::Subscriber<hui::KeyboardButtonEvent>{
             [&](hemlock::Sender, hui::KeyboardButtonEvent ev) {
+                if (m_state != happ::ScreenState::RUNNING) return;
+
                 switch (ev.physical_key) {
                     case hui::PhysicalKey::H_A:
                         m_process->go_to_screen(
