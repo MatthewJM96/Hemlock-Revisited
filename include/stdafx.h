@@ -93,6 +93,9 @@
 // Our generic preprocessor macros.
 #include "preprocessor.hpp"
 
+// Our compatibility definitions.
+#include "compat.hpp"
+
 // Our constants.
 #include "constants.hpp"
 #include "debug.hpp"

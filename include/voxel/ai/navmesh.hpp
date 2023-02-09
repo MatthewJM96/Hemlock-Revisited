@@ -34,14 +34,14 @@ namespace std {
             //                the same as explicit bit masking/shifting across
             //                platforms?
             union {
-                struct {
+                HEMLOCK_PACKED_STRUCT(struct {
                     i64 block_x : 5;
                     i64 block_y : 5;
                     i64 block_z : 5;
                     i64 chunk_x : 19;
                     i64 chunk_y : 11;
                     i64 chunk_z : 19;
-                } __attribute__((packed)) coords;
+                }) coords;
 
                 ui64 id;
             } packed_node;
