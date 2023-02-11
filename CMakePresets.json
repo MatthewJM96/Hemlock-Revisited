@@ -334,8 +334,7 @@
             },
             "targets": [
                 "Hemlock_Revisited"
-            ],
-            "jobs": 10
+            ]
         },
         {
             "name": "GCC-x64-Fast-Debug",
@@ -350,8 +349,7 @@
             },
             "targets": [
                 "Hemlock_Revisited"
-            ],
-            "jobs": 10
+            ]
         },
         {
             "name": "GCC-x64-Super-Fast-Debug",
@@ -366,8 +364,7 @@
             },
             "targets": [
                 "Hemlock_Revisited"
-            ],
-            "jobs": 10
+            ]
         },
         {
             "name": "GCC-x64-Hyper-Fast-Debug",
@@ -382,8 +379,7 @@
             },
             "targets": [
                 "Hemlock_Revisited"
-            ],
-            "jobs": 10
+            ]
         },
         {
             "name": "GCC-x64-Release",
@@ -397,8 +393,7 @@
             },
             "targets": [
                 "Hemlock_Revisited"
-            ],
-            "jobs": 10
+            ]
         },
         {
             "name": "GCC-x64-Asan",
@@ -412,8 +407,7 @@
             },
             "targets": [
                 "Hemlock_Revisited"
-            ],
-            "jobs": 10
+            ]
         },
         {
             "name": "Clang-x64-Debug",
@@ -427,8 +421,7 @@
             },
             "targets": [
                 "Hemlock_Revisited"
-            ],
-            "jobs": 10
+            ]
         },
         {
             "name": "Clang-x64-Fast-Debug",
@@ -443,8 +436,7 @@
             },
             "targets": [
                 "Hemlock_Revisited"
-            ],
-            "jobs": 10
+            ]
         },
         {
             "name": "Clang-x64-Release",
@@ -458,8 +450,7 @@
             },
             "targets": [
                 "Hemlock_Revisited"
-            ],
-            "jobs": 10
+            ]
         },
         {
             "name": "Clang-x64-Asan",
@@ -473,8 +464,7 @@
             },
             "targets": [
                 "Hemlock_Revisited"
-            ],
-            "jobs": 10
+            ]
         },
         {
             "name": "Clang-x64-Tsan",
@@ -488,8 +478,7 @@
             },
             "targets": [
                 "Hemlock_Revisited"
-            ],
-            "jobs": 10
+            ]
         },
         {
             "name": "Clang-x64-Msan",
@@ -503,8 +492,7 @@
             },
             "targets": [
                 "Hemlock_Revisited"
-            ],
-            "jobs": 10
+            ]
         },
         {
             "name": "Clang-x64-Gperf",
@@ -518,8 +506,7 @@
             },
             "targets": [
                 "Hemlock_Revisited"
-            ],
-            "jobs": 10
+            ]
         },
         {
             "name": "VS2022-x64-Debug",
