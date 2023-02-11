@@ -7,7 +7,7 @@
 void hscript::lua::deregister_lua_function(
     LuaHandle state, LuaFunctionState lua_func_state
 ) {
-    lua_getfield(state, LUA_REGISTRYINDEX, H_LUA_SCRIPT_FUNCTION_TABLE);
+    lua_getfield(state, LUA_REGISTRYINDEX, HEMLOCK_LUA_SCRIPT_FUNCTION_TABLE);
     luaL_unref(state, -1, lua_func_state.index);
 
     // NOTE(Matthew): Docs don't say if luaL_unref pops the indexed-into
@@ -33,7 +33,7 @@ hscript::lua::make_arbitrary_scalars_lua_delegate(
 
             // Put the script function table in the lua registry on to the top of the
             // lua stack.
-            lua_getfield(state, LUA_REGISTRYINDEX, H_LUA_SCRIPT_FUNCTION_TABLE);
+            lua_getfield(state, LUA_REGISTRYINDEX, HEMLOCK_LUA_SCRIPT_FUNCTION_TABLE);
             // Get a raw accessor to the wrapped script function.
             lua_rawgeti(state, -1, lua_func_state.index);
 
@@ -64,9 +64,9 @@ hscript::lua::make_arbitrary_scalars_lua_delegate(
                 }
             }
 
-            i32 return_count = expected_return_count < H_MAX_ARBITRARY_LUA_RETURNS ?
+            i32 return_count = expected_return_count < HEMLOCK_MAX_ARBITRARY_LUA_RETURNS ?
                                    expected_return_count :
-                                   H_MAX_ARBITRARY_LUA_RETURNS;
+                                   HEMLOCK_MAX_ARBITRARY_LUA_RETURNS;
 
             // Call the function with the provided parameters.
             if (lua_pcall(state, parameters.size(), return_count, 0) != 0) {

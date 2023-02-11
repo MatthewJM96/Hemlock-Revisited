@@ -47,7 +47,7 @@ hscript::lua::make_lua_delegate(LuaFunctionState lua_func_state) {
 
         // Put the script function table in the lua registry on to the top of the lua
         // stack.
-        lua_getfield(state, LUA_REGISTRYINDEX, H_LUA_SCRIPT_FUNCTION_TABLE);
+        lua_getfield(state, LUA_REGISTRYINDEX, HEMLOCK_LUA_SCRIPT_FUNCTION_TABLE);
         // Get a raw accessor to the wrapped script function.
         lua_rawgeti(state, -1, lua_func_state.index);
 
