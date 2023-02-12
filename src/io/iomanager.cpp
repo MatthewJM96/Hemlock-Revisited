@@ -115,7 +115,15 @@ bool hio::IOManagerBase::read_file_to_string(const fs::path& path, std::string& 
     buffer.resize(length);
 
     // Read data into buffer.
-    fread(&buffer[0], 1, length, file);
+    size_t chars_read = fread(&buffer[0], 1, length, file);
+
+#if DEBUG
+    if (chars_read != length) {
+        debug_printf("%s could not be read.", abs_path.string())
+    }
+#else // DEBUG
+    (void)chars_read;
+#endif // !DEBUG
 
     // Close file.
     fclose(file);
@@ -149,7 +157,15 @@ char* hio::IOManagerBase::
     buffer[_length] = '\0';
 
     // Read data into buffer.
-    fread(buffer, 1, _length, file);
+    size_t chars_read = fread(buffer, 1, _length, file);
+
+#if DEBUG
+    if (chars_read != length) {
+        debug_printf("%s could not be read.", abs_path.string())
+    }
+#else // DEBUG
+    (void)chars_read;
+#endif // !DEBUG
 
     // Close file.
     fclose(file);
@@ -180,7 +196,15 @@ bool hio::IOManagerBase::read_file_to_binary(
     buffer.resize(length);
 
     // Read data into buffer.
-    fread(&buffer[0], 1, length, file);
+    size_t chars_read = fread(&buffer[0], 1, length, file);
+
+#if DEBUG
+    if (chars_read != length) {
+        debug_printf("%s could not be read.", abs_path.string())
+    }
+#else // DEBUG
+    (void)chars_read;
+#endif // !DEBUG
 
     // Close file.
     fclose(file);
@@ -208,7 +232,15 @@ ui8* hio::IOManagerBase::read_file_to_binary(const fs::path& path, ui32& length)
     ui8* buffer = new ui8[length];
 
     // Read data into buffer.
-    fread(buffer, 1, length, file);
+    size_t chars_read = fread(buffer, 1, length, file);
+
+#if DEBUG
+    if (chars_read != length) {
+        debug_printf("%s could not be read.", abs_path.string())
+    }
+#else // DEBUG
+    (void)chars_read;
+#endif // !DEBUG
 
     // Close file.
     fclose(file);
