@@ -119,7 +119,7 @@ bool hio::IOManagerBase::read_file_to_string(const fs::path& path, std::string& 
 
 #if DEBUG
     if (chars_read != length) {
-        debug_printf("%s could not be read.", abs_path.string())
+        debug_printf("%s could not be read.", abs_path.c_str());
     }
 #else // DEBUG
     (void)chars_read;
@@ -160,8 +160,8 @@ char* hio::IOManagerBase::
     size_t chars_read = fread(buffer, 1, _length, file);
 
 #if DEBUG
-    if (chars_read != length) {
-        debug_printf("%s could not be read.", abs_path.string())
+    if (chars_read != _length) {
+        debug_printf("%s could not be read.", abs_path.c_str());
     }
 #else // DEBUG
     (void)chars_read;
@@ -200,7 +200,7 @@ bool hio::IOManagerBase::read_file_to_binary(
 
 #if DEBUG
     if (chars_read != length) {
-        debug_printf("%s could not be read.", abs_path.string())
+        debug_printf("%s could not be read.", abs_path.c_str());
     }
 #else // DEBUG
     (void)chars_read;
@@ -236,7 +236,7 @@ ui8* hio::IOManagerBase::read_file_to_binary(const fs::path& path, ui32& length)
 
 #if DEBUG
     if (chars_read != length) {
-        debug_printf("%s could not be read.", abs_path.string())
+        debug_printf("%s could not be read.", abs_path.c_str());
     }
 #else // DEBUG
     (void)chars_read;
