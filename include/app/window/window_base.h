@@ -55,8 +55,11 @@ namespace hemlock {
 
             virtual void set_name(const std::string& name)             = 0;
             virtual void set_dimensions(WindowDimensions dimensions)   = 0;
+            virtual void set_internal_dimensions(WindowDimensions dimensions) = 0;
             virtual void set_width(ui32 width)                         = 0;
+            virtual void set_internal_width(ui32 width)                         = 0;
             virtual void set_height(ui32 height)                       = 0;
+            virtual void set_internal_height(ui32 height)                       = 0;
             virtual void set_display(ui32 display_idx)                 = 0;
             virtual void set_fake_fullscreen(bool fake_fullscreen)     = 0;
             virtual void set_is_fullscreen(bool is_fullscreen)         = 0;
