@@ -11,7 +11,7 @@ happ::WindowBase::WindowBase() :
     handle_external_window_resize(Subscriber<hui::WindowResizeEvent>{
         [&](Sender, hui::WindowResizeEvent ev) {
             if (ev.window_id != m_window_id) return;
-            set_dimensions({
+            set_internal_dimensions({
                 {static_cast<ui32>(ev.width), static_cast<ui32>(ev.height)}
             });
         } }),

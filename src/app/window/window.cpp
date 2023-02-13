@@ -266,7 +266,15 @@ void happ::Window::set_dimensions(WindowDimensions dimensions) {
 
 #if defined(HEMLOCK_USING_SDL)
     SDL_SetWindowSize(m_window, dimensions.width, dimensions.height);
+#endif    // defined(HEMLOCK_USING_SDL)
 
+    set_internal_dimensions(dimensions);
+}
+
+void happ::Window::set_internal_dimensions(WindowDimensions dimensions) {
+    if (m_settings.dimensions == dimensions) return;
+
+#if defined(HEMLOCK_USING_SDL)
 #  if defined(HEMLOCK_USING_OPENGL)
     // TODO(Matthew): do we need to call this for fullscreen too?
     // TODO(Matthew): do we need to call this each time we change which
@@ -289,8 +297,20 @@ void happ::Window::set_width(ui32 width) {
     });
 }
 
+void happ::Window::set_internal_width(ui32 width) {
+    set_internal_dimensions({
+        {width, height()}
+    });
+}
+
 void happ::Window::set_height(ui32 height) {
     set_dimensions({
+        {width(), height}
+    });
+}
+
+void happ::Window::set_internal_height(ui32 height) {
+    set_internal_dimensions({
         {width(), height}
     });
 }
