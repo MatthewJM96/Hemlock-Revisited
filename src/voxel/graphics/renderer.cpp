@@ -143,7 +143,7 @@ hvox::ChunkRenderPage* hvox::ChunkRenderer::create_pages(ui32 count) {
     /********************************\
      * Append subsequent new pages. *
     \********************************/
-    for (ui32 i = 0; i < count; ++i) {
+    for (ui32 i = 1; i < count; ++i) {
         m_chunk_pages.emplace_back(new ChunkRenderPage{});
 
         ChunkRenderPage* new_page = m_chunk_pages.back();
@@ -180,7 +180,6 @@ void hvox::ChunkRenderer::put_chunk_in_page(
 
     if (page == nullptr) {
         page = create_pages(1);
-        ++page_idx;
     }
 
     ui32 chunk_idx = page->chunks.size();
