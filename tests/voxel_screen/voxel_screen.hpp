@@ -7,7 +7,8 @@
 
 #include "memory/handle.hpp"
 #include "voxel/generation/generator_task.hpp"
-#include "voxel/graphics/mesh/greedy_task.hpp"
+#include "voxel/graphics/mesh/mesh_task.hpp"
+#include "voxel/graphics/mesh/greedy_strategy.hpp"
 #include "voxel/graphics/outline_renderer.hpp"
 #include "voxel/ray.h"
 
@@ -384,8 +385,7 @@ public:
                     htest::voxel_screen::TVS_VoxelGenerator>();
             } },
             hvox::ChunkTaskBuilder{ []() {
-                return new hvox::ChunkGreedyMeshTask<
-                    htest::voxel_screen::TVS_BlockComparator>();
+                return new hvox::ChunkMeshTask<hvox::GreedyMeshStrategy<htest::voxel_screen::TVS_BlockComparator>>();
             } }
         );
 
