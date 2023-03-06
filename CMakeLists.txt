@@ -96,13 +96,14 @@ endif()
 
 set(Hemlock_Requirements
     glm/0.9.9.8
-    sdl/2.0.18
-    sdl_ttf/2.0.18
-    libpng/1.6.37
+    sdl/2.26.1
+    sdl_ttf/2.20.1
+    libpng/1.6.39
     concurrentqueue/1.0.3
     boost/1.78.0
     bullet3/3.24
     entt/3.10.1
+    zlib/1.2.13
 )
 
 if (HEMLOCK_USING_OPENGL)
