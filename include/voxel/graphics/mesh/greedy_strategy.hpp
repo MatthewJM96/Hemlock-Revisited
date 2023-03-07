@@ -1,6 +1,8 @@
 #ifndef __hemlock_voxel_graphics_mesh_greedy_strategy_hpp
 #define __hemlock_voxel_graphics_mesh_greedy_strategy_hpp
 
+#include "voxel/predicate.hpp"
+
 namespace hemlock {
     namespace voxel {
         template <hvox::IdealBlockComparator MeshComparator>
@@ -13,6 +15,6 @@ namespace hemlock {
 }  // namespace hemlock
 namespace hvox = hemlock::voxel;
 
-#include "voxel/graphics/mesh/greedy_strategy.inl"
+#include "greedy_strategy.inl"
 
 #endif  // __hemlock_voxel_graphics_mesh_greedy_strategy_hpp

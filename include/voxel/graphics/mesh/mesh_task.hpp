@@ -22,7 +22,7 @@ namespace hemlock {
                       } -> std::same_as<void>;
               };
 
-        template <hvox::ChunkMeshStrategy GenerationStrategy>
+        template <hvox::ChunkMeshStrategy MeshStrategy>
         class ChunkMeshTask : public ChunkTask {
         public:
             virtual ~ChunkMeshTask() { /* Empty. */
