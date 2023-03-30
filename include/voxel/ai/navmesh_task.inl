@@ -79,9 +79,9 @@ void hvox::ai::ChunkNavmeshTask<IsSolid>::execute(
     auto do_navigable_check = [&](const ChunkNavmeshVertexDescriptor& block_vertex,
                                   BlockChunkPosition                  start_offset,
                                   BlockChunkPosition                  offset,
-                                  size_t                              start,
-                                  size_t                              end) {
-        for (size_t y_off = start; y_off > end; --y_off) {
+                                  i64                                 start,
+                                  i64                                 end) {
+        for (i64 y_off = start; y_off > end; --y_off) {
             BlockIndex above_candidate_index
                 = hvox::block_index(offset + BlockChunkPosition{ 0, y_off, 0 });
             Block* above_candidate_block = &chunk->blocks[above_candidate_index];
@@ -1311,8 +1311,8 @@ void hvox::ai::ChunkNavmeshTask<IsSolid>::execute(
     auto do_side_stitch_navigable_check = [&](memory::Handle<Chunk>& neighbour,
                                               BlockChunkPosition     this_offset,
                                               BlockChunkPosition     neighbour_offset,
-                                              size_t                 start,
-                                              size_t                 end) {
+                                              i64                    start,
+                                              i64                    end) {
         BlockIndex this_block_index = hvox::block_index(this_offset);
         Block*     this_block       = &chunk->blocks[this_block_index];
 
@@ -1328,7 +1328,7 @@ void hvox::ai::ChunkNavmeshTask<IsSolid>::execute(
         } this_block_vertex = { get_vertex(chunk, this_block_coord),
                                 get_vertex(neighbour, this_block_coord) };
 
-        for (size_t y_off = start; y_off > end; --y_off) {
+        for (i64 y_off = start; y_off > end; --y_off) {
             BlockIndex above_candidate_index = hvox::block_index(
                 neighbour_offset + BlockChunkPosition{ 0, y_off, 0 }
             );
