@@ -45,13 +45,16 @@ namespace hemlock {
              * otherwise generate it.
              * @param build_mesh_task Builder that returns a valid
              * task to mesh a chunk.
+             * @param build_navmesh_task Builder that returns a valid
+             * task to navmesh a chunk.
              */
             void init(
                 hmem::WeakHandle<ChunkGrid> self,
                 ui32                        render_distance,
                 ui32                        thread_count,
                 ChunkTaskBuilder            build_load_or_generate_task,
-                ChunkTaskBuilder            build_mesh_task
+                ChunkTaskBuilder            build_mesh_task,
+                ChunkTaskBuilder*           build_navmesh_task = nullptr
             );
             /**
              * @brief Disposes of the chunk grid, ending
@@ -192,7 +195,7 @@ namespace hemlock {
             Delegate<void(Sender)>                   handle_chunk_load;
             Delegate<bool(Sender, BlockChangeEvent)> handle_block_change;
 
-            ChunkTaskBuilder m_build_load_or_generate_task, m_build_mesh_task;
+            ChunkTaskBuilder m_build_load_or_generate_task, m_build_mesh_task, m_build_navmesh_task;
             thread::ThreadPool<ChunkTaskContext> m_thread_pool;
 
             ChunkAllocator m_chunk_allocator;

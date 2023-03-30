@@ -27,9 +27,15 @@ hvox::ChunkGrid::ChunkGrid() :
         // an unload event for this chunk.
         if (chunk == nullptr) return;
 
-        auto task = m_build_mesh_task();
-        task->set_state(chunk, m_self);
-        m_thread_pool.threadsafe_add_task({ task, true });
+        auto mesh_task = m_build_mesh_task();
+        mesh_task->set_state(chunk, m_self);
+        m_thread_pool.threadsafe_add_task({ mesh_task, true });
+
+        if (m_build_navmesh_task) {
+            auto navmesh_task = m_build_navmesh_task();
+            navmesh_task->set_state(chunk, m_self);
+            m_thread_pool.threadsafe_add_task({ navmesh_task, true });
+        }
     } }),
     // TODO(Matthew): handle bulk block change too.
     // TODO(Matthew): right now we remesh even if block change is cancelled.
@@ -47,9 +53,15 @@ hvox::ChunkGrid::ChunkGrid() :
             // an unload event for this chunk.
             if (chunk == nullptr) return true;
 
-            auto task = m_build_mesh_task();
-            task->set_state(chunk, m_self);
-            m_thread_pool.add_task({ task, true });
+            auto mesh_task = m_build_mesh_task();
+            mesh_task->set_state(chunk, m_self);
+            m_thread_pool.add_task({ mesh_task, true });
+
+            if (m_build_navmesh_task) {
+                auto navmesh_task = m_build_navmesh_task();
+                navmesh_task->set_state(chunk, m_self);
+                m_thread_pool.threadsafe_add_task({ navmesh_task, true });
+            }
 
             return false;
         } }) {
@@ -61,7 +73,8 @@ void hvox::ChunkGrid::init(
     ui32                        render_distance,
     ui32                        thread_count,
     ChunkTaskBuilder            build_load_or_generate_task,
-    ChunkTaskBuilder            build_mesh_task
+    ChunkTaskBuilder            build_mesh_task,
+    ChunkTaskBuilder*           build_navmesh_task/* = nullptr*/
 ) {
     m_self = self;
 
@@ -70,6 +83,9 @@ void hvox::ChunkGrid::init(
 
     m_build_load_or_generate_task = build_load_or_generate_task;
     m_build_mesh_task             = build_mesh_task;
+    if (build_navmesh_task) {
+        m_build_navmesh_task = *build_navmesh_task;
+    }
 
     m_thread_pool.init(thread_count);
 
