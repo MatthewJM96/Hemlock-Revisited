@@ -9,4 +9,6 @@ namespace hemlock {
     Precision global_rand(Precision min, Precision max);
 }  // namespace hemlock
 
+#include "rand.inl"
+
 #endif  // __hemlock_rand_h
