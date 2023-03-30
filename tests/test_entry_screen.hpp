@@ -48,6 +48,18 @@ public:
                             m_process->timer()->frame_times().back()
                         );
                         return;
+                    case hui::PhysicalKey::H_P:
+                        m_process->go_to_screen(
+                            "test_performance_screen",
+                            m_process->timer()->frame_times().back()
+                        );
+                        return;
+                    case hui::PhysicalKey::H_N:
+                        m_process->go_to_screen(
+                            "test_navmesh_screen",
+                            m_process->timer()->frame_times().back()
+                        );
+                        return;
                     case hui::PhysicalKey::H_V:
                         m_process->go_to_screen(
                             "test_voxel_screen",
@@ -121,7 +133,7 @@ public:
             hg::f::WordWrap::NONE
         );
         m_sprite_batcher.add_string(
-            "Test script screen (S)",
+            "Test performance screen (P)",
             f32v4{ 30.0f, 90.0f, 1000.0f, 100.0f },
             f32v4{ 25.0f, 85.0f, 1010.0f, 110.0f },
             hg::f::StringSizing{ hg::f::StringSizingKind::SCALED, { f32v2{ 1.0f } } },
@@ -131,9 +143,29 @@ public:
             hg::f::WordWrap::NONE
         );
         m_sprite_batcher.add_string(
-            "Test AI screen (A)",
+            "Test navmesh screen (N)",
             f32v4{ 30.0f, 120.0f, 1000.0f, 100.0f },
             f32v4{ 25.0f, 115.0f, 1010.0f, 110.0f },
+            hg::f::StringSizing{ hg::f::StringSizingKind::SCALED, { f32v2{ 1.0f } } },
+            colour4{ 0, 0, 0, 255 },
+            "fonts/Orbitron-Regular.ttf",
+            hg::f::TextAlign::TOP_LEFT,
+            hg::f::WordWrap::NONE
+        );
+        m_sprite_batcher.add_string(
+            "Test script screen (S)",
+            f32v4{ 30.0f, 150.0f, 1000.0f, 100.0f },
+            f32v4{ 25.0f, 145.0f, 1010.0f, 110.0f },
+            hg::f::StringSizing{ hg::f::StringSizingKind::SCALED, { f32v2{ 1.0f } } },
+            colour4{ 0, 0, 0, 255 },
+            "fonts/Orbitron-Regular.ttf",
+            hg::f::TextAlign::TOP_LEFT,
+            hg::f::WordWrap::NONE
+        );
+        m_sprite_batcher.add_string(
+            "Test AI screen (A)",
+            f32v4{ 30.0f, 180.0f, 1000.0f, 100.0f },
+            f32v4{ 25.0f, 175.0f, 1010.0f, 110.0f },
             hg::f::StringSizing{ hg::f::StringSizingKind::SCALED, { f32v2{ 1.0f } } },
             colour4{ 0, 0, 0, 255 },
             "fonts/Orbitron-Regular.ttf",
