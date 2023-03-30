@@ -43,7 +43,7 @@ namespace hemlock::voxel::ai::impl {
 
 template <hvox::IdealBlockConstraint IsSolid>
 void hvox::ai::ChunkNavmeshTask<IsSolid>::execute(
-    ChunkLoadThreadState* state, ChunkTaskQueue* task_queue
+    ChunkLoadThreadState*, ChunkTaskQueue*
 ) {
     using namespace hvox::ai::impl;
 
