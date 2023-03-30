@@ -60,8 +60,6 @@ void hvox::ai::ChunkNavmeshTask<IsSolid>::execute(
 
     std::shared_lock block_lock(chunk->blocks_mutex);
 
-    Block* blocks = chunk->blocks;
-
     const IsSolid is_solid{};
 
     //----------------------------------------------------------------------------------
