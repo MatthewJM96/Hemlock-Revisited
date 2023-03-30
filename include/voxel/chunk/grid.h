@@ -8,6 +8,10 @@
 #include "voxel/graphics/renderer.h"
 #include "voxel/task.hpp"
 
+// TODO(Matthew): Do we want to make Grid and Chunk composable? Or else some other way
+//                of better letting user express what should be done when with regards
+//                to loading, generation, meshing, navmeshing and so on.
+
 namespace hemlock {
     namespace voxel {
         // TODO(Matthew): Make chunks & grids either decoratable or else composed? Not
