@@ -60,8 +60,6 @@ public:
                 }
             }
 
-            // Prepare generator.
-
             // const htest::performance_screen::VoxelGenerator generator{};
             const htest::performance_screen::VoxelGeneratorV2 generator{};
 
@@ -88,6 +86,14 @@ public:
                     hg::f::WordWrap::NONE
                 );
                 m_sprite_batcher.end();
+            }
+
+            // Force compiler to not optimise away intermediate results.
+            {
+                ui32 rand_chunk_idx = static_cast<ui32>(std::floor(hemlock::global_unitary_rand<f32>() * static_cast<f32>(iterations)));
+                ui32 rand_block_idx = static_cast<ui32>(std::floor(hemlock::global_unitary_rand<f32>() * static_cast<f32>(CHUNK_VOLUME)));
+
+                std::cout << "    - " << chunks[rand_chunk_idx]->blocks[rand_block_idx].id << std::endl;
             }
 
             const hvox::NaiveMeshStrategy<htest::performance_screen::BlockComparator> naive_mesh;
@@ -117,35 +123,58 @@ public:
                 m_sprite_batcher.end();
             }
 
+            // Force compiler to not optimise away intermediate results.
+            {
+                ui32 rand_chunk_idx = static_cast<ui32>(std::floor(hemlock::global_unitary_rand<f32>() * static_cast<f32>(iterations)));
+
+                std::shared_lock<std::shared_mutex> lock;
+                auto instance = chunks[rand_chunk_idx]->instance.get(lock);
+
+                ui32 rand_instance_idx = static_cast<ui32>(std::floor(hemlock::global_unitary_rand<f32>() * static_cast<f32>(instance.count)));
+
+                std::cout << "    - " << instance.data[rand_instance_idx].translation.x << std::endl;
+            }
+
+            const hvox::GreedyMeshStrategy<htest::performance_screen::BlockComparator> greedy_mesh;
+
             // Do greedy meshing profiling.
-            // {
-            //     auto start = std::chrono::high_resolution_clock::now();
-            //     for (ui32 iteration = 0; iteration < iterations; ++iteration) {
-            //         generator(chunks[iteration]);
-            //     }
-            //     auto duration = std::chrono::high_resolution_clock::now() - start;
-            //     auto duration_us = std::chrono::duration_cast<std::chrono::microseconds>(duration).count();
+            {
+                auto start = std::chrono::high_resolution_clock::now();
+                for (ui32 iteration = 0; iteration < iterations; ++iteration) {
+                    greedy_mesh({}, chunks[iteration]);
+                }
+                auto duration = std::chrono::high_resolution_clock::now() - start;
+                auto duration_us = std::chrono::duration_cast<std::chrono::microseconds>(duration).count();
 
-            //     auto avg_duration_us = static_cast<f32>(duration_us) / static_cast<f32>(iterations);
+                auto avg_duration_us = static_cast<f32>(duration_us) / static_cast<f32>(iterations);
 
-            //     std::string msg = "Average per-chunk time: " + std::to_string(avg_duration_us) + "us";
-            //     m_sprite_batcher.add_string(
-            //         msg.c_str(),
-            //         f32v4{ 40.0f, 180.0f, 1000.0f, 100.0f },
-            //         f32v4{ 35.0f, 175.0f, 1010.0f, 110.0f },
-            //         hg::f::StringSizing{ hg::f::StringSizingKind::SCALED, { f32v2{ 0.85f } } },
-            //         colour4{ 0, 0, 0, 255 },
-            //         "fonts/Orbitron-Regular.ttf",
-            //         hg::f::TextAlign::TOP_LEFT,
-            //         hg::f::WordWrap::NONE
-            //     );
-            //     m_sprite_batcher.end();
-            // }
+                std::string msg = "Average per-chunk time: " + std::to_string(avg_duration_us) + "us";
+                m_sprite_batcher.add_string(
+                    msg.c_str(),
+                    f32v4{ 40.0f, 180.0f, 1000.0f, 100.0f },
+                    f32v4{ 35.0f, 175.0f, 1010.0f, 110.0f },
+                    hg::f::StringSizing{ hg::f::StringSizingKind::SCALED, { f32v2{ 0.85f } } },
+                    colour4{ 0, 0, 0, 255 },
+                    "fonts/Orbitron-Regular.ttf",
+                    hg::f::TextAlign::TOP_LEFT,
+                    hg::f::WordWrap::NONE
+                );
+                m_sprite_batcher.end();
+            }
 
             // Force compiler to not optimise away intermediate results.
-            ui32 rand_chunk_idx = static_cast<ui32>(std::floor(hemlock::global_unitary_rand<f32>() * static_cast<f32>(iterations)));
+            {
+                ui32 rand_chunk_idx = static_cast<ui32>(std::floor(hemlock::global_unitary_rand<f32>() * static_cast<f32>(iterations)));
+
+                std::shared_lock<std::shared_mutex> lock;
+                auto instance = chunks[rand_chunk_idx]->instance.get(lock);
+
+                ui32 rand_instance_idx = static_cast<ui32>(std::floor(hemlock::global_unitary_rand<f32>() * static_cast<f32>(instance.count)));
+
+                std::cout << "    - " << instance.data[rand_instance_idx].translation.x << std::endl;
+            }
+
             std::cout << "Generation profiling complete." << std::endl;
-            std::cout << "    - " << chunks[rand_chunk_idx]->blocks[0].id << std::endl;
 
             m_do_profile.store(false);
         }
