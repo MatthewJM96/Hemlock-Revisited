@@ -6,7 +6,8 @@
 #include "memory/handle.hpp"
 #include "voxel/ai/navmesh_task.hpp"
 #include "voxel/generation/generator_task.hpp"
-#include "voxel/graphics/mesh/greedy_task.hpp"
+#include "voxel/graphics/mesh/mesh_task.hpp"
+#include "voxel/graphics/mesh/greedy_strategy.hpp"
 #include "voxel/graphics/outline_renderer.hpp"
 #include "voxel/ray.h"
 
@@ -220,8 +221,7 @@ public:
         m_default_texture = hg::load_texture("test_tex.png");
 
         static auto navmesh_task_builder = hvox::ChunkTaskBuilder{ []() {
-            return new hvox::ai::ChunkNavmeshTask<
-                htest::navmesh_screen::BlockSolidCheck>();
+            return new hvox::ChunkMeshTask<hvox::GreedyMeshStrategy<htest::navmesh_screen::BlockComparator>>();
         } };
 
         m_chunk_grid = hmem::make_handle<hvox::ChunkGrid>();
@@ -234,8 +234,7 @@ public:
                     htest::navmesh_screen::VoxelGenerator>();
             } },
             hvox::ChunkTaskBuilder{ []() {
-                return new hvox::ChunkGreedyMeshTask<
-                    htest::navmesh_screen::BlockComparator>();
+                return new hvox::ChunkMeshTask<hvox::GreedyMeshStrategy<htest::navmesh_screen::BlockComparator>>();
             } },
             &navmesh_task_builder
         );

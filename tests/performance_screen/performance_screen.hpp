@@ -11,7 +11,8 @@
 #include "ui/input/dispatcher.h"
 #include "voxel/ai/navmesh_task.hpp"
 #include "voxel/generation/generator_task.hpp"
-#include "voxel/graphics/mesh/greedy_task.hpp"
+#include "voxel/graphics/mesh/mesh_task.hpp"
+#include "voxel/graphics/mesh/greedy_strategy.hpp"
 #include "voxel/graphics/mesh/instance_manager.h"
 
 #include "tests/iomanager.hpp"
