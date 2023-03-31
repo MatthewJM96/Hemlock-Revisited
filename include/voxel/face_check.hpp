@@ -1,7 +1,7 @@
 #ifndef __hemlock_voxel_face_check_hpp
 #define __hemlock_voxel_face_check_hpp
 
-#include "voxel/constants.hpp"
+#include "voxel/chunk/constants.hpp"
 
 namespace hemlock {
     namespace voxel {
