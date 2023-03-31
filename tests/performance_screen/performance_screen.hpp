@@ -21,9 +21,7 @@
 
 class TestPerformanceScreen : public happ::ScreenBase {
 public:
-    TestPerformanceScreen() : happ::ScreenBase()
-        /*, m_do_gen_profile(false), m_do_naive_mesh_profile(false), m_do_greedy_mesh_profile(false), m_do_navmesh_profile(false)*/
-    {
+    TestPerformanceScreen() : happ::ScreenBase(), m_do_profile(false) {
         /* Empty. */
     }
 
@@ -31,119 +29,120 @@ public:
 
     virtual void start(hemlock::FrameTime time) override {
         happ::ScreenBase::start(time);
-
-        const ui32 xyz_len    = 18;
-        const ui32 iterations = xyz_len * xyz_len * xyz_len;
-        
-        // Prepare chunks.
-
-        hmem::Handle<hvox::ChunkBlockPager>        block_pager = hmem::make_handle<hvox::ChunkBlockPager>();
-        hmem::Handle<hvox::ChunkInstanceDataPager> instance_data_pager = hmem::make_handle<hvox::ChunkInstanceDataPager>();
-
-        hmem::PagedAllocator<hvox::Chunk, 4 * 4 * 4, 3> chunk_allocator;
-
-        hmem::Handle<hvox::Chunk>* chunks = new hmem::Handle<hvox::Chunk>[iterations];
-
-        for (ui32 x = 0; x < xyz_len; ++x) {
-            for (ui32 y = 0; y < xyz_len; ++y) {
-                for (ui32 z = 0; z < xyz_len; ++z) {
-                    ui32 idx = x + y * xyz_len + z * xyz_len * xyz_len;
-                    chunks[idx] = hmem::allocate_handle<hvox::Chunk>(chunk_allocator);
-                    chunks[idx]->position = {x, y, z};
-                    chunks[idx]->init(chunks[idx], block_pager, instance_data_pager);
-                }
-            }
-        }
-
-        // Prepare generator.
-
-        // const htest::performance_screen::VoxelGenerator generator{};
-        const htest::performance_screen::VoxelGeneratorV2 generator{};
-
-        // Do generation profiling.
-        {
-            auto start = std::chrono::high_resolution_clock::now();
-            for (ui32 iteration = 0; iteration < iterations; ++iteration) {
-                generator(chunks[iteration]);
-            }
-            auto duration = std::chrono::high_resolution_clock::now() - start;
-            auto duration_us = std::chrono::duration_cast<std::chrono::microseconds>(duration).count();
-
-            auto avg_duration_us = static_cast<f32>(duration_us) / static_cast<f32>(iterations);
-
-            std::string msg = "Average per-chunk time: " + std::to_string(avg_duration_us) + "us";
-            m_sprite_batcher.add_string(
-                msg.c_str(),
-                f32v4{ 40.0f, 60.0f, 1000.0f, 100.0f },
-                f32v4{ 35.0f, 55.0f, 1010.0f, 110.0f },
-                hg::f::StringSizing{ hg::f::StringSizingKind::SCALED, { f32v2{ 0.85f } } },
-                colour4{ 0, 0, 0, 255 },
-                "fonts/Orbitron-Regular.ttf",
-                hg::f::TextAlign::TOP_LEFT,
-                hg::f::WordWrap::NONE
-            );
-            m_sprite_batcher.end();
-        }
-
-        // Do naive meshing profiling.
-        // {
-        //     auto start = std::chrono::high_resolution_clock::now();
-        //     for (ui32 iteration = 0; iteration < iterations; ++iteration) {
-        //         generator(chunks[iteration]);
-        //     }
-        //     auto duration = std::chrono::high_resolution_clock::now() - start;
-        //     auto duration_us = std::chrono::duration_cast<std::chrono::microseconds>(duration).count();
-
-        //     auto avg_duration_us = static_cast<f32>(duration_us) / static_cast<f32>(iterations);
-
-        //     std::string msg = "Average per-chunk time: " + std::to_string(avg_duration_us) + "us";
-        //     m_sprite_batcher.add_string(
-        //         msg.c_str(),
-        //         f32v4{ 40.0f, 120.0f, 1000.0f, 100.0f },
-        //         f32v4{ 35.0f, 115.0f, 1010.0f, 110.0f },
-        //         hg::f::StringSizing{ hg::f::StringSizingKind::SCALED, { f32v2{ 0.85f } } },
-        //         colour4{ 0, 0, 0, 255 },
-        //         "fonts/Orbitron-Regular.ttf",
-        //         hg::f::TextAlign::TOP_LEFT,
-        //         hg::f::WordWrap::NONE
-        //     );
-        //     m_sprite_batcher.end();
-        // }
-
-        // Do greedy meshing profiling.
-        // {
-        //     auto start = std::chrono::high_resolution_clock::now();
-        //     for (ui32 iteration = 0; iteration < iterations; ++iteration) {
-        //         generator(chunks[iteration]);
-        //     }
-        //     auto duration = std::chrono::high_resolution_clock::now() - start;
-        //     auto duration_us = std::chrono::duration_cast<std::chrono::microseconds>(duration).count();
-
-        //     auto avg_duration_us = static_cast<f32>(duration_us) / static_cast<f32>(iterations);
-
-        //     std::string msg = "Average per-chunk time: " + std::to_string(avg_duration_us) + "us";
-        //     m_sprite_batcher.add_string(
-        //         msg.c_str(),
-        //         f32v4{ 40.0f, 180.0f, 1000.0f, 100.0f },
-        //         f32v4{ 35.0f, 175.0f, 1010.0f, 110.0f },
-        //         hg::f::StringSizing{ hg::f::StringSizingKind::SCALED, { f32v2{ 0.85f } } },
-        //         colour4{ 0, 0, 0, 255 },
-        //         "fonts/Orbitron-Regular.ttf",
-        //         hg::f::TextAlign::TOP_LEFT,
-        //         hg::f::WordWrap::NONE
-        //     );
-        //     m_sprite_batcher.end();
-        // }
-
-
-        // Force compiler to not optimise away intermediate results.
-        ui32 rand_chunk_idx = static_cast<ui32>(std::floor(hemlock::global_unitary_rand<f32>() * static_cast<f32>(iterations)));
-        std::cout << "Generation profiling complete." << std::endl;
-        std::cout << "    - " << chunks[rand_chunk_idx]->blocks[0].id << std::endl;
     }
 
     virtual void update(hemlock::FrameTime) override {
-        // Empty
+        if (m_do_profile) {
+            const ui32 xyz_len    = 18;
+            const ui32 iterations = xyz_len * xyz_len * xyz_len;
+            
+            // Prepare chunks.
+
+            hmem::Handle<hvox::ChunkBlockPager>        block_pager = hmem::make_handle<hvox::ChunkBlockPager>();
+            hmem::Handle<hvox::ChunkInstanceDataPager> instance_data_pager = hmem::make_handle<hvox::ChunkInstanceDataPager>();
+
+            hmem::PagedAllocator<hvox::Chunk, 4 * 4 * 4, 3> chunk_allocator;
+
+            hmem::Handle<hvox::Chunk>* chunks = new hmem::Handle<hvox::Chunk>[iterations];
+
+            for (ui32 x = 0; x < xyz_len; ++x) {
+                for (ui32 y = 0; y < xyz_len; ++y) {
+                    for (ui32 z = 0; z < xyz_len; ++z) {
+                        ui32 idx = x + y * xyz_len + z * xyz_len * xyz_len;
+                        chunks[idx] = hmem::allocate_handle<hvox::Chunk>(chunk_allocator);
+                        chunks[idx]->position = {x, y, z};
+                        chunks[idx]->init(chunks[idx], block_pager, instance_data_pager);
+                    }
+                }
+            }
+
+            // Prepare generator.
+
+            // const htest::performance_screen::VoxelGenerator generator{};
+            const htest::performance_screen::VoxelGeneratorV2 generator{};
+
+            // Do generation profiling.
+            {
+                auto start = std::chrono::high_resolution_clock::now();
+                for (ui32 iteration = 0; iteration < iterations; ++iteration) {
+                    generator(chunks[iteration]);
+                }
+                auto duration = std::chrono::high_resolution_clock::now() - start;
+                auto duration_us = std::chrono::duration_cast<std::chrono::microseconds>(duration).count();
+
+                auto avg_duration_us = static_cast<f32>(duration_us) / static_cast<f32>(iterations);
+
+                std::string msg = "Average per-chunk time: " + std::to_string(avg_duration_us) + "us";
+                m_sprite_batcher.add_string(
+                    msg.c_str(),
+                    f32v4{ 40.0f, 60.0f, 1000.0f, 100.0f },
+                    f32v4{ 35.0f, 55.0f, 1010.0f, 110.0f },
+                    hg::f::StringSizing{ hg::f::StringSizingKind::SCALED, { f32v2{ 0.85f } } },
+                    colour4{ 0, 0, 0, 255 },
+                    "fonts/Orbitron-Regular.ttf",
+                    hg::f::TextAlign::TOP_LEFT,
+                    hg::f::WordWrap::NONE
+                );
+                m_sprite_batcher.end();
+            }
+
+            // Do naive meshing profiling.
+            // {
+            //     auto start = std::chrono::high_resolution_clock::now();
+            //     for (ui32 iteration = 0; iteration < iterations; ++iteration) {
+            //         generator(chunks[iteration]);
+            //     }
+            //     auto duration = std::chrono::high_resolution_clock::now() - start;
+            //     auto duration_us = std::chrono::duration_cast<std::chrono::microseconds>(duration).count();
+
+            //     auto avg_duration_us = static_cast<f32>(duration_us) / static_cast<f32>(iterations);
+
+            //     std::string msg = "Average per-chunk time: " + std::to_string(avg_duration_us) + "us";
+            //     m_sprite_batcher.add_string(
+            //         msg.c_str(),
+            //         f32v4{ 40.0f, 120.0f, 1000.0f, 100.0f },
+            //         f32v4{ 35.0f, 115.0f, 1010.0f, 110.0f },
+            //         hg::f::StringSizing{ hg::f::StringSizingKind::SCALED, { f32v2{ 0.85f } } },
+            //         colour4{ 0, 0, 0, 255 },
+            //         "fonts/Orbitron-Regular.ttf",
+            //         hg::f::TextAlign::TOP_LEFT,
+            //         hg::f::WordWrap::NONE
+            //     );
+            //     m_sprite_batcher.end();
+            // }
+
+            // Do greedy meshing profiling.
+            // {
+            //     auto start = std::chrono::high_resolution_clock::now();
+            //     for (ui32 iteration = 0; iteration < iterations; ++iteration) {
+            //         generator(chunks[iteration]);
+            //     }
+            //     auto duration = std::chrono::high_resolution_clock::now() - start;
+            //     auto duration_us = std::chrono::duration_cast<std::chrono::microseconds>(duration).count();
+
+            //     auto avg_duration_us = static_cast<f32>(duration_us) / static_cast<f32>(iterations);
+
+            //     std::string msg = "Average per-chunk time: " + std::to_string(avg_duration_us) + "us";
+            //     m_sprite_batcher.add_string(
+            //         msg.c_str(),
+            //         f32v4{ 40.0f, 180.0f, 1000.0f, 100.0f },
+            //         f32v4{ 35.0f, 175.0f, 1010.0f, 110.0f },
+            //         hg::f::StringSizing{ hg::f::StringSizingKind::SCALED, { f32v2{ 0.85f } } },
+            //         colour4{ 0, 0, 0, 255 },
+            //         "fonts/Orbitron-Regular.ttf",
+            //         hg::f::TextAlign::TOP_LEFT,
+            //         hg::f::WordWrap::NONE
+            //     );
+            //     m_sprite_batcher.end();
+            // }
+
+            // Force compiler to not optimise away intermediate results.
+            ui32 rand_chunk_idx = static_cast<ui32>(std::floor(hemlock::global_unitary_rand<f32>() * static_cast<f32>(iterations)));
+            std::cout << "Generation profiling complete." << std::endl;
+            std::cout << "    - " << chunks[rand_chunk_idx]->blocks[0].id << std::endl;
+
+            m_do_profile.store(false);
+        }
     }
 
     virtual void draw(hemlock::FrameTime) override {
@@ -158,31 +157,22 @@ public:
 
         m_state = happ::ScreenState::RUNNING;
 
-        // handle_key_down = hemlock::Subscriber<hui::KeyboardButtonEvent>{
-        //     [&](hemlock::Sender, hui::KeyboardButtonEvent ev) {
-        //         if (m_state != happ::ScreenState::RUNNING) return;
+        handle_key_down = hemlock::Subscriber<hui::KeyboardButtonEvent>{
+            [&](hemlock::Sender, hui::KeyboardButtonEvent ev) {
+                if (m_state != happ::ScreenState::RUNNING) return;
 
-        //         switch (ev.physical_key) {
-        //             case hui::PhysicalKey::H_G:
-        //                 m_do_gen_profile.store(true);
-        //                 return;
-        //             case hui::PhysicalKey::H_M:
-        //                 m_do_naive_mesh_profile.store(true);
-        //                 return;
-        //             case hui::PhysicalKey::H_R:
-        //                 m_do_greedy_mesh_profile.store(true);
-        //                 return;
-        //             case hui::PhysicalKey::H_N:
-        //                 m_do_navmesh_profile.store(true);
-        //                 return;
-        //             default:
-        //                 break;
-        //         }
-        //     }
-        // };
+                switch (ev.physical_key) {
+                    case hui::PhysicalKey::H_SPACE:
+                        m_do_profile.store(true);
+                        return;
+                    default:
+                        break;
+                }
+            }
+        };
 
-        // hui::InputDispatcher* dispatcher     = hui::InputDispatcher::instance();
-        // dispatcher->on_keyboard.button_down += &handle_key_down;
+        hui::InputDispatcher* dispatcher     = hui::InputDispatcher::instance();
+        dispatcher->on_keyboard.button_down += &handle_key_down;
 
         m_shader_cache.init(
             &m_iom,
@@ -264,6 +254,8 @@ protected:
     hg::ShaderCache                  m_shader_cache;
     hg::f::FontCache                 m_font_cache;
     hg::s::SpriteBatcher             m_sprite_batcher;
+
+    std::atomic<bool>                m_do_profile;
 };
 
 #endif  // __hemlock_tests_test_performance_screen_hpp
