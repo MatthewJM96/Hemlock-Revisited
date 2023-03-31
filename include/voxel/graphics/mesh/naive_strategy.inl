@@ -4,35 +4,17 @@
 #include "voxel/face_check.hpp"
 
 template <hvox::IdealBlockComparator MeshComparator>
-void hvox::ChunkNaiveMeshTask<MeshComparator>::execute(
-    ChunkLoadThreadState* state, ChunkTaskQueue* task_queue
-) {
-    auto chunk = m_chunk.lock();
+bool hvox::GreedyMeshStrategy<MeshComparator>::can_run(hmem::Handle<ChunkGrid> chunk_grid, hmem::Handle<Chunk> chunk) const {
+    // Only execute if all preloaded neighbouring chunks have at least been
+    // generated.
+    auto [_, neighbours_in_required_state]
+        = chunk_grid->query_all_neighbour_states(chunk, ChunkState::GENERATED);
 
-    if (chunk == nullptr) return;
+    return neighbours_in_required_state;
+}
 
-    {
-        auto chunk_grid = m_chunk_grid.lock();
-
-        if (chunk_grid == nullptr) return;
-
-        // Only execute if all preloaded neighbouring chunks have at least been
-        // generated.
-        auto [_, neighbours_in_required_state]
-            = chunk_grid->query_all_neighbour_states(chunk, ChunkState::GENERATED);
-
-        if (!neighbours_in_required_state) {
-            // Put copy of this mesh task back onto the load task queue.
-            ChunkNaiveMeshTask<MeshComparator>* mesh_task
-                = new ChunkNaiveMeshTask<MeshComparator>();
-            mesh_task->set_state(m_chunk, m_chunk_grid);
-            task_queue->enqueue(state->producer_token, { mesh_task, true });
-            return;
-        }
-    }
-
-    chunk->meshing.store(ChunkState::ACTIVE, std::memory_order_release);
-
+template <hvox::IdealBlockComparator MeshComparator>
+void hvox::GreedyMeshStrategy<MeshComparator>::operator()(hmem::Handle<ChunkGrid> chunk_grid, hmem::Handle<Chunk> chunk) const {
     // TODO(Matthew): Better guess work should be possible and expand only when
     // needed.
     //                  Maybe in addition to managing how all chunk's transformations

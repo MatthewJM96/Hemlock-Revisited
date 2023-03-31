@@ -4,15 +4,12 @@
 #include "voxel/chunk/grid.h"
 
 template <hvox::IdealBlockComparator MeshComparator>
-void hvox::ChunkGreedyMeshTask<
-    MeshComparator>::execute(ChunkLoadThreadState*, ChunkTaskQueue*) {
-    auto chunk_grid = m_chunk_grid.lock();
-    if (chunk_grid == nullptr) return;
-    auto chunk = m_chunk.lock();
-    if (chunk == nullptr) return;
+bool hvox::GreedyMeshStrategy<MeshComparator>::can_run(hmem::Handle<ChunkGrid>, hmem::Handle<Chunk>) const {
+    return true;
+}
 
-    chunk->meshing.store(ChunkState::ACTIVE, std::memory_order_release);
-
+template <hvox::IdealBlockComparator MeshComparator>
+void hvox::GreedyMeshStrategy<MeshComparator>::operator()(hmem::Handle<ChunkGrid>, hmem::Handle<Chunk> chunk) const {
     // TODO(Matthew): Better guess work should be possible and expand only when
     // needed.
     //                  Maybe in addition to managing how all chunk's transformations
@@ -308,8 +305,4 @@ process_new_source:
     };
 
     delete[] visited;
-
-    chunk->meshing.store(ChunkState::COMPLETE, std::memory_order_release);
-
-    chunk->on_mesh_change();
 }
