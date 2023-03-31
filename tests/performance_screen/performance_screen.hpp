@@ -33,7 +33,11 @@ public:
 
     virtual void update(hemlock::FrameTime) override {
         if (m_do_profile) {
+#if defined(DEBUG)
+            const ui32 xyz_len    = 4;
+#else
             const ui32 xyz_len    = 18;
+#endif
             const ui32 iterations = xyz_len * xyz_len * xyz_len;
             
             // Prepare chunks.
