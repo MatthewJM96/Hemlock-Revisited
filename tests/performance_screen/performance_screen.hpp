@@ -49,13 +49,32 @@ public:
 
             hmem::Handle<hvox::Chunk>* chunks = new hmem::Handle<hvox::Chunk>[iterations];
 
+            auto chunk_idx = [](ui32 x, ui32 y, ui32 z) {
+                return x + y * xyz_len + z * xyz_len * xyz_len;
+            };
+
             for (ui32 x = 0; x < xyz_len; ++x) {
                 for (ui32 y = 0; y < xyz_len; ++y) {
                     for (ui32 z = 0; z < xyz_len; ++z) {
-                        ui32 idx = x + y * xyz_len + z * xyz_len * xyz_len;
+                        ui32 idx = chunk_idx(x, y, z);
                         chunks[idx] = hmem::allocate_handle<hvox::Chunk>(chunk_allocator);
                         chunks[idx]->position = {x, y, z};
                         chunks[idx]->init(chunks[idx], block_pager, instance_data_pager);
+                    }
+                }
+            }
+
+            for (ui32 x = 0; x < xyz_len; ++x) {
+                for (ui32 y = 0; y < xyz_len; ++y) {
+                    for (ui32 z = 0; z < xyz_len; ++z) {
+                        ui32 idx = chunk_idx(x, y, z);
+
+                        if (x !=           0) chunks[idx]->neighbours.one.left   = chunks[chunk_idx(x - 1, y, z)];
+                        if (x != xyz_len - 1) chunks[idx]->neighbours.one.right  = chunks[chunk_idx(x + 1, y, z)];
+                        if (y !=           0) chunks[idx]->neighbours.one.bottom = chunks[chunk_idx(x, y - 1, z)];
+                        if (y != xyz_len - 1) chunks[idx]->neighbours.one.top    = chunks[chunk_idx(x, y + 1, z)];
+                        if (z !=           0) chunks[idx]->neighbours.one.back   = chunks[chunk_idx(x, y, z - 1)];
+                        if (z != xyz_len - 1) chunks[idx]->neighbours.one.front  = chunks[chunk_idx(x, y, z + 1)];
                     }
                 }
             }
