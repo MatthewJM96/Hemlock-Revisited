@@ -4,17 +4,21 @@
 #include "voxel/face_check.hpp"
 
 template <hvox::IdealBlockComparator MeshComparator>
-bool hvox::GreedyMeshStrategy<MeshComparator>::can_run(hmem::Handle<ChunkGrid> chunk_grid, hmem::Handle<Chunk> chunk) const {
+bool hvox::NaiveMeshStrategy<MeshComparator>::can_run(hmem::Handle<ChunkGrid> chunk_grid, hmem::Handle<Chunk> chunk) const {
     // Only execute if all preloaded neighbouring chunks have at least been
     // generated.
-    auto [_, neighbours_in_required_state]
-        = chunk_grid->query_all_neighbour_states(chunk, ChunkState::GENERATED);
+    // TODO(Matthew): Revisit this. query_all_neighbour_states has been removed, do we
+    //                stand by this? Further, do we stand by the condition here? Perhaps
+    //                we don't really care about the saved vertices.
+    // auto [_, neighbours_in_required_state]
+    //     = chunk_grid->query_all_neighbour_states(chunk, ChunkState::GENERATED);
 
-    return neighbours_in_required_state;
+    // return neighbours_in_required_state;
+    return false;
 }
 
 template <hvox::IdealBlockComparator MeshComparator>
-void hvox::GreedyMeshStrategy<MeshComparator>::operator()(hmem::Handle<ChunkGrid> chunk_grid, hmem::Handle<Chunk> chunk) const {
+void hvox::NaiveMeshStrategy<MeshComparator>::operator()(hmem::Handle<ChunkGrid>, hmem::Handle<Chunk> chunk) const {
     // TODO(Matthew): Better guess work should be possible and expand only when
     // needed.
     //                  Maybe in addition to managing how all chunk's transformations
