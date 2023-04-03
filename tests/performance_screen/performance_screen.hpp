@@ -175,6 +175,8 @@ public:
                 auto start = std::chrono::high_resolution_clock::now();
                 for (ui32 iteration = 0; iteration < iterations; ++iteration) {
                     greedy_mesh({}, chunks[iteration]);
+
+                    chunks[iteration]->meshing.store(hvox::ChunkState::COMPLETE, std::memory_order_release);
                 }
                 auto duration = std::chrono::high_resolution_clock::now() - start;
                 auto duration_us = std::chrono::duration_cast<std::chrono::microseconds>(duration).count();
