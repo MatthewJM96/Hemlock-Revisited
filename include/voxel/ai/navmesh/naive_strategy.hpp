@@ -12,7 +12,7 @@ namespace hemlock {
             struct NaiveNavmeshStrategy {
                 void do_bulk(hmem::Handle<ChunkGrid> chunk_grid, hmem::Handle<Chunk> chunk) const;
 
-                void do_stitch()(hmem::Handle<ChunkGrid> chunk_grid, hmem::Handle<Chunk> chunk) const;
+                void do_stitch(hmem::Handle<ChunkGrid> chunk_grid, hmem::Handle<Chunk> chunk) const;
             };
         }  // namespace ai
     }      // namespace voxel
