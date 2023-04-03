@@ -20,6 +20,19 @@
 
 #include "tests/performance_screen/terrain.hpp"
 
+// Note(Matthew): Some thoughts about chunk prep timings. If we think of modern trains,
+//                for which the upper speed is roughly 600Km/h, we can calculate that
+//                for a 20 chunk view distance, in a game using the half-metre per voxel
+//                metric (so 320m view distance), we pessimistically need to prepare
+//                ~7000 chunks per second. With current (Apr 2023) timings, we have a
+//                ~1.5ms per chunk cost, which allows for ~670 chunks a second per
+//                thread. We can expect to target future hardware with 12 cores and
+//                upward, but we'd in those circumstances need to provide 10-11 threads
+//                to chunk preparation alone, ignoring any systems to maintain the
+//                on-vehicle experience and any future additional chunk prep costs.
+//                  Suffice to say, we would like to bring these timings down closer to
+//                  1ms to give any tricks we would need to employ more slack to work.
+
 class TestPerformanceScreen : public happ::ScreenBase {
 public:
     TestPerformanceScreen() : happ::ScreenBase(), m_do_profile(false) {
