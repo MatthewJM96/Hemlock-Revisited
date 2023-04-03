@@ -4371,13 +4371,13 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(hmem::Handle<ChunkGrid>,
                         };
 
                         boost::add_edge(
-                            neighbour_block_vertex.here,
-                            candidate_block_vertex.here,
+                            neighbour_block_vertex.in_neighbour,
+                            candidate_block_vertex.in_neighbour,
                             neighbour->navmesh.graph
                         );
                         boost::add_edge(
-                            candidate_block_vertex.here,
-                            neighbour_block_vertex.here,
+                            candidate_block_vertex.in_neighbour,
+                            neighbour_block_vertex.in_neighbour,
                             neighbour->navmesh.graph
                         );
 
