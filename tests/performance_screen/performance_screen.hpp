@@ -9,7 +9,8 @@
 #include "graphics/glsl_program.h"
 #include "graphics/sprite/batcher.h"
 #include "ui/input/dispatcher.h"
-#include "voxel/ai/navmesh_task.hpp"
+#include "voxel/chunk/state.hpp"
+#include "voxel/ai/navmesh/naive_strategy.hpp"
 #include "voxel/generation/generator_task.hpp"
 #include "voxel/graphics/mesh/naive_strategy.hpp"
 #include "voxel/graphics/mesh/greedy_strategy.hpp"
@@ -191,6 +192,53 @@ public:
                 ui32 rand_instance_idx = static_cast<ui32>(std::floor(hemlock::global_unitary_rand<f32>() * static_cast<f32>(instance.count)));
 
                 std::cout << "    - " << instance.data[rand_instance_idx].translation.x << std::endl;
+            }
+
+            const hvox::ai::NaiveNavmeshStrategy<htest::performance_screen::BlockSolidCheck> naive_navmesh;
+
+            // Do naive navmesh profiling.
+            {
+                auto bulk_start = std::chrono::high_resolution_clock::now();
+                for (ui32 iteration = 0; iteration < iterations; ++iteration) {
+                    naive_navmesh.do_bulk({}, chunks[iteration]);
+
+                    chunks[iteration]->bulk_navmeshing.store(hvox::ChunkState::COMPLETE, std::memory_order_release);
+                }
+                auto bulk_duration = std::chrono::high_resolution_clock::now() - bulk_start;
+                auto bulk_duration_us = std::chrono::duration_cast<std::chrono::microseconds>(bulk_duration).count();
+
+                auto bulk_avg_duration_us = static_cast<f32>(bulk_duration_us) / static_cast<f32>(iterations);
+
+                auto stitch_start = std::chrono::high_resolution_clock::now();
+                for (ui32 iteration = 0; iteration < iterations; ++iteration) {
+                    naive_navmesh.do_stitch({}, chunks[iteration]);
+
+                    chunks[iteration]->navmeshing.store(hvox::ChunkState::COMPLETE, std::memory_order_release);
+                }
+                auto stitch_duration = std::chrono::high_resolution_clock::now() - stitch_start;
+                auto stitch_duration_us = std::chrono::duration_cast<std::chrono::microseconds>(stitch_duration).count();
+
+                auto stitch_avg_duration_us = static_cast<f32>(stitch_duration_us) / static_cast<f32>(iterations);
+
+                std::string msg = "Average per-chunk time: bulk " + std::to_string(bulk_avg_duration_us) + "us // stitch " + std::to_string(stitch_avg_duration_us) + "us";
+                m_sprite_batcher.add_string(
+                    msg.c_str(),
+                    f32v4{ 40.0f, 240.0f, 1000.0f, 100.0f },
+                    f32v4{ 35.0f, 235.0f, 1010.0f, 110.0f },
+                    hg::f::StringSizing{ hg::f::StringSizingKind::SCALED, { f32v2{ 0.85f } } },
+                    colour4{ 0, 0, 0, 255 },
+                    "fonts/Orbitron-Regular.ttf",
+                    hg::f::TextAlign::TOP_LEFT,
+                    hg::f::WordWrap::NONE
+                );
+                m_sprite_batcher.end();
+            }
+
+            // Force compiler to not optimise away intermediate results.
+            {
+                ui32 rand_chunk_idx = static_cast<ui32>(std::floor(hemlock::global_unitary_rand<f32>() * static_cast<f32>(iterations)));
+
+                std::cout << "    - " << boost::num_vertices(chunks[rand_chunk_idx]->navmesh.graph) << std::endl;
             }
 
             std::cout << "Generation profiling complete." << std::endl;
