@@ -19,6 +19,6 @@ namespace hemlock {
 }  // namespace hemlock
 namespace hvox = hemlock::voxel;
 
-#include "navmesh_strategy.inl"
+#include "naive_strategy.inl"
 
 #endif  // __hemlock_voxel_ai_navmesh_naive_strategy_hpp
