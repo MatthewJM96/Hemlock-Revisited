@@ -42,7 +42,7 @@ namespace hemlock::voxel::ai::impl {
 }  // namespace hemlock::voxel::ai::impl
 
 template <hvox::IdealBlockConstraint IsSolid>
-void hvox::ai::NaiveNavmeshStrategy<MeshComparator>::do_bulk(hmem::Handle<ChunkGrid>, hmem::Handle<Chunk> chunk) const {
+void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_bulk(hmem::Handle<ChunkGrid>, hmem::Handle<Chunk> chunk) const {
     auto chunk_pos = chunk->position;
 
     std::shared_lock block_lock(chunk->blocks_mutex);
@@ -1283,7 +1283,7 @@ void hvox::ai::NaiveNavmeshStrategy<MeshComparator>::do_bulk(hmem::Handle<ChunkG
 }
 
 template <hvox::IdealBlockConstraint IsSolid>
-void hvox::ai::NaiveNavmeshStrategy<MeshComparator>::do_stitch(hmem::Handle<ChunkGrid>, hmem::Handle<Chunk> chunk) const {
+void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(hmem::Handle<ChunkGrid>, hmem::Handle<Chunk> chunk) const {
     auto chunk_pos = chunk->position;
 
     std::shared_lock block_lock(chunk->blocks_mutex);
