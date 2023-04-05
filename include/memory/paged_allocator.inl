@@ -35,10 +35,17 @@ typename hmem::PagedAllocator<DataType, PageSize, MaxFreePages>::pointer
         allocate(size_type count, const void* /*= 0*/) {
     if (count == 0) return nullptr;
 
+#if DEBUG
+    assert(count <= PageSize);
+#endif
+
     std::lock_guard<std::mutex> lock(m_state->free_items_mutex);
 
-    auto page_type = typeid(DataType).hash_code();
+    size_t page_type = typeid(DataType).hash_code();
 
+    // TODO(Matthew): std vector likely has a resizing pattern unsuitable for us, should
+    //                profile this versus a custom version.
+    //                  regardless can certainly expose this as a template param
     m_state->free_items.try_emplace(page_type, std::vector<void*>{});
 
     if (m_state->free_items[page_type].size() > 0) {

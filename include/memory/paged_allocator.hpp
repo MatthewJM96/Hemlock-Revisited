@@ -61,6 +61,8 @@ namespace hemlock {
             ~PagedAllocator() { /* Empty. */
             }
 
+            size_t allocated_bytes() { return m_state.pager.allocated_bytes(); }
+
             pointer allocate(size_type count, const void* = 0);
 
             template <typename... Args>
