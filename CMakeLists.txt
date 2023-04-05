@@ -66,6 +66,10 @@ if (UNIX OR MINGW)
 
     if (HEMLOCK_FAST_DEBUG)
         set(CMAKE_CXX_FLAGS_DEBUG "-g -O1")
+    elseif (HEMLOCK_SUPER_FAST_DEBUG)
+        set(CMAKE_CXX_FLAGS_DEBUG "-g -O2")
+    elseif (HEMLOCK_HYPER_FAST_DEBUG)
+        set(CMAKE_CXX_FLAGS_DEBUG "-g -O3")
     endif()
 
     if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
@@ -92,13 +96,14 @@ endif()
 
 set(Hemlock_Requirements
     glm/0.9.9.8
-    sdl/2.0.18
-    sdl_ttf/2.0.18
-    libpng/1.6.37
+    sdl/2.26.1
+    sdl_ttf/2.20.1
+    libpng/1.6.39
     concurrentqueue/1.0.3
     boost/1.78.0
     bullet3/3.24
     entt/3.10.1
+    zlib/1.2.13
 )
 
 if (HEMLOCK_USING_OPENGL)
@@ -179,6 +184,7 @@ add_executable(Hemlock_Revisited
     "${PROJECT_SOURCE_DIR}/src/app/window/window.cpp"
     "${PROJECT_SOURCE_DIR}/src/camera/basic_first_person_camera.cpp"
     "${PROJECT_SOURCE_DIR}/src/camera/basic_orthographic_camera.cpp"
+    "${PROJECT_SOURCE_DIR}/src/debug/heatmap.cpp"
     "${PROJECT_SOURCE_DIR}/src/graphics/font/font.cpp"
     "${PROJECT_SOURCE_DIR}/src/graphics/font/text_align.cpp"
     "${PROJECT_SOURCE_DIR}/src/graphics/glsl_program.cpp"
@@ -235,9 +241,12 @@ if (HEMLOCK_USING_LUA)
     )
 endif()
 
+# TODO(Matthew): remove the "${PROJECT_SOURCE_DIR}" line and properly build
+#                engine and tests separately.
 target_include_directories(Hemlock_Revisited
     PUBLIC
     "${PROJECT_SOURCE_DIR}/include"
+    "${PROJECT_SOURCE_DIR}"
 )
 
 target_include_directories(Hemlock_Revisited
@@ -335,6 +344,7 @@ target_link_libraries(Hemlock_Revisited
     SDL2_ttf::SDL2_ttf
     Boost::iostreams
     Bullet::Bullet
+    heatmap
 )
 
 if(CMAKE_BUILD_TYPE STREQUAL "Release" OR HEMLOCK_FAST_DEBUG)

@@ -33,8 +33,8 @@ namespace hemlock {
             ~EnvironmentRegistry() { /* Empty. */
             }
 
-            H_NON_COPYABLE(EnvironmentRegistry);
-            H_MOVABLE(EnvironmentRegistry);
+            HEMLOCK_NON_COPYABLE(EnvironmentRegistry);
+            HEMLOCK_MOVABLE(EnvironmentRegistry);
 
             /**
              * @brief Initialise the environment registry in which script

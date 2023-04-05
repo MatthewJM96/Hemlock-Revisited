@@ -44,9 +44,9 @@ namespace hemlock {
                 ~Environment() { /* Empty. */
                 }
 
-                H_NON_COPYABLE(Environment);
+                HEMLOCK_NON_COPYABLE(Environment);
 
-                H_MOVABLE(Environment) {
+                HEMLOCK_MOVABLE(Environment) {
                     this->_Base::operator=(std::move(rhs));
 
                     return *this;

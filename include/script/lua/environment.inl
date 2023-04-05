@@ -24,7 +24,7 @@ void hscript::lua::Environment<HasRPCManager, CallBufferSize>::init(
 
     // Create a table for storing registered functions.
     lua_newtable(m_state);
-    lua_setfield(m_state, LUA_REGISTRYINDEX, H_LUA_SCRIPT_FUNCTION_TABLE);
+    lua_setfield(m_state, LUA_REGISTRYINDEX, HEMLOCK_LUA_SCRIPT_FUNCTION_TABLE);
 
     // TODO(Matthew): Revisit namespace handling as it looks like Lua stack
     //                may keep growing (dangerous) if we don't track and
@@ -230,7 +230,7 @@ bool hscript::lua::Environment<HasRPCManager, CallBufferSize>::register_lua_func
 
     // Get our script function table in the Lua registry and place
     // it on the Lua stack.
-    lua_getfield(m_state, LUA_REGISTRYINDEX, H_LUA_SCRIPT_FUNCTION_TABLE);
+    lua_getfield(m_state, LUA_REGISTRYINDEX, HEMLOCK_LUA_SCRIPT_FUNCTION_TABLE);
 
     // Now put global namespace on the stack, we will be searching
     // for the Lua function to register from here.
@@ -441,7 +441,7 @@ bool hscript::lua::Environment<HasRPCManager, CallBufferSize>::get_script_functi
     if constexpr (std::is_same_v<ReturnType, CallParameters> && std::equal_to<size_t>()(sizeof...(Parameters), 1ul) && (std::is_same_v<Parameters, CallParameters> || ...))
     {
         delegate = make_arbitrary_scalars_lua_delegate(
-            lua_func_state, H_MAX_ARBITRARY_LUA_RETURNS
+            lua_func_state, HEMLOCK_MAX_ARBITRARY_LUA_RETURNS
         );
     } else {
         delegate = make_lua_delegate<ReturnType, Parameters...>(lua_func_state);

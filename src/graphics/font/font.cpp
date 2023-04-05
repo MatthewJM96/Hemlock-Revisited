@@ -4,29 +4,6 @@
 
 #include "graphics/font/font.h"
 
-/**
- * @brief Determines the next power of 2 after the given value and returns it.
- *
- * @param The value to determine the following power of 2 for.
- *
- * @return The power of 2 determined.
- */
-static ui32 next_power_2(ui32 value) {
-    // This is a rather lovely bit manipulation function.
-    // Essentially, all we're doing in this is up until the return
-    // statement we take a value like 0110110000110101101 and change
-    // it to become 0111111111111111111 so that when we add 1 (i.e.
-    // 0000000000000000001) it becomes 1000000000000000000 -> the
-    // next power of 2!
-    --value;
-    value |= value >> 1;
-    value |= value >> 2;
-    value |= value >> 4;
-    value |= value >> 8;
-    value |= value >> 16;
-    return ++value;
-}
-
 hg::f::FontInstanceHash
 hg::f::hash(FontSize size, FontStyle style, FontRenderStyle render_style) {
     FontInstanceHash hash = 0;
@@ -170,8 +147,8 @@ bool hg::f::Font::generate(
 
         // There are benefits of making the texture larger to match power of 2
         // boundaries on width and height.
-        current_width  = next_power_2(current_width);
-        current_height = next_power_2(current_height);
+        current_width  = hmaths::next_power_2(current_width);
+        current_height = hmaths::next_power_2(current_height);
 
         // If the area of the rectangle drawn out by the rows generated is less than
         // the previous best area, then we have a new candidate!

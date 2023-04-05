@@ -7,8 +7,22 @@
 hvox::Chunk::Chunk() :
     neighbours({}),
     blocks(nullptr),
-    state(ChunkState::NONE),
-    pending_task(ChunkTaskKind::NONE) { /* Empty. */
+    lod_level(0),
+    generation(ChunkState::NONE),
+    meshing(ChunkState::NONE),
+    mesh_uploading(ChunkState::NONE),
+    navmeshing(ChunkState::NONE),
+    navmesh_stitch({ ChunkState::NONE,
+                     ChunkState::NONE,
+                     ChunkState::NONE,
+                     ChunkState::NONE,
+                     ChunkState::NONE,
+                     ChunkState::NONE,
+                     ChunkState::NONE,
+                     ChunkState::NONE,
+                     ChunkState::NONE,
+                     ChunkState::NONE,
+                     ChunkState::NONE }) { /* Empty. */
 }
 
 hvox::Chunk::~Chunk() {
@@ -36,8 +50,6 @@ void hvox::Chunk::init(
     instance.init(instance_data_pager);
 
     neighbours = {};
-
-    state.store(ChunkState::PRELOADED, std::memory_order_release);
 }
 
 void hvox::Chunk::update(FrameTime) {
@@ -49,7 +61,8 @@ void hvox::Chunk::init_events(hmem::WeakHandle<Chunk> self) {
     on_bulk_block_change.set_sender(Sender(self));
     on_load.set_sender(Sender(self));
     on_mesh_change.set_sender(Sender(self));
-    on_render_state_change.set_sender(Sender(self));
+    on_navmesh_change.set_sender(Sender(self));
+    on_lod_change.set_sender(Sender(self));
     on_unload.set_sender(Sender(self));
 }
 
@@ -61,7 +74,8 @@ bool hvox::set_block(
     {
         std::shared_lock lock(chunk->blocks_mutex);
 
-        bool gen_task_active = chunk->gen_task_active.load(std::memory_order_acquire);
+        bool gen_task_active
+            = chunk->generation.load(std::memory_order_acquire) == ChunkState::ACTIVE;
         if (!gen_task_active) {
             bool should_cancel = chunk->on_block_change(
                 { chunk, chunk->blocks[block_idx], block, block_position }
@@ -86,7 +100,8 @@ bool hvox::set_blocks(
     {
         std::shared_lock lock(chunk->blocks_mutex);
 
-        bool gen_task_active = chunk->gen_task_active.load(std::memory_order_acquire);
+        bool gen_task_active
+            = chunk->generation.load(std::memory_order_acquire) == ChunkState::ACTIVE;
         if (!gen_task_active) {
             bool should_cancel = chunk->on_bulk_block_change(
                 { chunk, &block, true, start_block_position, end_block_position }
@@ -111,7 +126,8 @@ bool hvox::set_blocks(
     {
         std::shared_lock lock(chunk->blocks_mutex);
 
-        bool gen_task_active = chunk->gen_task_active.load(std::memory_order_acquire);
+        bool gen_task_active
+            = chunk->generation.load(std::memory_order_acquire) == ChunkState::ACTIVE;
         if (!gen_task_active) {
             bool should_cancel = chunk->on_bulk_block_change(
                 { chunk, blocks, false, start_block_position, end_block_position }

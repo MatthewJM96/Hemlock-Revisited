@@ -1,7 +1,5 @@
-#ifndef __hemlock_ai_pathing_voxel_h
-#define __hemlock_ai_pathing_voxel_h
-
-#include "voxel/coordinate_system.h"
+#ifndef __hemlock_ai_pathing_pathable_agent_hpp
+#define __hemlock_ai_pathing_pathable_agent_hpp
 
 namespace hemlock {
     namespace ai {
@@ -10,7 +8,7 @@ namespace hemlock {
             // component group
             //                composed of AgentComponent and DynamicComponent
             //                (ExtendedComponent by necessity?).
-            struct PathableAgenta
+            struct PathableAgent { };
         }  // namespace pathing
     }      // namespace ai
 }  // namespace hemlock

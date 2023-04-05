@@ -3,9 +3,12 @@
 
 // Basics
 #include <cstdlib>
+#include <random>
 
 // Containers
 #include <boost/circular_buffer.hpp>
+#include <boost/graph/adjacency_list.hpp>
+#include <boost/graph/graph_traits.hpp>
 #include <map>
 #include <moodycamel/blockingconcurrentqueue.h>
 #include <moodycamel/concurrentqueue.h>
@@ -90,6 +93,9 @@
 // Our generic preprocessor macros.
 #include "preprocessor.hpp"
 
+// Our compatibility definitions.
+#include "compat.hpp"
+
 // Our constants.
 #include "constants.hpp"
 #include "debug.hpp"
@@ -101,6 +107,9 @@
 
 // Our Timers.
 #include "timing.h"
+
+// Our Maths.
+#include "maths/powers.hpp"
 
 // Our Containers
 #include "memory/handle.hpp"

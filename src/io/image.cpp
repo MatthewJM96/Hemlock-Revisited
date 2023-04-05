@@ -201,8 +201,8 @@ bool hio::img::png::load(
 
     // Read header and compare for PNG signature.
     ui8 header[8];
-    fread(header, 1, 8, file);
-    if (png_sig_cmp(header, 0, 8)) return false;
+    size_t chars_read = fread(header, 1, 8, file);
+    if (chars_read != 8 || png_sig_cmp(header, 0, 8)) return false;
 
     // Set up handler that will be used to read the data.
     png_structp png

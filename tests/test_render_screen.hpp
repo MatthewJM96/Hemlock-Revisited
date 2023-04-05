@@ -13,7 +13,8 @@
 #include "ui/input/manager.h"
 #include "voxel/chunk/grid.h"
 #include "voxel/generation/generator_task.hpp"
-#include "voxel/graphics/mesh/greedy_task.hpp"
+#include "voxel/graphics/mesh/mesh_task.hpp"
+#include "voxel/graphics/mesh/greedy_strategy.hpp"
 
 #include "iomanager.hpp"
 
@@ -278,7 +279,7 @@ public:
                 return new hvox::ChunkGenerationTask<TRS_VoxelGenerator>();
             } },
             hvox::ChunkTaskBuilder{ []() {
-                return new hvox::ChunkGreedyMeshTask<TRS_BlockComparator>();
+                return new hvox::ChunkMeshTask<hvox::GreedyMeshStrategy<TRS_BlockComparator>>();
             } }
         );
 

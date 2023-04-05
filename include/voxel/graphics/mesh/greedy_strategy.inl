@@ -3,16 +3,13 @@
 #include "voxel/chunk.h"
 #include "voxel/chunk/grid.h"
 
-template <hvox::ChunkMeshComparator MeshComparator>
-void hvox::ChunkGreedyMeshTask<
-    MeshComparator>::execute(ChunkLoadThreadState*, ChunkTaskQueue*) {
-    auto chunk_grid = m_chunk_grid.lock();
-    if (chunk_grid == nullptr) return;
-    auto chunk = m_chunk.lock();
-    if (chunk == nullptr) return;
+template <hvox::IdealBlockComparator MeshComparator>
+bool hvox::GreedyMeshStrategy<MeshComparator>::can_run(hmem::Handle<ChunkGrid>, hmem::Handle<Chunk>) const {
+    return true;
+}
 
-    chunk->mesh_task_active.store(true, std::memory_order_release);
-
+template <hvox::IdealBlockComparator MeshComparator>
+void hvox::GreedyMeshStrategy<MeshComparator>::operator()(hmem::Handle<ChunkGrid>, hmem::Handle<Chunk> chunk) const {
     // TODO(Matthew): Better guess work should be possible and expand only when
     // needed.
     //                  Maybe in addition to managing how all chunk's transformations
@@ -308,15 +305,4 @@ process_new_source:
     };
 
     delete[] visited;
-
-    chunk->state.store(ChunkState::MESHED, std::memory_order_release);
-
-    chunk->mesh_task_active.store(false, std::memory_order_release);
-
-    chunk->on_mesh_change();
-
-    // TODO(Matthew): Set next task if chunk unload is false? Or else set that
-    //                between this task and next, but would need adjusting
-    //                workflow.
-    chunk->pending_task.store(ChunkTaskKind::NONE, std::memory_order_release);
 }
