@@ -16,11 +16,12 @@ void hmem::HeterogenousPager<PageSize, MaxFreePages>::dispose() {
     }
 
     for (auto& [type, metadata] : m_page_metadata) {
-        metadata.free_pages = 0;
+        metadata.free_pages  = 0;
         metadata.total_pages = 0;
     }
 
     _HeterogenousPages().swap(m_free_pages);
+    HeterogenousPageMetadata().swap(m_page_metadata);
 }
 
 template <size_t PageSize, size_t MaxFreePages>
@@ -44,7 +45,9 @@ hmem::Page<DataType> hmem::HeterogenousPager<PageSize, MaxFreePages>::get_page()
     size_t page_type = typeid(DataType).hash_code();
 
     m_free_pages.try_emplace(page_type, Pages<void, MaxFreePages>{});
-    m_page_metadata.try_emplace(page_type, HeterogenousPageMetadatum{0,0,sizeof(DataType)});
+    m_page_metadata.try_emplace(
+        page_type, HeterogenousPageMetadatum{ 0, 0, sizeof(DataType) }
+    );
 
     if (m_page_metadata[page_type].free_pages > 0)
         return reinterpret_cast<Page<DataType>>(
