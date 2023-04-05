@@ -256,6 +256,25 @@ public:
                 std::cout << "    - " << boost::num_vertices(chunks[rand_chunk_idx]->navmesh.graph) << std::endl;
             }
 
+            {
+                size_t allocated_bytes  = block_pager->allocated_bytes();
+                       allocated_bytes += chunk_allocator.allocated_bytes(); // + block_pager->allocated_bytes() + instance_data_pager->allocated_bytes();
+                size_t allocated_MB = allocated_bytes / 1000000;
+
+                std::string msg = "Memory consumption: " + std::to_string(allocated_MB) + "MB";
+                m_sprite_batcher.add_string(
+                    msg.c_str(),
+                    f32v4{ 40.0f, 300.0f, 1000.0f, 100.0f },
+                    f32v4{ 35.0f, 295.0f, 1010.0f, 110.0f },
+                    hg::f::StringSizing{ hg::f::StringSizingKind::SCALED, { f32v2{ 0.85f } } },
+                    colour4{ 0, 0, 0, 255 },
+                    "fonts/Orbitron-Regular.ttf",
+                    hg::f::TextAlign::TOP_LEFT,
+                    hg::f::WordWrap::NONE
+                );
+                m_sprite_batcher.end();
+            }
+
             std::cout << "Generation profiling complete." << std::endl;
 
             m_do_profile.store(false);
