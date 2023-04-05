@@ -13,6 +13,12 @@ namespace hemlock {
                 std::lock_guard<std::mutex> lock(free_items_mutex);
                 _Items().swap(free_items);
 
+                // TODO(Matthew): How are we ensuring paged memory is fully deallocated?
+                //                Need to track pages seperately from items, and items
+                //                can be tracked in membership via pointer arithmetic or
+                //                however works based on if and for what we need to
+                //                track that (e.g. for compaction).
+
                 pager.dispose();
             }
 
