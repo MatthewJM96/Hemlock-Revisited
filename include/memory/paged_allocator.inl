@@ -37,6 +37,12 @@ typename hmem::PagedAllocator<DataType, PageSize, MaxFreePages>::pointer
 
 #if DEBUG
     assert(count <= PageSize);
+
+    // TODO(Matthew): this only works for requesting one item at a time, any bulk
+    //                requests will break. We need to properly handle this which in
+    //                turn requires better item ownership tracking back to pages (which)
+    //                is also needed for the compaction issue.
+    assert(count == 1);
 #endif
 
     std::lock_guard<std::mutex> lock(m_state->free_items_mutex);
