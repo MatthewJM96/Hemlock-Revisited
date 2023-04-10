@@ -12,7 +12,9 @@ void hmem::Pager<DataType, PageSize, MaxFreePages>::dispose() {
     }
 
     _Pages().swap(m_free_pages);
-    m_free_page_count = 0;
+
+    m_free_page_count  = 0;
+    m_total_page_count = 0;
 }
 
 template <typename DataType, size_t PageSize, size_t MaxFreePages>

@@ -7,20 +7,23 @@ namespace hemlock {
     namespace memory {
         template <size_t MaxFreePages>
             requires (MaxFreePages > 0)
-        using HeterogenousPages = std::unordered_map<size_t, Pages<void, MaxFreePages>>;
-
-        struct HeterogenousPageMetadatum {
-            size_t free_pages;
-            size_t total_pages;
+        struct HeterogenousPageInfo {
+            size_t free_page_count;
+            size_t total_page_count;
             size_t data_byte_size;
+
+            Pages<void, MaxFreePages> pages;
         };
-        using HeterogenousPageMetadata = std::unordered_map<size_t, HeterogenousPageMetadatum>;
+        template <size_t MaxFreePages>
+            requires (MaxFreePages > 0)
+        using HeterogenousPageInfos = std::unordered_map<size_t, HeterogenousPageInfo<MaxFreePages>>;
 
         template <size_t PageSize, size_t MaxFreePages>
             requires (PageSize > 0 && MaxFreePages > 0)
         class HeterogenousPager {
         protected:
-            using _HeterogenousPages = HeterogenousPages<MaxFreePages>;
+            using _Pages                 = Pages<void, MaxFreePages>;
+            using _HeterogenousPageInfos = HeterogenousPageInfos<MaxFreePages>;
         public:
             HeterogenousPager() { /* Empty. */
             }
@@ -62,9 +65,8 @@ namespace hemlock {
             template <typename DataType>
             void free_page(Page<DataType> page);
         protected:
-            std::mutex               m_free_pages_mutex;
-            _HeterogenousPages       m_free_pages;
-            HeterogenousPageMetadata m_page_metadata;
+            std::mutex             m_heterogenous_pages_mutex;
+            _HeterogenousPageInfos m_heterogenous_page_infos;
         };
     }  // namespace memory
 }  // namespace hemlock

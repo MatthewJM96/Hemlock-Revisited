@@ -1,38 +1,35 @@
 template <size_t PageSize, size_t MaxFreePages>
     requires (PageSize > 0 && MaxFreePages > 0)
 void hmem::HeterogenousPager<PageSize, MaxFreePages>::dispose() {
-    std::lock_guard<std::mutex> lock(m_free_pages_mutex);
+    std::lock_guard<std::mutex> lock(m_heterogenous_pages_mutex);
 
 #if DEBUG
-    for (auto& [type, metadata] : m_page_metadata) {
-        assert(metadata.free_pages == metadata.total_pages);
+    for (auto& [type, heterogenous_page_info] : m_heterogenous_page_infos) {
+        assert(heterogenous_page_info.free_page_count == heterogenous_page_info.total_page_count);
     }
 #endif
 
-    for (auto& [type, pages] : m_free_pages) {
-        for (auto& page : pages) {
+    for (auto& [type, heterogenous_page_info] : m_heterogenous_page_infos) {
+        for (auto& page : heterogenous_page_info.pages) {
             delete[] page;
         }
+
+        heterogenous_page_info.free_page_count  = 0;
+        heterogenous_page_info.total_page_count = 0;
     }
 
-    for (auto& [type, metadata] : m_page_metadata) {
-        metadata.free_pages  = 0;
-        metadata.total_pages = 0;
-    }
-
-    _HeterogenousPages().swap(m_free_pages);
-    HeterogenousPageMetadata().swap(m_page_metadata);
+    _HeterogenousPageInfos().swap(m_heterogenous_page_infos);
 }
 
 template <size_t PageSize, size_t MaxFreePages>
     requires (PageSize > 0 && MaxFreePages > 0)
 size_t hmem::HeterogenousPager<PageSize, MaxFreePages>::allocated_bytes() {
-    std::lock_guard<std::mutex> lock(m_free_pages_mutex);
+    std::lock_guard<std::mutex> lock(m_heterogenous_pages_mutex);
 
     size_t allocated_bytes = 0;
 
-    for (auto& [type, metadata] : m_page_metadata) {
-        allocated_bytes += metadata.total_pages * metadata.data_byte_size * PageSize;
+    for (auto& [type, heterogenous_page_info] : m_heterogenous_page_infos) {
+        allocated_bytes += heterogenous_page_info.total_page_count * heterogenous_page_info.data_byte_size * PageSize;
     }
 }
 
@@ -40,21 +37,22 @@ template <size_t PageSize, size_t MaxFreePages>
     requires (PageSize > 0 && MaxFreePages > 0)
 template <typename DataType>
 hmem::Page<DataType> hmem::HeterogenousPager<PageSize, MaxFreePages>::get_page() {
-    std::lock_guard<std::mutex> lock(m_free_pages_mutex);
+    std::lock_guard<std::mutex> lock(m_heterogenous_pages_mutex);
 
     size_t page_type = typeid(DataType).hash_code();
 
-    m_free_pages.try_emplace(page_type, Pages<void, MaxFreePages>{});
-    m_page_metadata.try_emplace(
-        page_type, HeterogenousPageMetadatum{ 0, 0, sizeof(DataType) }
+    m_heterogenous_page_infos.try_emplace(
+        page_type, HeterogenousPageInfo{ 0, 0, sizeof(DataType), _Pages{} }
     );
 
-    if (m_page_metadata[page_type].free_pages > 0)
+    auto& page_info = m_heterogenous_page_infos[page_type];
+
+    if (page_info.free_page_count > 0)
         return reinterpret_cast<Page<DataType>>(
-            m_free_pages[page_type][--m_page_metadata[page_type].free_pages]
+            page_info.pages[--page_info.free_page_count]
         );
 
-    ++m_page_metadata[page_type].total_pages;
+    ++page_info.total_page_count;
 
     return reinterpret_cast<Page<DataType>>(new ui8[sizeof(DataType) * PageSize]);
 }
@@ -63,14 +61,20 @@ template <size_t PageSize, size_t MaxFreePages>
     requires (PageSize > 0 && MaxFreePages > 0)
 template <typename DataType>
 void hmem::HeterogenousPager<PageSize, MaxFreePages>::free_page(Page<DataType> page) {
-    std::lock_guard<std::mutex> lock(m_free_pages_mutex);
+    std::lock_guard<std::mutex> lock(m_heterogenous_pages_mutex);
 
     size_t page_type = typeid(DataType).hash_code();
 
-    if (m_page_metadata[page_type].free_pages < MaxFreePages) {
-        m_free_pages[page_type][m_page_metadata[page_type].free_pages++] = page;
+    m_heterogenous_page_infos.try_emplace(
+        page_type, HeterogenousPageInfo{ 0, 0, sizeof(DataType), _Pages{} }
+    );
+
+    auto& page_info = m_heterogenous_page_infos[page_type];
+
+    if (page_info.free_page_count < MaxFreePages) {
+        page_info.pages[page_info.free_page_count++] = page;
     } else {
-        --m_page_metadata[page_type].total_pages;
+        --page_info.total_page_count;
 
         delete[] page;
     }
