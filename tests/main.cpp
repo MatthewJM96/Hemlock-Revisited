@@ -7,5 +7,7 @@ int main(int, char*[]) {
     app.init();
     app.run();
 
+    app.dispose();
+
     return 0;
 }
