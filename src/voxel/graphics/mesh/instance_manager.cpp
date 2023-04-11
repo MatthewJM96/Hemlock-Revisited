@@ -10,11 +10,9 @@ void hvox::ChunkInstanceManager::init(hmem::Handle<ChunkInstanceDataPager> data_
 }
 
 void hvox::ChunkInstanceManager::dispose() {
-    if (m_instance.data) m_data_pager->free_page(m_instance.data);
+    free_buffer();
 
-    m_instance.data  = nullptr;
-    m_instance.count = 0;
-    m_data_pager     = nullptr;
+    m_data_pager = nullptr;
 }
 
 hvox::ChunkInstance&
