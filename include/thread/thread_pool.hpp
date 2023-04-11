@@ -107,8 +107,7 @@ namespace hemlock {
                 m_producer_token(moodycamel::ProducerToken(m_tasks)) { /* Empty. */
             }
 
-            ~ThreadPool() { /* Empty. */
-            }
+            ~ThreadPool() { dispose(); }
 
             /**
              * @brief Initialises the thread pool with the specified
