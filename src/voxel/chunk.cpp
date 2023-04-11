@@ -29,7 +29,7 @@ hvox::Chunk::~Chunk() {
     // debug_printf("Unloading chunk at (%d, %d, %d).\n", position.x, position.y,
     // position.z);
 
-    m_block_pager->free_page(blocks);
+    if (blocks) m_block_pager->free_page(blocks);
     blocks = nullptr;
 
     instance.dispose();
