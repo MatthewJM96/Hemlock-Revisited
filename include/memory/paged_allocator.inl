@@ -82,7 +82,7 @@ template <typename... Args>
 void hmem::PagedAllocator<DataType, PageSize, MaxFreePages>::construct(
     pointer data, Args&&... args
 ) {
-    new ((void*)data) DataType(args...);
+    new ((void*)data) DataType(std::forward<Args>(args)...);
 }
 
 template <typename DataType, size_t PageSize, size_t MaxFreePages>
