@@ -7,8 +7,8 @@
 
 #include "memory/handle.hpp"
 #include "voxel/generation/generator_task.hpp"
-#include "voxel/graphics/mesh/mesh_task.hpp"
 #include "voxel/graphics/mesh/greedy_strategy.hpp"
+#include "voxel/graphics/mesh/mesh_task.hpp"
 #include "voxel/graphics/outline_renderer.hpp"
 #include "voxel/ray.h"
 
@@ -40,7 +40,20 @@ public:
     TestVoxelScreen() : happ::ScreenBase(), m_input_manager(nullptr) { /* Empty. */
     }
 
-    virtual ~TestVoxelScreen(){ /* Empty */ };
+    virtual ~TestVoxelScreen(){
+        /* Empty. */
+    };
+
+    virtual void dispose() override {
+        htest::voxel_screen::dispose_physics(m_phys);
+        htest::voxel_screen::dispose_player(m_player);
+
+        m_outline_renderer.dispose();
+
+        m_chunk_grid->dispose();
+
+        happ::ScreenBase::dispose();
+    }
 
     virtual void start(hemlock::FrameTime time) override {
         happ::ScreenBase::start(time);
@@ -385,7 +398,9 @@ public:
                     htest::voxel_screen::TVS_VoxelGenerator>();
             } },
             hvox::ChunkTaskBuilder{ []() {
-                return new hvox::ChunkMeshTask<hvox::GreedyMeshStrategy<htest::voxel_screen::TVS_BlockComparator>>();
+                return new hvox::ChunkMeshTask<
+                    hvox::GreedyMeshStrategy<htest::voxel_screen::TVS_BlockComparator>>(
+                );
             } }
         );
 

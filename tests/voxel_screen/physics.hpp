@@ -33,6 +33,15 @@ namespace hemlock {
                     btIDebugDraw::DBG_DrawWireframe
                 );
             }
+
+            void dispose_physics(PhysicsData& phys) {
+                delete phys.world->getDebugDrawer();
+                delete phys.world;
+                delete phys.solver;
+                delete phys.dispatcher;
+                delete phys.collision_config;
+                delete phys.broadphase;
+            }
         }  // namespace voxel_screen
     }      // namespace test
 }  // namespace hemlock

@@ -38,7 +38,10 @@ public:
     TestPerformanceScreen() : happ::ScreenBase(), m_do_profile(false) { /* Empty. */
     }
 
-    virtual ~TestPerformanceScreen(){ /* Empty */ };
+    virtual ~TestPerformanceScreen() {
+        auto font = m_font_cache.fetch("fonts/Orbitron-Regular.ttf");
+        font->dispose();
+    };
 
     virtual void start(hemlock::FrameTime time) override {
         happ::ScreenBase::start(time);

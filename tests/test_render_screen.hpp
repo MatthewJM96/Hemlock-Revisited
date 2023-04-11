@@ -13,8 +13,8 @@
 #include "ui/input/manager.h"
 #include "voxel/chunk/grid.h"
 #include "voxel/generation/generator_task.hpp"
-#include "voxel/graphics/mesh/mesh_task.hpp"
 #include "voxel/graphics/mesh/greedy_strategy.hpp"
+#include "voxel/graphics/mesh/mesh_task.hpp"
 
 #include "iomanager.hpp"
 
@@ -74,7 +74,18 @@ public:
     TestRenderScreen() : happ::ScreenBase(), m_input_manager(nullptr) { /* Empty. */
     }
 
-    virtual ~TestRenderScreen(){ /* Empty */ };
+    virtual ~TestRenderScreen(){
+        /* Empty. */
+    };
+
+    virtual void dispose() override {
+        auto font = m_font_cache.fetch("fonts/Orbitron-Regular.ttf");
+        font->dispose();
+
+        m_chunk_grid->dispose();
+
+        happ::ScreenBase::dispose();
+    }
 
     virtual void start(hemlock::FrameTime time) override {
         happ::ScreenBase::start(time);
@@ -279,7 +290,8 @@ public:
                 return new hvox::ChunkGenerationTask<TRS_VoxelGenerator>();
             } },
             hvox::ChunkTaskBuilder{ []() {
-                return new hvox::ChunkMeshTask<hvox::GreedyMeshStrategy<TRS_BlockComparator>>();
+                return new hvox::ChunkMeshTask<
+                    hvox::GreedyMeshStrategy<TRS_BlockComparator>>();
             } }
         );
 
