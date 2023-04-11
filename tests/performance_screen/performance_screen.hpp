@@ -370,6 +370,10 @@ public:
 
             std::cout << "Generation profiling complete." << std::endl;
 
+            delete[] chunks;
+            block_pager->dispose();
+            instance_data_pager->dispose();
+
             m_do_profile.store(false);
         }
     }
