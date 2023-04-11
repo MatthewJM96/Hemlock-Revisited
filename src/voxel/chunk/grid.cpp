@@ -74,7 +74,7 @@ void hvox::ChunkGrid::init(
     ui32                        thread_count,
     ChunkTaskBuilder            build_load_or_generate_task,
     ChunkTaskBuilder            build_mesh_task,
-    ChunkTaskBuilder*           build_navmesh_task/* = nullptr*/
+    ChunkTaskBuilder*           build_navmesh_task /* = nullptr*/
 ) {
     m_self = self;
 
@@ -99,6 +99,8 @@ void hvox::ChunkGrid::init(
 
 void hvox::ChunkGrid::dispose() {
     m_thread_pool.dispose();
+
+    m_renderer.dispose();
 }
 
 void hvox::ChunkGrid::update(FrameTime time) {
