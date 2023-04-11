@@ -8,10 +8,14 @@
 #include "app/single_window_app.h"
 
 void happ::SingleWindowApp::init() {
+    if (ProcessBase::m_initialised) return;
+
     init(new FrameTimer());
 }
 
 void happ::SingleWindowApp::init(FrameTimer* timer) {
+    if (ProcessBase::m_initialised) return;
+
     m_timer = timer;
 
     hui::InputDispatcher::instance()->init(&m_input_manager);
@@ -27,6 +31,8 @@ void happ::SingleWindowApp::init(FrameTimer* timer) {
 }
 
 void happ::SingleWindowApp::init(f32 target_fps, size_t tracked_frames_count /*= 5*/) {
+    if (ProcessBase::m_initialised) return;
+
     init(new FrameLimiter(tracked_frames_count, target_fps));
 }
 
@@ -44,7 +50,7 @@ void happ::SingleWindowApp::dispose() {
 }
 
 void happ::SingleWindowApp::run() {
-    init();
+    if (!ProcessBase::m_initialised) return;
 
     m_timer->start();
 
