@@ -63,6 +63,7 @@ void hvox::ChunkRenderer::dispose() {
 
     for (auto& chunk_page : m_chunk_pages) {
         glDeleteBuffers(1, &chunk_page->vbo);
+        delete chunk_page;
     }
     ChunkRenderPages().swap(m_chunk_pages);
 
