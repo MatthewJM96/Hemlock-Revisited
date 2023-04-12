@@ -170,10 +170,22 @@ void hmem::PagedAllocator<DataType, PageSize, MaxFreePages>::deallocate(
     }
 
     // If no extent was attached to, then we need to add an extent.
-    if (!attached_to_extent)
-        page_tracker.free_extents.emplace(std::make_pair<void*, PageExtent>(
-            std::move(page_void), PageExtent{ data - page, data - page + count }
-        ));
+    if (attached_to_extent_it == page_tracker.free_extents.end()) {
+        if (count == PageSize) {
+            m_state->pager.free_page(page);
+            page_tracker.allocated_pages.erase(page_it);
+        } else {
+            page_tracker.free_extents.emplace(std::make_pair<void*, PageExtent>(
+                std::move(reinterpret_cast<void*>(page)),
+                PageExtent{ data - page, data - page + count }
+            ));
+        }
+    } else if (attached_to_extent_it->second.begin == 0 && attached_to_extent_it->second.end == PageSize)
+    {
+        m_state->pager.free_page(page);
+        page_tracker.allocated_pages.erase(page_it);
+        page_tracker.free_extents.erase(attached_to_extent_it);
+    }
 
     // Need to think about how to even do this, given live handles can hardly be
     // notified of this.
