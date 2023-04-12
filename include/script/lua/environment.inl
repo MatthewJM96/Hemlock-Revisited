@@ -2,9 +2,7 @@
 #include "script/rpc_manager.hpp"
 
 #include "c_function.hpp"
-#include "lua_function.hpp"
 #include "lua_value.hpp"
-#include "rpc_functions.hpp"
 
 template <bool HasRPCManager, size_t CallBufferSize>
 void hscript::lua::Environment<HasRPCManager, CallBufferSize>::init(

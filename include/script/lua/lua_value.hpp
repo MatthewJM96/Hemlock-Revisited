@@ -30,16 +30,6 @@ namespace hemlock {
                     || is_same_template<ui8v3, Type>::value>> :
                 public std::true_type { };
 
-            /**
-             * @brief Provides an API for moving data between Lua stack and C++ side.
-             * It is implemented for scalar types, pointer types, bounded array types
-             * and glm vectors.
-             *
-             * @tparam The type of the data to be moved.
-             */
-            template <typename, typename = void>
-            struct LuaValue { };
-
             template <typename Type>
             struct LuaValue<
                 Type,
