@@ -6,49 +6,43 @@
 namespace hemlock {
     namespace script {
         namespace lua {
-            template <typename>
+            template <typename, typename = void>
             struct is_single_lua_type : public std::false_type { };
 
             template <typename Type>
-                requires (
+            struct is_single_lua_type<
+                Type,
+                typename std::enable_if_t<
                     std::is_arithmetic<Type>::value || std::is_enum<Type>::value
                     || std::is_pointer<Type>::value
                     || std::is_member_function_pointer<Type>::value
-                    || is_same_template<std::string, Type>::value
-                )
-            struct is_single_lua_type<Type> : public std::true_type { };
+                    || is_same_template<std::string, Type>::value>> :
+                public std::true_type { };
 
-            template <typename>
+            template <typename, typename = void>
             struct is_multiple_lua_type : public std::false_type { };
 
             template <typename Type>
-                requires (
+            struct is_multiple_lua_type<
+                Type,
+                typename std::enable_if_t<
                     std::is_bounded_array<Type>::value
-                    || is_same_template<ui8v3, Type>::value
-                )
-            struct is_multiple_lua_type<Type> : public std::true_type { };
-
-            /**
-             * @brief Provides an API for moving data between Lua stack and C++ side.
-             * It is implemented for scalar types, pointer types, bounded array types
-             * and glm vectors.
-             *
-             * @tparam The type of the data to be moved.
-             */
-            template <typename>
-            struct LuaValue { };
+                    || is_same_template<ui8v3, Type>::value>> :
+                public std::true_type { };
 
             template <typename Type>
-                requires (std::is_same<Type, void>::value)
-            struct LuaValue<Type> {
+            struct LuaValue<
+                Type,
+                typename std::enable_if_t<std::is_same<Type, void>::value>> {
                 static constexpr ui32 value_count() { return 0; }
             };
 
             template <typename Type>
-                requires (
-                    is_single_lua_type<Type>::value || is_multiple_lua_type<Type>::value
-                )
-            struct LuaValue<Type> {
+            struct LuaValue<
+                Type,
+                typename std::enable_if_t<
+                    is_single_lua_type<Type>::value
+                    || is_multiple_lua_type<Type>::value>> {
                 /**
                  * @brief Provides the default value for
                  * type Type.

@@ -24,7 +24,7 @@ namespace hemlock {
         };
 
         union Neighbours {
-            Neighbours() : all({}) { /* Empty. */
+            Neighbours() : all{} { /* Empty. */
             }
 
             Neighbours(const Neighbours& rhs) {

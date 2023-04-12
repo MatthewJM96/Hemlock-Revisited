@@ -15,6 +15,19 @@ namespace hemlock {
                 LuaHandle state;
                 i32       index;
             };
+
+            /**
+             * @brief Provides an API for moving data between Lua stack and C++ side.
+             * It is implemented for scalar types, pointer types, bounded array types
+             * and glm vectors.
+             *
+             * @tparam The type of the data to be moved.
+             */
+            template <typename, typename = void>
+            struct LuaValue { };
+
+            template <bool HasRPCManager, size_t CallBufferSize>
+            class Environment;
         }  // namespace lua
     }      // namespace script
 }  // namespace hemlock

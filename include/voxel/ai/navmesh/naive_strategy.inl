@@ -42,7 +42,9 @@ namespace hemlock::voxel::ai::impl {
 }  // namespace hemlock::voxel::ai::impl
 
 template <hvox::IdealBlockConstraint IsSolid>
-void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_bulk(hmem::Handle<ChunkGrid>, hmem::Handle<Chunk> chunk) const {
+void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_bulk(
+    hmem::Handle<ChunkGrid>, hmem::Handle<Chunk> chunk
+) const {
     auto chunk_pos = chunk->position;
 
     std::shared_lock block_lock(chunk->blocks_mutex);
@@ -70,11 +72,12 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_bulk(hmem::Handle<ChunkGrid>, h
                                   i64                                 end) {
         for (i64 y_off = start; y_off > end; --y_off) {
             BlockIndex above_candidate_index
-                = hvox::block_index(offset + i64v3{ 0, y_off, 0 });
+                = hvox::block_index(static_cast<i64v3>(offset) + i64v3{ 0, y_off, 0 });
             Block* above_candidate_block = &chunk->blocks[above_candidate_index];
 
-            BlockIndex candidate_index
-                = hvox::block_index(offset + i64v3{ 0, y_off - 1, 0 });
+            BlockIndex candidate_index = hvox::block_index(
+                static_cast<i64v3>(offset) + i64v3{ 0, y_off - 1, 0 }
+            );
             Block* candidate_block = &chunk->blocks[candidate_index];
 
             if (is_solid(candidate_block) && !is_solid(above_candidate_block)) {
@@ -103,7 +106,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_bulk(hmem::Handle<ChunkGrid>, h
                 }
 
                 ChunkNavmeshNode candidate_block_coord = {
-                    offset + i64v3{0, y_off - 1, 0},
+                    static_cast<i64v3>(offset) + i64v3{0, y_off - 1, 0},
                       chunk_pos
                 };
 
@@ -572,7 +575,8 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_bulk(hmem::Handle<ChunkGrid>, h
                 {x, CHUNK_LENGTH - 2, 0},
                 chunk_pos
             };
-            ChunkNavmeshVertexDescriptor block_vertex = impl::get_vertex(chunk, block_coord);
+            ChunkNavmeshVertexDescriptor block_vertex
+                = impl::get_vertex(chunk, block_coord);
 
             // Left
             do_navigable_check(
@@ -673,7 +677,8 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_bulk(hmem::Handle<ChunkGrid>, h
                 {0, y, CHUNK_LENGTH - 1},
                 chunk_pos
             };
-            ChunkNavmeshVertexDescriptor block_vertex = impl::get_vertex(chunk, block_coord);
+            ChunkNavmeshVertexDescriptor block_vertex
+                = impl::get_vertex(chunk, block_coord);
 
             // Right
             do_navigable_check(
@@ -715,7 +720,8 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_bulk(hmem::Handle<ChunkGrid>, h
                 {CHUNK_LENGTH - 1, y, CHUNK_LENGTH - 1},
                 chunk_pos
             };
-            ChunkNavmeshVertexDescriptor block_vertex = impl::get_vertex(chunk, block_coord);
+            ChunkNavmeshVertexDescriptor block_vertex
+                = impl::get_vertex(chunk, block_coord);
 
             // Left
             do_navigable_check(
@@ -755,7 +761,8 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_bulk(hmem::Handle<ChunkGrid>, h
                 {0, y, 0},
                 chunk_pos
             };
-            ChunkNavmeshVertexDescriptor block_vertex = impl::get_vertex(chunk, block_coord);
+            ChunkNavmeshVertexDescriptor block_vertex
+                = impl::get_vertex(chunk, block_coord);
 
             // Right
             do_navigable_check(block_vertex, { 0, y, 0 }, { 1, y, 0 }, 2, -1);
@@ -784,7 +791,8 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_bulk(hmem::Handle<ChunkGrid>, h
                 {CHUNK_LENGTH - 1, y, 0},
                 chunk_pos
             };
-            ChunkNavmeshVertexDescriptor block_vertex = impl::get_vertex(chunk, block_coord);
+            ChunkNavmeshVertexDescriptor block_vertex
+                = impl::get_vertex(chunk, block_coord);
 
             // Left
             do_navigable_check(
@@ -824,7 +832,8 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_bulk(hmem::Handle<ChunkGrid>, h
                 {0, CHUNK_LENGTH - 2, CHUNK_LENGTH - 1},
                 chunk_pos
             };
-            ChunkNavmeshVertexDescriptor block_vertex = impl::get_vertex(chunk, block_coord);
+            ChunkNavmeshVertexDescriptor block_vertex
+                = impl::get_vertex(chunk, block_coord);
 
             // Right
             do_navigable_check(
@@ -865,7 +874,8 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_bulk(hmem::Handle<ChunkGrid>, h
                 {CHUNK_LENGTH - 1, CHUNK_LENGTH - 2, CHUNK_LENGTH - 1},
                 chunk_pos
             };
-            ChunkNavmeshVertexDescriptor block_vertex = impl::get_vertex(chunk, block_coord);
+            ChunkNavmeshVertexDescriptor block_vertex
+                = impl::get_vertex(chunk, block_coord);
 
             // Left
             do_navigable_check(
@@ -902,7 +912,8 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_bulk(hmem::Handle<ChunkGrid>, h
                 {0, CHUNK_LENGTH - 2, 0},
                 chunk_pos
             };
-            ChunkNavmeshVertexDescriptor block_vertex = impl::get_vertex(chunk, block_coord);
+            ChunkNavmeshVertexDescriptor block_vertex
+                = impl::get_vertex(chunk, block_coord);
 
             // Right
             do_navigable_check(
@@ -941,7 +952,8 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_bulk(hmem::Handle<ChunkGrid>, h
                 {CHUNK_LENGTH - 1, CHUNK_LENGTH - 2, 0},
                 chunk_pos
             };
-            ChunkNavmeshVertexDescriptor block_vertex = impl::get_vertex(chunk, block_coord);
+            ChunkNavmeshVertexDescriptor block_vertex
+                = impl::get_vertex(chunk, block_coord);
 
             // Left
             do_navigable_check(
@@ -990,7 +1002,8 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_bulk(hmem::Handle<ChunkGrid>, h
                 {x, 0, CHUNK_LENGTH - 1},
                 chunk_pos
             };
-            ChunkNavmeshVertexDescriptor block_vertex = impl::get_vertex(chunk, block_coord);
+            ChunkNavmeshVertexDescriptor block_vertex
+                = impl::get_vertex(chunk, block_coord);
 
             // Left
             do_navigable_check(
@@ -1039,7 +1052,8 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_bulk(hmem::Handle<ChunkGrid>, h
                 {x, 0, 0},
                 chunk_pos
             };
-            ChunkNavmeshVertexDescriptor block_vertex = impl::get_vertex(chunk, block_coord);
+            ChunkNavmeshVertexDescriptor block_vertex
+                = impl::get_vertex(chunk, block_coord);
 
             // Left
             do_navigable_check(block_vertex, { x, 0, 0 }, { x - 1, 0, 0 }, 2, 0);
@@ -1073,7 +1087,8 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_bulk(hmem::Handle<ChunkGrid>, h
                 {0, 0, z},
                 chunk_pos
             };
-            ChunkNavmeshVertexDescriptor block_vertex = impl::get_vertex(chunk, block_coord);
+            ChunkNavmeshVertexDescriptor block_vertex
+                = impl::get_vertex(chunk, block_coord);
 
             // Right
             do_navigable_check(block_vertex, { 0, 0, z }, { 1, 0, z }, 2, 0);
@@ -1105,7 +1120,8 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_bulk(hmem::Handle<ChunkGrid>, h
                 {CHUNK_LENGTH - 1, 0, z},
                 chunk_pos
             };
-            ChunkNavmeshVertexDescriptor block_vertex = impl::get_vertex(chunk, block_coord);
+            ChunkNavmeshVertexDescriptor block_vertex
+                = impl::get_vertex(chunk, block_coord);
 
             // Left
             do_navigable_check(
@@ -1158,7 +1174,8 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_bulk(hmem::Handle<ChunkGrid>, h
                 {0, 0, CHUNK_LENGTH - 1},
                 chunk_pos
             };
-            ChunkNavmeshVertexDescriptor block_vertex = impl::get_vertex(chunk, block_coord);
+            ChunkNavmeshVertexDescriptor block_vertex
+                = impl::get_vertex(chunk, block_coord);
 
             // Right
             do_navigable_check(
@@ -1195,7 +1212,8 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_bulk(hmem::Handle<ChunkGrid>, h
                 {0, 0, 0},
                 chunk_pos
             };
-            ChunkNavmeshVertexDescriptor block_vertex = impl::get_vertex(chunk, block_coord);
+            ChunkNavmeshVertexDescriptor block_vertex
+                = impl::get_vertex(chunk, block_coord);
 
             // Right
             do_navigable_check(block_vertex, { 0, 0, 0 }, { 1, 0, 0 }, 2, 0);
@@ -1222,7 +1240,8 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_bulk(hmem::Handle<ChunkGrid>, h
                 {CHUNK_LENGTH - 1, 0, CHUNK_LENGTH - 1},
                 chunk_pos
             };
-            ChunkNavmeshVertexDescriptor block_vertex = impl::get_vertex(chunk, block_coord);
+            ChunkNavmeshVertexDescriptor block_vertex
+                = impl::get_vertex(chunk, block_coord);
 
             // Left
             do_navigable_check(
@@ -1259,7 +1278,8 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_bulk(hmem::Handle<ChunkGrid>, h
                 {CHUNK_LENGTH - 1, 0, 0},
                 chunk_pos
             };
-            ChunkNavmeshVertexDescriptor block_vertex = impl::get_vertex(chunk, block_coord);
+            ChunkNavmeshVertexDescriptor block_vertex
+                = impl::get_vertex(chunk, block_coord);
 
             // Left
             do_navigable_check(
@@ -1283,7 +1303,9 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_bulk(hmem::Handle<ChunkGrid>, h
 }
 
 template <hvox::IdealBlockConstraint IsSolid>
-void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(hmem::Handle<ChunkGrid>, hmem::Handle<Chunk> chunk) const {
+void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
+    hmem::Handle<ChunkGrid>, hmem::Handle<Chunk> chunk
+) const {
     auto chunk_pos = chunk->position;
 
     std::shared_lock block_lock(chunk->blocks_mutex);
@@ -1324,18 +1346,18 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(hmem::Handle<ChunkGrid>,
 
         for (i64 y_off = start; y_off > end; --y_off) {
             BlockIndex above_candidate_index = hvox::block_index(
-                neighbour_offset + i64v3{ 0, y_off, 0 }
+                static_cast<i64v3>(neighbour_offset) + i64v3{ 0, y_off, 0 }
             );
             Block* above_candidate_block = &neighbour->blocks[above_candidate_index];
 
             BlockIndex candidate_index = hvox::block_index(
-                neighbour_offset + i64v3{ 0, y_off - 1, 0 }
+                static_cast<i64v3>(neighbour_offset) + i64v3{ 0, y_off - 1, 0 }
             );
             Block* candidate_block = &neighbour->blocks[candidate_index];
 
             if (is_solid(candidate_block) && !is_solid(above_candidate_block)) {
                 ChunkNavmeshNode candidate_block_coord = {
-                    neighbour_offset + i64v3{0, y_off - 1, 0},
+                    static_cast<i64v3>(neighbour_offset) + i64v3{0, y_off - 1, 0},
                     neighbour->position
                 };
                 struct {
@@ -1469,9 +1491,10 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(hmem::Handle<ChunkGrid>,
 
                         struct {
                             ChunkNavmeshVertexDescriptor here, in_below_neighbour;
-                        } candidate_block_vertex
-                            = { impl::get_vertex(chunk, candidate_block_coord),
-                                impl::get_vertex(below_neighbour, candidate_block_coord) };
+                        } candidate_block_vertex = {
+                            impl::get_vertex(chunk, candidate_block_coord),
+                            impl::get_vertex(below_neighbour, candidate_block_coord)
+                        };
 
                         boost::add_edge(
                             this_block_vertex.here,
@@ -1605,9 +1628,10 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(hmem::Handle<ChunkGrid>,
 
                         struct {
                             ChunkNavmeshVertexDescriptor here, in_below_neighbour;
-                        } candidate_block_vertex
-                            = { impl::get_vertex(chunk, candidate_block_coord),
-                                impl::get_vertex(below_neighbour, candidate_block_coord) };
+                        } candidate_block_vertex = {
+                            impl::get_vertex(chunk, candidate_block_coord),
+                            impl::get_vertex(below_neighbour, candidate_block_coord)
+                        };
 
                         boost::add_edge(
                             this_block_vertex.here,
@@ -1740,9 +1764,10 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(hmem::Handle<ChunkGrid>,
 
                         struct {
                             ChunkNavmeshVertexDescriptor here, in_below_neighbour;
-                        } candidate_block_vertex
-                            = { impl::get_vertex(chunk, candidate_block_coord),
-                                impl::get_vertex(below_neighbour, candidate_block_coord) };
+                        } candidate_block_vertex = {
+                            impl::get_vertex(chunk, candidate_block_coord),
+                            impl::get_vertex(below_neighbour, candidate_block_coord)
+                        };
 
                         boost::add_edge(
                             this_block_vertex.here,
@@ -1875,9 +1900,10 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(hmem::Handle<ChunkGrid>,
 
                         struct {
                             ChunkNavmeshVertexDescriptor here, in_below_neighbour;
-                        } candidate_block_vertex
-                            = { impl::get_vertex(chunk, candidate_block_coord),
-                                impl::get_vertex(below_neighbour, candidate_block_coord) };
+                        } candidate_block_vertex = {
+                            impl::get_vertex(chunk, candidate_block_coord),
+                            impl::get_vertex(below_neighbour, candidate_block_coord)
+                        };
 
                         boost::add_edge(
                             this_block_vertex.here,
@@ -1976,10 +2002,13 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(hmem::Handle<ChunkGrid>,
                                 // Ensure node exists for this block.
                                 struct {
                                     ChunkNavmeshVertexDescriptor here, in_neighbour;
-                                } left_of_neighbour_block_vertex = {
-                                    impl::get_vertex(chunk, left_of_neighbour_block_coord),
-                                    impl::get_vertex(neighbour, left_of_neighbour_block_coord)
-                                };
+                                } left_of_neighbour_block_vertex
+                                    = { impl::get_vertex(
+                                            chunk, left_of_neighbour_block_coord
+                                        ),
+                                        impl::get_vertex(
+                                            neighbour, left_of_neighbour_block_coord
+                                        ) };
 
                                 boost::add_edge(
                                     this_block_vertex.here,
@@ -2027,12 +2056,13 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(hmem::Handle<ChunkGrid>,
                                 // Ensure node exists for this block.
                                 struct {
                                     ChunkNavmeshVertexDescriptor here, in_neighbour;
-                                } right_of_neighbour_block_vertex = {
-                                    impl::get_vertex(chunk, right_of_neighbour_block_coord),
-                                    impl::get_vertex(
-                                        neighbour, right_of_neighbour_block_coord
-                                    )
-                                };
+                                } right_of_neighbour_block_vertex
+                                    = { impl::get_vertex(
+                                            chunk, right_of_neighbour_block_coord
+                                        ),
+                                        impl::get_vertex(
+                                            neighbour, right_of_neighbour_block_coord
+                                        ) };
 
                                 boost::add_edge(
                                     this_block_vertex.here,
@@ -2080,12 +2110,13 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(hmem::Handle<ChunkGrid>,
                                 // Ensure node exists for this block.
                                 struct {
                                     ChunkNavmeshVertexDescriptor here, in_neighbour;
-                                } front_of_neighbour_block_vertex = {
-                                    impl::get_vertex(chunk, front_of_neighbour_block_coord),
-                                    impl::get_vertex(
-                                        neighbour, front_of_neighbour_block_coord
-                                    )
-                                };
+                                } front_of_neighbour_block_vertex
+                                    = { impl::get_vertex(
+                                            chunk, front_of_neighbour_block_coord
+                                        ),
+                                        impl::get_vertex(
+                                            neighbour, front_of_neighbour_block_coord
+                                        ) };
 
                                 boost::add_edge(
                                     this_block_vertex.here,
@@ -2133,10 +2164,13 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(hmem::Handle<ChunkGrid>,
                                 // Ensure node exists for this block.
                                 struct {
                                     ChunkNavmeshVertexDescriptor here, in_neighbour;
-                                } back_of_neighbour_block_vertex = {
-                                    impl::get_vertex(chunk, back_of_neighbour_block_coord),
-                                    impl::get_vertex(neighbour, back_of_neighbour_block_coord)
-                                };
+                                } back_of_neighbour_block_vertex
+                                    = { impl::get_vertex(
+                                            chunk, back_of_neighbour_block_coord
+                                        ),
+                                        impl::get_vertex(
+                                            neighbour, back_of_neighbour_block_coord
+                                        ) };
 
                                 boost::add_edge(
                                     this_block_vertex.here,
@@ -2257,7 +2291,9 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(hmem::Handle<ChunkGrid>,
 
                                 // Ensure node exists for this block.
                                 ChunkNavmeshVertexDescriptor right_of_this_block_vertex
-                                    = impl::get_vertex(chunk, right_of_this_block_coord);
+                                    = impl::get_vertex(
+                                        chunk, right_of_this_block_coord
+                                    );
 
                                 boost::add_edge(
                                     this_block_vertex.here,
@@ -2323,7 +2359,9 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(hmem::Handle<ChunkGrid>,
 
                                 // Ensure node exists for this block.
                                 ChunkNavmeshVertexDescriptor front_of_this_block_vertex
-                                    = impl::get_vertex(chunk, front_of_this_block_coord);
+                                    = impl::get_vertex(
+                                        chunk, front_of_this_block_coord
+                                    );
 
                                 boost::add_edge(
                                     this_block_vertex.here,
@@ -2474,10 +2512,11 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(hmem::Handle<ChunkGrid>,
 
                         struct {
                             ChunkNavmeshVertexDescriptor here, in_left_of_neighbour;
-                        } left_of_neighbour_block_vertex = {
-                            impl::get_vertex(chunk, left_of_neighbour_block_coord),
-                            impl::get_vertex(left_of_neighbour, left_of_neighbour_block_coord)
-                        };
+                        } left_of_neighbour_block_vertex
+                            = { impl::get_vertex(chunk, left_of_neighbour_block_coord),
+                                impl::get_vertex(
+                                    left_of_neighbour, left_of_neighbour_block_coord
+                                ) };
 
                         BlockIndex twice_above_candidate_index
                             = hvox::block_index({ 0, 1, z });
@@ -2504,10 +2543,11 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(hmem::Handle<ChunkGrid>,
 
                             struct {
                                 ChunkNavmeshVertexDescriptor here, in_left_of_neighbour;
-                            } candidate_block_vertex = {
-                                impl::get_vertex(chunk, candidate_block_coord),
-                                impl::get_vertex(left_of_neighbour, candidate_block_coord)
-                            };
+                            } candidate_block_vertex
+                                = { impl::get_vertex(chunk, candidate_block_coord),
+                                    impl::get_vertex(
+                                        left_of_neighbour, candidate_block_coord
+                                    ) };
 
                             boost::add_edge(
                                 left_of_neighbour_block_vertex.here,
@@ -2608,10 +2648,11 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(hmem::Handle<ChunkGrid>,
                             struct {
                                 ChunkNavmeshVertexDescriptor here,
                                     in_right_of_neighbour;
-                            } candidate_block_vertex = {
-                                impl::get_vertex(chunk, candidate_block_coord),
-                                impl::get_vertex(right_of_neighbour, candidate_block_coord)
-                            };
+                            } candidate_block_vertex
+                                = { impl::get_vertex(chunk, candidate_block_coord),
+                                    impl::get_vertex(
+                                        right_of_neighbour, candidate_block_coord
+                                    ) };
 
                             boost::add_edge(
                                 right_of_neighbour_block_vertex.here,
@@ -2712,10 +2753,11 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(hmem::Handle<ChunkGrid>,
                             struct {
                                 ChunkNavmeshVertexDescriptor here,
                                     in_front_of_neighbour;
-                            } candidate_block_vertex = {
-                                impl::get_vertex(chunk, candidate_block_coord),
-                                impl::get_vertex(front_of_neighbour, candidate_block_coord)
-                            };
+                            } candidate_block_vertex
+                                = { impl::get_vertex(chunk, candidate_block_coord),
+                                    impl::get_vertex(
+                                        front_of_neighbour, candidate_block_coord
+                                    ) };
 
                             boost::add_edge(
                                 front_of_neighbour_block_vertex.here,
@@ -2781,10 +2823,11 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(hmem::Handle<ChunkGrid>,
 
                         struct {
                             ChunkNavmeshVertexDescriptor here, in_back_of_neighbour;
-                        } back_of_neighbour_block_vertex = {
-                            impl::get_vertex(chunk, back_of_neighbour_block_coord),
-                            impl::get_vertex(back_of_neighbour, back_of_neighbour_block_coord)
-                        };
+                        } back_of_neighbour_block_vertex
+                            = { impl::get_vertex(chunk, back_of_neighbour_block_coord),
+                                impl::get_vertex(
+                                    back_of_neighbour, back_of_neighbour_block_coord
+                                ) };
 
                         BlockIndex twice_above_candidate_index
                             = hvox::block_index({ x, 1, 0 });
@@ -2811,10 +2854,11 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(hmem::Handle<ChunkGrid>,
 
                             struct {
                                 ChunkNavmeshVertexDescriptor here, in_back_of_neighbour;
-                            } candidate_block_vertex = {
-                                impl::get_vertex(chunk, candidate_block_coord),
-                                impl::get_vertex(back_of_neighbour, candidate_block_coord)
-                            };
+                            } candidate_block_vertex
+                                = { impl::get_vertex(chunk, candidate_block_coord),
+                                    impl::get_vertex(
+                                        back_of_neighbour, candidate_block_coord
+                                    ) };
 
                             boost::add_edge(
                                 back_of_neighbour_block_vertex.here,
@@ -2920,9 +2964,10 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(hmem::Handle<ChunkGrid>,
 
                         struct {
                             ChunkNavmeshVertexDescriptor here, in_left_neighbour;
-                        } candidate_block_vertex
-                            = { impl::get_vertex(chunk, candidate_block_coord),
-                                impl::get_vertex(left_neighbour, candidate_block_coord) };
+                        } candidate_block_vertex = {
+                            impl::get_vertex(chunk, candidate_block_coord),
+                            impl::get_vertex(left_neighbour, candidate_block_coord)
+                        };
 
                         boost::add_edge(
                             this_block_vertex.here,
@@ -3001,9 +3046,10 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(hmem::Handle<ChunkGrid>,
 
                             struct {
                                 ChunkNavmeshVertexDescriptor here, in_left_neighbour;
-                            } candidate_block_vertex
-                                = { impl::get_vertex(chunk, candidate_block_coord),
-                                    impl::get_vertex(left_neighbour, candidate_block_coord) };
+                            } candidate_block_vertex = {
+                                impl::get_vertex(chunk, candidate_block_coord),
+                                impl::get_vertex(left_neighbour, candidate_block_coord)
+                            };
 
                             boost::add_edge(
                                 this_block_vertex.here,
@@ -3037,9 +3083,10 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(hmem::Handle<ChunkGrid>,
 
                             struct {
                                 ChunkNavmeshVertexDescriptor here, in_left_neighbour;
-                            } candidate_block_vertex
-                                = { impl::get_vertex(chunk, candidate_block_coord),
-                                    impl::get_vertex(left_neighbour, candidate_block_coord) };
+                            } candidate_block_vertex = {
+                                impl::get_vertex(chunk, candidate_block_coord),
+                                impl::get_vertex(left_neighbour, candidate_block_coord)
+                            };
 
                             boost::add_edge(
                                 this_block_vertex.here,
@@ -3144,9 +3191,10 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(hmem::Handle<ChunkGrid>,
 
                         struct {
                             ChunkNavmeshVertexDescriptor here, in_right_neighbour;
-                        } candidate_block_vertex
-                            = { impl::get_vertex(chunk, candidate_block_coord),
-                                impl::get_vertex(right_neighbour, candidate_block_coord) };
+                        } candidate_block_vertex = {
+                            impl::get_vertex(chunk, candidate_block_coord),
+                            impl::get_vertex(right_neighbour, candidate_block_coord)
+                        };
 
                         boost::add_edge(
                             this_block_vertex.here,
@@ -3369,9 +3417,10 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(hmem::Handle<ChunkGrid>,
 
                         struct {
                             ChunkNavmeshVertexDescriptor here, in_front_neighbour;
-                        } candidate_block_vertex
-                            = { impl::get_vertex(chunk, candidate_block_coord),
-                                impl::get_vertex(front_neighbour, candidate_block_coord) };
+                        } candidate_block_vertex = {
+                            impl::get_vertex(chunk, candidate_block_coord),
+                            impl::get_vertex(front_neighbour, candidate_block_coord)
+                        };
 
                         boost::add_edge(
                             this_block_vertex.here,
@@ -3593,9 +3642,10 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(hmem::Handle<ChunkGrid>,
 
                         struct {
                             ChunkNavmeshVertexDescriptor here, in_back_neighbour;
-                        } candidate_block_vertex
-                            = { impl::get_vertex(chunk, candidate_block_coord),
-                                impl::get_vertex(back_neighbour, candidate_block_coord) };
+                        } candidate_block_vertex = {
+                            impl::get_vertex(chunk, candidate_block_coord),
+                            impl::get_vertex(back_neighbour, candidate_block_coord)
+                        };
 
                         boost::add_edge(
                             this_block_vertex.here,
@@ -3674,9 +3724,10 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(hmem::Handle<ChunkGrid>,
 
                             struct {
                                 ChunkNavmeshVertexDescriptor here, in_back_neighbour;
-                            } candidate_block_vertex
-                                = { impl::get_vertex(chunk, candidate_block_coord),
-                                    impl::get_vertex(back_neighbour, candidate_block_coord) };
+                            } candidate_block_vertex = {
+                                impl::get_vertex(chunk, candidate_block_coord),
+                                impl::get_vertex(back_neighbour, candidate_block_coord)
+                            };
 
                             boost::add_edge(
                                 this_block_vertex.here,
@@ -3710,9 +3761,10 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(hmem::Handle<ChunkGrid>,
 
                             struct {
                                 ChunkNavmeshVertexDescriptor here, in_back_neighbour;
-                            } candidate_block_vertex
-                                = { impl::get_vertex(chunk, candidate_block_coord),
-                                    impl::get_vertex(back_neighbour, candidate_block_coord) };
+                            } candidate_block_vertex = {
+                                impl::get_vertex(chunk, candidate_block_coord),
+                                impl::get_vertex(back_neighbour, candidate_block_coord)
+                            };
 
                             boost::add_edge(
                                 this_block_vertex.here,
@@ -3811,7 +3863,9 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(hmem::Handle<ChunkGrid>,
                                     ChunkNavmeshVertexDescriptor here, in_neighbour;
                                 } left_of_this_block_vertex = {
                                     impl::get_vertex(chunk, left_of_this_block_coord),
-                                    impl::get_vertex(neighbour, left_of_this_block_coord)
+                                    impl::get_vertex(
+                                        neighbour, left_of_this_block_coord
+                                    )
                                 };
 
                                 boost::add_edge(
@@ -3861,7 +3915,9 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(hmem::Handle<ChunkGrid>,
                                     ChunkNavmeshVertexDescriptor here, in_neighbour;
                                 } right_of_this_block_vertex = {
                                     impl::get_vertex(chunk, right_of_this_block_coord),
-                                    impl::get_vertex(neighbour, right_of_this_block_coord)
+                                    impl::get_vertex(
+                                        neighbour, right_of_this_block_coord
+                                    )
                                 };
 
                                 boost::add_edge(
@@ -3911,7 +3967,9 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(hmem::Handle<ChunkGrid>,
                                     ChunkNavmeshVertexDescriptor here, in_neighbour;
                                 } front_of_this_block_vertex = {
                                     impl::get_vertex(chunk, front_of_this_block_coord),
-                                    impl::get_vertex(neighbour, front_of_this_block_coord)
+                                    impl::get_vertex(
+                                        neighbour, front_of_this_block_coord
+                                    )
                                 };
 
                                 boost::add_edge(
@@ -3961,7 +4019,9 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(hmem::Handle<ChunkGrid>,
                                     ChunkNavmeshVertexDescriptor here, in_neighbour;
                                 } back_of_this_block_vertex = {
                                     impl::get_vertex(chunk, back_of_this_block_coord),
-                                    impl::get_vertex(neighbour, back_of_this_block_coord)
+                                    impl::get_vertex(
+                                        neighbour, back_of_this_block_coord
+                                    )
                                 };
 
                                 boost::add_edge(
@@ -4337,10 +4397,11 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(hmem::Handle<ChunkGrid>,
                         struct {
                             ChunkNavmeshVertexDescriptor in_neighbour,
                                 in_below_left_neighbour;
-                        } neighbour_block_vertex = {
-                            impl::get_vertex(neighbour, neighbour_block_coord),
-                            impl::get_vertex(below_left_neighbour, neighbour_block_coord)
-                        };
+                        } neighbour_block_vertex
+                            = { impl::get_vertex(neighbour, neighbour_block_coord),
+                                impl::get_vertex(
+                                    below_left_neighbour, neighbour_block_coord
+                                ) };
 
                         BlockIndex above_candidate_index
                             = hvox::block_index({ CHUNK_LENGTH - 1, 0, z });
@@ -4365,10 +4426,11 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(hmem::Handle<ChunkGrid>,
                         struct {
                             ChunkNavmeshVertexDescriptor in_neighbour,
                                 in_below_left_neighbour;
-                        } candidate_block_vertex = {
-                            impl::get_vertex(neighbour, candidate_block_coord),
-                            impl::get_vertex(below_left_neighbour, candidate_block_coord)
-                        };
+                        } candidate_block_vertex
+                            = { impl::get_vertex(neighbour, candidate_block_coord),
+                                impl::get_vertex(
+                                    below_left_neighbour, candidate_block_coord
+                                ) };
 
                         boost::add_edge(
                             neighbour_block_vertex.in_neighbour,
@@ -4418,10 +4480,11 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(hmem::Handle<ChunkGrid>,
                         struct {
                             ChunkNavmeshVertexDescriptor in_neighbour,
                                 in_below_left_neighbour;
-                        } neighbour_block_vertex = {
-                            impl::get_vertex(neighbour, neighbour_block_coord),
-                            impl::get_vertex(below_left_neighbour, neighbour_block_coord)
-                        };
+                        } neighbour_block_vertex
+                            = { impl::get_vertex(neighbour, neighbour_block_coord),
+                                impl::get_vertex(
+                                    below_left_neighbour, neighbour_block_coord
+                                ) };
 
                         BlockIndex step_down_candidate_index = hvox::block_index(
                             { CHUNK_LENGTH - 1, CHUNK_LENGTH - 2, z }
@@ -4453,10 +4516,11 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(hmem::Handle<ChunkGrid>,
                             struct {
                                 ChunkNavmeshVertexDescriptor in_neighbour,
                                     in_below_left_neighbour;
-                            } candidate_block_vertex = {
-                                impl::get_vertex(neighbour, candidate_block_coord),
-                                impl::get_vertex(below_left_neighbour, candidate_block_coord)
-                            };
+                            } candidate_block_vertex
+                                = { impl::get_vertex(neighbour, candidate_block_coord),
+                                    impl::get_vertex(
+                                        below_left_neighbour, candidate_block_coord
+                                    ) };
 
                             boost::add_edge(
                                 neighbour_block_vertex.in_neighbour,
@@ -4491,10 +4555,11 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(hmem::Handle<ChunkGrid>,
                             struct {
                                 ChunkNavmeshVertexDescriptor in_neighbour,
                                     in_below_left_neighbour;
-                            } candidate_block_vertex = {
-                                impl::get_vertex(neighbour, candidate_block_coord),
-                                impl::get_vertex(below_left_neighbour, candidate_block_coord)
-                            };
+                            } candidate_block_vertex
+                                = { impl::get_vertex(neighbour, candidate_block_coord),
+                                    impl::get_vertex(
+                                        below_left_neighbour, candidate_block_coord
+                                    ) };
 
                             boost::add_edge(
                                 neighbour_block_vertex.in_neighbour,
@@ -4577,9 +4642,10 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(hmem::Handle<ChunkGrid>,
                         struct {
                             ChunkNavmeshVertexDescriptor in_neighbour,
                                 in_below_right_neighbour;
-                        } neighbour_block_vertex
-                            = { impl::get_vertex(neighbour, neighbour_block_coord),
-                                impl::get_vertex(right_neighbour, neighbour_block_coord) };
+                        } neighbour_block_vertex = {
+                            impl::get_vertex(neighbour, neighbour_block_coord),
+                            impl::get_vertex(right_neighbour, neighbour_block_coord)
+                        };
 
                         BlockIndex above_candidate_index
                             = hvox::block_index({ 0, 0, z });
@@ -4603,10 +4669,11 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(hmem::Handle<ChunkGrid>,
                         struct {
                             ChunkNavmeshVertexDescriptor in_neighbour,
                                 in_below_right_neighbour;
-                        } candidate_block_vertex = {
-                            impl::get_vertex(neighbour, candidate_block_coord),
-                            impl::get_vertex(below_right_neighbour, candidate_block_coord)
-                        };
+                        } candidate_block_vertex
+                            = { impl::get_vertex(neighbour, candidate_block_coord),
+                                impl::get_vertex(
+                                    below_right_neighbour, candidate_block_coord
+                                ) };
 
                         boost::add_edge(
                             neighbour_block_vertex.in_neighbour,
@@ -4657,10 +4724,11 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(hmem::Handle<ChunkGrid>,
                         struct {
                             ChunkNavmeshVertexDescriptor in_neighbour,
                                 in_below_right_neighbour;
-                        } neighbour_block_vertex = {
-                            impl::get_vertex(neighbour, neighbour_block_coord),
-                            impl::get_vertex(below_right_neighbour, neighbour_block_coord)
-                        };
+                        } neighbour_block_vertex
+                            = { impl::get_vertex(neighbour, neighbour_block_coord),
+                                impl::get_vertex(
+                                    below_right_neighbour, neighbour_block_coord
+                                ) };
 
                         BlockIndex step_down_candidate_index
                             = hvox::block_index({ 0, CHUNK_LENGTH - 2, z });
@@ -4690,10 +4758,11 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(hmem::Handle<ChunkGrid>,
                             struct {
                                 ChunkNavmeshVertexDescriptor in_neighbour,
                                     in_below_right_neighbour;
-                            } candidate_block_vertex = {
-                                impl::get_vertex(neighbour, candidate_block_coord),
-                                impl::get_vertex(below_right_neighbour, candidate_block_coord)
-                            };
+                            } candidate_block_vertex
+                                = { impl::get_vertex(neighbour, candidate_block_coord),
+                                    impl::get_vertex(
+                                        below_right_neighbour, candidate_block_coord
+                                    ) };
 
                             boost::add_edge(
                                 neighbour_block_vertex.in_neighbour,
@@ -4728,10 +4797,11 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(hmem::Handle<ChunkGrid>,
                             struct {
                                 ChunkNavmeshVertexDescriptor in_neighbour,
                                     in_below_right_neighbour;
-                            } candidate_block_vertex = {
-                                impl::get_vertex(neighbour, candidate_block_coord),
-                                impl::get_vertex(below_right_neighbour, candidate_block_coord)
-                            };
+                            } candidate_block_vertex
+                                = { impl::get_vertex(neighbour, candidate_block_coord),
+                                    impl::get_vertex(
+                                        below_right_neighbour, candidate_block_coord
+                                    ) };
 
                             boost::add_edge(
                                 neighbour_block_vertex.in_neighbour,
@@ -4814,10 +4884,11 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(hmem::Handle<ChunkGrid>,
                         struct {
                             ChunkNavmeshVertexDescriptor in_neighbour,
                                 in_below_front_neighbour;
-                        } neighbour_block_vertex = {
-                            impl::get_vertex(neighbour, neighbour_block_coord),
-                            impl::get_vertex(below_front_neighbour, neighbour_block_coord)
-                        };
+                        } neighbour_block_vertex
+                            = { impl::get_vertex(neighbour, neighbour_block_coord),
+                                impl::get_vertex(
+                                    below_front_neighbour, neighbour_block_coord
+                                ) };
 
                         BlockIndex above_candidate_index
                             = hvox::block_index({ x, 0, 0 });
@@ -4841,10 +4912,11 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(hmem::Handle<ChunkGrid>,
                         struct {
                             ChunkNavmeshVertexDescriptor in_neighbour,
                                 in_below_front_neighbour;
-                        } candidate_block_vertex = {
-                            impl::get_vertex(neighbour, candidate_block_coord),
-                            impl::get_vertex(below_front_neighbour, candidate_block_coord)
-                        };
+                        } candidate_block_vertex
+                            = { impl::get_vertex(neighbour, candidate_block_coord),
+                                impl::get_vertex(
+                                    below_front_neighbour, candidate_block_coord
+                                ) };
 
                         boost::add_edge(
                             neighbour_block_vertex.in_neighbour,
@@ -4895,10 +4967,11 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(hmem::Handle<ChunkGrid>,
                         struct {
                             ChunkNavmeshVertexDescriptor in_neighbour,
                                 in_below_front_neighbour;
-                        } neighbour_block_vertex = {
-                            impl::get_vertex(neighbour, neighbour_block_coord),
-                            impl::get_vertex(below_front_neighbour, neighbour_block_coord)
-                        };
+                        } neighbour_block_vertex
+                            = { impl::get_vertex(neighbour, neighbour_block_coord),
+                                impl::get_vertex(
+                                    below_front_neighbour, neighbour_block_coord
+                                ) };
 
                         BlockIndex step_down_candidate_index
                             = hvox::block_index({ x, CHUNK_LENGTH - 2, 0 });
@@ -4928,10 +5001,11 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(hmem::Handle<ChunkGrid>,
                             struct {
                                 ChunkNavmeshVertexDescriptor in_neighbour,
                                     in_below_front_neighbour;
-                            } candidate_block_vertex = {
-                                impl::get_vertex(neighbour, candidate_block_coord),
-                                impl::get_vertex(below_front_neighbour, candidate_block_coord)
-                            };
+                            } candidate_block_vertex
+                                = { impl::get_vertex(neighbour, candidate_block_coord),
+                                    impl::get_vertex(
+                                        below_front_neighbour, candidate_block_coord
+                                    ) };
 
                             boost::add_edge(
                                 neighbour_block_vertex.in_neighbour,
@@ -4966,10 +5040,11 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(hmem::Handle<ChunkGrid>,
                             struct {
                                 ChunkNavmeshVertexDescriptor in_neighbour,
                                     in_below_front_neighbour;
-                            } candidate_block_vertex = {
-                                impl::get_vertex(neighbour, candidate_block_coord),
-                                impl::get_vertex(below_front_neighbour, candidate_block_coord)
-                            };
+                            } candidate_block_vertex
+                                = { impl::get_vertex(neighbour, candidate_block_coord),
+                                    impl::get_vertex(
+                                        below_front_neighbour, candidate_block_coord
+                                    ) };
 
                             boost::add_edge(
                                 neighbour_block_vertex.in_neighbour,
@@ -5050,10 +5125,11 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(hmem::Handle<ChunkGrid>,
                         struct {
                             ChunkNavmeshVertexDescriptor in_neighbour,
                                 in_below_back_neighbour;
-                        } neighbour_block_vertex = {
-                            impl::get_vertex(neighbour, neighbour_block_coord),
-                            impl::get_vertex(below_back_neighbour, neighbour_block_coord)
-                        };
+                        } neighbour_block_vertex
+                            = { impl::get_vertex(neighbour, neighbour_block_coord),
+                                impl::get_vertex(
+                                    below_back_neighbour, neighbour_block_coord
+                                ) };
 
                         BlockIndex above_candidate_index
                             = hvox::block_index({ x, 0, CHUNK_LENGTH - 1 });
@@ -5078,10 +5154,11 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(hmem::Handle<ChunkGrid>,
                         struct {
                             ChunkNavmeshVertexDescriptor in_neighbour,
                                 in_below_back_neighbour;
-                        } candidate_block_vertex = {
-                            impl::get_vertex(neighbour, candidate_block_coord),
-                            impl::get_vertex(below_back_neighbour, candidate_block_coord)
-                        };
+                        } candidate_block_vertex
+                            = { impl::get_vertex(neighbour, candidate_block_coord),
+                                impl::get_vertex(
+                                    below_back_neighbour, candidate_block_coord
+                                ) };
 
                         boost::add_edge(
                             neighbour_block_vertex.in_neighbour,
@@ -5131,10 +5208,11 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(hmem::Handle<ChunkGrid>,
                         struct {
                             ChunkNavmeshVertexDescriptor in_neighbour,
                                 in_below_back_neighbour;
-                        } neighbour_block_vertex = {
-                            impl::get_vertex(neighbour, neighbour_block_coord),
-                            impl::get_vertex(below_back_neighbour, neighbour_block_coord)
-                        };
+                        } neighbour_block_vertex
+                            = { impl::get_vertex(neighbour, neighbour_block_coord),
+                                impl::get_vertex(
+                                    below_back_neighbour, neighbour_block_coord
+                                ) };
 
                         BlockIndex step_down_candidate_index = hvox::block_index(
                             { x, CHUNK_LENGTH - 2, CHUNK_LENGTH - 1 }
@@ -5166,10 +5244,11 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(hmem::Handle<ChunkGrid>,
                             struct {
                                 ChunkNavmeshVertexDescriptor in_neighbour,
                                     in_below_back_neighbour;
-                            } candidate_block_vertex = {
-                                impl::get_vertex(neighbour, candidate_block_coord),
-                                impl::get_vertex(below_back_neighbour, candidate_block_coord)
-                            };
+                            } candidate_block_vertex
+                                = { impl::get_vertex(neighbour, candidate_block_coord),
+                                    impl::get_vertex(
+                                        below_back_neighbour, candidate_block_coord
+                                    ) };
 
                             boost::add_edge(
                                 neighbour_block_vertex.in_neighbour,
@@ -5204,10 +5283,11 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(hmem::Handle<ChunkGrid>,
                             struct {
                                 ChunkNavmeshVertexDescriptor in_neighbour,
                                     in_below_back_neighbour;
-                            } candidate_block_vertex = {
-                                impl::get_vertex(neighbour, candidate_block_coord),
-                                impl::get_vertex(below_back_neighbour, candidate_block_coord)
-                            };
+                            } candidate_block_vertex
+                                = { impl::get_vertex(neighbour, candidate_block_coord),
+                                    impl::get_vertex(
+                                        below_back_neighbour, candidate_block_coord
+                                    ) };
 
                             boost::add_edge(
                                 neighbour_block_vertex.in_neighbour,

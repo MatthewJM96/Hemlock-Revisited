@@ -64,7 +64,7 @@ hscript::lua::make_lua_delegate(LuaFunctionState lua_func_state) {
             );
 
             if constexpr (!std::is_same<ReturnType, void>()) {
-                return { false, {} };
+                return std::tuple<bool, ReturnType>{ false, {} };
             } else {
                 return false;
             }

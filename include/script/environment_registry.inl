@@ -85,18 +85,18 @@ Environment* hscript::EnvironmentRegistry<Environment>::create_environment(
 ) {
     if (m_register.find(name) != m_register.end()) return nullptr;
 
-    EnvironmentGroup<Environment>& group;
+    EnvironmentGroup<Environment>* group = nullptr;
     try {
-        group = m_groups.at(group_id);
+        group = &m_groups.at(group_id);
     } catch (std::out_of_range e) {
         return nullptr;
     }
 
     Environment* env = new Environment();
-    env->init(group.parent, m_io_manager, m_max_script_length);
+    env->init(group->parent, m_io_manager, m_max_script_length);
 
     m_register[name] = env;
-    group.children.push_back(env);
+    group->children.push_back(env);
 
     return env;
 }
@@ -139,24 +139,24 @@ Environment* hscript::EnvironmentRegistry<Environment>::create_environments(
         if (m_register.find(names[env_idx]) != m_register.end()) return nullptr;
     }
 
-    EnvironmentGroup<Environment>& group;
+    EnvironmentGroup<Environment>* group = nullptr;
     try {
-        group = m_groups.at(group_id);
+        group = &m_groups.at(group_id);
     } catch (std::out_of_range e) {
         return nullptr;
     }
 
     Environment* envs = new Environment[num]();
 
-    group.children.reserve(group.children.size() + num);
+    group->children.reserve(group->children.size() + num);
 
     for (ui32 env_idx = 0; env_idx != num; ++env_idx) {
         Environment* env = &envs[env_idx];
 
-        env->init(group.parent, m_io_manager, m_max_script_length);
+        env->init(group->parent, m_io_manager, m_max_script_length);
 
         m_register[names[env_idx]] = env;
-        group.children.push_back(env);
+        group->children.push_back(env);
     }
 
     return envs;

@@ -2,6 +2,8 @@
 #define __hemlock_script_lua_environment_h
 
 #include "script/environment_base.hpp"
+#include "script/lua/lua_function.hpp"
+#include "script/lua/rpc_functions.hpp"
 #include "script/lua/state.hpp"
 
 namespace hemlock {
@@ -20,19 +22,25 @@ namespace hemlock {
                     HasRPCManager,
                     CallBufferSize> {
                 friend i32
-                    register_lua_function<HasRPCManager, CallBufferSize>(LuaHandle);
-                friend i32 call_foreign<HasRPCManager, CallBufferSize>(LuaHandle state);
+                    hscript::lua::register_lua_function<HasRPCManager, CallBufferSize>(
+                        LuaHandle
+                    );
                 friend i32
-                query_foreign_call<HasRPCManager, CallBufferSize>(LuaHandle state);
+                    hscript::lua::call_foreign<HasRPCManager, CallBufferSize>(LuaHandle
+                    );
                 friend i32
-                get_foreign_call_results<HasRPCManager, CallBufferSize>(LuaHandle state
-                );
+                    hscript::lua::query_foreign_call<HasRPCManager, CallBufferSize>(
+                        LuaHandle
+                    );
+                friend i32 hscript::lua::
+                    get_foreign_call_results<HasRPCManager, CallBufferSize>(LuaHandle);
+                friend i32 hscript::lua::set_manual_command_buffer_pump<
+                    HasRPCManager,
+                    CallBufferSize>(LuaHandle);
                 friend i32
-                set_manual_command_buffer_pump<HasRPCManager, CallBufferSize>(
-                    LuaHandle state
-                );
-                friend i32
-                pump_command_buffer<HasRPCManager, CallBufferSize>(LuaHandle state);
+                    hscript::lua::pump_command_buffer<HasRPCManager, CallBufferSize>(
+                        LuaHandle
+                    );
 
                 using _Environment = Environment<HasRPCManager, CallBufferSize>;
                 using _Base

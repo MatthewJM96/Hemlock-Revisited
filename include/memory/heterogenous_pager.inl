@@ -35,6 +35,8 @@ size_t hmem::HeterogenousPager<PageSize, MaxFreePages>::allocated_bytes() {
         allocated_bytes += heterogenous_page_info.total_page_count
                            * heterogenous_page_info.data_byte_size * PageSize;
     }
+
+    return allocated_bytes;
 }
 
 template <size_t PageSize, size_t MaxFreePages>
@@ -46,7 +48,8 @@ hmem::Page<DataType> hmem::HeterogenousPager<PageSize, MaxFreePages>::get_page()
     size_t page_type = typeid(DataType).hash_code();
 
     m_heterogenous_page_infos.try_emplace(
-        page_type, HeterogenousPageInfo{ 0, 0, sizeof(DataType), _Pages{} }
+        page_type,
+        HeterogenousPageInfo<MaxFreePages>{ 0, 0, sizeof(DataType), _Pages{} }
     );
 
     auto& page_info = m_heterogenous_page_infos[page_type];
@@ -70,7 +73,8 @@ void hmem::HeterogenousPager<PageSize, MaxFreePages>::free_page(Page<DataType> p
     size_t page_type = typeid(DataType).hash_code();
 
     m_heterogenous_page_infos.try_emplace(
-        page_type, HeterogenousPageInfo{ 0, 0, sizeof(DataType), _Pages{} }
+        page_type,
+        HeterogenousPageInfo<MaxFreePages>{ 0, 0, sizeof(DataType), _Pages{} }
     );
 
     auto& page_info = m_heterogenous_page_infos[page_type];
@@ -80,6 +84,6 @@ void hmem::HeterogenousPager<PageSize, MaxFreePages>::free_page(Page<DataType> p
     } else {
         --page_info.total_page_count;
 
-        delete[] page;
+        delete[] reinterpret_cast<ui8*>(page);
     }
 }

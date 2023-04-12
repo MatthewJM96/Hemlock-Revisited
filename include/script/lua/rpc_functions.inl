@@ -1,3 +1,5 @@
+#include "lua_value.hpp"
+
 template <bool HasRPCManager, size_t CallBufferSize>
 i32 hscript::lua::call_foreign(LuaHandle state) {
     using _Environment = Environment<HasRPCManager, CallBufferSize>;
