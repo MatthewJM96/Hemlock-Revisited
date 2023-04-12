@@ -78,7 +78,9 @@ public:
                         ui32 idx = chunk_idx(x, y, z);
                         chunks[idx]
                             = hmem::allocate_handle<hvox::Chunk>(chunk_allocator);
-                        chunks[idx]->position = { x, y, z };
+                        chunks[idx]->position = {
+                            {x, y, z}
+                        };
                         chunks[idx]->init(
                             chunks[idx], block_pager, instance_data_pager
                         );
