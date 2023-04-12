@@ -84,6 +84,6 @@ void hmem::HeterogenousPager<PageSize, MaxFreePages>::free_page(Page<DataType> p
     } else {
         --page_info.total_page_count;
 
-        delete[] page;
+        delete[] reinterpret_cast<ui8*>(page);
     }
 }

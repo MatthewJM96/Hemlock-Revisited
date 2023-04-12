@@ -45,6 +45,6 @@ void hmem::Pager<DataType, PageSize, MaxFreePages>::free_page(Page<DataType> pag
     } else {
         --m_total_page_count;
 
-        delete[] page;
+        delete[] reinterpret_cast<ui8*>(page);
     }
 }
