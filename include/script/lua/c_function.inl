@@ -1,155 +1,188 @@
 #include "script/lua/lua_value.hpp"
 
-template <typename ReturnType, typename... Parameters>
-    requires (!std::is_same<void, ReturnType>::value)
-i32 hscript::lua::impl::handle_delegate_invocation(
-    LuaHandle state, Delegate<ReturnType, Parameters...>* delegate
-) {
-    // Parameters and a return value, pop parameters off
-    // Lua stack, call with these, then report number of
-    // items pushed onto Lua stack.
+namespace hemlock {
+    namespace script {
+        namespace lua {
 
-    ReturnType ret = (*delegate)(LuaValue<Parameters>::pop(state)...);
+            namespace impl {
+                template <
+                    typename ReturnType,
+                    typename... Parameters,
+                    typename std::enable_if_t<!std::is_same<void, ReturnType>::value>>
+                i32 handle_delegate_invocation(
+                    LuaHandle state, Delegate<ReturnType, Parameters...>* delegate
+                ) {
+                    // Parameters and a return value, pop parameters off
+                    // Lua stack, call with these, then report number of
+                    // items pushed onto Lua stack.
 
-    return LuaValue<ReturnType>::push(state, ret);
-}
+                    ReturnType ret = (*delegate)(LuaValue<Parameters>::pop(state)...);
 
-template <typename ReturnType>
-    requires (!std::is_same<void, ReturnType>::value)
-i32 hscript::lua::impl::handle_delegate_invocation(
-    LuaHandle state, Delegate<ReturnType>* delegate
-) {
-    // No parameters but a return value, just call then
-    // report number of items pushed onto Lua stack.
+                    return LuaValue<ReturnType>::push(state, ret);
+                }
 
-    ReturnType ret = (*delegate)();
+                template <
+                    typename ReturnType,
+                    typename std::enable_if_t<!std::is_same<void, ReturnType>::value>>
+                i32 handle_delegate_invocation(
+                    LuaHandle state, Delegate<ReturnType>* delegate
+                ) {
+                    // No parameters but a return value, just call then
+                    // report number of items pushed onto Lua stack.
 
-    return LuaValue<ReturnType>::push(state, ret);
-}
+                    ReturnType ret = (*delegate)();
 
-template <typename = void, typename... Parameters>
-i32 hscript::lua::impl::handle_delegate_invocation(
-    LuaHandle state, Delegate<void, Parameters...>* delegate
-) {
-    // Parameters but no return value, pop parameters off
-    // Lua stack, call with these, then report zero items
-    // added to Lua stack.
+                    return LuaValue<ReturnType>::push(state, ret);
+                }
 
-    (*delegate)(LuaValue<Parameters>::pop(state)...);
+                template <
+                    typename ReturnType,
+                    typename... Parameters,
+                    typename std::enable_if_t<!std::is_same<void, ReturnType>::value>>
+                i32 handle_delegate_invocation(
+                    LuaHandle state, Delegate<void, Parameters...>* delegate
+                ) {
+                    // Parameters but no return value, pop parameters off
+                    // Lua stack, call with these, then report zero items
+                    // added to Lua stack.
 
-    return 0;
-}
+                    (*delegate)(LuaValue<Parameters>::pop(state)...);
 
-template <typename = void>
-i32 hscript::lua::impl::handle_delegate_invocation(
-    LuaHandle state, Delegate<void()>* delegate
-) {
-    // No parameters, no return value, just call and
-    // report zero items added to Lua stack.
+                    return 0;
+                }
 
-    (*delegate)();
-    return 0;
-}
+                template <
+                    typename ReturnType,
+                    typename std::enable_if_t<!std::is_same<void, ReturnType>::value>>
+                i32 handle_delegate_invocation(LuaHandle, Delegate<void()>* delegate) {
+                    // No parameters, no return value, just call and
+                    // report zero items added to Lua stack.
 
-template <typename ReturnType, typename... Parameters>
-    requires (!std::is_same<void, ReturnType>::value)
-i32 hscript::lua::impl::handle_function_invocation(
-    LuaHandle state, ReturnType (*func)(Parameters...)
-) {
-    // Parameters and a return value, pop parameters off
-    // Lua stack, call with these, then report number of
-    // items pushed onto Lua stack.
+                    (*delegate)();
+                    return 0;
+                }
 
-    ReturnType ret = func(LuaValue<Parameters>::pop(state)...);
+                template <
+                    typename ReturnType,
+                    typename... Parameters,
+                    typename std::enable_if_t<!std::is_same<void, ReturnType>::value>>
+                i32 handle_function_invocation(
+                    LuaHandle state, ReturnType (*func)(Parameters...)
+                ) {
+                    // Parameters and a return value, pop parameters off
+                    // Lua stack, call with these, then report number of
+                    // items pushed onto Lua stack.
 
-    return LuaValue<ReturnType>::push(state, ret);
-}
+                    ReturnType ret = func(LuaValue<Parameters>::pop(state)...);
 
-template <typename ReturnType>
-    requires (!std::is_same<void, ReturnType>::value)
-i32 hscript::lua::impl::handle_function_invocation(
-    LuaHandle state, ReturnType (*func)()
-) {
-    // No parameters but a return value, just call then
-    // report number of items pushed onto Lua stack.
+                    return LuaValue<ReturnType>::push(state, ret);
+                }
 
-    ReturnType ret = func();
+                template <
+                    typename ReturnType,
+                    typename std::enable_if_t<!std::is_same<void, ReturnType>::value>>
+                i32 handle_function_invocation(LuaHandle state, ReturnType (*func)()) {
+                    // No parameters but a return value, just call then
+                    // report number of items pushed onto Lua stack.
 
-    return LuaValue<ReturnType>::push(state, ret);
-}
+                    ReturnType ret = func();
 
-template <typename = void, typename... Parameters>
-i32 hscript::lua::impl::handle_function_invocation(
-    LuaHandle state, void (*func)(Parameters...)
-) {
-    // Parameters but no return value, pop parameters off
-    // Lua stack, call with these, then report zero items
-    // added to Lua stack.
+                    return LuaValue<ReturnType>::push(state, ret);
+                }
 
-    func(LuaValue<Parameters>::pop(state)...);
+                template <
+                    typename ReturnType,
+                    typename... Parameters,
+                    typename std::enable_if_t<std::is_same<void, ReturnType>::value>>
+                i32 handle_function_invocation(
+                    LuaHandle state, void (*func)(Parameters...)
+                ) {
+                    // Parameters but no return value, pop parameters off
+                    // Lua stack, call with these, then report zero items
+                    // added to Lua stack.
 
-    return 0;
-}
+                    func(LuaValue<Parameters>::pop(state)...);
 
-template <typename = void>
-i32 hscript::lua::impl::handle_function_invocation(LuaHandle state, void (*func)()) {
-    // No parameters, no return value, just call and
-    // report zero items added to Lua stack.
+                    return 0;
+                }
 
-    func();
-    return 0;
-}
+                template <
+                    typename ReturnType,
+                    typename std::enable_if_t<std::is_same<void, ReturnType>::value>>
+                i32 handle_function_invocation(LuaHandle, void (*func)()) {
+                    // No parameters, no return value, just call and
+                    // report zero items added to Lua stack.
 
-template <typename Closure, typename ReturnType, typename... Parameters>
-    requires (!std::is_same<void, ReturnType>::value)
-i32 hscript::lua::impl::handle_closure_invocation(
-    LuaHandle state, Closure* closure, ReturnType (*func)(Parameters...)
-) {
-    // Parameters and a return value, pop parameters off
-    // Lua stack, call with these, then report number of
-    // items pushed onto Lua stack.
+                    func();
+                    return 0;
+                }
 
-    ReturnType ret = (closure->*func)(LuaValue<Parameters>::pop(state)...);
+                template <
+                    typename Closure,
+                    typename ReturnType,
+                    typename... Parameters,
+                    typename std::enable_if_t<!std::is_same<void, ReturnType>::value>>
+                i32 handle_closure_invocation(
+                    LuaHandle state, Closure* closure, ReturnType (*func)(Parameters...)
+                ) {
+                    // Parameters and a return value, pop parameters off
+                    // Lua stack, call with these, then report number of
+                    // items pushed onto Lua stack.
 
-    return LuaValue<ReturnType>::push(state, ret);
-}
+                    ReturnType ret
+                        = (closure->*func)(LuaValue<Parameters>::pop(state)...);
 
-template <typename Closure, typename ReturnType>
-    requires (!std::is_same<void, ReturnType>::value)
-i32 hscript::lua::impl::handle_closure_invocation(
-    LuaHandle state, Closure* closure, ReturnType (*func)()
-) {
-    // No parameters but a return value, just call then
-    // report number of items pushed onto Lua stack.
+                    return LuaValue<ReturnType>::push(state, ret);
+                }
 
-    ReturnType ret = (closure->*func)();
+                template <
+                    typename Closure,
+                    typename ReturnType,
+                    typename std::enable_if_t<!std::is_same<void, ReturnType>::value>>
+                i32 handle_closure_invocation(
+                    LuaHandle state, Closure* closure, ReturnType (*func)()
+                ) {
+                    // No parameters but a return value, just call then
+                    // report number of items pushed onto Lua stack.
 
-    return LuaValue<ReturnType>::push(state, ret);
-}
+                    ReturnType ret = (closure->*func)();
 
-template <typename Closure, typename = void, typename... Parameters>
-i32 hscript::lua::impl::handle_closure_invocation(
-    LuaHandle state, Closure* closure, void (*func)(Parameters...)
-) {
-    // Parameters but no return value, pop parameters off
-    // Lua stack, call with these, then report zero items
-    // added to Lua stack.
+                    return LuaValue<ReturnType>::push(state, ret);
+                }
 
-    (closure->*func)(LuaValue<Parameters>::pop(state)...);
+                template <
+                    typename Closure,
+                    typename ReturnType,
+                    typename... Parameters,
+                    typename std::enable_if_t<std::is_same<void, ReturnType>::value>>
+                i32 handle_closure_invocation(
+                    LuaHandle state, Closure* closure, void (*func)(Parameters...)
+                ) {
+                    // Parameters but no return value, pop parameters off
+                    // Lua stack, call with these, then report zero items
+                    // added to Lua stack.
 
-    return 0;
-}
+                    (closure->*func)(LuaValue<Parameters>::pop(state)...);
 
-template <typename Closure, typename = void>
-i32 hscript::lua::impl::handle_closure_invocation(
-    LuaHandle state, Closure* closure, void (*func)()
-) {
-    // No parameters, no return value, just call and
-    // report zero items added to Lua stack.
+                    return 0;
+                }
 
-    (closure->*func)();
-    return 0;
-}
+                template <
+                    typename Closure,
+                    typename ReturnType,
+                    typename std::enable_if_t<std::is_same<void, ReturnType>::value>>
+                i32
+                handle_closure_invocation(LuaHandle, Closure* closure, void (*func)()) {
+                    // No parameters, no return value, just call and
+                    // report zero items added to Lua stack.
+
+                    (closure->*func)();
+                    return 0;
+                }
+            }  // namespace impl
+        }      // namespace lua
+    }          // namespace script
+}  // namespace hemlock
 
 template <typename ReturnType, typename... Parameters>
 i32 hscript::lua::invoke_delegate(LuaHandle state) {

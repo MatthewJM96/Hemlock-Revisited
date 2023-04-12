@@ -6,25 +6,6 @@
 namespace hemlock {
     namespace script {
         namespace lua {
-            namespace impl {
-                template <typename ReturnType, typename... Parameters>
-                i32 handle_delegate_invocation(
-                    LuaHandle state, Delegate<ReturnType, Parameters...>* delegate
-                );
-
-                template <typename ReturnType, typename... Parameters>
-                i32 handle_function_invocation(
-                    LuaHandle state, ReturnType (*func)(Parameters...)
-                );
-
-                template <typename Closure, typename ReturnType, typename... Parameters>
-                i32 handle_closure_invocation(
-                    LuaHandle state,
-                    Closure*  closure,
-                    ReturnType (Closure::*func)(Parameters...)
-                );
-            };  // namespace impl
-
             template <typename ReturnType, typename... Parameters>
             i32 invoke_delegate(LuaHandle state);
 
