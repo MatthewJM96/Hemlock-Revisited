@@ -5,8 +5,8 @@
 
 map::maze2d::Map
 map::maze2d::load_map(std::string map_filepath, Map2DDimensions dimensions) {
-    const size_t padded_dim_x = dimension::dim_to_padded_dim(dimensions.x);
-    const size_t padded_dim_y = dimension::dim_to_padded_dim(dimensions.y);
+    const ui32 padded_dim_x = dimension::dim_to_padded_dim(dimensions.x);
+    const ui32 padded_dim_y = dimension::dim_to_padded_dim(dimensions.y);
 
     Map map;
 
@@ -17,7 +17,7 @@ map::maze2d::load_map(std::string map_filepath, Map2DDimensions dimensions) {
     map.protoheatmap = heatmap_new(10 * map.dims.x, 10 * map.dims.y);
 
     // Initialise first and last row of halo map.
-    for (size_t i = 0; i < padded_dim_x; ++i) {
+    for (ui32 i = 0; i < padded_dim_x; ++i) {
         map.map[i]                                     = '#';
         map.map[padded_dim_x * (padded_dim_y - 1) + i] = '#';
 
@@ -31,7 +31,7 @@ map::maze2d::load_map(std::string map_filepath, Map2DDimensions dimensions) {
 
     // For each line in the map file, copy in its contents,
     // padding with a wall tile on each side.
-    size_t      row = 0;
+    ui32        row = 0;
     std::string line;
     while (std::getline(map_file, line)) {
         map.map[(row + 1) * padded_dim_x]     = WALL_TILE;
@@ -46,8 +46,8 @@ map::maze2d::load_map(std::string map_filepath, Map2DDimensions dimensions) {
 
         // Iterate over the "inner" (non-halo) width - that is,
         // the part we actually load from the map file.
-        for (size_t col = 0; col < dimensions.x; ++col) {
-            size_t halo_idx = (row + 1) * padded_dim_x + col + 1;
+        for (ui32 col = 0; col < dimensions.x; ++col) {
+            ui32 halo_idx = (row + 1) * padded_dim_x + col + 1;
 
             map.map[halo_idx] = line[col];
 
@@ -158,9 +158,9 @@ map::maze2d::map_to_graph(Map map, float initial_weight) {
         while (nodes_left_to_visit_in_round > 0) {
             size_t current_node_idx = *it;
 
-            size_t row_idx = std::floor(
+            size_t row_idx = static_cast<size_t>(std::floor(
                 static_cast<float>(current_node_idx) / static_cast<float>(map.dims.x)
-            );
+            ));
             size_t col_idx = current_node_idx % map.dims.x;
 
             // do_adjacent_node_visit((row_idx - 1) * map.dims.x + col_idx - 1,

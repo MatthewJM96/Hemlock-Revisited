@@ -8,7 +8,8 @@ namespace hemlock {
                 template <
                     typename ReturnType,
                     typename... Parameters,
-                    typename std::enable_if_t<!std::is_same<void, ReturnType>::value>>
+                    typename
+                    = typename std::enable_if_t<!std::is_same<void, ReturnType>::value>>
                 i32 handle_delegate_invocation(
                     LuaHandle state, Delegate<ReturnType, Parameters...>* delegate
                 ) {
@@ -23,7 +24,8 @@ namespace hemlock {
 
                 template <
                     typename ReturnType,
-                    typename std::enable_if_t<!std::is_same<void, ReturnType>::value>>
+                    typename
+                    = typename std::enable_if_t<!std::is_same<void, ReturnType>::value>>
                 i32 handle_delegate_invocation(
                     LuaHandle state, Delegate<ReturnType>* delegate
                 ) {
@@ -38,7 +40,8 @@ namespace hemlock {
                 template <
                     typename ReturnType,
                     typename... Parameters,
-                    typename std::enable_if_t<!std::is_same<void, ReturnType>::value>>
+                    typename
+                    = typename std::enable_if_t<!std::is_same<void, ReturnType>::value>>
                 i32 handle_delegate_invocation(
                     LuaHandle state, Delegate<void, Parameters...>* delegate
                 ) {
@@ -53,7 +56,8 @@ namespace hemlock {
 
                 template <
                     typename ReturnType,
-                    typename std::enable_if_t<!std::is_same<void, ReturnType>::value>>
+                    typename
+                    = typename std::enable_if_t<!std::is_same<void, ReturnType>::value>>
                 i32 handle_delegate_invocation(LuaHandle, Delegate<void()>* delegate) {
                     // No parameters, no return value, just call and
                     // report zero items added to Lua stack.
@@ -65,7 +69,8 @@ namespace hemlock {
                 template <
                     typename ReturnType,
                     typename... Parameters,
-                    typename std::enable_if_t<!std::is_same<void, ReturnType>::value>>
+                    typename
+                    = typename std::enable_if_t<!std::is_same<void, ReturnType>::value>>
                 i32 handle_function_invocation(
                     LuaHandle state, ReturnType (*func)(Parameters...)
                 ) {
@@ -80,7 +85,8 @@ namespace hemlock {
 
                 template <
                     typename ReturnType,
-                    typename std::enable_if_t<!std::is_same<void, ReturnType>::value>>
+                    typename
+                    = typename std::enable_if_t<!std::is_same<void, ReturnType>::value>>
                 i32 handle_function_invocation(LuaHandle state, ReturnType (*func)()) {
                     // No parameters but a return value, just call then
                     // report number of items pushed onto Lua stack.
@@ -93,7 +99,8 @@ namespace hemlock {
                 template <
                     typename ReturnType,
                     typename... Parameters,
-                    typename std::enable_if_t<std::is_same<void, ReturnType>::value>>
+                    typename
+                    = typename std::enable_if_t<std::is_same<void, ReturnType>::value>>
                 i32 handle_function_invocation(
                     LuaHandle state, void (*func)(Parameters...)
                 ) {
@@ -108,7 +115,8 @@ namespace hemlock {
 
                 template <
                     typename ReturnType,
-                    typename std::enable_if_t<std::is_same<void, ReturnType>::value>>
+                    typename
+                    = typename std::enable_if_t<std::is_same<void, ReturnType>::value>>
                 i32 handle_function_invocation(LuaHandle, void (*func)()) {
                     // No parameters, no return value, just call and
                     // report zero items added to Lua stack.
@@ -121,7 +129,8 @@ namespace hemlock {
                     typename Closure,
                     typename ReturnType,
                     typename... Parameters,
-                    typename std::enable_if_t<!std::is_same<void, ReturnType>::value>>
+                    typename
+                    = typename std::enable_if_t<!std::is_same<void, ReturnType>::value>>
                 i32 handle_closure_invocation(
                     LuaHandle state, Closure* closure, ReturnType (*func)(Parameters...)
                 ) {
@@ -138,7 +147,8 @@ namespace hemlock {
                 template <
                     typename Closure,
                     typename ReturnType,
-                    typename std::enable_if_t<!std::is_same<void, ReturnType>::value>>
+                    typename
+                    = typename std::enable_if_t<!std::is_same<void, ReturnType>::value>>
                 i32 handle_closure_invocation(
                     LuaHandle state, Closure* closure, ReturnType (*func)()
                 ) {
@@ -154,7 +164,8 @@ namespace hemlock {
                     typename Closure,
                     typename ReturnType,
                     typename... Parameters,
-                    typename std::enable_if_t<std::is_same<void, ReturnType>::value>>
+                    typename
+                    = typename std::enable_if_t<std::is_same<void, ReturnType>::value>>
                 i32 handle_closure_invocation(
                     LuaHandle state, Closure* closure, void (*func)(Parameters...)
                 ) {
@@ -170,7 +181,8 @@ namespace hemlock {
                 template <
                     typename Closure,
                     typename ReturnType,
-                    typename std::enable_if_t<std::is_same<void, ReturnType>::value>>
+                    typename
+                    = typename std::enable_if_t<std::is_same<void, ReturnType>::value>>
                 i32
                 handle_closure_invocation(LuaHandle, Closure* closure, void (*func)()) {
                     // No parameters, no return value, just call and

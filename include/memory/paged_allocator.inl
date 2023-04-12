@@ -82,7 +82,7 @@ typename hmem::PagedAllocator<DataType, PageSize, MaxFreePages>::pointer
 
     if (count < PageSize) {
         page_tracker.free_extents.emplace(
-            std::make_pair<void*, PageExtent>(page, PageExtent{ count, PageSize })
+            std::make_pair<void*, PageExtent>(page, PageExtent{ static_cast<ptrdiff_t>(count), PageSize })
         );
     }
 
@@ -177,7 +177,7 @@ void hmem::PagedAllocator<DataType, PageSize, MaxFreePages>::deallocate(
         } else {
             page_tracker.free_extents.emplace(std::make_pair<void*, PageExtent>(
                 std::move(reinterpret_cast<void*>(page)),
-                PageExtent{ data - page, data - page + count }
+                PageExtent{ data - page, data - page + static_cast<ptrdiff_t>(count) }
             ));
         }
     } else if (attached_to_extent_it->second.begin == 0 && attached_to_extent_it->second.end == PageSize)

@@ -176,7 +176,7 @@ i32 hscript::lua::get_foreign_call_results(LuaHandle state) {
         }
     }
 
-    return return_values.size();
+    return static_cast<i32>(return_values.size());
 }
 
 template <bool HasRPCManager, size_t CallBufferSize>

@@ -69,7 +69,7 @@ hscript::lua::make_arbitrary_scalars_lua_delegate(
                                    HEMLOCK_MAX_ARBITRARY_LUA_RETURNS;
 
             // Call the function with the provided parameters.
-            if (lua_pcall(state, parameters.size(), return_count, 0) != 0) {
+            if (lua_pcall(state, static_cast<i32>(parameters.size()), return_count, 0) != 0) {
                 debug_printf(
                     "Error calling Lua function: %s.\n",
                     LuaValue<const char*>::pop(state)

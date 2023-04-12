@@ -253,9 +253,9 @@ public:
                 {
                     debug_printf(
                         "    (%d, %d, %d)\n",
-                        chunk->position.x,
-                        chunk->position.y,
-                        chunk->position.z
+                        static_cast<i32>(chunk->position.x),
+                        static_cast<i32>(chunk->position.y),
+                        static_cast<i32>(chunk->position.z)
                     );
                 }
             }

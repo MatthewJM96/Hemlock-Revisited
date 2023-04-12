@@ -308,16 +308,29 @@ if (UNIX OR MINGW)
         endif()
     endif()
 else()
-    target_include_directories(Hemlock_Revisited
-    SYSTEM
-    PUBLIC
-    "${PROJECT_SOURCE_DIR}/deps/include"
-    )
+    if(CMAKE_BUILD_TYPE STREQUAL "Release" OR HEMLOCK_FAST_DEBUG)
+        target_include_directories(Hemlock_Revisited
+            SYSTEM
+            PUBLIC
+            "${PROJECT_SOURCE_DIR}/deps/Release/include"
+        )
 
-    target_link_directories(Hemlock_Revisited
-    PUBLIC
-    "${PROJECT_SOURCE_DIR}/deps/lib"
-    )
+        target_link_directories(Hemlock_Revisited
+            PUBLIC
+            "${PROJECT_SOURCE_DIR}/deps/Release/lib"
+        )
+    else()
+        target_include_directories(Hemlock_Revisited
+            SYSTEM
+            PUBLIC
+            "${PROJECT_SOURCE_DIR}/deps/Debug/include"
+        )
+
+        target_link_directories(Hemlock_Revisited
+            PUBLIC
+            "${PROJECT_SOURCE_DIR}/deps/Debug/lib"
+        )
+    endif()
 endif()
 
 if (HEMLOCK_USING_OPENGL)

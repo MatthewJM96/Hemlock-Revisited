@@ -1,8 +1,8 @@
 #include "algorithm/debug/debug.hpp"
 #include "maze2d.hpp"
 
-void __do_maze_graph_test(size_t map_dim, size_t count) {
-    size_t half_dim = ((map_dim - 1) / 2);
+void __do_maze_graph_test(ui32 map_dim, size_t count) {
+    ui32 half_dim = ((map_dim - 1) / 2);
 
     for (size_t map_idx = 0; map_idx < count; ++map_idx) {
         map::maze2d::Map map;
@@ -66,8 +66,8 @@ void do_maze_graph_test() {
     __do_maze_graph_test(61, 10);
 }
 
-void __do_maze_graph_timing_test(size_t iterations, size_t map_dim, size_t map_idx) {
-    size_t half_dim = ((map_dim - 1) / 2);
+void __do_maze_graph_timing_test(size_t iterations, ui32 map_dim, size_t map_idx) {
+    ui32 half_dim = ((map_dim - 1) / 2);
 
     map::maze2d::Map map;
 

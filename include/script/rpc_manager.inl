@@ -41,7 +41,7 @@ hscript::CallID hscript::RPCManager<EnvironmentImpl, BufferSize>::append_call(
         m_calls.emplace_back(std::make_pair(id, call));
     } else {
         if (m_calls_buffered < BufferSize) {
-            idx = m_calls_buffered;
+            idx = static_cast<i32>(m_calls_buffered);
 
             m_calls[m_calls_buffered++] = std::make_pair(id, call);
         } else {
