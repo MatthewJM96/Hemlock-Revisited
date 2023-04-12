@@ -7,7 +7,7 @@
 namespace hemlock {
     namespace memory {
         struct PageExtent {
-            size_t begin, end;
+            ptrdiff_t begin, end;
         };
 
         struct PageTracker {
