@@ -119,11 +119,15 @@ bool hio::IOManagerBase::read_file_to_string(const fs::path& path, std::string& 
 
 #if DEBUG
     if (chars_read != length) {
+#  if HEMLOCK_OS_WINDOWS
         debug_printf("%ls could not be read.", abs_path.c_str());
+#  else
+        debug_printf("%s could not be read.", abs_path.c_str());
+#  endif
     }
-#else // DEBUG
+#else   // DEBUG
     (void)chars_read;
-#endif // !DEBUG
+#endif  // !DEBUG
 
     // Close file.
     fclose(file);
@@ -161,11 +165,15 @@ char* hio::IOManagerBase::
 
 #if DEBUG
     if (chars_read != _length) {
+#  if HEMLOCK_OS_WINDOWS
         debug_printf("%ls could not be read.", abs_path.c_str());
+#  else
+        debug_printf("%s could not be read.", abs_path.c_str());
+#  endif
     }
-#else // DEBUG
+#else   // DEBUG
     (void)chars_read;
-#endif // !DEBUG
+#endif  // !DEBUG
 
     // Close file.
     fclose(file);
@@ -200,11 +208,15 @@ bool hio::IOManagerBase::read_file_to_binary(
 
 #if DEBUG
     if (chars_read != length) {
+#  if HEMLOCK_OS_WINDOWS
         debug_printf("%ls could not be read.", abs_path.c_str());
+#  else
+        debug_printf("%s could not be read.", abs_path.c_str());
+#  endif
     }
-#else // DEBUG
+#else   // DEBUG
     (void)chars_read;
-#endif // !DEBUG
+#endif  // !DEBUG
 
     // Close file.
     fclose(file);
@@ -236,11 +248,15 @@ ui8* hio::IOManagerBase::read_file_to_binary(const fs::path& path, ui32& length)
 
 #if DEBUG
     if (chars_read != length) {
+#  if HEMLOCK_OS_WINDOWS
         debug_printf("%ls could not be read.", abs_path.c_str());
+#  else
+        debug_printf("%s could not be read.", abs_path.c_str());
+#  endif
     }
-#else // DEBUG
+#else   // DEBUG
     (void)chars_read;
-#endif // !DEBUG
+#endif  // !DEBUG
 
     // Close file.
     fclose(file);
