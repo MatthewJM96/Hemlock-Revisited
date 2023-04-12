@@ -35,6 +35,8 @@ size_t hmem::HeterogenousPager<PageSize, MaxFreePages>::allocated_bytes() {
         allocated_bytes += heterogenous_page_info.total_page_count
                            * heterogenous_page_info.data_byte_size * PageSize;
     }
+
+    return allocated_bytes;
 }
 
 template <size_t PageSize, size_t MaxFreePages>
