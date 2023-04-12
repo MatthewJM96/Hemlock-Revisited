@@ -343,15 +343,8 @@ public:
 
             {
                 size_t allocated_bytes = block_pager->allocated_bytes()
-                                         + instance_data_pager->allocated_bytes();
-                // try {
-                //     allocated_bytes += chunk_allocator.allocated_bytes();
-                // } catch (std::system_error &e) {
-                //     std::cout << "SYSTEM ERROR: " << std::to_string(e.code().value())
-                //     << " - " << e.what() << std::endl;
-                // } catch (std::exception &e) {
-                //     std::cout << "ERROR: " << e.what() << std::endl;
-                // }
+                                         + instance_data_pager->allocated_bytes()
+                                         + chunk_allocator.allocated_bytes();
                 size_t allocated_MB = allocated_bytes / 1000000;
 
                 std::string msg
