@@ -553,6 +553,7 @@
             "targets": [
                 "Hemlock_Revisited"
             ],
+            "configuration": "Debug",
             "jobs": 10
         },
         {
@@ -568,6 +569,7 @@
             "targets": [
                 "Hemlock_Revisited"
             ],
+            "configuration": "Release",
             "jobs": 10
         },
         {
@@ -583,6 +585,7 @@
             "targets": [
                 "Hemlock_Revisited"
             ],
+            "configuration": "Debug",
             "jobs": 10
         },
         {
@@ -598,6 +601,7 @@
             "targets": [
                 "Hemlock_Revisited"
             ],
+            "configuration": "Release",
             "jobs": 10
         }
     ]
