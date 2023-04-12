@@ -118,7 +118,7 @@ void hmem::PagedAllocator<DataType, PageSize, MaxFreePages>::deallocate(
     void* page_void = nullptr;
     _Page page      = nullptr;
     for (void* page_void_tmp : page_tracker.allocated_pages) {
-        _Page page_tmp = reinterpret_cast<_Page>(page_void);
+        _Page page_tmp = reinterpret_cast<_Page>(page_void_tmp);
         if (data >= page_tmp && data <= page_tmp + PageSize) {
 #if DEBUG
             assert(data - page_tmp + count <= PageSize);
