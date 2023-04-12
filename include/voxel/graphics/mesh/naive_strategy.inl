@@ -4,7 +4,8 @@
 #include "voxel/face_check.hpp"
 
 template <hvox::IdealBlockComparator MeshComparator>
-bool hvox::NaiveMeshStrategy<MeshComparator>::can_run(hmem::Handle<ChunkGrid> chunk_grid, hmem::Handle<Chunk> chunk) const {
+bool hvox::NaiveMeshStrategy<
+    MeshComparator>::can_run(hmem::Handle<ChunkGrid>, hmem::Handle<Chunk>) const {
     // Only execute if all preloaded neighbouring chunks have at least been
     // generated.
     // TODO(Matthew): Revisit this. query_all_neighbour_states has been removed, do we
@@ -18,7 +19,9 @@ bool hvox::NaiveMeshStrategy<MeshComparator>::can_run(hmem::Handle<ChunkGrid> ch
 }
 
 template <hvox::IdealBlockComparator MeshComparator>
-void hvox::NaiveMeshStrategy<MeshComparator>::operator()(hmem::Handle<ChunkGrid>, hmem::Handle<Chunk> chunk) const {
+void hvox::NaiveMeshStrategy<MeshComparator>::operator()(
+    hmem::Handle<ChunkGrid>, hmem::Handle<Chunk> chunk
+) const {
     // TODO(Matthew): Better guess work should be possible and expand only when
     // needed.
     //                  Maybe in addition to managing how all chunk's transformations
@@ -64,8 +67,8 @@ void hvox::NaiveMeshStrategy<MeshComparator>::operator()(hmem::Handle<ChunkGrid>
             // LEFT
             if (is_at_left_face(i)) {
                 // Get corresponding neighbour index in neighbour chunk and check.
-                BlockIndex j   = index_at_right_face(i);
-                neighbour      = chunk->neighbours.one.left.lock();
+                BlockIndex j = index_at_right_face(i);
+                neighbour    = chunk->neighbours.one.left.lock();
                 if (neighbour) {
                     neighbour_lock = std::shared_lock(neighbour->blocks_mutex);
                     if (neighbour->blocks[j] == NULL_BLOCK) {
@@ -90,8 +93,8 @@ void hvox::NaiveMeshStrategy<MeshComparator>::operator()(hmem::Handle<ChunkGrid>
             // RIGHT
             if (is_at_right_face(i)) {
                 // Get corresponding neighbour index in neighbour chunk and check.
-                BlockIndex j   = index_at_left_face(i);
-                neighbour      = chunk->neighbours.one.right.lock();
+                BlockIndex j = index_at_left_face(i);
+                neighbour    = chunk->neighbours.one.right.lock();
                 if (neighbour) {
                     neighbour_lock = std::shared_lock(neighbour->blocks_mutex);
                     if (neighbour->blocks[j] == NULL_BLOCK) {
@@ -116,8 +119,8 @@ void hvox::NaiveMeshStrategy<MeshComparator>::operator()(hmem::Handle<ChunkGrid>
             // BOTTOM
             if (is_at_bottom_face(i)) {
                 // Get corresponding neighbour index in neighbour chunk and check.
-                BlockIndex j   = index_at_top_face(i);
-                neighbour      = chunk->neighbours.one.bottom.lock();
+                BlockIndex j = index_at_top_face(i);
+                neighbour    = chunk->neighbours.one.bottom.lock();
                 if (neighbour) {
                     neighbour_lock = std::shared_lock(neighbour->blocks_mutex);
                     if (neighbour->blocks[j] == NULL_BLOCK) {
@@ -142,8 +145,8 @@ void hvox::NaiveMeshStrategy<MeshComparator>::operator()(hmem::Handle<ChunkGrid>
             // TOP
             if (is_at_top_face(i)) {
                 // Get corresponding neighbour index in neighbour chunk and check.
-                BlockIndex j   = index_at_bottom_face(i);
-                neighbour      = chunk->neighbours.one.top.lock();
+                BlockIndex j = index_at_bottom_face(i);
+                neighbour    = chunk->neighbours.one.top.lock();
                 if (neighbour) {
                     neighbour_lock = std::shared_lock(neighbour->blocks_mutex);
                     if (neighbour->blocks[j] == NULL_BLOCK) {
@@ -168,8 +171,8 @@ void hvox::NaiveMeshStrategy<MeshComparator>::operator()(hmem::Handle<ChunkGrid>
             // FRONT
             if (is_at_front_face(i)) {
                 // Get corresponding neighbour index in neighbour chunk and check.
-                BlockIndex j   = index_at_back_face(i);
-                neighbour      = chunk->neighbours.one.front.lock();
+                BlockIndex j = index_at_back_face(i);
+                neighbour    = chunk->neighbours.one.front.lock();
                 if (neighbour) {
                     neighbour_lock = std::shared_lock(neighbour->blocks_mutex);
                     if (neighbour->blocks[j] == NULL_BLOCK) {
@@ -194,8 +197,8 @@ void hvox::NaiveMeshStrategy<MeshComparator>::operator()(hmem::Handle<ChunkGrid>
             // BACK
             if (is_at_back_face(i)) {
                 // Get corresponding neighbour index in neighbour chunk and check.
-                BlockIndex j   = index_at_front_face(i);
-                neighbour      = chunk->neighbours.one.back.lock();
+                BlockIndex j = index_at_front_face(i);
+                neighbour    = chunk->neighbours.one.back.lock();
                 if (neighbour) {
                     neighbour_lock = std::shared_lock(neighbour->blocks_mutex);
                     if (neighbour->blocks[j] == NULL_BLOCK) {
