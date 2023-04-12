@@ -121,6 +121,24 @@
             }
         },
         {
+            "name": "GCC-x64-Asan-Slow",
+            "displayName": "GCC x64 Address Sanitizer (Slow)",
+            "description": "Configuration for GCC x64 with address sanitizer build (no optimisation).",
+            "inherits": "base",
+            "generator": "Unix Makefiles",
+            "cacheVariables": {
+                "CMAKE_C_COMPILER": "gcc",
+                "CMAKE_CXX_COMPILER": "g++",
+                "CMAKE_BUILD_TYPE": "Debug",
+                "HEMLOCK_ENABLE_ADDRESS_SANITIZER": "On"
+            },
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Linux"
+            }
+        },
+        {
             "name": "Clang-x64-Debug",
             "displayName": "Clang x64 Debug",
             "description": "Configuration for Clang x64 debug build.",
@@ -399,6 +417,20 @@
             "name": "GCC-x64-Asan",
             "displayName": "GCC x64 Address Sanitizer",
             "description": "Configuration for GCC x64 with address sanitizer build.",
+            "configurePreset": "GCC-x64-Asan",
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Linux"
+            },
+            "targets": [
+                "Hemlock_Revisited"
+            ]
+        },
+        {
+            "name": "GCC-x64-Asan-Slow",
+            "displayName": "GCC x64 Address Sanitizer (Slow)",
+            "description": "Configuration for GCC x64 with address sanitizer build (no optimisation).",
             "configurePreset": "GCC-x64-Asan",
             "condition": {
                 "type": "equals",

@@ -35,32 +35,58 @@ typename hmem::PagedAllocator<DataType, PageSize, MaxFreePages>::pointer
         allocate(size_type count, const void* /*= 0*/) {
     if (count == 0) return nullptr;
 
-    std::lock_guard<std::mutex> lock(m_state->free_items_mutex);
+#if DEBUG
+    assert(count <= PageSize);
+#endif
 
-    auto page_type = typeid(DataType).hash_code();
+    std::lock_guard<std::mutex> lock(m_state->page_tracker_mutex);
 
-    m_state->free_items.try_emplace(page_type, std::vector<void*>{});
+    size_t page_type = typeid(DataType).hash_code();
 
-    if (m_state->free_items[page_type].size() > 0) {
-        pointer item = reinterpret_cast<pointer>(m_state->free_items[page_type].back());
-        m_state->free_items[page_type].pop_back();
-        return item;
+    // TODO(Matthew): std vector likely has a resizing pattern unsuitable for us, should
+    //                profile this versus a custom version.
+    //                  regardless can certainly expose this as a template param
+    m_state->page_tracker.try_emplace(page_type, PageTracker{});
+
+    auto& page_tracker = m_state->page_tracker[page_type];
+
+    // Determine if any extent currently exists sufficiently large to provide the
+    // allocation, and provide it if so - appropriately updating the extent.
+
+    for (auto extent_it = page_tracker.free_extents.begin();
+         extent_it != page_tracker.free_extents.end();
+         ++extent_it)
+    {
+        auto& [page, extent] = *extent_it;
+
+        if (extent.end - extent.begin > count) {
+            pointer item = reinterpret_cast<pointer>(page) + extent.begin;
+
+            extent.begin += count;
+
+            return item;
+        } else if (extent.end - extent.begin == count) {
+            pointer item = reinterpret_cast<pointer>(page) + extent.begin;
+
+            page_tracker.free_extents.erase(extent_it);
+
+            return item;
+        }
     }
+
+    // If no extent was available, then get a new page and provide an extent from that.
 
     _Page page = m_state->pager.template get_page<DataType>();
 
-    // Add all items in page after `count` first items
-    // to the free items list.
-    if (count < PageSize) {
-        // auto item_ptrs = std::ranges::transform_view(page, [](DataType& el) {
-        // return &el; }); m_state->free_items.insert(m_state->free_items.end(),
-        // std::begin(item_ptrs) + count, std::end(item_ptrs));
+    page_tracker.allocated_pages.emplace_back(page);
 
-        for (size_t i = count; i < PageSize; ++i)
-            m_state->free_items[page_type].emplace_back(&page[i]);
+    if (count < PageSize) {
+        page_tracker.free_extents.emplace(
+            std::make_pair<void*, PageExtent>(page, PageExtent{ count, PageSize })
+        );
     }
 
-    return &page[0];
+    return page;
 }
 
 template <typename DataType, size_t PageSize, size_t MaxFreePages>
@@ -69,7 +95,7 @@ template <typename... Args>
 void hmem::PagedAllocator<DataType, PageSize, MaxFreePages>::construct(
     pointer data, Args&&... args
 ) {
-    new ((void*)data) DataType(args...);
+    new ((void*)data) DataType(std::forward<Args>(args)...);
 }
 
 template <typename DataType, size_t PageSize, size_t MaxFreePages>
@@ -79,20 +105,87 @@ void hmem::PagedAllocator<DataType, PageSize, MaxFreePages>::deallocate(
 ) {
     if (data == nullptr || count == 0) return;
 
-    std::lock_guard<std::mutex> lock(m_state->free_items_mutex);
+    std::lock_guard<std::mutex> lock(m_state->page_tracker_mutex);
 
     auto page_type = typeid(DataType).hash_code();
 
-    m_state->free_items.try_emplace(page_type, std::vector<void*>{});
+    m_state->page_tracker.try_emplace(page_type, PageTracker{});
 
-    // TODO(Matthew): is this notably slower for the case of count == 1 than
-    // emplace_back? auto items = std::span(data, count); auto item_ptrs =
-    // std::ranges::transform_view(items, [](DataType& el) { return &el; });
-    // m_state->free_items.insert(m_state->free_items.end(), std::begin(item_ptrs),
-    // std::end(item_ptrs));
+    auto& page_tracker = m_state->page_tracker[page_type];
 
-    for (size_t i = 0; i < count; ++i)
-        m_state->free_items[page_type].emplace_back(&data[i]);
+    // Find the page to which this data belongs.
+
+    _Page page = nullptr;
+
+    auto page_it = page_tracker.allocated_pages.begin();
+    for (; page_it != page_tracker.allocated_pages.end(); ++page_it) {
+        _Page page_tmp = reinterpret_cast<_Page>(*page_it);
+        if (data >= page_tmp && data <= page_tmp + PageSize) {
+#if DEBUG
+            assert(data - page_tmp + count <= PageSize);
+#endif
+            page = page_tmp;
+
+            break;
+        }
+    }
+
+#if DEBUG
+    assert(page != nullptr);
+#else
+    if (page == nullptr) return;
+#endif
+
+    // For all extents currently free in page, attach this deallocated extent to those
+    // it is contiguous with, erasing any second extent if it borders two of them.
+
+    auto attached_to_extent_it = page_tracker.free_extents.end();
+    auto extents = page_tracker.free_extents.equal_range(reinterpret_cast<void*>(page));
+    for (auto extent_it = extents.first; extent_it != extents.second; ++extent_it) {
+        auto& [_, extent] = *extent_it;
+
+        if (data - page + count == extent.begin) {
+#if DEBUG
+            assert(count <= extent.begin);
+#endif
+
+            if (attached_to_extent_it != page_tracker.free_extents.end()) {
+                attached_to_extent_it->second.end = extent.end;
+                page_tracker.free_extents.erase(extent_it);
+                break;
+            } else {
+                extent.begin          -= count;
+                attached_to_extent_it = extent_it;
+            }
+        } else if (data - page == extent.end) {
+            if (attached_to_extent_it != page_tracker.free_extents.end()) {
+                attached_to_extent_it->second.begin = extent.begin;
+                page_tracker.free_extents.erase(extent_it);
+                break;
+            } else {
+                extent.end            += count;
+                attached_to_extent_it = extent_it;
+            }
+        }
+    }
+
+    // If no extent was attached to, then we need to add an extent.
+    if (attached_to_extent_it == page_tracker.free_extents.end()) {
+        if (count == PageSize) {
+            m_state->pager.free_page(page);
+            page_tracker.allocated_pages.erase(page_it);
+        } else {
+            page_tracker.free_extents.emplace(std::make_pair<void*, PageExtent>(
+                std::move(reinterpret_cast<void*>(page)),
+                PageExtent{ data - page, data - page + count }
+            ));
+        }
+    } else if (attached_to_extent_it->second.begin == 0 && attached_to_extent_it->second.end == PageSize)
+    {
+        m_state->pager.free_page(page);
+        page_tracker.allocated_pages.erase(page_it);
+        page_tracker.free_extents.erase(attached_to_extent_it);
+    }
 
     // Need to think about how to even do this, given live handles can hardly be
     // notified of this.

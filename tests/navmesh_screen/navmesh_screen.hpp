@@ -6,8 +6,8 @@
 #include "memory/handle.hpp"
 #include "voxel/ai/navmesh_task.hpp"
 #include "voxel/generation/generator_task.hpp"
-#include "voxel/graphics/mesh/mesh_task.hpp"
 #include "voxel/graphics/mesh/greedy_strategy.hpp"
+#include "voxel/graphics/mesh/mesh_task.hpp"
 #include "voxel/graphics/outline_renderer.hpp"
 #include "voxel/ray.h"
 
@@ -35,7 +35,17 @@ public:
     TestNavmeshScreen() : happ::ScreenBase(), m_input_manager(nullptr) { /* Empty. */
     }
 
-    virtual ~TestNavmeshScreen(){ /* Empty */ };
+    virtual ~TestNavmeshScreen(){
+        /* Empty. */
+    };
+
+    virtual void dispose() override {
+        m_outline_renderer.dispose();
+
+        m_chunk_grid->dispose();
+
+        happ::ScreenBase::dispose();
+    }
 
     virtual void start(hemlock::FrameTime time) override {
         happ::ScreenBase::start(time);
@@ -48,8 +58,8 @@ public:
 
         f32 frame_time = hemlock::frame_time_to_floating<>(time);
 
-        f32   speed_mult       = 1.0f;
-        f32v3 delta_pos        = {};
+        f32   speed_mult = 1.0f;
+        f32v3 delta_pos  = {};
         htest::navmesh_screen::handle_simple_user_inputs(
             m_input_manager,
             m_camera,
@@ -130,10 +140,14 @@ public:
         // Note would better be done only on window dimension change, but lazy.
         {
             std::vector<f32v3> lines;
-            lines.emplace_back(f32v3{ dims.width / 2.0f - 20.0f, dims.height / 2.0f, 0.0f });
-            lines.emplace_back(f32v3{ dims.width / 2.0f + 20.0f, dims.height / 2.0f, 0.0f });
-            lines.emplace_back(f32v3{ dims.width / 2.0f, dims.height / 2.0f - 20.0f, 0.0f });
-            lines.emplace_back(f32v3{ dims.width / 2.0f, dims.height / 2.0f + 20.0f, 0.0f });
+            lines.emplace_back(f32v3{
+                dims.width / 2.0f - 20.0f, dims.height / 2.0f, 0.0f });
+            lines.emplace_back(f32v3{
+                dims.width / 2.0f + 20.0f, dims.height / 2.0f, 0.0f });
+            lines.emplace_back(f32v3{
+                dims.width / 2.0f, dims.height / 2.0f - 20.0f, 0.0f });
+            lines.emplace_back(f32v3{
+                dims.width / 2.0f, dims.height / 2.0f + 20.0f, 0.0f });
 
             glNamedBufferSubData(
                 m_crosshair_vbo,
@@ -221,7 +235,8 @@ public:
         m_default_texture = hg::load_texture("test_tex.png");
 
         static auto navmesh_task_builder = hvox::ChunkTaskBuilder{ []() {
-            return new hvox::ChunkMeshTask<hvox::GreedyMeshStrategy<htest::navmesh_screen::BlockComparator>>();
+            return new hvox::ChunkMeshTask<
+                hvox::GreedyMeshStrategy<htest::navmesh_screen::BlockComparator>>();
         } };
 
         m_chunk_grid = hmem::make_handle<hvox::ChunkGrid>();
@@ -234,7 +249,8 @@ public:
                     htest::navmesh_screen::VoxelGenerator>();
             } },
             hvox::ChunkTaskBuilder{ []() {
-                return new hvox::ChunkMeshTask<hvox::GreedyMeshStrategy<htest::navmesh_screen::BlockComparator>>();
+                return new hvox::ChunkMeshTask<
+                    hvox::GreedyMeshStrategy<htest::navmesh_screen::BlockComparator>>();
             } },
             &navmesh_task_builder
         );
@@ -312,15 +328,15 @@ protected:
 
     ui32 m_default_texture;
 
-    MyIOManager                      m_iom;
-    hg::ShaderCache                  m_shader_cache;
-    hcam::BasicFirstPersonCamera     m_camera;
-    hui::InputManager*               m_input_manager;
-    hmem::Handle<hvox::ChunkGrid>    m_chunk_grid;
-    hg::GLSLProgram                  m_shader, m_line_shader, m_chunk_outline_shader;
+    MyIOManager                   m_iom;
+    hg::ShaderCache               m_shader_cache;
+    hcam::BasicFirstPersonCamera  m_camera;
+    hui::InputManager*            m_input_manager;
+    hmem::Handle<hvox::ChunkGrid> m_chunk_grid;
+    hg::GLSLProgram               m_shader, m_line_shader, m_chunk_outline_shader;
 
     hvox::ConditionalChunkOutlineRenderer<ChunkOutlinePredicate> m_outline_renderer;
-    bool m_draw_chunk_outlines;
+    bool                                                         m_draw_chunk_outlines;
 
     GLuint m_crosshair_vao, m_crosshair_vbo;
 

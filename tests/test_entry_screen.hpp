@@ -14,7 +14,10 @@ public:
     TestEntryScreen() : happ::ScreenBase() { /* Empty. */
     }
 
-    virtual ~TestEntryScreen(){ /* Empty */ };
+    virtual ~TestEntryScreen() {
+        auto font = m_font_cache.fetch("fonts/Orbitron-Regular.ttf");
+        font->dispose();
+    };
 
     virtual void update(hemlock::FrameTime) override {
         // Empty.

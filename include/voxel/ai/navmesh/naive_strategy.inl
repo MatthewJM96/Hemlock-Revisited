@@ -70,11 +70,11 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_bulk(hmem::Handle<ChunkGrid>, h
                                   i64                                 end) {
         for (i64 y_off = start; y_off > end; --y_off) {
             BlockIndex above_candidate_index
-                = hvox::block_index(offset + BlockChunkPosition{ 0, y_off, 0 });
+                = hvox::block_index(offset + i64v3{ 0, y_off, 0 });
             Block* above_candidate_block = &chunk->blocks[above_candidate_index];
 
             BlockIndex candidate_index
-                = hvox::block_index(offset + BlockChunkPosition{ 0, y_off - 1, 0 });
+                = hvox::block_index(offset + i64v3{ 0, y_off - 1, 0 });
             Block* candidate_block = &chunk->blocks[candidate_index];
 
             if (is_solid(candidate_block) && !is_solid(above_candidate_block)) {
@@ -103,7 +103,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_bulk(hmem::Handle<ChunkGrid>, h
                 }
 
                 ChunkNavmeshNode candidate_block_coord = {
-                    offset + BlockChunkPosition{0, y_off - 1, 0},
+                    offset + i64v3{0, y_off - 1, 0},
                       chunk_pos
                 };
 
@@ -998,7 +998,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_bulk(hmem::Handle<ChunkGrid>, h
                 { x, 0, CHUNK_LENGTH - 1 },
                 { x - 1, 0, CHUNK_LENGTH - 1 },
                 2,
-                -1
+                0
             );
 
             // Right
@@ -1007,7 +1007,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_bulk(hmem::Handle<ChunkGrid>, h
                 { x, 0, CHUNK_LENGTH - 1 },
                 { x + 1, 0, CHUNK_LENGTH - 1 },
                 2,
-                -1
+                0
             );
 
             // Back
@@ -1016,7 +1016,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_bulk(hmem::Handle<ChunkGrid>, h
                 { x, 0, CHUNK_LENGTH - 1 },
                 { x, 0, CHUNK_LENGTH - 2 },
                 2,
-                -1
+                0
             );
         }
 
@@ -1042,13 +1042,13 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_bulk(hmem::Handle<ChunkGrid>, h
             ChunkNavmeshVertexDescriptor block_vertex = impl::get_vertex(chunk, block_coord);
 
             // Left
-            do_navigable_check(block_vertex, { x, 0, 0 }, { x - 1, 0, 0 }, 2, -1);
+            do_navigable_check(block_vertex, { x, 0, 0 }, { x - 1, 0, 0 }, 2, 0);
 
             // Right
-            do_navigable_check(block_vertex, { x, 0, 0 }, { x + 1, 0, 0 }, 2, -1);
+            do_navigable_check(block_vertex, { x, 0, 0 }, { x + 1, 0, 0 }, 2, 0);
 
             // Front
-            do_navigable_check(block_vertex, { x, 0, 0 }, { x, 0, 1 }, 2, -1);
+            do_navigable_check(block_vertex, { x, 0, 0 }, { x, 0, 1 }, 2, 0);
         }
     }
 
@@ -1076,13 +1076,13 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_bulk(hmem::Handle<ChunkGrid>, h
             ChunkNavmeshVertexDescriptor block_vertex = impl::get_vertex(chunk, block_coord);
 
             // Right
-            do_navigable_check(block_vertex, { 0, 0, z }, { 1, 0, z }, 2, -1);
+            do_navigable_check(block_vertex, { 0, 0, z }, { 1, 0, z }, 2, 0);
 
             // Front
-            do_navigable_check(block_vertex, { 0, 0, z }, { 0, 0, z + 1 }, 2, -1);
+            do_navigable_check(block_vertex, { 0, 0, z }, { 0, 0, z + 1 }, 2, 0);
 
             // Back
-            do_navigable_check(block_vertex, { 0, 0, z }, { 0, 0, z - 1 }, 2, -1);
+            do_navigable_check(block_vertex, { 0, 0, z }, { 0, 0, z - 1 }, 2, 0);
         }
 
         // Right-Bottom Edge
@@ -1113,7 +1113,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_bulk(hmem::Handle<ChunkGrid>, h
                 { CHUNK_LENGTH - 1, 0, z },
                 { CHUNK_LENGTH - 2, 0, z },
                 2,
-                -1
+                0
             );
 
             // Front
@@ -1122,7 +1122,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_bulk(hmem::Handle<ChunkGrid>, h
                 { CHUNK_LENGTH - 1, 0, z },
                 { CHUNK_LENGTH - 1, 0, z + 1 },
                 2,
-                -1
+                0
             );
 
             // Back
@@ -1131,7 +1131,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_bulk(hmem::Handle<ChunkGrid>, h
                 { CHUNK_LENGTH - 1, 0, z },
                 { CHUNK_LENGTH - 1, 0, z - 1 },
                 2,
-                -1
+                0
             );
         }
     }
@@ -1324,18 +1324,18 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(hmem::Handle<ChunkGrid>,
 
         for (i64 y_off = start; y_off > end; --y_off) {
             BlockIndex above_candidate_index = hvox::block_index(
-                neighbour_offset + BlockChunkPosition{ 0, y_off, 0 }
+                neighbour_offset + i64v3{ 0, y_off, 0 }
             );
             Block* above_candidate_block = &neighbour->blocks[above_candidate_index];
 
             BlockIndex candidate_index = hvox::block_index(
-                neighbour_offset + BlockChunkPosition{ 0, y_off - 1, 0 }
+                neighbour_offset + i64v3{ 0, y_off - 1, 0 }
             );
             Block* candidate_block = &neighbour->blocks[candidate_index];
 
             if (is_solid(candidate_block) && !is_solid(above_candidate_block)) {
                 ChunkNavmeshNode candidate_block_coord = {
-                    neighbour_offset + BlockChunkPosition{0, y_off - 1, 0},
+                    neighbour_offset + i64v3{0, y_off - 1, 0},
                     neighbour->position
                 };
                 struct {

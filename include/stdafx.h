@@ -36,6 +36,7 @@
 #include <limits>
 #include <memory>
 #include <type_traits>
+#include <typeinfo>
 #include <utility>
 
 // Thread Handling

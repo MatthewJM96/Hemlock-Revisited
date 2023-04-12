@@ -6,22 +6,40 @@
 
 namespace hemlock {
     namespace memory {
+        struct PageExtent {
+            size_t begin, end;
+        };
+
+        struct PageTracker {
+            std::vector<void*>                         allocated_pages;
+            std::unordered_multimap<void*, PageExtent> free_extents;
+        };
+
         template <size_t PageSize, size_t MaxFreePages>
             requires (PageSize > 0)
         struct PagedAllocatorState {
+            using _Pager       = HeterogenousPager<PageSize, MaxFreePages>;
+            using _PageTracker = std::unordered_map<size_t, PageTracker>;
+
+            PagedAllocatorState() { /* Empty. */
+            }
+
             ~PagedAllocatorState() {
-                std::lock_guard<std::mutex> lock(free_items_mutex);
-                _Items().swap(free_items);
+                std::lock_guard<std::mutex> lock(page_tracker_mutex);
+                _PageTracker().swap(page_tracker);
+
+                // TODO(Matthew): How are we ensuring paged memory is fully deallocated?
+                //                Need to track pages seperately from items, and items
+                //                can be tracked in membership via pointer arithmetic or
+                //                however works based on if and for what we need to
+                //                track that (e.g. for compaction).
 
                 pager.dispose();
             }
 
-            using _Pager = HeterogenousPager<PageSize, MaxFreePages>;
-            using _Items = std::unordered_map<size_t, std::vector<void*>>;
-
-            _Pager     pager;
-            std::mutex free_items_mutex;
-            _Items     free_items;
+            _Pager       pager;
+            std::mutex   page_tracker_mutex;
+            _PageTracker page_tracker;
         };
 
         template <typename DataType, size_t PageSize, size_t MaxFreePages>
@@ -48,7 +66,8 @@ namespace hemlock {
         protected:
             using _Page  = Page<DataType>;
             using _Pager = typename PagedAllocatorState<PageSize, MaxFreePages>::_Pager;
-            using _Items = typename PagedAllocatorState<PageSize, MaxFreePages>::_Items;
+            using _PageTracker =
+                typename PagedAllocatorState<PageSize, MaxFreePages>::_PageTracker;
         public:
             PagedAllocator();
             PagedAllocator(const PagedAllocator<DataType, PageSize, MaxFreePages>& alloc
@@ -60,6 +79,8 @@ namespace hemlock {
 
             ~PagedAllocator() { /* Empty. */
             }
+
+            size_t allocated_bytes() { return m_state->pager.allocated_bytes(); }
 
             pointer allocate(size_type count, const void* = 0);
 
