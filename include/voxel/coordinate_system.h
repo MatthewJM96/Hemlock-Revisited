@@ -159,19 +159,24 @@ bool operator!=(hvox::ColumnWorldPosition lhs, hvox::ColumnWorldPosition rhs);
 bool operator==(hvox::ChunkGridPosition lhs, hvox::ChunkGridPosition rhs);
 bool operator!=(hvox::ChunkGridPosition lhs, hvox::ChunkGridPosition rhs);
 
-template <std::integral IntegralType>
-    requires (!std::same_as<hvox::BlockChunkPosition, glm::vec<3, IntegralType, glm::defaultp>>)
-hvox::BlockChunkPosition operator+(const hvox::BlockChunkPosition& lhs, const glm::vec<3, IntegralType, glm::defaultp>& rhs);
-template <std::integral IntegralType>
-    requires (!std::same_as<hvox::BlockChunkPosition, glm::vec<3, IntegralType, glm::defaultp>>)
-hvox::BlockChunkPosition operator+(const hvox::BlockChunkPosition& lhs, glm::vec<3, IntegralType, glm::defaultp>&& rhs);
+template <std::integral IntegralType, typename = void>
+hvox::BlockChunkPosition operator+(
+    const hvox::BlockChunkPosition&                 lhs,
+    const glm::vec<3, IntegralType, glm::defaultp>& rhs
+);
+template <std::integral IntegralType, typename = void>
+hvox::BlockChunkPosition operator+(
+    const hvox::BlockChunkPosition& lhs, glm::vec<3, IntegralType, glm::defaultp>&& rhs
+);
 
-template <std::integral IntegralType>
-    requires (!std::same_as<hvox::BlockChunkPosition, glm::vec<3, IntegralType, glm::defaultp>>)
-hvox::BlockChunkPosition& operator+=(hvox::BlockChunkPosition& lhs, const glm::vec<3, IntegralType, glm::defaultp>& rhs);
-template <std::integral IntegralType>
-    requires (!std::same_as<hvox::BlockChunkPosition, glm::vec<3, IntegralType, glm::defaultp>>)
-hvox::BlockChunkPosition& operator+=(hvox::BlockChunkPosition& lhs, glm::vec<3, IntegralType, glm::defaultp>&& rhs);
+template <std::integral IntegralType, typename = void>
+hvox::BlockChunkPosition& operator+=(
+    hvox::BlockChunkPosition& lhs, const glm::vec<3, IntegralType, glm::defaultp>& rhs
+);
+template <std::integral IntegralType, typename = void>
+hvox::BlockChunkPosition& operator+=(
+    hvox::BlockChunkPosition& lhs, glm::vec<3, IntegralType, glm::defaultp>&& rhs
+);
 
 namespace std {
     template <>
