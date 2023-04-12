@@ -252,7 +252,7 @@ public:
                     ))
                 {
                     debug_printf(
-                        "    (%d, %d, %d)\n",
+                        "    (%lld, %lld, %lld)\n",
                         chunk->position.x,
                         chunk->position.y,
                         chunk->position.z
