@@ -139,8 +139,8 @@ void hmem::PagedAllocator<DataType, PageSize, MaxFreePages>::deallocate(
     // For all extents currently free in page, attach this deallocated extent to those
     // it is contiguous with, erasing any second extent if it borders two of them.
 
-    PageExtent* attached_to_extent = nullptr;
-    auto        extents            = page_tracker.free_extents.equal_range(page_void);
+    auto attached_to_extent_it = page_tracker.free_extents.end();
+    auto extents = page_tracker.free_extents.equal_range(reinterpret_cast<void*>(page));
     for (auto extent_it = extents.first; extent_it != extents.second; ++extent_it) {
         auto& [_, extent] = *extent_it;
 
@@ -149,22 +149,22 @@ void hmem::PagedAllocator<DataType, PageSize, MaxFreePages>::deallocate(
             assert(count <= extent.begin);
 #endif
 
-            if (attached_to_extent) {
-                attached_to_extent->end = extent.end;
+            if (attached_to_extent_it != page_tracker.free_extents.end()) {
+                attached_to_extent_it->second.end = extent.end;
                 page_tracker.free_extents.erase(extent_it);
                 break;
             } else {
-                extent.begin       -= count;
-                attached_to_extent = &extent;
+                extent.begin          -= count;
+                attached_to_extent_it = extent_it;
             }
         } else if (data - page == extent.end) {
-            if (attached_to_extent) {
-                attached_to_extent->begin = extent.begin;
+            if (attached_to_extent_it != page_tracker.free_extents.end()) {
+                attached_to_extent_it->second.begin = extent.begin;
                 page_tracker.free_extents.erase(extent_it);
                 break;
             } else {
-                extent.end         += count;
-                attached_to_extent = &extent;
+                extent.end            += count;
+                attached_to_extent_it = extent_it;
             }
         }
     }
