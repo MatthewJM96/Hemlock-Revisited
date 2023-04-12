@@ -46,7 +46,7 @@ typename hmem::PagedAllocator<DataType, PageSize, MaxFreePages>::pointer
     // TODO(Matthew): std vector likely has a resizing pattern unsuitable for us, should
     //                profile this versus a custom version.
     //                  regardless can certainly expose this as a template param
-    m_state->page_tracker.try_emplace(page_type, _PageTracker{});
+    m_state->page_tracker.try_emplace(page_type, PageTracker{});
 
     auto& page_tracker = m_state->page_tracker[page_type];
 
@@ -109,7 +109,7 @@ void hmem::PagedAllocator<DataType, PageSize, MaxFreePages>::deallocate(
 
     auto page_type = typeid(DataType).hash_code();
 
-    m_state->page_tracker.try_emplace(page_type, _PageTracker{});
+    m_state->page_tracker.try_emplace(page_type, PageTracker{});
 
     auto& page_tracker = m_state->page_tracker[page_type];
 
