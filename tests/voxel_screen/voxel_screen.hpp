@@ -252,10 +252,10 @@ public:
                     ))
                 {
                     debug_printf(
-                        "    (%lld, %lld, %lld)\n",
-                        chunk->position.x,
-                        chunk->position.y,
-                        chunk->position.z
+                        "    (%d, %d, %d)\n",
+                        static_cast<i32>(chunk->position.x),
+                        static_cast<i32>(chunk->position.y),
+                        static_cast<i32>(chunk->position.z)
                     );
                 }
             }
