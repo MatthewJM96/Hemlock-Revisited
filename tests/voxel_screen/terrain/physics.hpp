@@ -77,7 +77,7 @@ namespace hemlock {
 
                 virtual void reportErrorWarning(const char* warning_string
                                                 [[maybe_unused]]) override {
-                    debug_printf(warning_string);
+                    debug_printf("%s", warning_string);
                 }
 
                 virtual void
