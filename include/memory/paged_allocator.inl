@@ -144,7 +144,7 @@ void hmem::PagedAllocator<DataType, PageSize, MaxFreePages>::deallocate(
     for (auto extent_it = extents.first; extent_it != extents.second; ++extent_it) {
         auto& [_, extent] = *extent_it;
 
-        if (data + count + 1 == page + extent.begin) {
+        if (data - page + count == extent.begin) {
 #if DEBUG
             assert(count <= extent.begin);
 #endif
@@ -157,7 +157,7 @@ void hmem::PagedAllocator<DataType, PageSize, MaxFreePages>::deallocate(
                 extent.begin       -= count;
                 attached_to_extent = &extent;
             }
-        } else if (page + extent.end == data) {
+        } else if (data - page == extent.end) {
             if (attached_to_extent) {
                 attached_to_extent->begin = extent.begin;
                 page_tracker.free_extents.erase(extent_it);
