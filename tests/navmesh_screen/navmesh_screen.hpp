@@ -4,6 +4,7 @@
 #include <FastNoise/FastNoise.h>
 
 #include "memory/handle.hpp"
+#include "voxel/ai/navmesh/naive_strategy.hpp"
 #include "voxel/ai/navmesh_task.hpp"
 #include "voxel/generation/generator_task.hpp"
 #include "voxel/graphics/mesh/greedy_strategy.hpp"
@@ -14,7 +15,7 @@
 #include "tests/iomanager.hpp"
 
 #if defined(DEBUG)
-#  define VIEW_DIST 16
+#  define VIEW_DIST 6
 #else
 #  define VIEW_DIST 10
 #endif
@@ -235,8 +236,9 @@ public:
         m_default_texture = hg::load_texture("test_tex.png");
 
         static auto navmesh_task_builder = hvox::ChunkTaskBuilder{ []() {
-            return new hvox::ChunkMeshTask<
-                hvox::GreedyMeshStrategy<htest::navmesh_screen::BlockComparator>>();
+            return new hvox::ai::ChunkNavmeshTask<
+                hvox::ai::NaiveNavmeshStrategy<htest::navmesh_screen::BlockSolidCheck>>(
+            );
         } };
 
         m_chunk_grid = hmem::make_handle<hvox::ChunkGrid>();
@@ -342,5 +344,7 @@ protected:
 
     std::vector<hmem::WeakHandle<hvox::Chunk>> m_unloading_chunks;
 };
+
+#undef VIEW_DIST
 
 #endif  // __hemlock_tests_test_navmesh_screen_hpp
