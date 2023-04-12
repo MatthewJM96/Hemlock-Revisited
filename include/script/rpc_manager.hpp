@@ -146,7 +146,7 @@ namespace hemlock {
 
             std::unordered_set<std::string> m_continuable_functions;
 
-            std::conditional<
+            typename std::conditional<
                 std::greater<size_t>()(BufferSize, 0),
                 size_t,
                 std::monostate>::type m_calls_buffered;

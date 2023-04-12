@@ -52,24 +52,24 @@ namespace hemlock {
             details::EdgeProperties<IsWeighted>>;
 
         template <typename Node, bool IsWeighted>
-        using VertexDescriptor
-            = boost::graph_traits<Graph<Node, IsWeighted>>::vertex_descriptor;
+        using VertexDescriptor =
+            typename boost::graph_traits<Graph<Node, IsWeighted>>::vertex_descriptor;
         template <typename Node, bool IsWeighted>
-        using EdgeDescriptor
-            = boost::graph_traits<Graph<Node, IsWeighted>>::edge_descriptor;
+        using EdgeDescriptor =
+            typename boost::graph_traits<Graph<Node, IsWeighted>>::edge_descriptor;
 
         template <typename Node, bool IsWeighted>
-        using PheromoneMap
-            = boost::property_map<Graph<Node, IsWeighted>, pheromone_t>::type;
+        using PheromoneMap =
+            typename boost::property_map<Graph<Node, IsWeighted>, pheromone_t>::type;
         template <typename Node, bool IsWeighted>
-        using VertexCoordMap
-            = boost::property_map<Graph<Node, IsWeighted>, vertex_data_t>::type;
+        using VertexCoordMap =
+            typename boost::property_map<Graph<Node, IsWeighted>, vertex_data_t>::type;
         template <typename Node, bool IsWeighted>
         using CoordVertexMap
             = std::unordered_map<Node, VertexDescriptor<Node, IsWeighted>>;
         template <typename Node, bool IsWeighted>
-        using EdgeWeightMap
-            = boost::property_map<Graph<Node, IsWeighted>, boost::edge_weight_t>::type;
+        using EdgeWeightMap = typename boost::
+            property_map<Graph<Node, IsWeighted>, boost::edge_weight_t>::type;
         template <typename Node, bool IsWeighted>
         using MaybeEdgeWeightMap = std::
             conditional_t<IsWeighted, EdgeWeightMap<Node, IsWeighted>, std::monostate>;

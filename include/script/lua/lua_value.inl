@@ -100,7 +100,9 @@ ui32 hscript::lua::LuaValue<Type>::push(LuaHandle state, Type value) {
     } else if constexpr (std::is_pointer<Type>()) {
         LuaValue<void*>::push(
             state,
-            reinterpret_cast<void*>(const_cast<std::remove_const<Type>::type>(value))
+            reinterpret_cast<void*>(
+                const_cast<typename std::remove_const<Type>::type>(value)
+            )
         );
 
         /****************\

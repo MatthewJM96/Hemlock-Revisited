@@ -279,7 +279,7 @@ namespace hemlock {
                     );
             }
 
-            std::conditional<
+            typename std::conditional<
                 HasRPCManager,
                 RPCManager<EnvironmentImpl, CallBufferSize>,
                 std::monostate>::type rpc
@@ -287,7 +287,7 @@ namespace hemlock {
         protected:
             EnvironmentRegistry<EnvironmentImpl>* m_registry;
 
-            std::conditional<HasRPCManager, bool, std::monostate>::type
+            typename std::conditional<HasRPCManager, bool, std::monostate>::type
                 m_rpc_manual_pump
                 = {};
 
