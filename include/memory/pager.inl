@@ -8,7 +8,7 @@ void hmem::Pager<DataType, PageSize, MaxFreePages>::dispose() {
 #endif
 
     for (auto& free_page : m_free_pages) {
-        delete[] free_page;
+        delete[] reinterpret_cast<ui8*>(free_page);
     }
 
     _Pages().swap(m_free_pages);
