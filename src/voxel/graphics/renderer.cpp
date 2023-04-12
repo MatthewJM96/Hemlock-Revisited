@@ -183,11 +183,11 @@ void hvox::ChunkRenderer::put_chunk_in_page(
         page = create_pages(1);
     }
 
-    ui32 chunk_idx = page->chunks.size();
+    ui32 chunk_idx = static_cast<ui32>(page->chunks.size());
     page->chunks.emplace_back(chunk_id);
 
     if (page->first_dirtied_chunk_idx >= page->chunks.size()) {
-        page->first_dirtied_chunk_idx = page->chunks.size() - 1;
+        page->first_dirtied_chunk_idx = static_cast<ui32>(page->chunks.size() - 1);
     }
 
     page->voxel_count += instance_count;
