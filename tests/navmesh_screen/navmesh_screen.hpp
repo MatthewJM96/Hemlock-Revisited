@@ -9,7 +9,7 @@
 #include "voxel/generation/generator_task.hpp"
 #include "voxel/graphics/mesh/greedy_strategy.hpp"
 #include "voxel/graphics/mesh/mesh_task.hpp"
-#include "voxel/graphics/outline_renderer.hpp"
+#include "voxel/graphics/outline_renderer.h"
 #include "voxel/ray.h"
 
 #include "tests/iomanager.hpp"
@@ -23,7 +23,7 @@
 #include "tests/navmesh_screen/io.hpp"
 #include "tests/navmesh_screen/terrain.hpp"
 
-struct ChunkOutlinePredicate {
+struct TNS_ChunkOutlinePredicate {
     std::tuple<bool, colour4> operator()(hmem::Handle<hvox::Chunk>) {
         return {
             true, {255, 0, 0, 255}
@@ -41,7 +41,9 @@ public:
     };
 
     virtual void dispose() override {
-        m_outline_renderer.dispose();
+        m_chunk_outline_renderer.dispose();
+
+        m_block_outline_renderer.dispose();
 
         m_chunk_grid->dispose();
 
@@ -172,19 +174,21 @@ public:
 
         m_line_shader.unuse();
 
-        if (m_draw_chunk_outlines) {
-            m_chunk_outline_shader.use();
+        if (m_draw_chunk_outlines || m_draw_block_outlines) {
+            m_outline_shader.use();
 
             glUniformMatrix4fv(
-                m_chunk_outline_shader.uniform_location("view_proj"),
+                m_outline_shader.uniform_location("view_proj"),
                 1,
                 GL_FALSE,
                 &m_camera.view_projection_matrix()[0][0]
             );
 
-            m_outline_renderer.draw(time);
+            if (m_draw_chunk_outlines) m_chunk_outline_renderer.draw(time);
 
-            m_chunk_outline_shader.unuse();
+            if (m_draw_block_outlines) m_block_outline_renderer.draw(time);
+
+            m_outline_shader.unuse();
         }
     }
 
@@ -227,11 +231,12 @@ public:
         m_line_shader.link();
 
         m_draw_chunk_outlines = false;
-        m_chunk_outline_shader.init(&m_shader_cache);
-        m_chunk_outline_shader.add_shaders(
+        m_draw_block_outlines = true;
+        m_outline_shader.init(&m_shader_cache);
+        m_outline_shader.add_shaders(
             "shaders/chunk_outline.vert", "shaders/chunk_outline.frag"
         );
-        m_chunk_outline_shader.link();
+        m_outline_shader.link();
 
         m_default_texture = hg::load_texture("test_tex.png");
 
@@ -257,7 +262,14 @@ public:
             &navmesh_task_builder
         );
 
-        m_outline_renderer.init(ChunkOutlinePredicate{}, m_chunk_grid);
+        m_chunk_outline_renderer.init(TNS_ChunkOutlinePredicate{}, m_chunk_grid);
+
+        m_block_outline_renderer.init();
+
+        m_block_outline_renderer.add_outline(hvox::OutlineData{
+            { 0.0f, 150.0f, 0.0f },
+            { 255, 0, 0, 255 }
+        });
 
         glCreateVertexArrays(1, &m_crosshair_vao);
 
@@ -335,10 +347,14 @@ protected:
     hcam::BasicFirstPersonCamera  m_camera;
     hui::InputManager*            m_input_manager;
     hmem::Handle<hvox::ChunkGrid> m_chunk_grid;
-    hg::GLSLProgram               m_shader, m_line_shader, m_chunk_outline_shader;
+    hg::GLSLProgram               m_shader, m_line_shader, m_outline_shader;
 
-    hvox::ConditionalChunkOutlineRenderer<ChunkOutlinePredicate> m_outline_renderer;
-    bool                                                         m_draw_chunk_outlines;
+    hvox::ConditionalChunkOutlineRenderer<TNS_ChunkOutlinePredicate>
+         m_chunk_outline_renderer;
+    bool m_draw_chunk_outlines;
+
+    hvox::BlockOutlineRenderer m_block_outline_renderer;
+    bool                       m_draw_block_outlines;
 
     GLuint m_crosshair_vao, m_crosshair_vbo;
 
