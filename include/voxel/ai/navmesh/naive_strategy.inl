@@ -34,7 +34,8 @@ namespace hemlock::voxel::ai::impl {
             return chunk->navmesh.coord_vertex_map.at(coord);
         } catch (std::out_of_range&) {
             auto vertex = boost::add_vertex(chunk->navmesh.graph);
-            chunk->navmesh.coord_vertex_map[coord] = vertex;
+            chunk->navmesh.coord_vertex_map[coord]  = vertex;
+            chunk->navmesh.vertex_coord_map[vertex] = coord;
             return vertex;
         }
     }
