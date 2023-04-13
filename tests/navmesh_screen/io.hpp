@@ -9,11 +9,16 @@ namespace hemlock {
                 hcam::BasicFirstPersonCamera& camera,
                 f32                           frame_time,
                 OUT bool&                     draw_chunk_outlines,
+                OUT ui32&                     nav_test_mode,
                 OUT f32&                      speed_mult,
                 OUT f32v3&                    delta_pos
             ) {
                 if (input_manager->is_pressed(hui::PhysicalKey::H_L)) {
                     draw_chunk_outlines = !draw_chunk_outlines;
+                }
+
+                if (input_manager->is_pressed(hui::PhysicalKey::H_T)) {
+                    nav_test_mode = 1;
                 }
 
                 speed_mult = 1.0f;
