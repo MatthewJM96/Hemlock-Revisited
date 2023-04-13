@@ -3,6 +3,7 @@
 
 #include <FastNoise/FastNoise.h>
 
+#include "algorithm/acs/acs.hpp"
 #include "memory/handle.hpp"
 #include "voxel/ai/navmesh/naive_strategy.hpp"
 #include "voxel/ai/navmesh_task.hpp"
@@ -113,6 +114,52 @@ public:
         last_pos = current_pos;
 
         m_chunk_grid->update(time);
+
+        if (m_nav_test_mode == 3) {
+            auto chunk = m_nav_test_start.chunk.lock();
+            if (chunk != nullptr) {
+                std::shared_lock lock(chunk->navmesh_mutex);
+
+                constexpr halgo::ACSConfig Config = { .debug = { .on = false } };
+
+                hvox::ai::ChunkNavmeshNode start
+                    = { hvox::block_chunk_position(m_nav_test_start.pos),
+                        chunk->position };
+                hvox::ai::ChunkNavmeshNode end
+                    = { hvox::block_chunk_position(m_nav_test_end.pos),
+                        chunk->position };
+
+                hvox::ai::ChunkNavmeshNode* path        = nullptr;
+                size_t                      path_length = 0;
+
+                halgo::GraphACS::find_path<hvox::ai::ChunkNavmeshNode, false, Config>(
+                    chunk->navmesh, start, end, path, path_length
+                );
+
+                if (path) {
+                    std::cout << "Path length is: " << std::to_string(path_length)
+                              << std::endl;
+
+                    for (size_t i = 0; i < path_length; ++i) {
+                        std::cout << "  " << std::to_string(i) << " - {"
+                                  << std::to_string(path[i].block_pos.x) << ", "
+                                  << std::to_string(path[i].block_pos.y) << ", "
+                                  << std::to_string(path[i].block_pos.z) << "}"
+                                  << std::endl;
+                        m_block_outline_renderer.add_outline(hvox::OutlineData{
+                            static_cast<f32v3>(hvox::block_world_position(
+                                path[i].chunk_pos, path[i].block_pos
+                            )),
+                            {0, 0, 255, 255}
+                        });
+                    }
+                } else {
+                    std::cout << "Path not found!" << std::endl;
+                }
+            }
+
+            m_nav_test_mode = 0;
+        }
     }
 
     virtual void draw(hemlock::FrameTime time) override {
@@ -264,8 +311,8 @@ public:
         );
 
         m_nav_test_mode  = 0;
-        m_nav_test_start = { 0, {} };
-        m_nav_test_end   = { 0, {} };
+        m_nav_test_start = { 0, {}, {} };
+        m_nav_test_end   = { 0, {}, {} };
 
         m_chunk_outline_renderer.init(TNS_ChunkOutlinePredicate{}, m_chunk_grid);
 
@@ -289,99 +336,102 @@ public:
         glVertexArrayAttribFormat(m_crosshair_vao, 0, 3, GL_FLOAT, GL_FALSE, 0);
         glVertexArrayAttribBinding(m_crosshair_vao, 0, 0);
 
-        handle_mouse_button = hemlock::Subscriber<hui::MouseButtonEvent>{
-            [&](hemlock::Sender, hui::MouseButtonEvent ev) {
-                if (ev.button_id == static_cast<ui8>(hui::MouseButton::LEFT)) {
-                    if (m_nav_test_mode > 0 && m_nav_test_mode < 3) {
-                        hvox::BlockWorldPosition position;
-                        f32                      distance;
+        handle_mouse_button = hemlock::Subscriber<
+            hui::MouseButtonEvent>{ [&](hemlock::Sender, hui::MouseButtonEvent ev) {
+            if (ev.button_id == static_cast<ui8>(hui::MouseButton::LEFT)) {
+                if (m_nav_test_mode > 0 && m_nav_test_mode < 3) {
+                    hvox::BlockWorldPosition      position;
+                    f32                           distance;
+                    hmem::WeakHandle<hvox::Chunk> chunk;
 
-                        if (hvox::Ray::cast_to_block(
-                                m_camera.position(),
-                                m_camera.direction(),
-                                m_chunk_grid,
-                                hvox::Block{ 1 },
-                                10,
-                                position,
-                                distance
-                            ))
-                        {
-                            if (m_nav_test_mode == 1) {
-                                if (m_nav_test_start.outline_id > 0) {
-                                    m_block_outline_renderer.modify_outline(
-                                        m_nav_test_start.outline_id,
-                                        hvox::OutlineData{
-                                            static_cast<f32v3>(position),
-                                            {0, 255, 0, 255}
-                                    }
-                                    );
-
-                                    m_nav_test_start.pos = position;
-                                } else {
-                                    size_t id = m_block_outline_renderer.add_outline(
-                                        hvox::OutlineData{
-                                            static_cast<f32v3>(position),
-                                            {0, 255, 0, 255}
-                                    }
-                                    );
-
-                                    m_nav_test_start = { id, position };
+                    if (hvox::Ray::cast_to_block(
+                            m_camera.position(),
+                            m_camera.direction(),
+                            m_chunk_grid,
+                            hvox::Block{ 1 },
+                            10,
+                            position,
+                            distance,
+                            &chunk
+                        ))
+                    {
+                        if (m_nav_test_mode == 1) {
+                            if (m_nav_test_start.outline_id > 0) {
+                                m_block_outline_renderer.modify_outline(
+                                    m_nav_test_start.outline_id,
+                                    hvox::OutlineData{
+                                        static_cast<f32v3>(position),
+                                        {0, 255, 0, 255}
                                 }
-                            } else if (m_nav_test_mode == 2) {
-                                if (m_nav_test_end.outline_id > 0) {
-                                    m_block_outline_renderer.modify_outline(
-                                        m_nav_test_end.outline_id,
-                                        hvox::OutlineData{
-                                            static_cast<f32v3>(position),
-                                            {255, 0, 0, 255}
-                                    }
-                                    );
-
-                                    m_nav_test_end.pos = position;
-                                } else {
-                                    size_t id = m_block_outline_renderer.add_outline(
-                                        hvox::OutlineData{
-                                            static_cast<f32v3>(position),
-                                            {255, 0, 0, 255}
-                                    }
-                                    );
-
-                                    m_nav_test_end = { id, position };
-                                }
-                            }
-
-                            ++m_nav_test_mode;
-                        }
-                    } else {
-                        hvox::BlockWorldPosition position;
-                        f32                      distance;
-
-                        if (hvox::Ray::cast_to_block_before(
-                                m_camera.position(),
-                                m_camera.direction(),
-                                m_chunk_grid,
-                                hvox::Block{ 1 },
-                                10,
-                                position,
-                                distance
-                            ))
-                        {
-                            auto chunk
-                                = m_chunk_grid->chunk(hvox::chunk_grid_position(position
-                                ));
-
-                            if (chunk != nullptr) {
-                                hvox::set_block(
-                                    chunk,
-                                    hvox::block_chunk_position(position),
-                                    hvox::Block{ 1 }
                                 );
+
+                                m_nav_test_start.pos   = position;
+                                m_nav_test_start.chunk = chunk;
+                            } else {
+                                size_t id = m_block_outline_renderer.add_outline(
+                                    hvox::OutlineData{
+                                        static_cast<f32v3>(position),
+                                        {0, 255, 0, 255}
+                                }
+                                );
+
+                                m_nav_test_start = { id, position, chunk };
+                            }
+                        } else if (m_nav_test_mode == 2) {
+                            if (m_nav_test_end.outline_id > 0) {
+                                m_block_outline_renderer.modify_outline(
+                                    m_nav_test_end.outline_id,
+                                    hvox::OutlineData{
+                                        static_cast<f32v3>(position),
+                                        {255, 0, 0, 255}
+                                }
+                                );
+
+                                m_nav_test_end.pos   = position;
+                                m_nav_test_end.chunk = chunk;
+                            } else {
+                                size_t id = m_block_outline_renderer.add_outline(
+                                    hvox::OutlineData{
+                                        static_cast<f32v3>(position),
+                                        {255, 0, 0, 255}
+                                }
+                                );
+
+                                m_nav_test_end = { id, position, chunk };
                             }
                         }
+
+                        ++m_nav_test_mode;
                     }
-                }
+                } /* else {
+                     hvox::BlockWorldPosition position;
+                     f32                      distance;
+
+                     if (hvox::Ray::cast_to_block_before(
+                             m_camera.position(),
+                             m_camera.direction(),
+                             m_chunk_grid,
+                             hvox::Block{ 1 },
+                             10,
+                             position,
+                             distance
+                         ))
+                     {
+                         auto chunk
+                             = m_chunk_grid->chunk(hvox::chunk_grid_position(position
+                             ));
+
+                         if (chunk != nullptr) {
+                             hvox::set_block(
+                                 chunk,
+                                 hvox::block_chunk_position(position),
+                                 hvox::Block{ 1 }
+                             );
+                         }
+                     }
+                 }*/
             }
-        };
+        } };
         hui::InputDispatcher::instance()->on_mouse.button_down += &handle_mouse_button;
 
         handle_mouse_move = hemlock::Subscriber<hui::MouseMoveEvent>{
@@ -422,8 +472,9 @@ protected:
     ui32 m_nav_test_mode;
 
     struct {
-        size_t                   outline_id;
-        hvox::BlockWorldPosition pos;
+        size_t                        outline_id;
+        hvox::BlockWorldPosition      pos;
+        hmem::WeakHandle<hvox::Chunk> chunk;
     } m_nav_test_start, m_nav_test_end;
 
     GLuint m_crosshair_vao, m_crosshair_vbo;
