@@ -23,8 +23,8 @@
 #define GEN_MESH_UPLOADER_DEF(PREFIX, INDEXED, ...)                                    \
   bool hg::upload_mesh(                                                                \
       IF_ELSE(NOT(INDEXED)                                                             \
-      )(const PREFIX##_MeshData&        mesh_data,                                     \
-        const PREFIX##_IndexedMeshData& mesh_data),                                    \
+      )(const Const##PREFIX##_MeshData&        mesh_data,                              \
+        const Const##PREFIX##_IndexedMeshData& mesh_data),                             \
       IF_ELSE(NOT(INDEXED)                                                             \
       )(OUT MeshHandles & handles, OUT IndexedMeshHandles & handles),                  \
       MeshDataVolatility volatility /*= MeshDataVolatility::DYNAMIC*/                  \

@@ -68,38 +68,37 @@ namespace hemlock {
         const ui32 CHUNK_OUTLINE_VERTEX_COUNT = 24;
 
         using ChunkOutlineVertex   = hg::Point_3D_32_Vertex;
-        using ChunkOutlineMeshData = hg::Point_3D_32_MeshData;
+        using ChunkOutlineMeshData = hg::ConstPoint_3D_32_MeshData;
 
-        static ChunkOutlineVertex* const CHUNK_OUTLINE_VERTICES
-            = new ChunkOutlineVertex[CHUNK_OUTLINE_VERTEX_COUNT]{
-                  { { 0.0f, 0.0f, 0.0f } },
-                  { { 0.0f, CHUNK_LENGTH_F, 0.0f } },
-                  { { 0.0f, 0.0f, 0.0f } },
-                  { { 0.0f, 0.0f, CHUNK_LENGTH_F } },
-                  { { 0.0f, 0.0f, 0.0f } },
-                  { { CHUNK_LENGTH_F, 0.0f, 0.0f } },
-                  { { CHUNK_LENGTH_F, CHUNK_LENGTH_F, CHUNK_LENGTH_F } },
-                  { { 0.0f, CHUNK_LENGTH_F, CHUNK_LENGTH_F } },
-                  { { CHUNK_LENGTH_F, CHUNK_LENGTH_F, CHUNK_LENGTH_F } },
-                  { { CHUNK_LENGTH_F, 0.0f, CHUNK_LENGTH_F } },
-                  { { CHUNK_LENGTH_F, CHUNK_LENGTH_F, CHUNK_LENGTH_F } },
-                  { { CHUNK_LENGTH_F, CHUNK_LENGTH_F, 0.0f } },
-                  { { 0.0f, CHUNK_LENGTH_F, 0.0f } },
-                  { { 0.0f, CHUNK_LENGTH_F, CHUNK_LENGTH_F } },
-                  { { 0.0f, CHUNK_LENGTH_F, 0.0f } },
-                  { { CHUNK_LENGTH_F, CHUNK_LENGTH_F, 0.0f } },
-                  { { CHUNK_LENGTH_F, 0.0f, CHUNK_LENGTH_F } },
-                  { { CHUNK_LENGTH_F, 0.0f, 0.0f } },
-                  { { CHUNK_LENGTH_F, 0.0f, CHUNK_LENGTH_F } },
-                  { { 0.0f, 0.0f, CHUNK_LENGTH_F } },
-                  { { 0.0f, CHUNK_LENGTH_F, CHUNK_LENGTH_F } },
-                  { { 0.0f, 0.0f, CHUNK_LENGTH_F } },
-                  { { CHUNK_LENGTH_F, 0.0f, 0.0f } },
-                  { { CHUNK_LENGTH_F, CHUNK_LENGTH_F, 0.0f } }
-              };
+        static const ChunkOutlineVertex
+            CHUNK_OUTLINE_VERTICES[CHUNK_OUTLINE_VERTEX_COUNT]
+            = { { { 0.0f, 0.0f, 0.0f } },
+                { { 0.0f, CHUNK_LENGTH_F, 0.0f } },
+                { { 0.0f, 0.0f, 0.0f } },
+                { { 0.0f, 0.0f, CHUNK_LENGTH_F } },
+                { { 0.0f, 0.0f, 0.0f } },
+                { { CHUNK_LENGTH_F, 0.0f, 0.0f } },
+                { { CHUNK_LENGTH_F, CHUNK_LENGTH_F, CHUNK_LENGTH_F } },
+                { { 0.0f, CHUNK_LENGTH_F, CHUNK_LENGTH_F } },
+                { { CHUNK_LENGTH_F, CHUNK_LENGTH_F, CHUNK_LENGTH_F } },
+                { { CHUNK_LENGTH_F, 0.0f, CHUNK_LENGTH_F } },
+                { { CHUNK_LENGTH_F, CHUNK_LENGTH_F, CHUNK_LENGTH_F } },
+                { { CHUNK_LENGTH_F, CHUNK_LENGTH_F, 0.0f } },
+                { { 0.0f, CHUNK_LENGTH_F, 0.0f } },
+                { { 0.0f, CHUNK_LENGTH_F, CHUNK_LENGTH_F } },
+                { { 0.0f, CHUNK_LENGTH_F, 0.0f } },
+                { { CHUNK_LENGTH_F, CHUNK_LENGTH_F, 0.0f } },
+                { { CHUNK_LENGTH_F, 0.0f, CHUNK_LENGTH_F } },
+                { { CHUNK_LENGTH_F, 0.0f, 0.0f } },
+                { { CHUNK_LENGTH_F, 0.0f, CHUNK_LENGTH_F } },
+                { { 0.0f, 0.0f, CHUNK_LENGTH_F } },
+                { { 0.0f, CHUNK_LENGTH_F, CHUNK_LENGTH_F } },
+                { { 0.0f, 0.0f, CHUNK_LENGTH_F } },
+                { { CHUNK_LENGTH_F, 0.0f, 0.0f } },
+                { { CHUNK_LENGTH_F, CHUNK_LENGTH_F, 0.0f } } };
 
-        const ChunkOutlineMeshData CHUNK_OUTLINE_MESH
-            = { CHUNK_OUTLINE_VERTICES, CHUNK_OUTLINE_VERTEX_COUNT };
+        static const ChunkOutlineMeshData CHUNK_OUTLINE_MESH
+            = { &CHUNK_OUTLINE_VERTICES[0], CHUNK_OUTLINE_VERTEX_COUNT };
     }  // namespace voxel
 }  // namespace hemlock
 namespace hvox = hemlock::voxel;

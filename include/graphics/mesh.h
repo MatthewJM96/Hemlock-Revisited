@@ -54,6 +54,11 @@ namespace hemlock {
             ui32  index_count;
         };
 
+        struct ConstIndexData {
+            ui32 const* indices;
+            ui32        index_count;
+        };
+
 #define VERTEX_FIELD_TYPE(                                                             \
     FIELD_TYPE, FIELD_NAME, ENUM_NAME, ELEM_COUNT, PRECISION, NORMALISED               \
 )                                                                                      \
@@ -99,12 +104,20 @@ namespace hemlock {
   struct PREFIX##_MeshData {                                                           \
     PREFIX##_Vertex* vertices;                                                         \
     ui32             vertex_count;                                                     \
+  };                                                                                   \
+  struct Const##PREFIX##_MeshData {                                                    \
+    PREFIX##_Vertex const* vertices;                                                   \
+    ui32                   vertex_count;                                               \
   };
 
 #define GEN_INDEXED_MESH_DATA_STRUCT(PREFIX)                                           \
   struct PREFIX##_IndexedMeshData :                                                    \
       public PREFIX##_MeshData,                                                        \
       public IndexData { /* Empty. */                                                  \
+  };                                                                                   \
+  struct Const##PREFIX##_IndexedMeshData :                                             \
+      public Const##PREFIX##_MeshData,                                                 \
+      public ConstIndexData { /* Empty. */                                             \
   };
 
 #define GEN_MESH_DATA_STRUCT_DEFS(PREFIX)                                              \
@@ -113,16 +126,16 @@ namespace hemlock {
 
 #define GEN_UNINDEXED_MESH_UPLOADER_DECL(PREFIX)                                       \
   bool upload_mesh(                                                                    \
-      const PREFIX##_MeshData& mesh_data,                                              \
-      OUT MeshHandles&         handles,                                                \
-      MeshDataVolatility       volatility = MeshDataVolatility::DYNAMIC                \
+      const Const##PREFIX##_MeshData& mesh_data,                                       \
+      OUT MeshHandles&                handles,                                         \
+      MeshDataVolatility              volatility = MeshDataVolatility::DYNAMIC         \
   );
 
 #define GEN_INDEXED_MESH_UPLOADER_DECL(PREFIX)                                         \
   bool upload_mesh(                                                                    \
-      const PREFIX##_IndexedMeshData& mesh_data,                                       \
-      OUT IndexedMeshHandles&         handles,                                         \
-      MeshDataVolatility              volatility = MeshDataVolatility::DYNAMIC         \
+      const Const##PREFIX##_IndexedMeshData& mesh_data,                                \
+      OUT IndexedMeshHandles&                handles,                                  \
+      MeshDataVolatility                     volatility = MeshDataVolatility::DYNAMIC  \
   );
 
 #define GEN_MESH_UPLOADER_DEFS(PREFIX, ...)                                            \
