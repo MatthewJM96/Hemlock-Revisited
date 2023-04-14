@@ -9,8 +9,13 @@ namespace hemlock {
     namespace voxel {
         class NavmeshOutlineRenderer {
         protected:
+            struct NavmeshOutlineDatum {
+                f32v3 pos;
+                ui8v4 colour;
+            };
+
             struct NavmeshOutlineData {
-                f32v3 start, end;
+                NavmeshOutlineDatum start, end;
             };
 
             struct NavmeshOutlines {

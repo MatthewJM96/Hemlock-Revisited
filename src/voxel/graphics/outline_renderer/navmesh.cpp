@@ -23,7 +23,7 @@ hvox::NavmeshOutlineRenderer::NavmeshOutlineRenderer() :
 void hvox::NavmeshOutlineRenderer::init() {
     hg::MeshHandles tmp = { .vao = 0, .vbo = static_cast<GLuint>(-1) };
     hg::upload_mesh(
-        hg::Point_2D_32_MeshData{ nullptr, 0 }, tmp, hg::MeshDataVolatility::STATIC
+        hg::RGBA_Point_2D_32_MeshData{ nullptr, 0 }, tmp, hg::MeshDataVolatility::STATIC
     );
     m_navmesh_outline_vao = tmp.vao;
 }
@@ -132,8 +132,13 @@ void hvox::NavmeshOutlineRenderer::__calculate_outlines(NavmeshOutlines& navmesh
                 = block_world_position(target_node.chunk_pos, target_node.block_pos);
 
             tmp_outline_buffer.emplace_back(
-                f32v3{ static_cast<f32v3>(vert_pos) },
-                f32v3{ static_cast<f32v3>(target_vert_pos) }
+                NavmeshOutlineDatum{
+                    static_cast<f32v3>(vert_pos) + f32v3{ 0.0f, 0.6f, 0.0f },
+                    { 255, 0, 0, 255 }
+            },
+                NavmeshOutlineDatum{ static_cast<f32v3>(target_vert_pos)
+                                         + f32v3{ 0.0f, 0.6f, 0.0f },
+                                     { 255, 0, 0, 255 } }
             );
         }
     }
