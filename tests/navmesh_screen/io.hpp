@@ -14,7 +14,7 @@ namespace hemlock {
                 OUT f32v3&                    delta_pos
             ) {
                 if (input_manager->is_pressed(hui::PhysicalKey::H_L)) {
-                    draw_chunk_outlines = !draw_chunk_outlines;
+                    draw_chunk_outlines = true;
                 }
 
                 if (input_manager->is_pressed(hui::PhysicalKey::H_T)) {

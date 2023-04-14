@@ -90,8 +90,10 @@ namespace hemlock {
             ) {
                 for (auto x = -VIEW_DIST; x <= VIEW_DIST; ++x) {
                     for (auto z = -VIEW_DIST; z <= VIEW_DIST; ++z) {
-                        for (auto y = -2; y < 6; ++y) {
-                            hvox::ChunkGridPosition pos = { x, y, z };
+                        for (auto y = -2; y < std::min(6, VIEW_DIST * 2 - 1); ++y) {
+                            hvox::ChunkGridPosition pos = {
+                                {x, y, z}
+                            };
 
                             chunk_grid->preload_chunk_at(pos);
 
@@ -103,7 +105,7 @@ namespace hemlock {
                 }
                 for (auto x = -VIEW_DIST; x <= VIEW_DIST; ++x) {
                     for (auto z = -VIEW_DIST; z <= VIEW_DIST; ++z) {
-                        for (auto y = -2; y < 6; ++y) {
+                        for (auto y = -2; y < std::min(6, VIEW_DIST * 2 - 1); ++y) {
                             chunk_grid->load_chunk_at({
                                 {x, y, z}
                             });
@@ -126,7 +128,7 @@ namespace hemlock {
                          z <= static_cast<i32>(current_pos.z) + VIEW_DIST;
                          ++z)
                     {
-                        for (auto y = -2; y < 6; ++y) {
+                        for (auto y = -2; y < std::min(6, VIEW_DIST * 2 - 1); ++y) {
                             unloading_chunks.emplace_back(
                                 hmem::WeakHandle<hvox::Chunk>{}
                             );
@@ -147,7 +149,7 @@ static_cast<i32>(current_pos.x)
                          z <= static_cast<i32>(current_pos.z) + VIEW_DIST;
                          ++z)
                     {
-                        for (auto y = -2; y < 6; ++y) {
+                        for (auto y = -2; y < std::min(6, VIEW_DIST * 2 - 1); ++y) {
                             hvox::ChunkGridPosition pos = {
                                 {x_step < 0 ?
 static_cast<i32>(current_pos.x) - VIEW_DIST :
@@ -166,7 +168,7 @@ static_cast<i32>(current_pos.x) + VIEW_DIST,
                          z <= static_cast<i32>(current_pos.z) + VIEW_DIST;
                          ++z)
                     {
-                        for (auto y = -2; y < 6; ++y) {
+                        for (auto y = -2; y < std::min(6, VIEW_DIST * 2 - 1); ++y) {
                             chunk_grid->load_chunk_at({
                                 {x_step < 0 ?
 static_cast<i32>(current_pos.x) - VIEW_DIST :
@@ -192,7 +194,7 @@ static_cast<i32>(current_pos.x) + VIEW_DIST,
                          x <= static_cast<i32>(current_pos.x) + VIEW_DIST;
                          ++x)
                     {
-                        for (auto y = -2; y < 6; ++y) {
+                        for (auto y = -2; y < std::min(6, VIEW_DIST * 2 - 1); ++y) {
                             unloading_chunks.emplace_back(
                                 hmem::WeakHandle<hvox::Chunk>{}
                             );
@@ -213,7 +215,7 @@ static_cast<i32>(current_pos.x) + VIEW_DIST,
                          x <= static_cast<i32>(current_pos.x) + VIEW_DIST;
                          ++x)
                     {
-                        for (auto y = -2; y < 6; ++y) {
+                        for (auto y = -2; y < std::min(6, VIEW_DIST * 2 - 1); ++y) {
                             hvox::ChunkGridPosition pos = {
                                 {x,
                                  y, z_step < 0 ?
@@ -232,7 +234,7 @@ static_cast<i32>(current_pos.x) + VIEW_DIST,
                          x <= static_cast<i32>(current_pos.x) + VIEW_DIST;
                          ++x)
                     {
-                        for (auto y = -2; y < 6; ++y) {
+                        for (auto y = -2; y < std::min(6, VIEW_DIST * 2 - 1); ++y) {
                             chunk_grid->load_chunk_at({
                                 {x,
                                  y, z_step < 0 ?

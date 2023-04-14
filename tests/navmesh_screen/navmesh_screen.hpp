@@ -15,7 +15,7 @@
 #include "tests/iomanager.hpp"
 
 #if defined(DEBUG)
-#  define VIEW_DIST 4
+#  define VIEW_DIST 6
 #else
 #  define VIEW_DIST 10
 #endif
@@ -26,7 +26,7 @@
 struct TNS_ChunkOutlinePredicate {
     std::tuple<bool, colour4> operator()(hmem::Handle<hvox::Chunk>) {
         return {
-            true, {255, 0, 0, 255}
+            true, {255, 255, 255, 255}
         };
     }
 };
