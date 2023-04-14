@@ -5,8 +5,7 @@
 
 #include "algorithm/acs/acs.hpp"
 #include "memory/handle.hpp"
-#include "voxel/ai/navmesh/naive_strategy.hpp"
-#include "voxel/ai/navmesh_task.hpp"
+#include "voxel/ai/navmesh.hpp"
 #include "voxel/generation/generator_task.hpp"
 #include "voxel/graphics/mesh/greedy_strategy.hpp"
 #include "voxel/graphics/mesh/mesh_task.hpp"

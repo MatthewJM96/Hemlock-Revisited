@@ -7,7 +7,7 @@
 
 #include "algorithm/acs/acs.hpp"
 
-#include "voxel/ai/navmesh_task.hpp"
+#include "voxel/ai/navmesh.hpp"
 
 #include "../iomanager.hpp"
 

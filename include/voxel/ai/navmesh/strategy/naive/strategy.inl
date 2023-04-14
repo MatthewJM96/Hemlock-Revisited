@@ -39,7 +39,6 @@ namespace hemlock::voxel::ai::impl {
             return vertex;
         }
     }
-
 }  // namespace hemlock::voxel::ai::impl
 
 template <hvox::IdealBlockConstraint IsSolid>

@@ -3,7 +3,7 @@
 
 #include "graphics/mesh.h"
 #include "timing.h"
-#include "voxel/ai/navmesh.hpp"
+#include "voxel/ai/navmesh/state.hpp"
 #include "voxel/block.hpp"
 #include "voxel/chunk/constants.hpp"
 #include "voxel/chunk/events.hpp"

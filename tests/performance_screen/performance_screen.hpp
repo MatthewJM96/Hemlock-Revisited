@@ -9,7 +9,7 @@
 #include "memory/handle.hpp"
 #include "rand.h"
 #include "ui/input/dispatcher.h"
-#include "voxel/ai/navmesh/naive_strategy.hpp"
+#include "voxel/ai/navmesh.hpp"
 #include "voxel/chunk/state.hpp"
 #include "voxel/generation/generator_task.hpp"
 #include "voxel/graphics/mesh/greedy_strategy.hpp"
