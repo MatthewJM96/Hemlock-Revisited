@@ -45,6 +45,8 @@ public:
 
         m_block_outline_renderer.dispose();
 
+        m_navmesh_outline_renderer.dispose();
+
         m_chunk_grid->dispose();
 
         happ::ScreenBase::dispose();
@@ -53,7 +55,7 @@ public:
     virtual void start(hemlock::FrameTime time) override {
         happ::ScreenBase::start(time);
 
-        htest::navmesh_screen::load_chunks(m_chunk_grid);
+        htest::navmesh_screen::load_chunks(m_chunk_grid, &m_navmesh_outline_renderer);
     }
 
     virtual void update(hemlock::FrameTime time) override {
@@ -103,11 +105,19 @@ public:
             = glm::floor(m_camera.position() / static_cast<f32>(CHUNK_LENGTH));
 
         htest::navmesh_screen::unload_x_chunks(
-            m_chunk_grid, m_unloading_chunks, current_pos, last_pos
+            m_chunk_grid,
+            m_unloading_chunks,
+            current_pos,
+            last_pos,
+            &m_navmesh_outline_renderer
         );
 
         htest::navmesh_screen::unload_z_chunks(
-            m_chunk_grid, m_unloading_chunks, current_pos, last_pos
+            m_chunk_grid,
+            m_unloading_chunks,
+            current_pos,
+            last_pos,
+            &m_navmesh_outline_renderer
         );
 
         last_pos = current_pos;
@@ -216,6 +226,8 @@ public:
 
             m_nav_test_mode = 0;
         }
+
+        m_navmesh_outline_renderer.update(time);
     }
 
     virtual void draw(hemlock::FrameTime time) override {
@@ -294,6 +306,21 @@ public:
 
             m_outline_shader.unuse();
         }
+
+        if (m_draw_navmesh_outlines) {
+            m_navmesh_outline_shader.use();
+
+            glUniformMatrix4fv(
+                m_navmesh_outline_shader.uniform_location("view_proj"),
+                1,
+                GL_FALSE,
+                &m_camera.view_projection_matrix()[0][0]
+            );
+
+            m_navmesh_outline_renderer.draw(time);
+
+            m_navmesh_outline_shader.unuse();
+        }
     }
 
     virtual void init(const std::string& name, happ::ProcessBase* process) override {
@@ -342,6 +369,13 @@ public:
         );
         m_outline_shader.link();
 
+        m_draw_navmesh_outlines = true;
+        m_navmesh_outline_shader.init(&m_shader_cache);
+        m_navmesh_outline_shader.add_shaders(
+            "shaders/navmesh_outline.vert", "shaders/navmesh_outline.frag"
+        );
+        m_navmesh_outline_shader.link();
+
         m_default_texture = hg::load_texture("test_tex.png");
 
         static auto navmesh_task_builder = hvox::ChunkTaskBuilder{ []() {
@@ -373,6 +407,8 @@ public:
         m_chunk_outline_renderer.init(TNS_ChunkOutlinePredicate{}, m_chunk_grid);
 
         m_block_outline_renderer.init();
+
+        m_navmesh_outline_renderer.init();
 
         glCreateVertexArrays(1, &m_crosshair_vao);
 
@@ -516,7 +552,7 @@ protected:
     hcam::BasicFirstPersonCamera  m_camera;
     hui::InputManager*            m_input_manager;
     hmem::Handle<hvox::ChunkGrid> m_chunk_grid;
-    hg::GLSLProgram               m_shader, m_line_shader, m_outline_shader;
+    hg::GLSLProgram m_shader, m_line_shader, m_outline_shader, m_navmesh_outline_shader;
 
     hvox::ConditionalChunkOutlineRenderer<TNS_ChunkOutlinePredicate>
          m_chunk_outline_renderer;
@@ -524,6 +560,9 @@ protected:
 
     hvox::BlockOutlineRenderer m_block_outline_renderer;
     bool                       m_draw_block_outlines;
+
+    hvox::NavmeshOutlineRenderer m_navmesh_outline_renderer;
+    bool                         m_draw_navmesh_outlines;
 
     ui32 m_nav_test_mode;
 

@@ -75,13 +75,20 @@ namespace hemlock {
                 }
             };
 
-            void load_chunks(hmem::Handle<hvox::ChunkGrid> chunk_grid) {
+            void load_chunks(
+                hmem::Handle<hvox::ChunkGrid> chunk_grid,
+                hvox::NavmeshOutlineRenderer* navmesh_outline_renderer
+            ) {
                 for (auto x = -VIEW_DIST; x <= VIEW_DIST; ++x) {
                     for (auto z = -VIEW_DIST; z <= VIEW_DIST; ++z) {
                         for (auto y = -2; y < 6; ++y) {
-                            chunk_grid->preload_chunk_at({
-                                {x, y, z}
-                            });
+                            hvox::ChunkGridPosition pos = { x, y, z };
+
+                            chunk_grid->preload_chunk_at(pos);
+
+                            navmesh_outline_renderer->register_chunk(
+                                chunk_grid->chunk(pos)
+                            );
                         }
                     }
                 }
@@ -96,12 +103,12 @@ namespace hemlock {
                 }
             }
 
-            
             void unload_x_chunks(
                 hmem::Handle<hvox::ChunkGrid>               chunk_grid,
                 std::vector<hmem::WeakHandle<hvox::Chunk>>& unloading_chunks,
                 const f32v3&                                current_pos,
-                const f32v3&                                last_pos
+                const f32v3&                                last_pos,
+                hvox::NavmeshOutlineRenderer*               navmesh_outline_renderer
             ) {
                 i32 x_step
                     = static_cast<i32>(current_pos.x) - static_cast<i32>(last_pos.x);
@@ -132,12 +139,18 @@ static_cast<i32>(current_pos.x)
                          ++z)
                     {
                         for (auto y = -2; y < 6; ++y) {
-                            chunk_grid->preload_chunk_at({
+                            hvox::ChunkGridPosition pos = {
                                 {x_step < 0 ?
 static_cast<i32>(current_pos.x) - VIEW_DIST :
 static_cast<i32>(current_pos.x) + VIEW_DIST,
                                  y, z}
-                            });
+                            };
+
+                            chunk_grid->preload_chunk_at(pos);
+
+                            navmesh_outline_renderer->register_chunk(
+                                chunk_grid->chunk(pos)
+                            );
                         }
                     }
                     for (auto z = static_cast<i32>(current_pos.z) - VIEW_DIST;
@@ -160,7 +173,8 @@ static_cast<i32>(current_pos.x) + VIEW_DIST,
                 hmem::Handle<hvox::ChunkGrid>               chunk_grid,
                 std::vector<hmem::WeakHandle<hvox::Chunk>>& unloading_chunks,
                 const f32v3&                                current_pos,
-                const f32v3&                                last_pos
+                const f32v3&                                last_pos,
+                hvox::NavmeshOutlineRenderer*               navmesh_outline_renderer
             ) {
                 i32 z_step
                     = static_cast<i32>(current_pos.z) - static_cast<i32>(last_pos.z);
@@ -191,12 +205,18 @@ static_cast<i32>(current_pos.x) + VIEW_DIST,
                          ++x)
                     {
                         for (auto y = -2; y < 6; ++y) {
-                            chunk_grid->preload_chunk_at({
+                            hvox::ChunkGridPosition pos = {
                                 {x,
                                  y, z_step < 0 ?
  static_cast<i32>(current_pos.z) - VIEW_DIST :
  static_cast<i32>(current_pos.z) + VIEW_DIST}
-                            });
+                            };
+
+                            chunk_grid->preload_chunk_at(pos);
+
+                            navmesh_outline_renderer->register_chunk(
+                                chunk_grid->chunk(pos)
+                            );
                         }
                     }
                     for (auto x = static_cast<i32>(current_pos.x) - VIEW_DIST;
