@@ -94,9 +94,14 @@ void hvox::NavmeshOutlineRenderer::draw(FrameTime) {
 void hvox::NavmeshOutlineRenderer::register_chunk(hmem::Handle<Chunk> chunk) {
     NavmeshOutlines tmp = {};
     tmp.chunk           = chunk;
-    auto [_, success]   = m_navmesh_outlines.try_emplace(chunk->position.id, tmp);
+    auto [it, success]  = m_navmesh_outlines.try_emplace(chunk->position.id, tmp);
 
     if (success) {
+        it->second.mesh_handles = { m_navmesh_outline_vao, 0 };
+        hg::upload_mesh(
+            hg::RGBA_Point_2D_32_MeshData{ nullptr, 0 }, it->second.mesh_handles
+        );
+
         chunk->on_navmesh_change += &handle_chunk_navmesh_change;
         chunk->on_unload         += &handle_chunk_unload;
     }
