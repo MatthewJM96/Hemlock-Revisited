@@ -45,6 +45,7 @@ void hvox::NavmeshOutlineRenderer::update(FrameTime) {
             __calculate_outlines(navmesh);
 
             navmesh.is_updated = true;
+            navmesh.is_dirty.store(false);
         }
     }
 }
