@@ -23,7 +23,7 @@ hvox::NavmeshOutlineRenderer::NavmeshOutlineRenderer() :
 void hvox::NavmeshOutlineRenderer::init() {
     hg::MeshHandles tmp = { .vao = 0, .vbo = static_cast<GLuint>(-1) };
     hg::upload_mesh(
-        hg::RGBA_Point_2D_32_MeshData{ nullptr, 0 }, tmp, hg::MeshDataVolatility::STATIC
+        hg::RGBA_Point_3D_32_MeshData{ nullptr, 0 }, tmp, hg::MeshDataVolatility::STATIC
     );
     m_navmesh_outline_vao = tmp.vao;
 }
@@ -87,7 +87,7 @@ void hvox::NavmeshOutlineRenderer::draw(FrameTime) {
             sizeof(NavmeshOutlineDatum)
         );
 
-        glDrawArrays(GL_LINES, 0, navmesh.outlines.size());
+        glDrawArrays(GL_LINES, 0, navmesh.outlines.size() * 2);
     }
 }
 
@@ -99,7 +99,7 @@ void hvox::NavmeshOutlineRenderer::register_chunk(hmem::Handle<Chunk> chunk) {
     if (success) {
         it->second.mesh_handles = { m_navmesh_outline_vao, 0 };
         hg::upload_mesh(
-            hg::RGBA_Point_2D_32_MeshData{ nullptr, 0 }, it->second.mesh_handles
+            hg::RGBA_Point_3D_32_MeshData{ nullptr, 0 }, it->second.mesh_handles
         );
 
         chunk->on_navmesh_change += &handle_chunk_navmesh_change;
