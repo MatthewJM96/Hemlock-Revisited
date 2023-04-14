@@ -150,14 +150,14 @@ namespace hemlock {
 #define GEN_UNINDEXED_MESH_UPLOADER_DECL(PREFIX)                                       \
   bool upload_mesh(                                                                    \
       const Const##PREFIX##_MeshData& mesh_data,                                       \
-      OUT MeshHandles&                handles,                                         \
+      IN OUT MeshHandles&             handles,                                         \
       MeshDataVolatility              volatility = MeshDataVolatility::DYNAMIC         \
   );
 
 #define GEN_INDEXED_MESH_UPLOADER_DECL(PREFIX)                                         \
   bool upload_mesh(                                                                    \
       const Const##PREFIX##_IndexedMeshData& mesh_data,                                \
-      OUT IndexedMeshHandles&                handles,                                  \
+      IN OUT IndexedMeshHandles&             handles,                                  \
       MeshDataVolatility                     volatility = MeshDataVolatility::DYNAMIC  \
   );
 
