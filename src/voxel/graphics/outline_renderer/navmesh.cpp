@@ -141,11 +141,11 @@ bool hvox::NavmeshOutlineRenderer::__calculate_outlines(NavmeshOutlines& navmesh
 
             tmp_outline_buffer.emplace_back(
                 NavmeshOutlineDatum{
-                    static_cast<f32v3>(vert_pos) + f32v3{ 0.0f, 0.6f, 0.0f },
+                    static_cast<f32v3>(vert_pos) + f32v3{ 0.5f, 1.6f, 0.5f },
                     { 255, 0, 0, 255 }
             },
                 NavmeshOutlineDatum{ static_cast<f32v3>(target_vert_pos)
-                                         + f32v3{ 0.0f, 0.6f, 0.0f },
+                                         + f32v3{ 0.5f, 1.6f, 0.5f },
                                      { 255, 0, 0, 255 } }
             );
         }
