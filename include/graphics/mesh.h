@@ -189,6 +189,38 @@ namespace hemlock {
         GEN_MESH_CASE_STRUCT_DEFS_AND_FUNC_DECLS(Point_3D_64, MAKE_POS3D(64))
 
         GEN_MESH_CASE_STRUCT_DEFS_AND_FUNC_DECLS(
+            RGB_Point_2D_32, MAKE_POS2D(32), MAKE_RGB(32)
+        )
+
+        GEN_MESH_CASE_STRUCT_DEFS_AND_FUNC_DECLS(
+            RGB_Point_3D_32, MAKE_POS3D(32), MAKE_RGB(32)
+        )
+
+        GEN_MESH_CASE_STRUCT_DEFS_AND_FUNC_DECLS(
+            RGB_Point_2D_64, MAKE_POS2D(64), MAKE_RGB(64)
+        )
+
+        GEN_MESH_CASE_STRUCT_DEFS_AND_FUNC_DECLS(
+            RGB_Point_3D_64, MAKE_POS3D(64), MAKE_RGB(64)
+        )
+
+        GEN_MESH_CASE_STRUCT_DEFS_AND_FUNC_DECLS(
+            RGBA_Point_2D_32, MAKE_POS2D(32), MAKE_RGBA(32)
+        )
+
+        GEN_MESH_CASE_STRUCT_DEFS_AND_FUNC_DECLS(
+            RGBA_Point_3D_32, MAKE_POS3D(32), MAKE_RGBA(32)
+        )
+
+        GEN_MESH_CASE_STRUCT_DEFS_AND_FUNC_DECLS(
+            RGBA_Point_2D_64, MAKE_POS2D(64), MAKE_RGBA(64)
+        )
+
+        GEN_MESH_CASE_STRUCT_DEFS_AND_FUNC_DECLS(
+            RGBA_Point_3D_64, MAKE_POS3D(64), MAKE_RGBA(64)
+        )
+
+        GEN_MESH_CASE_STRUCT_DEFS_AND_FUNC_DECLS(
             Colourless_2D_32, MAKE_POS2D(32), MAKE_UV(32)
         )
 
