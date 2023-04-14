@@ -5,9 +5,6 @@
 
 namespace hemlock {
     namespace voxel {
-        struct Chunk;
-        class ChunkGrid;
-
         class BlockOutlineRenderer {
         public:
             BlockOutlineRenderer();
