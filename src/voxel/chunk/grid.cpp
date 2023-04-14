@@ -53,15 +53,20 @@ hvox::ChunkGrid::ChunkGrid() :
             // an unload event for this chunk.
             if (chunk == nullptr) return true;
 
-            auto mesh_task = m_build_mesh_task();
-            mesh_task->set_state(chunk, m_self);
-            m_thread_pool.add_task({ mesh_task, true });
+            // TODO(Matthew): These tasks are being added in the wrong event - this
+            //                is the pre-block change event checking if the change may
+            //                occur, in fact we should do this only after the block
+            //                change has occurred.
 
-            if (m_build_navmesh_task) {
-                auto navmesh_task = m_build_navmesh_task();
-                navmesh_task->set_state(chunk, m_self);
-                m_thread_pool.threadsafe_add_task({ navmesh_task, true });
-            }
+            // auto mesh_task = m_build_mesh_task();
+            // mesh_task->set_state(chunk, m_self);
+            // m_thread_pool.add_task({ mesh_task, true });
+
+            // if (m_build_navmesh_task) {
+            //     auto navmesh_task = m_build_navmesh_task();
+            //     navmesh_task->set_state(chunk, m_self);
+            //     m_thread_pool.threadsafe_add_task({ navmesh_task, true });
+            // }
 
             return false;
         } }) {
