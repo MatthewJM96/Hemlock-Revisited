@@ -117,6 +117,8 @@ void hvox::NavmeshOutlineRenderer::__calculate_outlines(NavmeshOutlines& navmesh
 
     auto lock = std::shared_lock(chunk->navmesh_mutex);
 
+    if (chunk->navmeshing.load() != ChunkState::COMPLETE) return;
+
     std::vector<NavmeshOutlineData> tmp_outline_buffer;
     tmp_outline_buffer.reserve(navmesh.outlines.size());
 
