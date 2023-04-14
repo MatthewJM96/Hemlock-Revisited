@@ -57,6 +57,19 @@ namespace hemlock {
         struct ConstIndexData {
             ui32 const* indices;
             ui32        index_count;
+
+            ConstIndexData() : indices(nullptr), index_count(0) { /* Empty. */
+            }
+
+            ConstIndexData(ui32 const* indices_, ui32 index_count_) :
+                indices(indices_), index_count(index_count_) {
+                /* Empty. */
+            }
+
+            ConstIndexData(const IndexData& rhs) {
+                indices     = rhs.indices;
+                index_count = rhs.index_count;
+            }
         };
 
 #define VERTEX_FIELD_TYPE(                                                             \
@@ -108,6 +121,16 @@ namespace hemlock {
   struct Const##PREFIX##_MeshData {                                                    \
     PREFIX##_Vertex const* vertices;                                                   \
     ui32                   vertex_count;                                               \
+    Const##PREFIX##_MeshData() : vertices(nullptr), vertex_count(0) { /* Empty. */     \
+    }                                                                                  \
+    Const##PREFIX##_MeshData(PREFIX##_Vertex const* vertices_, ui32 vertex_count_) :   \
+        vertices(vertices_), vertex_count(vertex_count_) {                             \
+      /* Empty. */                                                                     \
+    }                                                                                  \
+    Const##PREFIX##_MeshData(const PREFIX##_MeshData& rhs) {                           \
+      vertices     = rhs.vertices;                                                     \
+      vertex_count = rhs.vertex_count;                                                 \
+    }                                                                                  \
   };
 
 #define GEN_INDEXED_MESH_DATA_STRUCT(PREFIX)                                           \
