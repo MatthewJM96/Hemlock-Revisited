@@ -36,14 +36,10 @@
     );                                                                                 \
                                                                                        \
     IF_ELSE(NOT(INDEXED))                                                              \
-      (assert(                                                                         \
-           (handles.vao != 0)                                                          \
-        || (handles.vao == 0 && handles.vbo == 0)                                      \
-      ),                                                                               \
-      assert(                                                                          \
-           (handles.vao != 0)                                                          \
-        || (handles.vao == 0 && handles.vbo == 0 && handles.ibo != 0)                  \
-      ));                                                                              \
+      (                                                                                \
+        assert(!(handles.vao != 0 && handles.vbo != 0)),                               \
+        assert(!(handles.vao != 0 && handles.vbo != 0 && handles.ibo != 0))            \
+      );                                                                               \
                                                                                        \
     IF(INDEXED)                                                                        \
       (assert(                                                                         \
