@@ -15,7 +15,7 @@
 #include "tests/iomanager.hpp"
 
 #if defined(DEBUG)
-#  define VIEW_DIST 6
+#  define VIEW_DIST 4
 #else
 #  define VIEW_DIST 10
 #endif
