@@ -9,6 +9,8 @@ void hvox::ai::ChunkNavmeshTask<
     auto chunk = m_chunk.lock();
     if (chunk == nullptr) return;
 
+    auto navmesh_lock = std::unique_lock(chunk->navmesh_mutex);
+
     const NavmeshStrategy navmesh{};
 
     chunk->navmeshing.store(ChunkState::ACTIVE, std::memory_order_release);
