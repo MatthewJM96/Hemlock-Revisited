@@ -204,7 +204,7 @@ add_executable(Hemlock_Revisited
     "${PROJECT_SOURCE_DIR}/src/voxel/chunk.cpp"
     "${PROJECT_SOURCE_DIR}/src/voxel/chunk/grid.cpp"
     "${PROJECT_SOURCE_DIR}/src/voxel/coordinate_system.cpp"
-    "${PROJECT_SOURCE_DIR}/src/voxel/graphics/outline_renderer.cpp"
+    "${PROJECT_SOURCE_DIR}/src/voxel/graphics/outline_renderer/block.cpp"
     "${PROJECT_SOURCE_DIR}/src/voxel/graphics/renderer.cpp"
     "${PROJECT_SOURCE_DIR}/src/voxel/graphics/mesh/instance_manager.cpp"
     "${PROJECT_SOURCE_DIR}/src/voxel/io/chunk_file_task.cpp"

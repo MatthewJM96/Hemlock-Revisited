@@ -9,7 +9,7 @@
 #include "voxel/generation/generator_task.hpp"
 #include "voxel/graphics/mesh/greedy_strategy.hpp"
 #include "voxel/graphics/mesh/mesh_task.hpp"
-#include "voxel/graphics/outline_renderer.h"
+#include "voxel/graphics/outline_renderer.hpp"
 #include "voxel/ray.h"
 
 #include "tests/iomanager.hpp"

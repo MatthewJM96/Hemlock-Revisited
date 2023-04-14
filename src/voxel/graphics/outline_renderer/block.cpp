@@ -1,6 +1,6 @@
 #include "stdafx.h"
 
-#include "voxel/graphics/outline_renderer.h"
+#include "voxel/graphics/outline_renderer/block.h"
 
 #include "maths/powers.hpp"
 
@@ -75,7 +75,9 @@ void hvox::BlockOutlineRenderer::draw(FrameTime) {
         block_mesh_handles.vao, 1, m_instance_vbo, 0, sizeof(OutlineData)
     );
 
-    glDrawArraysInstanced(GL_LINES, 0, BLOCK_VERTEX_COUNT, m_block_outlines.size());
+    glDrawArraysInstanced(
+        GL_LINES, 0, BLOCK_OUTLINE_VERTEX_COUNT, m_block_outlines.size()
+    );
 }
 
 size_t hvox::BlockOutlineRenderer::add_outline(OutlineData&& outline) {
