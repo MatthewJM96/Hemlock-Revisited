@@ -37,11 +37,11 @@
                                                                                        \
     IF_ELSE(NOT(INDEXED))                                                              \
       (assert(                                                                         \
-           (handles.vao != 0 && handles.vbo != 0)                                      \
+           (handles.vao != 0)                                                          \
         || (handles.vao == 0 && handles.vbo == 0)                                      \
       ),                                                                               \
       assert(                                                                          \
-           (handles.vao != 0 && handles.vbo != 0 && handles.ibo != 0)                  \
+           (handles.vao != 0)                                                          \
         || (handles.vao == 0 && handles.vbo == 0 && handles.ibo != 0)                  \
       ));                                                                              \
                                                                                        \
@@ -67,7 +67,7 @@
         static_cast<GLenum>(volatility)                                                \
       );                                                                               \
                                                                                        \
-    if (setup_vao)                                                                     \
+    if (mesh_data.vertices)                                                            \
       glVertexArrayVertexBuffer(                                                       \
         handles.vao, 0, handles.vbo, 0, sizeof(PREFIX##_Vertex)                        \
       );                                                                               \
@@ -84,7 +84,7 @@
           static_cast<GLenum>(volatility)                                              \
         );                                                                             \
                                                                                        \
-      if (setup_vao)                                                                   \
+      if (mesh_data.indices)                                                           \
         glVertexArrayElementBuffer(handles.vao, handles.ibo);)                         \
                                                                                        \
       if (setup_vao) {                                                                 \

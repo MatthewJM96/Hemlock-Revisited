@@ -97,9 +97,11 @@ static void __dispose_mesh(GLuint vao, GLuint vbo, GLuint ibo) {
     assert(vbo != 0);
     if constexpr (indexed) assert(ibo != 0);
 
-    glDeleteBuffers(1, &vbo);
-    if constexpr (indexed) glDeleteBuffers(1, &ibo);
-    glDeleteBuffers(1, &vao);
+    if (vbo != 0) glDeleteBuffers(1, &vbo);
+    if constexpr (indexed) {
+        if (ibo != 0) glDeleteBuffers(1, &ibo);
+    }
+    if (vao != 0) glDeleteBuffers(1, &vao);
 }
 #endif  // defined(HEMLOCK_USING_OPENGL)
 
