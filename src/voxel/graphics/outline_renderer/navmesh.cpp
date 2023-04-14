@@ -42,9 +42,7 @@ void hvox::NavmeshOutlineRenderer::dispose() {
 void hvox::NavmeshOutlineRenderer::update(FrameTime) {
     for (auto& [chunk_id, navmesh] : m_navmesh_outlines) {
         if (navmesh.is_dirty.load()) {
-            __calculate_outlines(navmesh);
-
-            navmesh.is_updated = true;
+            if (__calculate_outlines(navmesh)) navmesh.is_updated = true;
             navmesh.is_dirty.store(false);
         }
     }
@@ -107,17 +105,17 @@ void hvox::NavmeshOutlineRenderer::register_chunk(hmem::Handle<Chunk> chunk) {
     }
 }
 
-void hvox::NavmeshOutlineRenderer::__calculate_outlines(NavmeshOutlines& navmesh) {
+bool hvox::NavmeshOutlineRenderer::__calculate_outlines(NavmeshOutlines& navmesh) {
     hmem::Handle<Chunk> chunk = navmesh.chunk.lock();
 
     if (chunk == nullptr) {
         navmesh.is_dead.store(true);
-        return;
+        return false;
     }
 
     auto lock = std::shared_lock(chunk->navmesh_mutex);
 
-    if (chunk->navmeshing.load() != ChunkState::COMPLETE) return;
+    if (chunk->navmeshing.load() != ChunkState::COMPLETE) return false;
 
     std::vector<NavmeshOutlineData> tmp_outline_buffer;
     tmp_outline_buffer.reserve(navmesh.outlines.size());
@@ -152,4 +150,6 @@ void hvox::NavmeshOutlineRenderer::__calculate_outlines(NavmeshOutlines& navmesh
     }
 
     navmesh.outlines.swap(tmp_outline_buffer);
+
+    return true;
 }

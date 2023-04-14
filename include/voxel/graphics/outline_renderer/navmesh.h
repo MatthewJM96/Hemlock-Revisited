@@ -78,7 +78,7 @@ namespace hemlock {
 
             void register_chunk(hmem::Handle<Chunk> chunk);
         protected:
-            void __calculate_outlines(NavmeshOutlines& navmesh);
+            bool __calculate_outlines(NavmeshOutlines& navmesh);
 
             Delegate<void(Sender)> handle_chunk_navmesh_change;
             Delegate<void(Sender)> handle_chunk_unload;
