@@ -33,6 +33,8 @@ namespace hemlock::voxel::ai::impl {
         try {
             return chunk->navmesh.coord_vertex_map.at(coord);
         } catch (std::out_of_range&) {
+            auto lock = std::lock_guard(chunk->navmesh_mutex);
+
             auto vertex = boost::add_vertex(chunk->navmesh.graph);
             chunk->navmesh.coord_vertex_map[coord]  = vertex;
             chunk->navmesh.vertex_coord_map[vertex] = coord;
@@ -114,12 +116,16 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_bulk(
                 ChunkNavmeshVertexDescriptor candidate_block_vertex
                     = impl::get_vertex(chunk, candidate_block_coord);
 
-                boost::add_edge(
-                    block_vertex, candidate_block_vertex, chunk->navmesh.graph
-                );
-                boost::add_edge(
-                    candidate_block_vertex, block_vertex, chunk->navmesh.graph
-                );
+                {
+                    auto lock = std::lock_guard(chunk->navmesh_mutex);
+
+                    boost::add_edge(
+                        block_vertex, candidate_block_vertex, chunk->navmesh.graph
+                    );
+                    boost::add_edge(
+                        candidate_block_vertex, block_vertex, chunk->navmesh.graph
+                    );
+                }
             }
         }
     };
@@ -1366,27 +1372,35 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                     = { impl::get_vertex(chunk, candidate_block_coord),
                         impl::get_vertex(neighbour, candidate_block_coord) };
 
-                boost::add_edge(
-                    this_block_vertex.here,
-                    candidate_block_vertex.here,
-                    chunk->navmesh.graph
-                );
-                boost::add_edge(
-                    candidate_block_vertex.here,
-                    this_block_vertex.here,
-                    chunk->navmesh.graph
-                );
+                {
+                    auto lock = std::lock_guard(chunk->navmesh_mutex);
 
-                boost::add_edge(
-                    this_block_vertex.in_neighbour,
-                    candidate_block_vertex.in_neighbour,
-                    neighbour->navmesh.graph
-                );
-                boost::add_edge(
-                    candidate_block_vertex.in_neighbour,
-                    this_block_vertex.in_neighbour,
-                    neighbour->navmesh.graph
-                );
+                    boost::add_edge(
+                        this_block_vertex.here,
+                        candidate_block_vertex.here,
+                        chunk->navmesh.graph
+                    );
+                    boost::add_edge(
+                        candidate_block_vertex.here,
+                        this_block_vertex.here,
+                        chunk->navmesh.graph
+                    );
+                }
+
+                {
+                    auto lock = std::lock_guard(neighbour->navmesh_mutex);
+
+                    boost::add_edge(
+                        this_block_vertex.in_neighbour,
+                        candidate_block_vertex.in_neighbour,
+                        neighbour->navmesh.graph
+                    );
+                    boost::add_edge(
+                        candidate_block_vertex.in_neighbour,
+                        this_block_vertex.in_neighbour,
+                        neighbour->navmesh.graph
+                    );
+                }
             }
         }
     };
@@ -1496,27 +1510,35 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                             impl::get_vertex(below_neighbour, candidate_block_coord)
                         };
 
-                        boost::add_edge(
-                            this_block_vertex.here,
-                            candidate_block_vertex.here,
-                            chunk->navmesh.graph
-                        );
-                        boost::add_edge(
-                            candidate_block_vertex.here,
-                            this_block_vertex.here,
-                            chunk->navmesh.graph
-                        );
+                        {
+                            auto lock = std::lock_guard(chunk->navmesh_mutex);
 
-                        boost::add_edge(
-                            this_block_vertex.in_below_neighbour,
-                            candidate_block_vertex.in_below_neighbour,
-                            below_neighbour->navmesh.graph
-                        );
-                        boost::add_edge(
-                            candidate_block_vertex.in_below_neighbour,
-                            this_block_vertex.in_below_neighbour,
-                            below_neighbour->navmesh.graph
-                        );
+                            boost::add_edge(
+                                this_block_vertex.here,
+                                candidate_block_vertex.here,
+                                chunk->navmesh.graph
+                            );
+                            boost::add_edge(
+                                candidate_block_vertex.here,
+                                this_block_vertex.here,
+                                chunk->navmesh.graph
+                            );
+                        }
+
+                        {
+                            auto lock = std::lock_guard(below_neighbour->navmesh_mutex);
+
+                            boost::add_edge(
+                                this_block_vertex.in_below_neighbour,
+                                candidate_block_vertex.in_below_neighbour,
+                                below_neighbour->navmesh.graph
+                            );
+                            boost::add_edge(
+                                candidate_block_vertex.in_below_neighbour,
+                                this_block_vertex.in_below_neighbour,
+                                below_neighbour->navmesh.graph
+                            );
+                        }
                     }
                 }
 
@@ -1633,27 +1655,35 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                             impl::get_vertex(below_neighbour, candidate_block_coord)
                         };
 
-                        boost::add_edge(
-                            this_block_vertex.here,
-                            candidate_block_vertex.here,
-                            chunk->navmesh.graph
-                        );
-                        boost::add_edge(
-                            candidate_block_vertex.here,
-                            this_block_vertex.here,
-                            chunk->navmesh.graph
-                        );
+                        {
+                            auto lock = std::lock_guard(chunk->navmesh_mutex);
 
-                        boost::add_edge(
-                            this_block_vertex.in_below_neighbour,
-                            candidate_block_vertex.in_below_neighbour,
-                            below_neighbour->navmesh.graph
-                        );
-                        boost::add_edge(
-                            candidate_block_vertex.in_below_neighbour,
-                            this_block_vertex.in_below_neighbour,
-                            below_neighbour->navmesh.graph
-                        );
+                            boost::add_edge(
+                                this_block_vertex.here,
+                                candidate_block_vertex.here,
+                                chunk->navmesh.graph
+                            );
+                            boost::add_edge(
+                                candidate_block_vertex.here,
+                                this_block_vertex.here,
+                                chunk->navmesh.graph
+                            );
+                        }
+
+                        {
+                            auto lock = std::lock_guard(below_neighbour->navmesh_mutex);
+
+                            boost::add_edge(
+                                this_block_vertex.in_below_neighbour,
+                                candidate_block_vertex.in_below_neighbour,
+                                below_neighbour->navmesh.graph
+                            );
+                            boost::add_edge(
+                                candidate_block_vertex.in_below_neighbour,
+                                this_block_vertex.in_below_neighbour,
+                                below_neighbour->navmesh.graph
+                            );
+                        }
                     }
                 }
 
@@ -1769,27 +1799,35 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                             impl::get_vertex(below_neighbour, candidate_block_coord)
                         };
 
-                        boost::add_edge(
-                            this_block_vertex.here,
-                            candidate_block_vertex.here,
-                            chunk->navmesh.graph
-                        );
-                        boost::add_edge(
-                            candidate_block_vertex.here,
-                            this_block_vertex.here,
-                            chunk->navmesh.graph
-                        );
+                        {
+                            auto lock = std::lock_guard(chunk->navmesh_mutex);
 
-                        boost::add_edge(
-                            this_block_vertex.in_below_neighbour,
-                            candidate_block_vertex.in_below_neighbour,
-                            below_neighbour->navmesh.graph
-                        );
-                        boost::add_edge(
-                            candidate_block_vertex.in_below_neighbour,
-                            this_block_vertex.in_below_neighbour,
-                            below_neighbour->navmesh.graph
-                        );
+                            boost::add_edge(
+                                this_block_vertex.here,
+                                candidate_block_vertex.here,
+                                chunk->navmesh.graph
+                            );
+                            boost::add_edge(
+                                candidate_block_vertex.here,
+                                this_block_vertex.here,
+                                chunk->navmesh.graph
+                            );
+                        }
+
+                        {
+                            auto lock = std::lock_guard(below_neighbour->navmesh_mutex);
+
+                            boost::add_edge(
+                                this_block_vertex.in_below_neighbour,
+                                candidate_block_vertex.in_below_neighbour,
+                                below_neighbour->navmesh.graph
+                            );
+                            boost::add_edge(
+                                candidate_block_vertex.in_below_neighbour,
+                                this_block_vertex.in_below_neighbour,
+                                below_neighbour->navmesh.graph
+                            );
+                        }
                     }
                 }
 
@@ -1905,27 +1943,35 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                             impl::get_vertex(below_neighbour, candidate_block_coord)
                         };
 
-                        boost::add_edge(
-                            this_block_vertex.here,
-                            candidate_block_vertex.here,
-                            chunk->navmesh.graph
-                        );
-                        boost::add_edge(
-                            candidate_block_vertex.here,
-                            this_block_vertex.here,
-                            chunk->navmesh.graph
-                        );
+                        {
+                            auto lock = std::lock_guard(chunk->navmesh_mutex);
 
-                        boost::add_edge(
-                            this_block_vertex.in_below_neighbour,
-                            candidate_block_vertex.in_below_neighbour,
-                            below_neighbour->navmesh.graph
-                        );
-                        boost::add_edge(
-                            candidate_block_vertex.in_below_neighbour,
-                            this_block_vertex.in_below_neighbour,
-                            below_neighbour->navmesh.graph
-                        );
+                            boost::add_edge(
+                                this_block_vertex.here,
+                                candidate_block_vertex.here,
+                                chunk->navmesh.graph
+                            );
+                            boost::add_edge(
+                                candidate_block_vertex.here,
+                                this_block_vertex.here,
+                                chunk->navmesh.graph
+                            );
+                        }
+
+                        {
+                            auto lock = std::lock_guard(below_neighbour->navmesh_mutex);
+
+                            boost::add_edge(
+                                this_block_vertex.in_below_neighbour,
+                                candidate_block_vertex.in_below_neighbour,
+                                below_neighbour->navmesh.graph
+                            );
+                            boost::add_edge(
+                                candidate_block_vertex.in_below_neighbour,
+                                this_block_vertex.in_below_neighbour,
+                                below_neighbour->navmesh.graph
+                            );
+                        }
                     }
                 }
 
@@ -2010,27 +2056,36 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                                             neighbour, left_of_neighbour_block_coord
                                         ) };
 
-                                boost::add_edge(
-                                    this_block_vertex.here,
-                                    left_of_neighbour_block_vertex.here,
-                                    chunk->navmesh.graph
-                                );
-                                boost::add_edge(
-                                    left_of_neighbour_block_vertex.here,
-                                    this_block_vertex.here,
-                                    chunk->navmesh.graph
-                                );
+                                {
+                                    auto lock = std::lock_guard(chunk->navmesh_mutex);
 
-                                boost::add_edge(
-                                    this_block_vertex.in_neighbour,
-                                    left_of_neighbour_block_vertex.in_neighbour,
-                                    neighbour->navmesh.graph
-                                );
-                                boost::add_edge(
-                                    left_of_neighbour_block_vertex.in_neighbour,
-                                    this_block_vertex.in_neighbour,
-                                    neighbour->navmesh.graph
-                                );
+                                    boost::add_edge(
+                                        this_block_vertex.here,
+                                        left_of_neighbour_block_vertex.here,
+                                        chunk->navmesh.graph
+                                    );
+                                    boost::add_edge(
+                                        left_of_neighbour_block_vertex.here,
+                                        this_block_vertex.here,
+                                        chunk->navmesh.graph
+                                    );
+                                }
+
+                                {
+                                    auto lock
+                                        = std::lock_guard(neighbour->navmesh_mutex);
+
+                                    boost::add_edge(
+                                        this_block_vertex.in_neighbour,
+                                        left_of_neighbour_block_vertex.in_neighbour,
+                                        neighbour->navmesh.graph
+                                    );
+                                    boost::add_edge(
+                                        left_of_neighbour_block_vertex.in_neighbour,
+                                        this_block_vertex.in_neighbour,
+                                        neighbour->navmesh.graph
+                                    );
+                                }
                             }
 
                             // Right
@@ -2064,27 +2119,36 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                                             neighbour, right_of_neighbour_block_coord
                                         ) };
 
-                                boost::add_edge(
-                                    this_block_vertex.here,
-                                    right_of_neighbour_block_vertex.here,
-                                    chunk->navmesh.graph
-                                );
-                                boost::add_edge(
-                                    right_of_neighbour_block_vertex.here,
-                                    this_block_vertex.here,
-                                    chunk->navmesh.graph
-                                );
+                                {
+                                    auto lock = std::lock_guard(chunk->navmesh_mutex);
 
-                                boost::add_edge(
-                                    this_block_vertex.in_neighbour,
-                                    right_of_neighbour_block_vertex.in_neighbour,
-                                    neighbour->navmesh.graph
-                                );
-                                boost::add_edge(
-                                    right_of_neighbour_block_vertex.in_neighbour,
-                                    this_block_vertex.in_neighbour,
-                                    neighbour->navmesh.graph
-                                );
+                                    boost::add_edge(
+                                        this_block_vertex.here,
+                                        right_of_neighbour_block_vertex.here,
+                                        chunk->navmesh.graph
+                                    );
+                                    boost::add_edge(
+                                        right_of_neighbour_block_vertex.here,
+                                        this_block_vertex.here,
+                                        chunk->navmesh.graph
+                                    );
+                                }
+
+                                {
+                                    auto lock
+                                        = std::lock_guard(neighbour->navmesh_mutex);
+
+                                    boost::add_edge(
+                                        this_block_vertex.in_neighbour,
+                                        right_of_neighbour_block_vertex.in_neighbour,
+                                        neighbour->navmesh.graph
+                                    );
+                                    boost::add_edge(
+                                        right_of_neighbour_block_vertex.in_neighbour,
+                                        this_block_vertex.in_neighbour,
+                                        neighbour->navmesh.graph
+                                    );
+                                }
                             }
 
                             // Front
@@ -2118,27 +2182,36 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                                             neighbour, front_of_neighbour_block_coord
                                         ) };
 
-                                boost::add_edge(
-                                    this_block_vertex.here,
-                                    front_of_neighbour_block_vertex.here,
-                                    chunk->navmesh.graph
-                                );
-                                boost::add_edge(
-                                    front_of_neighbour_block_vertex.here,
-                                    this_block_vertex.here,
-                                    chunk->navmesh.graph
-                                );
+                                {
+                                    auto lock = std::lock_guard(chunk->navmesh_mutex);
 
-                                boost::add_edge(
-                                    this_block_vertex.in_neighbour,
-                                    front_of_neighbour_block_vertex.in_neighbour,
-                                    neighbour->navmesh.graph
-                                );
-                                boost::add_edge(
-                                    front_of_neighbour_block_vertex.in_neighbour,
-                                    this_block_vertex.in_neighbour,
-                                    neighbour->navmesh.graph
-                                );
+                                    boost::add_edge(
+                                        this_block_vertex.here,
+                                        front_of_neighbour_block_vertex.here,
+                                        chunk->navmesh.graph
+                                    );
+                                    boost::add_edge(
+                                        front_of_neighbour_block_vertex.here,
+                                        this_block_vertex.here,
+                                        chunk->navmesh.graph
+                                    );
+                                }
+
+                                {
+                                    auto lock
+                                        = std::lock_guard(neighbour->navmesh_mutex);
+
+                                    boost::add_edge(
+                                        this_block_vertex.in_neighbour,
+                                        front_of_neighbour_block_vertex.in_neighbour,
+                                        neighbour->navmesh.graph
+                                    );
+                                    boost::add_edge(
+                                        front_of_neighbour_block_vertex.in_neighbour,
+                                        this_block_vertex.in_neighbour,
+                                        neighbour->navmesh.graph
+                                    );
+                                }
                             }
 
                             // Back
@@ -2172,27 +2245,36 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                                             neighbour, back_of_neighbour_block_coord
                                         ) };
 
-                                boost::add_edge(
-                                    this_block_vertex.here,
-                                    back_of_neighbour_block_vertex.here,
-                                    chunk->navmesh.graph
-                                );
-                                boost::add_edge(
-                                    back_of_neighbour_block_vertex.here,
-                                    this_block_vertex.here,
-                                    chunk->navmesh.graph
-                                );
+                                {
+                                    auto lock = std::lock_guard(chunk->navmesh_mutex);
 
-                                boost::add_edge(
-                                    this_block_vertex.in_neighbour,
-                                    back_of_neighbour_block_vertex.in_neighbour,
-                                    neighbour->navmesh.graph
-                                );
-                                boost::add_edge(
-                                    back_of_neighbour_block_vertex.in_neighbour,
-                                    this_block_vertex.in_neighbour,
-                                    neighbour->navmesh.graph
-                                );
+                                    boost::add_edge(
+                                        this_block_vertex.here,
+                                        back_of_neighbour_block_vertex.here,
+                                        chunk->navmesh.graph
+                                    );
+                                    boost::add_edge(
+                                        back_of_neighbour_block_vertex.here,
+                                        this_block_vertex.here,
+                                        chunk->navmesh.graph
+                                    );
+                                }
+
+                                {
+                                    auto lock
+                                        = std::lock_guard(neighbour->navmesh_mutex);
+
+                                    boost::add_edge(
+                                        this_block_vertex.in_neighbour,
+                                        back_of_neighbour_block_vertex.in_neighbour,
+                                        neighbour->navmesh.graph
+                                    );
+                                    boost::add_edge(
+                                        back_of_neighbour_block_vertex.in_neighbour,
+                                        this_block_vertex.in_neighbour,
+                                        neighbour->navmesh.graph
+                                    );
+                                }
                             }
                         }
                         // Across and Down
@@ -2227,16 +2309,20 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                                 ChunkNavmeshVertexDescriptor left_of_this_block_vertex
                                     = impl::get_vertex(chunk, left_of_this_block_coord);
 
-                                boost::add_edge(
-                                    this_block_vertex.here,
-                                    left_of_this_block_vertex,
-                                    chunk->navmesh.graph
-                                );
-                                boost::add_edge(
-                                    left_of_this_block_vertex,
-                                    this_block_vertex.here,
-                                    chunk->navmesh.graph
-                                );
+                                {
+                                    auto lock = std::lock_guard(chunk->navmesh_mutex);
+
+                                    boost::add_edge(
+                                        this_block_vertex.here,
+                                        left_of_this_block_vertex,
+                                        chunk->navmesh.graph
+                                    );
+                                    boost::add_edge(
+                                        left_of_this_block_vertex,
+                                        this_block_vertex.here,
+                                        chunk->navmesh.graph
+                                    );
+                                }
                                 // Down
                             } else if (is_solid(left_of_and_below_this_block) && !is_solid(left_of_this_block) && !is_solid(left_of_neighbour_block))
                             {
@@ -2252,16 +2338,20 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                                         chunk, left_of_and_below_this_block_coord
                                     );
 
-                                boost::add_edge(
-                                    this_block_vertex.here,
-                                    left_of_and_below_this_block_vertex,
-                                    chunk->navmesh.graph
-                                );
-                                boost::add_edge(
-                                    left_of_and_below_this_block_vertex,
-                                    this_block_vertex.here,
-                                    chunk->navmesh.graph
-                                );
+                                {
+                                    auto lock = std::lock_guard(chunk->navmesh_mutex);
+
+                                    boost::add_edge(
+                                        this_block_vertex.here,
+                                        left_of_and_below_this_block_vertex,
+                                        chunk->navmesh.graph
+                                    );
+                                    boost::add_edge(
+                                        left_of_and_below_this_block_vertex,
+                                        this_block_vertex.here,
+                                        chunk->navmesh.graph
+                                    );
+                                }
                             }
 
                             // Right
@@ -2295,16 +2385,20 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                                         chunk, right_of_this_block_coord
                                     );
 
-                                boost::add_edge(
-                                    this_block_vertex.here,
-                                    right_of_this_block_vertex,
-                                    chunk->navmesh.graph
-                                );
-                                boost::add_edge(
-                                    right_of_this_block_vertex,
-                                    this_block_vertex.here,
-                                    chunk->navmesh.graph
-                                );
+                                {
+                                    auto lock = std::lock_guard(chunk->navmesh_mutex);
+
+                                    boost::add_edge(
+                                        this_block_vertex.here,
+                                        right_of_this_block_vertex,
+                                        chunk->navmesh.graph
+                                    );
+                                    boost::add_edge(
+                                        right_of_this_block_vertex,
+                                        this_block_vertex.here,
+                                        chunk->navmesh.graph
+                                    );
+                                }
                                 // Down
                             } else if (is_solid(right_of_and_below_this_block) && !is_solid(right_of_this_block) && !is_solid(right_of_neighbour_block))
                             {
@@ -2320,16 +2414,20 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                                         chunk, right_of_and_below_this_block_coord
                                     );
 
-                                boost::add_edge(
-                                    this_block_vertex.here,
-                                    right_of_and_below_this_block_vertex,
-                                    chunk->navmesh.graph
-                                );
-                                boost::add_edge(
-                                    right_of_and_below_this_block_vertex,
-                                    this_block_vertex.here,
-                                    chunk->navmesh.graph
-                                );
+                                {
+                                    auto lock = std::lock_guard(chunk->navmesh_mutex);
+
+                                    boost::add_edge(
+                                        this_block_vertex.here,
+                                        right_of_and_below_this_block_vertex,
+                                        chunk->navmesh.graph
+                                    );
+                                    boost::add_edge(
+                                        right_of_and_below_this_block_vertex,
+                                        this_block_vertex.here,
+                                        chunk->navmesh.graph
+                                    );
+                                }
                             }
 
                             // Front
@@ -2363,16 +2461,20 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                                         chunk, front_of_this_block_coord
                                     );
 
-                                boost::add_edge(
-                                    this_block_vertex.here,
-                                    front_of_this_block_vertex,
-                                    chunk->navmesh.graph
-                                );
-                                boost::add_edge(
-                                    front_of_this_block_vertex,
-                                    this_block_vertex.here,
-                                    chunk->navmesh.graph
-                                );
+                                {
+                                    auto lock = std::lock_guard(chunk->navmesh_mutex);
+
+                                    boost::add_edge(
+                                        this_block_vertex.here,
+                                        front_of_this_block_vertex,
+                                        chunk->navmesh.graph
+                                    );
+                                    boost::add_edge(
+                                        front_of_this_block_vertex,
+                                        this_block_vertex.here,
+                                        chunk->navmesh.graph
+                                    );
+                                }
                                 // Down
                             } else if (is_solid(front_of_and_below_this_block) && !is_solid(front_of_this_block) && !is_solid(front_of_neighbour_block))
                             {
@@ -2388,16 +2490,20 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                                         chunk, front_of_and_below_this_block_coord
                                     );
 
-                                boost::add_edge(
-                                    this_block_vertex.here,
-                                    front_of_and_below_this_block_vertex,
-                                    chunk->navmesh.graph
-                                );
-                                boost::add_edge(
-                                    front_of_and_below_this_block_vertex,
-                                    this_block_vertex.here,
-                                    chunk->navmesh.graph
-                                );
+                                {
+                                    auto lock = std::lock_guard(chunk->navmesh_mutex);
+
+                                    boost::add_edge(
+                                        this_block_vertex.here,
+                                        front_of_and_below_this_block_vertex,
+                                        chunk->navmesh.graph
+                                    );
+                                    boost::add_edge(
+                                        front_of_and_below_this_block_vertex,
+                                        this_block_vertex.here,
+                                        chunk->navmesh.graph
+                                    );
+                                }
                             }
 
                             // Back
@@ -2429,16 +2535,20 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                                 ChunkNavmeshVertexDescriptor back_of_this_block_vertex
                                     = impl::get_vertex(chunk, back_of_this_block_coord);
 
-                                boost::add_edge(
-                                    this_block_vertex.here,
-                                    back_of_this_block_vertex,
-                                    chunk->navmesh.graph
-                                );
-                                boost::add_edge(
-                                    back_of_this_block_vertex,
-                                    this_block_vertex.here,
-                                    chunk->navmesh.graph
-                                );
+                                {
+                                    auto lock = std::lock_guard(chunk->navmesh_mutex);
+
+                                    boost::add_edge(
+                                        this_block_vertex.here,
+                                        back_of_this_block_vertex,
+                                        chunk->navmesh.graph
+                                    );
+                                    boost::add_edge(
+                                        back_of_this_block_vertex,
+                                        this_block_vertex.here,
+                                        chunk->navmesh.graph
+                                    );
+                                }
                                 // Down
                             } else if (is_solid(back_of_and_below_this_block) && !is_solid(back_of_this_block) && !is_solid(back_of_neighbour_block))
                             {
@@ -2454,16 +2564,20 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                                         chunk, back_of_and_below_this_block_coord
                                     );
 
-                                boost::add_edge(
-                                    this_block_vertex.here,
-                                    back_of_and_below_this_block_vertex,
-                                    chunk->navmesh.graph
-                                );
-                                boost::add_edge(
-                                    back_of_and_below_this_block_vertex,
-                                    this_block_vertex.here,
-                                    chunk->navmesh.graph
-                                );
+                                {
+                                    auto lock = std::lock_guard(chunk->navmesh_mutex);
+
+                                    boost::add_edge(
+                                        this_block_vertex.here,
+                                        back_of_and_below_this_block_vertex,
+                                        chunk->navmesh.graph
+                                    );
+                                    boost::add_edge(
+                                        back_of_and_below_this_block_vertex,
+                                        this_block_vertex.here,
+                                        chunk->navmesh.graph
+                                    );
+                                }
                             }
                         }
                     }
@@ -2549,27 +2663,36 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                                         left_of_neighbour, candidate_block_coord
                                     ) };
 
-                            boost::add_edge(
-                                left_of_neighbour_block_vertex.here,
-                                candidate_block_vertex.here,
-                                chunk->navmesh.graph
-                            );
-                            boost::add_edge(
-                                candidate_block_vertex.here,
-                                left_of_neighbour_block_vertex.here,
-                                chunk->navmesh.graph
-                            );
+                            {
+                                auto lock = std::lock_guard(chunk->navmesh_mutex);
 
-                            boost::add_edge(
-                                left_of_neighbour_block_vertex.in_left_of_neighbour,
-                                candidate_block_vertex.in_left_of_neighbour,
-                                left_of_neighbour->navmesh.graph
-                            );
-                            boost::add_edge(
-                                candidate_block_vertex.in_left_of_neighbour,
-                                left_of_neighbour_block_vertex.in_left_of_neighbour,
-                                left_of_neighbour->navmesh.graph
-                            );
+                                boost::add_edge(
+                                    left_of_neighbour_block_vertex.here,
+                                    candidate_block_vertex.here,
+                                    chunk->navmesh.graph
+                                );
+                                boost::add_edge(
+                                    candidate_block_vertex.here,
+                                    left_of_neighbour_block_vertex.here,
+                                    chunk->navmesh.graph
+                                );
+                            }
+
+                            {
+                                auto lock
+                                    = std::lock_guard(left_of_neighbour->navmesh_mutex);
+
+                                boost::add_edge(
+                                    left_of_neighbour_block_vertex.in_left_of_neighbour,
+                                    candidate_block_vertex.in_left_of_neighbour,
+                                    left_of_neighbour->navmesh.graph
+                                );
+                                boost::add_edge(
+                                    candidate_block_vertex.in_left_of_neighbour,
+                                    left_of_neighbour_block_vertex.in_left_of_neighbour,
+                                    left_of_neighbour->navmesh.graph
+                                );
+                            }
                         }
                     }
 
@@ -2654,27 +2777,39 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                                         right_of_neighbour, candidate_block_coord
                                     ) };
 
-                            boost::add_edge(
-                                right_of_neighbour_block_vertex.here,
-                                candidate_block_vertex.here,
-                                chunk->navmesh.graph
-                            );
-                            boost::add_edge(
-                                candidate_block_vertex.here,
-                                right_of_neighbour_block_vertex.here,
-                                chunk->navmesh.graph
-                            );
+                            {
+                                auto lock = std::lock_guard(chunk->navmesh_mutex);
 
-                            boost::add_edge(
-                                right_of_neighbour_block_vertex.in_right_of_neighbour,
-                                candidate_block_vertex.in_right_of_neighbour,
-                                right_of_neighbour->navmesh.graph
-                            );
-                            boost::add_edge(
-                                candidate_block_vertex.in_right_of_neighbour,
-                                right_of_neighbour_block_vertex.in_right_of_neighbour,
-                                right_of_neighbour->navmesh.graph
-                            );
+                                boost::add_edge(
+                                    right_of_neighbour_block_vertex.here,
+                                    candidate_block_vertex.here,
+                                    chunk->navmesh.graph
+                                );
+                                boost::add_edge(
+                                    candidate_block_vertex.here,
+                                    right_of_neighbour_block_vertex.here,
+                                    chunk->navmesh.graph
+                                );
+                            }
+
+                            {
+                                auto lock
+                                    = std::lock_guard(right_of_neighbour->navmesh_mutex
+                                    );
+
+                                boost::add_edge(
+                                    right_of_neighbour_block_vertex
+                                        .in_right_of_neighbour,
+                                    candidate_block_vertex.in_right_of_neighbour,
+                                    right_of_neighbour->navmesh.graph
+                                );
+                                boost::add_edge(
+                                    candidate_block_vertex.in_right_of_neighbour,
+                                    right_of_neighbour_block_vertex
+                                        .in_right_of_neighbour,
+                                    right_of_neighbour->navmesh.graph
+                                );
+                            }
                         }
                     }
 
@@ -2759,27 +2894,39 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                                         front_of_neighbour, candidate_block_coord
                                     ) };
 
-                            boost::add_edge(
-                                front_of_neighbour_block_vertex.here,
-                                candidate_block_vertex.here,
-                                chunk->navmesh.graph
-                            );
-                            boost::add_edge(
-                                candidate_block_vertex.here,
-                                front_of_neighbour_block_vertex.here,
-                                chunk->navmesh.graph
-                            );
+                            {
+                                auto lock = std::lock_guard(chunk->navmesh_mutex);
 
-                            boost::add_edge(
-                                front_of_neighbour_block_vertex.in_front_of_neighbour,
-                                candidate_block_vertex.in_front_of_neighbour,
-                                front_of_neighbour->navmesh.graph
-                            );
-                            boost::add_edge(
-                                candidate_block_vertex.in_front_of_neighbour,
-                                front_of_neighbour_block_vertex.in_front_of_neighbour,
-                                front_of_neighbour->navmesh.graph
-                            );
+                                boost::add_edge(
+                                    front_of_neighbour_block_vertex.here,
+                                    candidate_block_vertex.here,
+                                    chunk->navmesh.graph
+                                );
+                                boost::add_edge(
+                                    candidate_block_vertex.here,
+                                    front_of_neighbour_block_vertex.here,
+                                    chunk->navmesh.graph
+                                );
+                            }
+
+                            {
+                                auto lock
+                                    = std::lock_guard(front_of_neighbour->navmesh_mutex
+                                    );
+
+                                boost::add_edge(
+                                    front_of_neighbour_block_vertex
+                                        .in_front_of_neighbour,
+                                    candidate_block_vertex.in_front_of_neighbour,
+                                    front_of_neighbour->navmesh.graph
+                                );
+                                boost::add_edge(
+                                    candidate_block_vertex.in_front_of_neighbour,
+                                    front_of_neighbour_block_vertex
+                                        .in_front_of_neighbour,
+                                    front_of_neighbour->navmesh.graph
+                                );
+                            }
                         }
                     }
 
@@ -2860,27 +3007,36 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                                         back_of_neighbour, candidate_block_coord
                                     ) };
 
-                            boost::add_edge(
-                                back_of_neighbour_block_vertex.here,
-                                candidate_block_vertex.here,
-                                chunk->navmesh.graph
-                            );
-                            boost::add_edge(
-                                candidate_block_vertex.here,
-                                back_of_neighbour_block_vertex.here,
-                                chunk->navmesh.graph
-                            );
+                            {
+                                auto lock = std::lock_guard(chunk->navmesh_mutex);
 
-                            boost::add_edge(
-                                back_of_neighbour_block_vertex.in_back_of_neighbour,
-                                candidate_block_vertex.in_back_of_neighbour,
-                                back_of_neighbour->navmesh.graph
-                            );
-                            boost::add_edge(
-                                candidate_block_vertex.in_back_of_neighbour,
-                                back_of_neighbour_block_vertex.in_back_of_neighbour,
-                                back_of_neighbour->navmesh.graph
-                            );
+                                boost::add_edge(
+                                    back_of_neighbour_block_vertex.here,
+                                    candidate_block_vertex.here,
+                                    chunk->navmesh.graph
+                                );
+                                boost::add_edge(
+                                    candidate_block_vertex.here,
+                                    back_of_neighbour_block_vertex.here,
+                                    chunk->navmesh.graph
+                                );
+                            }
+
+                            {
+                                auto lock
+                                    = std::lock_guard(back_of_neighbour->navmesh_mutex);
+
+                                boost::add_edge(
+                                    back_of_neighbour_block_vertex.in_back_of_neighbour,
+                                    candidate_block_vertex.in_back_of_neighbour,
+                                    back_of_neighbour->navmesh.graph
+                                );
+                                boost::add_edge(
+                                    candidate_block_vertex.in_back_of_neighbour,
+                                    back_of_neighbour_block_vertex.in_back_of_neighbour,
+                                    back_of_neighbour->navmesh.graph
+                                );
+                            }
                         }
                     }
 
@@ -2969,27 +3125,35 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                             impl::get_vertex(left_neighbour, candidate_block_coord)
                         };
 
-                        boost::add_edge(
-                            this_block_vertex.here,
-                            candidate_block_vertex.here,
-                            chunk->navmesh.graph
-                        );
-                        boost::add_edge(
-                            candidate_block_vertex.here,
-                            this_block_vertex.here,
-                            chunk->navmesh.graph
-                        );
+                        {
+                            auto lock = std::lock_guard(chunk->navmesh_mutex);
 
-                        boost::add_edge(
-                            this_block_vertex.in_left_neighbour,
-                            candidate_block_vertex.in_left_neighbour,
-                            left_neighbour->navmesh.graph
-                        );
-                        boost::add_edge(
-                            candidate_block_vertex.in_left_neighbour,
-                            this_block_vertex.in_left_neighbour,
-                            left_neighbour->navmesh.graph
-                        );
+                            boost::add_edge(
+                                this_block_vertex.here,
+                                candidate_block_vertex.here,
+                                chunk->navmesh.graph
+                            );
+                            boost::add_edge(
+                                candidate_block_vertex.here,
+                                this_block_vertex.here,
+                                chunk->navmesh.graph
+                            );
+                        }
+
+                        {
+                            auto lock = std::lock_guard(left_neighbour->navmesh_mutex);
+
+                            boost::add_edge(
+                                this_block_vertex.in_left_neighbour,
+                                candidate_block_vertex.in_left_neighbour,
+                                left_neighbour->navmesh.graph
+                            );
+                            boost::add_edge(
+                                candidate_block_vertex.in_left_neighbour,
+                                this_block_vertex.in_left_neighbour,
+                                left_neighbour->navmesh.graph
+                            );
+                        }
                     }
 
                     // Step across and down from y == CHUNK_LENGTH - 1
@@ -3051,27 +3215,36 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                                 impl::get_vertex(left_neighbour, candidate_block_coord)
                             };
 
-                            boost::add_edge(
-                                this_block_vertex.here,
-                                candidate_block_vertex.here,
-                                chunk->navmesh.graph
-                            );
-                            boost::add_edge(
-                                candidate_block_vertex.here,
-                                this_block_vertex.here,
-                                chunk->navmesh.graph
-                            );
+                            {
+                                auto lock = std::lock_guard(chunk->navmesh_mutex);
 
-                            boost::add_edge(
-                                this_block_vertex.in_left_neighbour,
-                                candidate_block_vertex.in_left_neighbour,
-                                left_neighbour->navmesh.graph
-                            );
-                            boost::add_edge(
-                                candidate_block_vertex.in_left_neighbour,
-                                this_block_vertex.in_left_neighbour,
-                                left_neighbour->navmesh.graph
-                            );
+                                boost::add_edge(
+                                    this_block_vertex.here,
+                                    candidate_block_vertex.here,
+                                    chunk->navmesh.graph
+                                );
+                                boost::add_edge(
+                                    candidate_block_vertex.here,
+                                    this_block_vertex.here,
+                                    chunk->navmesh.graph
+                                );
+                            }
+
+                            {
+                                auto lock
+                                    = std::lock_guard(left_neighbour->navmesh_mutex);
+
+                                boost::add_edge(
+                                    this_block_vertex.in_left_neighbour,
+                                    candidate_block_vertex.in_left_neighbour,
+                                    left_neighbour->navmesh.graph
+                                );
+                                boost::add_edge(
+                                    candidate_block_vertex.in_left_neighbour,
+                                    this_block_vertex.in_left_neighbour,
+                                    left_neighbour->navmesh.graph
+                                );
+                            }
                         }
                         // Step down
                         else if (is_solid(step_down_candidate_block) && !is_solid(step_across_candidate_block) && !is_solid(above_candidates_block))
@@ -3088,27 +3261,36 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                                 impl::get_vertex(left_neighbour, candidate_block_coord)
                             };
 
-                            boost::add_edge(
-                                this_block_vertex.here,
-                                candidate_block_vertex.here,
-                                chunk->navmesh.graph
-                            );
-                            boost::add_edge(
-                                candidate_block_vertex.here,
-                                this_block_vertex.here,
-                                chunk->navmesh.graph
-                            );
+                            {
+                                auto lock = std::lock_guard(chunk->navmesh_mutex);
 
-                            boost::add_edge(
-                                this_block_vertex.in_left_neighbour,
-                                candidate_block_vertex.in_left_neighbour,
-                                left_neighbour->navmesh.graph
-                            );
-                            boost::add_edge(
-                                candidate_block_vertex.in_left_neighbour,
-                                this_block_vertex.in_left_neighbour,
-                                left_neighbour->navmesh.graph
-                            );
+                                boost::add_edge(
+                                    this_block_vertex.here,
+                                    candidate_block_vertex.here,
+                                    chunk->navmesh.graph
+                                );
+                                boost::add_edge(
+                                    candidate_block_vertex.here,
+                                    this_block_vertex.here,
+                                    chunk->navmesh.graph
+                                );
+                            }
+
+                            {
+                                auto lock
+                                    = std::lock_guard(left_neighbour->navmesh_mutex);
+
+                                boost::add_edge(
+                                    this_block_vertex.in_left_neighbour,
+                                    candidate_block_vertex.in_left_neighbour,
+                                    left_neighbour->navmesh.graph
+                                );
+                                boost::add_edge(
+                                    candidate_block_vertex.in_left_neighbour,
+                                    this_block_vertex.in_left_neighbour,
+                                    left_neighbour->navmesh.graph
+                                );
+                            }
                         }
                     }
 
@@ -3196,27 +3378,35 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                             impl::get_vertex(right_neighbour, candidate_block_coord)
                         };
 
-                        boost::add_edge(
-                            this_block_vertex.here,
-                            candidate_block_vertex.here,
-                            chunk->navmesh.graph
-                        );
-                        boost::add_edge(
-                            candidate_block_vertex.here,
-                            this_block_vertex.here,
-                            chunk->navmesh.graph
-                        );
+                        {
+                            auto lock = std::lock_guard(chunk->navmesh_mutex);
 
-                        boost::add_edge(
-                            this_block_vertex.in_right_neighbour,
-                            candidate_block_vertex.in_right_neighbour,
-                            right_neighbour->navmesh.graph
-                        );
-                        boost::add_edge(
-                            candidate_block_vertex.in_right_neighbour,
-                            this_block_vertex.in_right_neighbour,
-                            right_neighbour->navmesh.graph
-                        );
+                            boost::add_edge(
+                                this_block_vertex.here,
+                                candidate_block_vertex.here,
+                                chunk->navmesh.graph
+                            );
+                            boost::add_edge(
+                                candidate_block_vertex.here,
+                                this_block_vertex.here,
+                                chunk->navmesh.graph
+                            );
+                        }
+
+                        {
+                            auto lock = std::lock_guard(right_neighbour->navmesh_mutex);
+
+                            boost::add_edge(
+                                this_block_vertex.in_right_neighbour,
+                                candidate_block_vertex.in_right_neighbour,
+                                right_neighbour->navmesh.graph
+                            );
+                            boost::add_edge(
+                                candidate_block_vertex.in_right_neighbour,
+                                this_block_vertex.in_right_neighbour,
+                                right_neighbour->navmesh.graph
+                            );
+                        }
                     }
 
                     // Step across and down from y == CHUNK_LENGTH - 1
@@ -3277,27 +3467,36 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                                 impl::get_vertex(right_neighbour, candidate_block_coord)
                             };
 
-                            boost::add_edge(
-                                this_block_vertex.here,
-                                candidate_block_vertex.here,
-                                chunk->navmesh.graph
-                            );
-                            boost::add_edge(
-                                candidate_block_vertex.here,
-                                this_block_vertex.here,
-                                chunk->navmesh.graph
-                            );
+                            {
+                                auto lock = std::lock_guard(chunk->navmesh_mutex);
 
-                            boost::add_edge(
-                                this_block_vertex.in_right_neighbour,
-                                candidate_block_vertex.in_right_neighbour,
-                                right_neighbour->navmesh.graph
-                            );
-                            boost::add_edge(
-                                candidate_block_vertex.in_right_neighbour,
-                                this_block_vertex.in_right_neighbour,
-                                right_neighbour->navmesh.graph
-                            );
+                                boost::add_edge(
+                                    this_block_vertex.here,
+                                    candidate_block_vertex.here,
+                                    chunk->navmesh.graph
+                                );
+                                boost::add_edge(
+                                    candidate_block_vertex.here,
+                                    this_block_vertex.here,
+                                    chunk->navmesh.graph
+                                );
+                            }
+
+                            {
+                                auto lock
+                                    = std::lock_guard(right_neighbour->navmesh_mutex);
+
+                                boost::add_edge(
+                                    this_block_vertex.in_right_neighbour,
+                                    candidate_block_vertex.in_right_neighbour,
+                                    right_neighbour->navmesh.graph
+                                );
+                                boost::add_edge(
+                                    candidate_block_vertex.in_right_neighbour,
+                                    this_block_vertex.in_right_neighbour,
+                                    right_neighbour->navmesh.graph
+                                );
+                            }
                         }
                         // Step down
                         else if (is_solid(step_down_candidate_block) && !is_solid(step_across_candidate_block) && !is_solid(above_candidates_block))
@@ -3314,27 +3513,36 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                                 impl::get_vertex(right_neighbour, candidate_block_coord)
                             };
 
-                            boost::add_edge(
-                                this_block_vertex.here,
-                                candidate_block_vertex.here,
-                                chunk->navmesh.graph
-                            );
-                            boost::add_edge(
-                                candidate_block_vertex.here,
-                                this_block_vertex.here,
-                                chunk->navmesh.graph
-                            );
+                            {
+                                auto lock = std::lock_guard(chunk->navmesh_mutex);
 
-                            boost::add_edge(
-                                this_block_vertex.in_right_neighbour,
-                                candidate_block_vertex.in_right_neighbour,
-                                right_neighbour->navmesh.graph
-                            );
-                            boost::add_edge(
-                                candidate_block_vertex.in_right_neighbour,
-                                this_block_vertex.in_right_neighbour,
-                                right_neighbour->navmesh.graph
-                            );
+                                boost::add_edge(
+                                    this_block_vertex.here,
+                                    candidate_block_vertex.here,
+                                    chunk->navmesh.graph
+                                );
+                                boost::add_edge(
+                                    candidate_block_vertex.here,
+                                    this_block_vertex.here,
+                                    chunk->navmesh.graph
+                                );
+                            }
+
+                            {
+                                auto lock
+                                    = std::lock_guard(right_neighbour->navmesh_mutex);
+
+                                boost::add_edge(
+                                    this_block_vertex.in_right_neighbour,
+                                    candidate_block_vertex.in_right_neighbour,
+                                    right_neighbour->navmesh.graph
+                                );
+                                boost::add_edge(
+                                    candidate_block_vertex.in_right_neighbour,
+                                    this_block_vertex.in_right_neighbour,
+                                    right_neighbour->navmesh.graph
+                                );
+                            }
                         }
                     }
 
@@ -3422,27 +3630,35 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                             impl::get_vertex(front_neighbour, candidate_block_coord)
                         };
 
-                        boost::add_edge(
-                            this_block_vertex.here,
-                            candidate_block_vertex.here,
-                            chunk->navmesh.graph
-                        );
-                        boost::add_edge(
-                            candidate_block_vertex.here,
-                            this_block_vertex.here,
-                            chunk->navmesh.graph
-                        );
+                        {
+                            auto lock = std::lock_guard(chunk->navmesh_mutex);
 
-                        boost::add_edge(
-                            this_block_vertex.in_front_neighbour,
-                            candidate_block_vertex.in_front_neighbour,
-                            front_neighbour->navmesh.graph
-                        );
-                        boost::add_edge(
-                            candidate_block_vertex.in_front_neighbour,
-                            this_block_vertex.in_front_neighbour,
-                            front_neighbour->navmesh.graph
-                        );
+                            boost::add_edge(
+                                this_block_vertex.here,
+                                candidate_block_vertex.here,
+                                chunk->navmesh.graph
+                            );
+                            boost::add_edge(
+                                candidate_block_vertex.here,
+                                this_block_vertex.here,
+                                chunk->navmesh.graph
+                            );
+                        }
+
+                        {
+                            auto lock = std::lock_guard(front_neighbour->navmesh_mutex);
+
+                            boost::add_edge(
+                                this_block_vertex.in_front_neighbour,
+                                candidate_block_vertex.in_front_neighbour,
+                                front_neighbour->navmesh.graph
+                            );
+                            boost::add_edge(
+                                candidate_block_vertex.in_front_neighbour,
+                                this_block_vertex.in_front_neighbour,
+                                front_neighbour->navmesh.graph
+                            );
+                        }
                     }
 
                     // Step across and down from y == CHUNK_LENGTH - 1
@@ -3503,27 +3719,36 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                                 impl::get_vertex(front_neighbour, candidate_block_coord)
                             };
 
-                            boost::add_edge(
-                                this_block_vertex.here,
-                                candidate_block_vertex.here,
-                                chunk->navmesh.graph
-                            );
-                            boost::add_edge(
-                                candidate_block_vertex.here,
-                                this_block_vertex.here,
-                                chunk->navmesh.graph
-                            );
+                            {
+                                auto lock = std::lock_guard(chunk->navmesh_mutex);
 
-                            boost::add_edge(
-                                this_block_vertex.in_front_neighbour,
-                                candidate_block_vertex.in_front_neighbour,
-                                front_neighbour->navmesh.graph
-                            );
-                            boost::add_edge(
-                                candidate_block_vertex.in_front_neighbour,
-                                this_block_vertex.in_front_neighbour,
-                                front_neighbour->navmesh.graph
-                            );
+                                boost::add_edge(
+                                    this_block_vertex.here,
+                                    candidate_block_vertex.here,
+                                    chunk->navmesh.graph
+                                );
+                                boost::add_edge(
+                                    candidate_block_vertex.here,
+                                    this_block_vertex.here,
+                                    chunk->navmesh.graph
+                                );
+                            }
+
+                            {
+                                auto lock
+                                    = std::lock_guard(front_neighbour->navmesh_mutex);
+
+                                boost::add_edge(
+                                    this_block_vertex.in_front_neighbour,
+                                    candidate_block_vertex.in_front_neighbour,
+                                    front_neighbour->navmesh.graph
+                                );
+                                boost::add_edge(
+                                    candidate_block_vertex.in_front_neighbour,
+                                    this_block_vertex.in_front_neighbour,
+                                    front_neighbour->navmesh.graph
+                                );
+                            }
                         }
                         // Step down
                         else if (is_solid(step_down_candidate_block) && !is_solid(step_across_candidate_block) && !is_solid(above_candidates_block))
@@ -3540,27 +3765,36 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                                 impl::get_vertex(front_neighbour, candidate_block_coord)
                             };
 
-                            boost::add_edge(
-                                this_block_vertex.here,
-                                candidate_block_vertex.here,
-                                chunk->navmesh.graph
-                            );
-                            boost::add_edge(
-                                candidate_block_vertex.here,
-                                this_block_vertex.here,
-                                chunk->navmesh.graph
-                            );
+                            {
+                                auto lock = std::lock_guard(chunk->navmesh_mutex);
 
-                            boost::add_edge(
-                                this_block_vertex.in_front_neighbour,
-                                candidate_block_vertex.in_front_neighbour,
-                                front_neighbour->navmesh.graph
-                            );
-                            boost::add_edge(
-                                candidate_block_vertex.in_front_neighbour,
-                                this_block_vertex.in_front_neighbour,
-                                front_neighbour->navmesh.graph
-                            );
+                                boost::add_edge(
+                                    this_block_vertex.here,
+                                    candidate_block_vertex.here,
+                                    chunk->navmesh.graph
+                                );
+                                boost::add_edge(
+                                    candidate_block_vertex.here,
+                                    this_block_vertex.here,
+                                    chunk->navmesh.graph
+                                );
+                            }
+
+                            {
+                                auto lock
+                                    = std::lock_guard(front_neighbour->navmesh_mutex);
+
+                                boost::add_edge(
+                                    this_block_vertex.in_front_neighbour,
+                                    candidate_block_vertex.in_front_neighbour,
+                                    front_neighbour->navmesh.graph
+                                );
+                                boost::add_edge(
+                                    candidate_block_vertex.in_front_neighbour,
+                                    this_block_vertex.in_front_neighbour,
+                                    front_neighbour->navmesh.graph
+                                );
+                            }
                         }
                     }
 
@@ -3647,27 +3881,35 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                             impl::get_vertex(back_neighbour, candidate_block_coord)
                         };
 
-                        boost::add_edge(
-                            this_block_vertex.here,
-                            candidate_block_vertex.here,
-                            chunk->navmesh.graph
-                        );
-                        boost::add_edge(
-                            candidate_block_vertex.here,
-                            this_block_vertex.here,
-                            chunk->navmesh.graph
-                        );
+                        {
+                            auto lock = std::lock_guard(chunk->navmesh_mutex);
 
-                        boost::add_edge(
-                            this_block_vertex.in_back_neighbour,
-                            candidate_block_vertex.in_back_neighbour,
-                            back_neighbour->navmesh.graph
-                        );
-                        boost::add_edge(
-                            candidate_block_vertex.in_back_neighbour,
-                            this_block_vertex.in_back_neighbour,
-                            back_neighbour->navmesh.graph
-                        );
+                            boost::add_edge(
+                                this_block_vertex.here,
+                                candidate_block_vertex.here,
+                                chunk->navmesh.graph
+                            );
+                            boost::add_edge(
+                                candidate_block_vertex.here,
+                                this_block_vertex.here,
+                                chunk->navmesh.graph
+                            );
+                        }
+
+                        {
+                            auto lock = std::lock_guard(back_neighbour->navmesh_mutex);
+
+                            boost::add_edge(
+                                this_block_vertex.in_back_neighbour,
+                                candidate_block_vertex.in_back_neighbour,
+                                back_neighbour->navmesh.graph
+                            );
+                            boost::add_edge(
+                                candidate_block_vertex.in_back_neighbour,
+                                this_block_vertex.in_back_neighbour,
+                                back_neighbour->navmesh.graph
+                            );
+                        }
                     }
 
                     // Step across and down from y == CHUNK_LENGTH - 1
@@ -3729,27 +3971,36 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                                 impl::get_vertex(back_neighbour, candidate_block_coord)
                             };
 
-                            boost::add_edge(
-                                this_block_vertex.here,
-                                candidate_block_vertex.here,
-                                chunk->navmesh.graph
-                            );
-                            boost::add_edge(
-                                candidate_block_vertex.here,
-                                this_block_vertex.here,
-                                chunk->navmesh.graph
-                            );
+                            {
+                                auto lock = std::lock_guard(chunk->navmesh_mutex);
 
-                            boost::add_edge(
-                                this_block_vertex.in_back_neighbour,
-                                candidate_block_vertex.in_back_neighbour,
-                                back_neighbour->navmesh.graph
-                            );
-                            boost::add_edge(
-                                candidate_block_vertex.in_back_neighbour,
-                                this_block_vertex.in_back_neighbour,
-                                back_neighbour->navmesh.graph
-                            );
+                                boost::add_edge(
+                                    this_block_vertex.here,
+                                    candidate_block_vertex.here,
+                                    chunk->navmesh.graph
+                                );
+                                boost::add_edge(
+                                    candidate_block_vertex.here,
+                                    this_block_vertex.here,
+                                    chunk->navmesh.graph
+                                );
+                            }
+
+                            {
+                                auto lock
+                                    = std::lock_guard(back_neighbour->navmesh_mutex);
+
+                                boost::add_edge(
+                                    this_block_vertex.in_back_neighbour,
+                                    candidate_block_vertex.in_back_neighbour,
+                                    back_neighbour->navmesh.graph
+                                );
+                                boost::add_edge(
+                                    candidate_block_vertex.in_back_neighbour,
+                                    this_block_vertex.in_back_neighbour,
+                                    back_neighbour->navmesh.graph
+                                );
+                            }
                         }
                         // Step down
                         else if (is_solid(step_down_candidate_block) && !is_solid(step_across_candidate_block) && !is_solid(above_candidates_block))
@@ -3766,27 +4017,36 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                                 impl::get_vertex(back_neighbour, candidate_block_coord)
                             };
 
-                            boost::add_edge(
-                                this_block_vertex.here,
-                                candidate_block_vertex.here,
-                                chunk->navmesh.graph
-                            );
-                            boost::add_edge(
-                                candidate_block_vertex.here,
-                                this_block_vertex.here,
-                                chunk->navmesh.graph
-                            );
+                            {
+                                auto lock = std::lock_guard(chunk->navmesh_mutex);
 
-                            boost::add_edge(
-                                this_block_vertex.in_back_neighbour,
-                                candidate_block_vertex.in_back_neighbour,
-                                back_neighbour->navmesh.graph
-                            );
-                            boost::add_edge(
-                                candidate_block_vertex.in_back_neighbour,
-                                this_block_vertex.in_back_neighbour,
-                                back_neighbour->navmesh.graph
-                            );
+                                boost::add_edge(
+                                    this_block_vertex.here,
+                                    candidate_block_vertex.here,
+                                    chunk->navmesh.graph
+                                );
+                                boost::add_edge(
+                                    candidate_block_vertex.here,
+                                    this_block_vertex.here,
+                                    chunk->navmesh.graph
+                                );
+                            }
+
+                            {
+                                auto lock
+                                    = std::lock_guard(back_neighbour->navmesh_mutex);
+
+                                boost::add_edge(
+                                    this_block_vertex.in_back_neighbour,
+                                    candidate_block_vertex.in_back_neighbour,
+                                    back_neighbour->navmesh.graph
+                                );
+                                boost::add_edge(
+                                    candidate_block_vertex.in_back_neighbour,
+                                    this_block_vertex.in_back_neighbour,
+                                    back_neighbour->navmesh.graph
+                                );
+                            }
                         }
                     }
 
@@ -3868,27 +4128,36 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                                     )
                                 };
 
-                                boost::add_edge(
-                                    neighbour_block_vertex.here,
-                                    left_of_this_block_vertex.here,
-                                    chunk->navmesh.graph
-                                );
-                                boost::add_edge(
-                                    left_of_this_block_vertex.here,
-                                    neighbour_block_vertex.here,
-                                    chunk->navmesh.graph
-                                );
+                                {
+                                    auto lock = std::lock_guard(chunk->navmesh_mutex);
 
-                                boost::add_edge(
-                                    neighbour_block_vertex.in_neighbour,
-                                    left_of_this_block_vertex.in_neighbour,
-                                    neighbour->navmesh.graph
-                                );
-                                boost::add_edge(
-                                    left_of_this_block_vertex.in_neighbour,
-                                    neighbour_block_vertex.in_neighbour,
-                                    neighbour->navmesh.graph
-                                );
+                                    boost::add_edge(
+                                        neighbour_block_vertex.here,
+                                        left_of_this_block_vertex.here,
+                                        chunk->navmesh.graph
+                                    );
+                                    boost::add_edge(
+                                        left_of_this_block_vertex.here,
+                                        neighbour_block_vertex.here,
+                                        chunk->navmesh.graph
+                                    );
+                                }
+
+                                {
+                                    auto lock
+                                        = std::lock_guard(neighbour->navmesh_mutex);
+
+                                    boost::add_edge(
+                                        neighbour_block_vertex.in_neighbour,
+                                        left_of_this_block_vertex.in_neighbour,
+                                        neighbour->navmesh.graph
+                                    );
+                                    boost::add_edge(
+                                        left_of_this_block_vertex.in_neighbour,
+                                        neighbour_block_vertex.in_neighbour,
+                                        neighbour->navmesh.graph
+                                    );
+                                }
                             }
 
                             // Right
@@ -3920,27 +4189,36 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                                     )
                                 };
 
-                                boost::add_edge(
-                                    neighbour_block_vertex.here,
-                                    right_of_this_block_vertex.here,
-                                    chunk->navmesh.graph
-                                );
-                                boost::add_edge(
-                                    right_of_this_block_vertex.here,
-                                    neighbour_block_vertex.here,
-                                    chunk->navmesh.graph
-                                );
+                                {
+                                    auto lock = std::lock_guard(chunk->navmesh_mutex);
 
-                                boost::add_edge(
-                                    neighbour_block_vertex.in_neighbour,
-                                    right_of_this_block_vertex.in_neighbour,
-                                    neighbour->navmesh.graph
-                                );
-                                boost::add_edge(
-                                    right_of_this_block_vertex.in_neighbour,
-                                    neighbour_block_vertex.in_neighbour,
-                                    neighbour->navmesh.graph
-                                );
+                                    boost::add_edge(
+                                        neighbour_block_vertex.here,
+                                        right_of_this_block_vertex.here,
+                                        chunk->navmesh.graph
+                                    );
+                                    boost::add_edge(
+                                        right_of_this_block_vertex.here,
+                                        neighbour_block_vertex.here,
+                                        chunk->navmesh.graph
+                                    );
+                                }
+
+                                {
+                                    auto lock
+                                        = std::lock_guard(neighbour->navmesh_mutex);
+
+                                    boost::add_edge(
+                                        neighbour_block_vertex.in_neighbour,
+                                        right_of_this_block_vertex.in_neighbour,
+                                        neighbour->navmesh.graph
+                                    );
+                                    boost::add_edge(
+                                        right_of_this_block_vertex.in_neighbour,
+                                        neighbour_block_vertex.in_neighbour,
+                                        neighbour->navmesh.graph
+                                    );
+                                }
                             }
 
                             // Front
@@ -3972,27 +4250,36 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                                     )
                                 };
 
-                                boost::add_edge(
-                                    neighbour_block_vertex.here,
-                                    front_of_this_block_vertex.here,
-                                    chunk->navmesh.graph
-                                );
-                                boost::add_edge(
-                                    front_of_this_block_vertex.here,
-                                    neighbour_block_vertex.here,
-                                    chunk->navmesh.graph
-                                );
+                                {
+                                    auto lock = std::lock_guard(chunk->navmesh_mutex);
 
-                                boost::add_edge(
-                                    neighbour_block_vertex.in_neighbour,
-                                    front_of_this_block_vertex.in_neighbour,
-                                    neighbour->navmesh.graph
-                                );
-                                boost::add_edge(
-                                    front_of_this_block_vertex.in_neighbour,
-                                    neighbour_block_vertex.in_neighbour,
-                                    neighbour->navmesh.graph
-                                );
+                                    boost::add_edge(
+                                        neighbour_block_vertex.here,
+                                        front_of_this_block_vertex.here,
+                                        chunk->navmesh.graph
+                                    );
+                                    boost::add_edge(
+                                        front_of_this_block_vertex.here,
+                                        neighbour_block_vertex.here,
+                                        chunk->navmesh.graph
+                                    );
+                                }
+
+                                {
+                                    auto lock
+                                        = std::lock_guard(neighbour->navmesh_mutex);
+
+                                    boost::add_edge(
+                                        neighbour_block_vertex.in_neighbour,
+                                        front_of_this_block_vertex.in_neighbour,
+                                        neighbour->navmesh.graph
+                                    );
+                                    boost::add_edge(
+                                        front_of_this_block_vertex.in_neighbour,
+                                        neighbour_block_vertex.in_neighbour,
+                                        neighbour->navmesh.graph
+                                    );
+                                }
                             }
 
                             // Back
@@ -4024,27 +4311,36 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                                     )
                                 };
 
-                                boost::add_edge(
-                                    neighbour_block_vertex.here,
-                                    back_of_this_block_vertex.here,
-                                    chunk->navmesh.graph
-                                );
-                                boost::add_edge(
-                                    back_of_this_block_vertex.here,
-                                    neighbour_block_vertex.here,
-                                    chunk->navmesh.graph
-                                );
+                                {
+                                    auto lock = std::lock_guard(chunk->navmesh_mutex);
 
-                                boost::add_edge(
-                                    neighbour_block_vertex.in_neighbour,
-                                    back_of_this_block_vertex.in_neighbour,
-                                    neighbour->navmesh.graph
-                                );
-                                boost::add_edge(
-                                    back_of_this_block_vertex.in_neighbour,
-                                    neighbour_block_vertex.in_neighbour,
-                                    neighbour->navmesh.graph
-                                );
+                                    boost::add_edge(
+                                        neighbour_block_vertex.here,
+                                        back_of_this_block_vertex.here,
+                                        chunk->navmesh.graph
+                                    );
+                                    boost::add_edge(
+                                        back_of_this_block_vertex.here,
+                                        neighbour_block_vertex.here,
+                                        chunk->navmesh.graph
+                                    );
+                                }
+
+                                {
+                                    auto lock
+                                        = std::lock_guard(neighbour->navmesh_mutex);
+
+                                    boost::add_edge(
+                                        neighbour_block_vertex.in_neighbour,
+                                        back_of_this_block_vertex.in_neighbour,
+                                        neighbour->navmesh.graph
+                                    );
+                                    boost::add_edge(
+                                        back_of_this_block_vertex.in_neighbour,
+                                        neighbour_block_vertex.in_neighbour,
+                                        neighbour->navmesh.graph
+                                    );
+                                }
                             }
                         }
                         // Across and Down
@@ -4083,16 +4379,21 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                                         neighbour, left_of_neighbour_block_coord
                                     );
 
-                                boost::add_edge(
-                                    neighbour_block_vertex.here,
-                                    left_of_neighbour_block_vertex,
-                                    neighbour->navmesh.graph
-                                );
-                                boost::add_edge(
-                                    left_of_neighbour_block_vertex,
-                                    neighbour_block_vertex.here,
-                                    neighbour->navmesh.graph
-                                );
+                                {
+                                    auto lock
+                                        = std::lock_guard(neighbour->navmesh_mutex);
+
+                                    boost::add_edge(
+                                        neighbour_block_vertex.here,
+                                        left_of_neighbour_block_vertex,
+                                        neighbour->navmesh.graph
+                                    );
+                                    boost::add_edge(
+                                        left_of_neighbour_block_vertex,
+                                        neighbour_block_vertex.here,
+                                        neighbour->navmesh.graph
+                                    );
+                                }
                                 // Down
                             } else if (is_solid(left_of_and_below_neighbour_block) && !is_solid(left_of_neighbour_block) && !is_solid(left_of_this_block))
                             {
@@ -4110,16 +4411,21 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                                         left_of_and_below_neighbour_block_coord
                                     );
 
-                                boost::add_edge(
-                                    neighbour_block_vertex.in_neighbour,
-                                    left_of_and_below_neighbour_block_vertex,
-                                    neighbour->navmesh.graph
-                                );
-                                boost::add_edge(
-                                    left_of_and_below_neighbour_block_vertex,
-                                    neighbour_block_vertex.in_neighbour,
-                                    neighbour->navmesh.graph
-                                );
+                                {
+                                    auto lock
+                                        = std::lock_guard(neighbour->navmesh_mutex);
+
+                                    boost::add_edge(
+                                        neighbour_block_vertex.in_neighbour,
+                                        left_of_and_below_neighbour_block_vertex,
+                                        neighbour->navmesh.graph
+                                    );
+                                    boost::add_edge(
+                                        left_of_and_below_neighbour_block_vertex,
+                                        neighbour_block_vertex.in_neighbour,
+                                        neighbour->navmesh.graph
+                                    );
+                                }
                             }
 
                             // Right
@@ -4155,16 +4461,21 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                                         neighbour, right_of_neighbour_block_coord
                                     );
 
-                                boost::add_edge(
-                                    neighbour_block_vertex.in_neighbour,
-                                    right_of_neighbour_block_vertex,
-                                    neighbour->navmesh.graph
-                                );
-                                boost::add_edge(
-                                    right_of_neighbour_block_vertex,
-                                    neighbour_block_vertex.in_neighbour,
-                                    neighbour->navmesh.graph
-                                );
+                                {
+                                    auto lock
+                                        = std::lock_guard(neighbour->navmesh_mutex);
+
+                                    boost::add_edge(
+                                        neighbour_block_vertex.in_neighbour,
+                                        right_of_neighbour_block_vertex,
+                                        neighbour->navmesh.graph
+                                    );
+                                    boost::add_edge(
+                                        right_of_neighbour_block_vertex,
+                                        neighbour_block_vertex.in_neighbour,
+                                        neighbour->navmesh.graph
+                                    );
+                                }
                                 // Down
                             } else if (is_solid(right_of_and_below_neighbour_block) && !is_solid(right_of_neighbour_block) && !is_solid(right_of_this_block))
                             {
@@ -4183,16 +4494,21 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                                         right_of_and_below_neighbour_block_coord
                                     );
 
-                                boost::add_edge(
-                                    neighbour_block_vertex.in_neighbour,
-                                    right_of_and_below_neighbour_block_vertex,
-                                    neighbour->navmesh.graph
-                                );
-                                boost::add_edge(
-                                    right_of_and_below_neighbour_block_vertex,
-                                    neighbour_block_vertex.in_neighbour,
-                                    neighbour->navmesh.graph
-                                );
+                                {
+                                    auto lock
+                                        = std::lock_guard(neighbour->navmesh_mutex);
+
+                                    boost::add_edge(
+                                        neighbour_block_vertex.in_neighbour,
+                                        right_of_and_below_neighbour_block_vertex,
+                                        neighbour->navmesh.graph
+                                    );
+                                    boost::add_edge(
+                                        right_of_and_below_neighbour_block_vertex,
+                                        neighbour_block_vertex.in_neighbour,
+                                        neighbour->navmesh.graph
+                                    );
+                                }
                             }
 
                             // Front
@@ -4228,16 +4544,21 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                                         neighbour, front_of_neighbour_block_coord
                                     );
 
-                                boost::add_edge(
-                                    neighbour_block_vertex.in_neighbour,
-                                    front_of_neighbour_block_vertex,
-                                    neighbour->navmesh.graph
-                                );
-                                boost::add_edge(
-                                    front_of_neighbour_block_vertex,
-                                    neighbour_block_vertex.in_neighbour,
-                                    neighbour->navmesh.graph
-                                );
+                                {
+                                    auto lock
+                                        = std::lock_guard(neighbour->navmesh_mutex);
+
+                                    boost::add_edge(
+                                        neighbour_block_vertex.in_neighbour,
+                                        front_of_neighbour_block_vertex,
+                                        neighbour->navmesh.graph
+                                    );
+                                    boost::add_edge(
+                                        front_of_neighbour_block_vertex,
+                                        neighbour_block_vertex.in_neighbour,
+                                        neighbour->navmesh.graph
+                                    );
+                                }
                                 // Down
                             } else if (is_solid(front_of_and_below_neighbour_block) && !is_solid(front_of_neighbour_block) && !is_solid(front_of_this_block))
                             {
@@ -4256,16 +4577,21 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                                         front_of_and_below_neighbour_block_coord
                                     );
 
-                                boost::add_edge(
-                                    neighbour_block_vertex.in_neighbour,
-                                    front_of_and_below_neighbour_block_vertex,
-                                    neighbour->navmesh.graph
-                                );
-                                boost::add_edge(
-                                    front_of_and_below_neighbour_block_vertex,
-                                    neighbour_block_vertex.in_neighbour,
-                                    neighbour->navmesh.graph
-                                );
+                                {
+                                    auto lock
+                                        = std::lock_guard(neighbour->navmesh_mutex);
+
+                                    boost::add_edge(
+                                        neighbour_block_vertex.in_neighbour,
+                                        front_of_and_below_neighbour_block_vertex,
+                                        neighbour->navmesh.graph
+                                    );
+                                    boost::add_edge(
+                                        front_of_and_below_neighbour_block_vertex,
+                                        neighbour_block_vertex.in_neighbour,
+                                        neighbour->navmesh.graph
+                                    );
+                                }
                             }
 
                             // Back
@@ -4301,16 +4627,21 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                                         neighbour, back_of_neighbour_block_coord
                                     );
 
-                                boost::add_edge(
-                                    neighbour_block_vertex.in_neighbour,
-                                    back_of_neighbour_block_vertex,
-                                    neighbour->navmesh.graph
-                                );
-                                boost::add_edge(
-                                    back_of_neighbour_block_vertex,
-                                    neighbour_block_vertex.in_neighbour,
-                                    neighbour->navmesh.graph
-                                );
+                                {
+                                    auto lock
+                                        = std::lock_guard(neighbour->navmesh_mutex);
+
+                                    boost::add_edge(
+                                        neighbour_block_vertex.in_neighbour,
+                                        back_of_neighbour_block_vertex,
+                                        neighbour->navmesh.graph
+                                    );
+                                    boost::add_edge(
+                                        back_of_neighbour_block_vertex,
+                                        neighbour_block_vertex.in_neighbour,
+                                        neighbour->navmesh.graph
+                                    );
+                                }
                                 // Down
                             } else if (is_solid(back_of_and_below_neighbour_block) && !is_solid(back_of_neighbour_block) && !is_solid(back_of_this_block))
                             {
@@ -4328,16 +4659,21 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                                         back_of_and_below_neighbour_block_coord
                                     );
 
-                                boost::add_edge(
-                                    neighbour_block_vertex.in_neighbour,
-                                    back_of_and_below_neighbour_block_vertex,
-                                    neighbour->navmesh.graph
-                                );
-                                boost::add_edge(
-                                    back_of_and_below_neighbour_block_vertex,
-                                    neighbour_block_vertex.in_neighbour,
-                                    neighbour->navmesh.graph
-                                );
+                                {
+                                    auto lock
+                                        = std::lock_guard(neighbour->navmesh_mutex);
+
+                                    boost::add_edge(
+                                        neighbour_block_vertex.in_neighbour,
+                                        back_of_and_below_neighbour_block_vertex,
+                                        neighbour->navmesh.graph
+                                    );
+                                    boost::add_edge(
+                                        back_of_and_below_neighbour_block_vertex,
+                                        neighbour_block_vertex.in_neighbour,
+                                        neighbour->navmesh.graph
+                                    );
+                                }
                             }
                         }
                     }
@@ -4432,27 +4768,36 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                                     below_left_neighbour, candidate_block_coord
                                 ) };
 
-                        boost::add_edge(
-                            neighbour_block_vertex.in_neighbour,
-                            candidate_block_vertex.in_neighbour,
-                            neighbour->navmesh.graph
-                        );
-                        boost::add_edge(
-                            candidate_block_vertex.in_neighbour,
-                            neighbour_block_vertex.in_neighbour,
-                            neighbour->navmesh.graph
-                        );
+                        {
+                            auto lock = std::lock_guard(neighbour->navmesh_mutex);
 
-                        boost::add_edge(
-                            neighbour_block_vertex.in_below_left_neighbour,
-                            candidate_block_vertex.in_below_left_neighbour,
-                            below_left_neighbour->navmesh.graph
-                        );
-                        boost::add_edge(
-                            candidate_block_vertex.in_below_left_neighbour,
-                            neighbour_block_vertex.in_below_left_neighbour,
-                            below_left_neighbour->navmesh.graph
-                        );
+                            boost::add_edge(
+                                neighbour_block_vertex.in_neighbour,
+                                candidate_block_vertex.in_neighbour,
+                                neighbour->navmesh.graph
+                            );
+                            boost::add_edge(
+                                candidate_block_vertex.in_neighbour,
+                                neighbour_block_vertex.in_neighbour,
+                                neighbour->navmesh.graph
+                            );
+                        }
+
+                        {
+                            auto lock
+                                = std::lock_guard(below_left_neighbour->navmesh_mutex);
+
+                            boost::add_edge(
+                                neighbour_block_vertex.in_below_left_neighbour,
+                                candidate_block_vertex.in_below_left_neighbour,
+                                below_left_neighbour->navmesh.graph
+                            );
+                            boost::add_edge(
+                                candidate_block_vertex.in_below_left_neighbour,
+                                neighbour_block_vertex.in_below_left_neighbour,
+                                below_left_neighbour->navmesh.graph
+                            );
+                        }
                     }
 
                     // Step across and down from y == CHUNK_LENGTH - 1
@@ -4522,27 +4867,37 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                                         below_left_neighbour, candidate_block_coord
                                     ) };
 
-                            boost::add_edge(
-                                neighbour_block_vertex.in_neighbour,
-                                candidate_block_vertex.in_neighbour,
-                                neighbour->navmesh.graph
-                            );
-                            boost::add_edge(
-                                candidate_block_vertex.in_neighbour,
-                                neighbour_block_vertex.in_neighbour,
-                                neighbour->navmesh.graph
-                            );
+                            {
+                                auto lock = std::lock_guard(neighbour->navmesh_mutex);
 
-                            boost::add_edge(
-                                neighbour_block_vertex.in_below_left_neighbour,
-                                candidate_block_vertex.in_below_left_neighbour,
-                                below_left_neighbour->navmesh.graph
-                            );
-                            boost::add_edge(
-                                candidate_block_vertex.in_below_left_neighbour,
-                                neighbour_block_vertex.in_below_left_neighbour,
-                                below_left_neighbour->navmesh.graph
-                            );
+                                boost::add_edge(
+                                    neighbour_block_vertex.in_neighbour,
+                                    candidate_block_vertex.in_neighbour,
+                                    neighbour->navmesh.graph
+                                );
+                                boost::add_edge(
+                                    candidate_block_vertex.in_neighbour,
+                                    neighbour_block_vertex.in_neighbour,
+                                    neighbour->navmesh.graph
+                                );
+                            }
+
+                            {
+                                auto lock = std::lock_guard(
+                                    below_left_neighbour->navmesh_mutex
+                                );
+
+                                boost::add_edge(
+                                    neighbour_block_vertex.in_below_left_neighbour,
+                                    candidate_block_vertex.in_below_left_neighbour,
+                                    below_left_neighbour->navmesh.graph
+                                );
+                                boost::add_edge(
+                                    candidate_block_vertex.in_below_left_neighbour,
+                                    neighbour_block_vertex.in_below_left_neighbour,
+                                    below_left_neighbour->navmesh.graph
+                                );
+                            }
                         }
                         // Step down
                         else if (is_solid(step_down_candidate_block) && !is_solid(step_across_candidate_block) && !is_solid(above_candidates_block))
@@ -4561,27 +4916,36 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                                         below_left_neighbour, candidate_block_coord
                                     ) };
 
-                            boost::add_edge(
-                                neighbour_block_vertex.in_neighbour,
-                                candidate_block_vertex.in_neighbour,
-                                chunk->navmesh.graph
-                            );
-                            boost::add_edge(
-                                candidate_block_vertex.in_neighbour,
-                                neighbour_block_vertex.in_neighbour,
-                                chunk->navmesh.graph
-                            );
+                            {
+                                auto lock = std::lock_guard(chunk->navmesh_mutex);
 
-                            boost::add_edge(
-                                neighbour_block_vertex.in_below_left_neighbour,
-                                candidate_block_vertex.in_below_left_neighbour,
-                                left_neighbour->navmesh.graph
-                            );
-                            boost::add_edge(
-                                candidate_block_vertex.in_below_left_neighbour,
-                                neighbour_block_vertex.in_below_left_neighbour,
-                                left_neighbour->navmesh.graph
-                            );
+                                boost::add_edge(
+                                    neighbour_block_vertex.in_neighbour,
+                                    candidate_block_vertex.in_neighbour,
+                                    chunk->navmesh.graph
+                                );
+                                boost::add_edge(
+                                    candidate_block_vertex.in_neighbour,
+                                    neighbour_block_vertex.in_neighbour,
+                                    chunk->navmesh.graph
+                                );
+                            }
+
+                            {
+                                auto lock
+                                    = std::lock_guard(left_neighbour->navmesh_mutex);
+
+                                boost::add_edge(
+                                    neighbour_block_vertex.in_below_left_neighbour,
+                                    candidate_block_vertex.in_below_left_neighbour,
+                                    left_neighbour->navmesh.graph
+                                );
+                                boost::add_edge(
+                                    candidate_block_vertex.in_below_left_neighbour,
+                                    neighbour_block_vertex.in_below_left_neighbour,
+                                    left_neighbour->navmesh.graph
+                                );
+                            }
                         }
                     }
 
@@ -4675,27 +5039,36 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                                     below_right_neighbour, candidate_block_coord
                                 ) };
 
-                        boost::add_edge(
-                            neighbour_block_vertex.in_neighbour,
-                            candidate_block_vertex.in_neighbour,
-                            neighbour->navmesh.graph
-                        );
-                        boost::add_edge(
-                            candidate_block_vertex.in_neighbour,
-                            neighbour_block_vertex.in_neighbour,
-                            neighbour->navmesh.graph
-                        );
+                        {
+                            auto lock = std::lock_guard(neighbour->navmesh_mutex);
 
-                        boost::add_edge(
-                            neighbour_block_vertex.in_below_right_neighbour,
-                            candidate_block_vertex.in_below_right_neighbour,
-                            below_right_neighbour->navmesh.graph
-                        );
-                        boost::add_edge(
-                            candidate_block_vertex.in_below_right_neighbour,
-                            neighbour_block_vertex.in_below_right_neighbour,
-                            below_right_neighbour->navmesh.graph
-                        );
+                            boost::add_edge(
+                                neighbour_block_vertex.in_neighbour,
+                                candidate_block_vertex.in_neighbour,
+                                neighbour->navmesh.graph
+                            );
+                            boost::add_edge(
+                                candidate_block_vertex.in_neighbour,
+                                neighbour_block_vertex.in_neighbour,
+                                neighbour->navmesh.graph
+                            );
+                        }
+
+                        {
+                            auto lock
+                                = std::lock_guard(below_right_neighbour->navmesh_mutex);
+
+                            boost::add_edge(
+                                neighbour_block_vertex.in_below_right_neighbour,
+                                candidate_block_vertex.in_below_right_neighbour,
+                                below_right_neighbour->navmesh.graph
+                            );
+                            boost::add_edge(
+                                candidate_block_vertex.in_below_right_neighbour,
+                                neighbour_block_vertex.in_below_right_neighbour,
+                                below_right_neighbour->navmesh.graph
+                            );
+                        }
                     }
 
                     // Step across and down from y == CHUNK_LENGTH - 1
@@ -4764,27 +5137,37 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                                         below_right_neighbour, candidate_block_coord
                                     ) };
 
-                            boost::add_edge(
-                                neighbour_block_vertex.in_neighbour,
-                                candidate_block_vertex.in_neighbour,
-                                neighbour->navmesh.graph
-                            );
-                            boost::add_edge(
-                                candidate_block_vertex.in_neighbour,
-                                neighbour_block_vertex.in_neighbour,
-                                neighbour->navmesh.graph
-                            );
+                            {
+                                auto lock = std::lock_guard(neighbour->navmesh_mutex);
 
-                            boost::add_edge(
-                                neighbour_block_vertex.in_below_right_neighbour,
-                                candidate_block_vertex.in_below_right_neighbour,
-                                below_right_neighbour->navmesh.graph
-                            );
-                            boost::add_edge(
-                                candidate_block_vertex.in_below_right_neighbour,
-                                neighbour_block_vertex.in_below_right_neighbour,
-                                below_right_neighbour->navmesh.graph
-                            );
+                                boost::add_edge(
+                                    neighbour_block_vertex.in_neighbour,
+                                    candidate_block_vertex.in_neighbour,
+                                    neighbour->navmesh.graph
+                                );
+                                boost::add_edge(
+                                    candidate_block_vertex.in_neighbour,
+                                    neighbour_block_vertex.in_neighbour,
+                                    neighbour->navmesh.graph
+                                );
+                            }
+
+                            {
+                                auto lock = std::lock_guard(
+                                    below_right_neighbour->navmesh_mutex
+                                );
+
+                                boost::add_edge(
+                                    neighbour_block_vertex.in_below_right_neighbour,
+                                    candidate_block_vertex.in_below_right_neighbour,
+                                    below_right_neighbour->navmesh.graph
+                                );
+                                boost::add_edge(
+                                    candidate_block_vertex.in_below_right_neighbour,
+                                    neighbour_block_vertex.in_below_right_neighbour,
+                                    below_right_neighbour->navmesh.graph
+                                );
+                            }
                         }
                         // Step down
                         else if (is_solid(step_down_candidate_block) && !is_solid(step_across_candidate_block) && !is_solid(above_candidates_block))
@@ -4803,27 +5186,37 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                                         below_right_neighbour, candidate_block_coord
                                     ) };
 
-                            boost::add_edge(
-                                neighbour_block_vertex.in_neighbour,
-                                candidate_block_vertex.in_neighbour,
-                                neighbour->navmesh.graph
-                            );
-                            boost::add_edge(
-                                candidate_block_vertex.in_neighbour,
-                                neighbour_block_vertex.in_neighbour,
-                                neighbour->navmesh.graph
-                            );
+                            {
+                                auto lock = std::lock_guard(neighbour->navmesh_mutex);
 
-                            boost::add_edge(
-                                neighbour_block_vertex.in_below_right_neighbour,
-                                candidate_block_vertex.in_below_right_neighbour,
-                                below_right_neighbour->navmesh.graph
-                            );
-                            boost::add_edge(
-                                candidate_block_vertex.in_below_right_neighbour,
-                                neighbour_block_vertex.in_below_right_neighbour,
-                                below_right_neighbour->navmesh.graph
-                            );
+                                boost::add_edge(
+                                    neighbour_block_vertex.in_neighbour,
+                                    candidate_block_vertex.in_neighbour,
+                                    neighbour->navmesh.graph
+                                );
+                                boost::add_edge(
+                                    candidate_block_vertex.in_neighbour,
+                                    neighbour_block_vertex.in_neighbour,
+                                    neighbour->navmesh.graph
+                                );
+                            }
+
+                            {
+                                auto lock = std::lock_guard(
+                                    below_right_neighbour->navmesh_mutex
+                                );
+
+                                boost::add_edge(
+                                    neighbour_block_vertex.in_below_right_neighbour,
+                                    candidate_block_vertex.in_below_right_neighbour,
+                                    below_right_neighbour->navmesh.graph
+                                );
+                                boost::add_edge(
+                                    candidate_block_vertex.in_below_right_neighbour,
+                                    neighbour_block_vertex.in_below_right_neighbour,
+                                    below_right_neighbour->navmesh.graph
+                                );
+                            }
                         }
                     }
 
@@ -4918,27 +5311,36 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                                     below_front_neighbour, candidate_block_coord
                                 ) };
 
-                        boost::add_edge(
-                            neighbour_block_vertex.in_neighbour,
-                            candidate_block_vertex.in_neighbour,
-                            neighbour->navmesh.graph
-                        );
-                        boost::add_edge(
-                            candidate_block_vertex.in_neighbour,
-                            neighbour_block_vertex.in_neighbour,
-                            neighbour->navmesh.graph
-                        );
+                        {
+                            auto lock = std::lock_guard(neighbour->navmesh_mutex);
 
-                        boost::add_edge(
-                            neighbour_block_vertex.in_below_front_neighbour,
-                            candidate_block_vertex.in_below_front_neighbour,
-                            below_front_neighbour->navmesh.graph
-                        );
-                        boost::add_edge(
-                            candidate_block_vertex.in_below_front_neighbour,
-                            neighbour_block_vertex.in_below_front_neighbour,
-                            below_front_neighbour->navmesh.graph
-                        );
+                            boost::add_edge(
+                                neighbour_block_vertex.in_neighbour,
+                                candidate_block_vertex.in_neighbour,
+                                neighbour->navmesh.graph
+                            );
+                            boost::add_edge(
+                                candidate_block_vertex.in_neighbour,
+                                neighbour_block_vertex.in_neighbour,
+                                neighbour->navmesh.graph
+                            );
+                        }
+
+                        {
+                            auto lock
+                                = std::lock_guard(below_front_neighbour->navmesh_mutex);
+
+                            boost::add_edge(
+                                neighbour_block_vertex.in_below_front_neighbour,
+                                candidate_block_vertex.in_below_front_neighbour,
+                                below_front_neighbour->navmesh.graph
+                            );
+                            boost::add_edge(
+                                candidate_block_vertex.in_below_front_neighbour,
+                                neighbour_block_vertex.in_below_front_neighbour,
+                                below_front_neighbour->navmesh.graph
+                            );
+                        }
                     }
 
                     // Step across and down from y == CHUNK_LENGTH - 1
@@ -5007,27 +5409,37 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                                         below_front_neighbour, candidate_block_coord
                                     ) };
 
-                            boost::add_edge(
-                                neighbour_block_vertex.in_neighbour,
-                                candidate_block_vertex.in_neighbour,
-                                neighbour->navmesh.graph
-                            );
-                            boost::add_edge(
-                                candidate_block_vertex.in_neighbour,
-                                neighbour_block_vertex.in_neighbour,
-                                neighbour->navmesh.graph
-                            );
+                            {
+                                auto lock = std::lock_guard(neighbour->navmesh_mutex);
 
-                            boost::add_edge(
-                                neighbour_block_vertex.in_below_front_neighbour,
-                                candidate_block_vertex.in_below_front_neighbour,
-                                below_front_neighbour->navmesh.graph
-                            );
-                            boost::add_edge(
-                                candidate_block_vertex.in_below_front_neighbour,
-                                neighbour_block_vertex.in_below_front_neighbour,
-                                below_front_neighbour->navmesh.graph
-                            );
+                                boost::add_edge(
+                                    neighbour_block_vertex.in_neighbour,
+                                    candidate_block_vertex.in_neighbour,
+                                    neighbour->navmesh.graph
+                                );
+                                boost::add_edge(
+                                    candidate_block_vertex.in_neighbour,
+                                    neighbour_block_vertex.in_neighbour,
+                                    neighbour->navmesh.graph
+                                );
+                            }
+
+                            {
+                                auto lock = std::lock_guard(
+                                    below_front_neighbour->navmesh_mutex
+                                );
+
+                                boost::add_edge(
+                                    neighbour_block_vertex.in_below_front_neighbour,
+                                    candidate_block_vertex.in_below_front_neighbour,
+                                    below_front_neighbour->navmesh.graph
+                                );
+                                boost::add_edge(
+                                    candidate_block_vertex.in_below_front_neighbour,
+                                    neighbour_block_vertex.in_below_front_neighbour,
+                                    below_front_neighbour->navmesh.graph
+                                );
+                            }
                         }
                         // Step down
                         else if (is_solid(step_down_candidate_block) && !is_solid(step_across_candidate_block) && !is_solid(above_candidates_block))
@@ -5046,27 +5458,37 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                                         below_front_neighbour, candidate_block_coord
                                     ) };
 
-                            boost::add_edge(
-                                neighbour_block_vertex.in_neighbour,
-                                candidate_block_vertex.in_neighbour,
-                                neighbour->navmesh.graph
-                            );
-                            boost::add_edge(
-                                candidate_block_vertex.in_neighbour,
-                                neighbour_block_vertex.in_neighbour,
-                                neighbour->navmesh.graph
-                            );
+                            {
+                                auto lock = std::lock_guard(neighbour->navmesh_mutex);
 
-                            boost::add_edge(
-                                neighbour_block_vertex.in_below_front_neighbour,
-                                candidate_block_vertex.in_below_front_neighbour,
-                                below_front_neighbour->navmesh.graph
-                            );
-                            boost::add_edge(
-                                candidate_block_vertex.in_below_front_neighbour,
-                                neighbour_block_vertex.in_below_front_neighbour,
-                                below_front_neighbour->navmesh.graph
-                            );
+                                boost::add_edge(
+                                    neighbour_block_vertex.in_neighbour,
+                                    candidate_block_vertex.in_neighbour,
+                                    neighbour->navmesh.graph
+                                );
+                                boost::add_edge(
+                                    candidate_block_vertex.in_neighbour,
+                                    neighbour_block_vertex.in_neighbour,
+                                    neighbour->navmesh.graph
+                                );
+                            }
+
+                            {
+                                auto lock = std::lock_guard(
+                                    below_front_neighbour->navmesh_mutex
+                                );
+
+                                boost::add_edge(
+                                    neighbour_block_vertex.in_below_front_neighbour,
+                                    candidate_block_vertex.in_below_front_neighbour,
+                                    below_front_neighbour->navmesh.graph
+                                );
+                                boost::add_edge(
+                                    candidate_block_vertex.in_below_front_neighbour,
+                                    neighbour_block_vertex.in_below_front_neighbour,
+                                    below_front_neighbour->navmesh.graph
+                                );
+                            }
                         }
                     }
 
@@ -5160,27 +5582,36 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                                     below_back_neighbour, candidate_block_coord
                                 ) };
 
-                        boost::add_edge(
-                            neighbour_block_vertex.in_neighbour,
-                            candidate_block_vertex.in_neighbour,
-                            neighbour->navmesh.graph
-                        );
-                        boost::add_edge(
-                            candidate_block_vertex.in_neighbour,
-                            neighbour_block_vertex.in_neighbour,
-                            neighbour->navmesh.graph
-                        );
+                        {
+                            auto lock = std::lock_guard(neighbour->navmesh_mutex);
 
-                        boost::add_edge(
-                            neighbour_block_vertex.in_below_back_neighbour,
-                            candidate_block_vertex.in_below_back_neighbour,
-                            below_back_neighbour->navmesh.graph
-                        );
-                        boost::add_edge(
-                            candidate_block_vertex.in_below_back_neighbour,
-                            neighbour_block_vertex.in_below_back_neighbour,
-                            below_back_neighbour->navmesh.graph
-                        );
+                            boost::add_edge(
+                                neighbour_block_vertex.in_neighbour,
+                                candidate_block_vertex.in_neighbour,
+                                neighbour->navmesh.graph
+                            );
+                            boost::add_edge(
+                                candidate_block_vertex.in_neighbour,
+                                neighbour_block_vertex.in_neighbour,
+                                neighbour->navmesh.graph
+                            );
+                        }
+
+                        {
+                            auto lock
+                                = std::lock_guard(below_back_neighbour->navmesh_mutex);
+
+                            boost::add_edge(
+                                neighbour_block_vertex.in_below_back_neighbour,
+                                candidate_block_vertex.in_below_back_neighbour,
+                                below_back_neighbour->navmesh.graph
+                            );
+                            boost::add_edge(
+                                candidate_block_vertex.in_below_back_neighbour,
+                                neighbour_block_vertex.in_below_back_neighbour,
+                                below_back_neighbour->navmesh.graph
+                            );
+                        }
                     }
 
                     // Step across and down from y == CHUNK_LENGTH - 1
@@ -5250,27 +5681,37 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                                         below_back_neighbour, candidate_block_coord
                                     ) };
 
-                            boost::add_edge(
-                                neighbour_block_vertex.in_neighbour,
-                                candidate_block_vertex.in_neighbour,
-                                neighbour->navmesh.graph
-                            );
-                            boost::add_edge(
-                                candidate_block_vertex.in_neighbour,
-                                neighbour_block_vertex.in_neighbour,
-                                neighbour->navmesh.graph
-                            );
+                            {
+                                auto lock = std::lock_guard(neighbour->navmesh_mutex);
 
-                            boost::add_edge(
-                                neighbour_block_vertex.in_below_back_neighbour,
-                                candidate_block_vertex.in_below_back_neighbour,
-                                below_back_neighbour->navmesh.graph
-                            );
-                            boost::add_edge(
-                                candidate_block_vertex.in_below_back_neighbour,
-                                neighbour_block_vertex.in_below_back_neighbour,
-                                below_back_neighbour->navmesh.graph
-                            );
+                                boost::add_edge(
+                                    neighbour_block_vertex.in_neighbour,
+                                    candidate_block_vertex.in_neighbour,
+                                    neighbour->navmesh.graph
+                                );
+                                boost::add_edge(
+                                    candidate_block_vertex.in_neighbour,
+                                    neighbour_block_vertex.in_neighbour,
+                                    neighbour->navmesh.graph
+                                );
+                            }
+
+                            {
+                                auto lock = std::lock_guard(
+                                    below_back_neighbour->navmesh_mutex
+                                );
+
+                                boost::add_edge(
+                                    neighbour_block_vertex.in_below_back_neighbour,
+                                    candidate_block_vertex.in_below_back_neighbour,
+                                    below_back_neighbour->navmesh.graph
+                                );
+                                boost::add_edge(
+                                    candidate_block_vertex.in_below_back_neighbour,
+                                    neighbour_block_vertex.in_below_back_neighbour,
+                                    below_back_neighbour->navmesh.graph
+                                );
+                            }
                         }
                         // Step down
                         else if (is_solid(step_down_candidate_block) && !is_solid(step_across_candidate_block) && !is_solid(above_candidates_block))
@@ -5289,27 +5730,37 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                                         below_back_neighbour, candidate_block_coord
                                     ) };
 
-                            boost::add_edge(
-                                neighbour_block_vertex.in_neighbour,
-                                candidate_block_vertex.in_neighbour,
-                                neighbour->navmesh.graph
-                            );
-                            boost::add_edge(
-                                candidate_block_vertex.in_neighbour,
-                                neighbour_block_vertex.in_neighbour,
-                                neighbour->navmesh.graph
-                            );
+                            {
+                                auto lock = std::lock_guard(neighbour->navmesh_mutex);
 
-                            boost::add_edge(
-                                neighbour_block_vertex.in_below_back_neighbour,
-                                candidate_block_vertex.in_below_back_neighbour,
-                                below_back_neighbour->navmesh.graph
-                            );
-                            boost::add_edge(
-                                candidate_block_vertex.in_below_back_neighbour,
-                                neighbour_block_vertex.in_below_back_neighbour,
-                                below_back_neighbour->navmesh.graph
-                            );
+                                boost::add_edge(
+                                    neighbour_block_vertex.in_neighbour,
+                                    candidate_block_vertex.in_neighbour,
+                                    neighbour->navmesh.graph
+                                );
+                                boost::add_edge(
+                                    candidate_block_vertex.in_neighbour,
+                                    neighbour_block_vertex.in_neighbour,
+                                    neighbour->navmesh.graph
+                                );
+                            }
+
+                            {
+                                auto lock = std::lock_guard(
+                                    below_back_neighbour->navmesh_mutex
+                                );
+
+                                boost::add_edge(
+                                    neighbour_block_vertex.in_below_back_neighbour,
+                                    candidate_block_vertex.in_below_back_neighbour,
+                                    below_back_neighbour->navmesh.graph
+                                );
+                                boost::add_edge(
+                                    candidate_block_vertex.in_below_back_neighbour,
+                                    neighbour_block_vertex.in_below_back_neighbour,
+                                    below_back_neighbour->navmesh.graph
+                                );
+                            }
                         }
                     }
                 }
