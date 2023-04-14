@@ -11,11 +11,11 @@
       handles.vao,                                                                     \
       static_cast<GLuint>(PREFIX##_MeshAttribID::VERTEX_ENUM_NAME VERTEX_INFO),        \
       VERTEX_ELEM_COUNT VERTEX_INFO,                                                   \
-      VERTEX_PRECISION VERTEX_INFO == 8 ?                                              \
+      (VERTEX_PRECISION VERTEX_INFO == 8) ?                                            \
         GL_UNSIGNED_BYTE                                                               \
-        : VERTEX_PRECISION VERTEX_INFO == 32 ?                                         \
+        : ((VERTEX_PRECISION VERTEX_INFO == 32) ?                                      \
           GL_FLOAT                                                                     \
-          : GL_DOUBLE,                                                                 \
+          : GL_DOUBLE),                                                                \
       VERTEX_NORMALISED VERTEX_INFO == 1 ? GL_TRUE : GL_FALSE,                         \
       OFFSET                                                                           \
   );                                                                                   \
