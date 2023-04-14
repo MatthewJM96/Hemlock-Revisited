@@ -75,6 +75,8 @@ void hvox::NavmeshOutlineRenderer::draw(FrameTime) {
             navmesh.is_updated = false;
         }
 
+        if (navmesh.outlines.size() == 0) continue;
+
         glBindVertexArray(navmesh.mesh_handles.vao);
 
         glVertexArrayVertexBuffer(
@@ -82,7 +84,7 @@ void hvox::NavmeshOutlineRenderer::draw(FrameTime) {
             0,
             navmesh.mesh_handles.vbo,
             0,
-            sizeof(OutlineData)
+            sizeof(NavmeshOutlineDatum)
         );
 
         glDrawArrays(GL_LINES, 0, navmesh.outlines.size());
