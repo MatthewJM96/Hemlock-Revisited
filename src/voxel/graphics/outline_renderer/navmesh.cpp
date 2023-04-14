@@ -139,15 +139,14 @@ bool hvox::NavmeshOutlineRenderer::__calculate_outlines(NavmeshOutlines& navmesh
             BlockWorldPosition target_vert_pos
                 = block_world_position(target_node.chunk_pos, target_node.block_pos);
 
-            tmp_outline_buffer.emplace_back(
-                NavmeshOutlineDatum{
-                    static_cast<f32v3>(vert_pos) + f32v3{ 0.5f, 1.6f, 0.5f },
-                    { 255, 0, 0, 255 }
-            },
-                NavmeshOutlineDatum{ static_cast<f32v3>(target_vert_pos)
-                                         + f32v3{ 0.5f, 1.6f, 0.5f },
-                                     { 255, 0, 0, 255 } }
-            );
+            tmp_outline_buffer.emplace_back(NavmeshOutlineData{
+                NavmeshOutlineDatum{static_cast<f32v3>(vert_pos)
++ f32v3{ 0.5f, 1.6f, 0.5f },
+                                    { 255, 0, 0, 255 }},
+                NavmeshOutlineDatum{static_cast<f32v3>(target_vert_pos)
++ f32v3{ 0.5f, 1.6f, 0.5f },
+                                    { 255, 0, 0, 255 }}
+            });
         }
     }
 
