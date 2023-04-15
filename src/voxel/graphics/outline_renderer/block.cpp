@@ -76,7 +76,7 @@ void hvox::BlockOutlineRenderer::draw(FrameTime) {
     );
 
     glDrawArraysInstanced(
-        GL_LINES, 0, BLOCK_OUTLINE_VERTEX_COUNT, m_block_outlines.size()
+        GL_LINES, 0, BLOCK_OUTLINE_VERTEX_COUNT, static_cast<GLsizei>(m_block_outlines.size())
     );
 }
 
@@ -98,7 +98,7 @@ bool hvox::BlockOutlineRenderer::modify_outline(
         size_t idx = m_block_outline_refs.at(outline_id);
 
         m_block_outlines[idx] = std::forward<OutlineData>(outline);
-    } catch (std::out_of_range& e) {
+    } catch (std::out_of_range&) {
         return false;
     }
 

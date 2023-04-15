@@ -87,7 +87,7 @@ void hvox::NavmeshOutlineRenderer::draw(FrameTime) {
             sizeof(NavmeshOutlineDatum)
         );
 
-        glDrawArrays(GL_LINES, 0, navmesh.outlines.size() * 2);
+        glDrawArrays(GL_LINES, 0, static_cast<GLsizei>(navmesh.outlines.size() * 2));
     }
 }
 
