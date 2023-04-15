@@ -56,6 +56,11 @@ public:
         happ::ScreenBase::start(time);
 
         htest::navmesh_screen::load_chunks(m_chunk_grid, &m_navmesh_outline_renderer);
+
+        hui::InputDispatcher::instance()->on_mouse.button_down += &handle_mouse_button;
+        hui::InputDispatcher::instance()->on_mouse.move        += &handle_mouse_move;
+        // hui::InputDispatcher::instance()->on_keyboard.button_down +=
+        // &handle_key_down;
     }
 
     virtual void update(hemlock::FrameTime time) override {
@@ -66,13 +71,7 @@ public:
         f32   speed_mult = 1.0f;
         f32v3 delta_pos  = {};
         htest::navmesh_screen::handle_simple_user_inputs(
-            m_input_manager,
-            m_camera,
-            frame_time,
-            m_draw_chunk_outlines,
-            m_nav_test_mode,
-            speed_mult,
-            delta_pos
+            m_input_manager, m_camera, frame_time, speed_mult, delta_pos
         );
 
 #if defined(DEBUG)
@@ -331,6 +330,8 @@ public:
             = static_cast<happ::SingleWindowApp*>(m_process)->input_manager();
         m_input_manager->init();
 
+        m_capture_mouse = false;
+
         m_camera.attach_to_window(m_process->window());
         m_camera.set_position(f32v3{ 0.0f, 60.0f, 0.0f });
         m_camera.rotate_from_mouse_with_absolute_up(-130.0f, 160.0f, 0.005f);
@@ -523,26 +524,40 @@ public:
                  }*/
             }
         } };
-        hui::InputDispatcher::instance()->on_mouse.button_down += &handle_mouse_button;
 
-        handle_mouse_move = hemlock::Subscriber<hui::MouseMoveEvent>{
-            [&](hemlock::Sender, hui::MouseMoveEvent ev) {
-                if (m_input_manager->is_pressed(static_cast<ui8>(hui::MouseButton::LEFT)
-                    )) {
-                    m_camera.rotate_from_mouse_with_absolute_up(
-                        -1.0f * static_cast<f32>(ev.dx),
-                        -1.0f * static_cast<f32>(ev.dy),
-                        0.005f
-                    );
+        handle_key_down = hemlock::Subscriber<hui::KeyboardButtonEvent>{
+            [&](hemlock::Sender, hui::KeyboardButtonEvent ev) {
+                if (ev.physical_key == hui::PhysicalKey::H_RETURN) {
+                    m_capture_mouse = true;
+                } else if (ev.physical_key == hui::PhysicalKey::H_ESCAPE) {
+                    m_capture_mouse = false;
+                } else if (ev.physical_key == hui::PhysicalKey::H_L) {
+                    m_draw_chunk_outlines = !m_draw_chunk_outlines;
+                } else if (ev.physical_key == hui::PhysicalKey::H_T) {
+                    if (m_nav_test_mode == 0) m_nav_test_mode = 1;
+                } else if (ev.physical_key == hui::PhysicalKey::H_K) {
+                    m_draw_navmesh_outlines = !m_draw_navmesh_outlines;
                 }
             }
         };
+        hui::InputDispatcher::instance()->on_keyboard.button_down += &handle_key_down;
 
-        hui::InputDispatcher::instance()->on_mouse.move += &handle_mouse_move;
+        handle_mouse_move
+            = hemlock::Subscriber<hui::MouseMoveEvent>{ [&](hemlock::Sender,
+                                                            hui::MouseMoveEvent ev) {
+                  if (m_capture_mouse) {
+                      m_camera.rotate_from_mouse_with_absolute_up(
+                          -1.0f * static_cast<f32>(ev.dx),
+                          -1.0f * static_cast<f32>(ev.dy),
+                          0.005f
+                      );
+                  }
+              } };
     }
 protected:
-    hemlock::Subscriber<hui::MouseMoveEvent>   handle_mouse_move;
-    hemlock::Subscriber<hui::MouseButtonEvent> handle_mouse_button;
+    hemlock::Subscriber<hui::MouseMoveEvent>      handle_mouse_move;
+    hemlock::Subscriber<hui::MouseButtonEvent>    handle_mouse_button;
+    hemlock::Subscriber<hui::KeyboardButtonEvent> handle_key_down;
 
     ui32 m_default_texture;
 
@@ -552,6 +567,8 @@ protected:
     hui::InputManager*            m_input_manager;
     hmem::Handle<hvox::ChunkGrid> m_chunk_grid;
     hg::GLSLProgram m_shader, m_line_shader, m_outline_shader, m_navmesh_outline_shader;
+
+    bool m_capture_mouse;
 
     hvox::ConditionalChunkOutlineRenderer<TNS_ChunkOutlinePredicate>
          m_chunk_outline_renderer;
