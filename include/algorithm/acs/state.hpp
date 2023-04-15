@@ -1,6 +1,8 @@
 #ifndef __hemlock_algorithm_acs_state_hpp
 #define __hemlock_algorithm_acs_state_hpp
 
+#include "graph/state.hpp"
+
 namespace hemlock {
     namespace algorithm {
         struct ACSConfig {
@@ -52,6 +54,23 @@ namespace hemlock {
                 size_t n_steps
                     = 1;  //< Create a heatframe every n steps in an iteration.
             } debug = {};
+        };
+
+        template <typename Candidate, typename Node, bool IsWeighted>
+        concept ACSDistanceCalculator
+            = requires (Candidate s, GraphMap<Node, IsWeighted> g, Node n) {
+                  {
+                      s.operator()(g, n, n, n)
+                      } -> std::same_as<f32>;
+              };
+
+        template <typename Node, bool IsWeighted>
+        struct NullACSDistanceCalculator {
+            f32
+            operator()(const GraphMap<Node, IsWeighted>&, const Node&, const Node&, const Node&)
+                const {
+                return 0.0f;
+            }
         };
 
         template <typename VertexType>

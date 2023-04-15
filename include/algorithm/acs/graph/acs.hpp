@@ -1,7 +1,7 @@
 #ifndef __hemlock_algorithm_acs_graph_acs_hpp
 #define __hemlock_algorithm_acs_graph_acs_hpp
 
-#include "state.hpp"
+#include "../state.hpp"
 
 namespace hemlock {
     namespace algorithm {
@@ -12,7 +12,12 @@ namespace hemlock {
         namespace deb = debug;
 
         namespace GraphACS {
-            template <typename Node, bool IsWeighted, ACSConfig Config>
+            template <
+                typename Node,
+                bool                                    IsWeighted,
+                ACSConfig                               Config,
+                ACSDistanceCalculator<Node, IsWeighted> DistanceCalculator
+                = NullACSDistanceCalculator<Node, IsWeighted>>
             void find_path(
                 GraphMap<Node, IsWeighted>&          map,
                 Node                                 source,
@@ -28,10 +33,25 @@ namespace hemlock {
                         );
                 }
 
+                using _EdgeDescriptor   = EdgeDescriptor<Node, IsWeighted>;
                 using _VertexDescriptor = VertexDescriptor<Node, IsWeighted>;
-                // using _EdgeDescriptor   = EdgeDescriptor<Node>;
-                using _Ant      = Ant<_VertexDescriptor>;
-                using _AntGroup = AntGroup<_VertexDescriptor, Config.ant_count>;
+                using _Ant              = Ant<_VertexDescriptor>;
+                using _AntGroup         = AntGroup<_VertexDescriptor, Config.ant_count>;
+
+                const auto calculate_score = [&](Node candidate, _EdgeDescriptor edge) {
+                    // TODO(Matthew): Fully expose this (at least optionally), likewise
+                    // make even providing distance calc
+                    //                and modifying score with it optional.
+
+                    const DistanceCalculator calc_distance{};
+
+                    f32 score = map.pheromone_map[edge];
+
+                    score
+                        /= (1.0f + calc_distance(map, source, destination, candidate));
+
+                    return score;
+                };
 
                 /******************\
                  * Initialisation *
@@ -169,7 +189,9 @@ namespace hemlock {
                                                    == candidate_vertex)
                                             continue;
 
-                                        f32 score = map.pheromone_map[edge];
+                                        f32 score = calculate_score(
+                                            map.vertex_coord_map[candidate_vertex], edge
+                                        );
 
                                         if (score > best_score) {
                                             found_best     = true;
@@ -209,7 +231,9 @@ namespace hemlock {
                                                    == candidate_vertex)
                                             continue;
 
-                                        total_score += map.pheromone_map[edge];
+                                        total_score += calculate_score(
+                                            map.vertex_coord_map[candidate_vertex], edge
+                                        );
                                     }
 
                                     if (total_score == 0.0f) {

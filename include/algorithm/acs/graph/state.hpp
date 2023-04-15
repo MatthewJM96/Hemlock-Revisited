@@ -1,8 +1,6 @@
 #ifndef __hemlock_algorithm_acs_graph_state_hpp
 #define __hemlock_algorithm_acs_graph_state_hpp
 
-#include "../state.hpp"
-
 namespace hemlock {
     namespace algorithm {
         enum vertex_data_t {
