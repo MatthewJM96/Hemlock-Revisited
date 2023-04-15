@@ -31,6 +31,25 @@ struct TNS_ChunkOutlinePredicate {
     }
 };
 
+struct TNS_ACSDistanceCalculator {
+    f32 operator()(
+        const halgo::GraphMap<hvox::ai::ChunkNavmeshNode, false>&,
+        const hvox::ai::ChunkNavmeshNode&,
+        const hvox::ai::ChunkNavmeshNode& destination,
+        const hvox::ai::ChunkNavmeshNode& candidate
+    ) const {
+        hvox::BlockWorldPosition destination_world
+            = hvox::block_world_position(destination.chunk_pos, destination.block_pos);
+        hvox::BlockWorldPosition candidate_world
+            = hvox::block_world_position(candidate.chunk_pos, candidate.block_pos);
+
+        f32v3 candidate_vect = static_cast<f32v3>(destination_world)
+                               - static_cast<f32v3>(candidate_world);
+
+        return glm::dot(candidate_vect, candidate_vect);
+    }
+};
+
 class TestNavmeshScreen : public happ::ScreenBase {
 public:
     TestNavmeshScreen() : happ::ScreenBase(), m_input_manager(nullptr) { /* Empty. */
@@ -196,7 +215,11 @@ public:
                 hvox::ai::ChunkNavmeshNode* path        = nullptr;
                 size_t                      path_length = 0;
 
-                halgo::GraphACS::find_path<hvox::ai::ChunkNavmeshNode, false, Config>(
+                halgo::GraphACS::find_path<
+                    hvox::ai::ChunkNavmeshNode,
+                    false,
+                    Config,
+                    TNS_ACSDistanceCalculator>(
                     chunk->navmesh, start, end, path, path_length
                 );
 
