@@ -15,7 +15,7 @@
 #include "tests/iomanager.hpp"
 
 #if defined(DEBUG)
-#  define VIEW_DIST 6
+#  define VIEW_DIST 4
 #else
 #  define VIEW_DIST 10
 #endif
@@ -388,7 +388,7 @@ public:
         m_chunk_grid->init(
             m_chunk_grid,
             VIEW_DIST * 2 + 1,
-            28,
+            1,  // 28,
             hvox::ChunkTaskBuilder{ []() {
                 return new hvox::ChunkGenerationTask<
                     htest::navmesh_screen::VoxelGenerator>();
