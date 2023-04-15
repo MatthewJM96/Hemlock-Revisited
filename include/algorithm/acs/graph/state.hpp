@@ -45,9 +45,9 @@ namespace hemlock {
 
         template <typename Node, bool IsWeighted>
         using Graph = boost::adjacency_list<
+            boost::setS,
             boost::vecS,
-            boost::vecS,
-            boost::bidirectionalS,
+            boost::directedS,
             details::VertexProperties<Node>,
             details::EdgeProperties<IsWeighted>>;
 
