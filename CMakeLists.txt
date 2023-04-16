@@ -207,7 +207,6 @@ add_executable(Hemlock_Revisited
     "${PROJECT_SOURCE_DIR}/src/voxel/graphics/outline_renderer/block.cpp"
     "${PROJECT_SOURCE_DIR}/src/voxel/graphics/outline_renderer/navmesh.cpp"
     "${PROJECT_SOURCE_DIR}/src/voxel/graphics/renderer.cpp"
-    "${PROJECT_SOURCE_DIR}/src/voxel/graphics/mesh/instance_manager.cpp"
     "${PROJECT_SOURCE_DIR}/src/voxel/io/chunk_file_task.cpp"
     "${PROJECT_SOURCE_DIR}/src/voxel/io/chunk_load_task.cpp"
     "${PROJECT_SOURCE_DIR}/src/voxel/io/chunk_save_task.cpp"

@@ -31,9 +31,9 @@ hvox::Chunk::~Chunk() {
 }
 
 void hvox::Chunk::init(
-    hmem::WeakHandle<Chunk>              self,
-    hmem::Handle<ChunkBlockPager>        block_pager,
-    hmem::Handle<ChunkInstanceDataPager> instance_data_pager
+    hmem::WeakHandle<Chunk>          self,
+    hmem::Handle<ChunkBlockPager>    block_pager,
+    hmem::Handle<ChunkInstancePager> instance_data_pager
 ) {
     init_events(self);
 

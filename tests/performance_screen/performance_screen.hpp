@@ -13,7 +13,7 @@
 #include "voxel/chunk/state.hpp"
 #include "voxel/generation/generator_task.hpp"
 #include "voxel/graphics/mesh/greedy_strategy.hpp"
-#include "voxel/graphics/mesh/instance_manager.h"
+#include "voxel/graphics/mesh/instance_manager.hpp"
 #include "voxel/graphics/mesh/naive_strategy.hpp"
 
 #include "tests/iomanager.hpp"
@@ -63,8 +63,8 @@ public:
 
             hmem::Handle<hvox::ChunkBlockPager> block_pager
                 = hmem::make_handle<hvox::ChunkBlockPager>();
-            hmem::Handle<hvox::ChunkInstanceDataPager> instance_data_pager
-                = hmem::make_handle<hvox::ChunkInstanceDataPager>();
+            hmem::Handle<hvox::ChunkInstancePager> instance_data_pager
+                = hmem::make_handle<hvox::ChunkInstancePager>();
 
             hmem::PagedAllocator<hvox::Chunk, 4 * 4 * 4, 3> chunk_allocator;
 

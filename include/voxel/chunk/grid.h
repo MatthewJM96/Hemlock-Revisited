@@ -195,13 +195,14 @@ namespace hemlock {
             Delegate<void(Sender)>                   handle_chunk_load;
             Delegate<bool(Sender, BlockChangeEvent)> handle_block_change;
 
-            ChunkTaskBuilder m_build_load_or_generate_task, m_build_mesh_task, m_build_navmesh_task;
+            ChunkTaskBuilder m_build_load_or_generate_task, m_build_mesh_task,
+                m_build_navmesh_task;
             thread::ThreadPool<ChunkTaskContext> m_thread_pool;
 
             ChunkAllocator m_chunk_allocator;
 
-            hmem::Handle<ChunkBlockPager>        m_block_pager;
-            hmem::Handle<ChunkInstanceDataPager> m_instance_data_pager;
+            hmem::Handle<ChunkBlockPager>    m_block_pager;
+            hmem::Handle<ChunkInstancePager> m_instance_data_pager;
 
             ChunkRenderer m_renderer;
             ui32          m_render_distance, m_chunks_in_render_distance;

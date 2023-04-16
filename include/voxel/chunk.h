@@ -9,7 +9,7 @@
 #include "voxel/chunk/events.hpp"
 #include "voxel/chunk/state.hpp"
 #include "voxel/coordinate_system.h"
-#include "voxel/graphics/mesh/instance_manager.h"
+#include "voxel/graphics/mesh/instance_manager.hpp"
 #include "voxel/task.hpp"
 
 namespace hemlock {
@@ -22,9 +22,9 @@ namespace hemlock {
             ~Chunk();
 
             void init(
-                hmem::WeakHandle<Chunk>              self,
-                hmem::Handle<ChunkBlockPager>        block_pager,
-                hmem::Handle<ChunkInstanceDataPager> instance_data_pager
+                hmem::WeakHandle<Chunk>          self,
+                hmem::Handle<ChunkBlockPager>    block_pager,
+                hmem::Handle<ChunkInstancePager> instance_data_pager
             );
 
             void update(FrameTime);
