@@ -143,106 +143,123 @@ public:
         m_chunk_grid->update(time);
 
         if (m_nav_test_mode == 3) {
-            auto chunk = m_nav_test_start.chunk.lock();
-            if (chunk != nullptr) {
-                std::shared_lock lock(chunk->navmesh_mutex);
+            auto chunk_start = m_nav_test_start.chunk.lock();
+            auto chunk_end   = m_nav_test_end.chunk.lock();
+            if (chunk_start != nullptr && chunk_end != nullptr) {
+                std::shared_lock lock_start(
+                    chunk_start->navmesh_mutex, std::defer_lock
+                );
+                std::shared_lock lock_end(chunk_end->navmesh_mutex, std::defer_lock);
+                std::lock(lock_start, lock_end);
 
-                constexpr halgo::ACSConfig Config = { .debug = { .on = false } };
+                // constexpr halgo::ACSConfig Config = { .debug = { .on = false } };
 
                 hvox::ai::ChunkNavmeshNode start
                     = { hvox::block_chunk_position(m_nav_test_start.pos),
-                        chunk->position };
+                        chunk_start->position };
                 hvox::ai::ChunkNavmeshNode end
                     = { hvox::block_chunk_position(m_nav_test_end.pos),
-                        chunk->position };
+                        chunk_end->position };
 
-                // {
-                //     auto edges = boost::make_iterator_range(boost::out_edges(
-                //         chunk->navmesh.coord_vertex_map[start], chunk->navmesh.graph
-                //     ));
+                if (chunk_start->navmesh.coord_vertex_map.find(start)
+                    != chunk_start->navmesh.coord_vertex_map.end())
+                {
+                    auto edges = boost::make_iterator_range(boost::out_edges(
+                        chunk_start->navmesh.coord_vertex_map[start],
+                        chunk_start->navmesh.graph
+                    ));
 
-                //     std::cout << "From green:" << std::endl;
-                //     size_t i = 1;
-                //     for (auto edge : edges) {
-                //         hvox::ai::ChunkNavmeshNode target
-                //             = chunk->navmesh.vertex_coord_map[boost::target(
-                //                 edge, chunk->navmesh.graph
-                //             )];
+                    std::cout << "From green:" << std::endl;
+                    size_t i = 1;
+                    for (auto edge : edges) {
+                        hvox::ai::ChunkNavmeshNode target
+                            = chunk_start->navmesh.vertex_coord_map[boost::target(
+                                edge, chunk_start->navmesh.graph
+                            )];
 
-                //         std::cout << "  " << std::to_string(i++) << " - {"
-                //                   << std::to_string(target.block_pos.x) << ", "
-                //                   << std::to_string(target.block_pos.y) << ", "
-                //                   << std::to_string(target.block_pos.z) << "}"
-                //                   << std::endl;
-
-                //         m_block_outline_renderer.add_outline(hvox::OutlineData{
-                //             static_cast<f32v3>(hvox::block_world_position(
-                //                 target.chunk_pos, target.block_pos
-                //             )),
-                //             {0, 0, 255, 255}
-                //         });
-                //     }
-                // }
-
-                // {
-                //     auto edges = boost::make_iterator_range(boost::out_edges(
-                //         chunk->navmesh.coord_vertex_map[end], chunk->navmesh.graph
-                //     ));
-
-                //     std::cout << "From red:" << std::endl;
-                //     size_t i = 1;
-                //     for (auto edge : edges) {
-                //         hvox::ai::ChunkNavmeshNode target
-                //             = chunk->navmesh.vertex_coord_map[boost::target(
-                //                 edge, chunk->navmesh.graph
-                //             )];
-
-                //         std::cout << "  " << std::to_string(i++) << " - {"
-                //                   << std::to_string(target.block_pos.x) << ", "
-                //                   << std::to_string(target.block_pos.y) << ", "
-                //                   << std::to_string(target.block_pos.z) << "}"
-                //                   << std::endl;
-
-                //         m_block_outline_renderer.add_outline(hvox::OutlineData{
-                //             static_cast<f32v3>(hvox::block_world_position(
-                //                 target.chunk_pos, target.block_pos
-                //             )),
-                //             {0, 0, 255, 255}
-                //         });
-                //     }
-                // }
-
-                hvox::ai::ChunkNavmeshNode* path        = nullptr;
-                size_t                      path_length = 0;
-
-                halgo::GraphACS::find_path<
-                    hvox::ai::ChunkNavmeshNode,
-                    false,
-                    Config,
-                    TNS_ACSDistanceCalculator>(
-                    chunk->navmesh, start, end, path, path_length
-                );
-
-                if (path) {
-                    std::cout << "Path length is: " << std::to_string(path_length)
-                              << std::endl;
-
-                    for (size_t i = 0; i < path_length; ++i) {
-                        std::cout << "  " << std::to_string(i) << " - {"
-                                  << std::to_string(path[i].block_pos.x) << ", "
-                                  << std::to_string(path[i].block_pos.y) << ", "
-                                  << std::to_string(path[i].block_pos.z) << "}"
+                        std::cout << "  " << std::to_string(i++) << " - {"
+                                  << std::to_string(target.block_pos.x) << ", "
+                                  << std::to_string(target.block_pos.y) << ", "
+                                  << std::to_string(target.block_pos.z) << "}"
+                                  << " - {" << std::to_string(target.chunk_pos.x)
+                                  << ", " << std::to_string(target.chunk_pos.y) << ", "
+                                  << std::to_string(target.chunk_pos.z) << "}"
                                   << std::endl;
+
                         m_block_outline_renderer.add_outline(hvox::OutlineData{
                             static_cast<f32v3>(hvox::block_world_position(
-                                path[i].chunk_pos, path[i].block_pos
+                                target.chunk_pos, target.block_pos
                             )),
                             {0, 0, 255, 255}
                         });
                     }
-                } else {
-                    std::cout << "Path not found!" << std::endl;
                 }
+
+                if (chunk_end->navmesh.coord_vertex_map.find(end)
+                    != chunk_end->navmesh.coord_vertex_map.end())
+                {
+                    auto edges = boost::make_iterator_range(boost::out_edges(
+                        chunk_end->navmesh.coord_vertex_map[end],
+                        chunk_end->navmesh.graph
+                    ));
+
+                    std::cout << "From red:" << std::endl;
+                    size_t i = 1;
+                    for (auto edge : edges) {
+                        hvox::ai::ChunkNavmeshNode target
+                            = chunk_end->navmesh.vertex_coord_map[boost::target(
+                                edge, chunk_end->navmesh.graph
+                            )];
+
+                        std::cout << "  " << std::to_string(i++) << " - {"
+                                  << std::to_string(target.block_pos.x) << ", "
+                                  << std::to_string(target.block_pos.y) << ", "
+                                  << std::to_string(target.block_pos.z) << "}"
+                                  << " - {" << std::to_string(target.chunk_pos.x)
+                                  << ", " << std::to_string(target.chunk_pos.y) << ", "
+                                  << std::to_string(target.chunk_pos.z) << "}"
+                                  << std::endl;
+
+                        m_block_outline_renderer.add_outline(hvox::OutlineData{
+                            static_cast<f32v3>(hvox::block_world_position(
+                                target.chunk_pos, target.block_pos
+                            )),
+                            {0, 0, 255, 255}
+                        });
+                    }
+                }
+
+                // hvox::ai::ChunkNavmeshNode* path        = nullptr;
+                // size_t                      path_length = 0;
+
+                // halgo::GraphACS::find_path<
+                //     hvox::ai::ChunkNavmeshNode,
+                //     false,
+                //     Config,
+                //     TNS_ACSDistanceCalculator>(
+                //     chunk->navmesh, start, end, path, path_length
+                // );
+
+                // if (path) {
+                //     std::cout << "Path length is: " << std::to_string(path_length)
+                //               << std::endl;
+
+                //     for (size_t i = 0; i < path_length; ++i) {
+                //         std::cout << "  " << std::to_string(i) << " - {"
+                //                   << std::to_string(path[i].block_pos.x) << ", "
+                //                   << std::to_string(path[i].block_pos.y) << ", "
+                //                   << std::to_string(path[i].block_pos.z) << "}"
+                //                   << std::endl;
+                //         m_block_outline_renderer.add_outline(hvox::OutlineData{
+                //             static_cast<f32v3>(hvox::block_world_position(
+                //                 path[i].chunk_pos, path[i].block_pos
+                //             )),
+                //             {0, 0, 255, 255}
+                //         });
+                //     }
+                // } else {
+                //     std::cout << "Path not found!" << std::endl;
+                // }
             }
 
             m_nav_test_mode = 0;
