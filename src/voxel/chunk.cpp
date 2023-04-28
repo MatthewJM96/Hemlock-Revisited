@@ -37,8 +37,11 @@ void hvox::Chunk::init(
     init_events(self);
 
     blocks.init(block_pager);
+    blocks.generate_buffer();
     mesh.init(mesh_pager);
+    mesh.generate_buffer();
     navmesh.init(navmesh_pager);
+    navmesh.generate_buffer();
 
     neighbours = {};
 }
