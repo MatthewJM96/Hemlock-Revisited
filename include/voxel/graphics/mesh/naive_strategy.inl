@@ -35,16 +35,16 @@ void hvox::NaiveMeshStrategy<MeshComparator>::operator()(
     //                      further improve performance and also remove the difficulty
     //                      of the above TODO.
 
-    chunk->instance.generate_buffer();
+    chunk->mesh.generate_buffer();
 
-    std::unique_lock<std::shared_mutex> instance_lock;
-    auto&                               instance = chunk->instance.get(instance_lock);
+    std::unique_lock<std::shared_mutex> mesh_lock;
+    auto&                               mesh = chunk->mesh.get(mesh_lock);
 
     // Determines if block is meshable.
     const MeshComparator meshable{};
 
     auto add_block = [&](BlockWorldPosition pos) {
-        instance.data[instance.count++] = { f32v3(pos), f32v3(1.0f) };
+        mesh.data[mesh.count++] = { f32v3(pos), f32v3(1.0f) };
     };
 
     Chunk* raw_chunk_ptr = chunk.get();

@@ -93,7 +93,7 @@ void hvox::ChunkRenderer::draw(FrameTime) {
         if (chunk_page->voxel_count == 0) continue;
 
         glVertexArrayVertexBuffer(
-            block_mesh_handles.vao, 1, chunk_page->vbo, 0, sizeof(ChunkInstanceData)
+            block_mesh_handles.vao, 1, chunk_page->vbo, 0, sizeof(ChunkMeshData)
         );
 
         glDrawArraysInstanced(
@@ -134,7 +134,7 @@ hvox::ChunkRenderPage* hvox::ChunkRenderer::create_pages(ui32 count) {
     glCreateBuffers(1, &first_new_page->vbo);
     glNamedBufferData(
         first_new_page->vbo,
-        block_page_size() * sizeof(ChunkInstanceData),
+        block_page_size() * sizeof(ChunkMeshData),
         nullptr,
         GL_DYNAMIC_DRAW
     );
@@ -152,7 +152,7 @@ hvox::ChunkRenderPage* hvox::ChunkRenderer::create_pages(ui32 count) {
         glCreateBuffers(1, &new_page->vbo);
         glNamedBufferData(
             new_page->vbo,
-            block_page_size() * sizeof(ChunkInstanceData),
+            block_page_size() * sizeof(ChunkMeshData),
             nullptr,
             GL_DYNAMIC_DRAW
         );
@@ -282,7 +282,7 @@ void hvox::ChunkRenderer::process_pages() {
             page.dirty = true;
         } else if (chunk != nullptr) {
             std::shared_lock<std::shared_mutex> instance_lock;
-            const auto& instance = chunk->instance.get(instance_lock);
+            const auto& instance = chunk->mesh.get(instance_lock);
 
             put_chunk_in_page(chunk->id(), instance.count, 0);
         }
@@ -313,7 +313,7 @@ void hvox::ChunkRenderer::process_pages() {
         glCreateBuffers(1, &new_vbos[page_idx]);
         glNamedBufferData(
             new_vbos[page_idx],
-            block_page_size() * sizeof(ChunkInstanceData),
+            block_page_size() * sizeof(ChunkMeshData),
             nullptr,
             GL_DYNAMIC_DRAW
         );
@@ -327,11 +327,7 @@ void hvox::ChunkRenderer::process_pages() {
 
         // Copy unchanged original data into new buffer.
         glCopyNamedBufferSubData(
-            page.vbo,
-            new_vbos[page_idx],
-            0,
-            0,
-            voxels_instanced * sizeof(ChunkInstanceData)
+            page.vbo, new_vbos[page_idx], 0, 0, voxels_instanced * sizeof(ChunkMeshData)
         );
 
         for (ui32 chunk_idx = page.first_dirtied_chunk_idx;
@@ -356,7 +352,7 @@ void hvox::ChunkRenderer::process_pages() {
             // data from wherever that lies on the GPU?
             if (metadata.dirty) {
                 std::shared_lock<std::shared_mutex> instance_lock;
-                const auto& instance = chunk->instance.get(instance_lock);
+                const auto& instance = chunk->mesh.get(instance_lock);
 
                 assert(instance.count <= block_page_size());
 
@@ -383,8 +379,8 @@ void hvox::ChunkRenderer::process_pages() {
 
                 glNamedBufferSubData(
                     new_vbos[page_idx],
-                    voxels_instanced * sizeof(ChunkInstanceData),
-                    instance.count * sizeof(ChunkInstanceData),
+                    voxels_instanced * sizeof(ChunkMeshData),
+                    instance.count * sizeof(ChunkMeshData),
                     reinterpret_cast<void*>(instance.data)
                 );
                 metadata.on_gpu_offset      = voxels_instanced;
@@ -398,9 +394,9 @@ void hvox::ChunkRenderer::process_pages() {
                 glCopyNamedBufferSubData(
                     m_chunk_pages[metadata.on_gpu_page_idx]->vbo,
                     new_vbos[page_idx],
-                    metadata.on_gpu_offset * sizeof(ChunkInstanceData),
-                    voxels_instanced * sizeof(ChunkInstanceData),
-                    metadata.on_gpu_voxel_count * sizeof(ChunkInstanceData)
+                    metadata.on_gpu_offset * sizeof(ChunkMeshData),
+                    voxels_instanced * sizeof(ChunkMeshData),
+                    metadata.on_gpu_voxel_count * sizeof(ChunkMeshData)
                 );
                 metadata.on_gpu_offset   = voxels_instanced;
                 metadata.on_gpu_page_idx = page_idx;
@@ -408,7 +404,7 @@ void hvox::ChunkRenderer::process_pages() {
                 voxels_instanced += metadata.on_gpu_voxel_count;
             }
 
-            chunk->instance.free_buffer();
+            chunk->mesh.free_buffer();
 
             ++chunk_idx;
         }

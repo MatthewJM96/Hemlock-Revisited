@@ -94,8 +94,8 @@ void hvox::ChunkGrid::init(
 
     m_thread_pool.init(thread_count);
 
-    m_block_pager         = hmem::make_handle<ChunkBlockPager>();
-    m_instance_data_pager = hmem::make_handle<ChunkInstancePager>();
+    m_block_pager = hmem::make_handle<ChunkBlockPager>();
+    m_mesh_pager  = hmem::make_handle<ChunkMeshPager>();
 
     // TODO(Matthew): smarter setting of page size - maybe should be dependent on draw
     // distance. m_renderer.init(20, 2);
@@ -152,7 +152,7 @@ bool hvox::ChunkGrid::preload_chunk_at(ChunkGridPosition chunk_position) {
 
     hmem::Handle<Chunk> chunk = hmem::allocate_handle<Chunk>(m_chunk_allocator);
     chunk->position           = chunk_position;
-    chunk->init(chunk, m_block_pager, m_instance_data_pager);
+    chunk->init(chunk, m_block_pager, m_mesh_pager);
 
     chunk->on_load         += &handle_chunk_load;
     chunk->on_block_change += &handle_block_change;

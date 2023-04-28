@@ -9,7 +9,7 @@
 #include "voxel/chunk/events.hpp"
 #include "voxel/chunk/state.hpp"
 #include "voxel/coordinate_system.h"
-#include "voxel/graphics/mesh/instance_manager.hpp"
+#include "voxel/graphics/mesh/mesh_manager.hpp"
 #include "voxel/task.hpp"
 
 namespace hemlock {
@@ -22,9 +22,9 @@ namespace hemlock {
             ~Chunk();
 
             void init(
-                hmem::WeakHandle<Chunk>          self,
-                hmem::Handle<ChunkBlockPager>    block_pager,
-                hmem::Handle<ChunkInstancePager> instance_data_pager
+                hmem::WeakHandle<Chunk>       self,
+                hmem::Handle<ChunkBlockPager> block_pager,
+                hmem::Handle<ChunkMeshPager>  mesh_pager
             );
 
             void update(FrameTime);
@@ -40,7 +40,7 @@ namespace hemlock {
             std::shared_mutex navmesh_mutex;
             ai::ChunkNavmesh  navmesh;
 
-            ChunkInstanceManager instance;
+            ChunkMeshManager mesh;
 
             std::atomic<LODLevel>   lod_level;
             std::atomic<ChunkState> generation, meshing, mesh_uploading,
