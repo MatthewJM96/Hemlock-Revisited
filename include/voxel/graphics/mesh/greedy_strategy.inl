@@ -25,9 +25,8 @@ void hvox::GreedyMeshStrategy<MeshComparator>::operator()(
     //                      further improve performance and also remove the difficulty
     //                      of the above TODO.
 
-    std::shared_lock block_lock(chunk->blocks_mutex);
-
-    Block* blocks = chunk->blocks;
+    hmem::SharedResourceLock block_lock;
+    auto                     blocks = chunk->blocks.get(block_lock);
 
     std::queue<BlockChunkPosition> queued_for_visit;
 
@@ -38,7 +37,7 @@ void hvox::GreedyMeshStrategy<MeshComparator>::operator()(
     std::unique_lock<std::shared_mutex> mesh_lock;
     auto&                               mesh = chunk->mesh.get(mesh_lock);
 
-    const Block*       source = &blocks[0];
+    const Block*       source = &blocks.data[0];
     BlockChunkPosition start  = BlockChunkPosition{ 0 };
     BlockChunkPosition end    = BlockChunkPosition{ 0 };
     BlockChunkPosition target_pos;
@@ -89,7 +88,7 @@ process_new_source:
         for (; target_pos.x < CHUNK_LENGTH; ++target_pos.x) {
             auto target_idx = block_index(target_pos);
 
-            const Block* target = &blocks[target_idx];
+            const Block* target = &blocks.data[target_idx];
             // We are scanning for a new meshable source block.
             if (!found_meshable) {
                 // Found a meshable source block that hasn't already
@@ -146,7 +145,7 @@ process_new_source:
             for (target_pos.x = start.x; target_pos.x <= end.x; ++target_pos.x) {
                 auto target_idx = block_index(target_pos);
 
-                const Block* target = &blocks[target_idx];
+                const Block* target = &blocks.data[target_idx];
                 // We are scanning for a new meshable source block.
                 if (!found_meshable) {
                     // Found a meshable source block that hasn't already
@@ -207,7 +206,7 @@ process_new_source:
                 for (target_pos.x = start.x; target_pos.x <= end.x; ++target_pos.x) {
                     auto target_idx = block_index(target_pos);
 
-                    const Block* target = &blocks[target_idx];
+                    const Block* target = &blocks.data[target_idx];
                     // We are scanning for a new meshable source block.
                     if (!found_meshable) {
                         // Found a meshable source block that hasn't already
@@ -285,7 +284,7 @@ process_new_source:
         do {
             start  = queued_for_visit.front();
             end    = start;
-            source = &blocks[block_index(start)];
+            source = &blocks.data[block_index(start)];
 
             queued_for_visit.pop();
 

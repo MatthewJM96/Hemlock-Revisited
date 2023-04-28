@@ -6,7 +6,6 @@
 
 hvox::Chunk::Chunk() :
     neighbours({}),
-    blocks(nullptr),
     lod_level(0),
     generation(ChunkState::NONE),
     meshing(ChunkState::NONE),
@@ -22,25 +21,24 @@ hvox::Chunk::~Chunk() {
     // debug_printf("Unloading chunk at (%d, %d, %d).\n", position.x, position.y,
     // position.z);
 
-    if (blocks) m_block_pager->free_page(blocks);
-    blocks = nullptr;
-
+    blocks.dispose();
     mesh.dispose();
+    navmesh.dispose();
 
     neighbours = {};
 }
 
 void hvox::Chunk::init(
-    hmem::WeakHandle<Chunk>       self,
-    hmem::Handle<ChunkBlockPager> block_pager,
-    hmem::Handle<ChunkMeshPager>  mesh_pager
+    hmem::WeakHandle<Chunk>             self,
+    hmem::Handle<ChunkBlockPager>       block_pager,
+    hmem::Handle<ChunkMeshPager>        mesh_pager,
+    hmem::Handle<ai::ChunkNavmeshPager> navmesh_pager
 ) {
     init_events(self);
 
-    blocks        = block_pager->get_page();
-    m_block_pager = block_pager;
-
+    blocks.init(block_pager);
     mesh.init(mesh_pager);
+    navmesh.init(navmesh_pager);
 
     neighbours = {};
 }
@@ -62,7 +60,8 @@ void hvox::Chunk::init_events(hmem::WeakHandle<Chunk> self) {
 bool hvox::set_block(
     hmem::Handle<Chunk> chunk, BlockChunkPosition block_position, Block block
 ) {
-    auto lock = std::unique_lock(chunk->blocks_mutex);
+    hmem::UniqueResourceLock lock;
+    auto                     blocks = chunk->blocks.get(lock);
 
     auto block_idx = block_index(block_position);
 
@@ -70,12 +69,12 @@ bool hvox::set_block(
         = chunk->generation.load(std::memory_order_acquire) == ChunkState::ACTIVE;
     if (!gen_task_active) {
         bool should_cancel = chunk->on_block_change(
-            { chunk, chunk->blocks[block_idx], block, block_position }
+            { chunk, blocks.data[block_idx], block, block_position }
         );
         if (should_cancel) return false;
     }
 
-    chunk->blocks[block_idx] = block;
+    blocks.data[block_idx] = block;
 
     return true;
 }
@@ -86,7 +85,8 @@ bool hvox::set_blocks(
     BlockChunkPosition  end_block_position,
     Block               block
 ) {
-    auto lock = std::unique_lock(chunk->blocks_mutex);
+    hmem::UniqueResourceLock lock;
+    auto                     chunk_blocks = chunk->blocks.get(lock);
 
     bool gen_task_active
         = chunk->generation.load(std::memory_order_acquire) == ChunkState::ACTIVE;
@@ -97,7 +97,9 @@ bool hvox::set_blocks(
         if (should_cancel) return false;
     }
 
-    set_per_block_data(chunk->blocks, start_block_position, end_block_position, block);
+    set_per_block_data(
+        chunk_blocks.data, start_block_position, end_block_position, block
+    );
 
     return true;
 }
@@ -108,18 +110,26 @@ bool hvox::set_blocks(
     BlockChunkPosition  end_block_position,
     Block*              blocks
 ) {
-    auto lock = std::unique_lock(chunk->blocks_mutex);
+    hmem::UniqueResourceLock lock;
+    auto                     chunk_blocks = chunk->blocks.get(lock);
 
     bool gen_task_active
         = chunk->generation.load(std::memory_order_acquire) == ChunkState::ACTIVE;
     if (!gen_task_active) {
-        bool should_cancel = chunk->on_bulk_block_change(
-            { chunk, blocks, false, start_block_position, end_block_position }
-        );
+        // TODO(Matthew): this is a problem... don't really want to provide chunk blocks
+        //                directly nor do we want deadlocks if people try to access
+        //                write on them from event triggers.
+        bool should_cancel = chunk->on_bulk_block_change({ chunk,
+                                                           chunk_blocks.data,
+                                                           false,
+                                                           start_block_position,
+                                                           end_block_position });
         if (should_cancel) return false;
     }
 
-    set_per_block_data(chunk->blocks, start_block_position, end_block_position, blocks);
+    set_per_block_data(
+        chunk_blocks.data, start_block_position, end_block_position, blocks
+    );
 
     return true;
 }

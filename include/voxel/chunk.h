@@ -3,7 +3,7 @@
 
 #include "graphics/mesh.h"
 #include "timing.h"
-#include "voxel/ai/navmesh/state.hpp"
+#include "voxel/ai/navmesh/navmesh_manager.hpp"
 #include "voxel/block.hpp"
 #include "voxel/chunk/constants.hpp"
 #include "voxel/chunk/events.hpp"
@@ -22,9 +22,10 @@ namespace hemlock {
             ~Chunk();
 
             void init(
-                hmem::WeakHandle<Chunk>       self,
-                hmem::Handle<ChunkBlockPager> block_pager,
-                hmem::Handle<ChunkMeshPager>  mesh_pager
+                hmem::WeakHandle<Chunk>             self,
+                hmem::Handle<ChunkBlockPager>       block_pager,
+                hmem::Handle<ChunkMeshPager>        mesh_pager,
+                hmem::Handle<ai::ChunkNavmeshPager> navmesh_pager
             );
 
             void update(FrameTime);
@@ -34,13 +35,11 @@ namespace hemlock {
             ChunkGridPosition position;
             Neighbours        neighbours;
 
-            std::shared_mutex blocks_mutex;
-            Block*            blocks;
-
-            std::shared_mutex navmesh_mutex;
-            ai::ChunkNavmesh  navmesh;
-
-            ChunkMeshManager mesh;
+            ChunkBlockManager blocks;
+            ChunkMeshManager  mesh;
+            // TODO(Matthew): navmesh wants to probably be paged in some amount of bulk
+            //                and divied out, that or we need to stack allocate.
+            ai::ChunkNavmeshManager navmesh;
 
             std::atomic<LODLevel>   lod_level;
             std::atomic<ChunkState> generation, meshing, mesh_uploading,
@@ -72,8 +71,6 @@ namespace hemlock {
             Event<>               on_unload;
         protected:
             void init_events(hmem::WeakHandle<Chunk> self);
-
-            hmem::Handle<ChunkBlockPager> m_block_pager;
         };
 
         /**

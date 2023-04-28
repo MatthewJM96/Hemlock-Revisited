@@ -146,10 +146,10 @@ public:
             auto chunk_start = m_nav_test_start.chunk.lock();
             auto chunk_end   = m_nav_test_end.chunk.lock();
             if (chunk_start != nullptr && chunk_end != nullptr) {
-                std::shared_lock lock_start(
-                    chunk_start->navmesh_mutex, std::defer_lock
-                );
-                std::shared_lock lock_end(chunk_end->navmesh_mutex, std::defer_lock);
+                hmem::SharedResourceLock lock_start, lock_end;
+                auto                     navmesh_start
+                    = chunk_start->navmesh.get(lock_start, std::defer_lock);
+                auto navmesh_end = chunk_end->navmesh.get(lock_end, std::defer_lock);
                 std::lock(lock_start, lock_end);
 
                 // constexpr halgo::ACSConfig Config = { .debug = { .on = false } };
@@ -161,20 +161,20 @@ public:
                     = { hvox::block_chunk_position(m_nav_test_end.pos),
                         chunk_end->position };
 
-                if (chunk_start->navmesh.coord_vertex_map.find(start)
-                    != chunk_start->navmesh.coord_vertex_map.end())
+                if (navmesh_start.data->coord_vertex_map.find(start)
+                    != navmesh_start.data->coord_vertex_map.end())
                 {
                     auto edges = boost::make_iterator_range(boost::out_edges(
-                        chunk_start->navmesh.coord_vertex_map[start],
-                        chunk_start->navmesh.graph
+                        navmesh_start.data->coord_vertex_map[start],
+                        navmesh_start.data->graph
                     ));
 
                     std::cout << "From green:" << std::endl;
                     size_t i = 1;
                     for (auto edge : edges) {
                         hvox::ai::ChunkNavmeshNode target
-                            = chunk_start->navmesh.vertex_coord_map[boost::target(
-                                edge, chunk_start->navmesh.graph
+                            = navmesh_start.data->vertex_coord_map[boost::target(
+                                edge, navmesh_start.data->graph
                             )];
 
                         std::cout << "  " << std::to_string(i++) << " - {"
@@ -195,20 +195,19 @@ public:
                     }
                 }
 
-                if (chunk_end->navmesh.coord_vertex_map.find(end)
-                    != chunk_end->navmesh.coord_vertex_map.end())
+                if (navmesh_end.data->coord_vertex_map.find(end)
+                    != navmesh_end.data->coord_vertex_map.end())
                 {
                     auto edges = boost::make_iterator_range(boost::out_edges(
-                        chunk_end->navmesh.coord_vertex_map[end],
-                        chunk_end->navmesh.graph
+                        navmesh_end.data->coord_vertex_map[end], navmesh_end.data->graph
                     ));
 
                     std::cout << "From red:" << std::endl;
                     size_t i = 1;
                     for (auto edge : edges) {
                         hvox::ai::ChunkNavmeshNode target
-                            = chunk_end->navmesh.vertex_coord_map[boost::target(
-                                edge, chunk_end->navmesh.graph
+                            = navmesh_end.data->vertex_coord_map[boost::target(
+                                edge, navmesh_end.data->graph
                             )];
 
                         std::cout << "  " << std::to_string(i++) << " - {"

@@ -65,6 +65,8 @@ public:
                 = hmem::make_handle<hvox::ChunkBlockPager>();
             hmem::Handle<hvox::ChunkMeshPager> mesh_pager
                 = hmem::make_handle<hvox::ChunkMeshPager>();
+            hmem::Handle<hvox::ai::ChunkNavmeshPager> navmesh_pager
+                = hmem::make_handle<hvox::ai::ChunkNavmeshPager>();
 
             hmem::PagedAllocator<hvox::Chunk, 4 * 4 * 4, 3> chunk_allocator;
 
@@ -85,7 +87,7 @@ public:
                             {x, y, z}
                         };
                         chunks[idx]->init(
-                            chunks[idx], block_pager, instance_data_pager
+                            chunks[idx], block_pager, mesh_pager, navmesh_pager
                         );
                     }
                 }
@@ -160,9 +162,10 @@ public:
                     hemlock::global_unitary_rand<f32>() * static_cast<f32>(CHUNK_VOLUME)
                 ));
 
-                std::cout << "    - "
-                          << chunks[rand_chunk_idx]->blocks[rand_block_idx].id
-                          << std::endl;
+                hmem::SharedResourceLock block_lock;
+                auto blocks = chunks[rand_chunk_idx]->blocks.get(block_lock);
+
+                std::cout << "    - " << blocks.data[rand_block_idx].id << std::endl;
             }
 
             const hvox::NaiveMeshStrategy<htest::performance_screen::BlockComparator>
@@ -339,14 +342,16 @@ public:
                     hemlock::global_unitary_rand<f32>() * static_cast<f32>(iterations)
                 ));
 
-                std::cout << "    - "
-                          << boost::num_vertices(chunks[rand_chunk_idx]->navmesh.graph)
+                hmem::SharedResourceLock lock;
+                auto navmesh = chunks[rand_chunk_idx]->navmesh.get(lock);
+
+                std::cout << "    - " << boost::num_vertices(navmesh.data->graph)
                           << std::endl;
             }
 
             {
                 size_t allocated_bytes = block_pager->allocated_bytes()
-                                         + instance_data_pager->allocated_bytes()
+                                         + mesh_pager->allocated_bytes()
                                          + chunk_allocator.allocated_bytes();
                 size_t allocated_MB = allocated_bytes / 1000000;
 
@@ -370,7 +375,7 @@ public:
 
             delete[] chunks;
             block_pager->dispose();
-            instance_data_pager->dispose();
+            mesh_pager->dispose();
 
             m_do_profile.store(false);
         }

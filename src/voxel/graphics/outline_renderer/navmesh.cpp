@@ -115,7 +115,8 @@ bool hvox::NavmeshOutlineRenderer::__calculate_outlines(NavmeshOutlines& navmesh
         return false;
     }
 
-    auto lock = std::shared_lock(chunk->navmesh_mutex);
+    hmem::SharedResourceLock lock;
+    auto                     chunk_navmesh = chunk->navmesh.get(lock);
 
     if (chunk->navmeshing.load() != ChunkState::COMPLETE) return false;
 
@@ -123,19 +124,20 @@ bool hvox::NavmeshOutlineRenderer::__calculate_outlines(NavmeshOutlines& navmesh
     tmp_outline_buffer.reserve(navmesh.outlines.size());
 
     for (auto vertex :
-         boost::make_iterator_range(boost::vertices(chunk->navmesh.graph)))
+         boost::make_iterator_range(boost::vertices(chunk_navmesh.data->graph)))
     {
-        ai::ChunkNavmeshNode node = chunk->navmesh.vertex_coord_map[vertex];
+        ai::ChunkNavmeshNode node = chunk_navmesh.data->vertex_coord_map[vertex];
         BlockWorldPosition   vert_pos
             = block_world_position(node.chunk_pos, node.block_pos);
 
-        for (auto edge :
-             boost::make_iterator_range(boost::out_edges(vertex, chunk->navmesh.graph)))
+        for (auto edge : boost::make_iterator_range(
+                 boost::out_edges(vertex, chunk_navmesh.data->graph)
+             ))
         {
-            auto target_vertex = boost::target(edge, chunk->navmesh.graph);
+            auto target_vertex = boost::target(edge, chunk_navmesh.data->graph);
 
             ai::ChunkNavmeshNode target_node
-                = chunk->navmesh.vertex_coord_map[target_vertex];
+                = chunk_navmesh.data->vertex_coord_map[target_vertex];
             BlockWorldPosition target_vert_pos
                 = block_world_position(target_node.chunk_pos, target_node.block_pos);
 

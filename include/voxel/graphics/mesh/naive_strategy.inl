@@ -49,14 +49,15 @@ void hvox::NaiveMeshStrategy<MeshComparator>::operator()(
 
     Chunk* raw_chunk_ptr = chunk.get();
 
-    std::shared_lock                    block_lock(chunk->blocks_mutex);
-    std::shared_lock<std::shared_mutex> neighbour_lock;
+    hmem::SharedResourceLock block_lock;
+    auto                     blocks = chunk->blocks.get(block_lock);
+    hmem::SharedResourceLock neighbour_lock;
 
     // TODO(Matthew): Checking block is NULL_BLOCK is wrong check really, we will have
     // transparent blocks
     //                e.g. air, to account for too.
     for (BlockIndex i = 0; i < CHUNK_VOLUME; ++i) {
-        Block& voxel = chunk->blocks[i];
+        Block& voxel = blocks.data[i];
         if (voxel != NULL_BLOCK) {
             BlockWorldPosition block_position
                 = block_world_position(chunk->position, i);
@@ -70,8 +71,8 @@ void hvox::NaiveMeshStrategy<MeshComparator>::operator()(
                 BlockIndex j = index_at_right_face(i);
                 neighbour    = chunk->neighbours.one.left.lock();
                 if (neighbour) {
-                    neighbour_lock = std::shared_lock(neighbour->blocks_mutex);
-                    if (neighbour->blocks[j] == NULL_BLOCK) {
+                    auto neighbour_blocks = neighbour->blocks.get(neighbour_lock);
+                    if (neighbour_blocks.data[j] == NULL_BLOCK) {
                         add_block(block_position);
                         continue;
                     }
@@ -79,8 +80,8 @@ void hvox::NaiveMeshStrategy<MeshComparator>::operator()(
             } else {
                 // Get corresponding neighbour index in this chunk and check.
                 if (meshable(
-                        &chunk->blocks[i - 1],
-                        &chunk->blocks[i - 1],
+                        &blocks.data[i - 1],
+                        &blocks.data[i - 1],
                         block_chunk_position(i),
                         raw_chunk_ptr
                     ))
@@ -96,8 +97,8 @@ void hvox::NaiveMeshStrategy<MeshComparator>::operator()(
                 BlockIndex j = index_at_left_face(i);
                 neighbour    = chunk->neighbours.one.right.lock();
                 if (neighbour) {
-                    neighbour_lock = std::shared_lock(neighbour->blocks_mutex);
-                    if (neighbour->blocks[j] == NULL_BLOCK) {
+                    auto neighbour_blocks = neighbour->blocks.get(neighbour_lock);
+                    if (neighbour_blocks.data[j] == NULL_BLOCK) {
                         add_block(block_position);
                         continue;
                     }
@@ -105,8 +106,8 @@ void hvox::NaiveMeshStrategy<MeshComparator>::operator()(
             } else {
                 // Get corresponding neighbour index in this chunk and check.
                 if (meshable(
-                        &chunk->blocks[i + 1],
-                        &chunk->blocks[i + 1],
+                        &blocks.data[i + 1],
+                        &blocks.data[i + 1],
                         block_chunk_position(i),
                         raw_chunk_ptr
                     ))
@@ -122,8 +123,8 @@ void hvox::NaiveMeshStrategy<MeshComparator>::operator()(
                 BlockIndex j = index_at_top_face(i);
                 neighbour    = chunk->neighbours.one.bottom.lock();
                 if (neighbour) {
-                    neighbour_lock = std::shared_lock(neighbour->blocks_mutex);
-                    if (neighbour->blocks[j] == NULL_BLOCK) {
+                    auto neighbour_blocks = neighbour->blocks.get(neighbour_lock);
+                    if (neighbour_blocks.data[j] == NULL_BLOCK) {
                         add_block(block_position);
                         continue;
                     }
@@ -131,8 +132,8 @@ void hvox::NaiveMeshStrategy<MeshComparator>::operator()(
             } else {
                 // Get corresponding neighbour index in this chunk and check.
                 if (meshable(
-                        &chunk->blocks[i - CHUNK_LENGTH],
-                        &chunk->blocks[i - CHUNK_LENGTH],
+                        &blocks.data[i - CHUNK_LENGTH],
+                        &blocks.data[i - CHUNK_LENGTH],
                         block_chunk_position(i),
                         raw_chunk_ptr
                     ))
@@ -148,8 +149,8 @@ void hvox::NaiveMeshStrategy<MeshComparator>::operator()(
                 BlockIndex j = index_at_bottom_face(i);
                 neighbour    = chunk->neighbours.one.top.lock();
                 if (neighbour) {
-                    neighbour_lock = std::shared_lock(neighbour->blocks_mutex);
-                    if (neighbour->blocks[j] == NULL_BLOCK) {
+                    auto neighbour_blocks = neighbour->blocks.get(neighbour_lock);
+                    if (neighbour_blocks.data[j] == NULL_BLOCK) {
                         add_block(block_position);
                         continue;
                     }
@@ -157,8 +158,8 @@ void hvox::NaiveMeshStrategy<MeshComparator>::operator()(
             } else {
                 // Get corresponding neighbour index in this chunk and check.
                 if (meshable(
-                        &chunk->blocks[i + CHUNK_LENGTH],
-                        &chunk->blocks[i + CHUNK_LENGTH],
+                        &blocks.data[i + CHUNK_LENGTH],
+                        &blocks.data[i + CHUNK_LENGTH],
                         block_chunk_position(i),
                         raw_chunk_ptr
                     ))
@@ -174,8 +175,8 @@ void hvox::NaiveMeshStrategy<MeshComparator>::operator()(
                 BlockIndex j = index_at_back_face(i);
                 neighbour    = chunk->neighbours.one.front.lock();
                 if (neighbour) {
-                    neighbour_lock = std::shared_lock(neighbour->blocks_mutex);
-                    if (neighbour->blocks[j] == NULL_BLOCK) {
+                    auto neighbour_blocks = neighbour->blocks.get(neighbour_lock);
+                    if (neighbour_blocks.data[j] == NULL_BLOCK) {
                         add_block(block_position);
                         continue;
                     }
@@ -183,8 +184,8 @@ void hvox::NaiveMeshStrategy<MeshComparator>::operator()(
             } else {
                 // Get corresponding neighbour index in this chunk and check.
                 if (meshable(
-                        &chunk->blocks[i - (CHUNK_AREA)],
-                        &chunk->blocks[i - (CHUNK_AREA)],
+                        &blocks.data[i - (CHUNK_AREA)],
+                        &blocks.data[i - (CHUNK_AREA)],
                         block_chunk_position(i),
                         raw_chunk_ptr
                     ))
@@ -200,8 +201,8 @@ void hvox::NaiveMeshStrategy<MeshComparator>::operator()(
                 BlockIndex j = index_at_front_face(i);
                 neighbour    = chunk->neighbours.one.back.lock();
                 if (neighbour) {
-                    neighbour_lock = std::shared_lock(neighbour->blocks_mutex);
-                    if (neighbour->blocks[j] == NULL_BLOCK) {
+                    auto neighbour_blocks = neighbour->blocks.get(neighbour_lock);
+                    if (neighbour_blocks.data[j] == NULL_BLOCK) {
                         add_block(block_position);
                         continue;
                     }
@@ -209,8 +210,8 @@ void hvox::NaiveMeshStrategy<MeshComparator>::operator()(
             } else {
                 // Get corresponding neighbour index in this chunk and check.
                 if (meshable(
-                        &chunk->blocks[i + (CHUNK_AREA)],
-                        &chunk->blocks[i + (CHUNK_AREA)],
+                        &blocks.data[i + (CHUNK_AREA)],
+                        &blocks.data[i + (CHUNK_AREA)],
                         block_chunk_position(i),
                         raw_chunk_ptr
                     ))

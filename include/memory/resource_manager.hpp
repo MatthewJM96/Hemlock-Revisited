@@ -5,6 +5,9 @@
 
 namespace hemlock {
     namespace memory {
+        using SharedResourceLock = std::shared_lock<std::shared_mutex>;
+        using UniqueResourceLock = std::unique_lock<std::shared_mutex>;
+
         template <typename Resource>
         struct PagedResource {
             Page<Resource> data;
@@ -29,12 +32,11 @@ namespace hemlock {
             void init();
             void dispose();
 
-            Resource& get(std::unique_lock<std::shared_mutex>& lock);
-            Resource& get(std::unique_lock<std::shared_mutex>& lock, std::defer_lock_t);
-            const Resource& get(std::shared_lock<std::shared_mutex>& lock);
-            const Resource&
-                      get(std::shared_lock<std::shared_mutex>& lock, std::defer_lock_t);
-            Resource& get_unsafe();
+            Resource&       get(UniqueResourceLock& lock);
+            Resource&       get(UniqueResourceLock& lock, std::defer_lock_t);
+            const Resource& get(SharedResourceLock& lock);
+            const Resource& get(SharedResourceLock& lock, std::defer_lock_t);
+            Resource&       get_unsafe();
         protected:
             std::shared_mutex m_mutex;
             Resource          m_resource;
@@ -56,13 +58,11 @@ namespace hemlock {
             void init(hmem::Handle<Pager> pager);
             void dispose();
 
-            _PagedResource& get(std::unique_lock<std::shared_mutex>& lock);
-            _PagedResource&
-            get(std::unique_lock<std::shared_mutex>& lock, std::defer_lock_t);
-            const _PagedResource& get(std::shared_lock<std::shared_mutex>& lock);
-            const _PagedResource&
-            get(std::shared_lock<std::shared_mutex>& lock, std::defer_lock_t);
-            _PagedResource& get_unsafe();
+            _PagedResource&       get(UniqueResourceLock& lock);
+            _PagedResource&       get(UniqueResourceLock& lock, std::defer_lock_t);
+            const _PagedResource& get(SharedResourceLock& lock);
+            const _PagedResource& get(SharedResourceLock& lock, std::defer_lock_t);
+            _PagedResource&       get_unsafe();
 
             void generate_buffer();
             void free_buffer();

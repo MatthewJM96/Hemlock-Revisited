@@ -194,11 +194,12 @@ bool hvox::Ray::cast_to_block(
 
         old_chunk_pos = new_chunk_pos;
 
-        std::shared_lock lock(chunk_tmp->blocks_mutex);
+        hmem::SharedResourceLock lock;
+        auto                     blocks = chunk_tmp->blocks.get(lock);
 
         auto idx = block_index(block_chunk_position(position));
 
-        block = chunk_tmp->blocks[idx];
+        block = blocks.data[idx];
 
         if (block_is_target(block)) {
             if (chunk) *chunk = chunk_tmp;
@@ -288,11 +289,12 @@ bool hvox::Ray::cast_to_block_before(
 
         old_chunk_pos = new_chunk_pos;
 
-        std::shared_lock lock(chunk_tmp->blocks_mutex);
+        hmem::SharedResourceLock lock;
+        auto                     blocks = chunk_tmp->blocks.get(lock);
 
         auto idx = block_index(block_chunk_position(block_position));
 
-        block = chunk_tmp->blocks[idx];
+        block = blocks.data[idx];
 
         if (block_is_target(block)) {
             if (chunk) *chunk = chunk_tmp;

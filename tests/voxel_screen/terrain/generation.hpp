@@ -79,13 +79,14 @@ namespace hemlock {
                     // );
 
                     {
-                        std::lock_guard lock(chunk->blocks_mutex);
+                        hmem::UniqueResourceLock lock;
+                        auto                     blocks = chunk->blocks.get(lock);
 
                         ui64 noise_idx = 0;
                         for (ui8 z = 0; z < CHUNK_LENGTH; ++z) {
                             for (ui8 y = 0; y < CHUNK_LENGTH; ++y) {
                                 for (ui8 x = 0; x < CHUNK_LENGTH; ++x) {
-                                    chunk->blocks[hvox::block_index(
+                                    blocks.data[hvox::block_index(
                                         { x, CHUNK_LENGTH - y - 1, z }
                                     )] = data[noise_idx++] > 0 ? hvox::Block{ 1 } :
                                                                  hvox::Block{ 0 };
