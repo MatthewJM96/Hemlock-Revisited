@@ -11,7 +11,7 @@ void hmem::ResourceManager<
     Resource,
     Pager,
     typename std::enable_if_t<std::is_void_v<Pager>>>::dispose() {
-    // Empty.
+    this->free_buffer();
 }
 
 template <typename Resource, typename Pager>
@@ -70,6 +70,8 @@ void hmem::ResourceManager<
     Resource,
     Pager,
     typename std::enable_if_t<!std::is_void_v<Pager>>>::dispose() {
+    this->free_buffer();
+
     m_pager = nullptr;
 }
 
