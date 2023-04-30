@@ -99,7 +99,7 @@ bool hphys::ChunkGridCollider::determine_candidate_colliding_voxels(
                 }
 
                 // At this point, chunk exists, get lock on blocks.
-                auto blocks = chunk->blocks.get(lock);
+                auto& blocks = chunk->blocks.get(lock);
 
                 auto block_idx
                     = hvox::block_index(hvox::block_chunk_position({ x, y, z }));

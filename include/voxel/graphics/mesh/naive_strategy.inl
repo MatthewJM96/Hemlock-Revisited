@@ -50,7 +50,7 @@ void hvox::NaiveMeshStrategy<MeshComparator>::operator()(
     Chunk* raw_chunk_ptr = chunk.get();
 
     hmem::SharedResourceLock block_lock;
-    auto                     blocks = chunk->blocks.get(block_lock);
+    auto&                    blocks = chunk->blocks.get(block_lock);
     hmem::SharedResourceLock neighbour_lock;
 
     // TODO(Matthew): Checking block is NULL_BLOCK is wrong check really, we will have
@@ -71,7 +71,7 @@ void hvox::NaiveMeshStrategy<MeshComparator>::operator()(
                 BlockIndex j = index_at_right_face(i);
                 neighbour    = chunk->neighbours.one.left.lock();
                 if (neighbour) {
-                    auto neighbour_blocks = neighbour->blocks.get(neighbour_lock);
+                    auto& neighbour_blocks = neighbour->blocks.get(neighbour_lock);
                     if (neighbour_blocks.data[j] == NULL_BLOCK) {
                         add_block(block_position);
                         continue;
@@ -97,7 +97,7 @@ void hvox::NaiveMeshStrategy<MeshComparator>::operator()(
                 BlockIndex j = index_at_left_face(i);
                 neighbour    = chunk->neighbours.one.right.lock();
                 if (neighbour) {
-                    auto neighbour_blocks = neighbour->blocks.get(neighbour_lock);
+                    auto& neighbour_blocks = neighbour->blocks.get(neighbour_lock);
                     if (neighbour_blocks.data[j] == NULL_BLOCK) {
                         add_block(block_position);
                         continue;
@@ -123,7 +123,7 @@ void hvox::NaiveMeshStrategy<MeshComparator>::operator()(
                 BlockIndex j = index_at_top_face(i);
                 neighbour    = chunk->neighbours.one.bottom.lock();
                 if (neighbour) {
-                    auto neighbour_blocks = neighbour->blocks.get(neighbour_lock);
+                    auto& neighbour_blocks = neighbour->blocks.get(neighbour_lock);
                     if (neighbour_blocks.data[j] == NULL_BLOCK) {
                         add_block(block_position);
                         continue;
@@ -149,7 +149,7 @@ void hvox::NaiveMeshStrategy<MeshComparator>::operator()(
                 BlockIndex j = index_at_bottom_face(i);
                 neighbour    = chunk->neighbours.one.top.lock();
                 if (neighbour) {
-                    auto neighbour_blocks = neighbour->blocks.get(neighbour_lock);
+                    auto& neighbour_blocks = neighbour->blocks.get(neighbour_lock);
                     if (neighbour_blocks.data[j] == NULL_BLOCK) {
                         add_block(block_position);
                         continue;
@@ -175,7 +175,7 @@ void hvox::NaiveMeshStrategy<MeshComparator>::operator()(
                 BlockIndex j = index_at_back_face(i);
                 neighbour    = chunk->neighbours.one.front.lock();
                 if (neighbour) {
-                    auto neighbour_blocks = neighbour->blocks.get(neighbour_lock);
+                    auto& neighbour_blocks = neighbour->blocks.get(neighbour_lock);
                     if (neighbour_blocks.data[j] == NULL_BLOCK) {
                         add_block(block_position);
                         continue;
@@ -201,7 +201,7 @@ void hvox::NaiveMeshStrategy<MeshComparator>::operator()(
                 BlockIndex j = index_at_front_face(i);
                 neighbour    = chunk->neighbours.one.back.lock();
                 if (neighbour) {
-                    auto neighbour_blocks = neighbour->blocks.get(neighbour_lock);
+                    auto& neighbour_blocks = neighbour->blocks.get(neighbour_lock);
                     if (neighbour_blocks.data[j] == NULL_BLOCK) {
                         add_block(block_position);
                         continue;

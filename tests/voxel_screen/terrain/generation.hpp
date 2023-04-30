@@ -80,7 +80,7 @@ namespace hemlock {
 
                     {
                         hmem::UniqueResourceLock lock;
-                        auto                     blocks = chunk->blocks.get(lock);
+                        auto&                    blocks = chunk->blocks.get(lock);
 
                         ui64 noise_idx = 0;
                         for (ui8 z = 0; z < CHUNK_LENGTH; ++z) {

@@ -54,7 +54,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_bulk(
     auto chunk_pos = chunk->position;
 
     hmem::SharedResourceLock block_lock;
-    auto                     blocks = chunk->blocks.get(block_lock);
+    auto&                    blocks = chunk->blocks.get(block_lock);
 
     const IsSolid is_solid{};
 
@@ -1309,7 +1309,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
     auto chunk_pos = chunk->position;
 
     hmem::SharedResourceLock block_lock;
-    auto                     blocks = chunk->blocks.get(block_lock);
+    auto&                    blocks = chunk->blocks.get(block_lock);
 
     const IsSolid is_solid{};
 
@@ -1331,7 +1331,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                                               i64                    start,
                                               i64                    end) {
         hmem::SharedResourceLock neighbour_block_lock;
-        auto neighbour_blocks = neighbour->blocks.get(neighbour_block_lock);
+        auto& neighbour_blocks = neighbour->blocks.get(neighbour_block_lock);
 
         BlockIndex this_block_index = hvox::block_index(this_offset);
         Block*     this_block       = &blocks.data[this_block_index];
@@ -1421,7 +1421,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
             ))
         {
             hmem::SharedResourceLock neighbour_block_lock;
-            auto neighbour_blocks = neighbour->blocks.get(neighbour_block_lock);
+            auto& neighbour_blocks = neighbour->blocks.get(neighbour_block_lock);
 
             for (BlockChunkPositionCoord z = 0; z < CHUNK_LENGTH; ++z) {
                 for (BlockChunkPositionCoord y = 1; y < CHUNK_LENGTH - 2; ++y) {
@@ -1571,7 +1571,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
             ))
         {
             hmem::SharedResourceLock neighbour_block_lock;
-            auto neighbour_blocks = neighbour->blocks.get(neighbour_block_lock);
+            auto& neighbour_blocks = neighbour->blocks.get(neighbour_block_lock);
             for (BlockChunkPositionCoord z = 0; z < CHUNK_LENGTH; ++z) {
                 for (BlockChunkPositionCoord y = 1; y < CHUNK_LENGTH - 2; ++y) {
                     do_side_stitch_navigable_check(
@@ -1720,7 +1720,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
             ))
         {
             hmem::SharedResourceLock neighbour_block_lock;
-            auto neighbour_blocks = neighbour->blocks.get(neighbour_block_lock);
+            auto& neighbour_blocks = neighbour->blocks.get(neighbour_block_lock);
             for (BlockChunkPositionCoord x = 0; x < CHUNK_LENGTH; ++x) {
                 for (BlockChunkPositionCoord y = 1; y < CHUNK_LENGTH - 2; ++y) {
                     do_side_stitch_navigable_check(
@@ -1870,7 +1870,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
             ))
         {
             hmem::SharedResourceLock neighbour_block_lock;
-            auto neighbour_blocks = neighbour->blocks.get(neighbour_block_lock);
+            auto& neighbour_blocks = neighbour->blocks.get(neighbour_block_lock);
             for (BlockChunkPositionCoord x = 0; x < CHUNK_LENGTH; ++x) {
                 for (BlockChunkPositionCoord y = 1; y < CHUNK_LENGTH - 2; ++y) {
                     do_side_stitch_navigable_check(
@@ -2018,7 +2018,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
             ))
         {
             hmem::SharedResourceLock neighbour_block_lock;
-            auto neighbour_blocks = neighbour->blocks.get(neighbour_block_lock);
+            auto& neighbour_blocks = neighbour->blocks.get(neighbour_block_lock);
             for (BlockChunkPositionCoord x = 1; x < CHUNK_LENGTH - 1; ++x) {
                 for (BlockChunkPositionCoord z = 1; z < CHUNK_LENGTH - 1; ++z) {
                     BlockIndex this_block_index
@@ -3096,9 +3096,10 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                     auto                     left_neighbour_blocks
                         = left_neighbour->blocks.get(left_neighbour_block_lock);
                     hmem::SharedResourceLock above_left_neighbour_block_lock;
-                    auto above_left_neighbour_blocks = above_left_neighbour->blocks.get(
-                        above_left_neighbour_block_lock
-                    );
+                    auto&                    above_left_neighbour_blocks
+                        = above_left_neighbour->blocks.get(
+                            above_left_neighbour_block_lock
+                        );
 
                     // Step up from y == CHUNK_LENGTH - 2
                     for (BlockChunkPositionCoord z = 0; z < CHUNK_LENGTH; ++z) {
@@ -3874,9 +3875,10 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                     auto                     back_neighbour_blocks
                         = back_neighbour->blocks.get(back_neighbour_block_lock);
                     hmem::SharedResourceLock above_back_neighbour_block_lock;
-                    auto above_back_neighbour_blocks = above_back_neighbour->blocks.get(
-                        above_back_neighbour_block_lock
-                    );
+                    auto&                    above_back_neighbour_blocks
+                        = above_back_neighbour->blocks.get(
+                            above_back_neighbour_block_lock
+                        );
 
                     // Step up from y == CHUNK_LENGTH - 2
                     for (BlockChunkPositionCoord x = 0; x < CHUNK_LENGTH; ++x) {
@@ -4132,7 +4134,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
             ))
         {
             hmem::SharedResourceLock neighbour_block_lock;
-            auto neighbour_blocks = neighbour->blocks.get(neighbour_block_lock);
+            auto& neighbour_blocks = neighbour->blocks.get(neighbour_block_lock);
             for (BlockChunkPositionCoord x = 1; x < CHUNK_LENGTH - 1; ++x) {
                 for (BlockChunkPositionCoord z = 1; z < CHUNK_LENGTH - 1; ++z) {
                     BlockIndex this_block_index = hvox::block_index({ x, 0, z });
@@ -4743,9 +4745,10 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                     auto                     left_neighbour_blocks
                         = left_neighbour->blocks.get(left_neighbour_block_lock);
                     hmem::SharedResourceLock below_left_neighbour_block_lock;
-                    auto below_left_neighbour_blocks = below_left_neighbour->blocks.get(
-                        below_left_neighbour_block_lock
-                    );
+                    auto&                    below_left_neighbour_blocks
+                        = below_left_neighbour->blocks.get(
+                            below_left_neighbour_block_lock
+                        );
 
                     // Step up from y == CHUNK_LENGTH - 2
                     for (BlockChunkPositionCoord z = 0; z < CHUNK_LENGTH; ++z) {
@@ -5575,8 +5578,8 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                                neighbour_stitch_state, ChunkState::ACTIVE
                            ))
                 {
-                    hmem::SharedResourceLock back_neighbour_block_lock;
-                    auto                     back_neighbour_blocks
+                    auto& below_back_neighbour_blocks
+                        = below_back_neighbour->blocks.get auto back_neighbour_blocks
                         = back_neighbour->blocks.get(back_neighbour_block_lock);
                     hmem::SharedResourceLock below_back_neighbour_block_lock;
                     auto below_back_neighbour_blocks = below_back_neighbour->blocks.get(

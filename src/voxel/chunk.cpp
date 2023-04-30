@@ -64,7 +64,7 @@ bool hvox::set_block(
     hmem::Handle<Chunk> chunk, BlockChunkPosition block_position, Block block
 ) {
     hmem::UniqueResourceLock lock;
-    auto                     blocks = chunk->blocks.get(lock);
+    auto&                    blocks = chunk->blocks.get(lock);
 
     auto block_idx = block_index(block_position);
 
@@ -89,7 +89,7 @@ bool hvox::set_blocks(
     Block               block
 ) {
     hmem::UniqueResourceLock lock;
-    auto                     chunk_blocks = chunk->blocks.get(lock);
+    auto&                    chunk_blocks = chunk->blocks.get(lock);
 
     bool gen_task_active
         = chunk->generation.load(std::memory_order_acquire) == ChunkState::ACTIVE;
@@ -114,7 +114,7 @@ bool hvox::set_blocks(
     Block*              blocks
 ) {
     hmem::UniqueResourceLock lock;
-    auto                     chunk_blocks = chunk->blocks.get(lock);
+    auto&                    chunk_blocks = chunk->blocks.get(lock);
 
     bool gen_task_active
         = chunk->generation.load(std::memory_order_acquire) == ChunkState::ACTIVE;

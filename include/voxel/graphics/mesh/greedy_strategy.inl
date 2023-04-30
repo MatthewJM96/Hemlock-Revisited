@@ -26,7 +26,7 @@ void hvox::GreedyMeshStrategy<MeshComparator>::operator()(
     //                      of the above TODO.
 
     hmem::SharedResourceLock block_lock;
-    auto                     blocks = chunk->blocks.get(block_lock);
+    auto&                    blocks = chunk->blocks.get(block_lock);
 
     std::queue<BlockChunkPosition> queued_for_visit;
 
