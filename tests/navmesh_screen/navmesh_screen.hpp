@@ -568,8 +568,10 @@ public:
             [&](hemlock::Sender, hui::KeyboardButtonEvent ev) {
                 if (ev.physical_key == hui::PhysicalKey::H_RETURN) {
                     m_capture_mouse = true;
+                    SDL_SetRelativeMouseMode(SDL_TRUE);
                 } else if (ev.physical_key == hui::PhysicalKey::H_ESCAPE) {
                     m_capture_mouse = false;
+                    SDL_SetRelativeMouseMode(SDL_FALSE);
                 } else if (ev.physical_key == hui::PhysicalKey::H_L) {
                     m_draw_chunk_outlines = !m_draw_chunk_outlines;
                 } else if (ev.physical_key == hui::PhysicalKey::H_T) {
