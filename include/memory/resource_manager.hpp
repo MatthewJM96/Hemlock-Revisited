@@ -64,8 +64,8 @@ namespace hemlock {
             const _PagedResource& get(SharedResourceLock& lock, std::defer_lock_t);
             _PagedResource&       get_unsafe();
 
-            void generate_buffer();
-            void free_buffer();
+            virtual void generate_buffer();
+            virtual void free_buffer();
         protected:
             hmem::Handle<Pager> m_pager;
 

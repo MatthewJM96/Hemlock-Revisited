@@ -3,7 +3,7 @@
 
 #include "algorithm/acs/graph/state.hpp"
 #include "timing.h"
-#include "voxel/ai/navmesh/navmesh_manager.hpp"
+#include "voxel/ai/navmesh/navmesh_manager.h"
 #include "voxel/chunk.h"
 #include "voxel/coordinate_system.h"
 #include "voxel/graphics/renderer.h"
