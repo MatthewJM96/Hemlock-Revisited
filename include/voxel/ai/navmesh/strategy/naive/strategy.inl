@@ -32,12 +32,12 @@ namespace hemlock::voxel::ai::impl {
     get_vertex(const hmem::Handle<Chunk>& chunk, const ChunkNavmeshNode& coord) {
         try {
             hmem::SharedResourceLock lock;
-            auto                     navmesh = chunk->navmesh.get(lock);
+            auto&                    navmesh = chunk->navmesh.get(lock);
 
             return navmesh.data->coord_vertex_map.at(coord);
         } catch (std::out_of_range&) {
             hmem::UniqueResourceLock lock;
-            auto                     navmesh = chunk->navmesh.get(lock);
+            auto&                    navmesh = chunk->navmesh.get(lock);
 
             auto vertex = boost::add_vertex(navmesh.data->graph);
             navmesh.data->coord_vertex_map[coord]  = vertex;
@@ -123,7 +123,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_bulk(
 
                 {
                     hmem::UniqueResourceLock lock;
-                    auto                     navmesh = chunk->navmesh.get(lock);
+                    auto&                    navmesh = chunk->navmesh.get(lock);
 
                     boost::add_edge(
                         block_vertex, candidate_block_vertex, navmesh.data->graph
@@ -1373,7 +1373,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                 {
                     hmem::UniqueResourceLock lock;
-                    auto                     navmesh = chunk->navmesh.get(lock);
+                    auto&                    navmesh = chunk->navmesh.get(lock);
 
                     boost::add_edge(
                         this_block_vertex.here,
@@ -1389,7 +1389,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                 {
                     hmem::UniqueResourceLock lock;
-                    auto                     navmesh = neighbour->navmesh.get(lock);
+                    auto&                    navmesh = neighbour->navmesh.get(lock);
 
                     boost::add_edge(
                         this_block_vertex.in_neighbour,
@@ -1517,7 +1517,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                         {
                             hmem::UniqueResourceLock lock;
-                            auto                     navmesh = chunk->navmesh.get(lock);
+                            auto&                    navmesh = chunk->navmesh.get(lock);
 
                             boost::add_edge(
                                 this_block_vertex.here,
@@ -1533,7 +1533,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                         {
                             hmem::UniqueResourceLock lock;
-                            auto navmesh = below_neighbour->navmesh.get(lock);
+                            auto& navmesh = below_neighbour->navmesh.get(lock);
 
                             boost::add_edge(
                                 this_block_vertex.in_below_neighbour,
@@ -1667,7 +1667,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                         {
                             hmem::UniqueResourceLock lock;
-                            auto                     navmesh = chunk->navmesh.get(lock);
+                            auto&                    navmesh = chunk->navmesh.get(lock);
 
                             boost::add_edge(
                                 this_block_vertex.here,
@@ -1683,7 +1683,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                         {
                             hmem::UniqueResourceLock lock;
-                            auto navmesh = below_neighbour->navmesh.get(lock);
+                            auto& navmesh = below_neighbour->navmesh.get(lock);
 
                             boost::add_edge(
                                 this_block_vertex.in_below_neighbour,
@@ -1816,7 +1816,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                         {
                             hmem::UniqueResourceLock lock;
-                            auto                     navmesh = chunk->navmesh.get(lock);
+                            auto&                    navmesh = chunk->navmesh.get(lock);
 
                             boost::add_edge(
                                 this_block_vertex.here,
@@ -1832,7 +1832,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                         {
                             hmem::UniqueResourceLock lock;
-                            auto navmesh = below_neighbour->navmesh.get(lock);
+                            auto& navmesh = below_neighbour->navmesh.get(lock);
 
                             boost::add_edge(
                                 this_block_vertex.in_below_neighbour,
@@ -1965,7 +1965,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                         {
                             hmem::UniqueResourceLock lock;
-                            auto                     navmesh = chunk->navmesh.get(lock);
+                            auto&                    navmesh = chunk->navmesh.get(lock);
 
                             boost::add_edge(
                                 this_block_vertex.here,
@@ -1981,7 +1981,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                         {
                             hmem::UniqueResourceLock lock;
-                            auto navmesh = below_neighbour->navmesh.get(lock);
+                            auto& navmesh = below_neighbour->navmesh.get(lock);
 
                             boost::add_edge(
                                 this_block_vertex.in_below_neighbour,
@@ -2082,7 +2082,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                             {
                                 hmem::UniqueResourceLock lock;
-                                auto navmesh = chunk->navmesh.get(lock);
+                                auto& navmesh = chunk->navmesh.get(lock);
 
                                 boost::add_edge(
                                     this_block_vertex.here,
@@ -2098,7 +2098,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                             {
                                 hmem::UniqueResourceLock lock;
-                                auto navmesh = neighbour->navmesh.get(lock);
+                                auto& navmesh = neighbour->navmesh.get(lock);
 
                                 boost::add_edge(
                                     this_block_vertex.in_neighbour,
@@ -2145,7 +2145,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                             {
                                 hmem::UniqueResourceLock lock;
-                                auto navmesh = chunk->navmesh.get(lock);
+                                auto& navmesh = chunk->navmesh.get(lock);
 
                                 boost::add_edge(
                                     this_block_vertex.here,
@@ -2161,7 +2161,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                             {
                                 hmem::UniqueResourceLock lock;
-                                auto navmesh = neighbour->navmesh.get(lock);
+                                auto& navmesh = neighbour->navmesh.get(lock);
 
                                 boost::add_edge(
                                     this_block_vertex.in_neighbour,
@@ -2208,7 +2208,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                             {
                                 hmem::UniqueResourceLock lock;
-                                auto navmesh = chunk->navmesh.get(lock);
+                                auto& navmesh = chunk->navmesh.get(lock);
 
                                 boost::add_edge(
                                     this_block_vertex.here,
@@ -2224,7 +2224,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                             {
                                 hmem::UniqueResourceLock lock;
-                                auto navmesh = neighbour->navmesh.get(lock);
+                                auto& navmesh = neighbour->navmesh.get(lock);
 
                                 boost::add_edge(
                                     this_block_vertex.in_neighbour,
@@ -2271,7 +2271,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                             {
                                 hmem::UniqueResourceLock lock;
-                                auto navmesh = chunk->navmesh.get(lock);
+                                auto& navmesh = chunk->navmesh.get(lock);
 
                                 boost::add_edge(
                                     this_block_vertex.here,
@@ -2287,7 +2287,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                             {
                                 hmem::UniqueResourceLock lock;
-                                auto navmesh = neighbour->navmesh.get(lock);
+                                auto& navmesh = neighbour->navmesh.get(lock);
 
                                 boost::add_edge(
                                     this_block_vertex.in_neighbour,
@@ -2334,7 +2334,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                         {
                             hmem::UniqueResourceLock lock;
-                            auto                     navmesh = chunk->navmesh.get(lock);
+                            auto&                    navmesh = chunk->navmesh.get(lock);
 
                             boost::add_edge(
                                 this_block_vertex.here,
@@ -2363,7 +2363,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                         {
                             hmem::UniqueResourceLock lock;
-                            auto                     navmesh = chunk->navmesh.get(lock);
+                            auto&                    navmesh = chunk->navmesh.get(lock);
 
                             boost::add_edge(
                                 this_block_vertex.here,
@@ -2409,7 +2409,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                         {
                             hmem::UniqueResourceLock lock;
-                            auto                     navmesh = chunk->navmesh.get(lock);
+                            auto&                    navmesh = chunk->navmesh.get(lock);
 
                             boost::add_edge(
                                 this_block_vertex.here,
@@ -2439,7 +2439,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                         {
                             hmem::UniqueResourceLock lock;
-                            auto                     navmesh = chunk->navmesh.get(lock);
+                            auto&                    navmesh = chunk->navmesh.get(lock);
 
                             boost::add_edge(
                                 this_block_vertex.here,
@@ -2485,7 +2485,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                         {
                             hmem::UniqueResourceLock lock;
-                            auto                     navmesh = chunk->navmesh.get(lock);
+                            auto&                    navmesh = chunk->navmesh.get(lock);
 
                             boost::add_edge(
                                 this_block_vertex.here,
@@ -2515,7 +2515,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                         {
                             hmem::UniqueResourceLock lock;
-                            auto                     navmesh = chunk->navmesh.get(lock);
+                            auto&                    navmesh = chunk->navmesh.get(lock);
 
                             boost::add_edge(
                                 this_block_vertex.here,
@@ -2560,7 +2560,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                         {
                             hmem::UniqueResourceLock lock;
-                            auto                     navmesh = chunk->navmesh.get(lock);
+                            auto&                    navmesh = chunk->navmesh.get(lock);
 
                             boost::add_edge(
                                 this_block_vertex.here,
@@ -2589,7 +2589,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                         {
                             hmem::UniqueResourceLock lock;
-                            auto                     navmesh = chunk->navmesh.get(lock);
+                            auto&                    navmesh = chunk->navmesh.get(lock);
 
                             boost::add_edge(
                                 this_block_vertex.here,
@@ -2689,7 +2689,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                             {
                                 hmem::UniqueResourceLock lock;
-                                auto navmesh = chunk->navmesh.get(lock);
+                                auto& navmesh = chunk->navmesh.get(lock);
 
                                 boost::add_edge(
                                     left_of_neighbour_block_vertex.here,
@@ -2705,7 +2705,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                             {
                                 hmem::UniqueResourceLock lock;
-                                auto navmesh = left_of_neighbour->navmesh.get(lock);
+                                auto& navmesh = left_of_neighbour->navmesh.get(lock);
 
                                 boost::add_edge(
                                     left_of_neighbour_block_vertex.in_left_of_neighbour,
@@ -2805,7 +2805,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                             {
                                 hmem::UniqueResourceLock lock;
-                                auto navmesh = chunk->navmesh.get(lock);
+                                auto& navmesh = chunk->navmesh.get(lock);
 
                                 boost::add_edge(
                                     right_of_neighbour_block_vertex.here,
@@ -2821,7 +2821,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                             {
                                 hmem::UniqueResourceLock lock;
-                                auto navmesh = right_of_neighbour->navmesh.get(lock);
+                                auto& navmesh = right_of_neighbour->navmesh.get(lock);
 
                                 boost::add_edge(
                                     right_of_neighbour_block_vertex
@@ -2923,7 +2923,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                             {
                                 hmem::UniqueResourceLock lock;
-                                auto navmesh = chunk->navmesh.get(lock);
+                                auto& navmesh = chunk->navmesh.get(lock);
 
                                 boost::add_edge(
                                     front_of_neighbour_block_vertex.here,
@@ -2939,7 +2939,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                             {
                                 hmem::UniqueResourceLock lock;
-                                auto navmesh = front_of_neighbour->navmesh.get(lock);
+                                auto& navmesh = front_of_neighbour->navmesh.get(lock);
 
                                 boost::add_edge(
                                     front_of_neighbour_block_vertex
@@ -3038,7 +3038,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                             {
                                 hmem::UniqueResourceLock lock;
-                                auto navmesh = chunk->navmesh.get(lock);
+                                auto& navmesh = chunk->navmesh.get(lock);
 
                                 boost::add_edge(
                                     back_of_neighbour_block_vertex.here,
@@ -3054,7 +3054,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                             {
                                 hmem::UniqueResourceLock lock;
-                                auto navmesh = back_of_neighbour->navmesh.get(lock);
+                                auto& navmesh = back_of_neighbour->navmesh.get(lock);
 
                                 boost::add_edge(
                                     back_of_neighbour_block_vertex.in_back_of_neighbour,
@@ -3159,7 +3159,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                         {
                             hmem::UniqueResourceLock lock;
-                            auto                     navmesh = chunk->navmesh.get(lock);
+                            auto&                    navmesh = chunk->navmesh.get(lock);
 
                             boost::add_edge(
                                 this_block_vertex.here,
@@ -3175,7 +3175,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                         {
                             hmem::UniqueResourceLock lock;
-                            auto navmesh = left_neighbour->navmesh.get(lock);
+                            auto& navmesh = left_neighbour->navmesh.get(lock);
 
                             boost::add_edge(
                                 this_block_vertex.in_left_neighbour,
@@ -3251,7 +3251,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                             {
                                 hmem::UniqueResourceLock lock;
-                                auto navmesh = chunk->navmesh.get(lock);
+                                auto& navmesh = chunk->navmesh.get(lock);
 
                                 boost::add_edge(
                                     this_block_vertex.here,
@@ -3267,7 +3267,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                             {
                                 hmem::UniqueResourceLock lock;
-                                auto navmesh = left_neighbour->navmesh.get(lock);
+                                auto& navmesh = left_neighbour->navmesh.get(lock);
 
                                 boost::add_edge(
                                     this_block_vertex.in_left_neighbour,
@@ -3298,7 +3298,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                             {
                                 hmem::UniqueResourceLock lock;
-                                auto navmesh = chunk->navmesh.get(lock);
+                                auto& navmesh = chunk->navmesh.get(lock);
 
                                 boost::add_edge(
                                     this_block_vertex.here,
@@ -3314,7 +3314,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                             {
                                 hmem::UniqueResourceLock lock;
-                                auto navmesh = left_neighbour->navmesh.get(lock);
+                                auto& navmesh = left_neighbour->navmesh.get(lock);
 
                                 boost::add_edge(
                                     this_block_vertex.in_left_neighbour,
@@ -3419,7 +3419,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                         {
                             hmem::UniqueResourceLock lock;
-                            auto                     navmesh = chunk->navmesh.get(lock);
+                            auto&                    navmesh = chunk->navmesh.get(lock);
 
                             boost::add_edge(
                                 this_block_vertex.here,
@@ -3435,7 +3435,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                         {
                             hmem::UniqueResourceLock lock;
-                            auto navmesh = right_neighbour->navmesh.get(lock);
+                            auto& navmesh = right_neighbour->navmesh.get(lock);
 
                             boost::add_edge(
                                 this_block_vertex.in_right_neighbour,
@@ -3511,7 +3511,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                             {
                                 hmem::UniqueResourceLock lock;
-                                auto navmesh = chunk->navmesh.get(lock);
+                                auto& navmesh = chunk->navmesh.get(lock);
 
                                 boost::add_edge(
                                     this_block_vertex.here,
@@ -3527,7 +3527,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                             {
                                 hmem::UniqueResourceLock lock;
-                                auto navmesh = right_neighbour->navmesh.get(lock);
+                                auto& navmesh = right_neighbour->navmesh.get(lock);
 
                                 boost::add_edge(
                                     this_block_vertex.in_right_neighbour,
@@ -3558,7 +3558,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                             {
                                 hmem::UniqueResourceLock lock;
-                                auto navmesh = chunk->navmesh.get(lock);
+                                auto& navmesh = chunk->navmesh.get(lock);
 
                                 boost::add_edge(
                                     this_block_vertex.here,
@@ -3574,7 +3574,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                             {
                                 hmem::UniqueResourceLock lock;
-                                auto navmesh = right_neighbour->navmesh.get(lock);
+                                auto& navmesh = right_neighbour->navmesh.get(lock);
 
                                 boost::add_edge(
                                     this_block_vertex.in_right_neighbour,
@@ -3679,7 +3679,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                         {
                             hmem::UniqueResourceLock lock;
-                            auto                     navmesh = chunk->navmesh.get(lock);
+                            auto&                    navmesh = chunk->navmesh.get(lock);
 
                             boost::add_edge(
                                 this_block_vertex.here,
@@ -3695,7 +3695,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                         {
                             hmem::UniqueResourceLock lock;
-                            auto navmesh = front_neighbour->navmesh.get(lock);
+                            auto& navmesh = front_neighbour->navmesh.get(lock);
 
                             boost::add_edge(
                                 this_block_vertex.in_front_neighbour,
@@ -3771,7 +3771,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                             {
                                 hmem::UniqueResourceLock lock;
-                                auto navmesh = chunk->navmesh.get(lock);
+                                auto& navmesh = chunk->navmesh.get(lock);
 
                                 boost::add_edge(
                                     this_block_vertex.here,
@@ -3787,7 +3787,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                             {
                                 hmem::UniqueResourceLock lock;
-                                auto navmesh = front_neighbour->navmesh.get(lock);
+                                auto& navmesh = front_neighbour->navmesh.get(lock);
 
                                 boost::add_edge(
                                     this_block_vertex.in_front_neighbour,
@@ -3818,7 +3818,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                             {
                                 hmem::UniqueResourceLock lock;
-                                auto navmesh = chunk->navmesh.get(lock);
+                                auto& navmesh = chunk->navmesh.get(lock);
 
                                 boost::add_edge(
                                     this_block_vertex.here,
@@ -3834,7 +3834,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                             {
                                 hmem::UniqueResourceLock lock;
-                                auto navmesh = front_neighbour->navmesh.get(lock);
+                                auto& navmesh = front_neighbour->navmesh.get(lock);
 
                                 boost::add_edge(
                                     this_block_vertex.in_front_neighbour,
@@ -3937,7 +3937,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                         {
                             hmem::UniqueResourceLock lock;
-                            auto                     navmesh = chunk->navmesh.get(lock);
+                            auto&                    navmesh = chunk->navmesh.get(lock);
 
                             boost::add_edge(
                                 this_block_vertex.here,
@@ -3953,7 +3953,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                         {
                             hmem::UniqueResourceLock lock;
-                            auto navmesh = back_neighbour->navmesh.get(lock);
+                            auto& navmesh = back_neighbour->navmesh.get(lock);
 
                             boost::add_edge(
                                 this_block_vertex.in_back_neighbour,
@@ -4029,7 +4029,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                             {
                                 hmem::UniqueResourceLock lock;
-                                auto navmesh = chunk->navmesh.get(lock);
+                                auto& navmesh = chunk->navmesh.get(lock);
 
                                 boost::add_edge(
                                     this_block_vertex.here,
@@ -4045,7 +4045,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                             {
                                 hmem::UniqueResourceLock lock;
-                                auto navmesh = back_neighbour->navmesh.get(lock);
+                                auto& navmesh = back_neighbour->navmesh.get(lock);
 
                                 boost::add_edge(
                                     this_block_vertex.in_back_neighbour,
@@ -4076,7 +4076,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                             {
                                 hmem::UniqueResourceLock lock;
-                                auto navmesh = chunk->navmesh.get(lock);
+                                auto& navmesh = chunk->navmesh.get(lock);
 
                                 boost::add_edge(
                                     this_block_vertex.here,
@@ -4092,7 +4092,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                             {
                                 hmem::UniqueResourceLock lock;
-                                auto navmesh = back_neighbour->navmesh.get(lock);
+                                auto& navmesh = back_neighbour->navmesh.get(lock);
 
                                 boost::add_edge(
                                     this_block_vertex.in_back_neighbour,
@@ -4191,7 +4191,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                             {
                                 hmem::UniqueResourceLock lock;
-                                auto navmesh = chunk->navmesh.get(lock);
+                                auto& navmesh = chunk->navmesh.get(lock);
 
                                 boost::add_edge(
                                     neighbour_block_vertex.here,
@@ -4207,7 +4207,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                             {
                                 hmem::UniqueResourceLock lock;
-                                auto navmesh = neighbour->navmesh.get(lock);
+                                auto& navmesh = neighbour->navmesh.get(lock);
 
                                 boost::add_edge(
                                     neighbour_block_vertex.in_neighbour,
@@ -4251,7 +4251,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                             {
                                 hmem::UniqueResourceLock lock;
-                                auto navmesh = chunk->navmesh.get(lock);
+                                auto& navmesh = chunk->navmesh.get(lock);
 
                                 boost::add_edge(
                                     neighbour_block_vertex.here,
@@ -4267,7 +4267,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                             {
                                 hmem::UniqueResourceLock lock;
-                                auto navmesh = neighbour->navmesh.get(lock);
+                                auto& navmesh = neighbour->navmesh.get(lock);
 
                                 boost::add_edge(
                                     neighbour_block_vertex.in_neighbour,
@@ -4311,7 +4311,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                             {
                                 hmem::UniqueResourceLock lock;
-                                auto navmesh = chunk->navmesh.get(lock);
+                                auto& navmesh = chunk->navmesh.get(lock);
 
                                 boost::add_edge(
                                     neighbour_block_vertex.here,
@@ -4327,7 +4327,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                             {
                                 hmem::UniqueResourceLock lock;
-                                auto navmesh = neighbour->navmesh.get(lock);
+                                auto& navmesh = neighbour->navmesh.get(lock);
 
                                 boost::add_edge(
                                     neighbour_block_vertex.in_neighbour,
@@ -4371,7 +4371,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                             {
                                 hmem::UniqueResourceLock lock;
-                                auto navmesh = chunk->navmesh.get(lock);
+                                auto& navmesh = chunk->navmesh.get(lock);
 
                                 boost::add_edge(
                                     neighbour_block_vertex.here,
@@ -4387,7 +4387,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                             {
                                 hmem::UniqueResourceLock lock;
-                                auto navmesh = neighbour->navmesh.get(lock);
+                                auto& navmesh = neighbour->navmesh.get(lock);
 
                                 boost::add_edge(
                                     neighbour_block_vertex.in_neighbour,
@@ -4438,7 +4438,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                         {
                             hmem::UniqueResourceLock lock;
-                            auto navmesh = neighbour->navmesh.get(lock);
+                            auto& navmesh = neighbour->navmesh.get(lock);
 
                             boost::add_edge(
                                 neighbour_block_vertex.in_neighbour,
@@ -4468,7 +4468,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                         {
                             hmem::UniqueResourceLock lock;
-                            auto navmesh = neighbour->navmesh.get(lock);
+                            auto& navmesh = neighbour->navmesh.get(lock);
 
                             boost::add_edge(
                                 neighbour_block_vertex.in_neighbour,
@@ -4517,7 +4517,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                         {
                             hmem::UniqueResourceLock lock;
-                            auto navmesh = neighbour->navmesh.get(lock);
+                            auto& navmesh = neighbour->navmesh.get(lock);
 
                             boost::add_edge(
                                 neighbour_block_vertex.in_neighbour,
@@ -4547,7 +4547,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                         {
                             hmem::UniqueResourceLock lock;
-                            auto navmesh = neighbour->navmesh.get(lock);
+                            auto& navmesh = neighbour->navmesh.get(lock);
 
                             boost::add_edge(
                                 neighbour_block_vertex.in_neighbour,
@@ -4596,7 +4596,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                         {
                             hmem::UniqueResourceLock lock;
-                            auto navmesh = neighbour->navmesh.get(lock);
+                            auto& navmesh = neighbour->navmesh.get(lock);
 
                             boost::add_edge(
                                 neighbour_block_vertex.in_neighbour,
@@ -4626,7 +4626,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                         {
                             hmem::UniqueResourceLock lock;
-                            auto navmesh = neighbour->navmesh.get(lock);
+                            auto& navmesh = neighbour->navmesh.get(lock);
 
                             boost::add_edge(
                                 neighbour_block_vertex.in_neighbour,
@@ -4674,7 +4674,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                         {
                             hmem::UniqueResourceLock lock;
-                            auto navmesh = neighbour->navmesh.get(lock);
+                            auto& navmesh = neighbour->navmesh.get(lock);
 
                             boost::add_edge(
                                 neighbour_block_vertex.in_neighbour,
@@ -4704,7 +4704,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                         {
                             hmem::UniqueResourceLock lock;
-                            auto navmesh = neighbour->navmesh.get(lock);
+                            auto& navmesh = neighbour->navmesh.get(lock);
 
                             boost::add_edge(
                                 neighbour_block_vertex.in_neighbour,
@@ -4814,7 +4814,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                         {
                             hmem::UniqueResourceLock lock;
-                            auto navmesh = neighbour->navmesh.get(lock);
+                            auto& navmesh = neighbour->navmesh.get(lock);
 
                             boost::add_edge(
                                 neighbour_block_vertex.in_neighbour,
@@ -4830,7 +4830,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                         {
                             hmem::UniqueResourceLock lock;
-                            auto navmesh = below_left_neighbour->navmesh.get(lock);
+                            auto& navmesh = below_left_neighbour->navmesh.get(lock);
 
                             boost::add_edge(
                                 neighbour_block_vertex.in_below_left_neighbour,
@@ -4915,7 +4915,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                             {
                                 hmem::UniqueResourceLock lock;
-                                auto navmesh = neighbour->navmesh.get(lock);
+                                auto& navmesh = neighbour->navmesh.get(lock);
 
                                 boost::add_edge(
                                     neighbour_block_vertex.in_neighbour,
@@ -4931,7 +4931,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                             {
                                 hmem::UniqueResourceLock lock;
-                                auto navmesh = below_left_neighbour->navmesh.get(lock);
+                                auto& navmesh = below_left_neighbour->navmesh.get(lock);
 
                                 boost::add_edge(
                                     neighbour_block_vertex.in_below_left_neighbour,
@@ -4964,7 +4964,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                             {
                                 hmem::UniqueResourceLock lock;
-                                auto navmesh = chunk->navmesh.get(lock);
+                                auto& navmesh = chunk->navmesh.get(lock);
 
                                 boost::add_edge(
                                     neighbour_block_vertex.in_neighbour,
@@ -4980,7 +4980,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                             {
                                 hmem::UniqueResourceLock lock;
-                                auto navmesh = left_neighbour->navmesh.get(lock);
+                                auto& navmesh = left_neighbour->navmesh.get(lock);
 
                                 boost::add_edge(
                                     neighbour_block_vertex.in_below_left_neighbour,
@@ -5092,7 +5092,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                         {
                             hmem::UniqueResourceLock lock;
-                            auto navmesh = neighbour->navmesh.get(lock);
+                            auto& navmesh = neighbour->navmesh.get(lock);
 
                             boost::add_edge(
                                 neighbour_block_vertex.in_neighbour,
@@ -5108,7 +5108,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                         {
                             hmem::UniqueResourceLock lock;
-                            auto navmesh = below_right_neighbour->navmesh.get(lock);
+                            auto& navmesh = below_right_neighbour->navmesh.get(lock);
 
                             boost::add_edge(
                                 neighbour_block_vertex.in_below_right_neighbour,
@@ -5192,7 +5192,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                             {
                                 hmem::UniqueResourceLock lock;
-                                auto navmesh = neighbour->navmesh.get(lock);
+                                auto& navmesh = neighbour->navmesh.get(lock);
 
                                 boost::add_edge(
                                     neighbour_block_vertex.in_neighbour,
@@ -5208,7 +5208,8 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                             {
                                 hmem::UniqueResourceLock lock;
-                                auto navmesh = below_right_neighbour->navmesh.get(lock);
+                                auto&                    navmesh
+                                    = below_right_neighbour->navmesh.get(lock);
 
                                 boost::add_edge(
                                     neighbour_block_vertex.in_below_right_neighbour,
@@ -5241,7 +5242,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                             {
                                 hmem::UniqueResourceLock lock;
-                                auto navmesh = neighbour->navmesh.get(lock);
+                                auto& navmesh = neighbour->navmesh.get(lock);
 
                                 boost::add_edge(
                                     neighbour_block_vertex.in_neighbour,
@@ -5257,7 +5258,8 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                             {
                                 hmem::UniqueResourceLock lock;
-                                auto navmesh = below_right_neighbour->navmesh.get(lock);
+                                auto&                    navmesh
+                                    = below_right_neighbour->navmesh.get(lock);
 
                                 boost::add_edge(
                                     neighbour_block_vertex.in_below_right_neighbour,
@@ -5370,7 +5372,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                         {
                             hmem::UniqueResourceLock lock;
-                            auto navmesh = neighbour->navmesh.get(lock);
+                            auto& navmesh = neighbour->navmesh.get(lock);
 
                             boost::add_edge(
                                 neighbour_block_vertex.in_neighbour,
@@ -5386,7 +5388,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                         {
                             hmem::UniqueResourceLock lock;
-                            auto navmesh = below_front_neighbour->navmesh.get(lock);
+                            auto& navmesh = below_front_neighbour->navmesh.get(lock);
 
                             boost::add_edge(
                                 neighbour_block_vertex.in_below_front_neighbour,
@@ -5470,7 +5472,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                             {
                                 hmem::UniqueResourceLock lock;
-                                auto navmesh = neighbour->navmesh.get(lock);
+                                auto& navmesh = neighbour->navmesh.get(lock);
 
                                 boost::add_edge(
                                     neighbour_block_vertex.in_neighbour,
@@ -5486,7 +5488,8 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                             {
                                 hmem::UniqueResourceLock lock;
-                                auto navmesh = below_front_neighbour->navmesh.get(lock);
+                                auto&                    navmesh
+                                    = below_front_neighbour->navmesh.get(lock);
 
                                 boost::add_edge(
                                     neighbour_block_vertex.in_below_front_neighbour,
@@ -5519,7 +5522,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                             {
                                 hmem::UniqueResourceLock lock;
-                                auto navmesh = neighbour->navmesh.get(lock);
+                                auto& navmesh = neighbour->navmesh.get(lock);
 
                                 boost::add_edge(
                                     neighbour_block_vertex.in_neighbour,
@@ -5535,7 +5538,8 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                             {
                                 hmem::UniqueResourceLock lock;
-                                auto navmesh = below_front_neighbour->navmesh.get(lock);
+                                auto&                    navmesh
+                                    = below_front_neighbour->navmesh.get(lock);
 
                                 boost::add_edge(
                                     neighbour_block_vertex.in_below_front_neighbour,
@@ -5646,7 +5650,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                         {
                             hmem::UniqueResourceLock lock;
-                            auto navmesh = neighbour->navmesh.get(lock);
+                            auto& navmesh = neighbour->navmesh.get(lock);
 
                             boost::add_edge(
                                 neighbour_block_vertex.in_neighbour,
@@ -5662,7 +5666,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                         {
                             hmem::UniqueResourceLock lock;
-                            auto navmesh = below_back_neighbour->navmesh.get(lock);
+                            auto& navmesh = below_back_neighbour->navmesh.get(lock);
 
                             boost::add_edge(
                                 neighbour_block_vertex.in_below_back_neighbour,
@@ -5747,7 +5751,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                             {
                                 hmem::UniqueResourceLock lock;
-                                auto navmesh = neighbour->navmesh.get(lock);
+                                auto& navmesh = neighbour->navmesh.get(lock);
 
                                 boost::add_edge(
                                     neighbour_block_vertex.in_neighbour,
@@ -5763,7 +5767,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                             {
                                 hmem::UniqueResourceLock lock;
-                                auto navmesh = below_back_neighbour->navmesh.get(lock);
+                                auto& navmesh = below_back_neighbour->navmesh.get(lock);
 
                                 boost::add_edge(
                                     neighbour_block_vertex.in_below_back_neighbour,
@@ -5796,7 +5800,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                             {
                                 hmem::UniqueResourceLock lock;
-                                auto navmesh = neighbour->navmesh.get(lock);
+                                auto& navmesh = neighbour->navmesh.get(lock);
 
                                 boost::add_edge(
                                     neighbour_block_vertex.in_neighbour,
@@ -5812,7 +5816,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                             {
                                 hmem::UniqueResourceLock lock;
-                                auto navmesh = below_back_neighbour->navmesh.get(lock);
+                                auto& navmesh = below_back_neighbour->navmesh.get(lock);
 
                                 boost::add_edge(
                                     neighbour_block_vertex.in_below_back_neighbour,

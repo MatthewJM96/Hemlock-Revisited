@@ -149,7 +149,7 @@ public:
                 hmem::SharedResourceLock lock_start, lock_end;
                 auto                     navmesh_start
                     = chunk_start->navmesh.get(lock_start, std::defer_lock);
-                auto navmesh_end = chunk_end->navmesh.get(lock_end, std::defer_lock);
+                auto& navmesh_end = chunk_end->navmesh.get(lock_end, std::defer_lock);
                 std::lock(lock_start, lock_end);
 
                 // constexpr halgo::ACSConfig Config = { .debug = { .on = false } };

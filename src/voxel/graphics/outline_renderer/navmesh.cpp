@@ -116,7 +116,7 @@ bool hvox::NavmeshOutlineRenderer::__calculate_outlines(NavmeshOutlines& navmesh
     }
 
     hmem::SharedResourceLock lock;
-    auto                     chunk_navmesh = chunk->navmesh.get(lock);
+    auto&                    chunk_navmesh = chunk->navmesh.get(lock);
 
     if (chunk->navmeshing.load() != ChunkState::COMPLETE) return false;
 
