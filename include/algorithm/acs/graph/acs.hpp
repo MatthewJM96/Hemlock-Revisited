@@ -45,11 +45,11 @@ namespace hemlock {
                  * Initialisation *
                 \******************/
 
-                _GraphMap&        source_map;
+                _GraphMap*        source_map = nullptr;
                 _VertexDescriptor source_vertex, destination_vertex;
 
-                std::tie(source_map, destination_vertex) = map_view.vertex(destination);
-                std::tie(source_map, source_vertex)      = map_view.vertex(source);
+                std::tie(destination_vertex, source_map) = map_view.vertex(destination);
+                std::tie(source_vertex, source_map)      = map_view.vertex(source);
 
                 struct {
                     _VertexDescriptor steps[Config.max_steps + 1] = {};
@@ -99,7 +99,7 @@ namespace hemlock {
 
                 const auto calculate_score = [&](Node            candidate,
                                                  _EdgeDescriptor edge,
-                                                 _GraphMap       map) {
+                                                 _GraphMap&      map) {
                     // TODO(Matthew): Fully expose this (at least optionally), likewise
                     // make even providing distance calc
                     //                and modifying score with it optional.
@@ -217,7 +217,8 @@ namespace hemlock {
                                         f32 score = calculate_score(
                                             ant.current_map
                                                 ->vertex_coord_map[candidate_vertex],
-                                            edge
+                                            edge,
+                                            *ant.current_map
                                         );
 
                                         if (score > best_score) {
@@ -263,7 +264,8 @@ namespace hemlock {
                                         total_score += calculate_score(
                                             ant.current_map
                                                 ->vertex_coord_map[candidate_vertex],
-                                            edge
+                                            edge,
+                                            *ant.current_map
                                         );
                                     }
 
@@ -337,12 +339,12 @@ namespace hemlock {
                                 auto [edge, _] = boost::edge(
                                     ant.current_vertex,
                                     next_vertex,
-                                    ant.current_map.graph
+                                    ant.current_map->graph
                                 );
 
-                                ant.current_map.pheromone_map[edge]
+                                ant.current_map->pheromone_map[edge]
                                     = (1.0f - Config.local.evaporation)
-                                          * ant.current_map.pheromone_map[edge]
+                                          * ant.current_map->pheromone_map[edge]
                                       + Config.local.evaporation
                                             * Config.local.increment;
 
@@ -517,10 +519,10 @@ namespace hemlock {
                             auto [edge, _] = boost::edge(
                                 shortest_path.steps[step_idx],
                                 shortest_path.steps[step_idx + 1],
-                                shortest_path.maps[step_idx].graph
+                                shortest_path.maps[step_idx]->graph
                             );
 
-                            shortest_path.maps[step_idx].pheromone_map[edge]
+                            shortest_path.maps[step_idx]->pheromone_map[edge]
                                 += Config.global.evaporation
                                    * (Config.global.increment
                                       / static_cast<f32>(shortest_path.length));
@@ -551,7 +553,7 @@ namespace hemlock {
 
                     for (size_t idx = 0; idx < path_length; ++idx) {
                         path[idx] = shortest_path.maps[idx]
-                                        .vertex_coord_map[shortest_path.steps[idx]];
+                                        ->vertex_coord_map[shortest_path.steps[idx]];
                     }
                 }
             }
