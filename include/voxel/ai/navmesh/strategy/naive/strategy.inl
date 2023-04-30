@@ -3092,11 +3092,11 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                                diagonal_stitch_state, ChunkState::ACTIVE
                            ))
                 {
-                    hmem::SharedResourceLock left_neighbour_block_lock;
-                    auto                     left_neighbour_blocks
+                    hmem::SharedResourceLock left_neighbour_block_lock,
+                        above_left_neighbour_block_lock;
+                    auto& left_neighbour_blocks
                         = left_neighbour->blocks.get(left_neighbour_block_lock);
-                    hmem::SharedResourceLock above_left_neighbour_block_lock;
-                    auto&                    above_left_neighbour_blocks
+                    auto& above_left_neighbour_blocks
                         = above_left_neighbour->blocks.get(
                             above_left_neighbour_block_lock
                         );
@@ -3871,11 +3871,11 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                                diagonal_stitch_state, ChunkState::ACTIVE
                            ))
                 {
-                    hmem::SharedResourceLock back_neighbour_block_lock;
-                    auto                     back_neighbour_blocks
+                    hmem::SharedResourceLock back_neighbour_block_lock,
+                        above_back_neighbour_block_lock;
+                    auto& back_neighbour_blocks
                         = back_neighbour->blocks.get(back_neighbour_block_lock);
-                    hmem::SharedResourceLock above_back_neighbour_block_lock;
-                    auto&                    above_back_neighbour_blocks
+                    auto& above_back_neighbour_blocks
                         = above_back_neighbour->blocks.get(
                             above_back_neighbour_block_lock
                         );
@@ -4741,11 +4741,11 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                                neighbour_stitch_state, ChunkState::ACTIVE
                            ))
                 {
-                    hmem::SharedResourceLock left_neighbour_block_lock;
-                    auto                     left_neighbour_blocks
+                    hmem::SharedResourceLock left_neighbour_block_lock,
+                        below_left_neighbour_block_lock;
+                    auto& left_neighbour_blocks
                         = left_neighbour->blocks.get(left_neighbour_block_lock);
-                    hmem::SharedResourceLock below_left_neighbour_block_lock;
-                    auto&                    below_left_neighbour_blocks
+                    auto& below_left_neighbour_blocks
                         = below_left_neighbour->blocks.get(
                             below_left_neighbour_block_lock
                         );
@@ -5578,13 +5578,14 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                                neighbour_stitch_state, ChunkState::ACTIVE
                            ))
                 {
+                    hmem::SharedResourceLock back_neighbour_block_lock,
+                        below_back_neighbour_block_lock;
                     auto& below_back_neighbour_blocks
-                        = below_back_neighbour->blocks.get auto back_neighbour_blocks
+                        = below_back_neighbour->blocks.get(
+                            below_back_neighbour_block_lock
+                        );
+                    auto& back_neighbour_blocks
                         = back_neighbour->blocks.get(back_neighbour_block_lock);
-                    hmem::SharedResourceLock below_back_neighbour_block_lock;
-                    auto below_back_neighbour_blocks = below_back_neighbour->blocks.get(
-                        below_back_neighbour_block_lock
-                    );
 
                     // Step up from y == CHUNK_LENGTH - 2
                     for (BlockChunkPositionCoord x = 0; x < CHUNK_LENGTH; ++x) {
