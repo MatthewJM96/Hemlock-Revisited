@@ -11,6 +11,7 @@ namespace hemlock {
 
             template <typename Node, bool IsWeighted>
             class ACSHeatmap2D {
+                using _Ant = Ant<VertexDescriptor<Node, IsWeighted>, Node, IsWeighted>;
             public:
                 ACSHeatmap2D();
 
@@ -23,9 +24,7 @@ namespace hemlock {
                 void initialise_heatmaps(size_t max_steps, size_t max_iterations);
 
                 void create_heatmaps(
-                    Ant<VertexDescriptor<Node, IsWeighted>>* ants,
-                    size_t                                   ant_count,
-                    GraphMap<Node, IsWeighted>&              map
+                    _Ant* ants, size_t ant_count, GraphMap<Node, IsWeighted>& map
                 );
 
                 void dispose_heatmaps();
@@ -35,9 +34,7 @@ namespace hemlock {
                 void create_pheromone_heatmap_frame(GraphMap<Node, IsWeighted>& map);
 
                 void create_ant_count_heatmap_frame(
-                    Ant<VertexDescriptor<Node, IsWeighted>>* ants,
-                    size_t                                   ant_count,
-                    GraphMap<Node, IsWeighted>&              map
+                    _Ant* ants, size_t ant_count, GraphMap<Node, IsWeighted>& map
                 );
 
                 NodeTo2DCoord<Node> m_get_2d_coord;

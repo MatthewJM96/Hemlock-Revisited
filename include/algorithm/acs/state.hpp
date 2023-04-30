@@ -73,21 +73,23 @@ namespace hemlock {
             }
         };
 
-        template <typename VertexType>
+        template <typename VertexType, typename Node, bool IsWeighted>
         struct Ant {
             bool   found_food   = false;
             bool   did_backstep = false;
             size_t steps_taken  = 0;
             size_t group        = 0;
 
-            VertexType* previous_vertices = nullptr;
-            VertexType  current_vertex    = {};
+            VertexType*                 previous_vertices = nullptr;
+            GraphMap<Node, IsWeighted>* previous_maps     = nullptr;
+            VertexType                  current_vertex    = {};
+            GraphMap<Node, IsWeighted>* current_map       = nullptr;
         };
 
-        template <typename VertexType, size_t AntCount>
+        template <typename VertexType, typename Node, bool IsWeighted, size_t AntCount>
         struct AntGroup {
-            Ant<VertexType>* ants[AntCount] = {};
-            size_t           size           = 0;
+            Ant<VertexType, Node, IsWeighted>* ants[AntCount] = {};
+            size_t                             size           = 0;
         };
     }  // namespace algorithm
 }  // namespace hemlock

@@ -2,6 +2,7 @@
 #define __hemlock_algorithm_acs_graph_acs_hpp
 
 #include "../state.hpp"
+#include "view.hpp"
 
 namespace hemlock {
     namespace algorithm {
@@ -19,7 +20,7 @@ namespace hemlock {
                 ACSDistanceCalculator<Node, IsWeighted> DistanceCalculator
                 = NullACSDistanceCalculator<Node, IsWeighted>>
             void find_path(
-                GraphMap<Node, IsWeighted>&          map,
+                GraphMapView<Node, IsWeighted>&      map_view,
                 Node                                 source,
                 Node                                 destination,
                 Node*&                               path,
@@ -33,36 +34,26 @@ namespace hemlock {
                         );
                 }
 
+                using _GraphMap         = GraphMap<Node, IsWeighted>;
                 using _EdgeDescriptor   = EdgeDescriptor<Node, IsWeighted>;
                 using _VertexDescriptor = VertexDescriptor<Node, IsWeighted>;
-                using _Ant              = Ant<_VertexDescriptor>;
-                using _AntGroup         = AntGroup<_VertexDescriptor, Config.ant_count>;
-
-                const auto calculate_score = [&](Node candidate, _EdgeDescriptor edge) {
-                    // TODO(Matthew): Fully expose this (at least optionally), likewise
-                    // make even providing distance calc
-                    //                and modifying score with it optional.
-
-                    const DistanceCalculator calc_distance{};
-
-                    f32 score = map.pheromone_map[edge];
-
-                    score
-                        /= (1.0f + calc_distance(map, source, destination, candidate));
-
-                    return score;
-                };
+                using _Ant              = Ant<_VertexDescriptor, Node, IsWeighted>;
+                using _AntGroup
+                    = AntGroup<_VertexDescriptor, Node, IsWeighted, Config.ant_count>;
 
                 /******************\
                  * Initialisation *
                 \******************/
 
-                _VertexDescriptor source_vertex = map.coord_vertex_map[source];
-                _VertexDescriptor destination_vertex
-                    = map.coord_vertex_map[destination];
+                _GraphMap&        source_map;
+                _VertexDescriptor source_vertex, destination_vertex;
+
+                std::tie(source_map, destination_vertex) = map_view.vertex(destination);
+                std::tie(source_map, source_vertex)      = map_view.vertex(source);
 
                 struct {
                     _VertexDescriptor steps[Config.max_steps + 1] = {};
+                    _GraphMap*        maps[Config.max_steps + 1]  = {};
                     size_t            length = std::numeric_limits<size_t>::max();
                     bool              found  = false;
                 } shortest_path;
@@ -76,6 +67,7 @@ namespace hemlock {
                 _VertexDescriptor
                     visited_vertices[Config.ant_count * (Config.max_steps + 1)]
                     = {};
+                _GraphMap* visited_maps[Config.ant_count * (Config.max_steps + 1)] = {};
 
                 // The actual ants.
                 const _Ant nil_ants[Config.ant_count] = {};
@@ -83,6 +75,7 @@ namespace hemlock {
 
                 for (size_t ant_idx = 0; ant_idx < Config.ant_count; ++ant_idx) {
                     ants[ant_idx].current_vertex = source_vertex;
+                    ants[ant_idx].current_map    = source_map;
                 }
 
                 // TODO(Matthew): Do we want to handle large Config.ant_count? This
@@ -92,9 +85,34 @@ namespace hemlock {
                     size_t    count                    = 0;
                 } ant_groups_new, ant_groups_old;
 
-                for (auto edge : boost::make_iterator_range(boost::edges(map.graph))) {
-                    map.pheromone_map[edge] += Config.local.increment;
-                }
+                // TODO(Matthew): local increment cannot be applied globally... are
+                //                we sure this is even the correct implementation from
+                //                papers?
+                // for (auto edge : boost::make_iterator_range(boost::edges(map.graph)))
+                // {
+                //     map.pheromone_map[edge] += Config.local.increment;
+                // }
+
+                /*********************\
+                 * Score Calculation *
+                \*********************/
+
+                const auto calculate_score = [&](Node            candidate,
+                                                 _EdgeDescriptor edge,
+                                                 _GraphMap       map) {
+                    // TODO(Matthew): Fully expose this (at least optionally), likewise
+                    // make even providing distance calc
+                    //                and modifying score with it optional.
+
+                    const DistanceCalculator calc_distance{};
+
+                    f32 score = map.pheromone_map[edge];
+
+                    score
+                        /= (1.0f + calc_distance(map, source, destination, candidate));
+
+                    return score;
+                };
 
                 /*****************\
                  * Do Iterations *
@@ -112,9 +130,13 @@ namespace hemlock {
                     ant_groups_old = {};
                     for (size_t ant_idx = 0; ant_idx < Config.ant_count; ++ant_idx) {
                         ants[ant_idx].current_vertex = source_vertex;
+                        ants[ant_idx].current_map    = source_map;
                         ants[ant_idx].previous_vertices
                             = &visited_vertices[ant_idx * (Config.max_steps + 1)];
-                        ants[ant_idx].previous_vertices[0]     = source_vertex;
+                        ants[ant_idx].previous_vertices[0] = source_vertex;
+                        ants[ant_idx].previous_maps
+                            = &visited_maps[ant_idx * (Config.max_steps + 1)];
+                        ants[ant_idx].previous_maps[0]         = source_map;
                         ant_groups_old.groups[0].ants[ant_idx] = &ants[ant_idx];
                     }
                     ant_groups_old.groups[0].size = Config.ant_count;
@@ -146,9 +168,10 @@ namespace hemlock {
                                         * std::pow(entropy, Config.exploitation.exp);
 
                             auto choose = [&]() -> std::tuple<bool, _VertexDescriptor> {
-                                auto edges = boost::make_iterator_range(
-                                    boost::out_edges(ant.current_vertex, map.graph)
-                                );
+                                auto edges
+                                    = boost::make_iterator_range(boost::out_edges(
+                                        ant.current_vertex, ant.current_map->graph
+                                    ));
 
                                 static std::random_device rand_dev;
 #if defined(DEBUG)
@@ -167,7 +190,9 @@ namespace hemlock {
                                     f32 best_score = std::numeric_limits<f32>::lowest();
                                     for (auto edge : edges) {
                                         _VertexDescriptor candidate_vertex
-                                            = boost::target(edge, map.graph);
+                                            = boost::target(
+                                                edge, ant.current_map->graph
+                                            );
 
                                         /**
                                          * If ant has just visited the candidate vertex,
@@ -190,7 +215,9 @@ namespace hemlock {
                                             continue;
 
                                         f32 score = calculate_score(
-                                            map.vertex_coord_map[candidate_vertex], edge
+                                            ant.current_map
+                                                ->vertex_coord_map[candidate_vertex],
+                                            edge
                                         );
 
                                         if (score > best_score) {
@@ -209,7 +236,9 @@ namespace hemlock {
                                     f32 total_score = 0.0f;
                                     for (auto edge : edges) {
                                         _VertexDescriptor candidate_vertex
-                                            = boost::target(edge, map.graph);
+                                            = boost::target(
+                                                edge, ant.current_map->graph
+                                            );
 
                                         /**
                                          * If ant has just visited the candidate vertex,
@@ -232,7 +261,9 @@ namespace hemlock {
                                             continue;
 
                                         total_score += calculate_score(
-                                            map.vertex_coord_map[candidate_vertex], edge
+                                            ant.current_map
+                                                ->vertex_coord_map[candidate_vertex],
+                                            edge
                                         );
                                     }
 
@@ -244,7 +275,9 @@ namespace hemlock {
                                                      * total_score;
                                     for (auto edge : edges) {
                                         _VertexDescriptor candidate_vertex
-                                            = boost::target(edge, map.graph);
+                                            = boost::target(
+                                                edge, ant.current_map->graph
+                                            );
 
                                         /**
                                          * If ant has just visited the candidate vertex,
@@ -266,7 +299,8 @@ namespace hemlock {
                                                    == candidate_vertex)
                                             continue;
 
-                                        choice_val -= map.pheromone_map[edge];
+                                        choice_val
+                                            -= ant.current_map->pheromone_map[edge];
 
                                         if (choice_val <= 0.0f) {
                                             return { true, candidate_vertex };
@@ -297,15 +331,18 @@ namespace hemlock {
                                 ant.did_backstep = true;
                                 ant.current_vertex
                                     = ant.previous_vertices[ant.steps_taken];
+                                ant.current_map = ant.previous_maps[ant.steps_taken];
                             } else {
                                 // Do local pheromone update.
                                 auto [edge, _] = boost::edge(
-                                    ant.current_vertex, next_vertex, map.graph
+                                    ant.current_vertex,
+                                    next_vertex,
+                                    ant.current_map.graph
                                 );
 
-                                map.pheromone_map[edge]
+                                ant.current_map.pheromone_map[edge]
                                     = (1.0f - Config.local.evaporation)
-                                          * map.pheromone_map[edge]
+                                          * ant.current_map.pheromone_map[edge]
                                       + Config.local.evaporation
                                             * Config.local.increment;
 
@@ -314,6 +351,13 @@ namespace hemlock {
                                 ant.did_backstep                       = false;
                                 ant.previous_vertices[ant.steps_taken] = next_vertex;
                                 ant.current_vertex                     = next_vertex;
+
+                                auto [_2, new_map] = map_view.vertex(
+                                    ant.current_map
+                                        ->vertex_coord_map[ant.current_vertex]
+                                );
+                                ant.current_map                    = new_map;
+                                ant.previous_maps[ant.steps_taken] = new_map;
                             }
 
                             bool need_new_group = false;
@@ -413,6 +457,11 @@ namespace hemlock {
                                         sizeof(_VertexDescriptor)
                                             * (ant.steps_taken + 1)
                                     );
+                                    std::memcpy(
+                                        &shortest_path.maps[0],
+                                        ant.previous_maps,
+                                        sizeof(_GraphMap*) * (ant.steps_taken + 1)
+                                    );
                                 }
                             }
                         }
@@ -426,7 +475,7 @@ namespace hemlock {
                         if constexpr (Config.debug.on) {
                             if (debugger) {
                                 debugger->create_heatmaps(
-                                    &ants[0], Config.ant_count, map
+                                    &ants[0], Config.ant_count, source_map
                                 );
                             }
                         }
@@ -450,11 +499,16 @@ namespace hemlock {
                     // Global pheromone update.
 
                     // TODO(Matthew): can we do lazy evaluation of this?
-                    for (auto edge :
-                         boost::make_iterator_range(boost::edges(map.graph)))
-                    {
-                        map.pheromone_map[edge] *= (1.0f - Config.global.evaporation);
-                    }
+                    debug_printf(
+                        "Not doing global evaporation due to needing to find a way to "
+                        "do it lazily on at least a per-map level."
+                    );
+                    // for (auto edge :
+                    //      boost::make_iterator_range(boost::edges(map.graph)))
+                    // {
+                    //     map.pheromone_map[edge] *= (1.0f -
+                    //     Config.global.evaporation);
+                    // }
 
                     if (shortest_path.found) {
                         for (size_t step_idx = 0; step_idx < shortest_path.length - 1;
@@ -463,10 +517,10 @@ namespace hemlock {
                             auto [edge, _] = boost::edge(
                                 shortest_path.steps[step_idx],
                                 shortest_path.steps[step_idx + 1],
-                                map.graph
+                                shortest_path.maps[step_idx].graph
                             );
 
-                            map.pheromone_map[edge]
+                            shortest_path.maps[step_idx].pheromone_map[edge]
                                 += Config.global.evaporation
                                    * (Config.global.increment
                                       / static_cast<f32>(shortest_path.length));
@@ -496,7 +550,8 @@ namespace hemlock {
                     path        = new Node[path_length];
 
                     for (size_t idx = 0; idx < path_length; ++idx) {
-                        path[idx] = map.vertex_coord_map[shortest_path.steps[idx]];
+                        path[idx] = shortest_path.maps[idx]
+                                        .vertex_coord_map[shortest_path.steps[idx]];
                     }
                 }
             }
