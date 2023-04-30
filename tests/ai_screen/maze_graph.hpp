@@ -38,10 +38,12 @@ void __do_maze_graph_test(ui32 map_dim, size_t count) {
             }
         );
 
-        size_t* path        = nullptr;
-        size_t  path_length = 0;
+        size_t*                                 path        = nullptr;
+        size_t                                  path_length = 0;
+        halgo::DummyGraphMapView<size_t, false> map_view;
+        map_view.init(graph_map);
         halgo::GraphACS::find_path<size_t, false, Config>(
-            graph_map, map.start_idx, map.finish_idx, path, path_length, &debugger
+            map_view, map.start_idx, map.finish_idx, path, path_length, &debugger
         );
         delete[] path;
 
@@ -89,8 +91,10 @@ void __do_maze_graph_timing_test(size_t iterations, ui32 map_dim, size_t map_idx
     for (size_t iteration = 0; iteration < iterations; ++iteration) {
         auto   start       = std::chrono::steady_clock::now();
         size_t path_length = 0;
+        halgo::DummyGraphMapView<size_t, false> map_view;
+        map_view.init(graph_map);
         halgo::GraphACS::find_path<size_t, false, Config>(
-            graph_map, map.start_idx, map.finish_idx, paths[iteration], path_length
+            map_view, map.start_idx, map.finish_idx, paths[iteration], path_length
         );
         duration += std::chrono::steady_clock::now() - start;
     }

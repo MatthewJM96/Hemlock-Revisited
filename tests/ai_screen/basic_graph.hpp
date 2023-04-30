@@ -37,9 +37,11 @@ void do_basic_graph_test() {
 
     constexpr halgo::ACSConfig Config = { .debug = { .on = false } };
 
-    int*   path        = nullptr;
-    size_t path_length = 0;
-    halgo::GraphACS::find_path<int, false, Config>(graph_map, 1, 3, path, path_length);
+    int*                                 path        = nullptr;
+    size_t                               path_length = 0;
+    halgo::DummyGraphMapView<int, false> map_view;
+    map_view.init(graph_map);
+    halgo::GraphACS::find_path<int, false, Config>(map_view, 1, 3, path, path_length);
 
     std::cout << path_length << std::endl;
     for (size_t i = 0; i < path_length; ++i) {
