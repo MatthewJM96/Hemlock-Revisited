@@ -80,10 +80,10 @@ namespace hemlock {
             size_t steps_taken  = 0;
             size_t group        = 0;
 
-            VertexType*                  previous_vertices = nullptr;
-            GraphMap<Node, IsWeighted>** previous_maps     = nullptr;
-            VertexType                   current_vertex    = {};
-            GraphMap<Node, IsWeighted>*  current_map       = nullptr;
+            std::pair<VertexType, VertexType>* previous_vertices = nullptr;
+            GraphMap<Node, IsWeighted>**       previous_maps     = nullptr;
+            std::pair<VertexType, VertexType>  current_vertex    = {};
+            GraphMap<Node, IsWeighted>*        current_map       = nullptr;
         };
 
         template <typename VertexType, typename Node, bool IsWeighted, size_t AntCount>

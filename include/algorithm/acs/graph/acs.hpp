@@ -52,10 +52,11 @@ namespace hemlock {
                 std::tie(source_vertex, source_map)      = map_view.vertex(source);
 
                 struct {
-                    _VertexDescriptor steps[Config.max_steps + 1] = {};
-                    _GraphMap*        maps[Config.max_steps + 1]  = {};
-                    size_t            length = std::numeric_limits<size_t>::max();
-                    bool              found  = false;
+                    std::pair<_VertexDescriptor, _VertexDescriptor>
+                               steps[Config.max_steps + 1] = {};
+                    _GraphMap* maps[Config.max_steps + 1]  = {};
+                    size_t     length = std::numeric_limits<size_t>::max();
+                    bool       found  = false;
                 } shortest_path;
 
                 size_t last_shortest_path      = std::numeric_limits<size_t>::max();
@@ -64,9 +65,8 @@ namespace hemlock {
                 // TODO(Matthew): Heap allocation (paged?) at least for large number of
                 // ants & max steps? Bucket of visited vertices for all ants. Vertices
                 // visited by each ant so far on its path for an iteration.
-                _VertexDescriptor
-                    visited_vertices[Config.ant_count * (Config.max_steps + 1)]
-                    = {};
+                std::pair<_VertexDescriptor, _VertexDescriptor>
+                    visited_vertices[Config.ant_count * (Config.max_steps + 1)]    = {};
                 _GraphMap* visited_maps[Config.ant_count * (Config.max_steps + 1)] = {};
 
                 // The actual ants.
@@ -74,7 +74,7 @@ namespace hemlock {
                 _Ant       ants[Config.ant_count]     = {};
 
                 for (size_t ant_idx = 0; ant_idx < Config.ant_count; ++ant_idx) {
-                    ants[ant_idx].current_vertex = source_vertex;
+                    ants[ant_idx].current_vertex = { source_vertex, source_vertex };
                     ants[ant_idx].current_map    = source_map;
                 }
 
@@ -124,16 +124,17 @@ namespace hemlock {
                 for (size_t iteration = 0; iteration < Config.max_iterations;
                      ++iteration)
                 {
-                    std::memcpy(
-                        &ants[0], &nil_ants[0], Config.ant_count * sizeof(_Ant)
-                    );
+                    for (size_t i = 0; i < Config.ant_count; ++i) {
+                        ants[i] = nil_ants[i];
+                    }
                     ant_groups_old = {};
                     for (size_t ant_idx = 0; ant_idx < Config.ant_count; ++ant_idx) {
-                        ants[ant_idx].current_vertex = source_vertex;
+                        ants[ant_idx].current_vertex = { source_vertex, source_vertex };
                         ants[ant_idx].current_map    = source_map;
                         ants[ant_idx].previous_vertices
                             = &visited_vertices[ant_idx * (Config.max_steps + 1)];
-                        ants[ant_idx].previous_vertices[0] = source_vertex;
+                        ants[ant_idx].previous_vertices[0]
+                            = { source_vertex, source_vertex };
                         ants[ant_idx].previous_maps
                             = &visited_maps[ant_idx * (Config.max_steps + 1)];
                         ants[ant_idx].previous_maps[0]         = source_map;
@@ -170,7 +171,8 @@ namespace hemlock {
                             auto choose = [&]() -> std::tuple<bool, _VertexDescriptor> {
                                 auto edges
                                     = boost::make_iterator_range(boost::out_edges(
-                                        ant.current_vertex, ant.current_map->graph
+                                        ant.current_vertex.second,
+                                        ant.current_map->graph
                                     ));
 
                                 static std::random_device rand_dev;
@@ -205,12 +207,14 @@ namespace hemlock {
                                         if (ant.steps_taken > 0
                                             && ant.previous_vertices
                                                        [ant.steps_taken - 1]
+                                                           .second
                                                    == candidate_vertex)
                                             continue;
 
                                         if (ant.did_backstep && ant.steps_taken > 0
                                             && ant.previous_vertices
                                                        [ant.steps_taken + 1]
+                                                           .second
                                                    == candidate_vertex)
                                             continue;
 
@@ -252,12 +256,14 @@ namespace hemlock {
                                         if (ant.steps_taken > 0
                                             && ant.previous_vertices
                                                        [ant.steps_taken - 1]
+                                                           .second
                                                    == candidate_vertex)
                                             continue;
 
                                         if (ant.did_backstep && ant.steps_taken > 0
                                             && ant.previous_vertices
                                                        [ant.steps_taken + 1]
+                                                           .second
                                                    == candidate_vertex)
                                             continue;
 
@@ -292,12 +298,14 @@ namespace hemlock {
                                         if (ant.steps_taken > 0
                                             && ant.previous_vertices
                                                        [ant.steps_taken - 1]
+                                                           .second
                                                    == candidate_vertex)
                                             continue;
 
                                         if (ant.did_backstep && ant.steps_taken > 0
                                             && ant.previous_vertices
                                                        [ant.steps_taken + 1]
+                                                           .second
                                                    == candidate_vertex)
                                             continue;
 
@@ -337,7 +345,7 @@ namespace hemlock {
                             } else {
                                 // Do local pheromone update.
                                 auto [edge, _] = boost::edge(
-                                    ant.current_vertex,
+                                    ant.current_vertex.second,
                                     next_vertex,
                                     ant.current_map->graph
                                 );
@@ -349,15 +357,18 @@ namespace hemlock {
                                             * Config.local.increment;
 
                                 // Update ant's vertex info.
-                                ant.steps_taken                        += 1;
-                                ant.did_backstep                       = false;
-                                ant.previous_vertices[ant.steps_taken] = next_vertex;
-                                ant.current_vertex                     = next_vertex;
+                                ant.steps_taken  += 1;
+                                ant.did_backstep = false;
 
-                                auto [_2, new_map] = map_view.vertex(
-                                    ant.current_map
-                                        ->vertex_coord_map[ant.current_vertex]
+                                // Need to check if the next vertex is possibly in a new
+                                // graph, otherwise we'll have mismatching vertex and
+                                // graph references.
+                                auto [new_vertex, new_map] = map_view.vertex(
+                                    ant.current_map->vertex_coord_map[next_vertex]
                                 );
+                                ant.current_vertex = { next_vertex, new_vertex };
+                                ant.previous_vertices[ant.steps_taken]
+                                    = { next_vertex, new_vertex };
                                 ant.current_map                    = new_map;
                                 ant.previous_maps[ant.steps_taken] = new_map;
                             }
@@ -453,17 +464,11 @@ namespace hemlock {
                                 if (ant.steps_taken + 1 < shortest_path.length) {
                                     shortest_path.length = ant.steps_taken + 1;
                                     shortest_path.found  = true;
-                                    std::memcpy(
-                                        &shortest_path.steps[0],
-                                        ant.previous_vertices,
-                                        sizeof(_VertexDescriptor)
-                                            * (ant.steps_taken + 1)
-                                    );
-                                    std::memcpy(
-                                        &shortest_path.maps[0],
-                                        ant.previous_maps,
-                                        sizeof(_GraphMap*) * (ant.steps_taken + 1)
-                                    );
+                                    for (size_t i = 0; i < ant.steps_taken + 1; ++i) {
+                                        shortest_path.steps[i]
+                                            = ant.previous_vertices[i];
+                                        shortest_path.maps[i] = ant.previous_maps[i];
+                                    }
                                 }
                             }
                         }
@@ -517,8 +522,8 @@ namespace hemlock {
                              ++step_idx)
                         {
                             auto [edge, _] = boost::edge(
-                                shortest_path.steps[step_idx],
-                                shortest_path.steps[step_idx + 1],
+                                shortest_path.steps[step_idx].second,
+                                shortest_path.steps[step_idx + 1].first,
                                 shortest_path.maps[step_idx]->graph
                             );
 
@@ -552,8 +557,9 @@ namespace hemlock {
                     path        = new Node[path_length];
 
                     for (size_t idx = 0; idx < path_length; ++idx) {
-                        path[idx] = shortest_path.maps[idx]
-                                        ->vertex_coord_map[shortest_path.steps[idx]];
+                        path[idx]
+                            = shortest_path.maps[idx]
+                                  ->vertex_coord_map[shortest_path.steps[idx].second];
                     }
                 }
             }
