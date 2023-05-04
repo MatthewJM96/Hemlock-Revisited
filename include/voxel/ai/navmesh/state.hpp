@@ -5,6 +5,8 @@
 #include "voxel/chunk/constants.hpp"
 #include "voxel/coordinate_system.h"
 
+#define DEFAULT_PHEROMONE_LEVEL 0.1
+
 namespace hemlock {
     namespace voxel {
         namespace ai {

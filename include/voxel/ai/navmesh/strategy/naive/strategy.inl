@@ -1,4 +1,5 @@
 #include "memory/handle.hpp"
+#include "voxel/ai/navmesh/state.hpp"
 #include "voxel/chunk.h"
 #include "voxel/coordinate_system.h"
 
@@ -125,12 +126,16 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_bulk(
                     hmem::UniqueResourceLock lock;
                     auto&                    navmesh = chunk->navmesh.get(lock);
 
-                    boost::add_edge(
+                    auto [block_edge, block_success] = boost::add_edge(
                         block_vertex, candidate_block_vertex, navmesh.data->graph
                     );
-                    boost::add_edge(
-                        candidate_block_vertex, block_vertex, navmesh.data->graph
-                    );
+                    navmesh.data->pheromone_map[block_edge] = DEFAULT_PHEROMONE_LEVEL;
+                    auto [candidate_block_edge, candidate_block_success]
+                        = boost::add_edge(
+                            candidate_block_vertex, block_vertex, navmesh.data->graph
+                        );
+                    navmesh.data->pheromone_map[candidate_block_edge]
+                        = DEFAULT_PHEROMONE_LEVEL;
                 }
             }
         }
@@ -1375,32 +1380,42 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                     hmem::UniqueResourceLock lock;
                     auto&                    navmesh = chunk->navmesh.get(lock);
 
-                    boost::add_edge(
+                    auto [this_block_edge, this_block_success] = boost::add_edge(
                         this_block_vertex.here,
                         candidate_block_vertex.here,
                         navmesh.data->graph
                     );
-                    boost::add_edge(
-                        candidate_block_vertex.here,
-                        this_block_vertex.here,
-                        navmesh.data->graph
-                    );
+                    navmesh.data->pheromone_map[this_block_edge]
+                        = DEFAULT_PHEROMONE_LEVEL;
+                    auto [candidate_block_edge, candidate_block_success]
+                        = boost::add_edge(
+                            candidate_block_vertex.here,
+                            this_block_vertex.here,
+                            navmesh.data->graph
+                        );
+                    navmesh.data->pheromone_map[candidate_block_edge]
+                        = DEFAULT_PHEROMONE_LEVEL;
                 }
 
                 {
                     hmem::UniqueResourceLock lock;
                     auto&                    navmesh = neighbour->navmesh.get(lock);
 
-                    boost::add_edge(
+                    auto [this_block_edge, this_block_success] = boost::add_edge(
                         this_block_vertex.in_neighbour,
                         candidate_block_vertex.in_neighbour,
                         navmesh.data->graph
                     );
-                    boost::add_edge(
-                        candidate_block_vertex.in_neighbour,
-                        this_block_vertex.in_neighbour,
-                        navmesh.data->graph
-                    );
+                    navmesh.data->pheromone_map[this_block_edge]
+                        = DEFAULT_PHEROMONE_LEVEL;
+                    auto [candidate_block_edge, candidate_block_success]
+                        = boost::add_edge(
+                            candidate_block_vertex.in_neighbour,
+                            this_block_vertex.in_neighbour,
+                            navmesh.data->graph
+                        );
+                    navmesh.data->pheromone_map[candidate_block_edge]
+                        = DEFAULT_PHEROMONE_LEVEL;
                 }
             }
         }
@@ -1519,32 +1534,44 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                             hmem::UniqueResourceLock lock;
                             auto&                    navmesh = chunk->navmesh.get(lock);
 
-                            boost::add_edge(
-                                this_block_vertex.here,
-                                candidate_block_vertex.here,
-                                navmesh.data->graph
-                            );
-                            boost::add_edge(
-                                candidate_block_vertex.here,
-                                this_block_vertex.here,
-                                navmesh.data->graph
-                            );
+                            auto [this_block_edge, this_block_success]
+                                = boost::add_edge(
+                                    this_block_vertex.here,
+                                    candidate_block_vertex.here,
+                                    navmesh.data->graph
+                                );
+                            navmesh.data->pheromone_map[this_block_edge]
+                                = DEFAULT_PHEROMONE_LEVEL;
+                            auto [candidate_block_edge, candidate_block_success]
+                                = boost::add_edge(
+                                    candidate_block_vertex.here,
+                                    this_block_vertex.here,
+                                    navmesh.data->graph
+                                );
+                            navmesh.data->pheromone_map[candidate_block_edge]
+                                = DEFAULT_PHEROMONE_LEVEL;
                         }
 
                         {
                             hmem::UniqueResourceLock lock;
                             auto& navmesh = below_neighbour->navmesh.get(lock);
 
-                            boost::add_edge(
-                                this_block_vertex.in_below_neighbour,
-                                candidate_block_vertex.in_below_neighbour,
-                                navmesh.data->graph
-                            );
-                            boost::add_edge(
-                                candidate_block_vertex.in_below_neighbour,
-                                this_block_vertex.in_below_neighbour,
-                                navmesh.data->graph
-                            );
+                            auto [this_block_edge, this_block_success]
+                                = boost::add_edge(
+                                    this_block_vertex.in_below_neighbour,
+                                    candidate_block_vertex.in_below_neighbour,
+                                    navmesh.data->graph
+                                );
+                            navmesh.data->pheromone_map[this_block_edge]
+                                = DEFAULT_PHEROMONE_LEVEL;
+                            auto [candidate_block_edge, candidate_block_success]
+                                = boost::add_edge(
+                                    candidate_block_vertex.in_below_neighbour,
+                                    this_block_vertex.in_below_neighbour,
+                                    navmesh.data->graph
+                                );
+                            navmesh.data->pheromone_map[candidate_block_edge]
+                                = DEFAULT_PHEROMONE_LEVEL;
                         }
                     }
                 }
@@ -1669,32 +1696,44 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                             hmem::UniqueResourceLock lock;
                             auto&                    navmesh = chunk->navmesh.get(lock);
 
-                            boost::add_edge(
-                                this_block_vertex.here,
-                                candidate_block_vertex.here,
-                                navmesh.data->graph
-                            );
-                            boost::add_edge(
-                                candidate_block_vertex.here,
-                                this_block_vertex.here,
-                                navmesh.data->graph
-                            );
+                            auto [this_block_edge, this_block_success]
+                                = boost::add_edge(
+                                    this_block_vertex.here,
+                                    candidate_block_vertex.here,
+                                    navmesh.data->graph
+                                );
+                            navmesh.data->pheromone_map[this_block_edge]
+                                = DEFAULT_PHEROMONE_LEVEL;
+                            auto [candidate_block_edge, candidate_block_success]
+                                = boost::add_edge(
+                                    candidate_block_vertex.here,
+                                    this_block_vertex.here,
+                                    navmesh.data->graph
+                                );
+                            navmesh.data->pheromone_map[candidate_block_edge]
+                                = DEFAULT_PHEROMONE_LEVEL;
                         }
 
                         {
                             hmem::UniqueResourceLock lock;
                             auto& navmesh = below_neighbour->navmesh.get(lock);
 
-                            boost::add_edge(
-                                this_block_vertex.in_below_neighbour,
-                                candidate_block_vertex.in_below_neighbour,
-                                navmesh.data->graph
-                            );
-                            boost::add_edge(
-                                candidate_block_vertex.in_below_neighbour,
-                                this_block_vertex.in_below_neighbour,
-                                navmesh.data->graph
-                            );
+                            auto [this_block_edge, this_block_success]
+                                = boost::add_edge(
+                                    this_block_vertex.in_below_neighbour,
+                                    candidate_block_vertex.in_below_neighbour,
+                                    navmesh.data->graph
+                                );
+                            navmesh.data->pheromone_map[this_block_edge]
+                                = DEFAULT_PHEROMONE_LEVEL;
+                            auto [candidate_block_edge, candidate_block_success]
+                                = boost::add_edge(
+                                    candidate_block_vertex.in_below_neighbour,
+                                    this_block_vertex.in_below_neighbour,
+                                    navmesh.data->graph
+                                );
+                            navmesh.data->pheromone_map[candidate_block_edge]
+                                = DEFAULT_PHEROMONE_LEVEL;
                         }
                     }
                 }
@@ -1818,32 +1857,44 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                             hmem::UniqueResourceLock lock;
                             auto&                    navmesh = chunk->navmesh.get(lock);
 
-                            boost::add_edge(
-                                this_block_vertex.here,
-                                candidate_block_vertex.here,
-                                navmesh.data->graph
-                            );
-                            boost::add_edge(
-                                candidate_block_vertex.here,
-                                this_block_vertex.here,
-                                navmesh.data->graph
-                            );
+                            auto [this_block_edge, this_block_success]
+                                = boost::add_edge(
+                                    this_block_vertex.here,
+                                    candidate_block_vertex.here,
+                                    navmesh.data->graph
+                                );
+                            navmesh.data->pheromone_map[this_block_edge]
+                                = DEFAULT_PHEROMONE_LEVEL;
+                            auto [candidate_block_edge, candidate_block_success]
+                                = boost::add_edge(
+                                    candidate_block_vertex.here,
+                                    this_block_vertex.here,
+                                    navmesh.data->graph
+                                );
+                            navmesh.data->pheromone_map[candidate_block_edge]
+                                = DEFAULT_PHEROMONE_LEVEL;
                         }
 
                         {
                             hmem::UniqueResourceLock lock;
                             auto& navmesh = below_neighbour->navmesh.get(lock);
 
-                            boost::add_edge(
-                                this_block_vertex.in_below_neighbour,
-                                candidate_block_vertex.in_below_neighbour,
-                                navmesh.data->graph
-                            );
-                            boost::add_edge(
-                                candidate_block_vertex.in_below_neighbour,
-                                this_block_vertex.in_below_neighbour,
-                                navmesh.data->graph
-                            );
+                            auto [this_block_edge, this_block_success]
+                                = boost::add_edge(
+                                    this_block_vertex.in_below_neighbour,
+                                    candidate_block_vertex.in_below_neighbour,
+                                    navmesh.data->graph
+                                );
+                            navmesh.data->pheromone_map[this_block_edge]
+                                = DEFAULT_PHEROMONE_LEVEL;
+                            auto [candidate_block_edge, candidate_block_success]
+                                = boost::add_edge(
+                                    candidate_block_vertex.in_below_neighbour,
+                                    this_block_vertex.in_below_neighbour,
+                                    navmesh.data->graph
+                                );
+                            navmesh.data->pheromone_map[candidate_block_edge]
+                                = DEFAULT_PHEROMONE_LEVEL;
                         }
                     }
                 }
@@ -1967,32 +2018,44 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                             hmem::UniqueResourceLock lock;
                             auto&                    navmesh = chunk->navmesh.get(lock);
 
-                            boost::add_edge(
-                                this_block_vertex.here,
-                                candidate_block_vertex.here,
-                                navmesh.data->graph
-                            );
-                            boost::add_edge(
-                                candidate_block_vertex.here,
-                                this_block_vertex.here,
-                                navmesh.data->graph
-                            );
+                            auto [this_block_edge, this_block_success]
+                                = boost::add_edge(
+                                    this_block_vertex.here,
+                                    candidate_block_vertex.here,
+                                    navmesh.data->graph
+                                );
+                            navmesh.data->pheromone_map[this_block_edge]
+                                = DEFAULT_PHEROMONE_LEVEL;
+                            auto [candidate_block_edge, candidate_block_success]
+                                = boost::add_edge(
+                                    candidate_block_vertex.here,
+                                    this_block_vertex.here,
+                                    navmesh.data->graph
+                                );
+                            navmesh.data->pheromone_map[candidate_block_edge]
+                                = DEFAULT_PHEROMONE_LEVEL;
                         }
 
                         {
                             hmem::UniqueResourceLock lock;
                             auto& navmesh = below_neighbour->navmesh.get(lock);
 
-                            boost::add_edge(
-                                this_block_vertex.in_below_neighbour,
-                                candidate_block_vertex.in_below_neighbour,
-                                navmesh.data->graph
-                            );
-                            boost::add_edge(
-                                candidate_block_vertex.in_below_neighbour,
-                                this_block_vertex.in_below_neighbour,
-                                navmesh.data->graph
-                            );
+                            auto [this_block_edge, this_block_success]
+                                = boost::add_edge(
+                                    this_block_vertex.in_below_neighbour,
+                                    candidate_block_vertex.in_below_neighbour,
+                                    navmesh.data->graph
+                                );
+                            navmesh.data->pheromone_map[this_block_edge]
+                                = DEFAULT_PHEROMONE_LEVEL;
+                            auto [candidate_block_edge, candidate_block_success]
+                                = boost::add_edge(
+                                    candidate_block_vertex.in_below_neighbour,
+                                    this_block_vertex.in_below_neighbour,
+                                    navmesh.data->graph
+                                );
+                            navmesh.data->pheromone_map[candidate_block_edge]
+                                = DEFAULT_PHEROMONE_LEVEL;
                         }
                     }
                 }
@@ -2084,32 +2147,50 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                                 hmem::UniqueResourceLock lock;
                                 auto& navmesh = chunk->navmesh.get(lock);
 
-                                boost::add_edge(
-                                    this_block_vertex.here,
-                                    left_of_neighbour_block_vertex.here,
-                                    navmesh.data->graph
-                                );
-                                boost::add_edge(
-                                    left_of_neighbour_block_vertex.here,
-                                    this_block_vertex.here,
-                                    navmesh.data->graph
-                                );
+                                auto [this_block_edge, this_block_success]
+                                    = boost::add_edge(
+                                        this_block_vertex.here,
+                                        left_of_neighbour_block_vertex.here,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data->pheromone_map[this_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
+                                auto
+                                    [left_of_neighbour_block_edge,
+                                     left_of_neighbour_block_success]
+                                    = boost::add_edge(
+                                        left_of_neighbour_block_vertex.here,
+                                        this_block_vertex.here,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data
+                                    ->pheromone_map[left_of_neighbour_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
                             }
 
                             {
                                 hmem::UniqueResourceLock lock;
                                 auto& navmesh = neighbour->navmesh.get(lock);
 
-                                boost::add_edge(
-                                    this_block_vertex.in_neighbour,
-                                    left_of_neighbour_block_vertex.in_neighbour,
-                                    navmesh.data->graph
-                                );
-                                boost::add_edge(
-                                    left_of_neighbour_block_vertex.in_neighbour,
-                                    this_block_vertex.in_neighbour,
-                                    navmesh.data->graph
-                                );
+                                auto [this_block_edge, this_block_success]
+                                    = boost::add_edge(
+                                        this_block_vertex.in_neighbour,
+                                        left_of_neighbour_block_vertex.in_neighbour,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data->pheromone_map[this_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
+                                auto
+                                    [left_of_neighbour_block_edge,
+                                     left_of_neighbour_block_success]
+                                    = boost::add_edge(
+                                        left_of_neighbour_block_vertex.in_neighbour,
+                                        this_block_vertex.in_neighbour,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data
+                                    ->pheromone_map[left_of_neighbour_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
                             }
                         }
 
@@ -2147,32 +2228,50 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                                 hmem::UniqueResourceLock lock;
                                 auto& navmesh = chunk->navmesh.get(lock);
 
-                                boost::add_edge(
-                                    this_block_vertex.here,
-                                    right_of_neighbour_block_vertex.here,
-                                    navmesh.data->graph
-                                );
-                                boost::add_edge(
-                                    right_of_neighbour_block_vertex.here,
-                                    this_block_vertex.here,
-                                    navmesh.data->graph
-                                );
+                                auto [this_block_edge, this_block_success]
+                                    = boost::add_edge(
+                                        this_block_vertex.here,
+                                        right_of_neighbour_block_vertex.here,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data->pheromone_map[this_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
+                                auto
+                                    [right_of_neighbour_block_edge,
+                                     right_of_neighbour_block_success]
+                                    = boost::add_edge(
+                                        right_of_neighbour_block_vertex.here,
+                                        this_block_vertex.here,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data
+                                    ->pheromone_map[right_of_neighbour_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
                             }
 
                             {
                                 hmem::UniqueResourceLock lock;
                                 auto& navmesh = neighbour->navmesh.get(lock);
 
-                                boost::add_edge(
-                                    this_block_vertex.in_neighbour,
-                                    right_of_neighbour_block_vertex.in_neighbour,
-                                    navmesh.data->graph
-                                );
-                                boost::add_edge(
-                                    right_of_neighbour_block_vertex.in_neighbour,
-                                    this_block_vertex.in_neighbour,
-                                    navmesh.data->graph
-                                );
+                                auto [this_block_edge, this_block_success]
+                                    = boost::add_edge(
+                                        this_block_vertex.in_neighbour,
+                                        right_of_neighbour_block_vertex.in_neighbour,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data->pheromone_map[this_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
+                                auto
+                                    [right_of_neighbour_block_edge,
+                                     right_of_neighbour_block_success]
+                                    = boost::add_edge(
+                                        right_of_neighbour_block_vertex.in_neighbour,
+                                        this_block_vertex.in_neighbour,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data
+                                    ->pheromone_map[right_of_neighbour_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
                             }
                         }
 
@@ -2210,32 +2309,50 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                                 hmem::UniqueResourceLock lock;
                                 auto& navmesh = chunk->navmesh.get(lock);
 
-                                boost::add_edge(
-                                    this_block_vertex.here,
-                                    front_of_neighbour_block_vertex.here,
-                                    navmesh.data->graph
-                                );
-                                boost::add_edge(
-                                    front_of_neighbour_block_vertex.here,
-                                    this_block_vertex.here,
-                                    navmesh.data->graph
-                                );
+                                auto [this_block_edge, this_block_success]
+                                    = boost::add_edge(
+                                        this_block_vertex.here,
+                                        front_of_neighbour_block_vertex.here,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data->pheromone_map[this_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
+                                auto
+                                    [front_of_neighbour_block_edge,
+                                     front_of_neighbour_block_success]
+                                    = boost::add_edge(
+                                        front_of_neighbour_block_vertex.here,
+                                        this_block_vertex.here,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data
+                                    ->pheromone_map[front_of_neighbour_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
                             }
 
                             {
                                 hmem::UniqueResourceLock lock;
                                 auto& navmesh = neighbour->navmesh.get(lock);
 
-                                boost::add_edge(
-                                    this_block_vertex.in_neighbour,
-                                    front_of_neighbour_block_vertex.in_neighbour,
-                                    navmesh.data->graph
-                                );
-                                boost::add_edge(
-                                    front_of_neighbour_block_vertex.in_neighbour,
-                                    this_block_vertex.in_neighbour,
-                                    navmesh.data->graph
-                                );
+                                auto [this_block_edge, this_block_success]
+                                    = boost::add_edge(
+                                        this_block_vertex.in_neighbour,
+                                        front_of_neighbour_block_vertex.in_neighbour,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data->pheromone_map[this_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
+                                auto
+                                    [front_of_neighbour_block_edge,
+                                     front_of_neighbour_block_success]
+                                    = boost::add_edge(
+                                        front_of_neighbour_block_vertex.in_neighbour,
+                                        this_block_vertex.in_neighbour,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data
+                                    ->pheromone_map[front_of_neighbour_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
                             }
                         }
 
@@ -2273,32 +2390,50 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                                 hmem::UniqueResourceLock lock;
                                 auto& navmesh = chunk->navmesh.get(lock);
 
-                                boost::add_edge(
-                                    this_block_vertex.here,
-                                    back_of_neighbour_block_vertex.here,
-                                    navmesh.data->graph
-                                );
-                                boost::add_edge(
-                                    back_of_neighbour_block_vertex.here,
-                                    this_block_vertex.here,
-                                    navmesh.data->graph
-                                );
+                                auto [this_block_edge, this_block_success]
+                                    = boost::add_edge(
+                                        this_block_vertex.here,
+                                        back_of_neighbour_block_vertex.here,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data->pheromone_map[this_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
+                                auto
+                                    [back_of_neighbour_block_edge,
+                                     back_of_neighbour_block_success]
+                                    = boost::add_edge(
+                                        back_of_neighbour_block_vertex.here,
+                                        this_block_vertex.here,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data
+                                    ->pheromone_map[back_of_neighbour_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
                             }
 
                             {
                                 hmem::UniqueResourceLock lock;
                                 auto& navmesh = neighbour->navmesh.get(lock);
 
-                                boost::add_edge(
-                                    this_block_vertex.in_neighbour,
-                                    back_of_neighbour_block_vertex.in_neighbour,
-                                    navmesh.data->graph
-                                );
-                                boost::add_edge(
-                                    back_of_neighbour_block_vertex.in_neighbour,
-                                    this_block_vertex.in_neighbour,
-                                    navmesh.data->graph
-                                );
+                                auto [this_block_edge, this_block_success]
+                                    = boost::add_edge(
+                                        this_block_vertex.in_neighbour,
+                                        back_of_neighbour_block_vertex.in_neighbour,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data->pheromone_map[this_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
+                                auto
+                                    [back_of_neighbour_block_edge,
+                                     back_of_neighbour_block_success]
+                                    = boost::add_edge(
+                                        back_of_neighbour_block_vertex.in_neighbour,
+                                        this_block_vertex.in_neighbour,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data
+                                    ->pheromone_map[back_of_neighbour_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
                             }
                         }
                     }
@@ -2336,16 +2471,22 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                             hmem::UniqueResourceLock lock;
                             auto&                    navmesh = chunk->navmesh.get(lock);
 
-                            boost::add_edge(
-                                this_block_vertex.here,
-                                left_of_this_block_vertex,
-                                navmesh.data->graph
-                            );
-                            boost::add_edge(
-                                left_of_this_block_vertex,
-                                this_block_vertex.here,
-                                navmesh.data->graph
-                            );
+                            auto [this_block_edge, this_block_success]
+                                = boost::add_edge(
+                                    this_block_vertex.here,
+                                    left_of_this_block_vertex,
+                                    navmesh.data->graph
+                                );
+                            navmesh.data->pheromone_map[this_block_edge]
+                                = DEFAULT_PHEROMONE_LEVEL;
+                            auto [left_of_this_block_edge, left_of_this_block_success]
+                                = boost::add_edge(
+                                    left_of_this_block_vertex,
+                                    this_block_vertex.here,
+                                    navmesh.data->graph
+                                );
+                            navmesh.data->pheromone_map[left_of_this_block_edge]
+                                = DEFAULT_PHEROMONE_LEVEL;
                         }
                         // Down
                     } else if (is_solid(left_of_and_below_this_block) && !is_solid(left_of_this_block) && !is_solid(left_of_neighbour_block))
@@ -2365,16 +2506,25 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                             hmem::UniqueResourceLock lock;
                             auto&                    navmesh = chunk->navmesh.get(lock);
 
-                            boost::add_edge(
-                                this_block_vertex.here,
-                                left_of_and_below_this_block_vertex,
-                                navmesh.data->graph
-                            );
-                            boost::add_edge(
-                                left_of_and_below_this_block_vertex,
-                                this_block_vertex.here,
-                                navmesh.data->graph
-                            );
+                            auto [this_block_edge, this_block_success]
+                                = boost::add_edge(
+                                    this_block_vertex.here,
+                                    left_of_and_below_this_block_vertex,
+                                    navmesh.data->graph
+                                );
+                            navmesh.data->pheromone_map[this_block_edge]
+                                = DEFAULT_PHEROMONE_LEVEL;
+                            auto
+                                [left_of_and_below_this_block_edge,
+                                 left_of_and_below_this_block_success]
+                                = boost::add_edge(
+                                    left_of_and_below_this_block_vertex,
+                                    this_block_vertex.here,
+                                    navmesh.data->graph
+                                );
+                            navmesh.data
+                                ->pheromone_map[left_of_and_below_this_block_edge]
+                                = DEFAULT_PHEROMONE_LEVEL;
                         }
                     }
 
@@ -2411,16 +2561,22 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                             hmem::UniqueResourceLock lock;
                             auto&                    navmesh = chunk->navmesh.get(lock);
 
-                            boost::add_edge(
-                                this_block_vertex.here,
-                                right_of_this_block_vertex,
-                                navmesh.data->graph
-                            );
-                            boost::add_edge(
-                                right_of_this_block_vertex,
-                                this_block_vertex.here,
-                                navmesh.data->graph
-                            );
+                            auto [this_block_edge, this_block_success]
+                                = boost::add_edge(
+                                    this_block_vertex.here,
+                                    right_of_this_block_vertex,
+                                    navmesh.data->graph
+                                );
+                            navmesh.data->pheromone_map[this_block_edge]
+                                = DEFAULT_PHEROMONE_LEVEL;
+                            auto [right_of_this_block_edge, right_of_this_block_success]
+                                = boost::add_edge(
+                                    right_of_this_block_vertex,
+                                    this_block_vertex.here,
+                                    navmesh.data->graph
+                                );
+                            navmesh.data->pheromone_map[right_of_this_block_edge]
+                                = DEFAULT_PHEROMONE_LEVEL;
                         }
                         // Down
                     } else if (is_solid(right_of_and_below_this_block) && !is_solid(right_of_this_block) && !is_solid(right_of_neighbour_block))
@@ -2441,16 +2597,25 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                             hmem::UniqueResourceLock lock;
                             auto&                    navmesh = chunk->navmesh.get(lock);
 
-                            boost::add_edge(
-                                this_block_vertex.here,
-                                right_of_and_below_this_block_vertex,
-                                navmesh.data->graph
-                            );
-                            boost::add_edge(
-                                right_of_and_below_this_block_vertex,
-                                this_block_vertex.here,
-                                navmesh.data->graph
-                            );
+                            auto [this_block_edge, this_block_success]
+                                = boost::add_edge(
+                                    this_block_vertex.here,
+                                    right_of_and_below_this_block_vertex,
+                                    navmesh.data->graph
+                                );
+                            navmesh.data->pheromone_map[this_block_edge]
+                                = DEFAULT_PHEROMONE_LEVEL;
+                            auto
+                                [right_of_and_below_this_block_edge,
+                                 right_of_and_below_this_block_success]
+                                = boost::add_edge(
+                                    right_of_and_below_this_block_vertex,
+                                    this_block_vertex.here,
+                                    navmesh.data->graph
+                                );
+                            navmesh.data
+                                ->pheromone_map[right_of_and_below_this_block_edge]
+                                = DEFAULT_PHEROMONE_LEVEL;
                         }
                     }
 
@@ -2487,16 +2652,22 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                             hmem::UniqueResourceLock lock;
                             auto&                    navmesh = chunk->navmesh.get(lock);
 
-                            boost::add_edge(
-                                this_block_vertex.here,
-                                front_of_this_block_vertex,
-                                navmesh.data->graph
-                            );
-                            boost::add_edge(
-                                front_of_this_block_vertex,
-                                this_block_vertex.here,
-                                navmesh.data->graph
-                            );
+                            auto [this_block_edge, this_block_success]
+                                = boost::add_edge(
+                                    this_block_vertex.here,
+                                    front_of_this_block_vertex,
+                                    navmesh.data->graph
+                                );
+                            navmesh.data->pheromone_map[this_block_edge]
+                                = DEFAULT_PHEROMONE_LEVEL;
+                            auto [front_of_this_block_edge, front_of_this_block_success]
+                                = boost::add_edge(
+                                    front_of_this_block_vertex,
+                                    this_block_vertex.here,
+                                    navmesh.data->graph
+                                );
+                            navmesh.data->pheromone_map[front_of_this_block_edge]
+                                = DEFAULT_PHEROMONE_LEVEL;
                         }
                         // Down
                     } else if (is_solid(front_of_and_below_this_block) && !is_solid(front_of_this_block) && !is_solid(front_of_neighbour_block))
@@ -2517,16 +2688,25 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                             hmem::UniqueResourceLock lock;
                             auto&                    navmesh = chunk->navmesh.get(lock);
 
-                            boost::add_edge(
-                                this_block_vertex.here,
-                                front_of_and_below_this_block_vertex,
-                                navmesh.data->graph
-                            );
-                            boost::add_edge(
-                                front_of_and_below_this_block_vertex,
-                                this_block_vertex.here,
-                                navmesh.data->graph
-                            );
+                            auto [this_block_edge, this_block_success]
+                                = boost::add_edge(
+                                    this_block_vertex.here,
+                                    front_of_and_below_this_block_vertex,
+                                    navmesh.data->graph
+                                );
+                            navmesh.data->pheromone_map[this_block_edge]
+                                = DEFAULT_PHEROMONE_LEVEL;
+                            auto
+                                [front_of_and_below_this_block_edge,
+                                 front_of_and_below_this_block_success]
+                                = boost::add_edge(
+                                    front_of_and_below_this_block_vertex,
+                                    this_block_vertex.here,
+                                    navmesh.data->graph
+                                );
+                            navmesh.data
+                                ->pheromone_map[front_of_and_below_this_block_edge]
+                                = DEFAULT_PHEROMONE_LEVEL;
                         }
                     }
 
@@ -2562,16 +2742,22 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                             hmem::UniqueResourceLock lock;
                             auto&                    navmesh = chunk->navmesh.get(lock);
 
-                            boost::add_edge(
-                                this_block_vertex.here,
-                                back_of_this_block_vertex,
-                                navmesh.data->graph
-                            );
-                            boost::add_edge(
-                                back_of_this_block_vertex,
-                                this_block_vertex.here,
-                                navmesh.data->graph
-                            );
+                            auto [this_block_edge, this_block_success]
+                                = boost::add_edge(
+                                    this_block_vertex.here,
+                                    back_of_this_block_vertex,
+                                    navmesh.data->graph
+                                );
+                            navmesh.data->pheromone_map[this_block_edge]
+                                = DEFAULT_PHEROMONE_LEVEL;
+                            auto [back_of_this_block_edge, back_of_this_block_success]
+                                = boost::add_edge(
+                                    back_of_this_block_vertex,
+                                    this_block_vertex.here,
+                                    navmesh.data->graph
+                                );
+                            navmesh.data->pheromone_map[back_of_this_block_edge]
+                                = DEFAULT_PHEROMONE_LEVEL;
                         }
                         // Down
                     } else if (is_solid(back_of_and_below_this_block) && !is_solid(back_of_this_block) && !is_solid(back_of_neighbour_block))
@@ -2591,16 +2777,25 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                             hmem::UniqueResourceLock lock;
                             auto&                    navmesh = chunk->navmesh.get(lock);
 
-                            boost::add_edge(
-                                this_block_vertex.here,
-                                back_of_and_below_this_block_vertex,
-                                navmesh.data->graph
-                            );
-                            boost::add_edge(
-                                back_of_and_below_this_block_vertex,
-                                this_block_vertex.here,
-                                navmesh.data->graph
-                            );
+                            auto [this_block_edge, this_block_success]
+                                = boost::add_edge(
+                                    this_block_vertex.here,
+                                    back_of_and_below_this_block_vertex,
+                                    navmesh.data->graph
+                                );
+                            navmesh.data->pheromone_map[this_block_edge]
+                                = DEFAULT_PHEROMONE_LEVEL;
+                            auto
+                                [back_of_and_below_this_block_edge,
+                                 back_of_and_below_this_block_success]
+                                = boost::add_edge(
+                                    back_of_and_below_this_block_vertex,
+                                    this_block_vertex.here,
+                                    navmesh.data->graph
+                                );
+                            navmesh.data
+                                ->pheromone_map[back_of_and_below_this_block_edge]
+                                = DEFAULT_PHEROMONE_LEVEL;
                         }
                     }
                 }
@@ -2691,32 +2886,52 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                                 hmem::UniqueResourceLock lock;
                                 auto& navmesh = chunk->navmesh.get(lock);
 
-                                boost::add_edge(
-                                    left_of_neighbour_block_vertex.here,
-                                    candidate_block_vertex.here,
-                                    navmesh.data->graph
-                                );
-                                boost::add_edge(
-                                    candidate_block_vertex.here,
-                                    left_of_neighbour_block_vertex.here,
-                                    navmesh.data->graph
-                                );
+                                auto
+                                    [left_of_neighbour_block_edge,
+                                     left_of_neighbour_block_success]
+                                    = boost::add_edge(
+                                        left_of_neighbour_block_vertex.here,
+                                        candidate_block_vertex.here,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data
+                                    ->pheromone_map[left_of_neighbour_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
+                                auto [candidate_block_edge, candidate_block_success]
+                                    = boost::add_edge(
+                                        candidate_block_vertex.here,
+                                        left_of_neighbour_block_vertex.here,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data->pheromone_map[candidate_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
                             }
 
                             {
                                 hmem::UniqueResourceLock lock;
                                 auto& navmesh = left_of_neighbour->navmesh.get(lock);
 
-                                boost::add_edge(
-                                    left_of_neighbour_block_vertex.in_left_of_neighbour,
-                                    candidate_block_vertex.in_left_of_neighbour,
-                                    navmesh.data->graph
-                                );
-                                boost::add_edge(
-                                    candidate_block_vertex.in_left_of_neighbour,
-                                    left_of_neighbour_block_vertex.in_left_of_neighbour,
-                                    navmesh.data->graph
-                                );
+                                auto
+                                    [left_of_neighbour_block_edge,
+                                     left_of_neighbour_block_success]
+                                    = boost::add_edge(
+                                        left_of_neighbour_block_vertex
+                                            .in_left_of_neighbour,
+                                        candidate_block_vertex.in_left_of_neighbour,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data
+                                    ->pheromone_map[left_of_neighbour_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
+                                auto [candidate_block_edge, candidate_block_success]
+                                    = boost::add_edge(
+                                        candidate_block_vertex.in_left_of_neighbour,
+                                        left_of_neighbour_block_vertex
+                                            .in_left_of_neighbour,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data->pheromone_map[candidate_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
                             }
                         }
                     }
@@ -2807,34 +3022,52 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                                 hmem::UniqueResourceLock lock;
                                 auto& navmesh = chunk->navmesh.get(lock);
 
-                                boost::add_edge(
-                                    right_of_neighbour_block_vertex.here,
-                                    candidate_block_vertex.here,
-                                    navmesh.data->graph
-                                );
-                                boost::add_edge(
-                                    candidate_block_vertex.here,
-                                    right_of_neighbour_block_vertex.here,
-                                    navmesh.data->graph
-                                );
+                                auto
+                                    [right_of_neighbour_block_edge,
+                                     right_of_neighbour_block_success]
+                                    = boost::add_edge(
+                                        right_of_neighbour_block_vertex.here,
+                                        candidate_block_vertex.here,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data
+                                    ->pheromone_map[right_of_neighbour_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
+                                auto [candidate_block_edge, candidate_block_success]
+                                    = boost::add_edge(
+                                        candidate_block_vertex.here,
+                                        right_of_neighbour_block_vertex.here,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data->pheromone_map[candidate_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
                             }
 
                             {
                                 hmem::UniqueResourceLock lock;
                                 auto& navmesh = right_of_neighbour->navmesh.get(lock);
 
-                                boost::add_edge(
-                                    right_of_neighbour_block_vertex
-                                        .in_right_of_neighbour,
-                                    candidate_block_vertex.in_right_of_neighbour,
-                                    navmesh.data->graph
-                                );
-                                boost::add_edge(
-                                    candidate_block_vertex.in_right_of_neighbour,
-                                    right_of_neighbour_block_vertex
-                                        .in_right_of_neighbour,
-                                    navmesh.data->graph
-                                );
+                                auto
+                                    [right_of_neighbour_block_edge,
+                                     right_of_neighbour_block_success]
+                                    = boost::add_edge(
+                                        right_of_neighbour_block_vertex
+                                            .in_right_of_neighbour,
+                                        candidate_block_vertex.in_right_of_neighbour,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data
+                                    ->pheromone_map[right_of_neighbour_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
+                                auto [candidate_block_edge, candidate_block_success]
+                                    = boost::add_edge(
+                                        candidate_block_vertex.in_right_of_neighbour,
+                                        right_of_neighbour_block_vertex
+                                            .in_right_of_neighbour,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data->pheromone_map[candidate_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
                             }
                         }
                     }
@@ -2925,34 +3158,52 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                                 hmem::UniqueResourceLock lock;
                                 auto& navmesh = chunk->navmesh.get(lock);
 
-                                boost::add_edge(
-                                    front_of_neighbour_block_vertex.here,
-                                    candidate_block_vertex.here,
-                                    navmesh.data->graph
-                                );
-                                boost::add_edge(
-                                    candidate_block_vertex.here,
-                                    front_of_neighbour_block_vertex.here,
-                                    navmesh.data->graph
-                                );
+                                auto
+                                    [front_of_neighbour_block_edge,
+                                     front_of_neighbour_block_success]
+                                    = boost::add_edge(
+                                        front_of_neighbour_block_vertex.here,
+                                        candidate_block_vertex.here,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data
+                                    ->pheromone_map[front_of_neighbour_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
+                                auto [candidate_block_edge, candidate_block_success]
+                                    = boost::add_edge(
+                                        candidate_block_vertex.here,
+                                        front_of_neighbour_block_vertex.here,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data->pheromone_map[candidate_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
                             }
 
                             {
                                 hmem::UniqueResourceLock lock;
                                 auto& navmesh = front_of_neighbour->navmesh.get(lock);
 
-                                boost::add_edge(
-                                    front_of_neighbour_block_vertex
-                                        .in_front_of_neighbour,
-                                    candidate_block_vertex.in_front_of_neighbour,
-                                    navmesh.data->graph
-                                );
-                                boost::add_edge(
-                                    candidate_block_vertex.in_front_of_neighbour,
-                                    front_of_neighbour_block_vertex
-                                        .in_front_of_neighbour,
-                                    navmesh.data->graph
-                                );
+                                auto
+                                    [front_of_neighbour_block_edge,
+                                     front_of_neighbour_block_success]
+                                    = boost::add_edge(
+                                        front_of_neighbour_block_vertex
+                                            .in_front_of_neighbour,
+                                        candidate_block_vertex.in_front_of_neighbour,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data
+                                    ->pheromone_map[front_of_neighbour_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
+                                auto [candidate_block_edge, candidate_block_success]
+                                    = boost::add_edge(
+                                        candidate_block_vertex.in_front_of_neighbour,
+                                        front_of_neighbour_block_vertex
+                                            .in_front_of_neighbour,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data->pheromone_map[candidate_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
                             }
                         }
                     }
@@ -3040,32 +3291,52 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                                 hmem::UniqueResourceLock lock;
                                 auto& navmesh = chunk->navmesh.get(lock);
 
-                                boost::add_edge(
-                                    back_of_neighbour_block_vertex.here,
-                                    candidate_block_vertex.here,
-                                    navmesh.data->graph
-                                );
-                                boost::add_edge(
-                                    candidate_block_vertex.here,
-                                    back_of_neighbour_block_vertex.here,
-                                    navmesh.data->graph
-                                );
+                                auto
+                                    [back_of_neighbour_block_edge,
+                                     back_of_neighbour_block_success]
+                                    = boost::add_edge(
+                                        back_of_neighbour_block_vertex.here,
+                                        candidate_block_vertex.here,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data
+                                    ->pheromone_map[back_of_neighbour_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
+                                auto [candidate_block_edge, candidate_block_success]
+                                    = boost::add_edge(
+                                        candidate_block_vertex.here,
+                                        back_of_neighbour_block_vertex.here,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data->pheromone_map[candidate_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
                             }
 
                             {
                                 hmem::UniqueResourceLock lock;
                                 auto& navmesh = back_of_neighbour->navmesh.get(lock);
 
-                                boost::add_edge(
-                                    back_of_neighbour_block_vertex.in_back_of_neighbour,
-                                    candidate_block_vertex.in_back_of_neighbour,
-                                    navmesh.data->graph
-                                );
-                                boost::add_edge(
-                                    candidate_block_vertex.in_back_of_neighbour,
-                                    back_of_neighbour_block_vertex.in_back_of_neighbour,
-                                    navmesh.data->graph
-                                );
+                                auto
+                                    [back_of_neighbour_block_edge,
+                                     back_of_neighbour_block_success]
+                                    = boost::add_edge(
+                                        back_of_neighbour_block_vertex
+                                            .in_back_of_neighbour,
+                                        candidate_block_vertex.in_back_of_neighbour,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data
+                                    ->pheromone_map[back_of_neighbour_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
+                                auto [candidate_block_edge, candidate_block_success]
+                                    = boost::add_edge(
+                                        candidate_block_vertex.in_back_of_neighbour,
+                                        back_of_neighbour_block_vertex
+                                            .in_back_of_neighbour,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data->pheromone_map[candidate_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
                             }
                         }
                     }
@@ -3162,32 +3433,44 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                             hmem::UniqueResourceLock lock;
                             auto&                    navmesh = chunk->navmesh.get(lock);
 
-                            boost::add_edge(
-                                this_block_vertex.here,
-                                candidate_block_vertex.here,
-                                navmesh.data->graph
-                            );
-                            boost::add_edge(
-                                candidate_block_vertex.here,
-                                this_block_vertex.here,
-                                navmesh.data->graph
-                            );
+                            auto [this_block_edge, this_block_success]
+                                = boost::add_edge(
+                                    this_block_vertex.here,
+                                    candidate_block_vertex.here,
+                                    navmesh.data->graph
+                                );
+                            navmesh.data->pheromone_map[this_block_edge]
+                                = DEFAULT_PHEROMONE_LEVEL;
+                            auto [candidate_block_edge, candidate_block_success]
+                                = boost::add_edge(
+                                    candidate_block_vertex.here,
+                                    this_block_vertex.here,
+                                    navmesh.data->graph
+                                );
+                            navmesh.data->pheromone_map[candidate_block_edge]
+                                = DEFAULT_PHEROMONE_LEVEL;
                         }
 
                         {
                             hmem::UniqueResourceLock lock;
                             auto& navmesh = left_neighbour->navmesh.get(lock);
 
-                            boost::add_edge(
-                                this_block_vertex.in_left_neighbour,
-                                candidate_block_vertex.in_left_neighbour,
-                                navmesh.data->graph
-                            );
-                            boost::add_edge(
-                                candidate_block_vertex.in_left_neighbour,
-                                this_block_vertex.in_left_neighbour,
-                                navmesh.data->graph
-                            );
+                            auto [this_block_edge, this_block_success]
+                                = boost::add_edge(
+                                    this_block_vertex.in_left_neighbour,
+                                    candidate_block_vertex.in_left_neighbour,
+                                    navmesh.data->graph
+                                );
+                            navmesh.data->pheromone_map[this_block_edge]
+                                = DEFAULT_PHEROMONE_LEVEL;
+                            auto [candidate_block_edge, candidate_block_success]
+                                = boost::add_edge(
+                                    candidate_block_vertex.in_left_neighbour,
+                                    this_block_vertex.in_left_neighbour,
+                                    navmesh.data->graph
+                                );
+                            navmesh.data->pheromone_map[candidate_block_edge]
+                                = DEFAULT_PHEROMONE_LEVEL;
                         }
                     }
 
@@ -3254,32 +3537,44 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                                 hmem::UniqueResourceLock lock;
                                 auto& navmesh = chunk->navmesh.get(lock);
 
-                                boost::add_edge(
-                                    this_block_vertex.here,
-                                    candidate_block_vertex.here,
-                                    navmesh.data->graph
-                                );
-                                boost::add_edge(
-                                    candidate_block_vertex.here,
-                                    this_block_vertex.here,
-                                    navmesh.data->graph
-                                );
+                                auto [this_block_edge, this_block_success]
+                                    = boost::add_edge(
+                                        this_block_vertex.here,
+                                        candidate_block_vertex.here,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data->pheromone_map[this_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
+                                auto [candidate_block_edge, candidate_block_success]
+                                    = boost::add_edge(
+                                        candidate_block_vertex.here,
+                                        this_block_vertex.here,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data->pheromone_map[candidate_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
                             }
 
                             {
                                 hmem::UniqueResourceLock lock;
                                 auto& navmesh = left_neighbour->navmesh.get(lock);
 
-                                boost::add_edge(
-                                    this_block_vertex.in_left_neighbour,
-                                    candidate_block_vertex.in_left_neighbour,
-                                    navmesh.data->graph
-                                );
-                                boost::add_edge(
-                                    candidate_block_vertex.in_left_neighbour,
-                                    this_block_vertex.in_left_neighbour,
-                                    navmesh.data->graph
-                                );
+                                auto [this_block_edge, this_block_success]
+                                    = boost::add_edge(
+                                        this_block_vertex.in_left_neighbour,
+                                        candidate_block_vertex.in_left_neighbour,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data->pheromone_map[this_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
+                                auto [candidate_block_edge, candidate_block_success]
+                                    = boost::add_edge(
+                                        candidate_block_vertex.in_left_neighbour,
+                                        this_block_vertex.in_left_neighbour,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data->pheromone_map[candidate_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
                             }
                         }
                         // Step down
@@ -3301,32 +3596,44 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                                 hmem::UniqueResourceLock lock;
                                 auto& navmesh = chunk->navmesh.get(lock);
 
-                                boost::add_edge(
-                                    this_block_vertex.here,
-                                    candidate_block_vertex.here,
-                                    navmesh.data->graph
-                                );
-                                boost::add_edge(
-                                    candidate_block_vertex.here,
-                                    this_block_vertex.here,
-                                    navmesh.data->graph
-                                );
+                                auto [this_block_edge, this_block_success]
+                                    = boost::add_edge(
+                                        this_block_vertex.here,
+                                        candidate_block_vertex.here,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data->pheromone_map[this_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
+                                auto [candidate_block_edge, candidate_block_success]
+                                    = boost::add_edge(
+                                        candidate_block_vertex.here,
+                                        this_block_vertex.here,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data->pheromone_map[candidate_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
                             }
 
                             {
                                 hmem::UniqueResourceLock lock;
                                 auto& navmesh = left_neighbour->navmesh.get(lock);
 
-                                boost::add_edge(
-                                    this_block_vertex.in_left_neighbour,
-                                    candidate_block_vertex.in_left_neighbour,
-                                    navmesh.data->graph
-                                );
-                                boost::add_edge(
-                                    candidate_block_vertex.in_left_neighbour,
-                                    this_block_vertex.in_left_neighbour,
-                                    navmesh.data->graph
-                                );
+                                auto [this_block_edge, this_block_success]
+                                    = boost::add_edge(
+                                        this_block_vertex.in_left_neighbour,
+                                        candidate_block_vertex.in_left_neighbour,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data->pheromone_map[this_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
+                                auto [candidate_block_edge, candidate_block_success]
+                                    = boost::add_edge(
+                                        candidate_block_vertex.in_left_neighbour,
+                                        this_block_vertex.in_left_neighbour,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data->pheromone_map[candidate_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
                             }
                         }
                     }
@@ -3422,32 +3729,44 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                             hmem::UniqueResourceLock lock;
                             auto&                    navmesh = chunk->navmesh.get(lock);
 
-                            boost::add_edge(
-                                this_block_vertex.here,
-                                candidate_block_vertex.here,
-                                navmesh.data->graph
-                            );
-                            boost::add_edge(
-                                candidate_block_vertex.here,
-                                this_block_vertex.here,
-                                navmesh.data->graph
-                            );
+                            auto [this_block_edge, this_block_success]
+                                = boost::add_edge(
+                                    this_block_vertex.here,
+                                    candidate_block_vertex.here,
+                                    navmesh.data->graph
+                                );
+                            navmesh.data->pheromone_map[this_block_edge]
+                                = DEFAULT_PHEROMONE_LEVEL;
+                            auto [candidate_block_edge, candidate_block_success]
+                                = boost::add_edge(
+                                    candidate_block_vertex.here,
+                                    this_block_vertex.here,
+                                    navmesh.data->graph
+                                );
+                            navmesh.data->pheromone_map[candidate_block_edge]
+                                = DEFAULT_PHEROMONE_LEVEL;
                         }
 
                         {
                             hmem::UniqueResourceLock lock;
                             auto& navmesh = right_neighbour->navmesh.get(lock);
 
-                            boost::add_edge(
-                                this_block_vertex.in_right_neighbour,
-                                candidate_block_vertex.in_right_neighbour,
-                                navmesh.data->graph
-                            );
-                            boost::add_edge(
-                                candidate_block_vertex.in_right_neighbour,
-                                this_block_vertex.in_right_neighbour,
-                                navmesh.data->graph
-                            );
+                            auto [this_block_edge, this_block_success]
+                                = boost::add_edge(
+                                    this_block_vertex.in_right_neighbour,
+                                    candidate_block_vertex.in_right_neighbour,
+                                    navmesh.data->graph
+                                );
+                            navmesh.data->pheromone_map[this_block_edge]
+                                = DEFAULT_PHEROMONE_LEVEL;
+                            auto [candidate_block_edge, candidate_block_success]
+                                = boost::add_edge(
+                                    candidate_block_vertex.in_right_neighbour,
+                                    this_block_vertex.in_right_neighbour,
+                                    navmesh.data->graph
+                                );
+                            navmesh.data->pheromone_map[candidate_block_edge]
+                                = DEFAULT_PHEROMONE_LEVEL;
                         }
                     }
 
@@ -3514,32 +3833,44 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                                 hmem::UniqueResourceLock lock;
                                 auto& navmesh = chunk->navmesh.get(lock);
 
-                                boost::add_edge(
-                                    this_block_vertex.here,
-                                    candidate_block_vertex.here,
-                                    navmesh.data->graph
-                                );
-                                boost::add_edge(
-                                    candidate_block_vertex.here,
-                                    this_block_vertex.here,
-                                    navmesh.data->graph
-                                );
+                                auto [this_block_edge, this_block_success]
+                                    = boost::add_edge(
+                                        this_block_vertex.here,
+                                        candidate_block_vertex.here,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data->pheromone_map[this_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
+                                auto [candidate_block_edge, candidate_block_success]
+                                    = boost::add_edge(
+                                        candidate_block_vertex.here,
+                                        this_block_vertex.here,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data->pheromone_map[candidate_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
                             }
 
                             {
                                 hmem::UniqueResourceLock lock;
                                 auto& navmesh = right_neighbour->navmesh.get(lock);
 
-                                boost::add_edge(
-                                    this_block_vertex.in_right_neighbour,
-                                    candidate_block_vertex.in_right_neighbour,
-                                    navmesh.data->graph
-                                );
-                                boost::add_edge(
-                                    candidate_block_vertex.in_right_neighbour,
-                                    this_block_vertex.in_right_neighbour,
-                                    navmesh.data->graph
-                                );
+                                auto [this_block_edge, this_block_success]
+                                    = boost::add_edge(
+                                        this_block_vertex.in_right_neighbour,
+                                        candidate_block_vertex.in_right_neighbour,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data->pheromone_map[this_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
+                                auto [candidate_block_edge, candidate_block_success]
+                                    = boost::add_edge(
+                                        candidate_block_vertex.in_right_neighbour,
+                                        this_block_vertex.in_right_neighbour,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data->pheromone_map[candidate_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
                             }
                         }
                         // Step down
@@ -3561,32 +3892,44 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                                 hmem::UniqueResourceLock lock;
                                 auto& navmesh = chunk->navmesh.get(lock);
 
-                                boost::add_edge(
-                                    this_block_vertex.here,
-                                    candidate_block_vertex.here,
-                                    navmesh.data->graph
-                                );
-                                boost::add_edge(
-                                    candidate_block_vertex.here,
-                                    this_block_vertex.here,
-                                    navmesh.data->graph
-                                );
+                                auto [this_block_edge, this_block_success]
+                                    = boost::add_edge(
+                                        this_block_vertex.here,
+                                        candidate_block_vertex.here,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data->pheromone_map[this_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
+                                auto [candidate_block_edge, candidate_block_success]
+                                    = boost::add_edge(
+                                        candidate_block_vertex.here,
+                                        this_block_vertex.here,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data->pheromone_map[candidate_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
                             }
 
                             {
                                 hmem::UniqueResourceLock lock;
                                 auto& navmesh = right_neighbour->navmesh.get(lock);
 
-                                boost::add_edge(
-                                    this_block_vertex.in_right_neighbour,
-                                    candidate_block_vertex.in_right_neighbour,
-                                    navmesh.data->graph
-                                );
-                                boost::add_edge(
-                                    candidate_block_vertex.in_right_neighbour,
-                                    this_block_vertex.in_right_neighbour,
-                                    navmesh.data->graph
-                                );
+                                auto [this_block_edge, this_block_success]
+                                    = boost::add_edge(
+                                        this_block_vertex.in_right_neighbour,
+                                        candidate_block_vertex.in_right_neighbour,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data->pheromone_map[this_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
+                                auto [candidate_block_edge, candidate_block_success]
+                                    = boost::add_edge(
+                                        candidate_block_vertex.in_right_neighbour,
+                                        this_block_vertex.in_right_neighbour,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data->pheromone_map[candidate_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
                             }
                         }
                     }
@@ -3682,32 +4025,44 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                             hmem::UniqueResourceLock lock;
                             auto&                    navmesh = chunk->navmesh.get(lock);
 
-                            boost::add_edge(
-                                this_block_vertex.here,
-                                candidate_block_vertex.here,
-                                navmesh.data->graph
-                            );
-                            boost::add_edge(
-                                candidate_block_vertex.here,
-                                this_block_vertex.here,
-                                navmesh.data->graph
-                            );
+                            auto [this_block_edge, this_block_success]
+                                = boost::add_edge(
+                                    this_block_vertex.here,
+                                    candidate_block_vertex.here,
+                                    navmesh.data->graph
+                                );
+                            navmesh.data->pheromone_map[this_block_edge]
+                                = DEFAULT_PHEROMONE_LEVEL;
+                            auto [candidate_block_edge, candidate_block_success]
+                                = boost::add_edge(
+                                    candidate_block_vertex.here,
+                                    this_block_vertex.here,
+                                    navmesh.data->graph
+                                );
+                            navmesh.data->pheromone_map[candidate_block_edge]
+                                = DEFAULT_PHEROMONE_LEVEL;
                         }
 
                         {
                             hmem::UniqueResourceLock lock;
                             auto& navmesh = front_neighbour->navmesh.get(lock);
 
-                            boost::add_edge(
-                                this_block_vertex.in_front_neighbour,
-                                candidate_block_vertex.in_front_neighbour,
-                                navmesh.data->graph
-                            );
-                            boost::add_edge(
-                                candidate_block_vertex.in_front_neighbour,
-                                this_block_vertex.in_front_neighbour,
-                                navmesh.data->graph
-                            );
+                            auto [this_block_edge, this_block_success]
+                                = boost::add_edge(
+                                    this_block_vertex.in_front_neighbour,
+                                    candidate_block_vertex.in_front_neighbour,
+                                    navmesh.data->graph
+                                );
+                            navmesh.data->pheromone_map[this_block_edge]
+                                = DEFAULT_PHEROMONE_LEVEL;
+                            auto [candidate_block_edge, candidate_block_success]
+                                = boost::add_edge(
+                                    candidate_block_vertex.in_front_neighbour,
+                                    this_block_vertex.in_front_neighbour,
+                                    navmesh.data->graph
+                                );
+                            navmesh.data->pheromone_map[candidate_block_edge]
+                                = DEFAULT_PHEROMONE_LEVEL;
                         }
                     }
 
@@ -3774,32 +4129,44 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                                 hmem::UniqueResourceLock lock;
                                 auto& navmesh = chunk->navmesh.get(lock);
 
-                                boost::add_edge(
-                                    this_block_vertex.here,
-                                    candidate_block_vertex.here,
-                                    navmesh.data->graph
-                                );
-                                boost::add_edge(
-                                    candidate_block_vertex.here,
-                                    this_block_vertex.here,
-                                    navmesh.data->graph
-                                );
+                                auto [this_block_edge, this_block_success]
+                                    = boost::add_edge(
+                                        this_block_vertex.here,
+                                        candidate_block_vertex.here,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data->pheromone_map[this_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
+                                auto [candidate_block_edge, candidate_block_success]
+                                    = boost::add_edge(
+                                        candidate_block_vertex.here,
+                                        this_block_vertex.here,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data->pheromone_map[candidate_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
                             }
 
                             {
                                 hmem::UniqueResourceLock lock;
                                 auto& navmesh = front_neighbour->navmesh.get(lock);
 
-                                boost::add_edge(
-                                    this_block_vertex.in_front_neighbour,
-                                    candidate_block_vertex.in_front_neighbour,
-                                    navmesh.data->graph
-                                );
-                                boost::add_edge(
-                                    candidate_block_vertex.in_front_neighbour,
-                                    this_block_vertex.in_front_neighbour,
-                                    navmesh.data->graph
-                                );
+                                auto [this_block_edge, this_block_success]
+                                    = boost::add_edge(
+                                        this_block_vertex.in_front_neighbour,
+                                        candidate_block_vertex.in_front_neighbour,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data->pheromone_map[this_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
+                                auto [candidate_block_edge, candidate_block_success]
+                                    = boost::add_edge(
+                                        candidate_block_vertex.in_front_neighbour,
+                                        this_block_vertex.in_front_neighbour,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data->pheromone_map[candidate_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
                             }
                         }
                         // Step down
@@ -3821,32 +4188,44 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                                 hmem::UniqueResourceLock lock;
                                 auto& navmesh = chunk->navmesh.get(lock);
 
-                                boost::add_edge(
-                                    this_block_vertex.here,
-                                    candidate_block_vertex.here,
-                                    navmesh.data->graph
-                                );
-                                boost::add_edge(
-                                    candidate_block_vertex.here,
-                                    this_block_vertex.here,
-                                    navmesh.data->graph
-                                );
+                                auto [this_block_edge, this_block_success]
+                                    = boost::add_edge(
+                                        this_block_vertex.here,
+                                        candidate_block_vertex.here,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data->pheromone_map[this_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
+                                auto [candidate_block_edge, candidate_block_success]
+                                    = boost::add_edge(
+                                        candidate_block_vertex.here,
+                                        this_block_vertex.here,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data->pheromone_map[candidate_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
                             }
 
                             {
                                 hmem::UniqueResourceLock lock;
                                 auto& navmesh = front_neighbour->navmesh.get(lock);
 
-                                boost::add_edge(
-                                    this_block_vertex.in_front_neighbour,
-                                    candidate_block_vertex.in_front_neighbour,
-                                    navmesh.data->graph
-                                );
-                                boost::add_edge(
-                                    candidate_block_vertex.in_front_neighbour,
-                                    this_block_vertex.in_front_neighbour,
-                                    navmesh.data->graph
-                                );
+                                auto [this_block_edge, this_block_success]
+                                    = boost::add_edge(
+                                        this_block_vertex.in_front_neighbour,
+                                        candidate_block_vertex.in_front_neighbour,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data->pheromone_map[this_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
+                                auto [candidate_block_edge, candidate_block_success]
+                                    = boost::add_edge(
+                                        candidate_block_vertex.in_front_neighbour,
+                                        this_block_vertex.in_front_neighbour,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data->pheromone_map[candidate_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
                             }
                         }
                     }
@@ -3941,32 +4320,44 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                             hmem::UniqueResourceLock lock;
                             auto&                    navmesh = chunk->navmesh.get(lock);
 
-                            boost::add_edge(
-                                this_block_vertex.here,
-                                candidate_block_vertex.here,
-                                navmesh.data->graph
-                            );
-                            boost::add_edge(
-                                candidate_block_vertex.here,
-                                this_block_vertex.here,
-                                navmesh.data->graph
-                            );
+                            auto [this_block_edge, this_block_success]
+                                = boost::add_edge(
+                                    this_block_vertex.here,
+                                    candidate_block_vertex.here,
+                                    navmesh.data->graph
+                                );
+                            navmesh.data->pheromone_map[this_block_edge]
+                                = DEFAULT_PHEROMONE_LEVEL;
+                            auto [candidate_block_edge, candidate_block_success]
+                                = boost::add_edge(
+                                    candidate_block_vertex.here,
+                                    this_block_vertex.here,
+                                    navmesh.data->graph
+                                );
+                            navmesh.data->pheromone_map[candidate_block_edge]
+                                = DEFAULT_PHEROMONE_LEVEL;
                         }
 
                         {
                             hmem::UniqueResourceLock lock;
                             auto& navmesh = back_neighbour->navmesh.get(lock);
 
-                            boost::add_edge(
-                                this_block_vertex.in_back_neighbour,
-                                candidate_block_vertex.in_back_neighbour,
-                                navmesh.data->graph
-                            );
-                            boost::add_edge(
-                                candidate_block_vertex.in_back_neighbour,
-                                this_block_vertex.in_back_neighbour,
-                                navmesh.data->graph
-                            );
+                            auto [this_block_edge, this_block_success]
+                                = boost::add_edge(
+                                    this_block_vertex.in_back_neighbour,
+                                    candidate_block_vertex.in_back_neighbour,
+                                    navmesh.data->graph
+                                );
+                            navmesh.data->pheromone_map[this_block_edge]
+                                = DEFAULT_PHEROMONE_LEVEL;
+                            auto [candidate_block_edge, candidate_block_success]
+                                = boost::add_edge(
+                                    candidate_block_vertex.in_back_neighbour,
+                                    this_block_vertex.in_back_neighbour,
+                                    navmesh.data->graph
+                                );
+                            navmesh.data->pheromone_map[candidate_block_edge]
+                                = DEFAULT_PHEROMONE_LEVEL;
                         }
                     }
 
@@ -4033,32 +4424,44 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                                 hmem::UniqueResourceLock lock;
                                 auto& navmesh = chunk->navmesh.get(lock);
 
-                                boost::add_edge(
-                                    this_block_vertex.here,
-                                    candidate_block_vertex.here,
-                                    navmesh.data->graph
-                                );
-                                boost::add_edge(
-                                    candidate_block_vertex.here,
-                                    this_block_vertex.here,
-                                    navmesh.data->graph
-                                );
+                                auto [this_block_edge, this_block_success]
+                                    = boost::add_edge(
+                                        this_block_vertex.here,
+                                        candidate_block_vertex.here,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data->pheromone_map[this_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
+                                auto [candidate_block_edge, candidate_block_success]
+                                    = boost::add_edge(
+                                        candidate_block_vertex.here,
+                                        this_block_vertex.here,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data->pheromone_map[candidate_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
                             }
 
                             {
                                 hmem::UniqueResourceLock lock;
                                 auto& navmesh = back_neighbour->navmesh.get(lock);
 
-                                boost::add_edge(
-                                    this_block_vertex.in_back_neighbour,
-                                    candidate_block_vertex.in_back_neighbour,
-                                    navmesh.data->graph
-                                );
-                                boost::add_edge(
-                                    candidate_block_vertex.in_back_neighbour,
-                                    this_block_vertex.in_back_neighbour,
-                                    navmesh.data->graph
-                                );
+                                auto [this_block_edge, this_block_success]
+                                    = boost::add_edge(
+                                        this_block_vertex.in_back_neighbour,
+                                        candidate_block_vertex.in_back_neighbour,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data->pheromone_map[this_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
+                                auto [candidate_block_edge, candidate_block_success]
+                                    = boost::add_edge(
+                                        candidate_block_vertex.in_back_neighbour,
+                                        this_block_vertex.in_back_neighbour,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data->pheromone_map[candidate_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
                             }
                         }
                         // Step down
@@ -4080,32 +4483,44 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                                 hmem::UniqueResourceLock lock;
                                 auto& navmesh = chunk->navmesh.get(lock);
 
-                                boost::add_edge(
-                                    this_block_vertex.here,
-                                    candidate_block_vertex.here,
-                                    navmesh.data->graph
-                                );
-                                boost::add_edge(
-                                    candidate_block_vertex.here,
-                                    this_block_vertex.here,
-                                    navmesh.data->graph
-                                );
+                                auto [this_block_edge, this_block_success]
+                                    = boost::add_edge(
+                                        this_block_vertex.here,
+                                        candidate_block_vertex.here,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data->pheromone_map[this_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
+                                auto [candidate_block_edge, candidate_block_success]
+                                    = boost::add_edge(
+                                        candidate_block_vertex.here,
+                                        this_block_vertex.here,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data->pheromone_map[candidate_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
                             }
 
                             {
                                 hmem::UniqueResourceLock lock;
                                 auto& navmesh = back_neighbour->navmesh.get(lock);
 
-                                boost::add_edge(
-                                    this_block_vertex.in_back_neighbour,
-                                    candidate_block_vertex.in_back_neighbour,
-                                    navmesh.data->graph
-                                );
-                                boost::add_edge(
-                                    candidate_block_vertex.in_back_neighbour,
-                                    this_block_vertex.in_back_neighbour,
-                                    navmesh.data->graph
-                                );
+                                auto [this_block_edge, this_block_success]
+                                    = boost::add_edge(
+                                        this_block_vertex.in_back_neighbour,
+                                        candidate_block_vertex.in_back_neighbour,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data->pheromone_map[this_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
+                                auto [candidate_block_edge, candidate_block_success]
+                                    = boost::add_edge(
+                                        candidate_block_vertex.in_back_neighbour,
+                                        this_block_vertex.in_back_neighbour,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data->pheromone_map[candidate_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
                             }
                         }
                     }
@@ -4195,32 +4610,48 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                                 hmem::UniqueResourceLock lock;
                                 auto& navmesh = chunk->navmesh.get(lock);
 
-                                boost::add_edge(
-                                    neighbour_block_vertex.here,
-                                    left_of_this_block_vertex.here,
-                                    navmesh.data->graph
-                                );
-                                boost::add_edge(
-                                    left_of_this_block_vertex.here,
-                                    neighbour_block_vertex.here,
-                                    navmesh.data->graph
-                                );
+                                auto [neighbour_block_edge, neighbour_block_success]
+                                    = boost::add_edge(
+                                        neighbour_block_vertex.here,
+                                        left_of_this_block_vertex.here,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data->pheromone_map[neighbour_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
+                                auto
+                                    [left_of_this_block_edge,
+                                     left_of_this_block_success]
+                                    = boost::add_edge(
+                                        left_of_this_block_vertex.here,
+                                        neighbour_block_vertex.here,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data->pheromone_map[left_of_this_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
                             }
 
                             {
                                 hmem::UniqueResourceLock lock;
                                 auto& navmesh = neighbour->navmesh.get(lock);
 
-                                boost::add_edge(
-                                    neighbour_block_vertex.in_neighbour,
-                                    left_of_this_block_vertex.in_neighbour,
-                                    navmesh.data->graph
-                                );
-                                boost::add_edge(
-                                    left_of_this_block_vertex.in_neighbour,
-                                    neighbour_block_vertex.in_neighbour,
-                                    navmesh.data->graph
-                                );
+                                auto [neighbour_block_edge, neighbour_block_success]
+                                    = boost::add_edge(
+                                        neighbour_block_vertex.in_neighbour,
+                                        left_of_this_block_vertex.in_neighbour,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data->pheromone_map[neighbour_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
+                                auto
+                                    [left_of_this_block_edge,
+                                     left_of_this_block_success]
+                                    = boost::add_edge(
+                                        left_of_this_block_vertex.in_neighbour,
+                                        neighbour_block_vertex.in_neighbour,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data->pheromone_map[left_of_this_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
                             }
                         }
 
@@ -4255,32 +4686,48 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                                 hmem::UniqueResourceLock lock;
                                 auto& navmesh = chunk->navmesh.get(lock);
 
-                                boost::add_edge(
-                                    neighbour_block_vertex.here,
-                                    right_of_this_block_vertex.here,
-                                    navmesh.data->graph
-                                );
-                                boost::add_edge(
-                                    right_of_this_block_vertex.here,
-                                    neighbour_block_vertex.here,
-                                    navmesh.data->graph
-                                );
+                                auto [neighbour_block_edge, neighbour_block_success]
+                                    = boost::add_edge(
+                                        neighbour_block_vertex.here,
+                                        right_of_this_block_vertex.here,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data->pheromone_map[neighbour_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
+                                auto
+                                    [right_of_this_block_edge,
+                                     right_of_this_block_success]
+                                    = boost::add_edge(
+                                        right_of_this_block_vertex.here,
+                                        neighbour_block_vertex.here,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data->pheromone_map[right_of_this_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
                             }
 
                             {
                                 hmem::UniqueResourceLock lock;
                                 auto& navmesh = neighbour->navmesh.get(lock);
 
-                                boost::add_edge(
-                                    neighbour_block_vertex.in_neighbour,
-                                    right_of_this_block_vertex.in_neighbour,
-                                    navmesh.data->graph
-                                );
-                                boost::add_edge(
-                                    right_of_this_block_vertex.in_neighbour,
-                                    neighbour_block_vertex.in_neighbour,
-                                    navmesh.data->graph
-                                );
+                                auto [neighbour_block_edge, neighbour_block_success]
+                                    = boost::add_edge(
+                                        neighbour_block_vertex.in_neighbour,
+                                        right_of_this_block_vertex.in_neighbour,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data->pheromone_map[neighbour_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
+                                auto
+                                    [right_of_this_block_edge,
+                                     right_of_this_block_success]
+                                    = boost::add_edge(
+                                        right_of_this_block_vertex.in_neighbour,
+                                        neighbour_block_vertex.in_neighbour,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data->pheromone_map[right_of_this_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
                             }
                         }
 
@@ -4315,32 +4762,48 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                                 hmem::UniqueResourceLock lock;
                                 auto& navmesh = chunk->navmesh.get(lock);
 
-                                boost::add_edge(
-                                    neighbour_block_vertex.here,
-                                    front_of_this_block_vertex.here,
-                                    navmesh.data->graph
-                                );
-                                boost::add_edge(
-                                    front_of_this_block_vertex.here,
-                                    neighbour_block_vertex.here,
-                                    navmesh.data->graph
-                                );
+                                auto [neighbour_block_edge, neighbour_block_success]
+                                    = boost::add_edge(
+                                        neighbour_block_vertex.here,
+                                        front_of_this_block_vertex.here,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data->pheromone_map[neighbour_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
+                                auto
+                                    [front_of_this_block_edge,
+                                     front_of_this_block_success]
+                                    = boost::add_edge(
+                                        front_of_this_block_vertex.here,
+                                        neighbour_block_vertex.here,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data->pheromone_map[front_of_this_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
                             }
 
                             {
                                 hmem::UniqueResourceLock lock;
                                 auto& navmesh = neighbour->navmesh.get(lock);
 
-                                boost::add_edge(
-                                    neighbour_block_vertex.in_neighbour,
-                                    front_of_this_block_vertex.in_neighbour,
-                                    navmesh.data->graph
-                                );
-                                boost::add_edge(
-                                    front_of_this_block_vertex.in_neighbour,
-                                    neighbour_block_vertex.in_neighbour,
-                                    navmesh.data->graph
-                                );
+                                auto [neighbour_block_edge, neighbour_block_success]
+                                    = boost::add_edge(
+                                        neighbour_block_vertex.in_neighbour,
+                                        front_of_this_block_vertex.in_neighbour,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data->pheromone_map[neighbour_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
+                                auto
+                                    [front_of_this_block_edge,
+                                     front_of_this_block_success]
+                                    = boost::add_edge(
+                                        front_of_this_block_vertex.in_neighbour,
+                                        neighbour_block_vertex.in_neighbour,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data->pheromone_map[front_of_this_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
                             }
                         }
 
@@ -4375,32 +4838,48 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                                 hmem::UniqueResourceLock lock;
                                 auto& navmesh = chunk->navmesh.get(lock);
 
-                                boost::add_edge(
-                                    neighbour_block_vertex.here,
-                                    back_of_this_block_vertex.here,
-                                    navmesh.data->graph
-                                );
-                                boost::add_edge(
-                                    back_of_this_block_vertex.here,
-                                    neighbour_block_vertex.here,
-                                    navmesh.data->graph
-                                );
+                                auto [neighbour_block_edge, neighbour_block_success]
+                                    = boost::add_edge(
+                                        neighbour_block_vertex.here,
+                                        back_of_this_block_vertex.here,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data->pheromone_map[neighbour_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
+                                auto
+                                    [back_of_this_block_edge,
+                                     back_of_this_block_success]
+                                    = boost::add_edge(
+                                        back_of_this_block_vertex.here,
+                                        neighbour_block_vertex.here,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data->pheromone_map[back_of_this_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
                             }
 
                             {
                                 hmem::UniqueResourceLock lock;
                                 auto& navmesh = neighbour->navmesh.get(lock);
 
-                                boost::add_edge(
-                                    neighbour_block_vertex.in_neighbour,
-                                    back_of_this_block_vertex.in_neighbour,
-                                    navmesh.data->graph
-                                );
-                                boost::add_edge(
-                                    back_of_this_block_vertex.in_neighbour,
-                                    neighbour_block_vertex.in_neighbour,
-                                    navmesh.data->graph
-                                );
+                                auto [neighbour_block_edge, neighbour_block_success]
+                                    = boost::add_edge(
+                                        neighbour_block_vertex.in_neighbour,
+                                        back_of_this_block_vertex.in_neighbour,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data->pheromone_map[neighbour_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
+                                auto
+                                    [back_of_this_block_edge,
+                                     back_of_this_block_success]
+                                    = boost::add_edge(
+                                        back_of_this_block_vertex.in_neighbour,
+                                        neighbour_block_vertex.in_neighbour,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data->pheromone_map[back_of_this_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
                             }
                         }
                     }
@@ -4442,16 +4921,24 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                             hmem::UniqueResourceLock lock;
                             auto& navmesh = neighbour->navmesh.get(lock);
 
-                            boost::add_edge(
-                                neighbour_block_vertex.in_neighbour,
-                                left_of_neighbour_block_vertex,
-                                navmesh.data->graph
-                            );
-                            boost::add_edge(
-                                left_of_neighbour_block_vertex,
-                                neighbour_block_vertex.in_neighbour,
-                                navmesh.data->graph
-                            );
+                            auto [neighbour_block_edge, neighbour_block_success]
+                                = boost::add_edge(
+                                    neighbour_block_vertex.in_neighbour,
+                                    left_of_neighbour_block_vertex,
+                                    navmesh.data->graph
+                                );
+                            navmesh.data->pheromone_map[neighbour_block_edge]
+                                = DEFAULT_PHEROMONE_LEVEL;
+                            auto
+                                [left_of_neighbour_block_edge,
+                                 left_of_neighbour_block_success]
+                                = boost::add_edge(
+                                    left_of_neighbour_block_vertex,
+                                    neighbour_block_vertex.in_neighbour,
+                                    navmesh.data->graph
+                                );
+                            navmesh.data->pheromone_map[left_of_neighbour_block_edge]
+                                = DEFAULT_PHEROMONE_LEVEL;
                         }
                         // Down
                     } else if (is_solid(left_of_and_below_neighbour_block) && !is_solid(left_of_neighbour_block) && !is_solid(left_of_this_block))
@@ -4472,16 +4959,25 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                             hmem::UniqueResourceLock lock;
                             auto& navmesh = neighbour->navmesh.get(lock);
 
-                            boost::add_edge(
-                                neighbour_block_vertex.in_neighbour,
-                                left_of_and_below_neighbour_block_vertex,
-                                navmesh.data->graph
-                            );
-                            boost::add_edge(
-                                left_of_and_below_neighbour_block_vertex,
-                                neighbour_block_vertex.in_neighbour,
-                                navmesh.data->graph
-                            );
+                            auto [neighbour_block_edge, neighbour_block_success]
+                                = boost::add_edge(
+                                    neighbour_block_vertex.in_neighbour,
+                                    left_of_and_below_neighbour_block_vertex,
+                                    navmesh.data->graph
+                                );
+                            navmesh.data->pheromone_map[neighbour_block_edge]
+                                = DEFAULT_PHEROMONE_LEVEL;
+                            auto
+                                [left_of_and_below_neighbour_block_edge,
+                                 left_of_and_below_neighbour_block_success]
+                                = boost::add_edge(
+                                    left_of_and_below_neighbour_block_vertex,
+                                    neighbour_block_vertex.in_neighbour,
+                                    navmesh.data->graph
+                                );
+                            navmesh.data
+                                ->pheromone_map[left_of_and_below_neighbour_block_edge]
+                                = DEFAULT_PHEROMONE_LEVEL;
                         }
                     }
 
@@ -4521,16 +5017,24 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                             hmem::UniqueResourceLock lock;
                             auto& navmesh = neighbour->navmesh.get(lock);
 
-                            boost::add_edge(
-                                neighbour_block_vertex.in_neighbour,
-                                right_of_neighbour_block_vertex,
-                                navmesh.data->graph
-                            );
-                            boost::add_edge(
-                                right_of_neighbour_block_vertex,
-                                neighbour_block_vertex.in_neighbour,
-                                navmesh.data->graph
-                            );
+                            auto [neighbour_block_edge, neighbour_block_success]
+                                = boost::add_edge(
+                                    neighbour_block_vertex.in_neighbour,
+                                    right_of_neighbour_block_vertex,
+                                    navmesh.data->graph
+                                );
+                            navmesh.data->pheromone_map[neighbour_block_edge]
+                                = DEFAULT_PHEROMONE_LEVEL;
+                            auto
+                                [right_of_neighbour_block_edge,
+                                 right_of_neighbour_block_success]
+                                = boost::add_edge(
+                                    right_of_neighbour_block_vertex,
+                                    neighbour_block_vertex.in_neighbour,
+                                    navmesh.data->graph
+                                );
+                            navmesh.data->pheromone_map[right_of_neighbour_block_edge]
+                                = DEFAULT_PHEROMONE_LEVEL;
                         }
                         // Down
                     } else if (is_solid(right_of_and_below_neighbour_block) && !is_solid(right_of_neighbour_block) && !is_solid(right_of_this_block))
@@ -4551,16 +5055,25 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                             hmem::UniqueResourceLock lock;
                             auto& navmesh = neighbour->navmesh.get(lock);
 
-                            boost::add_edge(
-                                neighbour_block_vertex.in_neighbour,
-                                right_of_and_below_neighbour_block_vertex,
-                                navmesh.data->graph
-                            );
-                            boost::add_edge(
-                                right_of_and_below_neighbour_block_vertex,
-                                neighbour_block_vertex.in_neighbour,
-                                navmesh.data->graph
-                            );
+                            auto [neighbour_block_edge, neighbour_block_success]
+                                = boost::add_edge(
+                                    neighbour_block_vertex.in_neighbour,
+                                    right_of_and_below_neighbour_block_vertex,
+                                    navmesh.data->graph
+                                );
+                            navmesh.data->pheromone_map[neighbour_block_edge]
+                                = DEFAULT_PHEROMONE_LEVEL;
+                            auto
+                                [right_of_and_below_neighbour_block_edge,
+                                 right_of_and_below_neighbour_block_success]
+                                = boost::add_edge(
+                                    right_of_and_below_neighbour_block_vertex,
+                                    neighbour_block_vertex.in_neighbour,
+                                    navmesh.data->graph
+                                );
+                            navmesh.data
+                                ->pheromone_map[right_of_and_below_neighbour_block_edge]
+                                = DEFAULT_PHEROMONE_LEVEL;
                         }
                     }
 
@@ -4600,16 +5113,24 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                             hmem::UniqueResourceLock lock;
                             auto& navmesh = neighbour->navmesh.get(lock);
 
-                            boost::add_edge(
-                                neighbour_block_vertex.in_neighbour,
-                                front_of_neighbour_block_vertex,
-                                navmesh.data->graph
-                            );
-                            boost::add_edge(
-                                front_of_neighbour_block_vertex,
-                                neighbour_block_vertex.in_neighbour,
-                                navmesh.data->graph
-                            );
+                            auto [neighbour_block_edge, neighbour_block_success]
+                                = boost::add_edge(
+                                    neighbour_block_vertex.in_neighbour,
+                                    front_of_neighbour_block_vertex,
+                                    navmesh.data->graph
+                                );
+                            navmesh.data->pheromone_map[neighbour_block_edge]
+                                = DEFAULT_PHEROMONE_LEVEL;
+                            auto
+                                [front_of_neighbour_block_edge,
+                                 front_of_neighbour_block_success]
+                                = boost::add_edge(
+                                    front_of_neighbour_block_vertex,
+                                    neighbour_block_vertex.in_neighbour,
+                                    navmesh.data->graph
+                                );
+                            navmesh.data->pheromone_map[front_of_neighbour_block_edge]
+                                = DEFAULT_PHEROMONE_LEVEL;
                         }
                         // Down
                     } else if (is_solid(front_of_and_below_neighbour_block) && !is_solid(front_of_neighbour_block) && !is_solid(front_of_this_block))
@@ -4630,16 +5151,25 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                             hmem::UniqueResourceLock lock;
                             auto& navmesh = neighbour->navmesh.get(lock);
 
-                            boost::add_edge(
-                                neighbour_block_vertex.in_neighbour,
-                                front_of_and_below_neighbour_block_vertex,
-                                navmesh.data->graph
-                            );
-                            boost::add_edge(
-                                front_of_and_below_neighbour_block_vertex,
-                                neighbour_block_vertex.in_neighbour,
-                                navmesh.data->graph
-                            );
+                            auto [neighbour_block_edge, neighbour_block_success]
+                                = boost::add_edge(
+                                    neighbour_block_vertex.in_neighbour,
+                                    front_of_and_below_neighbour_block_vertex,
+                                    navmesh.data->graph
+                                );
+                            navmesh.data->pheromone_map[neighbour_block_edge]
+                                = DEFAULT_PHEROMONE_LEVEL;
+                            auto
+                                [front_of_and_below_neighbour_block_edge,
+                                 front_of_and_below_neighbour_block_success]
+                                = boost::add_edge(
+                                    front_of_and_below_neighbour_block_vertex,
+                                    neighbour_block_vertex.in_neighbour,
+                                    navmesh.data->graph
+                                );
+                            navmesh.data
+                                ->pheromone_map[front_of_and_below_neighbour_block_edge]
+                                = DEFAULT_PHEROMONE_LEVEL;
                         }
                     }
 
@@ -4678,16 +5208,24 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                             hmem::UniqueResourceLock lock;
                             auto& navmesh = neighbour->navmesh.get(lock);
 
-                            boost::add_edge(
-                                neighbour_block_vertex.in_neighbour,
-                                back_of_neighbour_block_vertex,
-                                navmesh.data->graph
-                            );
-                            boost::add_edge(
-                                back_of_neighbour_block_vertex,
-                                neighbour_block_vertex.in_neighbour,
-                                navmesh.data->graph
-                            );
+                            auto [neighbour_block_edge, neighbour_block_success]
+                                = boost::add_edge(
+                                    neighbour_block_vertex.in_neighbour,
+                                    back_of_neighbour_block_vertex,
+                                    navmesh.data->graph
+                                );
+                            navmesh.data->pheromone_map[neighbour_block_edge]
+                                = DEFAULT_PHEROMONE_LEVEL;
+                            auto
+                                [back_of_neighbour_block_edge,
+                                 back_of_neighbour_block_success]
+                                = boost::add_edge(
+                                    back_of_neighbour_block_vertex,
+                                    neighbour_block_vertex.in_neighbour,
+                                    navmesh.data->graph
+                                );
+                            navmesh.data->pheromone_map[back_of_neighbour_block_edge]
+                                = DEFAULT_PHEROMONE_LEVEL;
                         }
                         // Down
                     } else if (is_solid(back_of_and_below_neighbour_block) && !is_solid(back_of_neighbour_block) && !is_solid(back_of_this_block))
@@ -4708,16 +5246,25 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                             hmem::UniqueResourceLock lock;
                             auto& navmesh = neighbour->navmesh.get(lock);
 
-                            boost::add_edge(
-                                neighbour_block_vertex.in_neighbour,
-                                back_of_and_below_neighbour_block_vertex,
-                                navmesh.data->graph
-                            );
-                            boost::add_edge(
-                                back_of_and_below_neighbour_block_vertex,
-                                neighbour_block_vertex.in_neighbour,
-                                navmesh.data->graph
-                            );
+                            auto [neighbour_block_edge, neighbour_block_success]
+                                = boost::add_edge(
+                                    neighbour_block_vertex.in_neighbour,
+                                    back_of_and_below_neighbour_block_vertex,
+                                    navmesh.data->graph
+                                );
+                            navmesh.data->pheromone_map[neighbour_block_edge]
+                                = DEFAULT_PHEROMONE_LEVEL;
+                            auto
+                                [back_of_and_below_neighbour_block_edge,
+                                 back_of_and_below_neighbour_block_success]
+                                = boost::add_edge(
+                                    back_of_and_below_neighbour_block_vertex,
+                                    neighbour_block_vertex.in_neighbour,
+                                    navmesh.data->graph
+                                );
+                            navmesh.data
+                                ->pheromone_map[back_of_and_below_neighbour_block_edge]
+                                = DEFAULT_PHEROMONE_LEVEL;
                         }
                     }
                 }
@@ -4819,32 +5366,44 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                             hmem::UniqueResourceLock lock;
                             auto& navmesh = neighbour->navmesh.get(lock);
 
-                            boost::add_edge(
-                                neighbour_block_vertex.in_neighbour,
-                                candidate_block_vertex.in_neighbour,
-                                navmesh.data->graph
-                            );
-                            boost::add_edge(
-                                candidate_block_vertex.in_neighbour,
-                                neighbour_block_vertex.in_neighbour,
-                                navmesh.data->graph
-                            );
+                            auto [neighbour_block_edge, neighbour_block_success]
+                                = boost::add_edge(
+                                    neighbour_block_vertex.in_neighbour,
+                                    candidate_block_vertex.in_neighbour,
+                                    navmesh.data->graph
+                                );
+                            navmesh.data->pheromone_map[neighbour_block_edge]
+                                = DEFAULT_PHEROMONE_LEVEL;
+                            auto [candidate_block_edge, candidate_block_success]
+                                = boost::add_edge(
+                                    candidate_block_vertex.in_neighbour,
+                                    neighbour_block_vertex.in_neighbour,
+                                    navmesh.data->graph
+                                );
+                            navmesh.data->pheromone_map[candidate_block_edge]
+                                = DEFAULT_PHEROMONE_LEVEL;
                         }
 
                         {
                             hmem::UniqueResourceLock lock;
                             auto& navmesh = below_left_neighbour->navmesh.get(lock);
 
-                            boost::add_edge(
-                                neighbour_block_vertex.in_below_left_neighbour,
-                                candidate_block_vertex.in_below_left_neighbour,
-                                navmesh.data->graph
-                            );
-                            boost::add_edge(
-                                candidate_block_vertex.in_below_left_neighbour,
-                                neighbour_block_vertex.in_below_left_neighbour,
-                                navmesh.data->graph
-                            );
+                            auto [neighbour_block_edge, neighbour_block_success]
+                                = boost::add_edge(
+                                    neighbour_block_vertex.in_below_left_neighbour,
+                                    candidate_block_vertex.in_below_left_neighbour,
+                                    navmesh.data->graph
+                                );
+                            navmesh.data->pheromone_map[neighbour_block_edge]
+                                = DEFAULT_PHEROMONE_LEVEL;
+                            auto [candidate_block_edge, candidate_block_success]
+                                = boost::add_edge(
+                                    candidate_block_vertex.in_below_left_neighbour,
+                                    neighbour_block_vertex.in_below_left_neighbour,
+                                    navmesh.data->graph
+                                );
+                            navmesh.data->pheromone_map[candidate_block_edge]
+                                = DEFAULT_PHEROMONE_LEVEL;
                         }
                     }
 
@@ -4920,32 +5479,44 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                                 hmem::UniqueResourceLock lock;
                                 auto& navmesh = neighbour->navmesh.get(lock);
 
-                                boost::add_edge(
-                                    neighbour_block_vertex.in_neighbour,
-                                    candidate_block_vertex.in_neighbour,
-                                    navmesh.data->graph
-                                );
-                                boost::add_edge(
-                                    candidate_block_vertex.in_neighbour,
-                                    neighbour_block_vertex.in_neighbour,
-                                    navmesh.data->graph
-                                );
+                                auto [neighbour_block_edge, neighbour_block_success]
+                                    = boost::add_edge(
+                                        neighbour_block_vertex.in_neighbour,
+                                        candidate_block_vertex.in_neighbour,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data->pheromone_map[neighbour_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
+                                auto [candidate_block_edge, candidate_block_success]
+                                    = boost::add_edge(
+                                        candidate_block_vertex.in_neighbour,
+                                        neighbour_block_vertex.in_neighbour,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data->pheromone_map[candidate_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
                             }
 
                             {
                                 hmem::UniqueResourceLock lock;
                                 auto& navmesh = below_left_neighbour->navmesh.get(lock);
 
-                                boost::add_edge(
-                                    neighbour_block_vertex.in_below_left_neighbour,
-                                    candidate_block_vertex.in_below_left_neighbour,
-                                    navmesh.data->graph
-                                );
-                                boost::add_edge(
-                                    candidate_block_vertex.in_below_left_neighbour,
-                                    neighbour_block_vertex.in_below_left_neighbour,
-                                    navmesh.data->graph
-                                );
+                                auto [neighbour_block_edge, neighbour_block_success]
+                                    = boost::add_edge(
+                                        neighbour_block_vertex.in_below_left_neighbour,
+                                        candidate_block_vertex.in_below_left_neighbour,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data->pheromone_map[neighbour_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
+                                auto [candidate_block_edge, candidate_block_success]
+                                    = boost::add_edge(
+                                        candidate_block_vertex.in_below_left_neighbour,
+                                        neighbour_block_vertex.in_below_left_neighbour,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data->pheromone_map[candidate_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
                             }
                         }
                         // Step down
@@ -4969,32 +5540,44 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                                 hmem::UniqueResourceLock lock;
                                 auto& navmesh = chunk->navmesh.get(lock);
 
-                                boost::add_edge(
-                                    neighbour_block_vertex.in_neighbour,
-                                    candidate_block_vertex.in_neighbour,
-                                    navmesh.data->graph
-                                );
-                                boost::add_edge(
-                                    candidate_block_vertex.in_neighbour,
-                                    neighbour_block_vertex.in_neighbour,
-                                    navmesh.data->graph
-                                );
+                                auto [neighbour_block_edge, neighbour_block_success]
+                                    = boost::add_edge(
+                                        neighbour_block_vertex.in_neighbour,
+                                        candidate_block_vertex.in_neighbour,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data->pheromone_map[neighbour_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
+                                auto [candidate_block_edge, candidate_block_success]
+                                    = boost::add_edge(
+                                        candidate_block_vertex.in_neighbour,
+                                        neighbour_block_vertex.in_neighbour,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data->pheromone_map[candidate_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
                             }
 
                             {
                                 hmem::UniqueResourceLock lock;
                                 auto& navmesh = left_neighbour->navmesh.get(lock);
 
-                                boost::add_edge(
-                                    neighbour_block_vertex.in_below_left_neighbour,
-                                    candidate_block_vertex.in_below_left_neighbour,
-                                    navmesh.data->graph
-                                );
-                                boost::add_edge(
-                                    candidate_block_vertex.in_below_left_neighbour,
-                                    neighbour_block_vertex.in_below_left_neighbour,
-                                    navmesh.data->graph
-                                );
+                                auto [neighbour_block_edge, neighbour_block_success]
+                                    = boost::add_edge(
+                                        neighbour_block_vertex.in_below_left_neighbour,
+                                        candidate_block_vertex.in_below_left_neighbour,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data->pheromone_map[neighbour_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
+                                auto [candidate_block_edge, candidate_block_success]
+                                    = boost::add_edge(
+                                        candidate_block_vertex.in_below_left_neighbour,
+                                        neighbour_block_vertex.in_below_left_neighbour,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data->pheromone_map[candidate_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
                             }
                         }
                     }
@@ -5097,32 +5680,44 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                             hmem::UniqueResourceLock lock;
                             auto& navmesh = neighbour->navmesh.get(lock);
 
-                            boost::add_edge(
-                                neighbour_block_vertex.in_neighbour,
-                                candidate_block_vertex.in_neighbour,
-                                navmesh.data->graph
-                            );
-                            boost::add_edge(
-                                candidate_block_vertex.in_neighbour,
-                                neighbour_block_vertex.in_neighbour,
-                                navmesh.data->graph
-                            );
+                            auto [neighbour_block_edge, neighbour_block_success]
+                                = boost::add_edge(
+                                    neighbour_block_vertex.in_neighbour,
+                                    candidate_block_vertex.in_neighbour,
+                                    navmesh.data->graph
+                                );
+                            navmesh.data->pheromone_map[neighbour_block_edge]
+                                = DEFAULT_PHEROMONE_LEVEL;
+                            auto [candidate_block_edge, candidate_block_success]
+                                = boost::add_edge(
+                                    candidate_block_vertex.in_neighbour,
+                                    neighbour_block_vertex.in_neighbour,
+                                    navmesh.data->graph
+                                );
+                            navmesh.data->pheromone_map[candidate_block_edge]
+                                = DEFAULT_PHEROMONE_LEVEL;
                         }
 
                         {
                             hmem::UniqueResourceLock lock;
                             auto& navmesh = below_right_neighbour->navmesh.get(lock);
 
-                            boost::add_edge(
-                                neighbour_block_vertex.in_below_right_neighbour,
-                                candidate_block_vertex.in_below_right_neighbour,
-                                navmesh.data->graph
-                            );
-                            boost::add_edge(
-                                candidate_block_vertex.in_below_right_neighbour,
-                                neighbour_block_vertex.in_below_right_neighbour,
-                                navmesh.data->graph
-                            );
+                            auto [neighbour_block_edge, neighbour_block_success]
+                                = boost::add_edge(
+                                    neighbour_block_vertex.in_below_right_neighbour,
+                                    candidate_block_vertex.in_below_right_neighbour,
+                                    navmesh.data->graph
+                                );
+                            navmesh.data->pheromone_map[neighbour_block_edge]
+                                = DEFAULT_PHEROMONE_LEVEL;
+                            auto [candidate_block_edge, candidate_block_success]
+                                = boost::add_edge(
+                                    candidate_block_vertex.in_below_right_neighbour,
+                                    neighbour_block_vertex.in_below_right_neighbour,
+                                    navmesh.data->graph
+                                );
+                            navmesh.data->pheromone_map[candidate_block_edge]
+                                = DEFAULT_PHEROMONE_LEVEL;
                         }
                     }
 
@@ -5197,16 +5792,22 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                                 hmem::UniqueResourceLock lock;
                                 auto& navmesh = neighbour->navmesh.get(lock);
 
-                                boost::add_edge(
-                                    neighbour_block_vertex.in_neighbour,
-                                    candidate_block_vertex.in_neighbour,
-                                    navmesh.data->graph
-                                );
-                                boost::add_edge(
-                                    candidate_block_vertex.in_neighbour,
-                                    neighbour_block_vertex.in_neighbour,
-                                    navmesh.data->graph
-                                );
+                                auto [neighbour_block_edge, neighbour_block_success]
+                                    = boost::add_edge(
+                                        neighbour_block_vertex.in_neighbour,
+                                        candidate_block_vertex.in_neighbour,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data->pheromone_map[neighbour_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
+                                auto [candidate_block_edge, candidate_block_success]
+                                    = boost::add_edge(
+                                        candidate_block_vertex.in_neighbour,
+                                        neighbour_block_vertex.in_neighbour,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data->pheromone_map[candidate_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
                             }
 
                             {
@@ -5214,16 +5815,22 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                                 auto&                    navmesh
                                     = below_right_neighbour->navmesh.get(lock);
 
-                                boost::add_edge(
-                                    neighbour_block_vertex.in_below_right_neighbour,
-                                    candidate_block_vertex.in_below_right_neighbour,
-                                    navmesh.data->graph
-                                );
-                                boost::add_edge(
-                                    candidate_block_vertex.in_below_right_neighbour,
-                                    neighbour_block_vertex.in_below_right_neighbour,
-                                    navmesh.data->graph
-                                );
+                                auto [neighbour_block_edge, neighbour_block_success]
+                                    = boost::add_edge(
+                                        neighbour_block_vertex.in_below_right_neighbour,
+                                        candidate_block_vertex.in_below_right_neighbour,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data->pheromone_map[neighbour_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
+                                auto [candidate_block_edge, candidate_block_success]
+                                    = boost::add_edge(
+                                        candidate_block_vertex.in_below_right_neighbour,
+                                        neighbour_block_vertex.in_below_right_neighbour,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data->pheromone_map[candidate_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
                             }
                         }
                         // Step down
@@ -5247,16 +5854,22 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                                 hmem::UniqueResourceLock lock;
                                 auto& navmesh = neighbour->navmesh.get(lock);
 
-                                boost::add_edge(
-                                    neighbour_block_vertex.in_neighbour,
-                                    candidate_block_vertex.in_neighbour,
-                                    navmesh.data->graph
-                                );
-                                boost::add_edge(
-                                    candidate_block_vertex.in_neighbour,
-                                    neighbour_block_vertex.in_neighbour,
-                                    navmesh.data->graph
-                                );
+                                auto [neighbour_block_edge, neighbour_block_success]
+                                    = boost::add_edge(
+                                        neighbour_block_vertex.in_neighbour,
+                                        candidate_block_vertex.in_neighbour,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data->pheromone_map[neighbour_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
+                                auto [candidate_block_edge, candidate_block_success]
+                                    = boost::add_edge(
+                                        candidate_block_vertex.in_neighbour,
+                                        neighbour_block_vertex.in_neighbour,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data->pheromone_map[candidate_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
                             }
 
                             {
@@ -5264,16 +5877,22 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                                 auto&                    navmesh
                                     = below_right_neighbour->navmesh.get(lock);
 
-                                boost::add_edge(
-                                    neighbour_block_vertex.in_below_right_neighbour,
-                                    candidate_block_vertex.in_below_right_neighbour,
-                                    navmesh.data->graph
-                                );
-                                boost::add_edge(
-                                    candidate_block_vertex.in_below_right_neighbour,
-                                    neighbour_block_vertex.in_below_right_neighbour,
-                                    navmesh.data->graph
-                                );
+                                auto [neighbour_block_edge, neighbour_block_success]
+                                    = boost::add_edge(
+                                        neighbour_block_vertex.in_below_right_neighbour,
+                                        candidate_block_vertex.in_below_right_neighbour,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data->pheromone_map[neighbour_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
+                                auto [candidate_block_edge, candidate_block_success]
+                                    = boost::add_edge(
+                                        candidate_block_vertex.in_below_right_neighbour,
+                                        neighbour_block_vertex.in_below_right_neighbour,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data->pheromone_map[candidate_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
                             }
                         }
                     }
@@ -5377,32 +5996,44 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                             hmem::UniqueResourceLock lock;
                             auto& navmesh = neighbour->navmesh.get(lock);
 
-                            boost::add_edge(
-                                neighbour_block_vertex.in_neighbour,
-                                candidate_block_vertex.in_neighbour,
-                                navmesh.data->graph
-                            );
-                            boost::add_edge(
-                                candidate_block_vertex.in_neighbour,
-                                neighbour_block_vertex.in_neighbour,
-                                navmesh.data->graph
-                            );
+                            auto [neighbour_block_edge, neighbour_block_success]
+                                = boost::add_edge(
+                                    neighbour_block_vertex.in_neighbour,
+                                    candidate_block_vertex.in_neighbour,
+                                    navmesh.data->graph
+                                );
+                            navmesh.data->pheromone_map[neighbour_block_edge]
+                                = DEFAULT_PHEROMONE_LEVEL;
+                            auto [candidate_block_edge, candidate_block_success]
+                                = boost::add_edge(
+                                    candidate_block_vertex.in_neighbour,
+                                    neighbour_block_vertex.in_neighbour,
+                                    navmesh.data->graph
+                                );
+                            navmesh.data->pheromone_map[candidate_block_edge]
+                                = DEFAULT_PHEROMONE_LEVEL;
                         }
 
                         {
                             hmem::UniqueResourceLock lock;
                             auto& navmesh = below_front_neighbour->navmesh.get(lock);
 
-                            boost::add_edge(
-                                neighbour_block_vertex.in_below_front_neighbour,
-                                candidate_block_vertex.in_below_front_neighbour,
-                                navmesh.data->graph
-                            );
-                            boost::add_edge(
-                                candidate_block_vertex.in_below_front_neighbour,
-                                neighbour_block_vertex.in_below_front_neighbour,
-                                navmesh.data->graph
-                            );
+                            auto [neighbour_block_edge, neighbour_block_success]
+                                = boost::add_edge(
+                                    neighbour_block_vertex.in_below_front_neighbour,
+                                    candidate_block_vertex.in_below_front_neighbour,
+                                    navmesh.data->graph
+                                );
+                            navmesh.data->pheromone_map[neighbour_block_edge]
+                                = DEFAULT_PHEROMONE_LEVEL;
+                            auto [candidate_block_edge, candidate_block_success]
+                                = boost::add_edge(
+                                    candidate_block_vertex.in_below_front_neighbour,
+                                    neighbour_block_vertex.in_below_front_neighbour,
+                                    navmesh.data->graph
+                                );
+                            navmesh.data->pheromone_map[candidate_block_edge]
+                                = DEFAULT_PHEROMONE_LEVEL;
                         }
                     }
 
@@ -5477,16 +6108,22 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                                 hmem::UniqueResourceLock lock;
                                 auto& navmesh = neighbour->navmesh.get(lock);
 
-                                boost::add_edge(
-                                    neighbour_block_vertex.in_neighbour,
-                                    candidate_block_vertex.in_neighbour,
-                                    navmesh.data->graph
-                                );
-                                boost::add_edge(
-                                    candidate_block_vertex.in_neighbour,
-                                    neighbour_block_vertex.in_neighbour,
-                                    navmesh.data->graph
-                                );
+                                auto [neighbour_block_edge, neighbour_block_success]
+                                    = boost::add_edge(
+                                        neighbour_block_vertex.in_neighbour,
+                                        candidate_block_vertex.in_neighbour,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data->pheromone_map[neighbour_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
+                                auto [candidate_block_edge, candidate_block_success]
+                                    = boost::add_edge(
+                                        candidate_block_vertex.in_neighbour,
+                                        neighbour_block_vertex.in_neighbour,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data->pheromone_map[candidate_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
                             }
 
                             {
@@ -5494,16 +6131,22 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                                 auto&                    navmesh
                                     = below_front_neighbour->navmesh.get(lock);
 
-                                boost::add_edge(
-                                    neighbour_block_vertex.in_below_front_neighbour,
-                                    candidate_block_vertex.in_below_front_neighbour,
-                                    navmesh.data->graph
-                                );
-                                boost::add_edge(
-                                    candidate_block_vertex.in_below_front_neighbour,
-                                    neighbour_block_vertex.in_below_front_neighbour,
-                                    navmesh.data->graph
-                                );
+                                auto [neighbour_block_edge, neighbour_block_success]
+                                    = boost::add_edge(
+                                        neighbour_block_vertex.in_below_front_neighbour,
+                                        candidate_block_vertex.in_below_front_neighbour,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data->pheromone_map[neighbour_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
+                                auto [candidate_block_edge, candidate_block_success]
+                                    = boost::add_edge(
+                                        candidate_block_vertex.in_below_front_neighbour,
+                                        neighbour_block_vertex.in_below_front_neighbour,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data->pheromone_map[candidate_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
                             }
                         }
                         // Step down
@@ -5527,16 +6170,22 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                                 hmem::UniqueResourceLock lock;
                                 auto& navmesh = neighbour->navmesh.get(lock);
 
-                                boost::add_edge(
-                                    neighbour_block_vertex.in_neighbour,
-                                    candidate_block_vertex.in_neighbour,
-                                    navmesh.data->graph
-                                );
-                                boost::add_edge(
-                                    candidate_block_vertex.in_neighbour,
-                                    neighbour_block_vertex.in_neighbour,
-                                    navmesh.data->graph
-                                );
+                                auto [neighbour_block_edge, neighbour_block_success]
+                                    = boost::add_edge(
+                                        neighbour_block_vertex.in_neighbour,
+                                        candidate_block_vertex.in_neighbour,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data->pheromone_map[neighbour_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
+                                auto [candidate_block_edge, candidate_block_success]
+                                    = boost::add_edge(
+                                        candidate_block_vertex.in_neighbour,
+                                        neighbour_block_vertex.in_neighbour,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data->pheromone_map[candidate_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
                             }
 
                             {
@@ -5544,16 +6193,22 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                                 auto&                    navmesh
                                     = below_front_neighbour->navmesh.get(lock);
 
-                                boost::add_edge(
-                                    neighbour_block_vertex.in_below_front_neighbour,
-                                    candidate_block_vertex.in_below_front_neighbour,
-                                    navmesh.data->graph
-                                );
-                                boost::add_edge(
-                                    candidate_block_vertex.in_below_front_neighbour,
-                                    neighbour_block_vertex.in_below_front_neighbour,
-                                    navmesh.data->graph
-                                );
+                                auto [neighbour_block_edge, neighbour_block_success]
+                                    = boost::add_edge(
+                                        neighbour_block_vertex.in_below_front_neighbour,
+                                        candidate_block_vertex.in_below_front_neighbour,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data->pheromone_map[neighbour_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
+                                auto [candidate_block_edge, candidate_block_success]
+                                    = boost::add_edge(
+                                        candidate_block_vertex.in_below_front_neighbour,
+                                        neighbour_block_vertex.in_below_front_neighbour,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data->pheromone_map[candidate_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
                             }
                         }
                     }
@@ -5656,32 +6311,44 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                             hmem::UniqueResourceLock lock;
                             auto& navmesh = neighbour->navmesh.get(lock);
 
-                            boost::add_edge(
-                                neighbour_block_vertex.in_neighbour,
-                                candidate_block_vertex.in_neighbour,
-                                navmesh.data->graph
-                            );
-                            boost::add_edge(
-                                candidate_block_vertex.in_neighbour,
-                                neighbour_block_vertex.in_neighbour,
-                                navmesh.data->graph
-                            );
+                            auto [neighbour_block_edge, neighbour_block_success]
+                                = boost::add_edge(
+                                    neighbour_block_vertex.in_neighbour,
+                                    candidate_block_vertex.in_neighbour,
+                                    navmesh.data->graph
+                                );
+                            navmesh.data->pheromone_map[neighbour_block_edge]
+                                = DEFAULT_PHEROMONE_LEVEL;
+                            auto [candidate_block_edge, candidate_block_success]
+                                = boost::add_edge(
+                                    candidate_block_vertex.in_neighbour,
+                                    neighbour_block_vertex.in_neighbour,
+                                    navmesh.data->graph
+                                );
+                            navmesh.data->pheromone_map[candidate_block_edge]
+                                = DEFAULT_PHEROMONE_LEVEL;
                         }
 
                         {
                             hmem::UniqueResourceLock lock;
                             auto& navmesh = below_back_neighbour->navmesh.get(lock);
 
-                            boost::add_edge(
-                                neighbour_block_vertex.in_below_back_neighbour,
-                                candidate_block_vertex.in_below_back_neighbour,
-                                navmesh.data->graph
-                            );
-                            boost::add_edge(
-                                candidate_block_vertex.in_below_back_neighbour,
-                                neighbour_block_vertex.in_below_back_neighbour,
-                                navmesh.data->graph
-                            );
+                            auto [neighbour_block_edge, neighbour_block_success]
+                                = boost::add_edge(
+                                    neighbour_block_vertex.in_below_back_neighbour,
+                                    candidate_block_vertex.in_below_back_neighbour,
+                                    navmesh.data->graph
+                                );
+                            navmesh.data->pheromone_map[neighbour_block_edge]
+                                = DEFAULT_PHEROMONE_LEVEL;
+                            auto [candidate_block_edge, candidate_block_success]
+                                = boost::add_edge(
+                                    candidate_block_vertex.in_below_back_neighbour,
+                                    neighbour_block_vertex.in_below_back_neighbour,
+                                    navmesh.data->graph
+                                );
+                            navmesh.data->pheromone_map[candidate_block_edge]
+                                = DEFAULT_PHEROMONE_LEVEL;
                         }
                     }
 
@@ -5757,32 +6424,44 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                                 hmem::UniqueResourceLock lock;
                                 auto& navmesh = neighbour->navmesh.get(lock);
 
-                                boost::add_edge(
-                                    neighbour_block_vertex.in_neighbour,
-                                    candidate_block_vertex.in_neighbour,
-                                    navmesh.data->graph
-                                );
-                                boost::add_edge(
-                                    candidate_block_vertex.in_neighbour,
-                                    neighbour_block_vertex.in_neighbour,
-                                    navmesh.data->graph
-                                );
+                                auto [neighbour_block_edge, neighbour_block_success]
+                                    = boost::add_edge(
+                                        neighbour_block_vertex.in_neighbour,
+                                        candidate_block_vertex.in_neighbour,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data->pheromone_map[neighbour_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
+                                auto [candidate_block_edge, candidate_block_success]
+                                    = boost::add_edge(
+                                        candidate_block_vertex.in_neighbour,
+                                        neighbour_block_vertex.in_neighbour,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data->pheromone_map[candidate_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
                             }
 
                             {
                                 hmem::UniqueResourceLock lock;
                                 auto& navmesh = below_back_neighbour->navmesh.get(lock);
 
-                                boost::add_edge(
-                                    neighbour_block_vertex.in_below_back_neighbour,
-                                    candidate_block_vertex.in_below_back_neighbour,
-                                    navmesh.data->graph
-                                );
-                                boost::add_edge(
-                                    candidate_block_vertex.in_below_back_neighbour,
-                                    neighbour_block_vertex.in_below_back_neighbour,
-                                    navmesh.data->graph
-                                );
+                                auto [neighbour_block_edge, neighbour_block_success]
+                                    = boost::add_edge(
+                                        neighbour_block_vertex.in_below_back_neighbour,
+                                        candidate_block_vertex.in_below_back_neighbour,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data->pheromone_map[neighbour_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
+                                auto [candidate_block_edge, candidate_block_success]
+                                    = boost::add_edge(
+                                        candidate_block_vertex.in_below_back_neighbour,
+                                        neighbour_block_vertex.in_below_back_neighbour,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data->pheromone_map[candidate_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
                             }
                         }
                         // Step down
@@ -5806,32 +6485,44 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                                 hmem::UniqueResourceLock lock;
                                 auto& navmesh = neighbour->navmesh.get(lock);
 
-                                boost::add_edge(
-                                    neighbour_block_vertex.in_neighbour,
-                                    candidate_block_vertex.in_neighbour,
-                                    navmesh.data->graph
-                                );
-                                boost::add_edge(
-                                    candidate_block_vertex.in_neighbour,
-                                    neighbour_block_vertex.in_neighbour,
-                                    navmesh.data->graph
-                                );
+                                auto [neighbour_block_edge, neighbour_block_success]
+                                    = boost::add_edge(
+                                        neighbour_block_vertex.in_neighbour,
+                                        candidate_block_vertex.in_neighbour,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data->pheromone_map[neighbour_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
+                                auto [candidate_block_edge, candidate_block_success]
+                                    = boost::add_edge(
+                                        candidate_block_vertex.in_neighbour,
+                                        neighbour_block_vertex.in_neighbour,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data->pheromone_map[candidate_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
                             }
 
                             {
                                 hmem::UniqueResourceLock lock;
                                 auto& navmesh = below_back_neighbour->navmesh.get(lock);
 
-                                boost::add_edge(
-                                    neighbour_block_vertex.in_below_back_neighbour,
-                                    candidate_block_vertex.in_below_back_neighbour,
-                                    navmesh.data->graph
-                                );
-                                boost::add_edge(
-                                    candidate_block_vertex.in_below_back_neighbour,
-                                    neighbour_block_vertex.in_below_back_neighbour,
-                                    navmesh.data->graph
-                                );
+                                auto [neighbour_block_edge, neighbour_block_success]
+                                    = boost::add_edge(
+                                        neighbour_block_vertex.in_below_back_neighbour,
+                                        candidate_block_vertex.in_below_back_neighbour,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data->pheromone_map[neighbour_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
+                                auto [candidate_block_edge, candidate_block_success]
+                                    = boost::add_edge(
+                                        candidate_block_vertex.in_below_back_neighbour,
+                                        neighbour_block_vertex.in_below_back_neighbour,
+                                        navmesh.data->graph
+                                    );
+                                navmesh.data->pheromone_map[candidate_block_edge]
+                                    = DEFAULT_PHEROMONE_LEVEL;
                             }
                         }
                     }
