@@ -21,6 +21,7 @@ namespace hemlock {
                 = NullACSDistanceCalculator<Node, IsWeighted>>
             void find_path(
                 GraphMapView<Node, IsWeighted>&      map_view,
+                PheromoneMap<Node>&                  pheromone_map,
                 Node                                 source,
                 Node                                 destination,
                 Node*&                               path,
@@ -90,8 +91,56 @@ namespace hemlock {
                 //                papers?
                 // for (auto edge : boost::make_iterator_range(boost::edges(map.graph)))
                 // {
-                //     map.pheromone_map[edge] += Config.local.increment;
+                //     pheromone_map[edge] += Config.local.increment;
                 // }
+
+                /********************\
+                 * Pheromone Access *
+                \********************/
+
+                const auto pheromone_from_nodes
+                    = [&](Node _source, Node _destination, size_t iteration) -> f32& {
+                    f32 default_pheromone
+                        = Config.local.increment
+                          * glm::pow(
+                              Config.global.evaporation, static_cast<f32>(iteration)
+                          );
+
+                    try {
+                        auto source_pheromones = pheromone_map.at(_source);
+                        try {
+                            return source_pheromones.at(_destination);
+                        } catch (std::out_of_range&) {
+                            pheromone_map[_source][_destination] = default_pheromone;
+                            return pheromone_map[_source][_destination];
+                        }
+                    } catch (std::out_of_range&) {
+                        pheromone_map[_source]               = {};
+                        pheromone_map[_source][_destination] = default_pheromone;
+                        return pheromone_map[_source][_destination];
+                    }
+                };
+
+                const auto pheromone_from_vertices = [&](_VertexDescriptor _source,
+                                                         _VertexDescriptor _destination,
+                                                         _GraphMap&        map,
+                                                         size_t iteration) -> f32& {
+                    return pheromone_from_nodes(
+                        map.vertex_coord_map[_source],
+                        map.vertex_coord_map[_destination],
+                        iteration
+                    );
+                };
+
+                const auto pheromone_from_edge
+                    = [&](_EdgeDescriptor edge, _GraphMap& map, size_t iteration
+                      ) -> f32& {
+                    return pheromone_from_nodes(
+                        map.vertex_coord_map[boost::source(edge, map.graph)],
+                        map.vertex_coord_map[boost::target(edge, map.graph)],
+                        iteration
+                    );
+                };
 
                 /*********************\
                  * Score Calculation *
@@ -99,14 +148,15 @@ namespace hemlock {
 
                 const auto calculate_score = [&](Node            candidate,
                                                  _EdgeDescriptor edge,
-                                                 _GraphMap&      map) {
+                                                 _GraphMap&      map,
+                                                 size_t          iteration) {
                     // TODO(Matthew): Fully expose this (at least optionally), likewise
                     // make even providing distance calc
                     //                and modifying score with it optional.
 
                     const DistanceCalculator calc_distance{};
 
-                    f32 score = map.pheromone_map[edge];
+                    f32 score = pheromone_from_edge(edge, map, iteration);
 
                     score
                         /= (1.0f + calc_distance(map, source, destination, candidate));
@@ -222,7 +272,8 @@ namespace hemlock {
                                             ant.current_map
                                                 ->vertex_coord_map[candidate_vertex],
                                             edge,
-                                            *ant.current_map
+                                            *ant.current_map,
+                                            iteration
                                         );
 
                                         if (score > best_score) {
@@ -271,7 +322,8 @@ namespace hemlock {
                                             ant.current_map
                                                 ->vertex_coord_map[candidate_vertex],
                                             edge,
-                                            *ant.current_map
+                                            *ant.current_map,
+                                            iteration
                                         );
                                     }
 
@@ -309,8 +361,9 @@ namespace hemlock {
                                                    == candidate_vertex)
                                             continue;
 
-                                        choice_val
-                                            -= ant.current_map->pheromone_map[edge];
+                                        choice_val -= pheromone_from_edge(
+                                            edge, *ant.current_map, iteration
+                                        );
 
                                         if (choice_val <= 0.0f) {
                                             return { true, candidate_vertex };
@@ -350,9 +403,11 @@ namespace hemlock {
                                     ant.current_map->graph
                                 );
 
-                                ant.current_map->pheromone_map[edge]
+                                pheromone_from_edge(edge, *ant.current_map, iteration)
                                     = (1.0f - Config.local.evaporation)
-                                          * ant.current_map->pheromone_map[edge]
+                                          * pheromone_from_edge(
+                                              edge, *ant.current_map, iteration
+                                          )
                                       + Config.local.evaporation
                                             * Config.local.increment;
 
@@ -524,16 +579,14 @@ namespace hemlock {
                         for (size_t step_idx = 0; step_idx < shortest_path.length - 1;
                              ++step_idx)
                         {
-                            auto [edge, _] = boost::edge(
+                            pheromone_from_vertices(
                                 shortest_path.steps[step_idx].second,
                                 shortest_path.steps[step_idx + 1].first,
-                                shortest_path.maps[step_idx]->graph
-                            );
-
-                            shortest_path.maps[step_idx]->pheromone_map[edge]
-                                += Config.global.evaporation
-                                   * (Config.global.increment
-                                      / static_cast<f32>(shortest_path.length));
+                                *shortest_path.maps[step_idx],
+                                iteration
+                            ) += Config.global.evaporation
+                                 * (Config.global.increment
+                                    / static_cast<f32>(shortest_path.length));
                         }
                     }
 

@@ -257,11 +257,15 @@ public:
                 hvox::ai::ChunkGridGraphMapView view;
                 view.init(m_chunk_grid);
 
+                halgo::PheromoneMap<hvox::ai::ChunkNavmeshNode> pheromone_map;
+
                 halgo::GraphACS::find_path<
                     hvox::ai::ChunkNavmeshNode,
                     false,
                     Config,
-                    TNS_ACSDistanceCalculator>(view, start, end, path, path_length);
+                    TNS_ACSDistanceCalculator>(
+                    view, pheromone_map, start, end, path, path_length
+                );
 
                 if (path) {
                     std::cout << "Path length is: " << std::to_string(path_length)
