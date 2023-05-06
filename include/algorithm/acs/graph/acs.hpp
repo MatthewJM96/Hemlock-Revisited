@@ -457,7 +457,10 @@ namespace hemlock {
                                 new_group.ants[new_group.size++] = &ant;
                             }
 
-                            if (next_vertex == destination_vertex) {
+                            if (ant.current_map
+                                    ->vertex_coord_map[ant.current_vertex.second]
+                                == destination)
+                            {
                                 ant.found_food  = true;
                                 ants_found_food += 1;
 
