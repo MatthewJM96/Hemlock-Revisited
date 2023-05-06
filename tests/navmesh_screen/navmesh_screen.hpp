@@ -153,7 +153,9 @@ public:
                 // auto& navmesh_end = chunk_end->navmesh.get(lock_end,
                 // std::defer_lock); std::lock(lock_start, lock_end);
 
-                constexpr halgo::ACSConfig Config = { .debug = { .on = false } };
+                constexpr halgo::ACSConfig Config = { .max_iterations = 100,
+                                                      .max_steps      = 500,
+                                                      .debug = { .on = false } };
 
                 hvox::ai::ChunkNavmeshNode start
                     = { hvox::block_chunk_position(m_nav_test_start.pos),
@@ -161,6 +163,23 @@ public:
                 hvox::ai::ChunkNavmeshNode end
                     = { hvox::block_chunk_position(m_nav_test_end.pos),
                         chunk_end->position };
+
+                std::cout << "  start - {" << std::to_string(start.block_pos.x) << ", "
+                          << std::to_string(start.block_pos.y) << ", "
+                          << std::to_string(start.block_pos.z) << "}"
+                          << " - {" << std::to_string(start.chunk_pos.x) << ", "
+                          << std::to_string(start.chunk_pos.y) << ","
+                          << std::to_string(start.chunk_pos.z) << "} - "
+                          << std::hash<hvox::ai::ChunkNavmeshNode>{}(start)
+                          << std::endl;
+
+                std::cout << "  end - {" << std::to_string(end.block_pos.x) << ", "
+                          << std::to_string(end.block_pos.y) << ", "
+                          << std::to_string(end.block_pos.z) << "}"
+                          << " - {" << std::to_string(end.chunk_pos.x) << ", "
+                          << std::to_string(end.chunk_pos.y) << ","
+                          << std::to_string(end.chunk_pos.z) << "} - "
+                          << std::hash<hvox::ai::ChunkNavmeshNode>{}(end) << std::endl;
 
                 // if (navmesh_start.data->coord_vertex_map.find(start)
                 //     != navmesh_start.data->coord_vertex_map.end())
@@ -261,6 +280,12 @@ public:
                             {0, 0, 255, 255}
                         });
                     }
+
+                    std::cout << "  actual end - "
+                              << std::hash<hvox::ai::ChunkNavmeshNode>{}(
+                                     path[path_length - 1]
+                                 )
+                              << std::endl;
                 } else {
                     std::cout << "Path not found!" << std::endl;
                 }
