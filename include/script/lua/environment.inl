@@ -24,10 +24,6 @@ void hscript::lua::Environment<HasRPCManager, CallBufferSize>::init(
     lua_newtable(m_state);
     lua_setfield(m_state, LUA_REGISTRYINDEX, HEMLOCK_LUA_SCRIPT_FUNCTION_TABLE);
 
-    // TODO(Matthew): Revisit namespace handling as it looks like Lua stack
-    //                may keep growing (dangerous) if we don't track and
-    //                pop namespaces.
-
     // Set global namespace.
     set_global_namespace();
 
@@ -194,6 +190,8 @@ void hscript::lua::Environment<HasRPCManager, CallBufferSize>::push_namespace(
         // value on the stack).
         lua_getfield(m_state, -1, _namespace.c_str());
     }
+
+    ++m_namespace_depth;
 }
 
 template <bool HasRPCManager, size_t CallBufferSize>
@@ -348,6 +346,7 @@ void hscript::lua::Environment<HasRPCManager, CallBufferSize>::add_value(
         // Make sure to pop the namespace we pushed, to avoid side
         // effects on the Lua stack.
         lua_pop(m_state, 1);
+        --m_namespace_depth;
     }
 }
 

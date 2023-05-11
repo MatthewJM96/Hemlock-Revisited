@@ -46,7 +46,10 @@ namespace hemlock {
                 using _Base
                     = EnvironmentBase<_Environment, HasRPCManager, CallBufferSize>;
             public:
-                Environment() : m_state(nullptr), m_parent(nullptr) { /* Empty. */
+                Environment() :
+                    m_state(nullptr),
+                    m_parent(nullptr),
+                    m_namespace_depth(0) { /* Empty. */
                 }
 
                 ~Environment() { /* Empty. */
