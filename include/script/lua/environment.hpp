@@ -25,22 +25,14 @@ namespace hemlock {
                     hscript::lua::register_lua_function<HasRPCManager, CallBufferSize>(
                         LuaHandle
                     );
+                friend i32 hscript::lua::call_foreign<CallBufferSize>(LuaHandle);
+                friend i32 hscript::lua::query_foreign_call<CallBufferSize>(LuaHandle);
                 friend i32
-                    hscript::lua::call_foreign<HasRPCManager, CallBufferSize>(LuaHandle
-                    );
-                friend i32
-                    hscript::lua::query_foreign_call<HasRPCManager, CallBufferSize>(
-                        LuaHandle
-                    );
-                friend i32 hscript::lua::
-                    get_foreign_call_results<HasRPCManager, CallBufferSize>(LuaHandle);
-                friend i32 hscript::lua::set_manual_command_buffer_pump<
-                    HasRPCManager,
-                    CallBufferSize>(LuaHandle);
-                friend i32
-                    hscript::lua::pump_command_buffer<HasRPCManager, CallBufferSize>(
-                        LuaHandle
-                    );
+                    hscript::lua::get_foreign_call_results<CallBufferSize>(LuaHandle);
+                friend i32 hscript::lua::set_manual_command_buffer_pump<CallBufferSize>(
+                    LuaHandle
+                );
+                friend i32 hscript::lua::pump_command_buffer<CallBufferSize>(LuaHandle);
 
                 using _Environment = Environment<HasRPCManager, CallBufferSize>;
                 using _Base

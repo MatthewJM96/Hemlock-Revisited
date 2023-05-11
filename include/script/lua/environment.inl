@@ -38,25 +38,17 @@ void hscript::lua::Environment<HasRPCManager, CallBufferSize>::init(
         _Base::rpc.init(this);
 
         set_namespaces("foreign");
-        add_c_function("call", &call_foreign<HasRPCManager, CallBufferSize>, this);
-        add_c_function(
-            "query", &query_foreign_call<HasRPCManager, CallBufferSize>, this
-        );
-        add_c_function(
-            "get_results",
-            &get_foreign_call_results<HasRPCManager, CallBufferSize>,
-            this
-        );
+        add_c_function("call", &call_foreign<CallBufferSize>, this);
+        add_c_function("query", &query_foreign_call<CallBufferSize>, this);
+        add_c_function("get_results", &get_foreign_call_results<CallBufferSize>, this);
 
         add_c_function(
             "set_manual_command_buffer_pump",
-            &set_manual_command_buffer_pump<HasRPCManager, CallBufferSize>,
+            &set_manual_command_buffer_pump<CallBufferSize>,
             this
         );
         add_c_function(
-            "pump_command_buffer",
-            &pump_command_buffer<HasRPCManager, CallBufferSize>,
-            this
+            "pump_command_buffer", &pump_command_buffer<CallBufferSize>, this
         );
         set_global_namespace();
     }
