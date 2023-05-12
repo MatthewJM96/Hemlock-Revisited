@@ -5,6 +5,7 @@
 #  define HEMLOCK_DEFAULT_MAX_SCRIPT_LENGTH 50 * 1024 * 1024
 #endif  // HEMLOCK_DEFAULT_MAX_SCRIPT_LENGTH
 
+#include "script/continuable_function.hpp"
 #include "script/environment_base_decl.hpp"
 #include "script/rpc_manager.hpp"
 #include "script/state.hpp"
@@ -276,6 +277,34 @@ namespace hemlock {
                 return reinterpret_cast<EnvironmentImpl*>(this)
                     ->template get_script_function<ReturnType, Parameters...>(
                         std::move(name), delegate
+                    );
+            }
+
+            /**
+             * @brief Get a continuable script function from the environment, allowing
+             * calls within C++ into the script where the script may yield back and be
+             * continued later.
+             *
+             * @tparam NewCallSignature The signature of a new call to the script
+             * function.
+             * @tparam ContinuationCallSignature The signautre of a continuation of the
+             * script function.
+             * @param name The name of the script function to obtain.
+             * @param continuable_function Delegate providing means to call the script
+             * function.
+             * @return True if the script function was obtained, false otherwise.
+             */
+            template <typename NewCallSignature, typename ContinuationCallSignature>
+            bool get_continuable_script_function(
+                std::string&& name,
+                OUT ContinuableFunction<NewCallSignature, ContinuationCallSignature>&
+                    continuable_function
+            ) {
+                return reinterpret_cast<EnvironmentImpl*>(this)
+                    ->template get_continuable_script_function<
+                        NewCallSignature,
+                        ContinuationCallSignature>(
+                        std::move(name), continuable_function
                     );
             }
 

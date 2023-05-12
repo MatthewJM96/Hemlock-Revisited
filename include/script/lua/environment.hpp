@@ -255,6 +255,28 @@ namespace hemlock {
                     std::string&& name,
                     OUT ScriptDelegate<ReturnType, Parameters...>& delegate
                 );
+
+                /**
+                 * @brief Get a continuable script function from the environment,
+                 * allowing calls within C++ into the script where the script may yield
+                 * back and be continued later.
+                 *
+                 * @tparam NewCallSignature The signature of a new call to the script
+                 * function.
+                 * @tparam ContinuationCallSignature The signautre of a continuation of
+                 * the script function.
+                 * @param name The name of the script function to obtain.
+                 * @param continuable_function Delegate providing means to call the
+                 * script function.
+                 * @return True if the script function was obtained, false otherwise.
+                 */
+                template <typename NewCallSignature, typename ContinuationCallSignature>
+                bool get_continuable_script_function(
+                    std::string&&                   name,
+                    OUT                             ContinuableFunction<
+                        NewCallSignature,
+                        ContinuationCallSignature>& continuable_function
+                );
             protected:
                 /**
                  * @brief Pushes namespaces onto the Lua stack. Last
@@ -279,9 +301,24 @@ namespace hemlock {
                     std::string&& name, OUT LuaFunctionState* state = nullptr
                 );
 
+                /**
+                 * @brief Registers a continuable Lua function given a name,
+                 * dot-separation for namespacing starting at global.
+                 *
+                 * @param name The name of the script function to register.
+                 * @param state Optional Lua function state struct into which
+                 * the registered Lua functions information will be placed.
+                 * @return True if the continuable Lua function was registered, false
+                 * if it was not already registered and could not be registered.
+                 */
+                bool register_continuable_lua_function(
+                    std::string&& name, OUT LuaFunctionState* state = nullptr
+                );
+
                 LuaHandle    m_state;
                 Environment* m_parent;
                 LuaFunctions m_lua_functions;
+                LuaFunctions m_lua_continuable_functions;
                 i32          m_namespace_depth;
             };
         }  // namespace lua

@@ -3,7 +3,8 @@
 
 #include "script/state.hpp"
 
-#define HEMLOCK_LUA_SCRIPT_FUNCTION_TABLE "ScriptFunctions"
+#define HEMLOCK_LUA_SCRIPT_FUNCTION_TABLE             "ScriptFunctions"
+#define HEMLOCK_LUA_CONTINUABLE_SCRIPT_FUNCTION_TABLE "ContinuableScriptFunctions"
 
 namespace hemlock {
     namespace script {
