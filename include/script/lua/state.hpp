@@ -3,8 +3,8 @@
 
 #include "script/state.hpp"
 
-#define HEMLOCK_LUA_SCRIPT_FUNCTION_TABLE             "ScriptFunctions"
-#define HEMLOCK_LUA_CONTINUABLE_SCRIPT_FUNCTION_TABLE "ContinuableScriptFunctions"
+#define HEMLOCK_LUA_SCRIPT_FUNCTION_TABLE "ScriptFunctions"
+#define HEMLOCK_LUA_THREAD_TABLE          "Threads"
 
 namespace hemlock {
     namespace script {
@@ -14,6 +14,11 @@ namespace hemlock {
 
             struct LuaFunctionState {
                 LuaHandle state;
+                i32       index;
+            };
+
+            struct LuaThreadState {
+                LuaHandle thread;
                 i32       index;
             };
 

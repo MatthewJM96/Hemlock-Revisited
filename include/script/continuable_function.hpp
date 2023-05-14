@@ -3,6 +3,10 @@
 
 namespace hemlock {
     namespace script {
+        template <typename ReturnType>
+        using ContinuationResult = std::
+            conditional_t<std::is_void_v<ReturnType>, i32, std::tuple<i32, ReturnType>>;
+
         template <
             typename ContinuableFunctionImpl,
             typename NewCallSignature,
@@ -14,23 +18,21 @@ namespace hemlock {
 
         template <
             typename ContinuableFunctionImpl,
-            typename NewCallReturnType,
-            typename ContinuationReturnType,
+            typename ReturnType,
             typename... NewCallParameters,
             typename... ContinuationParameters>
         class ContinuableFunction<
             ContinuableFunctionImpl,
-            std::tuple<NewCallReturnType, NewCallParameters...>,
-            std::tuple<ContinuationReturnType, ContinuationParameters...>,
+            std::tuple<ReturnType, NewCallParameters...>,
+            std::tuple<ReturnType, ContinuationParameters...>,
             std::enable_if_t<
-                std::is_same_v<NewCallReturnType, ContinuationReturnType>
-                && (...
-                    && std::is_same_v<NewCallParameters, ContinuationParameters>)>> {
+                (... && std::is_same_v<NewCallParameters, ContinuationParameters>)>> {
         public:
             ContinuableFunction() : m_is_yielded(false) { /* Empty. */
             }
 
-            NewCallReturnType operator()(NewCallParameters&&... parameters) {
+            ContinuationResult<ReturnType> operator()(NewCallParameters&&... parameters
+            ) {
                 if (m_is_yielded) {
                     return invoke_new_call(std::forward<NewCallParameters>(parameters
                     )...);
@@ -41,13 +43,14 @@ namespace hemlock {
                 }
             }
         protected:
-            NewCallReturnType invoke_new_call(NewCallParameters&&... parameters) {
+            ContinuationResult<ReturnType>
+            invoke_new_call(NewCallParameters&&... parameters) {
                 reinterpret_cast<ContinuableFunctionImpl*>(this)->invoke_new_call(
                     std::forward<NewCallParameters>(parameters)...
                 );
             }
 
-            ContinuationReturnType
+            ContinuationResult<ReturnType>
             invoke_continuation(ContinuationParameters&&... parameters) {
                 reinterpret_cast<ContinuableFunctionImpl*>(this)->invoke_continuation(
                     std::forward<NewCallParameters>(parameters)...
@@ -59,29 +62,29 @@ namespace hemlock {
 
         template <
             typename ContinuableFunctionImpl,
-            typename NewCallReturnType,
-            typename ContinuationReturnType,
+            typename ReturnType,
             typename... NewCallParameters,
             typename... ContinuationParameters>
         class ContinuableFunction<
             ContinuableFunctionImpl,
-            std::tuple<NewCallReturnType, NewCallParameters...>,
-            std::tuple<ContinuationReturnType, ContinuationParameters...>,
+            std::tuple<ReturnType, NewCallParameters...>,
+            std::tuple<ReturnType, ContinuationParameters...>,
             std::enable_if_t<
-                !std::is_same_v<NewCallReturnType, ContinuationReturnType>
-                || !(... && std::is_same_v<NewCallParameters, ContinuationParameters>)>> {
+                !(... && std::is_same_v<NewCallParameters, ContinuationParameters>)>> {
         public:
             ContinuableFunction() : m_is_yielded(false) { /* Empty. */
             }
 
-            NewCallReturnType operator()(NewCallParameters&&... parameters) {
+            ContinuationResult<ReturnType> operator()(NewCallParameters&&... parameters
+            ) {
 #if DEBUG
                 assert(!m_is_yielded);
 #endif
                 return invoke_new_call(std::forward<NewCallParameters>(parameters)...);
             }
 
-            ContinuationReturnType operator()(ContinuationParameters&&... parameters) {
+            ContinuationResult<ReturnType>
+            operator()(ContinuationParameters&&... parameters) {
 #if DEBUG
                 assert(m_is_yielded);
 #endif
@@ -90,13 +93,14 @@ namespace hemlock {
                 );
             }
         protected:
-            NewCallReturnType invoke_new_call(NewCallParameters&&... parameters) {
+            ContinuationResult<ReturnType>
+            invoke_new_call(NewCallParameters&&... parameters) {
                 reinterpret_cast<ContinuableFunctionImpl*>(this)->invoke_new_call(
                     std::forward<NewCallParameters>(parameters)...
                 );
             }
 
-            ContinuationReturnType
+            ContinuationResult<ReturnType>
             invoke_continuation(ContinuationParameters&&... parameters) {
                 reinterpret_cast<ContinuableFunctionImpl*>(this)->invoke_continuation(
                     std::forward<NewCallParameters>(parameters)...

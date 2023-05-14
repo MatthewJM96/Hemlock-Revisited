@@ -270,92 +270,6 @@ bool hscript::lua::Environment<HasRPCManager, CallBufferSize>::register_lua_func
 }
 
 template <bool HasRPCManager, size_t CallBufferSize>
-bool hscript::lua::Environment<HasRPCManager, CallBufferSize>::
-    register_continuable_lua_function(
-        std::string&& name, OUT LuaFunctionState* state /*= nullptr*/
-    ) {
-    if (name.length() == 0) return false;
-
-    auto& cache = m_lua_continuable_functions;
-    if (m_parent) cache = m_parent->m_lua_continuable_functions;
-
-    // Check cache for whether this function is already registered.
-    if (cache.contains(name)) {
-        if (state) *state = m_lua_continuable_functions[name];
-
-        return true;
-    }
-
-    i32 prior_index = lua_gettop(m_state);
-
-    // Now put global namespace on the stack, we will be searching
-    // for the Lua function to register from here.
-    lua_pushglobaltable(m_state);
-
-    // Iterate through namesapces needed to get to the function we
-    // are registering.
-    size_t last_idx = 0;
-    size_t next_idx = name.find('.');
-    while (true) {
-        // Determine the next token in the string naming the function.
-        std::string_view token
-            = std::string_view(name).substr(last_idx, next_idx - last_idx);
-
-        // Push token onto stack, naming the entry in the current table
-        // on the stack that should lead to the function we are registering.
-        lua_pushlstring(m_state, token.data(), token.size());
-        // Grab the next namespace (or function) from the previous' table.
-        lua_gettable(m_state, -2);
-        // Check that the object we just retrieved exists.
-        if (lua_isnil(m_state, -1)) return false;
-
-        // Break out if we just handled the last token in the function
-        // name.
-        if (next_idx == std::string::npos) break;
-
-        last_idx = next_idx + 1;
-        next_idx = name.find('.', last_idx);
-    }
-
-    // Check that the last object added to the stack
-    // was a valid function, if it wasn't then we have
-    // failed.
-    if (!lua_isfunction(m_state, -1)) return false;
-
-    // Get our script function table in the Lua registry and place
-    // it on the Lua stack.
-    lua_getfield(
-        m_state, LUA_REGISTRYINDEX, HEMLOCK_LUA_CONTINUABLE_SCRIPT_FUNCTION_TABLE
-    );
-
-    LuaHandle        continuable_thread = lua_newthread(m_state);
-    LuaFunctionState continuable_func_state
-        = { .state = continuable_thread, .index = luaL_ref(m_state, prior_index + 1) };
-
-    // Pop continuable function registry off stack.
-    lua_pop(m_state, 1);
-
-    // Move function over to new thread.
-    lua_xmove(m_state, continuable_thread, 1);
-
-    // Place a reference to the function in the script
-    // function table of the Lua registry, and cache
-    // this.
-    if (state) {
-        *state                 = continuable_func_state;
-        cache[std::move(name)] = *state;
-    } else {
-        cache[std::move(name)] = continuable_func_state;
-    }
-
-    // Return stack to state prior to function registration.
-    i32 final_index = lua_gettop(m_state);
-    lua_pop(m_state, final_index - prior_index);
-
-    return true;
-}
-
-template <bool HasRPCManager, size_t CallBufferSize>
 template <typename... Strings>
 void hscript::lua::Environment<HasRPCManager, CallBufferSize>::set_namespaces(
     Strings... namespaces
@@ -527,21 +441,53 @@ template <typename NewCallSignature, typename ContinuationCallSignature>
 bool hscript::lua::Environment<HasRPCManager, CallBufferSize>::
     get_continuable_script_function(
         std::string&& name,
-        OUT LuaContinuableFunction<NewCallSignature, ContinuationCallSignature>&
-            continuable_function
+        OUT  LuaContinuableFunction<NewCallSignature, ContinuationCallSignature>&
+             continuable_function,
+        bool attached_to_thread /*= false*/
     ) {
     // Try to obtain the named Lua function, registering it
     // if it was not already registered. If we could not
     // obtain it, report failure.
     LuaFunctionState lua_func_state;
-    if (!register_continuable_lua_function(std::move(name), &lua_func_state)) {
+    if (!register_lua_function(std::move(name), &lua_func_state)) {
         return false;
     }
 
-    continuable_function
-        = make_continuable_function<NewCallSignature, ContinuationCallSignature>(
-            lua_func_state
-        );
+    continuable_function = {};
+    continuable_function.init(m_state, lua_func_state);
+
+    if (attached_to_thread) {
+        LuaThreadState thread = make_thread();
+        continuable_function.attach_to_thread(thread);
+    }
 
     return true;
+}
+
+template <bool HasRPCManager, size_t CallBufferSize>
+hscript::lua::LuaThreadState
+hscript::lua::Environment<HasRPCManager, CallBufferSize>::make_thread() {
+    // Get thread registry table.
+    lua_getfield(m_state, LUA_REGISTRYINDEX, HEMLOCK_LUA_THREAD_TABLE);
+
+    // Create thread and put reference to it in thread registry.
+    LuaThreadState thread_state
+        = { .state = lua_newthread(m_state), .index = luaL_ref(m_state, -2) };
+
+    // Pop thread registry table.
+    lua_pop(m_state, 1);
+
+    return thread_state;
+}
+
+template <bool HasRPCManager, size_t CallBufferSize>
+void hscript::lua::Environment<HasRPCManager, CallBufferSize>::destroy_thread(
+    LuaThreadState thread
+) {
+    // Get thread registry table.
+    lua_getfield(m_state, LUA_REGISTRYINDEX, HEMLOCK_LUA_THREAD_TABLE);
+
+    luaL_unref(m_state, -1, thread.index);
+
+    thread = { nullptr, 0 };
 }

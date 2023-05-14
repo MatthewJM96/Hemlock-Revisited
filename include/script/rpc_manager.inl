@@ -4,8 +4,9 @@ template <
     typename EnvironmentImpl,
     template <typename, typename>
     typename ContinuableFuncImpl,
+    typename ThreadImpl,
     size_t BufferSize>
-void hscript::RPCManager<EnvironmentImpl, ContinuableFuncImpl, BufferSize>::
+void hscript::RPCManager<EnvironmentImpl, ContinuableFuncImpl, ThreadImpl, BufferSize>::
     init(_Environment* env, bool is_public /*= true*/) {
     if constexpr (BufferSize > 0) {
         m_calls.resize(BufferSize);
@@ -19,8 +20,10 @@ template <
     typename EnvironmentImpl,
     template <typename, typename>
     typename ContinuableFuncImpl,
+    typename ThreadImpl,
     size_t BufferSize>
-void hscript::RPCManager<EnvironmentImpl, ContinuableFuncImpl, BufferSize>::dispose() {
+void hscript::RPCManager<EnvironmentImpl, ContinuableFuncImpl, ThreadImpl, BufferSize>::
+    dispose() {
     std::lock_guard<std::mutex> lock(m_buffer_lock);
 
     m_environment = nullptr;
@@ -36,11 +39,11 @@ template <
     typename EnvironmentImpl,
     template <typename, typename>
     typename ContinuableFuncImpl,
+    typename ThreadImpl,
     size_t BufferSize>
 hscript::CallID
-hscript::RPCManager<EnvironmentImpl, ContinuableFuncImpl, BufferSize>::append_call(
-    std::string&& call, CallParameters&& parameters
-) {
+hscript::RPCManager<EnvironmentImpl, ContinuableFuncImpl, ThreadImpl, BufferSize>::
+    append_call(std::string&& call, CallParameters&& parameters) {
     std::lock_guard<std::mutex> lock(m_buffer_lock);
 
     CallID id  = m_latest_call_id++;
@@ -73,10 +76,10 @@ template <
     typename EnvironmentImpl,
     template <typename, typename>
     typename ContinuableFuncImpl,
+    typename ThreadImpl,
     size_t BufferSize>
-i32 hscript::RPCManager<EnvironmentImpl, ContinuableFuncImpl, BufferSize>::call_state(
-    CallID id, OUT CallState& state
-) {
+i32 hscript::RPCManager<EnvironmentImpl, ContinuableFuncImpl, ThreadImpl, BufferSize>::
+    call_state(CallID id, OUT CallState& state) {
     std::lock_guard<std::mutex> lock(m_buffer_lock);
 
     auto it = m_call_data.find(id);
@@ -94,8 +97,9 @@ template <
     typename EnvironmentImpl,
     template <typename, typename>
     typename ContinuableFuncImpl,
+    typename ThreadImpl,
     size_t BufferSize>
-i32 hscript::RPCManager<EnvironmentImpl, ContinuableFuncImpl, BufferSize>::
+i32 hscript::RPCManager<EnvironmentImpl, ContinuableFuncImpl, ThreadImpl, BufferSize>::
     call_return_values(CallID id, OUT CallParameters& return_values) {
     std::lock_guard<std::mutex> lock(m_buffer_lock);
 
@@ -118,10 +122,10 @@ template <
     typename EnvironmentImpl,
     template <typename, typename>
     typename ContinuableFuncImpl,
+    typename ThreadImpl,
     size_t BufferSize>
-i32 hscript::RPCManager<EnvironmentImpl, ContinuableFuncImpl, BufferSize>::remove_call(
-    CallID id
-) {
+i32 hscript::RPCManager<EnvironmentImpl, ContinuableFuncImpl, ThreadImpl, BufferSize>::
+    remove_call(CallID id) {
     std::lock_guard<std::mutex> lock(m_buffer_lock);
 
     auto it = m_call_data.find(id);
@@ -151,9 +155,10 @@ template <
     typename EnvironmentImpl,
     template <typename, typename>
     typename ContinuableFuncImpl,
+    typename ThreadImpl,
     size_t BufferSize>
-void hscript::RPCManager<EnvironmentImpl, ContinuableFuncImpl, BufferSize>::pump_calls(
-) {
+void hscript::RPCManager<EnvironmentImpl, ContinuableFuncImpl, ThreadImpl, BufferSize>::
+    pump_calls() {
     auto do_call = [&](CallID id, std::string cmd) {
         ScriptDelegate<CallParameters, CallParameters> delegate;
         m_environment->template get_script_function<CallParameters, CallParameters>(
@@ -194,8 +199,9 @@ template <
     typename EnvironmentImpl,
     template <typename, typename>
     typename ContinuableFuncImpl,
+    typename ThreadImpl,
     size_t BufferSize>
-void hscript::RPCManager<EnvironmentImpl, ContinuableFuncImpl, BufferSize>::
+void hscript::RPCManager<EnvironmentImpl, ContinuableFuncImpl, ThreadImpl, BufferSize>::
     set_is_public_env(bool is_public /*= true*/) {
     m_is_public_env = is_public;
 }
@@ -204,8 +210,9 @@ template <
     typename EnvironmentImpl,
     template <typename, typename>
     typename ContinuableFuncImpl,
+    typename ThreadImpl,
     size_t BufferSize>
-void hscript::RPCManager<EnvironmentImpl, ContinuableFuncImpl, BufferSize>::
+void hscript::RPCManager<EnvironmentImpl, ContinuableFuncImpl, ThreadImpl, BufferSize>::
     register_public_function(std::string&& function) {
     m_public_functions.emplace(std::move(function));
 }
@@ -214,8 +221,9 @@ template <
     typename EnvironmentImpl,
     template <typename, typename>
     typename ContinuableFuncImpl,
+    typename ThreadImpl,
     size_t BufferSize>
-void hscript::RPCManager<EnvironmentImpl, ContinuableFuncImpl, BufferSize>::
+void hscript::RPCManager<EnvironmentImpl, ContinuableFuncImpl, ThreadImpl, BufferSize>::
     register_continuable_function(std::string&& function) {
     m_continuable_functions.emplace(std::move(function));
 }

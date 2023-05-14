@@ -21,11 +21,13 @@ namespace hemlock {
             typename EnvironmentImpl,
             template <typename, typename>
             typename ContinuableFuncImpl,
+            typename ThreadImpl,
             size_t BufferSize = 0>
         class RPCManager {
             using _Environment = EnvironmentBase<
                 EnvironmentImpl,
                 ContinuableFuncImpl,
+                ThreadImpl,
                 true,
                 BufferSize>;
         public:

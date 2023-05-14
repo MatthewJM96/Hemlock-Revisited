@@ -25,6 +25,7 @@ namespace hemlock {
             typename EnvironmentImpl,
             template <typename, typename>
             typename ContinuableFuncImpl,
+            typename ThreadImpl,
             bool   HasRPCManager /*= false*/,
             size_t CallBufferSize /*= 0*/
             >
@@ -292,27 +293,55 @@ namespace hemlock {
              * @tparam ContinuationCallSignature The signautre of a continuation of the
              * script function.
              * @param name The name of the script function to obtain.
-             * @param continuable_function Delegate providing means to call the script
-             * function.
+             * @param continuable_function ContinuableFunction object providing means to
+             * call the script function.
+             * @param attached_to_thread If true, creates a thread that the function is
+             * attached to. This thread will be disposed of on function completion. If
+             * false, the function is not attached to a thread, leaving the attachment
+             * up to the caller.
              * @return True if the script function was obtained, false otherwise.
              */
             template <typename NewCallSignature, typename ContinuationCallSignature>
             bool get_continuable_script_function(
                 std::string&& name,
-                OUT ContinuableFuncImpl<NewCallSignature, ContinuationCallSignature>&
-                    continuable_function
+                OUT  ContinuableFuncImpl<NewCallSignature, ContinuationCallSignature>&
+                     continuable_function,
+                bool attached_to_thread = false
             ) {
                 return reinterpret_cast<EnvironmentImpl*>(this)
                     ->template get_continuable_script_function<
                         NewCallSignature,
                         ContinuationCallSignature>(
-                        std::move(name), continuable_function
+                        std::move(name), continuable_function, attached_to_thread
                     );
+            }
+
+            /**
+             * @brief Creatres a thread context within script environment for running
+             * script components concurrently.
+             *
+             * @return The created thread.
+             */
+            ThreadImpl make_thread() {
+                return reinterpret_cast<EnvironmentImpl*>(this)->make_thread();
+            }
+
+            /**
+             * @brief Destroys the given thread.
+             *
+             * @param thread The thread to destroy.
+             */
+            void destroy_thread(ThreadImpl thread) {
+                return reinterpret_cast<EnvironmentImpl*>(this)->destroy_thread(thread);
             }
 
             typename std::conditional<
                 HasRPCManager,
-                RPCManager<EnvironmentImpl, ContinuableFuncImpl, CallBufferSize>,
+                RPCManager<
+                    EnvironmentImpl,
+                    ContinuableFuncImpl,
+                    ThreadImpl,
+                    CallBufferSize>,
                 std::monostate>::type rpc
                 = {};
         protected:
