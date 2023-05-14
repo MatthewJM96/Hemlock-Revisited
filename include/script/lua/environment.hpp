@@ -2,6 +2,7 @@
 #define __hemlock_script_lua_environment_h
 
 #include "script/environment_base.hpp"
+#include "script/lua/continuable_function.hpp"
 #include "script/lua/lua_function.hpp"
 #include "script/lua/rpc_functions.hpp"
 #include "script/lua/state.hpp"
@@ -19,6 +20,7 @@ namespace hemlock {
             class Environment :
                 public EnvironmentBase<
                     Environment<HasRPCManager, CallBufferSize>,
+                    LuaContinuableFunction,
                     HasRPCManager,
                     CallBufferSize> {
                 friend i32
@@ -35,8 +37,11 @@ namespace hemlock {
                 friend i32 hscript::lua::pump_command_buffer<CallBufferSize>(LuaHandle);
 
                 using _Environment = Environment<HasRPCManager, CallBufferSize>;
-                using _Base
-                    = EnvironmentBase<_Environment, HasRPCManager, CallBufferSize>;
+                using _Base        = EnvironmentBase<
+                    _Environment,
+                    LuaContinuableFunction,
+                    HasRPCManager,
+                    CallBufferSize>;
             public:
                 Environment() :
                     m_state(nullptr),
@@ -273,7 +278,7 @@ namespace hemlock {
                 template <typename NewCallSignature, typename ContinuationCallSignature>
                 bool get_continuable_script_function(
                     std::string&&                   name,
-                    OUT                             ContinuableFunction<
+                    OUT                             LuaContinuableFunction<
                         NewCallSignature,
                         ContinuationCallSignature>& continuable_function
                 );

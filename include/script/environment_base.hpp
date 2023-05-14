@@ -23,6 +23,8 @@ namespace hemlock {
 
         template <
             typename EnvironmentImpl,
+            template <typename, typename>
+            typename ContinuableFuncImpl,
             bool   HasRPCManager /*= false*/,
             size_t CallBufferSize /*= 0*/
             >
@@ -297,7 +299,7 @@ namespace hemlock {
             template <typename NewCallSignature, typename ContinuationCallSignature>
             bool get_continuable_script_function(
                 std::string&& name,
-                OUT ContinuableFunction<NewCallSignature, ContinuationCallSignature>&
+                OUT ContinuableFuncImpl<NewCallSignature, ContinuationCallSignature>&
                     continuable_function
             ) {
                 return reinterpret_cast<EnvironmentImpl*>(this)
@@ -310,7 +312,7 @@ namespace hemlock {
 
             typename std::conditional<
                 HasRPCManager,
-                RPCManager<EnvironmentImpl, CallBufferSize>,
+                RPCManager<EnvironmentImpl, ContinuableFuncImpl, CallBufferSize>,
                 std::monostate>::type rpc
                 = {};
         protected:

@@ -58,10 +58,7 @@ void hscript::lua::Environment<HasRPCManager, CallBufferSize>::init(
 
 template <bool HasRPCManager, size_t CallBufferSize>
 void hscript::lua::Environment<HasRPCManager, CallBufferSize>::init(
-    EnvironmentBase<
-        Environment<HasRPCManager, CallBufferSize>,
-        HasRPCManager,
-        CallBufferSize>*               parent,
+    _Base*                             parent,
     hio::IOManagerBase*                io_manager,
     EnvironmentRegistry<_Environment>* registry /*= nullptr*/,
     ui32 max_script_length /*= HEMLOCK_DEFAULT_MAX_SCRIPT_LENGTH*/
@@ -527,8 +524,8 @@ template <typename NewCallSignature, typename ContinuationCallSignature>
 bool hscript::lua::Environment<HasRPCManager, CallBufferSize>::
     get_continuable_script_function(
         std::string&& name,
-        OUT           ContinuableFunction<NewCallSignature, ContinuationCallSignature>&
-                      continuable_function
+        OUT LuaContinuableFunction<NewCallSignature, ContinuationCallSignature>&
+            continuable_function
     ) {
     // Try to obtain the named Lua function, registering it
     // if it was not already registered. If we could not

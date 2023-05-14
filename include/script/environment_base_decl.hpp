@@ -5,6 +5,8 @@ namespace hemlock {
     namespace script {
         template <
             typename EnvironmentImpl,
+            template <typename, typename>
+            typename ContinuableFuncImpl,
             bool   HasRPCManager  = false,
             size_t CallBufferSize = 0>
         class EnvironmentBase;

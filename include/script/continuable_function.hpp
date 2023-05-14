@@ -4,6 +4,7 @@
 namespace hemlock {
     namespace script {
         template <
+            typename ContinuableFunctionImpl,
             typename NewCallSignature,
             typename ContinuationSignature,
             typename = void>
@@ -12,11 +13,13 @@ namespace hemlock {
         };
 
         template <
+            typename ContinuableFunctionImpl,
             typename NewCallReturnType,
-            typename... NewCallParameters,
             typename ContinuationReturnType,
+            typename... NewCallParameters,
             typename... ContinuationParameters>
         class ContinuableFunction<
+            ContinuableFunctionImpl,
             std::tuple<NewCallReturnType, NewCallParameters...>,
             std::tuple<ContinuationReturnType, ContinuationParameters...>,
             std::enable_if_t<
@@ -27,27 +30,41 @@ namespace hemlock {
             ContinuableFunction() : m_is_yielded(false) { /* Empty. */
             }
 
-            NewCallReturnType operator()(NewCallParameters... parameters) {
+            NewCallReturnType operator()(NewCallParameters&&... parameters) {
                 if (m_is_yielded) {
-                    return invoke_new_call(parameters...);
+                    return invoke_new_call(std::forward<NewCallParameters>(parameters
+                    )...);
                 } else {
-                    return invoke_continuation(parameters...);
+                    return invoke_continuation(
+                        std::forward<NewCallParameters>(parameters)...
+                    );
                 }
             }
         protected:
-            NewCallReturnType invoke_new_call(NewCallParameters... parameters);
+            NewCallReturnType invoke_new_call(NewCallParameters&&... parameters) {
+                reinterpret_cast<ContinuableFunctionImpl*>(this)->invoke_new_call(
+                    std::forward<NewCallParameters>(parameters)...
+                );
+            }
+
             ContinuationReturnType
-            invoke_continuation(ContinuationParameters... parameters);
+            invoke_continuation(ContinuationParameters&&... parameters) {
+                reinterpret_cast<ContinuableFunctionImpl*>(this)->invoke_continuation(
+                    std::forward<NewCallParameters>(parameters)...
+                );
+            }
 
             bool m_is_yielded;
         };
 
         template <
+            typename ContinuableFunctionImpl,
             typename NewCallReturnType,
-            typename... NewCallParameters,
             typename ContinuationReturnType,
+            typename... NewCallParameters,
             typename... ContinuationParameters>
         class ContinuableFunction<
+            ContinuableFunctionImpl,
             std::tuple<NewCallReturnType, NewCallParameters...>,
             std::tuple<ContinuationReturnType, ContinuationParameters...>,
             std::enable_if_t<
@@ -57,23 +74,34 @@ namespace hemlock {
             ContinuableFunction() : m_is_yielded(false) { /* Empty. */
             }
 
-            NewCallReturnType operator()(NewCallParameters... parameters) {
+            NewCallReturnType operator()(NewCallParameters&&... parameters) {
 #if DEBUG
                 assert(!m_is_yielded);
 #endif
-                return invoke_new_call(parameters...);
+                return invoke_new_call(std::forward<NewCallParameters>(parameters)...);
             }
 
-            ContinuationReturnType operator()(ContinuationParameters... parameters) {
+            ContinuationReturnType operator()(ContinuationParameters&&... parameters) {
 #if DEBUG
                 assert(m_is_yielded);
 #endif
-                return invoke_continuation(parameters...);
+                return invoke_continuation(
+                    std::forward<ContinuationParameters>(parameters)...
+                );
             }
         protected:
-            NewCallReturnType invoke_new_call(NewCallParameters... parameters);
+            NewCallReturnType invoke_new_call(NewCallParameters&&... parameters) {
+                reinterpret_cast<ContinuableFunctionImpl*>(this)->invoke_new_call(
+                    std::forward<NewCallParameters>(parameters)...
+                );
+            }
+
             ContinuationReturnType
-            invoke_continuation(ContinuationParameters... parameters);
+            invoke_continuation(ContinuationParameters&&... parameters) {
+                reinterpret_cast<ContinuableFunctionImpl*>(this)->invoke_continuation(
+                    std::forward<NewCallParameters>(parameters)...
+                );
+            }
 
             bool m_is_yielded;
         };

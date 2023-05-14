@@ -17,9 +17,17 @@ namespace hemlock {
         //                of return values and states that don't get removed
         //                after some number of pumps?
         // TODO(Matthew): Speed? Mutex use is heavy.
-        template <typename EnvironmentImpl, size_t BufferSize = 0>
+        template <
+            typename EnvironmentImpl,
+            template <typename, typename>
+            typename ContinuableFuncImpl,
+            size_t BufferSize = 0>
         class RPCManager {
-            using _Environment = EnvironmentBase<EnvironmentImpl, true, BufferSize>;
+            using _Environment = EnvironmentBase<
+                EnvironmentImpl,
+                ContinuableFuncImpl,
+                true,
+                BufferSize>;
         public:
             RPCManager() :
                 m_environment(nullptr),
