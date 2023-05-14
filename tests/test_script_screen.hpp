@@ -46,17 +46,17 @@ public:
         m_lua_env_3->run(hio::fs::path("scripts/coroutine_hello_world.lua"));
 
         hscript::lua::
-            LuaContinuableFunction<std::tuple<int, void>, std::tuple<int, void>>
+            LuaContinuableFunction<std::tuple<i32, void>, std::tuple<i32, void>>
                 lua_cont_func;
         m_lua_env_3->get_continuable_script_function(
             "hello_world", lua_cont_func, true
         );
 
-        auto res_1 = lua_cont_func();
-        std::cout << res_1[0] << " - " << res_1[1] << std::endl;
+        auto [err_1, res_1] = lua_cont_func();
+        std::cout << err_1 << " - " << res_1 << std::endl;
 
-        auto res_2 = lua_cont_func();
-        std::cout << res_2[0] << " - " << res_2[1] << std::endl;
+        auto [err_2, res_2] = lua_cont_func();
+        std::cout << err_2 << " - " << res_2 << std::endl;
     }
 
     virtual void update(hemlock::FrameTime) override {

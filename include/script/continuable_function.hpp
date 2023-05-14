@@ -31,8 +31,11 @@ namespace hemlock {
             ContinuableFunction() : m_is_yielded(false) { /* Empty. */
             }
 
-            ContinuationResult<ReturnType> operator()(NewCallParameters&&... parameters
-            ) {
+            std::enable_if_t<
+                sizeof...(NewCallParameters) != 1
+                    || !(... && std::is_same_v<NewCallParameters, void>),
+                ContinuationResult<ReturnType>>
+            operator()(NewCallParameters&&... parameters) {
                 if (m_is_yielded) {
                     return invoke_new_call(std::forward<NewCallParameters>(parameters
                     )...);
@@ -43,20 +46,54 @@ namespace hemlock {
                 }
             }
 
+            std::enable_if_t<
+                sizeof...(NewCallParameters) == 1
+                    && (... && std::is_same_v<NewCallParameters, void>),
+                ContinuationResult<ReturnType>>
+            operator()() {
+                if (m_is_yielded) {
+                    return invoke_new_call();
+                } else {
+                    return invoke_continuation();
+                }
+            }
+
             bool is_yielded() { return m_is_yielded; }
         protected:
-            ContinuationResult<ReturnType>
+            std::enable_if_t<
+                sizeof...(NewCallParameters) != 1
+                    || !(... && std::is_same_v<NewCallParameters, void>),
+                ContinuationResult<ReturnType>>
             invoke_new_call(NewCallParameters&&... parameters) {
                 reinterpret_cast<ContinuableFunctionImpl*>(this)->invoke_new_call(
                     std::forward<NewCallParameters>(parameters)...
                 );
             }
 
-            ContinuationResult<ReturnType>
-            invoke_continuation(ContinuationParameters&&... parameters) {
+            std::enable_if_t<
+                sizeof...(NewCallParameters) == 1
+                    && (... && std::is_same_v<NewCallParameters, void>),
+                ContinuationResult<ReturnType>>
+            invoke_new_call() {
+                reinterpret_cast<ContinuableFunctionImpl*>(this)->invoke_new_call();
+            }
+
+            std::enable_if_t<
+                sizeof...(NewCallParameters) != 1
+                    || !(... && std::is_same_v<NewCallParameters, void>),
+                ContinuationResult<ReturnType>>
+            invoke_continuation(NewCallParameters&&... parameters) {
                 reinterpret_cast<ContinuableFunctionImpl*>(this)->invoke_continuation(
                     std::forward<NewCallParameters>(parameters)...
                 );
+            }
+
+            std::enable_if_t<
+                sizeof...(NewCallParameters) == 1
+                    && (... && std::is_same_v<NewCallParameters, void>),
+                ContinuationResult<ReturnType>>
+            invoke_continuation() {
+                reinterpret_cast<ContinuableFunctionImpl*>(this)->invoke_continuation();
             }
 
             bool m_is_yielded;
@@ -86,7 +123,7 @@ namespace hemlock {
             }
 
             ContinuationResult<ReturnType>
-            operator()(ContinuationParameters&&... parameters) {
+            operator()(ContinuationParameters... parameters) {
 #if DEBUG
                 assert(m_is_yielded);
 #endif
@@ -107,7 +144,7 @@ namespace hemlock {
             ContinuationResult<ReturnType>
             invoke_continuation(ContinuationParameters&&... parameters) {
                 reinterpret_cast<ContinuableFunctionImpl*>(this)->invoke_continuation(
-                    std::forward<NewCallParameters>(parameters)...
+                    std::forward<ContinuationParameters>(parameters)...
                 );
             }
 

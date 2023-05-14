@@ -1,5 +1,3 @@
-#include "script/lua/lua_value.hpp"
-
 template <
     typename ReturnType,
     typename... NewCallParameters,
@@ -38,81 +36,4 @@ void hscript::lua::LuaContinuableFunction<
 
     m_thread            = {};
     _Base::m_is_yielded = false;
-}
-
-template <
-    typename ReturnType,
-    typename... NewCallParameters,
-    typename... ContinuationParameters>
-hscript::ContinuationResult<ReturnType> hscript::lua::LuaContinuableFunction<
-    std::tuple<ReturnType, NewCallParameters...>,
-    std::tuple<ReturnType, ContinuationParameters...>>::
-    invoke_new_call(NewCallParameters&&... parameters) {
-    return do_invocation<NewCallParameters...>(
-        std::forward<ContinuationParameters>(parameters)...
-    );
-}
-
-template <
-    typename ReturnType,
-    typename... NewCallParameters,
-    typename... ContinuationParameters>
-hscript::ContinuationResult<ReturnType> hscript::lua::LuaContinuableFunction<
-    std::tuple<ReturnType, NewCallParameters...>,
-    std::tuple<ReturnType, ContinuationParameters...>>::
-    invoke_continuation(ContinuationParameters&&... parameters) {
-    return do_invocation<ContinuationParameters...>(
-        std::forward<ContinuationParameters>(parameters)...
-    );
-}
-
-template <
-    typename ReturnType,
-    typename... NewCallParameters,
-    typename... ContinuationParameters>
-template <typename... Parameters>
-hscript::ContinuationResult<ReturnType> hscript::lua::LuaContinuableFunction<
-    std::tuple<ReturnType, NewCallParameters...>,
-    std::tuple<ReturnType, ContinuationParameters...>>::
-    do_invocation(Parameters&&... parameters) {
-    i32 prior_index = lua_gettop(m_thread.thread);
-
-    (LuaValue<NewCallParameters>::push(m_thread.thread, parameters), ...);
-
-    // Get number of items pushed.
-    i32 number_items = static_cast<i32>(total_value_count<NewCallParameters...>());
-
-    auto result = lua_resume(m_thread.thread, number_items);
-
-    // Call the function with the provided parameters.
-    if (result == 0) {
-        _Base::m_is_yielded = false;
-    } else if (result == LUA_YIELD) {
-        _Base::m_is_yielded = true;
-    } else {
-        debug_printf(
-            "Error calling Lua function: %s.\n", LuaValue<const char*>::pop(state)
-        );
-
-        return result;
-    }
-
-    if constexpr (!std::is_same<ReturnType, void>()) {
-        // Try to pop return value from Lua stack, report
-        // failure if we can't.
-        ContinuationResult<ReturnType> ret = { result, {} };
-        if (!LuaValue<ReturnType>::try_pop(m_thread.thread, ret[1])) {
-            debug_printf("Could not obtain return value from Lua function.");
-
-            ret[0] = HEMLOCK_SCRIPT_RETURN_TYPE_ERR;
-        }
-
-        // Restore stack to prior state and return
-        lua_pop(m_thread.thread, lua_gettop(m_thread.thread) - prior_index);
-        return ret;
-    } else {
-        // Restore stack to prior state and return
-        lua_pop(m_thread.thread, lua_gettop(m_thread.thread) - prior_index);
-        return result;
-    }
 }

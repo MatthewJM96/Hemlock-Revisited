@@ -472,7 +472,7 @@ hscript::lua::Environment<HasRPCManager, CallBufferSize>::make_thread() {
 
     // Create thread and put reference to it in thread registry.
     LuaThreadState thread_state
-        = { .state = lua_newthread(m_state), .index = luaL_ref(m_state, -2) };
+        = { .thread = lua_newthread(m_state), .index = luaL_ref(m_state, -2) };
 
     // Pop thread registry table.
     lua_pop(m_state, 1);
