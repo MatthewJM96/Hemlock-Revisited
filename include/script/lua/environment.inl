@@ -288,16 +288,6 @@ bool hscript::lua::Environment<HasRPCManager, CallBufferSize>::
 
     i32 prior_index = lua_gettop(m_state);
 
-    // Get our script function table in the Lua registry and place
-    // it on the Lua stack.
-    lua_getfield(
-        m_state, LUA_REGISTRYINDEX, HEMLOCK_LUA_CONTINUABLE_SCRIPT_FUNCTION_TABLE
-    );
-
-    LuaHandle        continuable_thread = lua_newthread(m_state);
-    LuaFunctionState continuable_func_state
-        = { .state = continuable_thread, .index = luaL_ref(m_state, prior_index + 1) };
-
     // Now put global namespace on the stack, we will be searching
     // for the Lua function to register from here.
     lua_pushglobaltable(m_state);
@@ -331,6 +321,19 @@ bool hscript::lua::Environment<HasRPCManager, CallBufferSize>::
     // was a valid function, if it wasn't then we have
     // failed.
     if (!lua_isfunction(m_state, -1)) return false;
+
+    // Get our script function table in the Lua registry and place
+    // it on the Lua stack.
+    lua_getfield(
+        m_state, LUA_REGISTRYINDEX, HEMLOCK_LUA_CONTINUABLE_SCRIPT_FUNCTION_TABLE
+    );
+
+    LuaHandle        continuable_thread = lua_newthread(m_state);
+    LuaFunctionState continuable_func_state
+        = { .state = continuable_thread, .index = luaL_ref(m_state, prior_index + 1) };
+
+    // Pop continuable function registry off stack.
+    lua_pop(m_state, 1);
 
     // Move function over to new thread.
     lua_xmove(m_state, continuable_thread, 1);
