@@ -454,7 +454,7 @@ bool hscript::lua::Environment<HasRPCManager, CallBufferSize>::
     }
 
     continuable_function = {};
-    continuable_function.init(m_state, lua_func_state);
+    continuable_function.init(lua_func_state);
 
     if (attached_to_thread) {
         LuaThreadState thread = make_thread();

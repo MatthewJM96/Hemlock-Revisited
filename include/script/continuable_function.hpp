@@ -42,6 +42,8 @@ namespace hemlock {
                     );
                 }
             }
+
+            bool is_yielded() { return m_is_yielded; }
         protected:
             ContinuationResult<ReturnType>
             invoke_new_call(NewCallParameters&&... parameters) {
@@ -92,6 +94,8 @@ namespace hemlock {
                     std::forward<ContinuationParameters>(parameters)...
                 );
             }
+
+            bool is_yielded() { return m_is_yielded; }
         protected:
             ContinuationResult<ReturnType>
             invoke_new_call(NewCallParameters&&... parameters) {

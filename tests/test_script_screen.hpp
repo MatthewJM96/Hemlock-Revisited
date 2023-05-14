@@ -27,6 +27,8 @@ public:
 
         m_lua_env_2 = m_lua_env_reg->create_environment("env_2");
 
+        m_lua_env_3 = m_lua_env_reg->create_environment("env_3");
+
         m_lua_env_1->run(hio::fs::path("scripts/hello_world.lua"));
 
         hscript::ScriptDelegate<void> hello_world;
@@ -40,6 +42,21 @@ public:
         hscript::ScriptDelegate<void> check_hello_world;
         m_lua_env_2->get_script_function<void>("check_hello_world", check_hello_world);
         check_hello_world();
+
+        m_lua_env_3->run(hio::fs::path("scripts/coroutine_hello_world.lua"));
+
+        hscript::lua::
+            LuaContinuableFunction<std::tuple<int, void>, std::tuple<int, void>>
+                lua_cont_func;
+        m_lua_env_3->get_continuable_script_function(
+            "hello_world", lua_cont_func, true
+        );
+
+        auto res_1 = lua_cont_func();
+        std::cout << res_1[0] << " - " << res_1[1] << std::endl;
+
+        auto res_2 = lua_cont_func();
+        std::cout << res_2[0] << " - " << res_2[1] << std::endl;
     }
 
     virtual void update(hemlock::FrameTime) override {
@@ -64,7 +81,7 @@ protected:
     MyIOManager        m_iom;
     hui::InputManager* m_input_manager;
     TSS_EnvReg*        m_lua_env_reg;
-    TSS_Env *          m_lua_env_1, *m_lua_env_2;
+    TSS_Env *          m_lua_env_1, *m_lua_env_2, *m_lua_env_3;
 };
 
 #endif  // __hemlock_tests_test_script_screen_hpp
