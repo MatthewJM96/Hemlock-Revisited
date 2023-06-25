@@ -24,6 +24,10 @@ void hscript::lua::Environment<HasRPCManager, CallBufferSize>::init(
     lua_newtable(m_state);
     lua_setfield(m_state, LUA_REGISTRYINDEX, HEMLOCK_LUA_SCRIPT_FUNCTION_TABLE);
 
+    // Create a table for storing threads.
+    lua_newtable(m_state);
+    lua_setfield(m_state, LUA_REGISTRYINDEX, HEMLOCK_LUA_THREAD_TABLE);
+
     // Set global namespace.
     set_global_namespace();
 
@@ -342,7 +346,7 @@ void hscript::lua::Environment<HasRPCManager, CallBufferSize>::add_value(
 template <bool HasRPCManager, size_t CallBufferSize>
 template <typename ReturnType, typename... Parameters>
 void hscript::lua::Environment<HasRPCManager, CallBufferSize>::add_c_delegate(
-    std::string_view name, Delegate<ReturnType, Parameters...>* delegate
+    std::string_view name, Delegate<ReturnType(Parameters...)>* delegate
 ) {
     if (m_parent) return m_parent->add_c_delegate(name, delegate);
 
@@ -437,13 +441,11 @@ bool hscript::lua::Environment<HasRPCManager, CallBufferSize>::get_script_functi
 }
 
 template <bool HasRPCManager, size_t CallBufferSize>
-template <typename NewCallSignature, typename ContinuationCallSignature>
 bool hscript::lua::Environment<HasRPCManager, CallBufferSize>::
     get_continuable_script_function(
-        std::string&& name,
-        OUT  LuaContinuableFunction<NewCallSignature, ContinuationCallSignature>&
-             continuable_function,
-        bool attached_to_thread /*= false*/
+        std::string&&               name,
+        OUT LuaContinuableFunction& continuable_function,
+        bool                        attached_to_thread /*= false*/
     ) {
     // Try to obtain the named Lua function, registering it
     // if it was not already registered. If we could not

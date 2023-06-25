@@ -199,7 +199,7 @@ namespace hemlock {
                  */
                 template <typename ReturnType, typename... Parameters>
                 void add_c_delegate(
-                    std::string_view name, Delegate<ReturnType, Parameters...>* delegate
+                    std::string_view name, Delegate<ReturnType(Parameters...)>* delegate
                 );
                 /**
                  * @brief Add a function to the environment, exposed to the
@@ -268,10 +268,6 @@ namespace hemlock {
                  * allowing calls within C++ into the script where the script may yield
                  * back and be continued later.
                  *
-                 * @tparam NewCallSignature The signature of a new call to the script
-                 * function.
-                 * @tparam ContinuationCallSignature The signautre of a continuation of
-                 * the script function.
                  * @param name The name of the script function to obtain.
                  * @param continuable_function ContinuableFunction object providing
                  * means to call the script function.
@@ -281,13 +277,10 @@ namespace hemlock {
                  * leaving the attachment up to the caller.
                  * @return True if the script function was obtained, false otherwise.
                  */
-                template <typename NewCallSignature, typename ContinuationCallSignature>
                 bool get_continuable_script_function(
-                    std::string&&                   name,
-                    OUT                             LuaContinuableFunction<
-                        NewCallSignature,
-                        ContinuationCallSignature>& continuable_function,
-                    bool                            attached_to_thread = false
+                    std::string&&               name,
+                    OUT LuaContinuableFunction& continuable_function,
+                    bool                        attached_to_thread = false
                 );
 
                 /**

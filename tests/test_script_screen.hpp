@@ -45,17 +45,24 @@ public:
 
         m_lua_env_3->run(hio::fs::path("scripts/coroutine_hello_world.lua"));
 
-        hscript::lua::
-            LuaContinuableFunction<std::tuple<i32, void>, std::tuple<i32, void>>
-                lua_cont_func;
+        hscript::lua::LuaContinuableFunction lua_cont_func;
         m_lua_env_3->get_continuable_script_function(
             "hello_world", lua_cont_func, true
         );
 
-        auto [err_1, res_1] = lua_cont_func();
+        auto do_forced_yield = hemlock::Delegate<void()>{ [&]() {
+            std::cout << "Forcing a yield..." << std::endl;
+            std::cout << lua_cont_func.force_yield() << std::endl;
+        } };
+        m_lua_env_3->set_global_namespace();
+        m_lua_env_3->add_c_delegate<void>("beg_a_forced_yield", &do_forced_yield);
+
+        auto [err_1, res_1] = lua_cont_func.invoke<i32>();
         std::cout << err_1 << " - " << res_1 << std::endl;
 
-        auto [err_2, res_2] = lua_cont_func();
+        std::cout << "EYUP" << std::endl;
+
+        auto [err_2, res_2] = lua_cont_func.invoke<i32>();
         std::cout << err_2 << " - " << res_2 << std::endl;
     }
 

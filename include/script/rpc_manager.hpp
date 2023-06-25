@@ -19,7 +19,6 @@ namespace hemlock {
         // TODO(Matthew): Speed? Mutex use is heavy.
         template <
             typename EnvironmentImpl,
-            template <typename, typename>
             typename ContinuableFuncImpl,
             typename ThreadImpl,
             size_t BufferSize = 0>

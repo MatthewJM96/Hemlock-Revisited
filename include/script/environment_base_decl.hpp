@@ -5,7 +5,6 @@ namespace hemlock {
     namespace script {
         template <
             typename EnvironmentImpl,
-            template <typename, typename>
             typename ContinuableFuncImpl,
             typename ThreadImpl,
             bool   HasRPCManager  = false,

@@ -2,7 +2,6 @@
 
 template <
     typename EnvironmentImpl,
-    template <typename, typename>
     typename ContinuableFuncImpl,
     typename ThreadImpl,
     size_t BufferSize>
@@ -18,7 +17,6 @@ void hscript::RPCManager<EnvironmentImpl, ContinuableFuncImpl, ThreadImpl, Buffe
 
 template <
     typename EnvironmentImpl,
-    template <typename, typename>
     typename ContinuableFuncImpl,
     typename ThreadImpl,
     size_t BufferSize>
@@ -37,7 +35,6 @@ void hscript::RPCManager<EnvironmentImpl, ContinuableFuncImpl, ThreadImpl, Buffe
 
 template <
     typename EnvironmentImpl,
-    template <typename, typename>
     typename ContinuableFuncImpl,
     typename ThreadImpl,
     size_t BufferSize>
@@ -74,7 +71,6 @@ hscript::RPCManager<EnvironmentImpl, ContinuableFuncImpl, ThreadImpl, BufferSize
 
 template <
     typename EnvironmentImpl,
-    template <typename, typename>
     typename ContinuableFuncImpl,
     typename ThreadImpl,
     size_t BufferSize>
@@ -95,7 +91,6 @@ i32 hscript::RPCManager<EnvironmentImpl, ContinuableFuncImpl, ThreadImpl, Buffer
 
 template <
     typename EnvironmentImpl,
-    template <typename, typename>
     typename ContinuableFuncImpl,
     typename ThreadImpl,
     size_t BufferSize>
@@ -120,7 +115,6 @@ i32 hscript::RPCManager<EnvironmentImpl, ContinuableFuncImpl, ThreadImpl, Buffer
 
 template <
     typename EnvironmentImpl,
-    template <typename, typename>
     typename ContinuableFuncImpl,
     typename ThreadImpl,
     size_t BufferSize>
@@ -153,7 +147,6 @@ i32 hscript::RPCManager<EnvironmentImpl, ContinuableFuncImpl, ThreadImpl, Buffer
 
 template <
     typename EnvironmentImpl,
-    template <typename, typename>
     typename ContinuableFuncImpl,
     typename ThreadImpl,
     size_t BufferSize>
@@ -197,7 +190,6 @@ void hscript::RPCManager<EnvironmentImpl, ContinuableFuncImpl, ThreadImpl, Buffe
 
 template <
     typename EnvironmentImpl,
-    template <typename, typename>
     typename ContinuableFuncImpl,
     typename ThreadImpl,
     size_t BufferSize>
@@ -208,7 +200,6 @@ void hscript::RPCManager<EnvironmentImpl, ContinuableFuncImpl, ThreadImpl, Buffe
 
 template <
     typename EnvironmentImpl,
-    template <typename, typename>
     typename ContinuableFuncImpl,
     typename ThreadImpl,
     size_t BufferSize>
@@ -219,7 +210,6 @@ void hscript::RPCManager<EnvironmentImpl, ContinuableFuncImpl, ThreadImpl, Buffe
 
 template <
     typename EnvironmentImpl,
-    template <typename, typename>
     typename ContinuableFuncImpl,
     typename ThreadImpl,
     size_t BufferSize>

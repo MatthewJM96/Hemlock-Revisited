@@ -11,7 +11,7 @@ namespace hemlock {
                     typename
                     = typename std::enable_if_t<!std::is_same<void, ReturnType>::value>>
                 i32 handle_delegate_invocation(
-                    LuaHandle state, Delegate<ReturnType, Parameters...>* delegate
+                    LuaHandle state, Delegate<ReturnType(Parameters...)>* delegate
                 ) {
                     // Parameters and a return value, pop parameters off
                     // Lua stack, call with these, then report number of
@@ -41,9 +41,9 @@ namespace hemlock {
                     typename ReturnType,
                     typename... Parameters,
                     typename
-                    = typename std::enable_if_t<!std::is_same<void, ReturnType>::value>>
+                    = typename std::enable_if_t<std::is_same<void, ReturnType>::value>>
                 i32 handle_delegate_invocation(
-                    LuaHandle state, Delegate<void, Parameters...>* delegate
+                    LuaHandle state, Delegate<void(Parameters...)>* delegate
                 ) {
                     // Parameters but no return value, pop parameters off
                     // Lua stack, call with these, then report zero items
@@ -57,7 +57,7 @@ namespace hemlock {
                 template <
                     typename ReturnType,
                     typename
-                    = typename std::enable_if_t<!std::is_same<void, ReturnType>::value>>
+                    = typename std::enable_if_t<std::is_same<void, ReturnType>::value>>
                 i32 handle_delegate_invocation(LuaHandle, Delegate<void()>* delegate) {
                     // No parameters, no return value, just call and
                     // report zero items added to Lua stack.
@@ -198,12 +198,12 @@ namespace hemlock {
 
 template <typename ReturnType, typename... Parameters>
 i32 hscript::lua::invoke_delegate(LuaHandle state) {
-    using DelegateType = Delegate<ReturnType, Parameters...>;
+    using DelegateType = Delegate<ReturnType(Parameters...)>;
 
     DelegateType* delegate
         = reinterpret_cast<DelegateType*>(lua_touserdata(state, lua_upvalueindex(1)));
 
-    return handle_delegate_invocation(state, delegate);
+    return impl::handle_delegate_invocation<ReturnType, Parameters...>(state, delegate);
 }
 
 template <typename ReturnType, typename... Parameters>
@@ -213,7 +213,7 @@ i32 hscript::lua::invoke_function(LuaHandle state) {
     FuncType* func
         = reinterpret_cast<FuncType*>(lua_touserdata(state, lua_upvalueindex(1)));
 
-    return handle_function_invocation(state, func);
+    return impl::handle_function_invocation(state, func);
 }
 
 template <typename Closure, typename ReturnType, typename... Parameters>
@@ -225,5 +225,5 @@ i32 hscript::lua::invoke_closure(LuaHandle state) {
     FuncType* func
         = reinterpret_cast<FuncType*>(lua_touserdata(state, lua_upvalueindex(2)));
 
-    return handle_closure_invocation(state, closure, func);
+    return impl::handle_closure_invocation(state, closure, func);
 }
