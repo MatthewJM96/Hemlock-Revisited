@@ -23,7 +23,9 @@ namespace hemlock {
                 void attach_to_thread(LuaThreadState thread);
                 void detach_from_thread();
 
-                i32 force_yield() { return lua_yield(m_thread.thread, 0); }
+                HEMLOCK_NOINLINE i32 force_yield() {
+                    return lua_yield(m_thread.thread, 0);
+                }
             protected:
                 template <typename ReturnType, typename... Parameters>
                 std::enable_if_t<
