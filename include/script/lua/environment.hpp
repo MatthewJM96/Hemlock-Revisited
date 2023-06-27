@@ -246,6 +246,53 @@ namespace hemlock {
                     ReturnType (Closure::*func)(Parameters...)
                 );
                 /**
+                 * @brief Add a delegate to the environment, exposed to the
+                 * scripts ran within.
+                 *
+                 * @tparam ReturnType The return type of the delegate.
+                 * @tparam Parameters The parameters accepted by the delegate.
+                 * @param name The name to expose the delegate as within the
+                 * environment.
+                 * @param delegate The delegate to be added to the environment.
+                 */
+                template <typename ReturnType, typename... Parameters>
+                void add_yieldable_c_delegate(
+                    std::string_view                                      name,
+                    Delegate<YieldableResult<ReturnType>(Parameters...)>* delegate
+                );
+                /**
+                 * @brief Add a function to the environment, exposed to the
+                 * scripts ran within.
+                 *
+                 * @tparam Func The invocable type.
+                 * @param name The name to expose the function as within the
+                 * environment.
+                 * @param func The function to be added to the environment.
+                 */
+                template <typename ReturnType, typename... Parameters>
+                void add_yieldable_c_function(
+                    std::string_view name,
+                    YieldableResult<ReturnType> (*func)(Parameters...)
+                );
+                /**
+                 * @brief Add a closure to the environment, exposed to the
+                 * scripts ran within.
+                 *
+                 * @tparam Func The invocable type.
+                 * @param name The name to expose the closure as within the
+                 * environment.
+                 * @param closure The closure to be added to the environment.
+                 */
+                template <
+                    std::invocable Closure,
+                    typename ReturnType,
+                    typename... Parameters>
+                void add_yieldable_c_closure(
+                    std::string_view name,
+                    Closure*         closure,
+                    YieldableResult<ReturnType> (Closure::*func)(Parameters...)
+                );
+                /**
                  * @brief Get a script function from the environment, allowing
                  * calls within C++ into the script. Name can specify namespacing
                  * with dot-separation.

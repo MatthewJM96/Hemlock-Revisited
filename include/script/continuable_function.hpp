@@ -7,6 +7,12 @@ namespace hemlock {
         using ContinuationResult = std::
             conditional_t<std::is_void_v<ReturnType>, i32, std::tuple<i32, ReturnType>>;
 
+        template <typename ReturnType>
+        using YieldableResult = std::conditional_t<
+            std::is_void_v<ReturnType>,
+            bool,
+            std::tuple<bool, ReturnType>>;
+
         template <typename ContinuableFunctionImpl>
         class ContinuableFunction {
         public:

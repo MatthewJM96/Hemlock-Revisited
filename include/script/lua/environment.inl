@@ -415,6 +415,69 @@ void hscript::lua::Environment<HasRPCManager, CallBufferSize>::add_c_closure(
 
 template <bool HasRPCManager, size_t CallBufferSize>
 template <typename ReturnType, typename... Parameters>
+void hscript::lua::Environment<HasRPCManager, CallBufferSize>::add_yieldable_c_delegate(
+    std::string_view                                      name,
+    Delegate<YieldableResult<ReturnType>(Parameters...)>* delegate
+) {
+    if (m_parent)
+        return m_parent->add_yieldable_c_delegate<ReturnType, Parameters...>(
+            name, delegate
+        );
+
+    lua_pushlstring(m_state, name.data(), name.size());
+
+    LuaValue<void*>::push(m_state, reinterpret_cast<void*>(delegate));
+
+    lua_pushcclosure(m_state, invoke_yieldable_delegate<ReturnType, Parameters...>, 1);
+
+    lua_settable(m_state, -3);
+}
+
+template <bool HasRPCManager, size_t CallBufferSize>
+template <typename ReturnType, typename... Parameters>
+void hscript::lua::Environment<HasRPCManager, CallBufferSize>::add_yieldable_c_function(
+    std::string_view name, YieldableResult<ReturnType> (*func)(Parameters...)
+) {
+    if (m_parent)
+        return m_parent->add_yieldable_c_function<ReturnType, Parameters...>(
+            name, func
+        );
+
+    lua_pushlstring(m_state, name.data(), name.size());
+
+    LuaValue<void*>::push(m_state, reinterpret_cast<void*>(func));
+
+    lua_pushcclosure(m_state, invoke_yieldable_function<ReturnType, Parameters...>, 1);
+
+    lua_settable(m_state, -3);
+}
+
+template <bool HasRPCManager, size_t CallBufferSize>
+template <std::invocable Closure, typename ReturnType, typename... Parameters>
+void hscript::lua::Environment<HasRPCManager, CallBufferSize>::add_yieldable_c_closure(
+    std::string_view name,
+    Closure*         closure,
+    YieldableResult<ReturnType> (Closure::*func)(Parameters...)
+) {
+    if (m_parent)
+        return m_parent->add_yieldable_c_closure<ReturnType, Parameters...>(
+            name, closure, func
+        );
+
+    lua_pushlstring(m_state, name.data(), name.size());
+
+    LuaValue<void*>::push(m_state, reinterpret_cast<void*>(closure));
+    LuaValue<decltype(func)>::push(m_state, func);
+
+    lua_pushcclosure(
+        m_state, invoke_yieldable_closure<Closure, ReturnType, Parameters...>, 2
+    );
+
+    lua_settable(m_state, -3);
+}
+
+template <bool HasRPCManager, size_t CallBufferSize>
+template <typename ReturnType, typename... Parameters>
 bool hscript::lua::Environment<HasRPCManager, CallBufferSize>::get_script_function(
     std::string&& name, OUT ScriptDelegate<ReturnType, Parameters...>& delegate
 ) {

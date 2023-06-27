@@ -262,6 +262,100 @@ namespace hemlock {
             }
 
             /**
+             * @brief Add a delegate to the environment, exposed to the
+             * scripts ran within. Being yieldable means that, should this
+             * function return true for the first return value, the script
+             * calling it will yield back to whoever is running it.
+             *
+             * @tparam ReturnType The return type of the delegate.
+             * @tparam Parameters The parameters accepted by the delegate.
+             * @param name The name to expose the delegate as within the
+             * environment.
+             * @param delegate The delegate to be added to the environment.
+             */
+            template <typename ReturnType, typename... Parameters>
+            void add_yieldable_c_delegate(
+                std::string_view                                      name,
+                Delegate<YieldableResult<ReturnType>(Parameters...)>* delegate
+            ) {
+                reinterpret_cast<EnvironmentImpl*>(this)->add_yieldable_c_delegate(
+                    name, delegate
+                );
+            }
+
+            /**
+             * @brief Add a function to the environment, exposed to the
+             * scripts ran within. Being yieldable means that, should this
+             * function return true for the first return value, the script
+             * calling it will yield back to whoever is running it.
+             *
+             * @tparam ReturnType The return type of the function.
+             * @tparam Parameters The parameters accepted by the function.
+             * @param name The name to expose the function as within the
+             * environment.
+             * @param func The function to be added to the environment.
+             */
+            template <typename ReturnType, typename... Parameters>
+            void add_yieldable_c_function(
+                std::string_view name,
+                YieldableResult<ReturnType> (*func)(Parameters...)
+            ) {
+                reinterpret_cast<EnvironmentImpl*>(this)->add_yieldable_c_function(
+                    name, func
+                );
+            }
+
+            /**
+             * @brief Add a closure to the environment, exposed to the
+             * scripts ran within. Being yieldable means that, should this
+             * function return true for the first return value, the script
+             * calling it will yield back to whoever is running it.
+             *
+             * @tparam Closure The closure type.
+             * @tparam ReturnType The return type of the closure's invocation.
+             * @tparam Parameters The parameters accepted by the closure's invocation.
+             * @param name The name to expose the closure as within the
+             * environment.
+             * @param closure The closure to be added to the environment.
+             * @param func The closure's invocation method.
+             */
+            template <
+                std::invocable Closure,
+                typename ReturnType,
+                typename... Parameters>
+            void add_yieldable_c_closure(
+                std::string_view name,
+                Closure*         closure,
+                YieldableResult<ReturnType> (Closure::*func)(Parameters...)
+            ) {
+                reinterpret_cast<EnvironmentImpl*>(this)->add_yieldable_c_closure(
+                    name, closure, func
+                );
+            }
+
+            /**
+             * @brief Add a closure to the environment, exposed to the
+             * scripts ran within. This provides a default expecation
+             * of an unambiguous operator() in the Closure type. Being
+             * yieldable means that, should this function return true
+             * for the first return value, the script calling it will
+             * yield back to whoever is running it.
+             *
+             * @tparam Closure The closure type.
+             * @tparam ReturnType The return type of the closure's invocation.
+             * @tparam Parameters The parameters accepted by the closure's invocation.
+             * @param name The name to expose the closure as within the
+             * environment.
+             * @param closure The closure to be added to the environment.
+             */
+            template <std::invocable Closure>
+            void add_yieldable_c_closure(std::string_view name, Closure* closure) {
+                reinterpret_cast<EnvironmentImpl*>(this)->add_yieldable_c_closure(
+                    name, closure, Closure::operator()
+                );
+            }
+
+            /**
              * @brief Get a script function from the environment, allowing
              * calls within C++ into the script.
              *
