@@ -43,6 +43,10 @@ public:
         m_lua_env_2->get_script_function<void>("check_hello_world", check_hello_world);
         check_hello_world();
 
+        hscript::ScriptDelegate<void> check_add;
+        m_lua_env_2->get_script_function<void>("check_add", check_add);
+        check_add();
+
         m_lua_env_3->run(hio::fs::path("scripts/coroutine_hello_world.lua"));
 
         hscript::lua::LuaContinuableFunction lua_cont_func;
