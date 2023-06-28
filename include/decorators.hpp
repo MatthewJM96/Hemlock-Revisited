@@ -32,7 +32,9 @@
   TYPE& operator=(TYPE&& rhs)
 
 #if defined(HEMLOCK_COMPILER_GCC) || defined(HEMLOCK_COMPILER_CLANG)
-#   define HEMLOCK_PACKED_STRUCT(DECL) DECL __attribute__((packed))
-#else // defined(HEMLOCK_COMPILER_GCC) || defined(HEMLOCK_COMPILER_CLANG)
-#   define HEMLOCK_PACKED_STRUCT(DECL) __pragma( pack(push, 1) ) DECL __pragma( pack(pop))
+#  define HEMLOCK_PACKED_STRUCT(DECL) DECL __attribute__((packed))
+#  define HEMLOCK_NOINLINE            __attribute__((noinline))
+#else  // defined(HEMLOCK_COMPILER_GCC) || defined(HEMLOCK_COMPILER_CLANG)
+#  define HEMLOCK_PACKED_STRUCT(DECL) __pragma(pack(push, 1)) DECL __pragma(pack(pop))
+#  define HEMLOCK_NOINLINE            __declspec(noinline)
 #endif

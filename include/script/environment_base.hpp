@@ -5,6 +5,7 @@
 #  define HEMLOCK_DEFAULT_MAX_SCRIPT_LENGTH 50 * 1024 * 1024
 #endif  // HEMLOCK_DEFAULT_MAX_SCRIPT_LENGTH
 
+#include "script/continuable_function.hpp"
 #include "script/environment_base_decl.hpp"
 #include "script/rpc_manager.hpp"
 #include "script/state.hpp"
@@ -22,6 +23,8 @@ namespace hemlock {
 
         template <
             typename EnvironmentImpl,
+            typename ContinuableFuncImpl,
+            typename ThreadImpl,
             bool   HasRPCManager /*= false*/,
             size_t CallBufferSize /*= 0*/
             >
@@ -190,7 +193,7 @@ namespace hemlock {
              */
             template <typename ReturnType, typename... Parameters>
             void add_c_delegate(
-                std::string_view name, Delegate<ReturnType, Parameters...>* delegate
+                std::string_view name, Delegate<ReturnType(Parameters...)>* delegate
             ) {
                 reinterpret_cast<EnvironmentImpl*>(this)->add_c_delegate(
                     name, delegate
@@ -259,6 +262,100 @@ namespace hemlock {
             }
 
             /**
+             * @brief Add a delegate to the environment, exposed to the
+             * scripts ran within. Being yieldable means that, should this
+             * function return true for the first return value, the script
+             * calling it will yield back to whoever is running it.
+             *
+             * @tparam ReturnType The return type of the delegate.
+             * @tparam Parameters The parameters accepted by the delegate.
+             * @param name The name to expose the delegate as within the
+             * environment.
+             * @param delegate The delegate to be added to the environment.
+             */
+            template <typename ReturnType, typename... Parameters>
+            void add_yieldable_c_delegate(
+                std::string_view                                      name,
+                Delegate<YieldableResult<ReturnType>(Parameters...)>* delegate
+            ) {
+                reinterpret_cast<EnvironmentImpl*>(this)->add_yieldable_c_delegate(
+                    name, delegate
+                );
+            }
+
+            /**
+             * @brief Add a function to the environment, exposed to the
+             * scripts ran within. Being yieldable means that, should this
+             * function return true for the first return value, the script
+             * calling it will yield back to whoever is running it.
+             *
+             * @tparam ReturnType The return type of the function.
+             * @tparam Parameters The parameters accepted by the function.
+             * @param name The name to expose the function as within the
+             * environment.
+             * @param func The function to be added to the environment.
+             */
+            template <typename ReturnType, typename... Parameters>
+            void add_yieldable_c_function(
+                std::string_view name,
+                YieldableResult<ReturnType> (*func)(Parameters...)
+            ) {
+                reinterpret_cast<EnvironmentImpl*>(this)->add_yieldable_c_function(
+                    name, func
+                );
+            }
+
+            /**
+             * @brief Add a closure to the environment, exposed to the
+             * scripts ran within. Being yieldable means that, should this
+             * function return true for the first return value, the script
+             * calling it will yield back to whoever is running it.
+             *
+             * @tparam Closure The closure type.
+             * @tparam ReturnType The return type of the closure's invocation.
+             * @tparam Parameters The parameters accepted by the closure's invocation.
+             * @param name The name to expose the closure as within the
+             * environment.
+             * @param closure The closure to be added to the environment.
+             * @param func The closure's invocation method.
+             */
+            template <
+                std::invocable Closure,
+                typename ReturnType,
+                typename... Parameters>
+            void add_yieldable_c_closure(
+                std::string_view name,
+                Closure*         closure,
+                YieldableResult<ReturnType> (Closure::*func)(Parameters...)
+            ) {
+                reinterpret_cast<EnvironmentImpl*>(this)->add_yieldable_c_closure(
+                    name, closure, func
+                );
+            }
+
+            /**
+             * @brief Add a closure to the environment, exposed to the
+             * scripts ran within. This provides a default expecation
+             * of an unambiguous operator() in the Closure type. Being
+             * yieldable means that, should this function return true
+             * for the first return value, the script calling it will
+             * yield back to whoever is running it.
+             *
+             * @tparam Closure The closure type.
+             * @tparam ReturnType The return type of the closure's invocation.
+             * @tparam Parameters The parameters accepted by the closure's invocation.
+             * @param name The name to expose the closure as within the
+             * environment.
+             * @param closure The closure to be added to the environment.
+             */
+            template <std::invocable Closure>
+            void add_yieldable_c_closure(std::string_view name, Closure* closure) {
+                reinterpret_cast<EnvironmentImpl*>(this)->add_yieldable_c_closure(
+                    name, closure, Closure::operator()
+                );
+            }
+
+            /**
              * @brief Get a script function from the environment, allowing
              * calls within C++ into the script.
              *
@@ -279,9 +376,57 @@ namespace hemlock {
                     );
             }
 
+            /**
+             * @brief Get a continuable script function from the environment, allowing
+             * calls within C++ into the script where the script may yield back and be
+             * continued later.
+             *
+             * @param name The name of the script function to obtain.
+             * @param continuable_function ContinuableFunction object providing means to
+             * call the script function.
+             * @param attached_to_thread If true, creates a thread that the function is
+             * attached to. This thread will be disposed of on function completion. If
+             * false, the function is not attached to a thread, leaving the attachment
+             * up to the caller.
+             * @return True if the script function was obtained, false otherwise.
+             */
+            bool get_continuable_script_function(
+                std::string&&            name,
+                OUT ContinuableFuncImpl& continuable_function,
+                bool                     attached_to_thread = false
+            ) {
+                return reinterpret_cast<EnvironmentImpl*>(this)
+                    ->get_continuable_script_function(
+                        std::move(name), continuable_function, attached_to_thread
+                    );
+            }
+
+            /**
+             * @brief Creatres a thread context within script environment for running
+             * script components concurrently.
+             *
+             * @return The created thread.
+             */
+            ThreadImpl make_thread() {
+                return reinterpret_cast<EnvironmentImpl*>(this)->make_thread();
+            }
+
+            /**
+             * @brief Destroys the given thread.
+             *
+             * @param thread The thread to destroy.
+             */
+            void destroy_thread(ThreadImpl thread) {
+                return reinterpret_cast<EnvironmentImpl*>(this)->destroy_thread(thread);
+            }
+
             typename std::conditional<
                 HasRPCManager,
-                RPCManager<EnvironmentImpl, CallBufferSize>,
+                RPCManager<
+                    EnvironmentImpl,
+                    ContinuableFuncImpl,
+                    ThreadImpl,
+                    CallBufferSize>,
                 std::monostate>::type rpc
                 = {};
         protected:

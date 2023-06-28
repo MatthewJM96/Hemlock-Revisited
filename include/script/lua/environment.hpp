@@ -2,6 +2,7 @@
 #define __hemlock_script_lua_environment_h
 
 #include "script/environment_base.hpp"
+#include "script/lua/continuable_function.hpp"
 #include "script/lua/lua_function.hpp"
 #include "script/lua/rpc_functions.hpp"
 #include "script/lua/state.hpp"
@@ -19,34 +20,35 @@ namespace hemlock {
             class Environment :
                 public EnvironmentBase<
                     Environment<HasRPCManager, CallBufferSize>,
+                    LuaContinuableFunction,
+                    LuaThreadState,
                     HasRPCManager,
                     CallBufferSize> {
                 friend i32
                     hscript::lua::register_lua_function<HasRPCManager, CallBufferSize>(
                         LuaHandle
                     );
+                friend i32 hscript::lua::call_foreign<CallBufferSize>(LuaHandle);
+                friend i32 hscript::lua::query_foreign_call<CallBufferSize>(LuaHandle);
                 friend i32
-                    hscript::lua::call_foreign<HasRPCManager, CallBufferSize>(LuaHandle
-                    );
-                friend i32
-                    hscript::lua::query_foreign_call<HasRPCManager, CallBufferSize>(
-                        LuaHandle
-                    );
-                friend i32 hscript::lua::
-                    get_foreign_call_results<HasRPCManager, CallBufferSize>(LuaHandle);
-                friend i32 hscript::lua::set_manual_command_buffer_pump<
-                    HasRPCManager,
-                    CallBufferSize>(LuaHandle);
-                friend i32
-                    hscript::lua::pump_command_buffer<HasRPCManager, CallBufferSize>(
-                        LuaHandle
-                    );
+                    hscript::lua::get_foreign_call_results<CallBufferSize>(LuaHandle);
+                friend i32 hscript::lua::set_manual_command_buffer_pump<CallBufferSize>(
+                    LuaHandle
+                );
+                friend i32 hscript::lua::pump_command_buffer<CallBufferSize>(LuaHandle);
 
                 using _Environment = Environment<HasRPCManager, CallBufferSize>;
-                using _Base
-                    = EnvironmentBase<_Environment, HasRPCManager, CallBufferSize>;
+                using _Base        = EnvironmentBase<
+                    _Environment,
+                    LuaContinuableFunction,
+                    LuaThreadState,
+                    HasRPCManager,
+                    CallBufferSize>;
             public:
-                Environment() : m_state(nullptr), m_parent(nullptr) { /* Empty. */
+                Environment() :
+                    m_state(nullptr),
+                    m_parent(nullptr),
+                    m_namespace_depth(0) { /* Empty. */
                 }
 
                 ~Environment() { /* Empty. */
@@ -197,7 +199,7 @@ namespace hemlock {
                  */
                 template <typename ReturnType, typename... Parameters>
                 void add_c_delegate(
-                    std::string_view name, Delegate<ReturnType, Parameters...>* delegate
+                    std::string_view name, Delegate<ReturnType(Parameters...)>* delegate
                 );
                 /**
                  * @brief Add a function to the environment, exposed to the
@@ -244,6 +246,53 @@ namespace hemlock {
                     ReturnType (Closure::*func)(Parameters...)
                 );
                 /**
+                 * @brief Add a delegate to the environment, exposed to the
+                 * scripts ran within.
+                 *
+                 * @tparam ReturnType The return type of the delegate.
+                 * @tparam Parameters The parameters accepted by the delegate.
+                 * @param name The name to expose the delegate as within the
+                 * environment.
+                 * @param delegate The delegate to be added to the environment.
+                 */
+                template <typename ReturnType, typename... Parameters>
+                void add_yieldable_c_delegate(
+                    std::string_view                                      name,
+                    Delegate<YieldableResult<ReturnType>(Parameters...)>* delegate
+                );
+                /**
+                 * @brief Add a function to the environment, exposed to the
+                 * scripts ran within.
+                 *
+                 * @tparam Func The invocable type.
+                 * @param name The name to expose the function as within the
+                 * environment.
+                 * @param func The function to be added to the environment.
+                 */
+                template <typename ReturnType, typename... Parameters>
+                void add_yieldable_c_function(
+                    std::string_view name,
+                    YieldableResult<ReturnType> (*func)(Parameters...)
+                );
+                /**
+                 * @brief Add a closure to the environment, exposed to the
+                 * scripts ran within.
+                 *
+                 * @tparam Func The invocable type.
+                 * @param name The name to expose the closure as within the
+                 * environment.
+                 * @param closure The closure to be added to the environment.
+                 */
+                template <
+                    std::invocable Closure,
+                    typename ReturnType,
+                    typename... Parameters>
+                void add_yieldable_c_closure(
+                    std::string_view name,
+                    Closure*         closure,
+                    YieldableResult<ReturnType> (Closure::*func)(Parameters...)
+                );
+                /**
                  * @brief Get a script function from the environment, allowing
                  * calls within C++ into the script. Name can specify namespacing
                  * with dot-separation.
@@ -260,6 +309,41 @@ namespace hemlock {
                     std::string&& name,
                     OUT ScriptDelegate<ReturnType, Parameters...>& delegate
                 );
+
+                /**
+                 * @brief Get a continuable script function from the environment,
+                 * allowing calls within C++ into the script where the script may yield
+                 * back and be continued later.
+                 *
+                 * @param name The name of the script function to obtain.
+                 * @param continuable_function ContinuableFunction object providing
+                 * means to call the script function.
+                 * @param attached_to_thread If true, creates a thread that the function
+                 * is attached to. This thread will be disposed of on function
+                 * completion. If false, the function is not attached to a thread,
+                 * leaving the attachment up to the caller.
+                 * @return True if the script function was obtained, false otherwise.
+                 */
+                bool get_continuable_script_function(
+                    std::string&&               name,
+                    OUT LuaContinuableFunction& continuable_function,
+                    bool                        attached_to_thread = false
+                );
+
+                /**
+                 * @brief Creatres a thread context within script environment for
+                 * running script components concurrently.
+                 *
+                 * @return The created thread.
+                 */
+                LuaThreadState make_thread();
+
+                /**
+                 * @brief Destroys the given thread.
+                 *
+                 * @param thread The thread to destroy.
+                 */
+                void destroy_thread(LuaThreadState thread);
             protected:
                 /**
                  * @brief Pushes namespaces onto the Lua stack. Last
@@ -287,6 +371,7 @@ namespace hemlock {
                 LuaHandle    m_state;
                 Environment* m_parent;
                 LuaFunctions m_lua_functions;
+                LuaFunctions m_lua_continuable_functions;
                 i32          m_namespace_depth;
             };
         }  // namespace lua

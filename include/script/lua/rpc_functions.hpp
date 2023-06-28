@@ -11,11 +11,10 @@ namespace hemlock {
              * function.
              *
              * @param state The Lua state to operate within.
-             * @tparam HasRPCManager Whether the environment has an RPC manager.
              * @tparam CallBufferSize The size of the command buffer.
              * @return i32 The number of returned arguments.
              */
-            template <bool HasRPCManager, size_t CallBufferSize>
+            template <size_t CallBufferSize>
             i32 call_foreign(LuaHandle state);
 
             /**
@@ -23,11 +22,10 @@ namespace hemlock {
              * a call to a foreign function.
              *
              * @param state The Lua state to operate within.
-             * @tparam HasRPCManager Whether the environment has an RPC manager.
              * @tparam CallBufferSize The size of the command buffer.
              * @return i32 The number of returned arguments.
              */
-            template <bool HasRPCManager, size_t CallBufferSize>
+            template <size_t CallBufferSize>
             i32 query_foreign_call(LuaHandle state);
 
             /**
@@ -35,11 +33,10 @@ namespace hemlock {
              * values of a call to a foreign function.
              *
              * @param state The Lua state to operate within.
-             * @tparam HasRPCManager Whether the environment has an RPC manager.
              * @tparam CallBufferSize The size of the command buffer.
              * @return i32 The number of returned arguments.
              */
-            template <bool HasRPCManager, size_t CallBufferSize>
+            template <size_t CallBufferSize>
             i32 get_foreign_call_results(LuaHandle state);
 
             /**
@@ -48,11 +45,10 @@ namespace hemlock {
              * manually or automatically.
              *
              * @param state The Lua state to operate within.
-             * @tparam HasRPCManager Whether the environment has an RPC manager.
              * @tparam CallBufferSize The size of the command buffer.
              * @return i32 The number of returned arguments.
              */
-            template <bool HasRPCManager, size_t CallBufferSize>
+            template <size_t CallBufferSize>
             i32 set_manual_command_buffer_pump(LuaHandle state);
 
             /**
@@ -62,11 +58,10 @@ namespace hemlock {
              * pumping is turned on.
              *
              * @param state The Lua state to operate within.
-             * @tparam HasRPCManager Whether the environment has an RPC manager.
              * @tparam CallBufferSize The size of the command buffer.
              * @return i32 The number of returned arguments.
              */
-            template <bool HasRPCManager, size_t CallBufferSize>
+            template <size_t CallBufferSize>
             i32 pump_command_buffer(LuaHandle state);
         }  // namespace lua
     }      // namespace script

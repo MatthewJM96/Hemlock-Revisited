@@ -27,6 +27,8 @@ public:
 
         m_lua_env_2 = m_lua_env_reg->create_environment("env_2");
 
+        m_lua_env_3 = m_lua_env_reg->create_environment("env_3");
+
         m_lua_env_1->run(hio::fs::path("scripts/hello_world.lua"));
 
         hscript::ScriptDelegate<void> hello_world;
@@ -40,6 +42,40 @@ public:
         hscript::ScriptDelegate<void> check_hello_world;
         m_lua_env_2->get_script_function<void>("check_hello_world", check_hello_world);
         check_hello_world();
+
+        hscript::ScriptDelegate<void> check_add;
+        m_lua_env_2->get_script_function<void>("check_add", check_add);
+        check_add();
+
+        m_lua_env_3->run(hio::fs::path("scripts/coroutine_hello_world.lua"));
+
+        hscript::lua::LuaContinuableFunction lua_cont_func;
+        m_lua_env_3->get_continuable_script_function(
+            "hello_world", lua_cont_func, true
+        );
+
+        auto do_forced_yield = hemlock::Delegate<hscript::YieldableResult<i32>(i32)>{
+            [&](i32 p) -> hscript::YieldableResult<i32> {
+                return { true, p };
+            }
+        };
+        m_lua_env_3->set_global_namespace();
+        m_lua_env_3->add_yieldable_c_delegate<i32>(
+            "beg_a_forced_yield", &do_forced_yield
+        );
+
+        auto [err_1, res_1] = lua_cont_func.invoke<i32>();
+        std::cout << err_1 << " - " << res_1 << std::endl;
+
+        std::cout << "EYUP" << std::endl;
+
+        auto [err_2, res_2] = lua_cont_func.invoke<i32>();
+        std::cout << err_2 << " - " << res_2 << std::endl;
+
+        std::cout << "EYUP 2" << std::endl;
+
+        auto [err_3, res_3] = lua_cont_func.invoke<i32>();
+        std::cout << err_3 << " - " << res_3 << std::endl;
     }
 
     virtual void update(hemlock::FrameTime) override {
@@ -64,7 +100,7 @@ protected:
     MyIOManager        m_iom;
     hui::InputManager* m_input_manager;
     TSS_EnvReg*        m_lua_env_reg;
-    TSS_Env *          m_lua_env_1, *m_lua_env_2;
+    TSS_Env *          m_lua_env_1, *m_lua_env_2, *m_lua_env_3;
 };
 
 #endif  // __hemlock_tests_test_script_screen_hpp
