@@ -7,11 +7,12 @@
 #include "app/window/window_base.h"
 
 #include "ai_screen/ai_screen.hpp"
-#include "test_entry_screen.hpp"
-#include "test_render_screen.hpp"
-#include "test_script_screen.hpp"
 #include "navmesh_screen/navmesh_screen.hpp"
 #include "performance_screen/performance_screen.hpp"
+#include "test_entry_screen.hpp"
+#include "test_mod_screen.hpp"
+#include "test_render_screen.hpp"
+#include "test_script_screen.hpp"
 #include "voxel_screen/voxel_screen.hpp"
 
 class MyApp : public happ::SingleWindowApp {
@@ -33,6 +34,8 @@ protected:
         test_voxel_screen->init("test_voxel_screen", this);
         happ::ScreenBase* test_script_screen = new TestScriptScreen();
         test_script_screen->init("test_script_screen", this);
+        happ::ScreenBase* test_mod_screen = new TestModScreen();
+        test_mod_screen->init("test_mod_screen", this);
 
         m_screens.insert({ "test_ai_screen", test_ai_screen });
         m_screens.insert({ "test_entry_screen", test_entry_screen });
@@ -41,6 +44,7 @@ protected:
         m_screens.insert({ "test_navmesh_screen", test_navmesh_screen });
         m_screens.insert({ "test_voxel_screen", test_voxel_screen });
         m_screens.insert({ "test_script_screen", test_script_screen });
+        m_screens.insert({ "test_mod_screen", test_mod_screen });
 
         m_current_screen = test_entry_screen;
     }

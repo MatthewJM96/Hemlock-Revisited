@@ -75,6 +75,11 @@ public:
                             m_process->timer()->frame_times().back()
                         );
                         return;
+                    case hui::PhysicalKey::H_M:
+                        m_process->go_to_screen(
+                            "test_mod_screen", m_process->timer()->frame_times().back()
+                        );
+                        return;
                     default:
                         break;
                 }
