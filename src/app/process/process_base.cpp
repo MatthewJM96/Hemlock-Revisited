@@ -5,12 +5,12 @@
 
 #include "app/process/process_base.h"
 
-happ::ProcessBase::ProcessBase()  :
+happ::ProcessBase::ProcessBase() :
     m_initialised(false),
     m_should_end_process(false),
     m_current_screen(nullptr),
-    m_window(nullptr)
-{ /* Empty */ }
+    m_window(nullptr) { /* Empty */
+}
 
 void happ::ProcessBase::init() {
     if (m_initialised) return;
@@ -55,7 +55,7 @@ bool happ::ProcessBase::go_to_screen(const std::string& name, FrameTime time) {
         m_current_screen->end(time);
     }
 
-    auto tmp = m_current_screen;
+    auto tmp         = m_current_screen;
     m_current_screen = (*it).second;
 
     m_current_screen->start(time);
@@ -136,7 +136,9 @@ void happ::ProcessBase::goto_next_screen() {
 
         if (it == m_screens.end()) {
             m_current_screen->set_next_screen(nullptr);
-            m_current_screen = nullptr; // TODO(Matthew): Instead of nullptr, maybe a default object that at least linked back to previous screen?
+            m_current_screen
+                = nullptr;  // TODO(Matthew): Instead of nullptr, maybe a default
+                            // object that at least linked back to previous screen?
         } else {
             m_current_screen = (*it).second;
             m_current_screen->set_prev_screen(tmp);
@@ -160,7 +162,9 @@ void happ::ProcessBase::goto_prev_screen() {
 
         if (it == m_screens.end()) {
             m_current_screen->set_prev_screen(nullptr);
-            m_current_screen = nullptr; // TODO(Matthew): Instead of nullptr, maybe a default object that at least linked back to previous screen?
+            m_current_screen
+                = nullptr;  // TODO(Matthew): Instead of nullptr, maybe a default
+                            // object that at least linked back to previous screen?
         } else {
             m_current_screen = (*it).second;
             m_current_screen->set_next_screen(tmp);

@@ -14,24 +14,39 @@ namespace hemlock {
         class BaseCamera {
         public:
             BaseCamera(Subscriber<happ::ResizeEvent>&& handler) :
-                handle_window_resize(std::forward<Subscriber<happ::ResizeEvent>>(handler)),
+                handle_window_resize(std::forward<Subscriber<happ::ResizeEvent>>(handler
+                )),
                 m_view_changed(false),
-                m_projection_changed(false)
-            { /* Empty. */ };
-            virtual ~BaseCamera() { /* Empty. */ }
+                m_projection_changed(false){ /* Empty. */ };
+
+            virtual ~BaseCamera() { /* Empty. */
+            }
 
             void attach_to_window(app::WindowBase* window);
 
-                  f32    near_clipping()            { return m_state.near_clipping;                             }
-                  f32    far_clipping()             { return m_state.far_clipping;                              }
-                  f32v2  nf_clipping()              { return { m_state.near_clipping, m_state.far_clipping };   }
-            const f32v3& position()                 { return m_state.position;                                  }
-            const f32v3& direction()                { return m_state.direction;                                 }
-            const f32v3& right()                    { return m_state.right;                                     }
-            const f32v3& up()                       { return m_state.up;                                        }
-            const f32m4& projection_matrix()        { return m_state.projection_matrix;                         }
-            const f32m4& view_matrix()              { return m_state.view_matrix;                               }
-            const f32m4& view_projection_matrix()   { return m_state.view_projection_matrix;                    }
+            f32 near_clipping() const { return m_state.near_clipping; }
+
+            f32 far_clipping() const { return m_state.far_clipping; }
+
+            f32v2 nf_clipping() const {
+                return { m_state.near_clipping, m_state.far_clipping };
+            }
+
+            const f32v3& position() const { return m_state.position; }
+
+            const f32v3& direction() const { return m_state.direction; }
+
+            const f32v3& right() const { return m_state.right; }
+
+            const f32v3& up() const { return m_state.up; }
+
+            const f32m4& projection_matrix() const { return m_state.projection_matrix; }
+
+            const f32m4& view_matrix() const { return m_state.view_matrix; }
+
+            const f32m4& view_projection_matrix() const {
+                return m_state.view_projection_matrix;
+            }
 
             void set_near_clipping(f32 near_clipping);
             void set_far_clipping(f32 far_clipping);
@@ -46,10 +61,10 @@ namespace hemlock {
             bool m_view_changed;
             bool m_projection_changed;
         };
-    }
-}
+    }  // namespace camera
+}  // namespace hemlock
 namespace hcam = hemlock::camera;
 
 #include "base_camera.inl"
 
-#endif // __hemlock_camera_base_camera_h
+#endif  // __hemlock_camera_base_camera_h

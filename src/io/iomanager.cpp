@@ -4,7 +4,6 @@
 
 #include "io/iomanager.h"
 
-
 bool hio::IOManagerBase::can_access_file(const fs::path& path) const {
     fs::path abs_path{};
     if (!resolve_path(path, abs_path)) return false;
@@ -26,15 +25,16 @@ bool hio::IOManagerBase::create_directories(const fs::path& path) const {
     return fs::create_directories(abs_path);
 }
 
-bool hio::IOManagerBase::rename(const fs::path& src, const fs::path& dest, bool force /*= false*/) const {
+bool hio::IOManagerBase::
+    rename(const fs::path& src, const fs::path& dest, bool force /*= false*/) const {
     fs::path abs_src{};
     fs::path abs_dest{};
-    
+
     if (force) {
-        if (!assure_path(src,  abs_src,  true))   return false;
+        if (!assure_path(src, abs_src, true)) return false;
         if (!assure_path(dest, abs_dest, true)) return false;
     } else {
-        if (!resolve_path(src,  abs_src))  return false;
+        if (!resolve_path(src, abs_src)) return false;
         if (!resolve_path(dest, abs_dest)) return false;
     }
 
@@ -43,11 +43,15 @@ bool hio::IOManagerBase::rename(const fs::path& src, const fs::path& dest, bool 
     return true;
 }
 
-void hio::IOManagerBase::apply_to_paths(std::vector<fs::path>&& paths, Delegate<void(const fs::path&)> func) const {
+void hio::IOManagerBase::apply_to_paths(
+    std::vector<fs::path>&& paths, Delegate<void(const fs::path&)> func
+) const {
     for (const auto& path : paths) apply_to_path(path, func);
 }
 
-ui32 hio::IOManagerBase::apply_to_paths(std::vector<fs::path>&& paths, Delegate<bool(const fs::path&)> func) const {
+ui32 hio::IOManagerBase::apply_to_paths(
+    std::vector<fs::path>&& paths, Delegate<bool(const fs::path&)> func
+) const {
     ui32 successes = 0;
     for (const auto& path : paths) {
         if (apply_to_path(path, func)) ++successes;
@@ -55,15 +59,21 @@ ui32 hio::IOManagerBase::apply_to_paths(std::vector<fs::path>&& paths, Delegate<
     return successes;
 }
 
-void hio::IOManagerBase::apply_to_globpath(const fs::path& globpath, Delegate<void(const fs::path&)> func) const {
+void hio::IOManagerBase::apply_to_globpath(
+    const fs::path& globpath, Delegate<void(const fs::path&)> func
+) const {
     apply_to_paths(glob::glob(globpath), func);
 }
 
-ui32 hio::IOManagerBase::apply_to_globpath(const fs::path& globpath, Delegate<bool(const fs::path&)> func) const {
+ui32 hio::IOManagerBase::apply_to_globpath(
+    const fs::path& globpath, Delegate<bool(const fs::path&)> func
+) const {
     return apply_to_paths(glob::glob(globpath), func);
 }
 
-bool hio::IOManagerBase::memory_map_file(const fs::path& path, OUT hio::fs::mapped_file& file) const {
+bool hio::IOManagerBase::memory_map_file(
+    const fs::path& path, OUT hio::fs::mapped_file& file
+) const {
     fs::path abs_path{};
     if (!resolve_path(path, abs_path)) return false;
 
@@ -72,7 +82,9 @@ bool hio::IOManagerBase::memory_map_file(const fs::path& path, OUT hio::fs::mapp
     return true;
 }
 
-bool hio::IOManagerBase::memory_map_read_only_file(const fs::path& path, OUT hio::fs::mapped_file_source& file) const {
+bool hio::IOManagerBase::memory_map_read_only_file(
+    const fs::path& path, OUT hio::fs::mapped_file_source& file
+) const {
     fs::path abs_path{};
     if (!resolve_path(path, abs_path)) return false;
 
@@ -81,7 +93,8 @@ bool hio::IOManagerBase::memory_map_read_only_file(const fs::path& path, OUT hio
     return true;
 }
 
-bool hio::IOManagerBase::read_file_to_string(const fs::path& path, std::string& buffer) const {
+bool hio::IOManagerBase::read_file_to_string(const fs::path& path, std::string& buffer)
+    const {
     fs::path abs_path{};
     if (!resolve_path(path, abs_path)) return false;
 
@@ -102,7 +115,19 @@ bool hio::IOManagerBase::read_file_to_string(const fs::path& path, std::string& 
     buffer.resize(length);
 
     // Read data into buffer.
-    fread(&buffer[0], 1, length, file);
+    size_t chars_read = fread(&buffer[0], 1, length, file);
+
+#if DEBUG
+    if (chars_read != length) {
+#  if defined(HEMLOCK_OS_WINDOWS)
+        debug_printf("%ls could not be read.", abs_path.c_str());
+#  else
+        debug_printf("%s could not be read.", abs_path.c_str());
+#  endif
+    }
+#else   // DEBUG
+    (void)chars_read;
+#endif  // !DEBUG
 
     // Close file.
     fclose(file);
@@ -110,7 +135,8 @@ bool hio::IOManagerBase::read_file_to_string(const fs::path& path, std::string& 
     return true;
 }
 
-char* hio::IOManagerBase::read_file_to_string(const fs::path& path, ui32* length /*= nullptr*/) const {
+char* hio::IOManagerBase::
+    read_file_to_string(const fs::path& path, ui32* length /*= nullptr*/) const {
     fs::path abs_path{};
     if (!resolve_path(path, abs_path)) return nullptr;
 
@@ -135,7 +161,19 @@ char* hio::IOManagerBase::read_file_to_string(const fs::path& path, ui32* length
     buffer[_length] = '\0';
 
     // Read data into buffer.
-    fread(buffer, 1, _length, file);
+    size_t chars_read = fread(buffer, 1, _length, file);
+
+#if DEBUG
+    if (chars_read != _length) {
+#  if defined(HEMLOCK_OS_WINDOWS)
+        debug_printf("%ls could not be read.", abs_path.c_str());
+#  else
+        debug_printf("%s could not be read.", abs_path.c_str());
+#  endif
+    }
+#else   // DEBUG
+    (void)chars_read;
+#endif  // !DEBUG
 
     // Close file.
     fclose(file);
@@ -143,8 +181,9 @@ char* hio::IOManagerBase::read_file_to_string(const fs::path& path, ui32* length
     return buffer;
 }
 
-
-bool hio::IOManagerBase::read_file_to_binary(const fs::path& path, std::vector<ui8>& buffer) const {
+bool hio::IOManagerBase::read_file_to_binary(
+    const fs::path& path, std::vector<ui8>& buffer
+) const {
     fs::path abs_path{};
     if (!resolve_path(path, abs_path)) return false;
 
@@ -165,7 +204,19 @@ bool hio::IOManagerBase::read_file_to_binary(const fs::path& path, std::vector<u
     buffer.resize(length);
 
     // Read data into buffer.
-    fread(&buffer[0], 1, length, file);
+    size_t chars_read = fread(&buffer[0], 1, length, file);
+
+#if DEBUG
+    if (chars_read != length) {
+#  if defined(HEMLOCK_OS_WINDOWS)
+        debug_printf("%ls could not be read.", abs_path.c_str());
+#  else
+        debug_printf("%s could not be read.", abs_path.c_str());
+#  endif
+    }
+#else   // DEBUG
+    (void)chars_read;
+#endif  // !DEBUG
 
     // Close file.
     fclose(file);
@@ -193,7 +244,19 @@ ui8* hio::IOManagerBase::read_file_to_binary(const fs::path& path, ui32& length)
     ui8* buffer = new ui8[length];
 
     // Read data into buffer.
-    fread(buffer, 1, length, file);
+    size_t chars_read = fread(buffer, 1, length, file);
+
+#if DEBUG
+    if (chars_read != length) {
+#  if defined(HEMLOCK_OS_WINDOWS)
+        debug_printf("%ls could not be read.", abs_path.c_str());
+#  else
+        debug_printf("%s could not be read.", abs_path.c_str());
+#  endif
+    }
+#else   // DEBUG
+    (void)chars_read;
+#endif  // !DEBUG
 
     // Close file.
     fclose(file);

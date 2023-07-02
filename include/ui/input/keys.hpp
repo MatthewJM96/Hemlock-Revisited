@@ -3,8 +3,9 @@
 
 namespace hemlock {
     namespace ui {
+// clang-format off
         enum class PhysicalKey {
-#define PUT(X) H_##X = SDL_SCANCODE_##X,
+#define PUT(X)        H_##X = SDL_SCANCODE_##X,
 #define PUTASYM(X, Y) H_##X = SDL_SCANCODE_##Y,
             PUT(0)
             PUT(1)
@@ -249,7 +250,7 @@ namespace hemlock {
         };
 
         enum class VirtualKey {
-#define PUT(X) H_##X = SDLK_##X,
+#define PUT(X)        H_##X = SDLK_##X,
 #define PUTASYM(X, Y) H_##X = SDLK_##Y,
             PUT(0)
             PUT(1)
@@ -492,8 +493,9 @@ namespace hemlock {
 #undef PUTASYM
 #undef PUT
         };
-    }
-}
+// clang-format on
+    }  // namespace ui
+}  // namespace hemlock
 namespace hui = hemlock::ui;
 
-#endif // __hemlock_ui_input_keys_hpp
+#endif  // __hemlock_ui_input_keys_hpp

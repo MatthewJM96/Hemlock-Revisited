@@ -9,10 +9,7 @@ H_DEF_ENUM_WITH_SERIALISATION(hemlock::graphics, ShaderLinkResult)
 GLuint hg::GLSLProgram::current = 0;
 
 hg::GLSLProgram::GLSLProgram() :
-    m_id(0),
-    m_vertex_id(0), m_frag_id(0),
-    m_is_linked(false)
-{
+    m_id(0), m_vertex_id(0), m_frag_id(0), m_is_linked(false) {
     /* Empty */
 }
 
@@ -39,7 +36,7 @@ void hg::GLSLProgram::dispose() {
     // Clear the shader program if it exists.
     if (m_id != 0) {
         glDeleteProgram(m_id);
-        m_id = 0;
+        m_id        = 0;
         m_is_linked = false;
     }
 
@@ -71,7 +68,9 @@ hg::ShaderCreationResult hg::GLSLProgram::add_shader(const ShaderInfo& shader) {
         default:
             debug_printf(
                 "Unknow shader type in add_shader: %i",
-                static_cast<std::underlying_type<decltype(shader.type)>::type>(shader.type)
+                static_cast<std::underlying_type<decltype(shader.type)>::type>(
+                    shader.type
+                )
             );
             on_shader_add_fail(ShaderCreationResult::INVALID_STAGE);
             return ShaderCreationResult::INVALID_STAGE;
@@ -107,7 +106,7 @@ hg::ShaderCreationResult hg::GLSLProgram::add_shader(const ShaderInfo& shader) {
         glGetShaderInfoLog(shader_id, max_length, nullptr, log);
         log[max_length] = '\0';
 
-        debug_printf(log);
+        debug_printf("%s", log);
 
         on_shader_add_fail(ShaderCreationResult::COMPILE_FAIL);
         on_shader_compilation_fail(log);
@@ -117,17 +116,19 @@ hg::ShaderCreationResult hg::GLSLProgram::add_shader(const ShaderInfo& shader) {
     }
 
     // Set the appropriate shader ID.
-    switch(shader.type) {
+    switch (shader.type) {
         case ShaderType::VERTEX:
             m_vertex_id = shader_id;
             break;
         case ShaderType::FRAGMENT:
-            m_frag_id   = shader_id;
+            m_frag_id = shader_id;
             break;
         default:
             debug_printf(
                 "Previously known shader type has become unknown: %i",
-                static_cast<std::underlying_type<decltype(shader.type)>::type>(shader.type)
+                static_cast<std::underlying_type<decltype(shader.type)>::type>(
+                    shader.type
+                )
             );
             on_shader_add_fail(ShaderCreationResult::INVALID_STAGE);
             return ShaderCreationResult::INVALID_STAGE;
@@ -136,9 +137,11 @@ hg::ShaderCreationResult hg::GLSLProgram::add_shader(const ShaderInfo& shader) {
     return ShaderCreationResult::SUCCESS;
 }
 
-hg::ShaderCreationResults hg::GLSLProgram::add_shaders(const std::string& vertex_path, const std::string& fragment_path) {
+hg::ShaderCreationResults hg::GLSLProgram::add_shaders(
+    const std::string& vertex_path, const std::string& fragment_path
+) {
     return ShaderCreationResults{
-        add_shader(ShaderInfo{ ShaderType::VERTEX,   vertex_path   }),
+        add_shader(ShaderInfo{ ShaderType::VERTEX, vertex_path }),
         add_shader(ShaderInfo{ ShaderType::FRAGMENT, fragment_path })
     };
 }
@@ -149,7 +152,7 @@ hg::ShaderLinkResult hg::GLSLProgram::link() {
 
     // If we are missing either shader, fail.
     if (!m_vertex_id) return ShaderLinkResult::VERTEX_MISSING;
-    if (!m_frag_id)   return ShaderLinkResult::FRAG_MISSING;
+    if (!m_frag_id) return ShaderLinkResult::FRAG_MISSING;
 
     // Attach our shaders, link program and then detach shaders.
     glAttachShader(m_id, m_vertex_id);
@@ -180,7 +183,7 @@ hg::ShaderLinkResult hg::GLSLProgram::link() {
         glGetProgramInfoLog(m_id, max_length, nullptr, log);
         log[max_length] = '\0';
 
-        debug_printf(log);
+        debug_printf("%s", log);
 
         on_shader_link_fail(log);
 
@@ -191,7 +194,7 @@ hg::ShaderLinkResult hg::GLSLProgram::link() {
 }
 
 bool hg::GLSLProgram::set_attribute(const std::string& name, GLuint index) {
-    return set_attribute({name, index});
+    return set_attribute({ name, index });
 }
 
 bool hg::GLSLProgram::set_attribute(const ShaderAttribute& attribute) {
@@ -233,7 +236,8 @@ void hg::GLSLProgram::disable_vertex_attrib_arrays(GLuint vao) const {
     }
 }
 
-bool hg::GLSLProgram::enable_vertex_attrib_array(GLuint vao, const std::string& name) const {
+bool hg::GLSLProgram::enable_vertex_attrib_array(GLuint vao, const std::string& name)
+    const {
     try {
         glEnableVertexArrayAttrib(vao, m_attributes.at(name));
     } catch (std::out_of_range&) {
@@ -242,7 +246,8 @@ bool hg::GLSLProgram::enable_vertex_attrib_array(GLuint vao, const std::string& 
     return true;
 }
 
-bool hg::GLSLProgram::disable_vertex_attrib_array(GLuint vao, const std::string& name) const {
+bool hg::GLSLProgram::disable_vertex_attrib_array(GLuint vao, const std::string& name)
+    const {
     try {
         glDisableVertexArrayAttrib(vao, m_attributes.at(name));
     } catch (std::out_of_range&) {

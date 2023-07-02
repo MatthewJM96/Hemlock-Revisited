@@ -15,18 +15,23 @@ using namespace hg::f;
 
 hg::s::SpriteBatcher::SpriteBatcher() :
     m_is_initialised(false),
-    m_vao(0), m_vbo(0), m_ibo(0),
+    m_vao(0),
+    m_vbo(0),
+    m_ibo(0),
     m_usage_hint(GL_STATIC_DRAW),
     m_index_count(0),
     m_default_texture(0),
     m_active_shader(nullptr),
     m_shader_cache(nullptr),
-    m_font_cache(nullptr)
-{
+    m_font_cache(nullptr) {
     // Empty.
 }
 
-void hg::s::SpriteBatcher::init(ShaderCache* shader_cache, FontCache* font_cache /*= nullptr*/, bool is_dynamic /*= false*/) {
+void hg::s::SpriteBatcher::init(
+    ShaderCache* shader_cache,
+    FontCache*   font_cache /*= nullptr*/,
+    bool         is_dynamic /*= false*/
+) {
     if (m_is_initialised) return;
     m_is_initialised = true;
 
@@ -42,14 +47,20 @@ void hg::s::SpriteBatcher::init(ShaderCache* shader_cache, FontCache* font_cache
     m_default_shader.init(m_shader_cache);
 
     // Set each attribute's corresponding index.
-    m_default_shader.set_attribute("vPosition",         SpriteShaderAttribID::POSITION);
-    m_default_shader.set_attribute("vRelativePosition", SpriteShaderAttribID::RELATIVE_POSITION);
-    m_default_shader.set_attribute("vUVDimensions",     SpriteShaderAttribID::UV_DIMENSIONS);
-    m_default_shader.set_attribute("vColour",           SpriteShaderAttribID::COLOUR);
+    m_default_shader.set_attribute("vPosition", SpriteShaderAttribID::POSITION);
+    m_default_shader.set_attribute(
+        "vRelativePosition", SpriteShaderAttribID::RELATIVE_POSITION
+    );
+    m_default_shader.set_attribute(
+        "vUVDimensions", SpriteShaderAttribID::UV_DIMENSIONS
+    );
+    m_default_shader.set_attribute("vColour", SpriteShaderAttribID::COLOUR);
 
     // TODO(Matthew): Handle errors.
     // Add the shaders to the program.
-    m_default_shader.add_shaders("shaders/default_sprite.vert", "shaders/default_sprite.frag");
+    m_default_shader.add_shaders(
+        "shaders/default_sprite.vert", "shaders/default_sprite.frag"
+    );
 
     // Link program (i.e. send to GPU).
     m_default_shader.link();
@@ -75,25 +86,59 @@ void hg::s::SpriteBatcher::init(ShaderCache* shader_cache, FontCache* font_cache
     // Enable the attributes in our shader.
     m_default_shader.enable_vertex_attrib_arrays(m_vao);
 
-    // Connect the vertex attributes in the shader (e.g. vPosition) to its corresponding chunk of memory inside the SpriteVertex struct.
-    //     We first tell OpenGL the ID of the attribute within the shader (as we set earlier), then the number of values and their type.
+    // Connect the vertex attributes in the shader (e.g. vPosition) to its
+    // corresponding chunk of memory inside the SpriteVertex struct.
+    //     We first tell OpenGL the ID of the attribute within the shader (as we set
+    //     earlier), then the number of values and their type.
     //
-    //     After that, we tell OpenGL whether that data should be normalised (e.g. unsigned bytes that need normalising will be converted 
-    //     to a float divided through by 255.0f and by OpenGL - so that colours, e.g., are represented by values between 0.0f and 1.0f 
-    //     per R/G/B/A channel rather than the usual 0 to 255).
+    //     After that, we tell OpenGL whether that data should be normalised (e.g.
+    //     unsigned bytes that need normalising will be converted to a float divided
+    //     through by 255.0f and by OpenGL - so that colours, e.g., are represented by
+    //     values between 0.0f and 1.0f per R/G/B/A channel rather than the usual 0 to
+    //     255).
     //
-    //     We then pass the size of the data representing a vertex followed by how many bytes into that data the value is stored - we use offset rather than 
-    //     manually writing this to give us flexibility in changing the order of the SpriteVertex struct.
-    glVertexArrayAttribFormat(m_vao, SpriteShaderAttribID::POSITION,          3, GL_FLOAT,         false, offsetof(SpriteVertex, position));
-    glVertexArrayAttribFormat(m_vao, SpriteShaderAttribID::RELATIVE_POSITION, 2, GL_FLOAT,         false, offsetof(SpriteVertex, relative_position));
-    glVertexArrayAttribFormat(m_vao, SpriteShaderAttribID::UV_DIMENSIONS,     4, GL_FLOAT,         false, offsetof(SpriteVertex, uv_rect));
-    glVertexArrayAttribFormat(m_vao, SpriteShaderAttribID::COLOUR,            4, GL_UNSIGNED_BYTE, true,  offsetof(SpriteVertex, colour));
+    //     We then pass the size of the data representing a vertex followed by how
+    //     many bytes into that data the value is stored - we use offset rather than
+    //     manually writing this to give us flexibility in changing the order of the
+    //     SpriteVertex struct.
+    glVertexArrayAttribFormat(
+        m_vao,
+        SpriteShaderAttribID::POSITION,
+        3,
+        GL_FLOAT,
+        false,
+        offsetof(SpriteVertex, position)
+    );
+    glVertexArrayAttribFormat(
+        m_vao,
+        SpriteShaderAttribID::RELATIVE_POSITION,
+        2,
+        GL_FLOAT,
+        false,
+        offsetof(SpriteVertex, relative_position)
+    );
+    glVertexArrayAttribFormat(
+        m_vao,
+        SpriteShaderAttribID::UV_DIMENSIONS,
+        4,
+        GL_FLOAT,
+        false,
+        offsetof(SpriteVertex, uv_rect)
+    );
+    glVertexArrayAttribFormat(
+        m_vao,
+        SpriteShaderAttribID::COLOUR,
+        4,
+        GL_UNSIGNED_BYTE,
+        true,
+        offsetof(SpriteVertex, colour)
+    );
 
     // Clean up.
-    glVertexArrayAttribBinding(m_vao, SpriteShaderAttribID::POSITION,           0);
-    glVertexArrayAttribBinding(m_vao, SpriteShaderAttribID::RELATIVE_POSITION,  0);
-    glVertexArrayAttribBinding(m_vao, SpriteShaderAttribID::UV_DIMENSIONS,      0);
-    glVertexArrayAttribBinding(m_vao, SpriteShaderAttribID::COLOUR,             0);
+    glVertexArrayAttribBinding(m_vao, SpriteShaderAttribID::POSITION, 0);
+    glVertexArrayAttribBinding(m_vao, SpriteShaderAttribID::RELATIVE_POSITION, 0);
+    glVertexArrayAttribBinding(m_vao, SpriteShaderAttribID::UV_DIMENSIONS, 0);
+    glVertexArrayAttribBinding(m_vao, SpriteShaderAttribID::COLOUR, 0);
 
     /***********************************\
      * Create a default white texture. *
@@ -105,14 +150,17 @@ void hg::s::SpriteBatcher::init(ShaderCache* shader_cache, FontCache* font_cache
     // Set texture to be just a 1x1 image of a pure white pixel.
     ui32 pix = 0xffffffff;
     glTextureStorage2D(m_default_texture, 1, GL_RGBA8, 1, 1);
-    glTextureSubImage2D(m_default_texture, 0, 0, 0, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, &pix);
+    glTextureSubImage2D(
+        m_default_texture, 0, 0, 0, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, &pix
+    );
 
-    // Set texture parameters to repeat our pixel as needed and to not do any averaging of pixels.
+    // Set texture parameters to repeat our pixel as needed and to not do any
+    // averaging of pixels.
     glTextureParameteri(m_default_texture, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTextureParameteri(m_default_texture, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTextureParameteri(m_default_texture, GL_TEXTURE_WRAP_S,     GL_REPEAT);
-    glTextureParameteri(m_default_texture, GL_TEXTURE_WRAP_T,     GL_REPEAT);
-    glTextureParameteri(m_default_texture, GL_TEXTURE_WRAP_R,     GL_REPEAT);
+    glTextureParameteri(m_default_texture, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTextureParameteri(m_default_texture, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTextureParameteri(m_default_texture, GL_TEXTURE_WRAP_R, GL_REPEAT);
 }
 
 void hg::s::SpriteBatcher::dispose() {
@@ -127,7 +175,7 @@ void hg::s::SpriteBatcher::dispose() {
 
     if (m_ibo != 0) {
         glDeleteBuffers(1, &m_ibo);
-        m_ibo = 0;
+        m_ibo         = 0;
         m_index_count = 0;
     }
 
@@ -193,209 +241,228 @@ void hg::s::SpriteBatcher::add_sprite(Sprite* sprites, ui32 sprite_count) {
 }
 
 void hg::s::SpriteBatcher::add_sprite(
-                 QuadBuilder builder,
-                      GLuint texture,
-                       f32v2 position,
-                       f32v2 size,
-                     colour4 c1       /*= { 255, 255, 255, 255 }*/,
-                     colour4 c2       /*= { 255, 255, 255, 255 }*/,
-                    Gradient gradient /*= Gradient::NONE*/,
-                         f32 depth    /*= 0.0f*/,
-                       f32v4 uv_rect  /*= f32v4(0.0f, 0.0f, 1.0f, 1.0f)*/
+    QuadBuilder builder,
+    GLuint      texture,
+    f32v2       position,
+    f32v2       size,
+    colour4     c1 /*= { 255, 255, 255, 255 }*/,
+    colour4     c2 /*= { 255, 255, 255, 255 }*/,
+    Gradient    gradient /*= Gradient::NONE*/,
+    f32         depth /*= 0.0f*/,
+    f32v4       uv_rect /*= f32v4(0.0f, 0.0f, 1.0f, 1.0f)*/
 ) {
     m_sprites.emplace_back(Sprite{
-        texture,
-        position,
-        size,
-        depth,
-        uv_rect,
-        c1,
-        c2,
-        gradient,
-        builder
-    });
+        texture, position, size, depth, uv_rect, c1, c2, gradient, builder });
 }
 
 void hg::s::SpriteBatcher::add_sprite(
-                 QuadBuilder builder,
-                       f32v2 position,
-                       f32v2 size,
-                     colour4 c1       /*= { 255, 255, 255, 255 }*/,
-                     colour4 c2       /*= { 255, 255, 255, 255 }*/,
-                    Gradient gradient /*= Gradient::NONE*/,
-                         f32 depth    /*= 0.0f*/,
-                       f32v4 uv_rect  /*= f32v4(0.0f, 0.0f, 1.0f, 1.0f)*/
+    QuadBuilder builder,
+    f32v2       position,
+    f32v2       size,
+    colour4     c1 /*= { 255, 255, 255, 255 }*/,
+    colour4     c2 /*= { 255, 255, 255, 255 }*/,
+    Gradient    gradient /*= Gradient::NONE*/,
+    f32         depth /*= 0.0f*/,
+    f32v4       uv_rect /*= f32v4(0.0f, 0.0f, 1.0f, 1.0f)*/
 ) {
     m_sprites.emplace_back(Sprite{
-        m_default_texture,
-        position,
-        size,
-        depth,
-        uv_rect,
-        c1,
-        c2,
-        gradient,
-        builder
-    });
+        m_default_texture, position, size, depth, uv_rect, c1, c2, gradient, builder });
 }
 
 void hg::s::SpriteBatcher::add_sprite(
-                 GLuint texture,
-                  f32v2 position,
-                  f32v2 size,
-                colour4 c1       /*= { 255, 255, 255, 255 }*/,
-                colour4 c2       /*= { 255, 255, 255, 255 }*/,
-               Gradient gradient /*= Gradient::NONE*/,
-                    f32 depth    /*= 0.0f*/,
-                  f32v4 uv_rect  /*= f32v4(0.0f, 0.0f, 1.0f, 1.0f)*/
+    GLuint   texture,
+    f32v2    position,
+    f32v2    size,
+    colour4  c1 /*= { 255, 255, 255, 255 }*/,
+    colour4  c2 /*= { 255, 255, 255, 255 }*/,
+    Gradient gradient /*= Gradient::NONE*/,
+    f32      depth /*= 0.0f*/,
+    f32v4    uv_rect /*= f32v4(0.0f, 0.0f, 1.0f, 1.0f)*/
 ) {
-    m_sprites.emplace_back(Sprite{
-        texture,
-        position,
-        size,
-        depth,
-        uv_rect,
-        c1,
-        c2,
-        gradient,
-        { &impl::basic_build_quad }
-    });
+    m_sprites.emplace_back(Sprite{ texture,
+                                   position,
+                                   size,
+                                   depth,
+                                   uv_rect,
+                                   c1,
+                                   c2,
+                                   gradient,
+                                   { &impl::basic_build_quad } });
 }
 
 void hg::s::SpriteBatcher::add_sprite(
-                 f32v2 position,
-                 f32v2 size,
-               colour4 c1       /*= { 255, 255, 255, 255 }*/,
-               colour4 c2       /*= { 255, 255, 255, 255 }*/,
-              Gradient gradient /*= Gradient::NONE*/,
-                   f32 depth    /*= 0.0f*/,
-                 f32v4 uv_rect  /*= f32v4(0.0f, 0.0f, 1.0f, 1.0f)*/
+    f32v2    position,
+    f32v2    size,
+    colour4  c1 /*= { 255, 255, 255, 255 }*/,
+    colour4  c2 /*= { 255, 255, 255, 255 }*/,
+    Gradient gradient /*= Gradient::NONE*/,
+    f32      depth /*= 0.0f*/,
+    f32v4    uv_rect /*= f32v4(0.0f, 0.0f, 1.0f, 1.0f)*/
 ) {
-    m_sprites.emplace_back(Sprite{
-        m_default_texture,
-        position,
-        size,
-        depth,
-        uv_rect,
-        c1,
-        c2,
-        gradient,
-        { &impl::basic_build_quad }
-    });
+    m_sprites.emplace_back(Sprite{ m_default_texture,
+                                   position,
+                                   size,
+                                   depth,
+                                   uv_rect,
+                                   c1,
+                                   c2,
+                                   gradient,
+                                   { &impl::basic_build_quad } });
 }
-
 
 void hg::s::SpriteBatcher::add_string(
-                 CALLER_DELETE const char* str,
-                                     f32v4 target_rect,
-                                     f32v4 clip_rect,
-                              StringSizing sizing,
-                                   colour4 tint,
-                        const std::string& font_name,
-                                  FontSize font_size,
-                                 TextAlign align        /*= TextAlign::TOP_LEFT*/,
-                                  WordWrap wrap         /*= WordWrap::NONE*/,
-                                       f32 depth        /*= 0.0f*/,
-                                 FontStyle style        /*= FontStyle::NORMAL*/,
-                           FontRenderStyle render_style /*= FontRenderStyle::BLENDED*/
+    CALLER_DELETE const char* str,
+    f32v4                     target_rect,
+    f32v4                     clip_rect,
+    StringSizing              sizing,
+    colour4                   tint,
+    const std::string&        font_name,
+    FontSize                  font_size,
+    TextAlign                 align /*= TextAlign::TOP_LEFT*/,
+    WordWrap                  wrap /*= WordWrap::NONE*/,
+    f32                       depth /*= 0.0f*/,
+    FontStyle                 style /*= FontStyle::NORMAL*/,
+    FontRenderStyle           render_style /*= FontRenderStyle::BLENDED*/
 ) {
     add_string(
-        str, target_rect, clip_rect, sizing, tint,
-        m_font_cache->fetch(font_name)
-                    ->get_instance(font_size, style, render_style),
-        align, wrap, depth
+        str,
+        target_rect,
+        clip_rect,
+        sizing,
+        tint,
+        m_font_cache->fetch(font_name)->get_instance(font_size, style, render_style),
+        align,
+        wrap,
+        depth
     );
 }
 
 void hg::s::SpriteBatcher::add_string(
-                 CALLER_DELETE const char* str,
-                                     f32v4 target_rect,
-                                     f32v4 clip_rect,
-                              StringSizing sizing,
-                                   colour4 tint,
-                        const std::string& font_name,
-                                 TextAlign align        /*= TextAlign::TOP_LEFT*/,
-                                  WordWrap wrap         /*= WordWrap::NONE*/,
-                                       f32 depth        /*= 0.0f*/,
-                                 FontStyle style        /*= FontStyle::NORMAL*/,
-                           FontRenderStyle render_style /*= FontRenderStyle::BLENDED*/
+    CALLER_DELETE const char* str,
+    f32v4                     target_rect,
+    f32v4                     clip_rect,
+    StringSizing              sizing,
+    colour4                   tint,
+    const std::string&        font_name,
+    TextAlign                 align /*= TextAlign::TOP_LEFT*/,
+    WordWrap                  wrap /*= WordWrap::NONE*/,
+    f32                       depth /*= 0.0f*/,
+    FontStyle                 style /*= FontStyle::NORMAL*/,
+    FontRenderStyle           render_style /*= FontRenderStyle::BLENDED*/
 ) {
     add_string(
-        str, target_rect, clip_rect, sizing, tint,
-        m_font_cache->fetch(font_name)
-                    ->get_instance(style, render_style),
-        align, wrap, depth
+        str,
+        target_rect,
+        clip_rect,
+        sizing,
+        tint,
+        m_font_cache->fetch(font_name)->get_instance(style, render_style),
+        align,
+        wrap,
+        depth
     );
 }
 
 void hg::s::SpriteBatcher::add_string(
-                 CALLER_DELETE const char* str,
-                                     f32v4 target_rect,
-                                     f32v4 clip_rect,
-                              StringSizing sizing,
-                                   colour4 tint,
-                              FontInstance font_instance,
-                                 TextAlign align /*= TextAlign::TOP_LEFT*/,
-                                  WordWrap wrap  /*= WordWrap::NONE*/,
-                                       f32 depth /*= 0.0f*/
+    CALLER_DELETE const char* str,
+    f32v4                     target_rect,
+    f32v4                     clip_rect,
+    StringSizing              sizing,
+    colour4                   tint,
+    FontInstance              font_instance,
+    TextAlign                 align /*= TextAlign::TOP_LEFT*/,
+    WordWrap                  wrap /*= WordWrap::NONE*/,
+    f32                       depth /*= 0.0f*/
 ) {
     add_string(
         DrawableStringComponent{
-            str, {
-                font_instance,
-                sizing,
-                tint
-            }
-        },
-        target_rect, clip_rect, align, wrap, depth
+            str, {font_instance, sizing, tint}
+    },
+        target_rect,
+        clip_rect,
+        align,
+        wrap,
+        depth
     );
 }
 
 void hg::s::SpriteBatcher::add_string(
-                 CALLER_DELETE DrawableStringComponent str_component,
-                                                 f32v4 target_rect,
-                                                 f32v4 clip_rect,
-                                             TextAlign align /*= TextAlign::TOP_LEFT*/,
-                                              WordWrap wrap  /*= WordWrap::NONE*/,
-                                                   f32 depth /*= 0.0f*/
+    CALLER_DELETE DrawableStringComponent str_component,
+    f32v4                                 target_rect,
+    f32v4                                 clip_rect,
+    TextAlign                             align /*= TextAlign::TOP_LEFT*/,
+    WordWrap                              wrap /*= WordWrap::NONE*/,
+    f32                                   depth /*= 0.0f*/
 ) {
-    switch(wrap) {
+    switch (wrap) {
         case WordWrap::NONE:
-            add_string_no_wrap(this, str_component, target_rect, clip_rect, align, depth);
+            add_string_no_wrap(
+                this, str_component, target_rect, clip_rect, align, depth
+            );
             break;
         case WordWrap::QUICK:
-            add_string_quick_wrap(this, str_component, target_rect, clip_rect, align, depth);
+            add_string_quick_wrap(
+                this, str_component, target_rect, clip_rect, align, depth
+            );
             break;
         case WordWrap::GREEDY:
-            add_string_greedy_wrap(this, str_component, target_rect, clip_rect, align, depth);
+            add_string_greedy_wrap(
+                this, str_component, target_rect, clip_rect, align, depth
+            );
             break;
         case WordWrap::MINIMUM_RAGGEDNESS:
-            // add_string_minimum_raggedness_wrap(this, str_component, target_rect, clip_rect, align, depth);
+            // add_string_minimum_raggedness_wrap(this, str_component, target_rect,
+            // clip_rect, align, depth);
             break;
     }
 }
 
 void hg::s::SpriteBatcher::add_string(
-                 CALLER_DELETE DrawableStringComponents str_components,
-                                                   ui32 num_components,
-                                                  f32v4 target_rect,
-                                                  f32v4 clip_rect,
-                                              TextAlign align /*= TextAlign::TOP_LEFT*/,
-                                               WordWrap wrap  /*= WordWrap::NONE*/,
-                                                    f32 depth /*= 0.0f*/
+    CALLER_DELETE DrawableStringComponents str_components,
+    ui32                                   num_components,
+    f32v4                                  target_rect,
+    f32v4                                  clip_rect,
+    TextAlign                              align /*= TextAlign::TOP_LEFT*/,
+    WordWrap                               wrap /*= WordWrap::NONE*/,
+    f32                                    depth /*= 0.0f*/
 ) {
-    switch(wrap) {
+    switch (wrap) {
         case WordWrap::NONE:
-            add_string_no_wrap(this, str_components, num_components, target_rect, clip_rect, align, depth);
+            add_string_no_wrap(
+                this,
+                str_components,
+                num_components,
+                target_rect,
+                clip_rect,
+                align,
+                depth
+            );
             break;
         case WordWrap::QUICK:
-            add_string_quick_wrap(this, str_components, num_components, target_rect, clip_rect, align, depth);
+            add_string_quick_wrap(
+                this,
+                str_components,
+                num_components,
+                target_rect,
+                clip_rect,
+                align,
+                depth
+            );
             break;
         case WordWrap::GREEDY:
-            add_string_greedy_wrap(this, str_components, num_components, target_rect, clip_rect, align, depth);
+            add_string_greedy_wrap(
+                this,
+                str_components,
+                num_components,
+                target_rect,
+                clip_rect,
+                align,
+                depth
+            );
             break;
         case WordWrap::MINIMUM_RAGGEDNESS:
-            // add_string_minimum_raggedness_wrap(this, str_components, num_components, target_rect, clip_rect, align, depth);
+            // add_string_minimum_raggedness_wrap(this, str_components,
+            // num_components, target_rect, clip_rect, align, depth);
             break;
     }
 }
@@ -407,10 +474,12 @@ bool hg::s::SpriteBatcher::set_shader(GLSLProgram* shader /*= nullptr*/) {
         if (!shader->initialised()) return false;
 
         if (!shader->linked()) {
-            shader->set_attribute("vPosition",         SpriteShaderAttribID::POSITION);
-            shader->set_attribute("vRelativePosition", SpriteShaderAttribID::RELATIVE_POSITION);
-            shader->set_attribute("vUVDimensions",     SpriteShaderAttribID::UV_DIMENSIONS);
-            shader->set_attribute("vColour",           SpriteShaderAttribID::COLOUR);
+            shader->set_attribute("vPosition", SpriteShaderAttribID::POSITION);
+            shader->set_attribute(
+                "vRelativePosition", SpriteShaderAttribID::RELATIVE_POSITION
+            );
+            shader->set_attribute("vUVDimensions", SpriteShaderAttribID::UV_DIMENSIONS);
+            shader->set_attribute("vColour", SpriteShaderAttribID::COLOUR);
 
             if (shader->link() != ShaderLinkResult::SUCCESS) return false;
         }
@@ -426,8 +495,18 @@ void hg::s::SpriteBatcher::render(f32m4 world_projection, f32m4 view_projection)
     m_active_shader->use();
 
     // Upload our projection matrices.
-    glUniformMatrix4fv(m_active_shader->uniform_location("WorldProjection"), 1, false, &world_projection[0][0]);
-    glUniformMatrix4fv(m_active_shader->uniform_location("ViewProjection"),  1, false, &view_projection[0][0]);
+    glUniformMatrix4fv(
+        m_active_shader->uniform_location("WorldProjection"),
+        1,
+        false,
+        &world_projection[0][0]
+    );
+    glUniformMatrix4fv(
+        m_active_shader->uniform_location("ViewProjection"),
+        1,
+        false,
+        &view_projection[0][0]
+    );
 
     // Bind our vertex array.
     glBindVertexArray(m_vao);
@@ -438,14 +517,21 @@ void hg::s::SpriteBatcher::render(f32m4 world_projection, f32m4 view_projection)
     glActiveTexture(GL_TEXTURE0);
     glUniform1i(m_active_shader->uniform_location("SpriteTexture"), 0);
 
-    // For each batch, bind its texture, set the sampler state (have to do this each time), and draw the triangles in that batch.
+    // For each batch, bind its texture, set the sampler state (have to do this each
+    // time), and draw the triangles in that batch.
     for (auto& batch : m_batches) {
         glBindTextureUnit(0, batch.texture);
 
-        // Note that we pass an offset as the final argument despite glDrawElements expecting a pointer as we have already uploaded
-        // the data to the buffer on the GPU - we only need to pass an offset in bytes from the beginning of this buffer rather than
-        // the address of a buffer in RAM.
-        glDrawElements(GL_TRIANGLES, batch.index_count , GL_UNSIGNED_INT, reinterpret_cast<const GLvoid*>(batch.index_offset * sizeof(ui32)));
+        // Note that we pass an offset as the final argument despite glDrawElements
+        // expecting a pointer as we have already uploaded the data to the buffer on
+        // the GPU - we only need to pass an offset in bytes from the beginning of
+        // this buffer rather than the address of a buffer in RAM.
+        glDrawElements(
+            GL_TRIANGLES,
+            batch.index_count,
+            GL_UNSIGNED_INT,
+            reinterpret_cast<const GLvoid*>(batch.index_offset * sizeof(ui32))
+        );
     }
 
     // Unbind out vertex array.
@@ -457,17 +543,29 @@ void hg::s::SpriteBatcher::render(f32m4 world_projection, f32m4 view_projection)
 
 void hg::s::SpriteBatcher::render(f32m4 world_projection, f32v2 screen_size) {
     f32m4 view_projection = f32m4(
-         2.0f / screen_size.x,  0.0f,                 0.0f, 0.0f,
-         0.0f,                 -2.0f / screen_size.y, 0.0f, 0.0f,
-         0.0f,                  0.0f,                 1.0f, 0.0f,
-        -1.0f,                  1.0f,                 0.0f, 1.0f
+        2.0f / screen_size.x,
+        0.0f,
+        0.0f,
+        0.0f,
+        0.0f,
+        -2.0f / screen_size.y,
+        0.0f,
+        0.0f,
+        0.0f,
+        0.0f,
+        1.0f,
+        0.0f,
+        -1.0f,
+        1.0f,
+        0.0f,
+        1.0f
     );
 
     render(world_projection, view_projection);
 }
 
 void hg::s::SpriteBatcher::render(f32v2 screen_size) {
-    render(f32m4{1.0f}, screen_size);
+    render(f32m4{ 1.0f }, screen_size);
 }
 
 void hg::s::SpriteBatcher::sort_sprites(SpriteSortMode sort_mode) {
@@ -475,17 +573,23 @@ void hg::s::SpriteBatcher::sort_sprites(SpriteSortMode sort_mode) {
 
     // Sort the data according to mode.
     switch (sort_mode) {
-    case SpriteSortMode::TEXTURE:
-        std::stable_sort(m_sprite_ptrs.begin(), m_sprite_ptrs.end(), &impl::sort_texture);
-        break;
-    case SpriteSortMode::FRONT_TO_BACK:
-        std::stable_sort(m_sprite_ptrs.begin(), m_sprite_ptrs.end(), &impl::sort_front_to_back);
-        break;
-    case SpriteSortMode::BACK_TO_FRONT:
-        std::stable_sort(m_sprite_ptrs.begin(), m_sprite_ptrs.end(), &impl::sort_back_to_front);
-        break;
-    default:
-        break;
+        case SpriteSortMode::TEXTURE:
+            std::stable_sort(
+                m_sprite_ptrs.begin(), m_sprite_ptrs.end(), &impl::sort_texture
+            );
+            break;
+        case SpriteSortMode::FRONT_TO_BACK:
+            std::stable_sort(
+                m_sprite_ptrs.begin(), m_sprite_ptrs.end(), &impl::sort_front_to_back
+            );
+            break;
+        case SpriteSortMode::BACK_TO_FRONT:
+            std::stable_sort(
+                m_sprite_ptrs.begin(), m_sprite_ptrs.end(), &impl::sort_back_to_front
+            );
+            break;
+        default:
+            break;
     }
 }
 
@@ -521,22 +625,23 @@ void hg::s::SpriteBatcher::generate_batches() {
     m_batches.back().texture      = m_sprite_ptrs[0]->texture;
 
     // For each sprite, we want to populate the vertex buffer with those for that
-    // sprite. In the case that we are changing to a new texture, we need to 
+    // sprite. In the case that we are changing to a new texture, we need to
     // start a new batch.
     for (auto& sprite : m_sprite_ptrs) {
         // Start a new batch with texture of the sprite we're currently working with
         // if that texture is different to the previous batch.
         if (sprite->texture != m_batches.back().texture) {
-            // Now we are making a new batch, we can set the number of indices in 
+            // Now we are making a new batch, we can set the number of indices in
             // the previous batch.
-            m_batches.back().index_count  = index_count - m_batches.back().index_offset;
+            m_batches.back().index_count = index_count - m_batches.back().index_offset;
             m_batches.emplace_back();
 
             m_batches.back().index_offset = index_count;
             m_batches.back().texture      = sprite->texture;
         }
 
-        // Builds the sprite's quad, i.e. adds the sprite's vertices to the vertex buffer.
+        // Builds the sprite's quad, i.e. adds the sprite's vertices to the vertex
+        // buffer.
         sprite->build(sprite, vertices + vertex_count);
 
         // Update our counts.
@@ -556,18 +661,18 @@ void hg::s::SpriteBatcher::generate_batches() {
 
         // Create a local index buffer we will upload to the GPU.
         ui32* indices = new ui32[m_index_count];
-        ui32 i = 0; // Index cursor.
-        ui32 v = 0; // Vertex cursor.
+        ui32  i       = 0;  // Index cursor.
+        ui32  v       = 0;  // Vertex cursor.
         while (i < m_index_count) {
-            // For each quad, we have four vertices which we write 6 indices for - giving us two triangles.
-            // The order of these indices is important - each triple should form a triangle correlating
-            // to the build functions.
-            indices[i++] = v;     // Top left vertex.
-            indices[i++] = v + 2; // Bottom left vertex.
-            indices[i++] = v + 3; // Bottom right vertex.
-            indices[i++] = v + 3; // Bottom right vertex.
-            indices[i++] = v + 1; // Top right vertex.
-            indices[i++] = v;     // Top left vertex.
+            // For each quad, we have four vertices which we write 6 indices for -
+            // giving us two triangles. The order of these indices is important - each
+            // triple should form a triangle correlating to the build functions.
+            indices[i++] = v;      // Top left vertex.
+            indices[i++] = v + 2;  // Bottom left vertex.
+            indices[i++] = v + 3;  // Bottom right vertex.
+            indices[i++] = v + 3;  // Bottom right vertex.
+            indices[i++] = v + 1;  // Top right vertex.
+            indices[i++] = v;      // Top left vertex.
 
             v += 4;
         }
@@ -579,7 +684,9 @@ void hg::s::SpriteBatcher::generate_batches() {
     }
 
     // Write our data to GPU.
-    glNamedBufferData(m_vbo, vertex_count * sizeof(SpriteVertex), vertices, m_usage_hint);
+    glNamedBufferData(
+        m_vbo, vertex_count * sizeof(SpriteVertex), vertices, m_usage_hint
+    );
 
     // Clear up memory.
     delete[] vertices;
@@ -616,25 +723,26 @@ void hg::s::impl::basic_build_quad(const Sprite* sprite, SpriteVertex* vertices)
 
     switch (sprite->gradient) {
         case Gradient::LEFT_TO_RIGHT:
-            top_left.colour  = bottom_left.colour  = sprite->c1;
+            top_left.colour = bottom_left.colour = sprite->c1;
             top_right.colour = bottom_right.colour = sprite->c2;
             break;
         case Gradient::TOP_TO_BOTTOM:
-            top_left.colour    = top_right.colour    = sprite->c1;
+            top_left.colour = top_right.colour = sprite->c1;
             bottom_left.colour = bottom_right.colour = sprite->c2;
             break;
         case Gradient::TOP_LEFT_TO_BOTTOM_RIGHT:
             top_left.colour     = sprite->c1;
             bottom_right.colour = sprite->c2;
-            top_right.colour    = bottom_left.colour = lerp(sprite->c1, sprite->c2, 0.5);
+            top_right.colour = bottom_left.colour = lerp(sprite->c1, sprite->c2, 0.5);
             break;
         case Gradient::TOP_RIGHT_TO_BOTTOM_LEFT:
             top_right.colour   = sprite->c1;
             bottom_left.colour = sprite->c2;
-            top_left.colour    = bottom_right.colour = lerp(sprite->c1, sprite->c2, 0.5);
+            top_left.colour = bottom_right.colour = lerp(sprite->c1, sprite->c2, 0.5);
             break;
         case Gradient::NONE:
-            top_left.colour = top_right.colour = bottom_left.colour = bottom_right.colour = sprite->c1;
+            top_left.colour = top_right.colour = bottom_left.colour
+                = bottom_right.colour          = sprite->c1;
             break;
         default:
             debug_printf("Invalid gradient type!");

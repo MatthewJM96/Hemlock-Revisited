@@ -1,8 +1,8 @@
 #ifndef __hemlock_voxel_graphics_renderer_h
 #define __hemlock_voxel_graphics_renderer_h
 
-#include "timing.h"
 #include "graphics/mesh.h"
+#include "timing.h"
 #include "voxel/coordinate_system.h"
 
 namespace hemlock {
@@ -24,12 +24,15 @@ namespace hemlock {
             bool dirty;
             bool paged;
         };
-        using PagedChunksMetadata   = std::unordered_map<ChunkID, PagedChunkMetadata>;
+
+        using PagedChunksMetadata = std::unordered_map<ChunkID, PagedChunkMetadata>;
+
         struct HandleAndID {
             hmem::WeakHandle<Chunk> handle;
             ChunkID                 id;
         };
-        using PagedChunkQueue       = moodycamel::ConcurrentQueue<HandleAndID>;
+
+        using PagedChunkQueue = moodycamel::ConcurrentQueue<HandleAndID>;
 
         struct ChunkRenderPage {
             PagedChunks chunks;
@@ -38,12 +41,15 @@ namespace hemlock {
             bool        dirty;
             ui32        first_dirtied_chunk_idx;
         };
+
         using ChunkRenderPages = std::vector<ChunkRenderPage*>;
 
         class ChunkRenderer {
         public:
             ChunkRenderer();
-            ~ChunkRenderer() { /* Empty. */ }
+
+            ~ChunkRenderer() { /* Empty. */
+            }
 
             /**
              * @brief Initialises chunk renderer.
@@ -58,13 +64,14 @@ namespace hemlock {
 
             /**
              * @brief Set the page size.
-             * 
+             *
              * @param page_size The number of instances to be stored per
              * page in units of half a block-volume of a chunk.
              */
             void set_page_size(ui32 page_size);
 
-            ui32 page_size()       const { return m_page_size;                                            };
+            ui32 page_size() const { return m_page_size; };
+
             ui32 block_page_size() const { return m_page_size * CHUNK_VOLUME / 2; };
 
             void update(FrameTime time);
@@ -82,8 +89,8 @@ namespace hemlock {
         protected:
             static hg::MeshHandles block_mesh_handles;
 
-            Subscriber<>    handle_chunk_mesh_change;
-            Subscriber<>    handle_chunk_unload;
+            Subscriber<> handle_chunk_mesh_change;
+            Subscriber<> handle_chunk_unload;
 
             /**
              * @brief Creates count number of new pages.
@@ -104,7 +111,9 @@ namespace hemlock {
              * @param first_page_idx The index of the first page
              * to consider.
              */
-            void put_chunk_in_page(ChunkID chunk_id, ui32 instance_count, ui32 first_page_idx);
+            void put_chunk_in_page(
+                ChunkID chunk_id, ui32 instance_count, ui32 first_page_idx
+            );
 
             /**
              * @brief Updates chunks, removing those that
@@ -122,8 +131,8 @@ namespace hemlock {
             ui32 m_page_size;
             ui32 m_max_unused_pages;
         };
-    }
-}
+    }  // namespace voxel
+}  // namespace hemlock
 namespace hvox = hemlock::voxel;
 
-#endif // __hemlock_voxel_graphics_renderer_h
+#endif  // __hemlock_voxel_graphics_renderer_h

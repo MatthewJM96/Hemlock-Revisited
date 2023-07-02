@@ -33,7 +33,9 @@ option(HEMLOCK_USING_LUA "Whether Hemlock uses Lua for scripting." ON)
 
 option(HEMLOCK_PREPROC_DEBUG "Whether to emit results of running preprocessor." OFF)
 
-option(HEMLOCK_FAST_DEBUG "Whether to compile debug builds with some optimisation." OFF)
+option(HEMLOCK_FAST_DEBUG "Whether to compile debug builds with O1 optimisation." OFF)
+option(HEMLOCK_SUPER_FAST_DEBUG "Whether to compile debug builds with O2 optimisation." OFF)
+option(HEMLOCK_HYPER_FAST_DEBUG "Whether to compile debug builds with O3 optimisation." OFF)
 
 option(HEMLOCK_ENABLE_ADDRESS_SANITIZER "Whether to compile with address sanitizer." OFF)
 option(HEMLOCK_ENABLE_THREAD_SANITIZER "Whether to compile with thread sanitizer." OFF)
@@ -48,20 +50,20 @@ if (UNIX OR MINGW)
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address -fno-omit-frame-pointer")
         set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fsanitize=address -fno-omit-frame-pointer")
         set(CMAKE_CXX_FLAGS_RELEASE "-g -O3")
-        set(CMAKE_CXX_FLAGS_DEBUG "-g -O1")
+        set(CMAKE_CXX_FLAGS_DEBUG "-g")
     elseif(HEMLOCK_ENABLE_THREAD_SANITIZER)
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=thread -fno-omit-frame-pointer")
         set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fsanitize=thread -fno-omit-frame-pointer")
         set(CMAKE_CXX_FLAGS_RELEASE "-g -O2")
-        set(CMAKE_CXX_FLAGS_DEBUG "-g -O1")
+        set(CMAKE_CXX_FLAGS_DEBUG "-g")
     elseif(HEMLOCK_ENABLE_MEMORY_SANITIZER)
             set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=memory -fsanitize-memory-track-origins -fPIE -fno-omit-frame-pointer")
             set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fsanitize=memory -fsanitize-memory-track-origins -pie -fno-omit-frame-pointer")
             set(CMAKE_CXX_FLAGS_RELEASE "-g -O2")
-            set(CMAKE_CXX_FLAGS_DEBUG "-g -O1")
+            set(CMAKE_CXX_FLAGS_DEBUG "-g")
     elseif(HEMLOCK_ENABLE_GPERF_PROFILER)
         set(CMAKE_CXX_FLAGS_RELEASE "-g -O3")
-        set(CMAKE_CXX_FLAGS_DEBUG "-g -O1")
+        set(CMAKE_CXX_FLAGS_DEBUG "-g")
     else()
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wold-style-cast -Wshadow -Wformat=2 -Werror")
         set(CMAKE_CXX_FLAGS_RELEASE "-O3")
@@ -70,6 +72,10 @@ if (UNIX OR MINGW)
 
     if (HEMLOCK_FAST_DEBUG)
         set(CMAKE_CXX_FLAGS_DEBUG "-g -O1")
+    elseif (HEMLOCK_SUPER_FAST_DEBUG)
+        set(CMAKE_CXX_FLAGS_DEBUG "-g -O2")
+    elseif (HEMLOCK_HYPER_FAST_DEBUG)
+        set(CMAKE_CXX_FLAGS_DEBUG "-g -O3")
     endif()
 
     if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
@@ -96,14 +102,15 @@ endif()
 
 set(Hemlock_Requirements
     glm/0.9.9.8
-    sdl/2.0.18
-    sdl_ttf/2.0.18
-    libpng/1.6.37
+    sdl/2.26.1
+    sdl_ttf/2.20.1
+    libpng/1.6.39
     concurrentqueue/1.0.3
     boost/1.78.0
     bullet3/3.24
     entt/3.10.1
     yaml-cpp/0.7.0
+    zlib/1.2.13
 )
 
 if (HEMLOCK_USING_OPENGL)
@@ -185,6 +192,7 @@ add_executable(Hemlock_Revisited
     "${PROJECT_SOURCE_DIR}/src/app/window/window.cpp"
     "${PROJECT_SOURCE_DIR}/src/camera/basic_first_person_camera.cpp"
     "${PROJECT_SOURCE_DIR}/src/camera/basic_orthographic_camera.cpp"
+    "${PROJECT_SOURCE_DIR}/src/debug/heatmap.cpp"
     "${PROJECT_SOURCE_DIR}/src/graphics/font/font.cpp"
     "${PROJECT_SOURCE_DIR}/src/graphics/font/text_align.cpp"
     "${PROJECT_SOURCE_DIR}/src/graphics/glsl_program.cpp"
@@ -196,7 +204,7 @@ add_executable(Hemlock_Revisited
     "${PROJECT_SOURCE_DIR}/src/io/image.cpp"
     "${PROJECT_SOURCE_DIR}/src/io/iomanager.cpp"
     "${PROJECT_SOURCE_DIR}/src/io/yaml/yaml.cpp"
-    "${PROJECT_SOURCE_DIR}/src/script/lua/environment.cpp"
+    "${PROJECT_SOURCE_DIR}/src/script/lua/continuable_function.cpp"
     "${PROJECT_SOURCE_DIR}/src/script/lua/lua_function.cpp"
     "${PROJECT_SOURCE_DIR}/src/thread/thread_workflow_builder.cpp"
     "${PROJECT_SOURCE_DIR}/src/ui/input/dispatcher.cpp"
@@ -244,9 +252,12 @@ if (HEMLOCK_USING_LUA)
     )
 endif()
 
+# TODO(Matthew): remove the "${PROJECT_SOURCE_DIR}" line and properly build
+#                engine and tests separately.
 target_include_directories(Hemlock_Revisited
     PUBLIC
     "${PROJECT_SOURCE_DIR}/include"
+    "${PROJECT_SOURCE_DIR}"
 )
 
 target_include_directories(Hemlock_Revisited
@@ -306,16 +317,29 @@ if (UNIX OR MINGW)
         endif()
     endif()
 else()
-    target_include_directories(Hemlock_Revisited
-    SYSTEM
-    PUBLIC
-    "${PROJECT_SOURCE_DIR}/deps/include"
-    )
+    if(CMAKE_BUILD_TYPE STREQUAL "Release" OR HEMLOCK_FAST_DEBUG)
+        target_include_directories(Hemlock_Revisited
+            SYSTEM
+            PUBLIC
+            "${PROJECT_SOURCE_DIR}/deps/Release/include"
+        )
 
-    target_link_directories(Hemlock_Revisited
-    PUBLIC
-    "${PROJECT_SOURCE_DIR}/deps/lib"
-    )
+        target_link_directories(Hemlock_Revisited
+            PUBLIC
+            "${PROJECT_SOURCE_DIR}/deps/Release/lib"
+        )
+    else()
+        target_include_directories(Hemlock_Revisited
+            SYSTEM
+            PUBLIC
+            "${PROJECT_SOURCE_DIR}/deps/Debug/include"
+        )
+
+        target_link_directories(Hemlock_Revisited
+            PUBLIC
+            "${PROJECT_SOURCE_DIR}/deps/Debug/lib"
+        )
+    endif()
 endif()
 
 if (HEMLOCK_USING_OPENGL)
@@ -345,6 +369,7 @@ target_link_libraries(Hemlock_Revisited
     Boost::iostreams
     Bullet::Bullet
     yaml-cpp
+    heatmap
 )
 
 if(CMAKE_BUILD_TYPE STREQUAL "Release" OR HEMLOCK_FAST_DEBUG)

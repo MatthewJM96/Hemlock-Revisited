@@ -8,7 +8,9 @@ namespace hemlock {
         class ThreadWorkflowBuilder {
         public:
             ThreadWorkflowBuilder();
-            ~ThreadWorkflowBuilder() { /* Empty. */ }
+
+            ~ThreadWorkflowBuilder() { /* Empty. */
+            }
 
             void init(ThreadWorkflowDAG* dag);
             void dispose();
@@ -18,7 +20,7 @@ namespace hemlock {
             /**
              * @brief Set the expected number of tasks
              * to be in the DAG.
-             * 
+             *
              * @param expected_task_count The number of
              * tasks to expect.
              */
@@ -27,14 +29,14 @@ namespace hemlock {
             /**
              * @brief Marks a new task as existing and
              * returns its ID.
-             * 
+             *
              * @return The ID of the new task.
              */
             ThreadWorkflowTaskID add_task();
             /**
              * @brief Marks count new tasks as existing
              * and returns the ID of the first of them.
-             * 
+             *
              * @return The ID of the first new task.
              */
             ThreadWorkflowTaskID add_tasks(ui32 count);
@@ -86,9 +88,8 @@ namespace hemlock {
              * where ID is that of the newly chained task.
              * [false, 0] otherwise.
              */
-            std::tuple<bool, ThreadWorkflowTaskID> chain_task(
-                ThreadWorkflowTaskID from_task
-            );
+            std::tuple<bool, ThreadWorkflowTaskID>
+            chain_task(ThreadWorkflowTaskID from_task);
             /**
              * @brief Marks count new tasks as existing
              * and sets them each as depending on the
@@ -105,10 +106,8 @@ namespace hemlock {
              * where ID is that of the first newly chained
              * task. [false, 0] otherwise.
              */
-            std::tuple<bool, ThreadWorkflowTaskID> chain_tasks(
-                ThreadWorkflowTaskID from_task,
-                                ui32 count
-            );
+            std::tuple<bool, ThreadWorkflowTaskID>
+            chain_tasks(ThreadWorkflowTaskID from_task, ui32 count);
             /**
              * @brief Marks count new tasks as existing
              * and sets them each as depending on the
@@ -126,10 +125,8 @@ namespace hemlock {
              * where ID is that of the first newly chained
              * task. [false, 0] otherwise.
              */
-            std::tuple<bool, ThreadWorkflowTaskID> chain_tasks_parallel(
-                ThreadWorkflowTaskID from_task,
-                                ui32 count
-            );
+            std::tuple<bool, ThreadWorkflowTaskID>
+            chain_tasks_parallel(ThreadWorkflowTaskID from_task, ui32 count);
 
             /**
              * @brief Chains the tasks passed by their IDs.
@@ -141,8 +138,9 @@ namespace hemlock {
              * @return True if both tasks existed and were
              * chained, false otherwise.
              */
-            bool set_task_depends( ThreadWorkflowTaskID first_task,
-                                ThreadWorkflowTaskID second_task );
+            bool set_task_depends(
+                ThreadWorkflowTaskID first_task, ThreadWorkflowTaskID second_task
+            );
             /**
              * @brief Chains the tasks passed by their IDs.
              *
@@ -154,17 +152,15 @@ namespace hemlock {
              * @return True if both tasks existed and were
              * chained, false otherwise.
              */
-            bool set_tasks_depend( std::pair<
-                                        ThreadWorkflowTaskID,
-                                        ThreadWorkflowTaskID
-                                    >* task_pairs,
-                                    ui32 count
+            bool set_tasks_depend(
+                std::pair<ThreadWorkflowTaskID, ThreadWorkflowTaskID>* task_pairs,
+                ui32                                                   count
             );
         protected:
             ThreadWorkflowDAG* m_dag;
         };
-    }
-}
+    }  // namespace thread
+}  // namespace hemlock
 namespace hthread = hemlock::thread;
 
-#endif // __hemlock_thread_thread_workflow_builder_h
+#endif  // __hemlock_thread_thread_workflow_builder_h

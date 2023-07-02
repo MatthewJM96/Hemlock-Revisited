@@ -8,45 +8,43 @@
 hg::MeshHandles hvox::ChunkRenderer::block_mesh_handles = {};
 
 hvox::ChunkRenderer::ChunkRenderer() :
-    handle_chunk_mesh_change(Subscriber<>{
-        [&](Sender sender) {
-            hmem::WeakHandle<Chunk> handle = sender.get_handle<Chunk>();
+    handle_chunk_mesh_change(Subscriber<>{ [&](Sender sender) {
+        hmem::WeakHandle<Chunk> handle = sender.get_handle<Chunk>();
 
-            auto chunk = handle.lock();
-            // If chunk is nullptr, then there's no point
-            // handling the mesh change as we will have
-            // an unload event for this chunk.
-            if (chunk == nullptr) return;
+        auto chunk = handle.lock();
+        // If chunk is nullptr, then there's no point
+        // handling the mesh change as we will have
+        // an unload event for this chunk.
+        if (chunk == nullptr) return;
 
-            m_chunk_dirty_queue.enqueue({ handle, chunk->id() });
-        }
-    }),
-    handle_chunk_unload(Subscriber<>{
-        [&](Sender sender) {
-            hmem::WeakHandle<Chunk> handle = sender.get_handle<Chunk>();
+        m_chunk_dirty_queue.enqueue({ handle, chunk->id() });
+    } }),
+    handle_chunk_unload(Subscriber<>{ [&](Sender sender) {
+        hmem::WeakHandle<Chunk> handle = sender.get_handle<Chunk>();
 
-            auto chunk = handle.lock();
-            // If chunk is nullptr, then we have
-            // a major problem. on_unload MUST
-            // complete before chunk is released.
-            assert(chunk != nullptr);
+        auto chunk = handle.lock();
+        // If chunk is nullptr, then we have
+        // a major problem. on_unload MUST
+        // complete before chunk is released.
+        assert(chunk != nullptr);
 
-            m_chunk_removal_queue.enqueue({ handle, chunk->id() });
-        }
-    }),
-    m_page_size(0)
-{ /* Empty. */ }
+        m_chunk_removal_queue.enqueue({ handle, chunk->id() });
+    } }),
+    m_page_size(0) { /* Empty. */
+}
 
 void hvox::ChunkRenderer::init(ui32 page_size, ui32 max_unused_pages) {
     if (block_mesh_handles.vao == 0) {
         hg::upload_mesh(BLOCK_MESH, block_mesh_handles, hg::MeshDataVolatility::STATIC);
 
-        glEnableVertexArrayAttrib(block_mesh_handles.vao,  3);
-        glVertexArrayAttribFormat(block_mesh_handles.vao,  3, 3, GL_FLOAT, GL_FALSE, 0);
+        glEnableVertexArrayAttrib(block_mesh_handles.vao, 3);
+        glVertexArrayAttribFormat(block_mesh_handles.vao, 3, 3, GL_FLOAT, GL_FALSE, 0);
         glVertexArrayAttribBinding(block_mesh_handles.vao, 3, 1);
 
-        glEnableVertexArrayAttrib(block_mesh_handles.vao,  4);
-        glVertexArrayAttribFormat(block_mesh_handles.vao,  4, 3, GL_FLOAT, GL_FALSE, sizeof(f32v3));
+        glEnableVertexArrayAttrib(block_mesh_handles.vao, 4);
+        glVertexArrayAttribFormat(
+            block_mesh_handles.vao, 4, 3, GL_FLOAT, GL_FALSE, sizeof(f32v3)
+        );
         glVertexArrayAttribBinding(block_mesh_handles.vao, 4, 1);
 
         glVertexArrayBindingDivisor(block_mesh_handles.vao, 1, 1);
@@ -56,7 +54,7 @@ void hvox::ChunkRenderer::init(ui32 page_size, ui32 max_unused_pages) {
     m_max_unused_pages = max_unused_pages;
 
     // Create pages up to max unused pages so we don't
-    // do as much allocation later. 
+    // do as much allocation later.
     create_pages(m_max_unused_pages);
 }
 
@@ -65,12 +63,14 @@ void hvox::ChunkRenderer::dispose() {
 
     for (auto& chunk_page : m_chunk_pages) {
         glDeleteBuffers(1, &chunk_page->vbo);
+        delete chunk_page;
     }
     ChunkRenderPages().swap(m_chunk_pages);
 
-    // TODO(Matthew): Should do refcounting like in outline renderer for block mesh handles.
-    //                  Less important here as we probably never don't have some chunk renderer
-    //                  in existence, and it's all very cheap.
+    // TODO(Matthew): Should do refcounting like in outline renderer for block mesh
+    // handles.
+    //                  Less important here as we probably never don't have some chunk
+    //                  renderer in existence, and it's all very cheap.
 }
 
 void hvox::ChunkRenderer::set_page_size(ui32 page_size) {
@@ -92,9 +92,13 @@ void hvox::ChunkRenderer::draw(FrameTime) {
     for (auto& chunk_page : m_chunk_pages) {
         if (chunk_page->voxel_count == 0) continue;
 
-        glVertexArrayVertexBuffer(block_mesh_handles.vao, 1, chunk_page->vbo, 0, sizeof(ChunkInstanceData));
+        glVertexArrayVertexBuffer(
+            block_mesh_handles.vao, 1, chunk_page->vbo, 0, sizeof(ChunkInstanceData)
+        );
 
-        glDrawArraysInstanced(GL_TRIANGLES, 0, BLOCK_VERTEX_COUNT, chunk_page->voxel_count);
+        glDrawArraysInstanced(
+            GL_TRIANGLES, 0, BLOCK_VERTEX_COUNT, chunk_page->voxel_count
+        );
     }
 }
 
@@ -107,7 +111,7 @@ void hvox::ChunkRenderer::add_chunk(hmem::WeakHandle<Chunk> handle) {
     chunk->on_unload      += &handle_chunk_unload;
 
     m_all_paged_chunks[chunk->id()] = handle;
-    m_chunk_metadata[chunk->id()] = PagedChunkMetadata{};
+    m_chunk_metadata[chunk->id()]   = PagedChunkMetadata{};
 }
 
 hvox::ChunkRenderPage* hvox::ChunkRenderer::create_pages(ui32 count) {
@@ -128,20 +132,30 @@ hvox::ChunkRenderPage* hvox::ChunkRenderer::create_pages(ui32 count) {
     ChunkRenderPage* first_new_page = m_chunk_pages.back();
 
     glCreateBuffers(1, &first_new_page->vbo);
-    glNamedBufferData(first_new_page->vbo, block_page_size() * sizeof(ChunkInstanceData), nullptr, GL_DYNAMIC_DRAW);
+    glNamedBufferData(
+        first_new_page->vbo,
+        block_page_size() * sizeof(ChunkInstanceData),
+        nullptr,
+        GL_DYNAMIC_DRAW
+    );
 
     first_new_page->chunks.reserve(m_page_size);
 
     /********************************\
      * Append subsequent new pages. *
     \********************************/
-    for (ui32 i = 0; i < count; ++i) {
+    for (ui32 i = 1; i < count; ++i) {
         m_chunk_pages.emplace_back(new ChunkRenderPage{});
 
         ChunkRenderPage* new_page = m_chunk_pages.back();
 
         glCreateBuffers(1, &new_page->vbo);
-        glNamedBufferData(new_page->vbo, block_page_size() * sizeof(ChunkInstanceData), nullptr, GL_DYNAMIC_DRAW);
+        glNamedBufferData(
+            new_page->vbo,
+            block_page_size() * sizeof(ChunkInstanceData),
+            nullptr,
+            GL_DYNAMIC_DRAW
+        );
 
         new_page->chunks.reserve(m_page_size);
     }
@@ -150,13 +164,16 @@ hvox::ChunkRenderPage* hvox::ChunkRenderer::create_pages(ui32 count) {
     return first_new_page;
 }
 
-void hvox::ChunkRenderer::put_chunk_in_page(ChunkID chunk_id, ui32 instance_count, ui32 first_page_idx) {
+void hvox::ChunkRenderer::put_chunk_in_page(
+    ChunkID chunk_id, ui32 instance_count, ui32 first_page_idx
+) {
     PagedChunkMetadata& metadata = m_chunk_metadata[chunk_id];
 
-    ui32 page_idx = first_page_idx;
-    ChunkRenderPage* page = nullptr;
+    ui32             page_idx = first_page_idx;
+    ChunkRenderPage* page     = nullptr;
     for (; page_idx < m_chunk_pages.size(); ++page_idx) {
-        if (m_chunk_pages[page_idx]->voxel_count + instance_count <= block_page_size()) {
+        if (m_chunk_pages[page_idx]->voxel_count + instance_count <= block_page_size())
+        {
             page = m_chunk_pages[page_idx];
             break;
         }
@@ -164,14 +181,13 @@ void hvox::ChunkRenderer::put_chunk_in_page(ChunkID chunk_id, ui32 instance_coun
 
     if (page == nullptr) {
         page = create_pages(1);
-        ++page_idx;
     }
 
-    ui32 chunk_idx = page->chunks.size();
+    ui32 chunk_idx = static_cast<ui32>(page->chunks.size());
     page->chunks.emplace_back(chunk_id);
 
     if (page->first_dirtied_chunk_idx >= page->chunks.size()) {
-        page->first_dirtied_chunk_idx  = page->chunks.size() - 1;
+        page->first_dirtied_chunk_idx = static_cast<ui32>(page->chunks.size() - 1);
     }
 
     page->voxel_count += instance_count;
@@ -212,11 +228,9 @@ void hvox::ChunkRenderer::process_pages() {
             // TODO(Matthew): This updates chunk indexes, but feels like it
             //                isn't the best approach. Perhaps we can do
             //                better?
-            for (
-                ui32 chunk_idx = metadata.chunk_idx;
-                chunk_idx < page.chunks.size();
-                ++chunk_idx
-            ) {
+            for (ui32 chunk_idx = metadata.chunk_idx; chunk_idx < page.chunks.size();
+                 ++chunk_idx)
+            {
                 m_chunk_metadata[page.chunks[chunk_idx]].chunk_idx = chunk_idx;
             }
 
@@ -251,11 +265,10 @@ void hvox::ChunkRenderer::process_pages() {
     while (m_chunk_dirty_queue.try_dequeue(handle_and_id)) {
         auto it = m_chunk_metadata.find(handle_and_id.id);
 
-        if (it == m_chunk_metadata.end())
-            continue;
+        if (it == m_chunk_metadata.end()) continue;
 
         PagedChunkMetadata& metadata = it->second;
-        metadata.dirty = true;
+        metadata.dirty               = true;
 
         auto chunk = handle_and_id.handle.lock();
 
@@ -298,17 +311,32 @@ void hvox::ChunkRenderer::process_pages() {
 
         // Create a new on-GPU buffer to populate.
         glCreateBuffers(1, &new_vbos[page_idx]);
-        glNamedBufferData(new_vbos[page_idx], block_page_size() * sizeof(ChunkInstanceData), nullptr, GL_DYNAMIC_DRAW);
+        glNamedBufferData(
+            new_vbos[page_idx],
+            block_page_size() * sizeof(ChunkInstanceData),
+            nullptr,
+            GL_DYNAMIC_DRAW
+        );
 
         ui32 voxels_instanced = 0;
-        for (ui32 chunk_idx = 0; chunk_idx < page.first_dirtied_chunk_idx; ++chunk_idx) {
-            voxels_instanced += m_chunk_metadata[page.chunks[chunk_idx]].on_gpu_voxel_count;
+        for (ui32 chunk_idx = 0; chunk_idx < page.first_dirtied_chunk_idx; ++chunk_idx)
+        {
+            voxels_instanced
+                += m_chunk_metadata[page.chunks[chunk_idx]].on_gpu_voxel_count;
         }
 
         // Copy unchanged original data into new buffer.
-        glCopyNamedBufferSubData(page.vbo, new_vbos[page_idx], 0, 0, voxels_instanced * sizeof(ChunkInstanceData));
+        glCopyNamedBufferSubData(
+            page.vbo,
+            new_vbos[page_idx],
+            0,
+            0,
+            voxels_instanced * sizeof(ChunkInstanceData)
+        );
 
-        for (ui32 chunk_idx = page.first_dirtied_chunk_idx; chunk_idx < page.chunks.size();) {
+        for (ui32 chunk_idx = page.first_dirtied_chunk_idx;
+             chunk_idx < page.chunks.size();)
+        {
             ChunkID id = page.chunks[chunk_idx];
 
             auto it = m_chunk_metadata.find(id);
@@ -356,7 +384,7 @@ void hvox::ChunkRenderer::process_pages() {
                 glNamedBufferSubData(
                     new_vbos[page_idx],
                     voxels_instanced * sizeof(ChunkInstanceData),
-                    instance.count   * sizeof(ChunkInstanceData),
+                    instance.count * sizeof(ChunkInstanceData),
                     reinterpret_cast<void*>(instance.data)
                 );
                 metadata.on_gpu_offset      = voxels_instanced;
@@ -370,12 +398,12 @@ void hvox::ChunkRenderer::process_pages() {
                 glCopyNamedBufferSubData(
                     m_chunk_pages[metadata.on_gpu_page_idx]->vbo,
                     new_vbos[page_idx],
-                    metadata.on_gpu_offset      * sizeof(ChunkInstanceData),
-                    voxels_instanced            * sizeof(ChunkInstanceData),
+                    metadata.on_gpu_offset * sizeof(ChunkInstanceData),
+                    voxels_instanced * sizeof(ChunkInstanceData),
                     metadata.on_gpu_voxel_count * sizeof(ChunkInstanceData)
                 );
-                metadata.on_gpu_offset      = voxels_instanced;
-                metadata.on_gpu_page_idx    = page_idx;
+                metadata.on_gpu_offset   = voxels_instanced;
+                metadata.on_gpu_page_idx = page_idx;
 
                 voxels_instanced += metadata.on_gpu_voxel_count;
             }
@@ -385,8 +413,8 @@ void hvox::ChunkRenderer::process_pages() {
             ++chunk_idx;
         }
 
-        page.voxel_count = voxels_instanced;
-        page.dirty = false;
+        page.voxel_count             = voxels_instanced;
+        page.dirty                   = false;
         page.first_dirtied_chunk_idx = std::numeric_limits<ui32>::max();
     }
 

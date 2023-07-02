@@ -9,19 +9,18 @@ happ::Window::Window() :
     m_window(nullptr),
 #if defined(HEMLOCK_USING_OPENGL)
     m_context(nullptr)
-#elif defined(HEMLOCK_USING_VULKAN) // HEMLOCK_USING_OPENGL
-    m_evalutor(DeviceEvaluator{
+#elif defined(HEMLOCK_USING_VULKAN)  // HEMLOCK_USING_OPENGL
+    m_evalutor(DeviceEvaluator {
         [&](VkPhyiscalDevice device) {
             // TODO(Matthew): Implement.
         };
     });
-    m_instance(nullptr),
-    m_device(nullptr),
-    m_surface(nullptr),
-    m_extensions({0, nullptr}),
-    m_available_devices({0, nullptr})
-#endif // HEMLOCK_USING_VULKAN
-{ /* Empty. */ }
+m_instance(nullptr), m_device(nullptr), m_surface(nullptr),
+    m_extensions({ 0, nullptr }),
+    m_available_devices({ 0, nullptr })
+#endif                               // HEMLOCK_USING_VULKAN
+{                                    /* Empty. */
+}
 
 happ::WindowError happ::Window::init(WindowSettings settings /*= {}*/) {
     if (m_initialised) return WindowError::NONE;
@@ -37,11 +36,11 @@ happ::WindowError happ::Window::init(WindowSettings settings /*= {}*/) {
     //                in OpenGL & Vulkan sections are generic even if we were
     //                to support some other library like GLFW.
 #if defined(HEMLOCK_USING_SDL)
-#if defined(HEMLOCK_USING_OPENGL)
+#  if defined(HEMLOCK_USING_OPENGL)
     flags |= SDL_WINDOW_OPENGL;
-#elif defined(HEMLOCK_USING_VULKAN) // defined(HEMLOCK_USING_OPENGL)
+#  elif defined(HEMLOCK_USING_VULKAN)  // defined(HEMLOCK_USING_OPENGL)
     flags |= SDL_WINDOW_VULKAN;
-#endif // defined(HEMLOCK_USING_VULKAN)
+#  endif                               // defined(HEMLOCK_USING_VULKAN)
     if (m_settings.is_fullscreen) {
         flags |= SDL_WINDOW_FULLSCREEN;
     }
@@ -52,7 +51,14 @@ happ::WindowError happ::Window::init(WindowSettings settings /*= {}*/) {
         flags |= SDL_WINDOW_RESIZABLE;
     }
 
-    m_window = SDL_CreateWindow(name().data(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width(), height(), flags);
+    m_window = SDL_CreateWindow(
+        name().data(),
+        SDL_WINDOWPOS_CENTERED,
+        SDL_WINDOWPOS_CENTERED,
+        width(),
+        height(),
+        flags
+    );
     if (m_window == nullptr) {
         debug_printf("Couldn't create SDL Window.\n");
 
@@ -61,9 +67,9 @@ happ::WindowError happ::Window::init(WindowSettings settings /*= {}*/) {
         return WindowError::SDL_WINDOW;
     }
 
-#if defined(HEMLOCK_USING_OPENGL)
+#  if defined(HEMLOCK_USING_OPENGL)
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 5);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
     m_context = SDL_GL_CreateContext(m_window);
     if (m_context == nullptr) {
@@ -78,10 +84,7 @@ happ::WindowError happ::Window::init(WindowSettings settings /*= {}*/) {
     if (error != GLEW_OK) {
         debug_printf("Couldn't initialise Glew.\n");
 
-        debug_printf(
-            "%s\n",
-            reinterpret_cast<const char*>(glewGetErrorString(error))
-        );
+        debug_printf("%s\n", reinterpret_cast<const char*>(glewGetErrorString(error)));
 
         return WindowError::GLEW_INIT;
     }
@@ -97,7 +100,7 @@ happ::WindowError happ::Window::init(WindowSettings settings /*= {}*/) {
 
         // Enable blending.
         glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); 
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
         // Enable depth testing.
         glEnable(GL_DEPTH_TEST);
@@ -112,17 +115,26 @@ happ::WindowError happ::Window::init(WindowSettings settings /*= {}*/) {
             SDL_GL_SetSwapInterval(0);
         }
     }
-#elif defined(HEMLOCK_USING_VULKAN) // defined(HEMLOCK_USING_OPENGL)
-#if defined(DEBUG)
+#  elif defined(HEMLOCK_USING_VULKAN)  // defined(HEMLOCK_USING_OPENGL)
+#    if defined(DEBUG)
     {
         ui32 total_extension_count = 0;
-        vkEnumerateInstanceExtensionProperties(nullptr, &total_extension_count, nullptr);
-        VkExtensionProperties* extensions = new VkExtensionProperties[total_extension_count];
-        vkEnumerateInstanceExtensionProperties(nullptr, &total_extension_count, extensions);
+        vkEnumerateInstanceExtensionProperties(
+            nullptr, &total_extension_count, nullptr
+        );
+        VkExtensionProperties* extensions
+            = new VkExtensionProperties[total_extension_count];
+        vkEnumerateInstanceExtensionProperties(
+            nullptr, &total_extension_count, extensions
+        );
 
         debug_printf("Available Vulkan Extensions:\n");
         for (ui32 i = 0; i < total_extension_count; ++i) {
-            debug_printf("    -> %s - spec v%d\n", extensions[i].extensionName, extensions[i].specVersion);
+            debug_printf(
+                "    -> %s - spec v%d\n",
+                extensions[i].extensionName,
+                extensions[i].specVersion
+            );
         }
 
         ui32 total_layer_count = 0;
@@ -132,16 +144,24 @@ happ::WindowError happ::Window::init(WindowSettings settings /*= {}*/) {
 
         debug_printf("Available Vulkan Validation Layers:\n");
         for (ui32 i = 0; i < total_layer_count; ++i) {
-            debug_printf("    -> %s - impl v%d - spec v%d\n", layers[i].layerName, layers[i].implementationVersion, layers[i].specVersion);
+            debug_printf(
+                "    -> %s - impl v%d - spec v%d\n",
+                layers[i].layerName,
+                layers[i].implementationVersion,
+                layers[i].specVersion
+            );
             debug_printf("          - %s\n", layers[i].description);
         }
     }
-#endif // defined(DEBUG)
+#    endif  // defined(DEBUG)
 
     // Get number of Vulkan extensions required to create our instance
     // and surface for rendering with Vulkan to our window.
     if (!SDL_Vulkan_GetInstanceExtensions(m_window, &m_extensions.count, nullptr)) {
-        debug_printf("Could not get count of extensions needed to create a Vulkan instance useable with SDL.\n");
+        debug_printf(
+            "Could not get count of extensions needed to create a Vulkan instance "
+            "useable with SDL.\n"
+        );
 
         return WindowError::VULKAN_INSTANCE;
     }
@@ -149,8 +169,14 @@ happ::WindowError happ::Window::init(WindowSettings settings /*= {}*/) {
     m_extensions.names = new const char*[m_extensions.count];
 
     // Get the names of those extensions.
-    if (!SDL_Vulkan_GetInstanceExtensions(m_window, &m_extensions.count, m_extensions.names)) {
-        debug_printf("Could not get extensions needed to create a Vulkan instance useable with SDL.\n");
+    if (!SDL_Vulkan_GetInstanceExtensions(
+            m_window, &m_extensions.count, m_extensions.names
+        ))
+    {
+        debug_printf(
+            "Could not get extensions needed to create a Vulkan instance useable "
+            "with SDL.\n"
+        );
 
         return WindowError::VULKAN_INSTANCE;
     }
@@ -159,16 +185,15 @@ happ::WindowError happ::Window::init(WindowSettings settings /*= {}*/) {
     // that vulkan should use to give us feedback on things going wrong.
     CREATE_VK_VALIDATION_LAYERS;
 
-    VkInstanceCreateInfo instance_info = {
-        .sType                      = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
-        .pNext                      = nullptr,
-        .flags                      = 0,
-        .pApplicationInfo           = &APP_INFO,
-        .enabledLayerCount          = ENABLE_VK_VALIDATION_LAYERS,
-        .ppEnabledLayerNames        = VK_VALIDATION_LAYERS,
-        .enabledExtensionCount      = m_extensions.count,
-        .ppEnabledExtensionNames    = m_extensions.names
-    };
+    VkInstanceCreateInfo instance_info
+        = { .sType                   = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
+            .pNext                   = nullptr,
+            .flags                   = 0,
+            .pApplicationInfo        = &APP_INFO,
+            .enabledLayerCount       = ENABLE_VK_VALIDATION_LAYERS,
+            .ppEnabledLayerNames     = VK_VALIDATION_LAYERS,
+            .enabledExtensionCount   = m_extensions.count,
+            .ppEnabledExtensionNames = m_extensions.names };
 
     VkResult err = vkCreateInstance(&instance_info, nullptr, &m_instance);
     if (err != VkResult::VK_SUCCESS) {
@@ -191,13 +216,14 @@ happ::WindowError happ::Window::init(WindowSettings settings /*= {}*/) {
 
         return WindowError::SDL_VULKAN_SURFACE;
     }
-#endif // defined(HEMLOCK_USING_VULKAN)
+#  endif    // defined(HEMLOCK_USING_VULKAN)
 
     m_window_id = SDL_GetWindowID(m_window);
-#endif // defined(HEMLOCK_USING_SDL)
+#endif  // defined(HEMLOCK_USING_SDL)
 
-    hui::InputDispatcher::instance()->on_window.move   += &handle_external_window_move;
-    hui::InputDispatcher::instance()->on_window.resize += &handle_external_window_resize;
+    hui::InputDispatcher::instance()->on_window.move += &handle_external_window_move;
+    hui::InputDispatcher::instance()->on_window.resize
+        += &handle_external_window_resize;
 
     return WindowError::NONE;
 }
@@ -206,21 +232,22 @@ void happ::Window::dispose() {
     if (!m_initialised) return;
     m_initialised = false;
 
-    hui::InputDispatcher::instance()->on_window.move   -= &handle_external_window_move;
-    hui::InputDispatcher::instance()->on_window.resize -= &handle_external_window_resize;
+    hui::InputDispatcher::instance()->on_window.move -= &handle_external_window_move;
+    hui::InputDispatcher::instance()->on_window.resize
+        -= &handle_external_window_resize;
 
 #if defined(HEMLOCK_USING_SDL)
-#if defined(HEMLOCK_USING_OPENGL)
+#  if defined(HEMLOCK_USING_OPENGL)
     SDL_GL_DeleteContext(m_context);
     m_context = nullptr;
-#elif defined(HEMLOCK_USING_VULKAN) // defined(HEMLOCK_USING_OPENGL)
+#  elif defined(HEMLOCK_USING_VULKAN)  // defined(HEMLOCK_USING_OPENGL)
     vkDestroyInstance(m_instance, nullptr);
     m_instance = nullptr;
-#endif // defined(HEMLOCK_USING_VULKAN)
+#  endif                               // defined(HEMLOCK_USING_VULKAN)
 
     SDL_DestroyWindow(m_window);
     m_window = nullptr;
-#endif // defined(HEMLOCK_USING_SDL)
+#endif  // defined(HEMLOCK_USING_SDL)
 
     WindowDimensionMap().swap(m_allowed_resolutions);
     FullscreenModeMap().swap(m_fullscreen_modes);
@@ -231,7 +258,7 @@ void happ::Window::set_name(const std::string& name) {
 
 #if defined(HEMLOCK_USING_SDL)
     SDL_SetWindowTitle(m_window, name.data());
-#endif // defined(HEMLOCK_USING_SDL)
+#endif  // defined(HEMLOCK_USING_SDL)
 }
 
 void happ::Window::set_dimensions(WindowDimensions dimensions) {
@@ -239,14 +266,22 @@ void happ::Window::set_dimensions(WindowDimensions dimensions) {
 
 #if defined(HEMLOCK_USING_SDL)
     SDL_SetWindowSize(m_window, dimensions.width, dimensions.height);
+#endif    // defined(HEMLOCK_USING_SDL)
 
-#if defined(HEMLOCK_USING_OPENGL)
+    set_internal_dimensions(dimensions);
+}
+
+void happ::Window::set_internal_dimensions(WindowDimensions dimensions) {
+    if (m_settings.dimensions == dimensions) return;
+
+#if defined(HEMLOCK_USING_SDL)
+#  if defined(HEMLOCK_USING_OPENGL)
     // TODO(Matthew): do we need to call this for fullscreen too?
     // TODO(Matthew): do we need to call this each time we change which
     //                window we are handling?
     glViewport(0, 0, dimensions.width, dimensions.height);
-#endif // defined(HEMLOCK_USING_OPENGL)
-#endif // defined(HEMLOCK_USING_SDL)
+#  endif  // defined(HEMLOCK_USING_OPENGL)
+#endif    // defined(HEMLOCK_USING_SDL)
 
     WindowDimensions temp = m_settings.dimensions;
     m_settings.dimensions = dimensions;
@@ -257,11 +292,27 @@ void happ::Window::set_dimensions(WindowDimensions dimensions) {
 }
 
 void happ::Window::set_width(ui32 width) {
-    set_dimensions({{ width, height() }});
+    set_dimensions({
+        {width, height()}
+    });
+}
+
+void happ::Window::set_internal_width(ui32 width) {
+    set_internal_dimensions({
+        {width, height()}
+    });
 }
 
 void happ::Window::set_height(ui32 height) {
-    set_dimensions({{ width(), height }});
+    set_dimensions({
+        {width(), height}
+    });
+}
+
+void happ::Window::set_internal_height(ui32 height) {
+    set_internal_dimensions({
+        {width(), height}
+    });
 }
 
 void happ::Window::set_display(ui32 display_idx) {
@@ -274,7 +325,7 @@ void happ::Window::set_display(ui32 display_idx) {
     if (m_settings.is_fullscreen) {
 #if defined(HEMLOCK_USING_SDL)
         SDL_SetWindowFullscreen(m_window, 0);
-#endif // defined(HEMLOCK_USING_SDL)
+#endif  // defined(HEMLOCK_USING_SDL)
     }
 
     // Make sure the new display allows the current dimensions,
@@ -283,8 +334,12 @@ void happ::Window::set_display(ui32 display_idx) {
 
 #if defined(HEMLOCK_USING_SDL)
     // Centre window on new display.
-    SDL_SetWindowPosition(m_window, SDL_WINDOWPOS_CENTERED_DISPLAY(display_idx), SDL_WINDOWPOS_CENTERED_DISPLAY(display_idx));
-#endif // defined(HEMLOCK_USING_SDL)
+    SDL_SetWindowPosition(
+        m_window,
+        SDL_WINDOWPOS_CENTERED_DISPLAY(display_idx),
+        SDL_WINDOWPOS_CENTERED_DISPLAY(display_idx)
+    );
+#endif  // defined(HEMLOCK_USING_SDL)
 
     // Make sure the new display allows the current fullscreen
     // mode, setting a new one if not.
@@ -295,10 +350,10 @@ void happ::Window::set_display(ui32 display_idx) {
 #if defined(HEMLOCK_USING_SDL)
         SDL_SetWindowFullscreen(
             m_window,
-            m_settings.fake_fullscreen ?
-                SDL_WINDOW_FULLSCREEN_DESKTOP : SDL_WINDOW_FULLSCREEN
+            m_settings.fake_fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP :
+                                         SDL_WINDOW_FULLSCREEN
         );
-#endif // defined(HEMLOCK_USING_SDL)
+#endif  // defined(HEMLOCK_USING_SDL)
     }
 
     on_display_change();
@@ -307,23 +362,21 @@ void happ::Window::set_display(ui32 display_idx) {
 void happ::Window::set_fullscreen_mode(FullscreenMode fullscreen_mode) {
     if (m_settings.fullscreen_mode == fullscreen_mode) return;
 
-    FullscreenMode tmp = m_settings.fullscreen_mode;
+    FullscreenMode tmp         = m_settings.fullscreen_mode;
     m_settings.fullscreen_mode = fullscreen_mode;
 
 #if defined(HEMLOCK_USING_SDL)
-    SDL_DisplayMode mode = {
-        fullscreen_mode.pixel_format,
-        static_cast<int>(fullscreen_mode.resolution.width),
-        static_cast<int>(fullscreen_mode.resolution.height),
-        static_cast<int>(fullscreen_mode.refresh_rate),
-        nullptr
-    };
+    SDL_DisplayMode mode = { fullscreen_mode.pixel_format,
+                             static_cast<int>(fullscreen_mode.resolution.width),
+                             static_cast<int>(fullscreen_mode.resolution.height),
+                             static_cast<int>(fullscreen_mode.refresh_rate),
+                             nullptr };
     if (!SDL_SetWindowDisplayMode(m_window, &mode)) {
         debug_printf("Could not set window display mode for %u.\n", m_window_id);
 
         debug_printf("%s\n", SDL_GetError());
     }
-#endif // defined(HEMLOCK_USING_SDL)
+#endif  // defined(HEMLOCK_USING_SDL)
 
     if (m_settings.is_fullscreen) {
         FullscreenModeChangeEvent fmce{ tmp, fullscreen_mode };
@@ -345,10 +398,10 @@ void happ::Window::set_fake_fullscreen(bool fake_fullscreen) {
 #if defined(HEMLOCK_USING_SDL)
         SDL_SetWindowFullscreen(
             m_window,
-            m_settings.fake_fullscreen ?
-                SDL_WINDOW_FULLSCREEN_DESKTOP : SDL_WINDOW_FULLSCREEN
+            m_settings.fake_fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP :
+                                         SDL_WINDOW_FULLSCREEN
         );
-#endif // defined(HEMLOCK_USING_SDL)
+#endif  // defined(HEMLOCK_USING_SDL)
     }
 }
 
@@ -361,15 +414,15 @@ void happ::Window::set_is_fullscreen(bool fullscreen) {
 #if defined(HEMLOCK_USING_SDL)
         SDL_SetWindowFullscreen(
             m_window,
-            m_settings.fake_fullscreen ?
-                SDL_WINDOW_FULLSCREEN_DESKTOP : SDL_WINDOW_FULLSCREEN
+            m_settings.fake_fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP :
+                                         SDL_WINDOW_FULLSCREEN
         );
-#endif // defined(HEMLOCK_USING_SDL)
+#endif  // defined(HEMLOCK_USING_SDL)
         on_window_fullscreen_enter();
     } else {
 #if defined(HEMLOCK_USING_SDL)
         SDL_SetWindowFullscreen(m_window, 0);
-#endif // defined(HEMLOCK_USING_SDL)
+#endif  // defined(HEMLOCK_USING_SDL)
         on_window_fullscreen_exit();
     }
 }
@@ -381,7 +434,7 @@ void happ::Window::set_is_resizable(bool resizable) {
 
 #if defined(HEMLOCK_USING_SDL)
     SDL_SetWindowResizable(m_window, static_cast<SDL_bool>(resizable));
-#endif // defined(HEMLOCK_USING_SDL)
+#endif  // defined(HEMLOCK_USING_SDL)
 }
 
 void happ::Window::set_is_borderless(bool borderless) {
@@ -395,7 +448,7 @@ void happ::Window::set_is_borderless(bool borderless) {
 
 #if defined(HEMLOCK_USING_SDL)
     SDL_SetWindowBordered(m_window, static_cast<SDL_bool>(!borderless));
-#endif // defined(HEMLOCK_USING_SDL)
+#endif  // defined(HEMLOCK_USING_SDL)
 }
 
 void happ::Window::set_is_maximised(bool maximised) {
@@ -404,12 +457,12 @@ void happ::Window::set_is_maximised(bool maximised) {
     if (maximised) {
 #if defined(HEMLOCK_USING_SDL)
         SDL_MaximizeWindow(m_window);
-#endif // defined(HEMLOCK_USING_SDL)
+#endif  // defined(HEMLOCK_USING_SDL)
         on_window_maximise();
     } else {
 #if defined(HEMLOCK_USING_SDL)
         SDL_MinimizeWindow(m_window);
-#endif // defined(HEMLOCK_USING_SDL)
+#endif  // defined(HEMLOCK_USING_SDL)
         on_window_minimise();
     }
 }
@@ -422,31 +475,34 @@ void happ::Window::set_swap_interval(SwapInterval swap_interval) {
     int vsync = (swap_interval == SwapInterval::V_SYNC ? 1 : 0);
 #if defined(HEMLOCK_USING_SDL)
     SDL_GL_SetSwapInterval(vsync);
-#endif // defined(HEMLOCK_USING_SDL)
+#endif  // defined(HEMLOCK_USING_SDL)
 }
 
 void happ::Window::set_allowed_resolutions(WindowDimensionMap allowed_resolutions) {
     m_allowed_resolutions = allowed_resolutions;
 
-    // If we're windowed and not resizable, we must keep window to one of the allowed resolutions.
-    if (!m_settings.is_resizable && !m_settings.is_maximised && !m_settings.is_fullscreen) {
+    // If we're windowed and not resizable, we must keep window to one of the allowed
+    // resolutions.
+    if (!m_settings.is_resizable && !m_settings.is_maximised
+        && !m_settings.is_fullscreen)
+    {
         validate_dimensions();
     }
 }
 
 void happ::Window::sync() {
 #if defined(HEMLOCK_USING_SDL)
-#if defined(HEMLOCK_USING_OPENGL)
+#  if defined(HEMLOCK_USING_OPENGL)
     SDL_GL_SwapWindow(m_window);
-#endif // defined(HEMLOCK_USING_OPENGL)
-#endif // defined(HEMLOCK_USING_SDL)
+#  endif  // defined(HEMLOCK_USING_OPENGL)
+#endif    // defined(HEMLOCK_USING_SDL)
 }
 
 #if defined(HEMLOCK_USING_VULKAN)
 void happ::Window::set_device_evaluator(DeviceEvaluator&& evaluator) {
     m_evaluator = evaluator;
 }
-#endif // defined(HEMLOCK_USING_VULKAN)
+#endif  // defined(HEMLOCK_USING_VULKAN)
 
 void happ::Window::check_display_occupied() {
     ui32 current_display_idx = static_cast<ui32>(SDL_GetWindowDisplayIndex(m_window));
@@ -475,7 +531,9 @@ void happ::Window::determine_modes() {
             SDL_DisplayMode mode;
             SDL_GetDisplayMode(display_idx, mode_idx, &mode);
 
-            WindowDimensions resolution{{ static_cast<ui32>(mode.w), static_cast<ui32>(mode.h) }};
+            WindowDimensions resolution{
+                {static_cast<ui32>(mode.w), static_cast<ui32>(mode.h)}
+            };
 
             m_fullscreen_modes[display_idx][mode_idx] = FullscreenMode{
                 resolution, static_cast<ui32>(mode.refresh_rate), mode.format
@@ -491,7 +549,7 @@ void happ::Window::determine_modes() {
         // Finally set the allowed resolutions.
         m_allowed_resolutions[display_idx] = allowed_resolutions;
     }
-#endif // defined(HEMLOCK_USING_SDL)
+#endif  // defined(HEMLOCK_USING_SDL)
 }
 
 #if defined(HEMLOCK_USING_VULKAN)
@@ -508,7 +566,7 @@ bool happ::Window::determine_devices() {
     for (ui32 i = 0; i < device_count; ++i) {
         i32 score = m_evaluator(candidate_devices[i]);
         if (score > 0) {
-            valid_devices.insert({score, i});
+            valid_devices.insert({ score, i });
         }
     }
 
@@ -517,7 +575,7 @@ bool happ::Window::determine_devices() {
     // Add valid devices to our available devices list.
     m_available_devices.count   = valid_devices.size();
     m_available_devices.devices = new VkPhysicalDevice[m_available_devices.count];
-    ui32 i = 0;
+    ui32 i                      = 0;
     for (auto valid_device : valid_devices) {
         m_available_devices.devices[i++] = candidate_devices[valid_device.second];
     }
@@ -527,4 +585,4 @@ bool happ::Window::determine_devices() {
 
     return true;
 }
-#endif // defined(HEMLOCK_USING_VULKAN)
+#endif  // defined(HEMLOCK_USING_VULKAN)

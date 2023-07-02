@@ -15,7 +15,7 @@ H_DECL_VENUM_WITH_SERIALISATION(
     (FRAGMENT, GL_FRAGMENT_SHADER),
     (VERTEX, GL_VERTEX_SHADER)
 )
-#endif // defined(HEMLOCK_USING_OPENGL)
+#endif  // defined(HEMLOCK_USING_OPENGL)
 
 /**
  * @brief Information needed to compile a shader.
@@ -76,12 +76,16 @@ namespace hemlock {
         using ShaderAttributes   = std::vector<ShaderAttribute>;
         using ShaderAttributeMap = std::map<std::string, GLuint>;
 
-        class ShaderCache : public hio::Cache<std::string, std::unordered_map<std::string, std::string>> {};
+        class ShaderCache :
+            public hio::
+                Cache<std::string, std::unordered_map<std::string, std::string>> { };
 
         class GLSLProgram {
         public:
             GLSLProgram();
-            ~GLSLProgram() { /* Empty */ }
+
+            ~GLSLProgram() { /* Empty */
+            }
 
             /**
              * @brief Initialises a shader program.
@@ -102,10 +106,13 @@ namespace hemlock {
              */
             GLuint id() const { return m_id; }
 
-            bool initialised() const { return m_id != 0;                    }
-            bool linked()      const { return m_is_linked;                  }
-            bool editable()    const { return !linked() && initialised();   }
-            bool in_use()      const { return m_id == GLSLProgram::current; }
+            bool initialised() const { return m_id != 0; }
+
+            bool linked() const { return m_is_linked; }
+
+            bool editable() const { return !linked() && initialised(); }
+
+            bool in_use() const { return m_id == GLSLProgram::current; }
 
             /**
              * @brief Adds a shader to the program.
@@ -123,7 +130,9 @@ namespace hemlock {
              *
              * @return True if the shaders are successfully added, false otherwise.
              */
-            ShaderCreationResults add_shaders(const std::string& vertex_path, const std::string& fragment_path);
+            ShaderCreationResults add_shaders(
+                const std::string& vertex_path, const std::string& fragment_path
+            );
 
             /**
              * @brief Links the shaders to the shader program.
@@ -145,13 +154,18 @@ namespace hemlock {
              */
             bool set_attributes(const ShaderAttributes& attributes);
 
-            // TODO(Matthew): If we add shaders from source instead of filepath, could parse location of uniforms that explicitly set it using "layout(location = X)".
-            GLuint attribute_location(const std::string& name) const { return m_attributes.at(name); }
-            GLuint uniform_location(const std::string& name)   const;
+            // TODO(Matthew): If we add shaders from source instead of filepath, could
+            // parse location of uniforms that explicitly set it using
+            // "layout(location = X)".
+            GLuint attribute_location(const std::string& name) const {
+                return m_attributes.at(name);
+            }
 
-            void enable_vertex_attrib_arrays(GLuint vao)  const;
+            GLuint uniform_location(const std::string& name) const;
+
+            void enable_vertex_attrib_arrays(GLuint vao) const;
             void disable_vertex_attrib_arrays(GLuint vao) const;
-            bool enable_vertex_attrib_array(GLuint vao, const std::string& name)  const;
+            bool enable_vertex_attrib_array(GLuint vao, const std::string& name) const;
             bool disable_vertex_attrib_array(GLuint vao, const std::string& name) const;
 
             /**
@@ -177,8 +191,8 @@ namespace hemlock {
 
             ShaderCache* m_shader_cache;
         };
-    }
-}
-namespace hg  = hemlock::graphics;
+    }  // namespace graphics
+}  // namespace hemlock
+namespace hg = hemlock::graphics;
 
-#endif // __hemlock_graphics_glsl_program_h
+#endif  // __hemlock_graphics_glsl_program_h

@@ -1,0 +1,174 @@
+---
+BasedOnStyle: LLVM
+ColumnLimit: 88
+IndentWidth: 4
+DeriveLineEnding: true
+UseCRLF: false
+UseTab: Never
+---
+Language: Cpp
+
+Standard: c++20
+
+ContinuationIndentWidth: 4
+
+IncludeBlocks: Preserve
+SortIncludes: CaseSensitive
+
+ReflowComments: true
+SpacesBeforeTrailingComments: 2
+AlignTrailingComments: true
+SpacesInLineCommentPrefix:
+  Minimum: 1
+  Maximum: -1
+
+SeparateDefinitionBlocks: Always
+KeepEmptyLinesAtTheStartOfBlocks: false
+MaxEmptyLinesToKeep: 1
+
+AlignAfterOpenBracket: BlockIndent
+SpaceBeforeParens: Custom
+SpaceBeforeParensOptions:
+  AfterControlStatements: true
+  AfterForeachMacros: false
+  AfterFunctionDeclarationName: false
+  AfterFunctionDefinitionName: false
+  AfterIfMacros: false
+  AfterOverloadedOperator: false
+  AfterRequiresInClause: true
+  AfterRequiresInExpression: true
+  BeforeNonEmptyParentheses: false
+
+AlignEscapedNewlines: Right
+
+IndentPPDirectives: AfterHash
+PPIndentWidth: 2
+
+CompactNamespaces: false
+FixNamespaceComments: true
+NamespaceIndentation: All
+
+AlwaysBreakTemplateDeclarations: Yes
+SpaceAfterTemplateKeyword: true
+RequiresClausePosition: OwnLine
+# RequiresExpressionIndentation: Keyword
+IndentRequiresClause: true
+
+SpaceBeforeInheritanceColon: true
+BreakInheritanceList: AfterColon
+
+IndentAccessModifiers: false
+AccessModifierOffset: -4
+EmptyLineAfterAccessModifier: Never
+EmptyLineBeforeAccessModifier: Never
+
+IndentWrappedFunctionNames: false
+AlwaysBreakAfterReturnType: None
+AllowAllArgumentsOnNextLine: true
+BinPackArguments: false
+AllowAllParametersOfDeclarationOnNextLine: true
+BinPackParameters: false
+AttributeMacros: ['CALLER_DELETE', 'CALLEE_DELETE', 'OUT', 'IN']
+
+ConstructorInitializerIndentWidth: 4
+SpaceBeforeCtorInitializerColon: true
+BreakConstructorInitializers: AfterColon
+PackConstructorInitializers: NextLine
+
+SpacesInContainerLiterals: true
+Cpp11BracedListStyle: false
+SpaceBeforeCpp11BracedList: false
+
+DerivePointerAlignment: false
+SpaceAroundPointerQualifiers: Default
+PointerAlignment: Left
+ReferenceAlignment: Left
+
+QualifierAlignment: Leave
+
+SortUsingDeclarations: false
+
+SpaceAfterLogicalNot: false
+BreakBeforeBinaryOperators: All
+BreakBeforeTernaryOperators: false
+AlignOperands: Align
+
+SpaceBeforeAssignmentOperators: true
+AlignConsecutiveAssignments:
+  Enabled: true
+  AcrossEmptyLines: false
+  AcrossComments: false
+  AlignCompound: true
+  PadOperators: true
+
+BitFieldColonSpacing: Both
+AlignConsecutiveBitFields: Consecutive
+
+AlignConsecutiveDeclarations: Consecutive
+AlignConsecutiveMacros: Consecutive
+
+AllowShortBlocksOnASingleLine: Empty
+AllowShortCaseLabelsOnASingleLine: false
+AllowShortEnumsOnASingleLine: false
+AllowShortFunctionsOnASingleLine: Inline
+AllowShortIfStatementsOnASingleLine: WithoutElse
+AllowShortLambdasOnASingleLine: Inline
+AllowShortLoopsOnASingleLine: true
+
+# BreakArrays: false
+AlignArrayOfStructures: Right
+
+BreakStringLiterals: true
+AlwaysBreakBeforeMultilineStrings: true
+
+IfMacros: ['IF']
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterEnum: false
+  AfterClass: false
+  AfterCaseLabel: true
+  AfterControlStatement: MultiLine
+  AfterFunction: false
+  AfterNamespace: false
+  AfterStruct: false
+  AfterUnion: false
+  AfterExternBlock: false
+  BeforeElse: false
+  BeforeCatch: false
+  BeforeLambdaBody: false
+  BeforeWhile: false
+  IndentBraces: false
+  SplitEmptyFunction: false
+  SplitEmptyRecord: false
+  SplitEmptyNamespace: false
+
+SpacesInConditionalStatement: false
+SpaceBeforeRangeBasedForLoopColon: true
+SpaceBeforeSquareBrackets: false
+SpaceInEmptyBlock: true
+SpacesInAngles: Never
+SpacesInParentheses: false
+SpacesInSquareBrackets: false
+
+IndentCaseLabels: true
+IndentCaseBlocks: false
+SpaceBeforeCaseColon: false
+
+LambdaBodyIndentation: Signature
+
+BreakBeforeConceptDeclarations: true
+
+# BreakBeforeInlineASMColon: OnlyMultiline
+
+IndentExternBlock: Indent
+
+IndentGotoLabels: false
+
+SpaceAfterCStyleCast: false
+SpacesInCStyleCastParentheses: false
+
+# Possible semantic modification... never do this.
+InsertBraces: false
+InsertTrailingCommas: None
+RemoveBracesLLVM: false
+# RemoveSemicolon: false

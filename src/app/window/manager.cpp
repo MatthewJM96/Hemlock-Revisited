@@ -8,8 +8,8 @@ happ::WindowManager::WindowManager() :
     handle_window_close([&](Sender, hui::WindowEvent event) {
         dispose_window(event.window_id);
     }),
-    m_quit_on_main_window_close(true)
-{ /* Empty. */ }
+    m_quit_on_main_window_close(true) { /* Empty. */
+}
 
 happ::WindowError happ::WindowManager::init(hemlock::app::AppBase* app) {
     if (m_main_window != nullptr) return WindowError::NONE;
@@ -18,11 +18,11 @@ happ::WindowError happ::WindowManager::init(hemlock::app::AppBase* app) {
 
     hui::InputDispatcher::instance()->on_window.close += &handle_window_close;
 
-    auto [ window, err ] = add_window();
+    auto [window, err] = add_window();
     if (err != WindowError::NONE) return err;
 
     m_main_window = window;
-    m_windows.insert({m_main_window->window_id(), m_main_window});
+    m_windows.insert({ m_main_window->window_id(), m_main_window });
 
     return WindowError::NONE;
 }
@@ -38,9 +38,10 @@ void happ::WindowManager::dispose() {
 }
 
 bool happ::WindowManager::set_main_window(Window* window) {
-    auto it = std::find_if(m_windows.begin(), m_windows.end(), [window](const auto& rhs) {
-        return rhs.second == window;
-    });
+    auto it
+        = std::find_if(m_windows.begin(), m_windows.end(), [window](const auto& rhs) {
+              return rhs.second == window;
+          });
 
     if (it == m_windows.end()) return false;
 
@@ -50,7 +51,7 @@ bool happ::WindowManager::set_main_window(Window* window) {
 }
 
 bool happ::WindowManager::set_main_window(ui32 window_id) {
-    auto it =  m_windows.find(window_id);
+    auto it = m_windows.find(window_id);
 
     if (it == m_windows.end()) return false;
 
@@ -62,9 +63,9 @@ bool happ::WindowManager::set_main_window(ui32 window_id) {
 std::pair<happ::Window*, happ::WindowError>
 happ::WindowManager::add_window(WindowSettings settings /*= {}*/) {
     happ::Window* new_window = new happ::Window();
-    WindowError err = new_window->init(settings);
+    WindowError   err        = new_window->init(settings);
 
-    m_windows.insert({new_window->window_id(), new_window});
+    m_windows.insert({ new_window->window_id(), new_window });
 
     return { new_window, err };
 }
@@ -80,9 +81,9 @@ bool happ::WindowManager::dispose_window(Window* window) {
 
     if (erased == 0) return false;
 
-    if ((m_main_window == window
-            && m_quit_on_main_window_close)
-        || m_windows.size() <= 0) {
+    if ((m_main_window == window && m_quit_on_main_window_close)
+        || m_windows.size() <= 0)
+    {
         m_app->set_should_quit();
     }
 
@@ -93,7 +94,7 @@ bool happ::WindowManager::dispose_window(Window* window) {
 }
 
 bool happ::WindowManager::dispose_window(ui32 window_id) {
-    auto it =  m_windows.find(window_id);
+    auto it = m_windows.find(window_id);
 
     if (it == m_windows.end()) return false;
 
@@ -101,9 +102,9 @@ bool happ::WindowManager::dispose_window(ui32 window_id) {
 
     m_windows.erase(it);
 
-    if ((m_main_window == window
-            && m_quit_on_main_window_close)
-        || m_windows.size() <= 0) {
+    if ((m_main_window == window && m_quit_on_main_window_close)
+        || m_windows.size() <= 0)
+    {
         m_app->set_should_quit();
     }
 

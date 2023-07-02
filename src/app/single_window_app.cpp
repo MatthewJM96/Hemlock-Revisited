@@ -8,10 +8,14 @@
 #include "app/single_window_app.h"
 
 void happ::SingleWindowApp::init() {
+    if (ProcessBase::m_initialised) return;
+
     init(new FrameTimer());
 }
 
 void happ::SingleWindowApp::init(FrameTimer* timer) {
+    if (ProcessBase::m_initialised) return;
+
     m_timer = timer;
 
     hui::InputDispatcher::instance()->init(&m_input_manager);
@@ -19,13 +23,16 @@ void happ::SingleWindowApp::init(FrameTimer* timer) {
 
 #if defined(HEMLOCK_USING_DEVIL)
     ilutRenderer(ILUT_OPENGL);
-    ilutEnable(ILUT_OPENGL_CONV); // TODO(Matthew): Make this optional, some projects may consider on-board texture conversions fine.
+    ilutEnable(ILUT_OPENGL_CONV);  // TODO(Matthew): Make this optional, some projects
+                                   // may consider on-board texture conversions fine.
 #endif
 
     ProcessBase::init();
 }
 
 void happ::SingleWindowApp::init(f32 target_fps, size_t tracked_frames_count /*= 5*/) {
+    if (ProcessBase::m_initialised) return;
+
     init(new FrameLimiter(tracked_frames_count, target_fps));
 }
 
@@ -39,11 +46,11 @@ void happ::SingleWindowApp::dispose() {
 
 #if defined(HEMLOCK_USING_SDL_TTF)
     TTF_Quit();
-#endif // defined(HEMLOCK_USING_SDL_TTF)
+#endif  // defined(HEMLOCK_USING_SDL_TTF)
 }
 
 void happ::SingleWindowApp::run() {
-    init();
+    if (!ProcessBase::m_initialised) return;
 
     m_timer->start();
 
@@ -62,7 +69,7 @@ void happ::SingleWindowApp::run() {
         }
 
         m_window->sync();
-        
+
 #if defined(OUTPUT_FPS)
         static i32 i = 0;
         if (i++ % 20 == 0) {
@@ -79,27 +86,21 @@ void happ::SingleWindowApp::run() {
 
 void happ::SingleWindowApp::prepare_window() {
 #if defined(HEMLOCK_USING_SDL)
-    if (
-        SDL_Init(
-            SDL_INIT_TIMER
-          | SDL_INIT_VIDEO
-          | SDL_INIT_GAMECONTROLLER
-        ) < 0
-    ) {
+    if (SDL_Init(SDL_INIT_TIMER | SDL_INIT_VIDEO | SDL_INIT_GAMECONTROLLER) < 0) {
         debug_printf("Couldn't initialise SDL.\n");
         debug_printf("%s\n", SDL_GetError());
         exit(1);
     }
     SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-#endif // defined(HEMLOCK_USING_SDL)
+#endif  // defined(HEMLOCK_USING_SDL)
 
 #if defined(HEMLOCK_USING_SDL_TTF)
     if (TTF_Init() < 0) {
         debug_printf("TTF font library could not be initialised...\n");
         exit(2);
     }
-#endif // defined(HEMLOCK_USING_SDL_TTF)
+#endif  // defined(HEMLOCK_USING_SDL_TTF)
 
     m_window = new happ::Window();
     if (m_window->init() != happ::WindowError::NONE) {
@@ -114,5 +115,5 @@ void happ::SingleWindowApp::prepare_window() {
     GLint nr_attributes;
     glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &nr_attributes);
     debug_printf("Maximum # of vertex attributes supported: %d.\n", nr_attributes);
-#endif // defined(HEMLOCK_USING_OPENGL)
+#endif  // defined(HEMLOCK_USING_OPENGL)
 }

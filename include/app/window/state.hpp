@@ -8,16 +8,16 @@ namespace hemlock {
          * occur while initialising a window.
          */
         enum class WindowError {
-            NONE                =  0,
-            SDL_WINDOW          = -1,
+            NONE       = 0,
+            SDL_WINDOW = -1,
 #if defined(HEMLOCK_USING_OPENGL)
-            SDL_GL_CONTEXT      = -2,
-            GLEW_INIT           = -3
-#elif defined(HEMLOCK_USING_VULKAN) // defined(HEMLOCK_USING_OPENGL)
-            VULKAN_INSTANCE     = -2,
-            VULKAN_HARDWARE     = -3,
-            SDL_VULKAN_SURFACE  = -4
-#endif // defined(HEMLOCK_USING_VULKAN)
+            SDL_GL_CONTEXT = -2,
+            GLEW_INIT      = -3
+#elif defined(HEMLOCK_USING_VULKAN)  // defined(HEMLOCK_USING_OPENGL)
+            VULKAN_INSTANCE    = -2,
+            VULKAN_HARDWARE    = -3,
+            SDL_VULKAN_SURFACE = -4
+#endif                               // defined(HEMLOCK_USING_VULKAN)
         };
 
         /**
@@ -25,10 +25,12 @@ namespace hemlock {
          */
         union WindowDimensions {
             ui32v2 data;
+
             struct {
                 ui32 width, height;
             };
         };
+
         using WindowDimensionMap = std::map<ui8, std::vector<WindowDimensions>>;
 
         /**
@@ -39,7 +41,8 @@ namespace hemlock {
             ui32             refresh_rate;
             ui32             pixel_format;
         };
-        using FullscreenModeMap  = std::map<ui8, std::vector<FullscreenMode>>;
+
+        using FullscreenModeMap = std::map<ui8, std::vector<FullscreenMode>>;
 
         /**
          * @brief Possible swap interval settings.
@@ -54,16 +57,18 @@ namespace hemlock {
          * @brief Basic settings for a window.
          */
         struct WindowSettings {
-            std::string      name            = "Hemlock Window";
-            WindowDimensions dimensions      = {{800, 600}};
-            ui32             display_idx     = 0;
-            FullscreenMode   fullscreen_mode = {};
-            bool             fake_fullscreen = false;
-            bool             is_fullscreen   = false;
-            bool             is_resizable    = true;
-            bool             is_borderless   = false;
-            bool             is_maximised    = false;
-            SwapInterval     swap_interval   = SwapInterval::V_SYNC;
+            std::string      name       = "Hemlock Window";
+            WindowDimensions dimensions = {
+                {800, 600}
+            };
+            ui32           display_idx     = 0;
+            FullscreenMode fullscreen_mode = {};
+            bool           fake_fullscreen = false;
+            bool           is_fullscreen   = false;
+            bool           is_resizable    = true;
+            bool           is_borderless   = false;
+            bool           is_maximised    = false;
+            SwapInterval   swap_interval   = SwapInterval::V_SYNC;
         };
 
         struct ResizeEvent {
@@ -73,8 +78,8 @@ namespace hemlock {
         struct FullscreenModeChangeEvent {
             FullscreenMode before, now;
         };
-    }
-}
+    }  // namespace app
+}  // namespace hemlock
 namespace happ = hemlock::app;
 
 bool operator==(const happ::WindowDimensions& lhs, const happ::WindowDimensions& rhs);
@@ -83,4 +88,4 @@ bool operator!=(const happ::WindowDimensions& lhs, const happ::WindowDimensions&
 bool operator==(const happ::FullscreenMode& lhs, const happ::FullscreenMode& rhs);
 bool operator!=(const happ::FullscreenMode& lhs, const happ::FullscreenMode& rhs);
 
-#endif // __hemlock_app_window_state_hpp
+#endif  // __hemlock_app_window_state_hpp

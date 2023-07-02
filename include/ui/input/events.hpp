@@ -14,13 +14,16 @@ namespace hemlock {
         struct MouseEvent : InputEvent {
             MouseCoords coords;
         };
+
         struct MouseButtonEvent : MouseEvent {
             hui::MouseButton name;
-            ui8 button_id, presses;
+            ui8              button_id, presses;
         };
+
         struct MouseWheelScrollEvent : MouseEvent {
             i32 dx, dy;
         };
+
         struct MouseMoveEvent : MouseEvent {
             i32 dx, dy;
         };
@@ -34,19 +37,21 @@ namespace hemlock {
 
         struct TextInputEvent : InputEvent {
             union {
-                ui8    text[32];
-                ui16  wtext[16];
+                ui8  text[32];
+                ui16 wtext[16];
                 ui32 wwtext[8];
             };
         };
+
         struct TextEditingEvent : TextInputEvent {
             ui32 start;
             ui32 length;
         };
-                
+
         struct TextDropEvent {
             std::string text;
         };
+
         struct FileDropEvent {
             std::string filename;
         };
@@ -96,8 +101,8 @@ namespace hemlock {
             Event<FileDropEvent> file;
             Event<TextDropEvent> text;
         };
-    }
-}
+    }  // namespace ui
+}  // namespace hemlock
 namespace hui = hemlock::ui;
 
-#endif // __hemlock_ui_input_state_window_state_hpp
+#endif  // __hemlock_ui_input_state_window_state_hpp

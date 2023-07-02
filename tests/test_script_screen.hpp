@@ -2,77 +2,87 @@
 #define __hemlock_tests_test_script_screen_hpp
 
 #include "app/screen_base.h"
-#include "io/yaml.hpp"
+
+#include "script/environment_registry.hpp"
 #include "script/lua/environment.hpp"
 
 #include "iomanager.hpp"
 
-H_DECL_ENUM_WITH_SERIALISATION(
-    ,
-    TestEnum,
-    ui8,
-    HELLO,
-    WORLD
-)
-H_DEF_ENUM_WITH_SERIALISATION(, TestEnum)
-
-H_DEF_STRUCT_WITH_YAML_CONVERSION(
-    ,
-    Person,
-    (name, std::string)
-);
-H_DEF_STRUCT_WITH_YAML_CONVERSION(
-    ,
-    TestStruct,
-    (pos, i32v3),
-    (person, Person)
-);
+using TSS_Env    = hscript::lua::Environment<true, 10>;
+using TSS_EnvReg = hscript::EnvironmentRegistry<TSS_Env>;
 
 class TestScriptScreen : public happ::ScreenBase {
 public:
-    TestScriptScreen() :
-        happ::ScreenBase(),
-        m_input_manager(nullptr)
-    { /* Empty. */ }
-    virtual ~TestScriptScreen() { /* Empty */ };
+    TestScriptScreen() : happ::ScreenBase(), m_input_manager(nullptr) { /* Empty. */
+    }
+
+    virtual ~TestScriptScreen(){ /* Empty */ };
 
     virtual void start(hemlock::FrameTime time) override {
         happ::ScreenBase::start(time);
 
-        m_lua_env = new hscript::lua::Environment();
-        m_lua_env->init(&m_iom);
+        m_lua_env_reg = new TSS_EnvReg();
+        m_lua_env_reg->init(&m_iom);
 
-        m_lua_env->run(hio::fs::path("scripts/hello_world.lua"));
+        m_lua_env_1 = m_lua_env_reg->create_environment("env_1");
+
+        m_lua_env_2 = m_lua_env_reg->create_environment("env_2");
+
+        m_lua_env_3 = m_lua_env_reg->create_environment("env_3");
+
+        m_lua_env_1->run(hio::fs::path("scripts/hello_world.lua"));
 
         hscript::ScriptDelegate<void> hello_world;
-        if (m_lua_env->get_script_function<void>("hello_world", hello_world)) {
-            hello_world();
-        }
+        m_lua_env_1->get_script_function<void>("hello_world", hello_world);
+        hello_world();
 
-        YAML::Node vec_node = YAML::Load("[1, 2, 3]");
-        i32v3 vec = vec_node.as<i32v3>();
-        std::cout << "vec: " << vec.x << " " << vec.y << " " << vec.z << std::endl;
+        m_lua_env_2->run(hio::fs::path("scripts/call_hello_world.lua"));
 
-        YAML::Node sq_mat_node = YAML::Load("[[1, 2], [3, 4]]");
-        i32m2 sq_mat = sq_mat_node.as<i32m2>();
-        std::cout << "sq mat: " << sq_mat[0][0] << " " << sq_mat[1][0] << " / " << sq_mat[0][1] << " " << sq_mat[1][1] << std::endl;
+        m_lua_env_1->rpc.pump_calls();
 
-        YAML::Node mat_node = YAML::Load("[[1, 2], [3, 4], [5, 6]]");
-        glm::i32mat2x3 mat = mat_node.as<glm::i32mat2x3>();
-        std::cout << "mat: " << mat[0][0] << " " << mat[1][0] << " / " << mat[0][1] << " " << mat[1][1] << " / " << mat[0][2] << " " << mat[1][2] << std::endl;
+        hscript::ScriptDelegate<void> check_hello_world;
+        m_lua_env_2->get_script_function<void>("check_hello_world", check_hello_world);
+        check_hello_world();
 
-        YAML::Node test_enum_node = YAML::Load("[ 'HELLO', 'WORLD' ]");
-        std::array<TestEnum, 2> test_enum = test_enum_node.as<std::array<TestEnum, 2>>();
-        std::cout << hio::serialisable_enum_name(test_enum[0]) << ", " << hio::serialisable_enum_name(test_enum[1]) << std::endl;
+        hscript::ScriptDelegate<void> check_add;
+        m_lua_env_2->get_script_function<void>("check_add", check_add);
+        check_add();
 
-        YAML::Node test_struct_node = YAML::Load("{ pos: [1, 2, 3], person: { name: 'Matthew' } }");
-        TestStruct test_struct = test_struct_node.as<TestStruct>();
-        std::cout << "Person: " << test_struct.person.name << " at " << test_struct.pos.x << " " << test_struct.pos.y << " " << test_struct.pos.z << std::endl;
+        m_lua_env_3->run(hio::fs::path("scripts/coroutine_hello_world.lua"));
+
+        hscript::lua::LuaContinuableFunction lua_cont_func;
+        m_lua_env_3->get_continuable_script_function(
+            "hello_world", lua_cont_func, true
+        );
+
+        auto do_forced_yield = hemlock::Delegate<hscript::YieldableResult<i32>(i32)>{
+            [&](i32 p) -> hscript::YieldableResult<i32> {
+                return { true, p };
+            }
+        };
+        m_lua_env_3->set_global_namespace();
+        m_lua_env_3->add_yieldable_c_delegate<i32>(
+            "beg_a_forced_yield", &do_forced_yield
+        );
+
+        auto [err_1, res_1] = lua_cont_func.invoke<i32>();
+        std::cout << err_1 << " - " << res_1 << std::endl;
+
+        std::cout << "EYUP" << std::endl;
+
+        auto [err_2, res_2] = lua_cont_func.invoke<i32>();
+        std::cout << err_2 << " - " << res_2 << std::endl;
+
+        std::cout << "EYUP 2" << std::endl;
+
+        auto [err_3, res_3] = lua_cont_func.invoke<i32>();
+        std::cout << err_3 << " - " << res_3 << std::endl;
     }
 
     virtual void update(hemlock::FrameTime) override {
         // Empty.
     }
+
     virtual void draw(hemlock::FrameTime) override {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -84,12 +94,14 @@ public:
 
         m_state = happ::ScreenState::RUNNING;
 
-        m_input_manager = static_cast<happ::SingleWindowApp*>(m_process)->input_manager();
+        m_input_manager
+            = static_cast<happ::SingleWindowApp*>(m_process)->input_manager();
     }
 protected:
-    MyIOManager                  m_iom;
-    hui::InputManager*           m_input_manager;
-    hscript::lua::Environment*   m_lua_env;
+    MyIOManager        m_iom;
+    hui::InputManager* m_input_manager;
+    TSS_EnvReg*        m_lua_env_reg;
+    TSS_Env *          m_lua_env_1, *m_lua_env_2, *m_lua_env_3;
 };
 
-#endif // __hemlock_tests_test_script_screen_hpp
+#endif  // __hemlock_tests_test_script_screen_hpp
