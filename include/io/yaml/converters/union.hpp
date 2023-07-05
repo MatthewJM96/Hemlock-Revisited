@@ -1,9 +1,6 @@
 #ifndef __hemlock_io_yaml_converters_union_hpp
 #define __hemlock_io_yaml_converters_union_hpp
 
-// TODO(Matthew): Fix defining enum we want serialisable without using enum
-//                serialisation macros.
-
 #if !defined(H_POD_STRUCT)
 #  define H_POD_STRUCT 1
 #endif  // !defined(H_POD_STRUCT)
