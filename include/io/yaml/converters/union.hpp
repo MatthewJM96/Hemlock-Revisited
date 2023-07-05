@@ -77,7 +77,9 @@ break;                                                                          
 \*******************************************/
 
 #  define H_DEF_YAML_CONVERSION_OF_UNION(UNION_TYPE, KIND_UNDERLYING_TYPE, ...)        \
-    YAML::Node YAML::convert<UNION_TYPE>::encode(const UNION_TYPE& val) {              \
+    [[maybe_unused]] YAML::Node YAML::convert<UNION_TYPE>::encode(                     \
+        const UNION_TYPE& val                                                          \
+    ) {                                                                                \
       YAML::Node node(YAML::NodeType::Map);                                            \
                                                                                        \
       node["kind"] = YAML::Node(val.kind);                                             \
@@ -99,7 +101,9 @@ break;                                                                          
       return node;                                                                     \
     }                                                                                  \
                                                                                        \
-    bool YAML::convert<UNION_TYPE>::decode(const Node& node, UNION_TYPE& result) {     \
+    [[maybe_unused]] bool YAML::convert<UNION_TYPE>::decode(                           \
+        const Node& node, UNION_TYPE& result                                           \
+    ) {                                                                                \
       if (!convert<UNION_TYPE##Kind>::decode(node["kind"], result.kind)) {             \
         return false;                                                                  \
       }                                                                                \
