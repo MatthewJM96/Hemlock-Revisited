@@ -12,6 +12,22 @@ H_DEF_ENUM_WITH_SERIALISATION(, TestEnum)
 H_DEF_STRUCT_WITH_YAML_CONVERSION(, Person, (name, std::string));
 H_DEF_STRUCT_WITH_YAML_CONVERSION(, TestStruct, (pos, i32v3), (person, Person));
 
+H_DECL_UNION_WITH_SERIALISATION(
+    ,
+    TestUnion,
+    ui8,
+    (H_NON_POD_TYPE(), SCALED, (scaling, f32v2)),
+    (H_POD_STRUCT(), FIXED, (scale_x, f32), (target_height, f32)),
+)
+
+H_DEF_UNION_WITH_SERIALISATION(
+    ,
+    TestUnion,
+    ui8,
+    (H_NON_POD_TYPE(), SCALED, (scaling, f32v2)),
+    (H_POD_STRUCT(), FIXED, (scale_x, f32), (target_height, f32)),
+)
+
 class TestYAMLScreen : public happ::ScreenBase {
 public:
     TestYAMLScreen() : happ::ScreenBase(), m_input_manager(nullptr) { /* Empty. */
@@ -49,6 +65,12 @@ public:
         std::cout << "Person: " << test_struct.person.name << " at "
                   << test_struct.pos.x << " " << test_struct.pos.y << " "
                   << test_struct.pos.z << std::endl;
+
+        YAML::Node test_union_node = YAML::Load("{ kind: 'SCALED', scaling: [1, 1] }");
+        TestUnion  test_union      = test_union_node.as<TestUnion>();
+        std::cout << "Sizing kind: " << static_cast<ui32>(test_union.kind)
+                  << " with scaling: " << test_union.scaling[0] << " "
+                  << test_union.scaling[1] << std::endl;
     }
 
     virtual void update(hemlock::FrameTime) override {
