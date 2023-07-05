@@ -3,7 +3,19 @@
 #include "graphics/glsl_program.h"
 
 H_DEF_ENUM_WITH_SERIALISATION(hemlock::graphics, ShaderType)
+H_DEF_STRUCT_WITH_SERIALISATION(
+    hemlock::graphics,
+    ShaderInfo,
+    (type, hemlock::graphics::ShaderType),
+    (filepath, std::string)
+)
 H_DEF_ENUM_WITH_SERIALISATION(hemlock::graphics, ShaderCreationResult)
+H_DEF_STRUCT_WITH_SERIALISATION(
+    hemlock::graphics,
+    ShaderCreationResults,
+    (vertex, hemlock::graphics::ShaderCreationResult),
+    (fragment, hemlock::graphics::ShaderCreationResult)
+)
 H_DEF_ENUM_WITH_SERIALISATION(hemlock::graphics, ShaderLinkResult)
 
 GLuint hg::GLSLProgram::current = 0;

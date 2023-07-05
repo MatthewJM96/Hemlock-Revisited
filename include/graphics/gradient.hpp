@@ -1,6 +1,8 @@
 #ifndef __hemlock_graphics_gradient_hpp
 #define __hemlock_graphics_gradient_hpp
 
+#include "io/serialisation.hpp"
+
 /**
  * @brief Provides an enumeration of the possible gradient styles.
  */

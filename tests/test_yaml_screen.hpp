@@ -9,8 +9,11 @@
 H_DECL_ENUM_WITH_SERIALISATION(, TestEnum, ui8, HELLO, WORLD)
 H_DEF_ENUM_WITH_SERIALISATION(, TestEnum)
 
-H_DEF_STRUCT_WITH_YAML_CONVERSION(, Person, (name, std::string));
-H_DEF_STRUCT_WITH_YAML_CONVERSION(, TestStruct, (pos, i32v3), (person, Person));
+H_DECL_STRUCT_WITH_SERIALISATION(, Person, (name, std::string));
+H_DEF_STRUCT_WITH_SERIALISATION(, Person, (name, std::string));
+
+H_DECL_STRUCT_WITH_SERIALISATION(, TestStruct, (pos, i32v3), (person, Person));
+H_DEF_STRUCT_WITH_SERIALISATION(, TestStruct, (pos, i32v3), (person, Person));
 
 H_DECL_UNION_WITH_SERIALISATION(
     ,

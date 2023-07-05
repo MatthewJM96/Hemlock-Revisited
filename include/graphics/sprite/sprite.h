@@ -2,6 +2,7 @@
 #define __hemlock_graphics_sprite_sprite_hpp
 
 #include "graphics/gradient.hpp"
+#include "io/serialisation.hpp"
 
 // TODO(Matthew): unsorted mode?
 /**
@@ -19,7 +20,7 @@ H_DECL_ENUM_WITH_SERIALISATION(
 /**
  * @brief Information to define a sprite.
  */
-H_DEF_STRUCT_WITH_SERIALISATION(
+H_DECL_STRUCT_WITH_SERIALISATION(
     hemlock::graphics::sprite,
     SpriteData,
     (texture, GLuint),

@@ -200,6 +200,7 @@ add_executable(Hemlock_Revisited
     "${PROJECT_SOURCE_DIR}/src/graphics/mesh.cpp"
     "${PROJECT_SOURCE_DIR}/src/graphics/pixel.cpp"
     "${PROJECT_SOURCE_DIR}/src/graphics/sprite/batcher.cpp"
+    "${PROJECT_SOURCE_DIR}/src/graphics/sprite/sprite.cpp"
     "${PROJECT_SOURCE_DIR}/src/graphics/sprite/string_drawer.cpp"
     "${PROJECT_SOURCE_DIR}/src/io/glob.cpp"
     "${PROJECT_SOURCE_DIR}/src/io/image.cpp"

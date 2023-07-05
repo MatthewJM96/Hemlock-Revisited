@@ -20,7 +20,7 @@ H_DECL_VENUM_WITH_SERIALISATION(
 /**
  * @brief Information needed to compile a shader.
  */
-H_DEF_STRUCT_WITH_SERIALISATION(
+H_DECL_STRUCT_WITH_SERIALISATION(
     hemlock::graphics,
     ShaderInfo,
     (type, hemlock::graphics::ShaderType),
@@ -48,7 +48,7 @@ H_DECL_ENUM_WITH_SERIALISATION(
  * @brief Success status of creating a vertex-fragment
  * shader pair.
  */
-H_DEF_STRUCT_WITH_SERIALISATION(
+H_DECL_STRUCT_WITH_SERIALISATION(
     hemlock::graphics,
     ShaderCreationResults,
     (vertex, hemlock::graphics::ShaderCreationResult),

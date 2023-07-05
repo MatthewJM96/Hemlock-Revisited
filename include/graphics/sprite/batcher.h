@@ -4,7 +4,7 @@
 #include "graphics/font/drawable.h"
 #include "graphics/font/text_align.h"
 #include "graphics/glsl_program.h"
-#include "graphics/sprite/sprite.hpp"
+#include "graphics/sprite/sprite.h"
 
 namespace hemlock {
     namespace graphics {
