@@ -118,13 +118,15 @@
     namespace hemlock {                                                                \
       namespace io {                                                                   \
         template <>                                                                    \
-        const char* serialisable_enum_name<NAMESPACE ::NAME>(NAMESPACE ::NAME val) {   \
+        [[maybe_unused]] const char*                                                   \
+        serialisable_enum_name<NAMESPACE ::NAME>(NAMESPACE ::NAME val) {               \
           return NAME##_Names[static_cast<size_t>(val)];                               \
         }                                                                              \
                                                                                        \
         template <>                                                                    \
-        NAMESPACE ::NAME                                                               \
-        serialisable_enum_val<NAMESPACE ::NAME>(const std::string& name) {             \
+        NAMESPACE ::NAME [[maybe_unused]] serialisable_enum_val<NAMESPACE ::NAME>(     \
+            const std::string& name                                                    \
+        ) {                                                                            \
           auto it = NAME##_Values.find(name);                                          \
           if (it != NAME##_Values.end()) {                                             \
             return it->second;                                                         \
