@@ -7,9 +7,9 @@ namespace YAML {
      * GLM Vectors *
     \***************/
 
-    template <glm::length_t Length, typename Type>
-    struct convert<glm::vec<Length, Type, glm::precision::defaultp>> {
-        static Node encode(const glm::vec<Length, Type, glm::precision::defaultp>& vec) {
+    template <glm::length_t Length, typename Type, glm::qualifier Qualifier>
+    struct convert<glm::vec<Length, Type, Qualifier>> {
+        static Node encode(const glm::vec<Length, Type, Qualifier>& vec) {
             Node result;
             for (glm::length_t i = 0; i < Length; ++i) {
                 result[i] = vec[i];
@@ -17,8 +17,9 @@ namespace YAML {
             return result;
         }
 
-        static bool decode(const Node& node, glm::vec<Length, Type, OUT glm::precision::defaultp>& result) {
-            if(!node.IsSequence() || node.size() != Length) {
+        static bool
+        decode(const Node& node, glm::vec<Length, Type, OUT Qualifier>& result) {
+            if (!node.IsSequence() || node.size() != Length) {
                 return false;
             }
 
@@ -38,9 +39,9 @@ namespace YAML {
      * GLM Square Matrices *
     \***********************/
 
-    template <glm::length_t Size, typename Type>
-    struct convert<glm::mat<Size, Size, Type, glm::precision::defaultp>> {
-        static Node encode(const glm::mat<Size, Size, Type, glm::precision::defaultp>& mat) {
+    template <glm::length_t Size, typename Type, glm::qualifier Qualifier>
+    struct convert<glm::mat<Size, Size, Type, Qualifier>> {
+        static Node encode(const glm::mat<Size, Size, Type, Qualifier>& mat) {
             Node result;
             for (glm::length_t i = 0; i < Size; ++i) {
                 result[i] = Node(NodeType::Sequence);
@@ -54,8 +55,9 @@ namespace YAML {
             return result;
         }
 
-        static bool decode(const Node& node, glm::mat<Size, Size, Type, OUT glm::precision::defaultp>& result) {
-            if(!node.IsSequence() || node.size() != Size) {
+        static bool
+        decode(const Node& node, glm::mat<Size, Size, Type, OUT Qualifier>& result) {
+            if (!node.IsSequence() || node.size() != Size) {
                 return false;
             }
 
@@ -81,10 +83,14 @@ namespace YAML {
      * GLM Non-Square Matrices *
     \***************************/
 
-    template <glm::length_t Columns, glm::length_t Rows, typename Type>
-        requires ( Columns != Rows )
-    struct convert<glm::mat<Columns, Rows, Type, glm::precision::defaultp>> {
-        static Node encode(const glm::mat<Columns, Rows, Type, glm::precision::defaultp>& mat) {
+    template <
+        glm::length_t Columns,
+        glm::length_t Rows,
+        typename Type,
+        glm::qualifier Qualifier>
+        requires (Columns != Rows)
+    struct convert<glm::mat<Columns, Rows, Type, Qualifier>> {
+        static Node encode(const glm::mat<Columns, Rows, Type, Qualifier>& mat) {
             Node result;
             for (glm::length_t i = 0; i < Rows; ++i) {
                 result[i] = Node(NodeType::Sequence);
@@ -98,8 +104,9 @@ namespace YAML {
             return result;
         }
 
-        static bool decode(const Node& node, glm::mat<Columns, Rows, Type, OUT glm::precision::defaultp>& result) {
-            if(!node.IsSequence() || node.size() != Rows) {
+        static bool
+        decode(const Node& node, glm::mat<Columns, Rows, Type, OUT Qualifier>& result) {
+            if (!node.IsSequence() || node.size() != Rows) {
                 return false;
             }
 
@@ -120,7 +127,6 @@ namespace YAML {
             return true;
         }
     };
+}  // namespace YAML
 
-}
-
-#endif // __hemlock_io_yaml_converters_glm_hpp
+#endif  // __hemlock_io_yaml_converters_glm_hpp
