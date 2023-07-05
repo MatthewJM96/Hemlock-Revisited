@@ -1,7 +1,7 @@
 #ifndef __hemlock_graphics_sprite_batcher_h
 #define __hemlock_graphics_sprite_batcher_h
 
-#include "graphics/font/drawable.hpp"
+#include "graphics/font/drawable.h"
 #include "graphics/font/text_align.h"
 #include "graphics/glsl_program.h"
 #include "graphics/sprite/sprite.hpp"
