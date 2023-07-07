@@ -248,7 +248,7 @@ bool hg::f::Font::generate(
                         { 255, 255, 255, 255 }
                     );
                     break;
-                case FontRenderStyle::SENTINEL:
+                default:
                     debug_printf("Trying to render a font with invalid render style.");
                     return false;
                     break;
