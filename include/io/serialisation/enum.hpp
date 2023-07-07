@@ -124,9 +124,8 @@
         }                                                                              \
                                                                                        \
         template <>                                                                    \
-        NAMESPACE ::NAME [[maybe_unused]] serialisable_enum_val<NAMESPACE ::NAME>(     \
-            const std::string& name                                                    \
-        ) {                                                                            \
+        [[maybe_unused]] NAMESPACE ::NAME                                              \
+        serialisable_enum_val<NAMESPACE ::NAME>(const std::string& name) {             \
           auto it = NAME##_Values.find(name);                                          \
           if (it != NAME##_Values.end()) {                                             \
             return it->second;                                                         \
