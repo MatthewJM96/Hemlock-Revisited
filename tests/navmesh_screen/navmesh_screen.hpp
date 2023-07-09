@@ -3,7 +3,10 @@
 
 #include <FastNoise/FastNoise.h>
 
+#include "graphics/glsl_program.h"
+#include "graphics/texture.hpp"
 #include "memory/handle.hpp"
+#include "ui/input/dispatcher.h"
 #include "voxel/ai/navmesh_task.hpp"
 #include "voxel/generation/generator_task.hpp"
 #include "voxel/graphics/mesh/greedy_strategy.hpp"

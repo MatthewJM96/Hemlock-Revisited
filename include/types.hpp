@@ -125,4 +125,9 @@ namespace hemlock {
     };
 }  // namespace hemlock
 
+template <typename Type>
+const Type& make_const(Type& val) {
+    return *const_cast<const Type*>(&val);
+}
+
 #endif  // __hemlock_types_h

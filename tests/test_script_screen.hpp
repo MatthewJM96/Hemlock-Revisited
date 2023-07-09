@@ -2,6 +2,7 @@
 #define __hemlock_tests_test_script_screen_hpp
 
 #include "app/screen_base.h"
+
 #include "script/environment_registry.hpp"
 #include "script/lua/environment.hpp"
 

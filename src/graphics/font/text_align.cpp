@@ -2,6 +2,8 @@
 
 #include "graphics/font/text_align.h"
 
+H_DEF_ENUM_WITH_SERIALISATION(hemlock::graphics::font, TextAlign)
+
 f32v2 hg::f::calculate_align_offset(
     TextAlign align, f32v4 rect, f32 height, f32 length
 ) {
