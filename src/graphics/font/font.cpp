@@ -4,6 +4,16 @@
 
 #include "graphics/font/font.h"
 
+/**
+ * @brief Enumeration of styles of fonts.
+ */
+H_DEF_ENUM_WITH_SERIALISATION(hemlock::graphics::font, FontStyle)
+
+/**
+ * @brief Enumeration of styles of font rendering.
+ */
+H_DEF_ENUM_WITH_SERIALISATION(hemlock::graphics::font, FontRenderStyle)
+
 hg::f::FontInstanceHash
 hg::f::hash(FontSize size, FontStyle style, FontRenderStyle render_style) {
     FontInstanceHash hash = 0;
@@ -237,6 +247,10 @@ bool hg::f::Font::generate(
                         static_cast<ui16>(m_start + char_index),
                         { 255, 255, 255, 255 }
                     );
+                    break;
+                default:
+                    debug_printf("Trying to render a font with invalid render style.");
+                    return false;
                     break;
             }
 

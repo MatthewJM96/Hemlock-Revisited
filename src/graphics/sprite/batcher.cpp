@@ -5,6 +5,9 @@
 
 #include "graphics/sprite/batcher.h"
 
+H_DEF_ENUM_WITH_SERIALISATION(hemlock::graphics, Gradient)
+H_DEF_ENUM_WITH_SERIALISATION(hemlock::graphics::sprite, SpriteSortMode)
+
 using namespace hg::f;
 
 #define VERTICES_PER_QUAD 4
@@ -249,7 +252,7 @@ void hg::s::SpriteBatcher::add_sprite(
     f32v4       uv_rect /*= f32v4(0.0f, 0.0f, 1.0f, 1.0f)*/
 ) {
     m_sprites.emplace_back(Sprite{
-        builder, texture, position, size, depth, uv_rect, c1, c2, gradient });
+        texture, position, size, depth, uv_rect, c1, c2, gradient, builder });
 }
 
 void hg::s::SpriteBatcher::add_sprite(
@@ -263,7 +266,7 @@ void hg::s::SpriteBatcher::add_sprite(
     f32v4       uv_rect /*= f32v4(0.0f, 0.0f, 1.0f, 1.0f)*/
 ) {
     m_sprites.emplace_back(Sprite{
-        builder, m_default_texture, position, size, depth, uv_rect, c1, c2, gradient });
+        m_default_texture, position, size, depth, uv_rect, c1, c2, gradient, builder });
 }
 
 void hg::s::SpriteBatcher::add_sprite(
@@ -276,15 +279,15 @@ void hg::s::SpriteBatcher::add_sprite(
     f32      depth /*= 0.0f*/,
     f32v4    uv_rect /*= f32v4(0.0f, 0.0f, 1.0f, 1.0f)*/
 ) {
-    m_sprites.emplace_back(Sprite{ { &impl::basic_build_quad },
-                                   texture,
+    m_sprites.emplace_back(Sprite{ texture,
                                    position,
                                    size,
                                    depth,
                                    uv_rect,
                                    c1,
                                    c2,
-                                   gradient });
+                                   gradient,
+                                   { &impl::basic_build_quad } });
 }
 
 void hg::s::SpriteBatcher::add_sprite(
@@ -296,15 +299,15 @@ void hg::s::SpriteBatcher::add_sprite(
     f32      depth /*= 0.0f*/,
     f32v4    uv_rect /*= f32v4(0.0f, 0.0f, 1.0f, 1.0f)*/
 ) {
-    m_sprites.emplace_back(Sprite{ { &impl::basic_build_quad },
-                                   m_default_texture,
+    m_sprites.emplace_back(Sprite{ m_default_texture,
                                    position,
                                    size,
                                    depth,
                                    uv_rect,
                                    c1,
                                    c2,
-                                   gradient });
+                                   gradient,
+                                   { &impl::basic_build_quad } });
 }
 
 void hg::s::SpriteBatcher::add_string(

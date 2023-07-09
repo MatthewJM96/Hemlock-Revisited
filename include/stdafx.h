@@ -82,6 +82,9 @@
 // Image Libs
 #include <png.h>
 
+// YAML
+#include <yaml-cpp/yaml.h>
+
 // Scripting Libs
 #if defined(HEMLOCK_USING_LUA)
 #  include <lua.hpp>

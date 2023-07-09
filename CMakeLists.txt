@@ -31,6 +31,8 @@ option(HEMLOCK_USING_OPENGL "Whether Hemlock uses OpenGL." ON)
 option(HEMLOCK_USING_VULKAN "Whether Hemlock uses Vulkan." OFF)
 option(HEMLOCK_USING_LUA "Whether Hemlock uses Lua for scripting." ON)
 
+option(HEMLOCK_PREPROC_DEBUG "Whether to emit results of running preprocessor." OFF)
+
 option(HEMLOCK_FAST_DEBUG "Whether to compile debug builds with O1 optimisation." OFF)
 option(HEMLOCK_SUPER_FAST_DEBUG "Whether to compile debug builds with O2 optimisation." OFF)
 option(HEMLOCK_HYPER_FAST_DEBUG "Whether to compile debug builds with O3 optimisation." OFF)
@@ -42,7 +44,9 @@ option(HEMLOCK_ENABLE_GPERF_PROFILER "Whether to compile with GPerf profiler." O
 
 if (UNIX OR MINGW)
     set(CMAKE_CXX_FLAGS "-pthread")
-    if (HEMLOCK_ENABLE_ADDRESS_SANITIZER)
+    if (HEMLOCK_PREPROC_DEBUG)
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -E")
+    elseif (HEMLOCK_ENABLE_ADDRESS_SANITIZER)
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address -fno-omit-frame-pointer")
         set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fsanitize=address -fno-omit-frame-pointer")
         set(CMAKE_CXX_FLAGS_RELEASE "-g -O3")
@@ -105,6 +109,7 @@ set(Hemlock_Requirements
     boost/1.78.0
     bullet3/3.24
     entt/3.10.1
+    yaml-cpp/0.7.0
     zlib/1.2.13
 )
 
@@ -146,6 +151,7 @@ find_package(concurrentqueue REQUIRED)
 find_package(Boost COMPONENTS iostreams REQUIRED)
 find_package(Bullet REQUIRED)
 find_package(EnTT REQUIRED)
+find_package(yaml-cpp REQUIRED)
 if (HEMLOCK_USING_LUA)
     find_package(luajit REQUIRED)
 endif()
@@ -187,16 +193,19 @@ add_executable(Hemlock_Revisited
     "${PROJECT_SOURCE_DIR}/src/camera/basic_first_person_camera.cpp"
     "${PROJECT_SOURCE_DIR}/src/camera/basic_orthographic_camera.cpp"
     "${PROJECT_SOURCE_DIR}/src/debug/heatmap.cpp"
+    "${PROJECT_SOURCE_DIR}/src/graphics/font/drawable.cpp"
     "${PROJECT_SOURCE_DIR}/src/graphics/font/font.cpp"
     "${PROJECT_SOURCE_DIR}/src/graphics/font/text_align.cpp"
     "${PROJECT_SOURCE_DIR}/src/graphics/glsl_program.cpp"
     "${PROJECT_SOURCE_DIR}/src/graphics/mesh.cpp"
     "${PROJECT_SOURCE_DIR}/src/graphics/pixel.cpp"
     "${PROJECT_SOURCE_DIR}/src/graphics/sprite/batcher.cpp"
+    "${PROJECT_SOURCE_DIR}/src/graphics/sprite/sprite.cpp"
     "${PROJECT_SOURCE_DIR}/src/graphics/sprite/string_drawer.cpp"
     "${PROJECT_SOURCE_DIR}/src/io/glob.cpp"
     "${PROJECT_SOURCE_DIR}/src/io/image.cpp"
     "${PROJECT_SOURCE_DIR}/src/io/iomanager.cpp"
+    "${PROJECT_SOURCE_DIR}/src/io/yaml/yaml.cpp"
     "${PROJECT_SOURCE_DIR}/src/script/lua/continuable_function.cpp"
     "${PROJECT_SOURCE_DIR}/src/script/lua/lua_function.cpp"
     "${PROJECT_SOURCE_DIR}/src/thread/thread_workflow_builder.cpp"
@@ -228,6 +237,7 @@ set(Hemlock_Include_Dirs
     ${Boost_INCLUDE_DIRS}
     ${Bullet_INCLUDE_DIRS}
     ${EnTT_INCLUDE_DIRS}
+    ${yaml-cpp_INCLUDE_DIRS}
 )
 
 if (HEMLOCK_USING_OPENGL)
@@ -360,6 +370,7 @@ target_link_libraries(Hemlock_Revisited
     SDL2_ttf::SDL2_ttf
     Boost::iostreams
     Bullet::Bullet
+    yaml-cpp
     heatmap
 )
 
