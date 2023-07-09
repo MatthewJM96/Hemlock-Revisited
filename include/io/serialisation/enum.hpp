@@ -21,9 +21,12 @@
 #  if !defined(H_VENUM_NAME)
 #    define H_VENUM_NAME(NAME, VALUE) NAME
 #  endif  //! defined(H_VENUM_NAME)
+#  if !defined(H_VENUM_VALUE)
+#    define H_VENUM_VALUE(NAME, VALUE) VALUE
+#  endif  //! defined(H_VENUM_VALUE)
 
 #  if !defined(H_SERIALISABLE_VENUM_ENTRY)
-#    define H_SERIALISABLE_VENUM_ENTRY(ENTRY) H_VENUM_NAME ENTRY
+#    define H_SERIALISABLE_VENUM_ENTRY(ENTRY) H_VENUM_NAME ENTRY = H_VENUM_VALUE ENTRY
 #  endif  //! defined(H_SERIALISABLE_ENUM_ENTRY)
 
 #  define H_DEF_SERIALISABLE_VENUM(NAME, TYPE, ...)                                    \
