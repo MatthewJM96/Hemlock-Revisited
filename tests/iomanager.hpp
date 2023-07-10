@@ -25,27 +25,6 @@ public:
         full_path = hio::fs::absolute(path);
         return true;
     }
-
-    virtual bool resolve_paths(IN OUT std::vector<hio::fs::path>& paths
-    ) const override {
-        bool bad = false;
-        for (auto& path : paths) {
-            hio::fs::path tmp{};
-            bad  |= !resolve_path(path, tmp);
-            path = tmp;
-        }
-        return !bad;
-    }
-
-    virtual bool assure_paths(IN OUT std::vector<hio::fs::path>& paths) const override {
-        bool bad = false;
-        for (auto& path : paths) {
-            hio::fs::path tmp{};
-            bad  |= !assure_path(path, tmp);
-            path = tmp;
-        }
-        return !bad;
-    }
 };
 
 #endif  // __hemlock_tests_iomanager_hpp
