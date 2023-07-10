@@ -143,6 +143,9 @@ namespace hemlock {
                 std::vector<fs::path>&& paths, Delegate<bool(const fs::path&)> func
             ) const;
 
+            // TODO(Matthew): These are currently incorrectly implemented as they
+            //                currently glob the globpath directly, as opposed to
+            //                globbing after choosing base(s) to attach it to.
             /**
              * Apply a function to all resources located after resolving the globpath
              * provided.
