@@ -205,6 +205,7 @@ add_executable(Hemlock_Revisited
     "${PROJECT_SOURCE_DIR}/src/io/glob.cpp"
     "${PROJECT_SOURCE_DIR}/src/io/image.cpp"
     "${PROJECT_SOURCE_DIR}/src/io/iomanager.cpp"
+    "${PROJECT_SOURCE_DIR}/src/io/ordered_iomanager.cpp"
     "${PROJECT_SOURCE_DIR}/src/io/yaml/yaml.cpp"
     "${PROJECT_SOURCE_DIR}/src/mod/metadata.cpp"
     "${PROJECT_SOURCE_DIR}/src/script/lua/continuable_function.cpp"
