@@ -5,8 +5,9 @@
 
 namespace hemlock {
     namespace mod {
+        // TODO(Matthew): UUID? Can assign a hashable ID at runtime.
         using ModID = ui64;
-    }
+    }  // namespace mod
 }  // namespace hemlock
 namespace hmod = hemlock::mod;
 
