@@ -15,11 +15,24 @@ void hio::OrderedIOManager::dispose() {
 }
 
 bool hio::OrderedIOManager::resolve_path(const fs::path& path, OUT fs::path& full_path)
-    const { }
+    const {
+    for (const auto& base : m_search_directories) {
+        auto candidate_path = fs::absolute(base / path);
+
+        if (fs::exists(candidate_path)) {
+            full_path = candidate_path;
+
+            return true;
+        }
+    }
+
+    return false;
+}
 
 bool hio::OrderedIOManager::assure_path(
-    const fs::path& path,
-    OUT fs::path& full_path,
-    bool          is_file /*= false*/,
-    OUT bool*     was_existing /*= nullptr*/
-) const { }
+    const fs::path&, OUT fs::path&, bool /*= false*/, OUT bool* /*= nullptr*/
+) const {
+    // Cannot assure path via this IO manager, as it cannot know which base to operate
+    // with.
+    return false;
+}
