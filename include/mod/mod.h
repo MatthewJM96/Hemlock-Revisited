@@ -1,5 +1,5 @@
-#ifndef __hemlock_mod_loader_order_h
-#define __hemlock_mod_loader_order_h
+#ifndef __hemlock_mod_mod_h
+#define __hemlock_mod_mod_h
 
 #include "io/ordered_iomanager.h"
 
@@ -12,14 +12,14 @@ namespace hemlock {
             Mod();
             ~Mod();
 
-            void update(FrameTime time) = 0;
+            void update(FrameTime time);
         protected:
             ModMetadata m_metadata;
 
             io::IOManager m_iom;
-        }
+        };
     }  // namespace mod
 }  // namespace hemlock
 namespace hmod = hemlock::mod;
 
-#endif  // __hemlock_mod_loader_order_h
+#endif  // __hemlock_mod_mod_h

@@ -16,7 +16,9 @@ namespace hmod = hemlock::mod;
 H_DECL_STRUCT_WITH_SERIALISATION(
     hemlock::mod,
     LoadOrder,
-    (id, LoadOrderID),
+    (_load_order_version, ui16),
+    (_reserved, ui16),
+    (id, hmod::LoadOrderID),
     (name, std::string),
     (mods, std::vector<hmod::ModID>),
     (description, std::string)
@@ -38,7 +40,7 @@ namespace hemlock {
             std::vector<Mod> m_mods;
 
             io::OrderedIOManager m_non_merging_iom;
-        }
+        };
     }  // namespace mod
 }  // namespace hemlock
 namespace hmod = hemlock::mod;

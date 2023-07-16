@@ -1,15 +1,15 @@
 #include "stdafx.h"
 
-#include "mod/metadata.h"
+#include "mod/environment.h"
 
 H_DEF_STRUCT_WITH_SERIALISATION(
     hemlock::mod,
-    ModMetadata,
-    (_metadata_version, ui16),
+    LoadOrder,
+    (_load_order_version, ui16),
     (_reserved, ui16),
-    (id, hmod::ModID),
+    (id, hmod::LoadOrderID),
     (name, std::string),
-    (authors, std::vector<std::string>),
+    (mods, std::vector<hmod::ModID>),
     (description, std::string)
     // Last updated?
     // Version?
