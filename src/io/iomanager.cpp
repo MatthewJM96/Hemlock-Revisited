@@ -50,7 +50,7 @@ bool hio::IOManagerBase::
         if (!resolve_path(src, abs_src)) return false;
         if (!fs::exists(abs_src)) return false;
 
-        if (!resolve_path(dest.parent_path(), abs_dest)) return false;
+        if (!assure_path(dest.parent_path(), abs_dest)) return false;
 
         abs_dest = abs_dest / dest.filename();
 
