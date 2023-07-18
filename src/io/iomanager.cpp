@@ -29,8 +29,8 @@ bool hio::IOManagerBase::create_directories(const fs::path& path) const {
     if (err.value() != 0) {
         debug_printf(
             "Creating directories:\n    %s\nhas failed with error:\n    %s",
-            path.string(),
-            err.message()
+            path.c_str(),
+            err.message().c_str()
         );
     }
 #endif  // DEBUG
@@ -76,9 +76,9 @@ bool hio::IOManagerBase::
     if (err.value() != 0) {
         debug_printf(
             "Renaming:\n    %s\nto\n    %s\nhas failed with error:\n    %s",
-            src.string(),
-            dest.string(),
-            err.message()
+            src.c_str(),
+            dest.c_str(),
+            err.message().c_str()
         );
     }
 #endif  // DEBUG
