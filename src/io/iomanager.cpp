@@ -22,7 +22,20 @@ bool hio::IOManagerBase::create_directories(const fs::path& path) const {
     fs::path abs_path{};
     if (!resolve_path(path, abs_path)) return false;
 
-    return fs::create_directories(abs_path);
+    std::error_code err;
+    fs::create_directories(abs_path, err);
+
+#if DEBUG
+    if (err.value() != 0) {
+        debug_printf(
+            "Creating directories:\n    %s\nhas failed with error:\n    %s",
+            path.string(),
+            err.message()
+        );
+    }
+#endif  // DEBUG
+
+    return err.value() == 0;
 }
 
 bool hio::IOManagerBase::
@@ -38,9 +51,20 @@ bool hio::IOManagerBase::
         if (!resolve_path(dest, abs_dest)) return false;
     }
 
+    std::error_code err;
     fs::rename(abs_src, abs_dest);
 
-    return true;
+#if DEBUG
+    if (err.value() != 0) {
+        debug_printf(
+            "Creating directories:\n    %s\nhas failed with error:\n    %s",
+            path.string(),
+            err.message()
+        );
+    }
+#endif  // DEBUG
+
+    return err.value() == 0;
 }
 
 void hio::IOManagerBase::apply_to_paths(
