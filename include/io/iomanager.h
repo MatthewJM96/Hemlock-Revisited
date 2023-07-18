@@ -249,6 +249,63 @@ namespace hemlock {
             CALLER_DELETE ui8*
             read_file_to_binary(const fs::path& path, OUT ui32& length) const;
         };
+
+        class IOManager : public IOManagerBase {
+        public:
+            IOManager() : IOManagerBase() { /* Empty. */
+            }
+
+            virtual ~IOManager() { /* Empty. */
+            }
+
+            /**
+             * @brief Initialises the IO manager with a base directory from which to
+             * search.
+             *
+             * @param base_path The absolute filepath to the base directory from which
+             * this IO manager instance will resolve and assure paths.
+             */
+            void init(const fs::path& base_path);
+
+            /**
+             * @brief Disposes the IO manager.
+             */
+            void dispose();
+
+            /**
+             * @brief Resolve a relative filepath into a valid absolute filepath.
+             * Permissibility of access is not implemented here, rather should this
+             * function succeed then permissibility is assumed.
+             *
+             * @param path The relative filepath to resolve.
+             * @param full_path The absolute filepath if successfully resolved.
+             * @return True if the path was resolved successfully, false otherwise.
+             */
+            bool resolve_path(const fs::path& path, OUT fs::path& full_path)
+                const override final;
+            /**
+             * @brief Resolve a relative filepath into a valid absolute filepath,
+             * creating the underlying directory structure where it does not already
+             * exist. Permissibility of access is not implemented here, rather should
+             * this function succeed then permissibility is assumed.
+             *
+             * @param path The relative filepath to resolve.
+             * @param full_path The absolute filepath if successfully resolved.
+             * @param is_file Whether the path to assure is a regular file (true) or
+             * not (false).
+             * @param was_existing Whether the leaf node in the filepath was already
+             * existing or not prior to assuring it.
+             * @return True if the path was resolved successfully, false otherwise.
+             */
+            bool assure_path(
+                const fs::path& path,
+                OUT fs::path& full_path,
+                bool          is_file      = false,
+                OUT bool*     was_existing = nullptr
+            ) const override final;
+        protected:
+            fs::path m_base_path;
+        };
     }  // namespace io
 }  // namespace hemlock
 namespace hio = hemlock::io;

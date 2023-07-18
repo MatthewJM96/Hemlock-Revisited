@@ -306,3 +306,52 @@ ui8* hio::IOManagerBase::read_file_to_binary(const fs::path& path, ui32& length)
 
     return buffer;
 }
+
+void hio::IOManager::init(const fs::path& base_path) {
+#if DEBUG
+    assert(base_path.is_absolute());
+#endif  // DEBUG
+
+    m_base_path = base_path;
+}
+
+void hio::IOManager::dispose() {
+    m_base_path = fs::path{};
+}
+
+bool hio::IOManager::resolve_path(const fs::path& path, OUT fs::path& full_path) const {
+    if (path.is_absolute()) return false;
+
+    full_path = m_base_path / path;
+
+    if (fs::exists(full_path)) return true;
+
+    return false;
+}
+
+bool hio::IOManager::assure_path(
+    const fs::path& path,
+    OUT fs::path& full_path,
+    bool          is_file /*= false*/,
+    OUT bool*     was_existing /*= nullptr*/
+) const {
+    if (path.is_absolute()) return false;
+
+    full_path = m_base_path / path;
+
+    if (is_file) {
+        *was_existing = fs::is_regular_file(full_path);
+
+        create_directories(full_path.parent_path());
+
+        return true;
+    } else {
+        *was_existing = fs::is_directory(full_path);
+
+        create_directories(full_path);
+
+        return true;
+    }
+
+    return false;
+}
