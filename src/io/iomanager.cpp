@@ -44,11 +44,29 @@ bool hio::IOManagerBase::
     fs::path abs_dest{};
 
     if (force) {
-        if (!assure_path(src, abs_src, true)) return false;
-        if (!assure_path(dest, abs_dest, true)) return false;
-    } else {
+        // Want to ensure source exists, and assure that the directory structure up to
+        // the directory in which it will exist after renaming does too. Any resource
+        // that exists with the filepath of dest will be destroyed.
         if (!resolve_path(src, abs_src)) return false;
-        if (!resolve_path(dest, abs_dest)) return false;
+        if (!fs::exists(abs_src)) return false;
+
+        if (!resolve_path(dest.parent_path(), abs_dest)) return false;
+
+        abs_dest = abs_dest / dest.filename();
+
+        if (fs::exists(abs_dest)) fs::remove(abs_dest);
+    } else {
+        // Want to know that source exists, and that the directory in which it will
+        // exist after renaming does too. If any resource exists with the filepath of
+        // dest, then we also fail.
+        if (!resolve_path(src, abs_src)) return false;
+        if (!fs::exists(abs_src)) return false;
+
+        if (!resolve_path(dest.parent_path(), abs_dest)) return false;
+
+        abs_dest = abs_dest / dest.filename();
+
+        if (fs::exists(abs_dest)) return false;
     }
 
     std::error_code err;
@@ -57,8 +75,9 @@ bool hio::IOManagerBase::
 #if DEBUG
     if (err.value() != 0) {
         debug_printf(
-            "Creating directories:\n    %s\nhas failed with error:\n    %s",
-            path.string(),
+            "Renaming:\n    %s\nto\n    %s\nhas failed with error:\n    %s",
+            src.string(),
+            dest.string(),
             err.message()
         );
     }
