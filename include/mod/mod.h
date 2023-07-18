@@ -1,7 +1,7 @@
 #ifndef __hemlock_mod_mod_h
 #define __hemlock_mod_mod_h
 
-#include "io/ordered_iomanager.h"
+#include "io/iomanager.h"
 
 #include "metadata.h"
 

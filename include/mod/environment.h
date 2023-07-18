@@ -1,7 +1,7 @@
 #ifndef __hemlock_mod_loader_order_h
 #define __hemlock_mod_loader_order_h
 
-#include "io/ordered_iomanager.h"
+#include "io/iomanager.h"
 
 #include "mod.h"
 
@@ -39,7 +39,7 @@ namespace hemlock {
         protected:
             std::vector<Mod> m_mods;
 
-            io::OrderedIOManager m_non_merging_iom;
+            io::IOManager* m_base_iom;
         };
     }  // namespace mod
 }  // namespace hemlock
