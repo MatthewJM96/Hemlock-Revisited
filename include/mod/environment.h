@@ -34,17 +34,17 @@ namespace hemlock {
         public:
             ModEnvironment();
 
-            ~ModEnvironment() { /* Empty. */
+            virtual ~ModEnvironment() { /* Empty. */
             }
 
-            void init(ModRegistry&& registry);
-            void init(ModRegistry&& registry, LoadOrder&& load_order);
-            void dispose();
+            void         init(ModRegistry&& registry);
+            void         init(ModRegistry&& registry, LoadOrder&& load_order);
+            virtual void dispose();
 
             void activate_environment();
             void deactivate_environment();
 
-            void update(FrameTime time);
+            virtual void update(FrameTime time);
 
             bool set_load_order(LoadOrder&& load_order);
         protected:
