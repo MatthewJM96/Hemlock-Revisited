@@ -33,14 +33,26 @@ namespace hemlock {
         class ModEnvironment {
         public:
             ModEnvironment();
-            ~ModEnvironment();
 
-            void init(const ModRegistry& registry, const LoadOrder& load_order);
+            ~ModEnvironment() { /* Empty. */
+            }
+
+            void init(ModRegistry&& registry);
+            void init(ModRegistry&& registry, LoadOrder&& load_order);
+            void dispose();
+
+            void activate_environment();
+            void deactivate_environment();
 
             void update(FrameTime time);
 
-            bool set_load_order(const LoadOrder& load_order);
+            bool set_load_order(LoadOrder&& load_order);
         protected:
+            ModRegistry m_registry;
+            LoadOrder   m_load_order;
+
+            bool m_is_active;
+
             std::vector<Mod> m_mods;
 
             io::IOManager* m_base_iom;
