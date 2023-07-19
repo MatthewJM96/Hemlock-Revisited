@@ -2,8 +2,10 @@
 #define __hemlock_mod_loader_order_h
 
 #include "io/iomanager.h"
+#include "io/serialisation.hpp"
 
 #include "mod.h"
+#include "registry.h"
 
 namespace hemlock {
     namespace mod {
@@ -32,6 +34,8 @@ namespace hemlock {
         public:
             ModEnvironment();
             ~ModEnvironment();
+
+            void init(const ModRegistry& registry, const LoadOrder& load_order);
 
             void update(FrameTime time);
 

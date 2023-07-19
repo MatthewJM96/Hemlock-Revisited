@@ -7,7 +7,5 @@ H_DEF_STRUCT_WITH_SERIALISATION(
     ModRegistry,
     (_registry_version, ui16),
     (_reserved, ui16),
-    (authors, std::vector<hio::fs::path>),
-    // Last updated?
-    // Version?
+    (mods, hmod::ModRegistryEntries)
 )
