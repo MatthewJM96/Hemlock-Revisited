@@ -13,12 +13,11 @@ hscript::EnvironmentRegistry<Environment>::operator=(
 
 template <typename Environment>
 void hscript::EnvironmentRegistry<Environment>::init(
-    hio::IOManagerBase* io_manager,
+    hio::IOManagerBase* default_io_manager /*= nullptr*/,
     i32                 max_script_length /* = HEMLOCK_DEFAULT_MAX_SCRIPT_LENGTH*/
 ) {
-    m_io_manager = io_manager;
-
-    m_max_script_length = max_script_length;
+    m_default_io_manager = default_io_manager;
+    m_max_script_length  = max_script_length;
 }
 
 template <typename Environment>
@@ -49,7 +48,7 @@ hscript::EnvironmentGroupID
 hscript::EnvironmentRegistry<Environment>::create_group(EnvironmentBuilder<Environment>*
                                                             builder /* = nullptr*/) {
     Environment* group_env = new Environment();
-    group_env->init(m_io_manager, m_max_script_length);
+    group_env->init(nullptr, m_max_script_length);
 
     if (builder != nullptr) {
         builder(group_env);
@@ -62,12 +61,16 @@ hscript::EnvironmentRegistry<Environment>::create_group(EnvironmentBuilder<Envir
 
 template <typename Environment>
 Environment* hscript::EnvironmentRegistry<Environment>::create_environment(
-    std::string name, EnvironmentBuilder<Environment>* builder /* = nullptr*/
+    std::string                      name,
+    hio::IOManagerBase*              io_manager /* = nullptr*/,
+    EnvironmentBuilder<Environment>* builder /* = nullptr*/
 ) {
     if (m_register.find(name) != m_register.end()) return nullptr;
 
     Environment* env = new Environment();
-    env->init(m_io_manager, this, m_max_script_length);
+    env->init(
+        io_manager ? io_manager : m_default_io_manager, this, m_max_script_length
+    );
 
     if (builder != nullptr) {
         (*builder)(env);
@@ -81,7 +84,9 @@ Environment* hscript::EnvironmentRegistry<Environment>::create_environment(
 
 template <typename Environment>
 Environment* hscript::EnvironmentRegistry<Environment>::create_environment(
-    std::string name, EnvironmentGroupID group_id
+    std::string         name,
+    EnvironmentGroupID  group_id,
+    hio::IOManagerBase* io_manager /* = nullptr*/
 ) {
     if (m_register.find(name) != m_register.end()) return nullptr;
 
@@ -93,7 +98,11 @@ Environment* hscript::EnvironmentRegistry<Environment>::create_environment(
     }
 
     Environment* env = new Environment();
-    env->init(group->parent, m_io_manager, m_max_script_length);
+    env->init(
+        group->parent,
+        io_manager ? io_manager : m_default_io_manager,
+        m_max_script_length
+    );
 
     m_register[name] = env;
     group->children.push_back(env);
@@ -105,6 +114,7 @@ template <typename Environment>
 Environment* hscript::EnvironmentRegistry<Environment>::create_environments(
     ui32                             num,
     std::string*                     names,
+    hio::IOManagerBase*              io_manager /* = nullptr*/,
     EnvironmentBuilder<Environment>* builder /* = nullptr*/
 ) {
     for (ui32 env_idx = 0; env_idx != num; ++env_idx) {
@@ -118,7 +128,7 @@ Environment* hscript::EnvironmentRegistry<Environment>::create_environments(
     for (ui32 env_idx = 0; env_idx != num; ++env_idx) {
         Environment* env = &envs[env_idx];
 
-        env->init(m_io_manager, m_max_script_length);
+        env->init(io_manager ? io_manager : m_default_io_manager, m_max_script_length);
 
         if (builder != nullptr) {
             builder(env);
@@ -133,7 +143,10 @@ Environment* hscript::EnvironmentRegistry<Environment>::create_environments(
 
 template <typename Environment>
 Environment* hscript::EnvironmentRegistry<Environment>::create_environments(
-    ui32 num, std::string* names, EnvironmentGroupID group_id
+    ui32                num,
+    std::string*        names,
+    EnvironmentGroupID  group_id,
+    hio::IOManagerBase* io_manager /* = nullptr*/
 ) {
     for (ui32 env_idx = 0; env_idx != num; ++env_idx) {
         if (m_register.find(names[env_idx]) != m_register.end()) return nullptr;
@@ -153,7 +166,11 @@ Environment* hscript::EnvironmentRegistry<Environment>::create_environments(
     for (ui32 env_idx = 0; env_idx != num; ++env_idx) {
         Environment* env = &envs[env_idx];
 
-        env->init(group->parent, m_io_manager, m_max_script_length);
+        env->init(
+            group->parent,
+            io_manager ? io_manager : m_default_io_manager,
+            m_max_script_length
+        );
 
         m_register[names[env_idx]] = env;
         group->children.push_back(env);

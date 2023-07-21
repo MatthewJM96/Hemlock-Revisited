@@ -40,14 +40,13 @@ namespace hemlock {
              * @brief Initialise the environment registry in which script
              * environments and groupings can be created.
              *
-             * @param io_manager The IO manager to use for discovering
-             * scripts when using load and run functions in registered
-             * environments.
+             * @param default_io_manager The default IO manager to use for discovering
+             * scripts when using load and run functions in registered environments.
              * @param max_script_length The maximum length of any
              * script that this environment will process.
              */
             void init(
-                hio::IOManagerBase* io_manager,
+                hio::IOManagerBase* default_io_manager = nullptr,
                 i32 max_script_length = HEMLOCK_DEFAULT_MAX_SCRIPT_LENGTH
             );
             /**
@@ -73,11 +72,15 @@ namespace hemlock {
              * with no other environment.
              *
              * @param name The name of the environment created.
+             * @param io_manager The IO manager to give the environment. If this is
+             * nullptr, the default IO manager is used instead.
              * @param builder Optional builder to use in creating environment.
              * @return Environment* Pointer to the created environment.
              */
             Environment* create_environment(
-                std::string name, EnvironmentBuilder<Environment>* builder = nullptr
+                std::string                      name,
+                hio::IOManagerBase*              io_manager = nullptr,
+                EnvironmentBuilder<Environment>* builder    = nullptr
             );
             /**
              * @brief Create an environment within a group, this environment
@@ -86,10 +89,15 @@ namespace hemlock {
              * @param name The name of the environment created.
              * @param group_id The ID of the group to create the environment
              * within.
+             * @param io_manager The IO manager to give the environment. If this is
+             * nullptr, the default IO manager is used instead.
              * @return Environment* Pointer to the created environment.
              */
-            Environment*
-            create_environment(std::string name, EnvironmentGroupID group_id);
+            Environment* create_environment(
+                std::string         name,
+                EnvironmentGroupID  group_id,
+                hio::IOManagerBase* io_manager = nullptr
+            );
 
             /**
              * @brief Create environments optionally using a builder. This
@@ -98,13 +106,16 @@ namespace hemlock {
              *
              * @param num The number of environments to create.
              * @param names The names of the environments created.
+             * @param io_manager The IO manager to give the environment. If this is
+             * nullptr, the default IO manager is used instead.
              * @param builder Optional builder to use in creating environment.
              * @return Environment* Pointer to the created environments.
              */
             Environment* create_environments(
                 ui32                             num,
                 std::string*                     names,
-                EnvironmentBuilder<Environment>* builder = nullptr
+                hio::IOManagerBase*              io_manager = nullptr,
+                EnvironmentBuilder<Environment>* builder    = nullptr
             );
             /**
              * @brief Create environments within a group, this environment
@@ -114,10 +125,15 @@ namespace hemlock {
              * @param names The names of the environments created.
              * @param group_id The ID of the group to create the environment
              * within.
+             * @param io_manager The IO manager to give the environment. If this is
+             * nullptr, the default IO manager is used instead.
              * @return Environment* Pointer to the created environments.
              */
             Environment* create_environments(
-                ui32 num, std::string* names, EnvironmentGroupID group_id
+                ui32                num,
+                std::string*        names,
+                EnvironmentGroupID  group_id,
+                hio::IOManagerBase* io_manager = nullptr
             );
 
             /**
@@ -136,7 +152,7 @@ namespace hemlock {
             EnvironmentGroups<Environment> m_groups;
             Environments<Environment>      m_ungrouped_envs;
 
-            hio::IOManagerBase* m_io_manager;
+            hio::IOManagerBase* m_default_io_manager;
             i32                 m_max_script_length;
         };
     }  // namespace script
