@@ -19,7 +19,8 @@ H_DECL_STRUCT_WITH_SERIALISATION(
     (id, hmod::ModID),
     (name, std::string),
     (authors, std::vector<std::string>),
-    (description, std::string)
+    (description, std::string),
+    (version, hemlock::SemanticVersion)
     // Last updated?
     // Version?
 )
