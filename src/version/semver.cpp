@@ -1,6 +1,6 @@
 #include "stdafx.h"
 
-#include "semver.h"
+#include "version/semver.h"
 
 hemlock::SemanticVersion::SemanticVersion() :
     m_major(0), m_minor(0), m_patch(0), m_pre_release(nullptr), m_build(nullptr) {

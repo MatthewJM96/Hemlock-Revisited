@@ -1,7 +1,7 @@
 #ifndef __hemlock_io_yaml_converters_semver_hpp
 #define __hemlock_io_yaml_converters_semver_hpp
 
-#include "semver.h"
+#include "version/semver.h"
 
 namespace YAML {
     template <>

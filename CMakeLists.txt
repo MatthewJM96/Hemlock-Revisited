@@ -181,7 +181,6 @@ if (CMAKE_BUILD_TYPE STREQUAL "Debug")
 endif()
 
 add_executable(Hemlock_Revisited
-    "${PROJECT_SOURCE_DIR}/src/semver.cpp"
     "${PROJECT_SOURCE_DIR}/src/stdafx.cpp"
     "${PROJECT_SOURCE_DIR}/src/timing.cpp"
     "${PROJECT_SOURCE_DIR}/src/app/app_base.cpp"
@@ -216,6 +215,8 @@ add_executable(Hemlock_Revisited
     "${PROJECT_SOURCE_DIR}/src/thread/thread_workflow_builder.cpp"
     "${PROJECT_SOURCE_DIR}/src/ui/input/dispatcher.cpp"
     "${PROJECT_SOURCE_DIR}/src/ui/input/manager.cpp"
+    "${PROJECT_SOURCE_DIR}/src/version/semver.cpp"
+    "${PROJECT_SOURCE_DIR}/src/version/validate.cpp"
     "${PROJECT_SOURCE_DIR}/src/voxel/chunk.cpp"
     "${PROJECT_SOURCE_DIR}/src/voxel/chunk/grid.cpp"
     "${PROJECT_SOURCE_DIR}/src/voxel/coordinate_system.cpp"

@@ -1,5 +1,5 @@
-#ifndef __hemlock_semver_h
-#define __hemlock_semver_h
+#ifndef __hemlock_version_semver_h
+#define __hemlock_version_semver_h
 
 namespace hemlock {
     /**
@@ -96,4 +96,4 @@ namespace hemlock {
     };
 }  // namespace hemlock
 
-#endif  // __hemlock_semver_h
+#endif  // __hemlock_version_semver_h
