@@ -140,8 +140,8 @@ public:
         }
 
         YAML::Node datetime_node = YAML::Load("'1970-01-01T00:00+0000'");
-        std::chrono::time_point<std::chrono::utc_clock> datetime
-            = datetime_node.as<std::chrono::time_point<std::chrono::utc_clock>>();
+        std::chrono::time_point<std::chrono::system_clock> datetime
+            = datetime_node.as<std::chrono::time_point<std::chrono::system_clock>>();
         std::cout << std::format("Datetime: {0:%F}T{0:%R%z}.", datetime) << std::endl;
     }
 

@@ -52,26 +52,29 @@ namespace YAML {
         }
     };
 
-    template <typename Clock>
-    struct convert<std::chrono::time_point<Clock>> {
-        static Node encode(const std::chrono::time_point<Clock>& time) {
+    template <>
+    struct convert<std::chrono::time_point<std::chrono::system_clock>> {
+        static Node
+        encode(const std::chrono::time_point<std::chrono::system_clock>& time) {
             std::stringstream ss;
 
-            ss << std::format("{0:%F}T{0:%R%z}", time);
+            ss << std::format("%FT%T%z", time);
 
             return Node{ ss.str() };
         }
 
-        static bool decode(const Node& node, std::chrono::time_point<Clock>& time) {
+        static bool decode(
+            const Node& node, std::chrono::time_point<std::chrono::system_clock>& time
+        ) {
             if (!node.IsScalar()) {
                 return false;
             }
 
             std::stringstream ss{ node.as<std::string>() };
 
-            ss >> date::parse("{0:%F}T{0:%R%z}", time);
+            ss >> date::parse("%FT%T%z", time);
 
-            return !!ss;
+            return !ss.fail();
         }
     };
 }  // namespace YAML
