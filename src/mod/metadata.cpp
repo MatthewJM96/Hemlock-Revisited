@@ -3,6 +3,10 @@
 #include "mod/metadata.h"
 
 H_DEF_STRUCT_WITH_SERIALISATION(
+    hemlock::mod, ModCompatibility, (id, hmod::ModID), (versions, hemlock::Versions)
+)
+
+H_DEF_STRUCT_WITH_SERIALISATION(
     hemlock::mod,
     ModMetadata,
     (_metadata_version, ui16),
@@ -10,7 +14,8 @@ H_DEF_STRUCT_WITH_SERIALISATION(
     (id, hmod::ModID),
     (name, std::string),
     (authors, std::vector<std::string>),
-    (description, std::string)
+    (description, std::string),
+    (version, hemlock::SemanticVersion)
     // Last updated?
     // Version?
 )

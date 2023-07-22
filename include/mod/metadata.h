@@ -1,8 +1,6 @@
 #ifndef __hemlock_mod_metadata_hpp
 #define __hemlock_mod_metadata_hpp
 
-#include "io/serialisation.hpp"
-
 namespace hemlock {
     namespace mod {
         // TODO(Matthew): UUID? Can assign a hashable ID at runtime.
@@ -10,6 +8,10 @@ namespace hemlock {
     }  // namespace mod
 }  // namespace hemlock
 namespace hmod = hemlock::mod;
+
+H_DECL_STRUCT_WITH_SERIALISATION(
+    hemlock::mod, ModCompatibility, (id, hmod::ModID), (versions, hemlock::Versions)
+)
 
 H_DECL_STRUCT_WITH_SERIALISATION(
     hemlock::mod,
