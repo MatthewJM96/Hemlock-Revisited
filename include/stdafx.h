@@ -109,6 +109,9 @@
 #include "basic_concepts.hpp"
 #include "types.hpp"
 
+// Our Semantic Versioning.
+#include "semver.h"
+
 // Our Timers.
 #include "timing.h"
 

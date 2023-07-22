@@ -74,6 +74,10 @@ public:
         std::cout << "Sizing kind: " << static_cast<ui32>(test_union.kind)
                   << " with scaling: " << test_union.scaling[0] << " "
                   << test_union.scaling[1] << std::endl;
+
+        hemlock::SemanticVersion ver{};
+        ver.load("1.0.1-alpha.beta+1222");
+        std::cout << ver.c_str() << std::endl;
     }
 
     virtual void update(hemlock::FrameTime) override {

@@ -181,6 +181,7 @@ if (CMAKE_BUILD_TYPE STREQUAL "Debug")
 endif()
 
 add_executable(Hemlock_Revisited
+    "${PROJECT_SOURCE_DIR}/src/semver.cpp"
     "${PROJECT_SOURCE_DIR}/src/stdafx.cpp"
     "${PROJECT_SOURCE_DIR}/src/timing.cpp"
     "${PROJECT_SOURCE_DIR}/src/app/app_base.cpp"
@@ -208,6 +209,7 @@ add_executable(Hemlock_Revisited
     "${PROJECT_SOURCE_DIR}/src/io/yaml/yaml.cpp"
     "${PROJECT_SOURCE_DIR}/src/mod/environment.cpp"
     "${PROJECT_SOURCE_DIR}/src/mod/metadata.cpp"
+    "${PROJECT_SOURCE_DIR}/src/mod/mod.cpp"
     "${PROJECT_SOURCE_DIR}/src/mod/registry.cpp"
     "${PROJECT_SOURCE_DIR}/src/script/lua/continuable_function.cpp"
     "${PROJECT_SOURCE_DIR}/src/script/lua/lua_function.cpp"
