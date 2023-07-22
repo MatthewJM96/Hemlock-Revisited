@@ -38,20 +38,214 @@ hemlock::SemanticVersion::SemanticVersion(
     // Empty.
 }
 
-hemlock::SemanticVersion::SemanticVersion(
-    ui32 major, ui32 minor, ui32 patch, const char* build
-) :
-    m_major(major),
-    m_minor(minor),
-    m_patch(patch),
-    m_pre_release(nullptr),
-    m_build(build) {
-    // Empty.
-}
-
 hemlock::SemanticVersion::~SemanticVersion() {
     if (m_pre_release) delete[] m_pre_release;
     if (m_build) delete[] m_build;
+}
+
+std::strong_ordering hemlock::SemanticVersion::operator<=>(const SemanticVersion& rhs
+) const {
+    if (m_major > rhs.m_major) {
+        return std::strong_ordering::greater;
+    } else if (m_major < rhs.m_major) {
+        return std::strong_ordering::less;
+    }
+
+    if (m_minor > rhs.m_minor) {
+        return std::strong_ordering::greater;
+    } else if (m_minor < rhs.m_minor) {
+        return std::strong_ordering::less;
+    }
+
+    if (m_patch > rhs.m_patch) {
+        return std::strong_ordering::greater;
+    } else if (m_patch < rhs.m_patch) {
+        return std::strong_ordering::less;
+    }
+
+    PartIterator lhs_it, rhs_it;
+
+    for (lhs_it = pre_release_begin(), rhs_it = rhs.pre_release_begin();
+         (lhs_it < pre_release_end()) || (rhs_it < rhs.pre_release_end());
+         ++lhs_it, ++rhs_it)
+    {
+        auto [lhs_part, lhs_len] = *lhs_it;
+        auto [rhs_part, rhs_len] = *rhs_it;
+
+        i32 part_cmp
+            = std::strncmp(lhs_part, rhs_part, lhs_len < rhs_len ? lhs_len : rhs_len);
+
+        if (part_cmp > 0) {
+            return std::strong_ordering::greater;
+        } else if (part_cmp < 0) {
+            return std::strong_ordering::less;
+        }
+    }
+
+    for (lhs_it = build_begin(), rhs_it = rhs.build_begin();
+         (lhs_it < build_end()) || (rhs_it < rhs.build_end());
+         ++lhs_it, ++rhs_it)
+    {
+        auto [lhs_part, lhs_len] = *lhs_it;
+        auto [rhs_part, rhs_len] = *rhs_it;
+
+        i32 part_cmp
+            = std::strncmp(lhs_part, rhs_part, lhs_len < rhs_len ? lhs_len : rhs_len);
+
+        if (part_cmp > 0) {
+            return std::strong_ordering::greater;
+        } else if (part_cmp < 0) {
+            return std::strong_ordering::less;
+        }
+    }
+
+    return std::strong_ordering::equal;
+}
+
+hemlock::SemanticVersion::PartIterator::PartIterator() :
+    m_target(nullptr), m_offset(0), m_length(0) {
+    // Empty.
+}
+
+hemlock::SemanticVersion::PartIterator::PartIterator(
+    const SemanticVersion& semver,
+    PartIteratorTarget     target,
+    size_t                 offset,
+    size_t                 length
+) :
+    m_offset(offset), m_length(length) {
+    if (target == PartIteratorTarget::PRE_RELEASE) {
+        m_target = semver.m_pre_release;
+    } else {
+        m_target = semver.m_build;
+    }
+
+    m_target_length = std::strlen(m_target);
+}
+
+std::partial_ordering
+hemlock::SemanticVersion::PartIterator::operator<=>(const PartIterator& rhs) const {
+    if (m_target != rhs.m_target) return std::partial_ordering::unordered;
+
+    if (m_offset < rhs.m_offset) {
+        return std::partial_ordering::less;
+    } else if (m_offset > rhs.m_offset) {
+        return std::partial_ordering::greater;
+    }
+
+    return std::partial_ordering::equivalent;
+}
+
+hemlock::SemanticVersion::PartIterator&
+hemlock::SemanticVersion::PartIterator::operator++() {
+#if DEBUG
+    assert(m_offset + m_length <= m_target_length);
+#endif
+
+    auto it = std::find(
+        m_target + m_offset + m_length + 1, m_target + m_target_length, '.'
+    );
+    auto new_part_end = it - m_target;
+
+    m_offset += m_length + 1;
+    m_length = new_part_end - m_offset;
+
+    return *this;
+}
+
+hemlock::SemanticVersion::PartIterator
+hemlock::SemanticVersion::PartIterator::operator++(int) {
+#if DEBUG
+    assert(m_offset + m_length <= m_target_length);
+#endif
+
+    auto it = std::find(
+        m_target + m_offset + m_length + 1, m_target + m_target_length, '.'
+    );
+    auto new_part_end = it - m_target;
+
+    PartIterator tmp{};
+
+    tmp.m_target        = m_target;
+    tmp.m_target_length = m_target_length;
+
+    tmp.m_offset = m_offset + m_length + 1;
+    tmp.m_length = new_part_end - tmp.m_offset;
+
+    return tmp;
+}
+
+hemlock::SemanticVersion::PartIterator&
+hemlock::SemanticVersion::PartIterator::operator--() {
+#if DEBUG
+    assert(m_offset >= 0);
+#endif
+
+    if (m_offset == 0) {
+        m_offset = -1;
+        return *this;
+    }
+
+    auto it = std::find(
+        std::reverse_iterator<const char*>(m_target + m_offset - 1),
+        std::reverse_iterator<const char*>(m_target),
+        '.'
+    );
+    auto new_part_begin = (&*it) - m_target;
+
+    if (new_part_begin < 0) {
+        m_length = m_offset - 1;
+        m_offset = 0;
+    } else {
+        m_length = m_offset - new_part_begin - 2;
+        m_offset = new_part_begin + 1;
+    }
+
+    return *this;
+}
+
+hemlock::SemanticVersion::PartIterator
+hemlock::SemanticVersion::PartIterator::operator--(int) {
+#if DEBUG
+    assert(m_offset >= 0);
+#endif
+
+    if (m_offset == 0) {
+        PartIterator tmp{};
+
+        tmp.m_target        = m_target;
+        tmp.m_target_length = m_target_length;
+        tmp.m_offset        = -1;
+
+        return tmp;
+    }
+
+    auto it = std::find(
+        std::reverse_iterator<const char*>(m_target + m_offset - 1),
+        std::reverse_iterator<const char*>(m_target),
+        '.'
+    );
+    auto new_part_begin = (&*it) - m_target;
+
+    PartIterator tmp{};
+
+    tmp.m_target        = m_target;
+    tmp.m_target_length = m_target_length;
+
+    if (new_part_begin < 0) {
+        tmp.m_length = m_offset - 1;
+        tmp.m_offset = 0;
+    } else {
+        tmp.m_length = tmp.m_offset - new_part_begin - 2;
+        tmp.m_offset = new_part_begin + 1;
+    }
+
+    return tmp;
+}
+
+std::tuple<const char*, size_t>
+hemlock::SemanticVersion::PartIterator::operator*() const {
+    return { m_target + m_offset, m_length };
 }
 
 bool hemlock::SemanticVersion::load(const std::string& str) {
@@ -71,6 +265,44 @@ void hemlock::SemanticVersion::reset() {
     if (m_build) delete[] m_build;
 
     *this = {};
+}
+
+hemlock::SemanticVersion::PartIterator
+hemlock::SemanticVersion::pre_release_begin() const {
+    if (!m_pre_release)
+        return PartIterator(*this, PartIteratorTarget::PRE_RELEASE, 0, 0);
+
+    auto it = std::find(m_pre_release, m_pre_release + std::strlen(m_pre_release), '.');
+    size_t first_part_len = it - m_pre_release;
+
+    return PartIterator(*this, PartIteratorTarget::PRE_RELEASE, 0, first_part_len);
+}
+
+hemlock::SemanticVersion::PartIterator
+hemlock::SemanticVersion::pre_release_end() const {
+    if (!m_pre_release)
+        return PartIterator(*this, PartIteratorTarget::PRE_RELEASE, 0, 0);
+
+    size_t pre_release_len = std::strlen(m_pre_release);
+
+    return PartIterator(*this, PartIteratorTarget::PRE_RELEASE, pre_release_len + 1, 0);
+}
+
+hemlock::SemanticVersion::PartIterator hemlock::SemanticVersion::build_begin() const {
+    if (!m_build) return PartIterator(*this, PartIteratorTarget::BUILD, 0, 0);
+
+    auto   it             = std::find(m_build, m_build + std::strlen(m_build), '.');
+    size_t first_part_len = it - m_build;
+
+    return PartIterator(*this, PartIteratorTarget::BUILD, 0, first_part_len);
+}
+
+hemlock::SemanticVersion::PartIterator hemlock::SemanticVersion::build_end() const {
+    if (!m_build) return PartIterator(*this, PartIteratorTarget::BUILD, 0, 0);
+
+    size_t build_len = std::strlen(m_build);
+
+    return PartIterator(*this, PartIteratorTarget::BUILD, build_len + 1, 0);
 }
 
 const char* hemlock::SemanticVersion::c_str() const {

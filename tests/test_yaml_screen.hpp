@@ -76,8 +76,68 @@ public:
                   << test_union.scaling[1] << std::endl;
 
         hemlock::SemanticVersion ver{};
-        ver.load("1.0.1-alpha.beta+1222");
-        std::cout << ver.c_str() << std::endl;
+        ver.load("1.0.1-alpha.beta.gamma+1222");
+        std::cout << "Ver 1: " << ver.c_str() << std::endl;
+
+        for (auto it = ver.pre_release_begin(); it < ver.pre_release_end(); ++it) {
+            auto [str, len] = *it;
+
+            std::cout << str << " - " << len << std::endl;
+        }
+
+        for (auto it = --ver.pre_release_end(); it >= ver.pre_release_begin(); --it) {
+            auto [str, len] = *it;
+
+            std::cout << str << " - " << len << std::endl;
+        }
+
+        hemlock::SemanticVersion ver2{};
+        ver2.load("1.0.2-alpha.beta.gamma+1222");
+        std::cout << "Ver 2: " << ver2.c_str() << std::endl;
+
+        hemlock::SemanticVersion ver3{};
+        ver3.load("1.0.2-alpha.beta.gamma+1212");
+        std::cout << "Ver 3: " << ver3.c_str() << std::endl;
+
+        hemlock::SemanticVersion ver4{};
+        ver4.load("1.0.2-beta.gamma+1212");
+        std::cout << "Ver 4: " << ver4.c_str() << std::endl;
+
+        if (ver < ver2) {
+            std::cout << ver.c_str() << " < " << ver2.c_str() << std::endl;
+        } else if (ver > ver2) {
+            std::cout << ver.c_str() << " > " << ver2.c_str() << std::endl;
+        }
+
+        if (ver < ver3) {
+            std::cout << ver.c_str() << " < " << ver3.c_str() << std::endl;
+        } else if (ver > ver3) {
+            std::cout << ver.c_str() << " > " << ver3.c_str() << std::endl;
+        }
+
+        if (ver < ver4) {
+            std::cout << ver.c_str() << " < " << ver4.c_str() << std::endl;
+        } else if (ver > ver4) {
+            std::cout << ver.c_str() << " > " << ver4.c_str() << std::endl;
+        }
+
+        if (ver2 < ver3) {
+            std::cout << ver2.c_str() << " < " << ver3.c_str() << std::endl;
+        } else if (ver2 > ver3) {
+            std::cout << ver2.c_str() << " > " << ver3.c_str() << std::endl;
+        }
+
+        if (ver2 < ver4) {
+            std::cout << ver2.c_str() << " < " << ver4.c_str() << std::endl;
+        } else if (ver2 > ver4) {
+            std::cout << ver2.c_str() << " > " << ver4.c_str() << std::endl;
+        }
+
+        if (ver3 < ver4) {
+            std::cout << ver3.c_str() << " < " << ver4.c_str() << std::endl;
+        } else if (ver3 > ver4) {
+            std::cout << ver3.c_str() << " > " << ver4.c_str() << std::endl;
+        }
     }
 
     virtual void update(hemlock::FrameTime) override {

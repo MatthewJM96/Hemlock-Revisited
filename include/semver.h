@@ -18,8 +18,44 @@ namespace hemlock {
             const char* pre_release,
             const char* build
         );
-        SemanticVersion(ui32 major, ui32 minor, ui32 patch, const char* build);
         ~SemanticVersion();
+
+        std::strong_ordering operator<=>(const SemanticVersion& rhs) const;
+
+        enum class PartIteratorTarget {
+            PRE_RELEASE,
+            BUILD
+        };
+
+        class PartIterator {
+            friend class SemanticVersion;
+        public:
+            PartIterator();
+            PartIterator(
+                const SemanticVersion& semver,
+                PartIteratorTarget     target,
+                size_t                 offset,
+                size_t                 length
+            );
+
+            ~PartIterator() { /* Empty. */
+            }
+
+            std::partial_ordering operator<=>(const PartIterator& rhs) const;
+
+            PartIterator& operator++();
+            PartIterator  operator++(int);
+
+            PartIterator& operator--();
+            PartIterator  operator--(int);
+
+            std::tuple<const char*, size_t> operator*() const;
+        protected:
+            const char* m_target;
+            i64         m_target_length;
+
+            i64 m_offset, m_length;
+        };
 
         bool load(const std::string& str);
         bool load(const char* c_str);
@@ -34,7 +70,13 @@ namespace hemlock {
 
         const char* pre_release() const { return m_pre_release; }
 
+        PartIterator pre_release_begin() const;
+        PartIterator pre_release_end() const;
+
         const char* build() const { return m_build; }
+
+        PartIterator build_begin() const;
+        PartIterator build_end() const;
 
         const char* c_str() const;
         std::string string() const;
