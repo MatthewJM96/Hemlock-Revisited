@@ -13,7 +13,7 @@ H_DECL_STRUCT_WITH_SERIALISATION(
 )
 
 H_DECL_UNION_WITH_SERIALISATION(
-    hemlock::mod,
+    hemlock,
     Versions,
     ui8,
     (H_NON_POD_TYPE(), LIST, (list, hemlock::VersionList)),
