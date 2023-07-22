@@ -41,8 +41,8 @@ namespace hemlock {
             void         init(ModRegistry&& registry, LoadOrder&& load_order);
             virtual void dispose();
 
-            virtual void activate_environment();
-            virtual void deactivate_environment();
+            virtual void activate();
+            virtual void deactivate();
 
             virtual void update(FrameTime time);
 

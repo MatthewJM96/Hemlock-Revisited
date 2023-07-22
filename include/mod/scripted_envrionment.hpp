@@ -32,8 +32,8 @@ namespace hemlock {
 
             void dispose() override final;
 
-            void activate_environment() override final;
-            void deactivate_environment() override final;
+            void activate() override final;
+            void deactivate() override final;
 
             void update(FrameTime time) override final;
 

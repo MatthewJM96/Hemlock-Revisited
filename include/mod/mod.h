@@ -12,7 +12,7 @@ namespace hemlock {
             Mod();
             ~Mod();
 
-            void update(FrameTime time);
+            virtual void update(FrameTime time);
         protected:
             ModMetadata m_metadata;
 

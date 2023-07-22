@@ -29,7 +29,7 @@ void hmod::ModEnvironment::init(ModRegistry&& registry, LoadOrder&& load_order) 
 }
 
 void hmod::ModEnvironment::dispose() {
-    deactivate_environment();
+    deactivate();
 
     m_registry   = {};
     m_load_order = {};
@@ -37,9 +37,16 @@ void hmod::ModEnvironment::dispose() {
     std::vector<Mod>().swap(m_mods);
 }
 
-void hmod::ModEnvironment::activate_environment() { }
+void hmod::ModEnvironment::activate() {
+    // Load each mod's metadata.
 
-void hmod::ModEnvironment::deactivate_environment() { }
+    // Validate load order.
+
+    // For each mod, run load sequence (TBD)
+    //   Load in any static data that should be preloaded.
+}
+
+void hmod::ModEnvironment::deactivate() { }
 
 void hmod::ModEnvironment::update(FrameTime time) { }
 

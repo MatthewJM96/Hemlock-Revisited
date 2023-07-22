@@ -26,10 +26,24 @@ void hmod::ScriptModEnvironment<ScriptEnvironment>::dispose() {
 }
 
 template <typename ScriptEnvironment>
-void hmod::ScriptModEnvironment<ScriptEnvironment>::activate_environment() { }
+void hmod::ScriptModEnvironment<ScriptEnvironment>::activate() {
+    // Load each mod's metadata.
+
+    // Validate load order.
+
+    // For each mod, run load sequence (TBD)
+    //   Load in any static data that should be preloaded.
+    //   Run an on_load (TBN) script of that mod.
+    //     Mod should register various functions including its update function in this.
+    //       Some functions like update function if not registered will be checked for
+    //       as some standardised name. Mod invalid if this does not exist and metadata
+    //       suggests it has an updatable script component.
+
+    // Activation successful if all mods completed load sequence correctly.
+}
 
 template <typename ScriptEnvironment>
-void hmod::ScriptModEnvironment<ScriptEnvironment>::deactivate_environment() { }
+void hmod::ScriptModEnvironment<ScriptEnvironment>::deactivate() { }
 
 template <typename ScriptEnvironment>
 void hmod::ScriptModEnvironment<ScriptEnvironment>::update(FrameTime time) { }
