@@ -48,7 +48,7 @@ void hmod::ModEnvironment::activate() {
 
 void hmod::ModEnvironment::deactivate() { }
 
-void hmod::ModEnvironment::update(FrameTime time) { }
+void hmod::ModEnvironment::update(FrameTime time [[maybe_unused]]) { }
 
 bool hmod::ModEnvironment::set_load_order(LoadOrder&& load_order) {
     if (m_is_active) return false;
