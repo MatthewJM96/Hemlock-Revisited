@@ -143,6 +143,16 @@ public:
         std::chrono::sys_seconds datetime
             = datetime_node.as<std::chrono::sys_seconds>();
         std::cout << std::format("Datetime: {0:%F}T{0:%T%z}.", datetime) << std::endl;
+
+        YAML::Node mod_metadata_node = YAML::Load(
+            "_version: 1\n_reserved: 0\nid: 1\nname: SomeMod\nauthors:\n  - Matthew\n  "
+            "- Jeff\ndescription: a very good mod\nversion: 0.0.1\nlast_updated: "
+            "1970-01-01T00:00:00+0000"
+        );
+        hemlock::VersionedFormat vf = mod_metadata_node.as<hemlock::VersionedFormat>();
+        hmod::ModMetadata        metadata = mod_metadata_node.as<hmod::ModMetadata>();
+
+        std::cout << vf._version << std::endl;
     }
 
     virtual void update(hemlock::FrameTime) override {

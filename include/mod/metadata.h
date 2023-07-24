@@ -22,9 +22,8 @@ H_DECL_STRUCT_WITH_SERIALISATION(
     (name, std::string),
     (authors, std::vector<std::string>),
     (description, std::string),
-    (version, hemlock::SemanticVersion)
-    // Last updated?
-    // Version?
+    (version, hemlock::SemanticVersion),
+    (last_updated, std::chrono::sys_seconds)
 )
 
 #endif  // __hemlock_mod_metadata_hpp
