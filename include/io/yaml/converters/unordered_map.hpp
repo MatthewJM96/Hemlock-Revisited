@@ -1,5 +1,5 @@
-#ifndef __hemlock_io_yaml_converters_std_hpp
-#define __hemlock_io_yaml_converters_std_hpp
+#ifndef __hemlock_io_yaml_converters_unordered_map_hpp
+#define __hemlock_io_yaml_converters_unordered_map_hpp
 
 #include "io/filesystem.hpp"
 
@@ -36,4 +36,4 @@ namespace YAML {
     };
 }  // namespace YAML
 
-#endif  // __hemlock_io_yaml_converters_std_hpp
+#endif  // __hemlock_io_yaml_converters_unordered_map_hpp
