@@ -3,6 +3,10 @@
 #include "version/validate.h"
 
 H_DEF_STRUCT_WITH_SERIALISATION(
+    hemlock, VersionedFormat, (_version, ui16), (_reserved, ui16)
+)
+
+H_DEF_STRUCT_WITH_SERIALISATION(
     hemlock, VersionList, (versions, std::vector<hemlock::SemanticVersion>),
 )
 

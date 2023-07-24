@@ -5,7 +5,7 @@
 H_DEF_STRUCT_WITH_SERIALISATION(
     hemlock::mod,
     LoadOrder,
-    (_load_order_version, ui16),
+    (_version, ui16),
     (_reserved, ui16),
     (id, hmod::LoadOrderID),
     (name, std::string),

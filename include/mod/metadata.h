@@ -16,7 +16,7 @@ H_DECL_STRUCT_WITH_SERIALISATION(
 H_DECL_STRUCT_WITH_SERIALISATION(
     hemlock::mod,
     ModMetadata,
-    (_metadata_version, ui16),
+    (_version, ui16),
     (_reserved, ui16),
     (id, hmod::ModID),
     (name, std::string),
