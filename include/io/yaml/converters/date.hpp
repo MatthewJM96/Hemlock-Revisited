@@ -52,19 +52,21 @@ namespace YAML {
         }
     };
 
-    template <>
-    struct convert<std::chrono::time_point<std::chrono::system_clock>> {
+    template <typename Duration>
+    struct convert<std::chrono::time_point<std::chrono::system_clock, Duration>> {
         static Node
-        encode(const std::chrono::time_point<std::chrono::system_clock>& time) {
+        encode(const std::chrono::time_point<std::chrono::system_clock, Duration>& time
+        ) {
             std::stringstream ss;
 
-            ss << std::format("%FT%T%z", time);
+            ss << std::format("{0:%F}T{0:%T%z}", time);
 
             return Node{ ss.str() };
         }
 
         static bool decode(
-            const Node& node, std::chrono::time_point<std::chrono::system_clock>& time
+            const Node&                                                   node,
+            std::chrono::time_point<std::chrono::system_clock, Duration>& time
         ) {
             if (!node.IsScalar()) {
                 return false;

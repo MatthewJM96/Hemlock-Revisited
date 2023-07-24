@@ -139,10 +139,10 @@ public:
             std::cout << ver3.c_str() << " > " << ver4.c_str() << std::endl;
         }
 
-        YAML::Node datetime_node = YAML::Load("'1970-01-01T00:00+0000'");
-        std::chrono::time_point<std::chrono::system_clock> datetime
-            = datetime_node.as<std::chrono::time_point<std::chrono::system_clock>>();
-        std::cout << std::format("Datetime: {0:%F}T{0:%R%z}.", datetime) << std::endl;
+        YAML::Node               datetime_node = YAML::Load("1970-01-01T00:00:00+0000");
+        std::chrono::sys_seconds datetime
+            = datetime_node.as<std::chrono::sys_seconds>();
+        std::cout << std::format("Datetime: {0:%F}T{0:%T%z}.", datetime) << std::endl;
     }
 
     virtual void update(hemlock::FrameTime) override {
