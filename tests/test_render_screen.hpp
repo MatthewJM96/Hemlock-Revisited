@@ -133,7 +133,7 @@ public:
             "Hello, world!",
             f32v4{ 300.0f, 300.0f, 1000.0f, 1000.0f },
             f32v4{ 295.0f, 295.0f, 1010.0f, 1010.0f },
-            hg::f::StringSizing{ hg::f::StringSizingKind::SCALED, { f32v2{ 1.0f } } },
+            hg::f::StringSizing{ { f32v2{ 1.0f } } },
             colour4{ 0, 0, 0, 255 },
             "fonts/Orbitron-Regular.ttf",
             hg::f::TextAlign::TOP_LEFT,

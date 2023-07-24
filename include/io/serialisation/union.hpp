@@ -26,6 +26,9 @@
 #if !defined(H_FIELD_NAME)
 #  define H_FIELD_NAME(NAME, TYPE) NAME
 #endif  //! defined(H_FIELD_NAME)
+#if !defined(H_FIELD_NAME_MOD)
+#  define H_FIELD_NAME_MOD(NAME, TYPE) NAME##_
+#endif  //! defined(H_FIELD_NAME_MOD)
 #if !defined(H_FIELD_NAME_STR)
 #  define H_FIELD_NAME_STR(NAME, TYPE) #NAME
 #endif  //! defined(H_FIELD_NAME_STR)
@@ -74,6 +77,114 @@
 #    define H_INDIRECT_WRITE_UNION_ENTRY(ARGS) H_WRITE_UNION_ENTRY ARGS
 #  endif  // !defined(H_INDIRECT_WRITE_UNION_ENTRY)
 
+#  if !defined(H_DEFAULT_INITIALISE_NON_POD_TYPE_ENTRY)
+#    define H_DEFAULT_INITIALISE_NON_POD_TYPE_ENTRY(FIELD_DATA)                        \
+      H_FIELD_NAME FIELD_DATA({})
+#  endif  // !defined(H_DEFAULT_INITIALISE_NON_POD_TYPE_ENTRY)
+
+#  if !defined(H_DEFAULT_INITIALISE_POD_STRUCT_ENTRY)
+#    define H_DEFAULT_INITIALISE_POD_STRUCT_ENTRY(...)                                 \
+      MAP(H_DEFAULT_INITIALISE_NON_POD_TYPE_ENTRY, COMMA, __VA_ARGS__)
+#  endif  // !defined(H_DEFAULT_INITIALISE_POD_STRUCT_ENTRY)
+
+#  if !defined(H_DEFAULT_INITIALISE_FIELDS)
+#    define H_DEFAULT_INITIALISE_FIELDS(IS_POD_STRUCT, NAME, ...)                      \
+      IF_ELSE(BOOL(IS_POD_STRUCT))                                                     \
+      (H_DEFAULT_INITIALISE_POD_STRUCT_ENTRY(__VA_ARGS__),                             \
+       H_DEFAULT_INITIALISE_NON_POD_TYPE_ENTRY(__VA_ARGS__))
+#  endif  // !defined(H_DEFAULT_INITIALISE_FIELDS)
+
+#  if !defined(H_INDIRECT_DEFAULT_INITIALISE_FIELDS)
+#    define H_INDIRECT_DEFAULT_INITIALISE_FIELDS(ARGS) H_DEFAULT_INITIALISE_FIELDS ARGS
+#  endif  // !defined(H_INDIRECT_DEFAULT_INITIALISE_FIELDS)
+
+#  if !defined(H_WRITE_UNION_FIELD_COPY)
+#    define H_WRITE_UNION_FIELD_COPY(FIELD_DATA)                                       \
+      H_FIELD_NAME FIELD_DATA = rhs.H_FIELD_NAME FIELD_DATA;
+#  endif  // !defined(H_INDIRECT_WRITE_UNION_COPY)
+
+#  if !defined(H_WRITE_UNION_COPY)
+#    define H_WRITE_UNION_COPY(IS_POD_STRUCT, NAME, ...)                               \
+NAME:                                                                                  \
+{                                                                                      \
+MAP(H_WRITE_UNION_FIELD_COPY, EMPTY, __VA_ARGS__)                                      \
+break;                                                                                 \
+}
+#  endif  // !defined(H_WRITE_UNION_COPY)
+
+#  if !defined(H_INDIRECT_WRITE_UNION_COPY)
+#    define H_INDIRECT_WRITE_UNION_COPY(KIND_TYPE, ARGS)                               \
+      case KIND_TYPE ::H_WRITE_UNION_COPY ARGS
+#  endif  // !defined(H_INDIRECT_WRITE_UNION_COPY)
+
+#  if !defined(H_WRITE_UNION_FIELD_MOVE)
+#    define H_WRITE_UNION_FIELD_MOVE(FIELD_DATA)                                       \
+      H_FIELD_NAME FIELD_DATA                                                          \
+          = std::forward<H_FIELD_TYPE FIELD_DATA>(rhs.H_FIELD_NAME FIELD_DATA);
+#  endif  // !defined(H_INDIRECT_WRITE_UNION_MOVE)
+
+#  if !defined(H_WRITE_UNION_MOVE)
+#    define H_WRITE_UNION_MOVE(IS_POD_STRUCT, NAME, ...)                               \
+NAME:                                                                                  \
+{                                                                                      \
+MAP(H_WRITE_UNION_FIELD_MOVE, EMPTY, __VA_ARGS__)                                      \
+break;                                                                                 \
+}
+#  endif  // !defined(H_WRITE_UNION_MOVE)
+
+#  if !defined(H_INDIRECT_WRITE_UNION_MOVE)
+#    define H_INDIRECT_WRITE_UNION_MOVE(KIND_TYPE, ARGS)                               \
+      case KIND_TYPE ::H_WRITE_UNION_MOVE ARGS
+#  endif  // !defined(H_INDIRECT_WRITE_UNION_MOVE)
+
+#  if !defined(H_WRITE_UNION_NON_POD_TYPE_FIELD_CONSTRUCT_PARAMS)
+#    define H_WRITE_UNION_NON_POD_TYPE_FIELD_CONSTRUCT_PARAMS(FIELD_DATA)              \
+      H_FIELD_TYPE FIELD_DATA H_FIELD_NAME_MOD FIELD_DATA
+#  endif  // !defined(H_WRITE_UNION_NON_POD_TYPE_FIELD_CONSTRUCT_PARAMS)
+
+#  if !defined(H_WRITE_UNION_POD_STRUCT_FIELD_CONSTRUCT_PARAMS)
+#    define H_WRITE_UNION_POD_STRUCT_FIELD_CONSTRUCT_PARAMS(...)                       \
+      MAP(H_WRITE_UNION_NON_POD_TYPE_FIELD_CONSTRUCT_PARAMS, COMMA, __VA_ARGS__)
+#  endif  // !defined(H_WRITE_UNION_POD_STRUCT_FIELD_CONSTRUCT_PARAMS)
+
+#  if !defined(H_WRITE_UNION_NON_POD_TYPE_FIELD_CONSTRUCT_BODY_PART)
+#    define H_WRITE_UNION_NON_POD_TYPE_FIELD_CONSTRUCT_BODY_PART(FIELD_DATA)           \
+      H_FIELD_NAME FIELD_DATA = H_FIELD_NAME_MOD FIELD_DATA;
+#  endif  // !defined(H_WRITE_UNION_NON_POD_TYPE_FIELD_CONSTRUCT_BODY_PART)
+
+#  if !defined(H_WRITE_UNION_NON_POD_TYPE_FIELD_CONSTRUCT_BODY)
+#    define H_WRITE_UNION_NON_POD_TYPE_FIELD_CONSTRUCT_BODY(NAME, FIELD_DATA)          \
+      NAME;                                                                            \
+      H_WRITE_UNION_NON_POD_TYPE_FIELD_CONSTRUCT_BODY_PART(FIELD_DATA)
+#  endif  // !defined(H_WRITE_UNION_NON_POD_TYPE_FIELD_CONSTRUCT_BODY)
+
+#  if !defined(H_WRITE_UNION_POD_STRUCT_FIELD_CONSTRUCT_BODY)
+#    define H_WRITE_UNION_POD_STRUCT_FIELD_CONSTRUCT_BODY(NAME, ...)                   \
+      NAME;                                                                            \
+      MAP(H_WRITE_UNION_NON_POD_TYPE_FIELD_CONSTRUCT_BODY_PART, EMPTY, __VA_ARGS__)
+#  endif  // !defined(H_WRITE_UNION_POD_STRUCT_FIELD_CONSTRUCT_BODY)
+
+#  if !defined(H_WRITE_UNION_FIELD_CONSTRUCT_PARAMS)
+#    define H_WRITE_UNION_FIELD_CONSTRUCT_PARAMS(IS_POD_STRUCT, NAME, ...)             \
+      IF_ELSE(BOOL(IS_POD_STRUCT))                                                     \
+      (H_WRITE_UNION_POD_STRUCT_FIELD_CONSTRUCT_PARAMS(__VA_ARGS__),                   \
+       H_WRITE_UNION_NON_POD_TYPE_FIELD_CONSTRUCT_PARAMS(__VA_ARGS__))
+#  endif  // !defined(H_WRITE_UNION_FIELD_CONSTRUCT_PARAMS)
+
+#  if !defined(H_WRITE_UNION_FIELD_CONSTRUCT_BODY)
+#    define H_WRITE_UNION_FIELD_CONSTRUCT_BODY(IS_POD_STRUCT, NAME, ...)               \
+      IF_ELSE(BOOL(IS_POD_STRUCT))                                                     \
+      (H_WRITE_UNION_POD_STRUCT_FIELD_CONSTRUCT_BODY(NAME, __VA_ARGS__),               \
+       H_WRITE_UNION_NON_POD_TYPE_FIELD_CONSTRUCT_BODY(NAME, __VA_ARGS__))
+#  endif  // !defined(H_WRITE_UNION_FIELD_CONSTRUCT_BODY)
+
+#  if !defined(H_INDIRECT_WRITE_UNION_FIELD_CONSTRUCT)
+#    define H_INDIRECT_WRITE_UNION_FIELD_CONSTRUCT(NAME, ARGS)                         \
+      NAME(H_WRITE_UNION_FIELD_CONSTRUCT_PARAMS ARGS) : NAME() {                       \
+        kind = NAME##Kind ::H_WRITE_UNION_FIELD_CONSTRUCT_BODY ARGS                    \
+      }
+#  endif  // !defined(H_INDIRECT_WRITE_UNION_FIELD_CONSTRUCT)
+
 /****************************************\
  * Serialisable union decl entry macro. *
 \****************************************/
@@ -84,6 +195,67 @@
           MAP(H_WRITE_UNION_ENTRY_KIND, EMPTY, __VA_ARGS__) SENTINEL                   \
       };                                                                               \
       struct NAME {                                                                    \
+        NAME() : H_INDIRECT_DEFAULT_INITIALISE_FIELDS(FIRST(__VA_ARGS__)) { }          \
+        NAME(const NAME& rhs) : NAME() {                                               \
+          if (rhs.kind == NAME##Kind::SENTINEL) {                                      \
+            kind = NAME##Kind::SENTINEL;                                               \
+            return;                                                                    \
+          }                                                                            \
+                                                                                       \
+          switch (rhs.kind) {                                                          \
+            BIND_MAP_2(                                                                \
+                H_INDIRECT_WRITE_UNION_COPY, CAT(NAME, Kind), EMPTY, __VA_ARGS__       \
+            )                                                                          \
+          }                                                                            \
+        }                                                                              \
+        NAME(NAME&& rhs) : NAME() {                                                    \
+          if (rhs.kind == NAME##Kind::SENTINEL) {                                      \
+            kind = NAME##Kind::SENTINEL;                                               \
+            return;                                                                    \
+          }                                                                            \
+                                                                                       \
+          switch (rhs.kind) {                                                          \
+            BIND_MAP_2(                                                                \
+                H_INDIRECT_WRITE_UNION_MOVE, CAT(NAME, Kind), EMPTY, __VA_ARGS__       \
+            )                                                                          \
+          }                                                                            \
+        }                                                                              \
+        BIND_MAP_2(H_INDIRECT_WRITE_UNION_FIELD_CONSTRUCT, NAME, EMPTY, __VA_ARGS__)   \
+        ~NAME() { }                                                                    \
+                                                                                       \
+        NAME& operator=(const NAME& rhs) {                                             \
+          *this = {};                                                                  \
+                                                                                       \
+          if (rhs.kind == NAME##Kind::SENTINEL) {                                      \
+            kind = NAME##Kind::SENTINEL;                                               \
+            return *this;                                                              \
+          }                                                                            \
+                                                                                       \
+          switch (rhs.kind) {                                                          \
+            BIND_MAP_2(                                                                \
+                H_INDIRECT_WRITE_UNION_COPY, CAT(NAME, Kind), EMPTY, __VA_ARGS__       \
+            )                                                                          \
+          }                                                                            \
+                                                                                       \
+          return *this;                                                                \
+        }                                                                              \
+        NAME& operator=(NAME&& rhs) {                                                  \
+          *this = {};                                                                  \
+                                                                                       \
+          if (rhs.kind == NAME##Kind::SENTINEL) {                                      \
+            kind = NAME##Kind::SENTINEL;                                               \
+            return *this;                                                              \
+          }                                                                            \
+                                                                                       \
+          switch (rhs.kind) {                                                          \
+            BIND_MAP_2(                                                                \
+                H_INDIRECT_WRITE_UNION_MOVE, CAT(NAME, Kind), EMPTY, __VA_ARGS__       \
+            )                                                                          \
+          }                                                                            \
+                                                                                       \
+          return *this;                                                                \
+        }                                                                              \
+                                                                                       \
         NAME##Kind kind;                                                               \
         union {                                                                        \
           MAP_2(H_INDIRECT_WRITE_UNION_ENTRY, EMPTY, __VA_ARGS__)                      \
