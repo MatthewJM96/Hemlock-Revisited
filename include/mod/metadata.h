@@ -9,9 +9,12 @@ namespace hemlock {
 }  // namespace hemlock
 namespace hmod = hemlock::mod;
 
-H_DECL_STRUCT_WITH_SERIALISATION(
-    hemlock::mod, ModCompatibility, (id, hmod::ModID), (versions, hemlock::Versions)
-)
+namespace hemlock {
+    namespace mod {
+        using ModCompatibilities
+            = std::unordered_map<hmod::ModID, std::optional<hemlock::Versions>>;
+    }
+}  // namespace hemlock
 
 H_DECL_STRUCT_WITH_SERIALISATION(
     hemlock::mod,
@@ -23,7 +26,13 @@ H_DECL_STRUCT_WITH_SERIALISATION(
     (authors, std::vector<std::string>),
     (description, std::string),
     (version, hemlock::SemanticVersion),
-    (last_updated, std::chrono::sys_seconds)
+    (last_updated, std::chrono::sys_seconds),
+    (hard_depends, std::optional<hmod::ModCompatibilities>),
+    (soft_depends, std::optional<hmod::ModCompatibilities>),
+    (hard_wanted_by, std::optional<hmod::ModCompatibilities>),
+    (soft_wanted_by, std::optional<hmod::ModCompatibilities>),
+    (compatible, std::optional<hmod::ModCompatibilities>),
+    (incompatible, std::optional<hmod::ModCompatibilities>)
 )
 
 #endif  // __hemlock_mod_metadata_hpp
