@@ -210,6 +210,7 @@ add_executable(Hemlock_Revisited
     "${PROJECT_SOURCE_DIR}/src/io/iomanager.cpp"
     "${PROJECT_SOURCE_DIR}/src/io/yaml/yaml.cpp"
     "${PROJECT_SOURCE_DIR}/src/mod/environment.cpp"
+    "${PROJECT_SOURCE_DIR}/src/mod/load_order.cpp"
     "${PROJECT_SOURCE_DIR}/src/mod/metadata.cpp"
     "${PROJECT_SOURCE_DIR}/src/mod/mod.cpp"
     "${PROJECT_SOURCE_DIR}/src/mod/registry.cpp"
