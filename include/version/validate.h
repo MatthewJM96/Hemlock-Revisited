@@ -16,6 +16,12 @@ H_DECL_STRUCT_WITH_SERIALISATION(
     (maximum, hemlock::SemanticVersion)
 )
 
+namespace hemlock {
+    struct VersionMinimum : public SemanticVersion { };
+
+    struct VersionMaximum : public SemanticVersion { };
+}  // namespace hemlock
+
 H_DECL_UNION_WITH_SERIALISATION(
     hemlock,
     Versions,
