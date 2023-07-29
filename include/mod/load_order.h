@@ -20,7 +20,13 @@ H_DECL_STRUCT_WITH_SERIALISATION(
 )
 
 H_DECL_ENUM_WITH_SERIALISATION(
-    hemlock::mod, LoadOrderState, ui8, VALID_ORDER, INVALID_ORDER, MISSING_MOD_METADATA
+    hemlock::mod,
+    LoadOrderState,
+    ui8,
+    VALID_ORDER,
+    INVALID_ORDER,
+    MISSING_MOD_METADATA,
+    MOD_COMPATIBILITY_VERSION_MISMATCH
 )
 
 namespace hemlock {
