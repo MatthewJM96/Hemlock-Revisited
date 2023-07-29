@@ -140,3 +140,15 @@ bool hemlock::overlaps(Versions a, Versions b) {
 
     return false;
 }
+
+bool hemlock::overlaps(SemanticVersion a, Versions b) {
+    Versions vers;
+    vers.kind = VersionsKind::LIST;
+    vers.list = { { a } };
+
+    return overlaps(vers, b);
+}
+
+bool hemlock::overlaps(Versions a, SemanticVersion b) {
+    return overlaps(b, a);
+}
