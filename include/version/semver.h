@@ -20,6 +20,7 @@ namespace hemlock {
         );
         ~SemanticVersion();
 
+        bool                 operator==(const SemanticVersion& rhs) const;
         std::strong_ordering operator<=>(const SemanticVersion& rhs) const;
 
         enum class PartIteratorTarget {

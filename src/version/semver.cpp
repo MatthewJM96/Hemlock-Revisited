@@ -43,6 +43,12 @@ hemlock::SemanticVersion::~SemanticVersion() {
     if (m_build) delete[] m_build;
 }
 
+bool hemlock::SemanticVersion::operator==(const SemanticVersion& rhs) const {
+    return (m_major == rhs.m_major) && (m_minor == rhs.m_minor)
+           && (m_patch == rhs.m_patch) && (m_pre_release == rhs.m_pre_release)
+           && (m_build == rhs.m_build);
+}
+
 std::strong_ordering hemlock::SemanticVersion::operator<=>(const SemanticVersion& rhs
 ) const {
     if (m_major > rhs.m_major) {
