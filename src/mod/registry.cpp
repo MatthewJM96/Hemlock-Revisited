@@ -4,8 +4,8 @@
 
 H_DEF_STRUCT_WITH_SERIALISATION(
     hemlock::mod,
-    ModRegistry,
+    ModDirectories,
     (_version, ui16),
     (_reserved, ui16),
-    (mods, hmod::ModRegistryEntries)
+    (mod_directories, std::vector<hio::fs::path>)
 )

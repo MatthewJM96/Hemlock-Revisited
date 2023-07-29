@@ -7,7 +7,7 @@ H_DEF_STRUCT_WITH_SERIALISATION(
     ModMetadata,
     (_version, ui16),
     (_reserved, ui16),
-    (id, hmod::ModID),
+    (id, boost::uuids::uuid),
     (name, std::string),
     (authors, std::vector<std::string>),
     (description, std::string),

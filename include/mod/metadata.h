@@ -1,27 +1,22 @@
-#ifndef __hemlock_mod_metadata_hpp
-#define __hemlock_mod_metadata_hpp
+#ifndef __hemlock_mod_metadata_h
+#define __hemlock_mod_metadata_h
 
 namespace hemlock {
     namespace mod {
-        // TODO(Matthew): UUID? Can assign a hashable ID at runtime.
-        using ModID = ui64;
+        using ModCompatibilities = std::unordered_map<
+            boost::uuids::uuid,
+            std::optional<hemlock::Versions>,
+            boost::hash<boost::uuids::uuid>>;
     }  // namespace mod
 }  // namespace hemlock
 namespace hmod = hemlock::mod;
-
-namespace hemlock {
-    namespace mod {
-        using ModCompatibilities
-            = std::unordered_map<hmod::ModID, std::optional<hemlock::Versions>>;
-    }
-}  // namespace hemlock
 
 H_DECL_STRUCT_WITH_SERIALISATION(
     hemlock::mod,
     ModMetadata,
     (_version, ui16),
     (_reserved, ui16),
-    (id, hmod::ModID),
+    (id, boost::uuids::uuid),
     (name, std::string),
     (authors, std::vector<std::string>),
     (description, std::string),
@@ -35,4 +30,4 @@ H_DECL_STRUCT_WITH_SERIALISATION(
     (incompatible, std::optional<hmod::ModCompatibilities>)
 )
 
-#endif  // __hemlock_mod_metadata_hpp
+#endif  // __hemlock_mod_metadata_h

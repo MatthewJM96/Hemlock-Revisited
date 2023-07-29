@@ -3,21 +3,25 @@
 
 #include "io/serialisation.hpp"
 
+#include "metadata.h"
 #include "mod.h"
-
-namespace hemlock {
-    namespace mod {
-        using ModRegistryEntries = std::unordered_map<hmod::ModID, hio::fs::path>;
-    }
-}  // namespace hemlock
-namespace hmod = hemlock::mod;
 
 H_DECL_STRUCT_WITH_SERIALISATION(
     hemlock::mod,
-    ModRegistry,
+    ModDirectories,
     (_version, ui16),
     (_reserved, ui16),
-    (mods, hmod::ModRegistryEntries)
+    (mod_directories, std::vector<hio::fs::path>)
 )
+
+namespace hemlock {
+    namespace mod {
+        using ModRegistry = std::unordered_map<
+            boost::uuids::uuid,
+            ModMetadata,
+            boost::hash<boost::uuids::uuid>>;
+    }
+}  // namespace hemlock
+namespace hmod = hemlock::mod;
 
 #endif  // __hemlock_mod_registry_hpp
