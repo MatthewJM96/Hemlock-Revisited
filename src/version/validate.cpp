@@ -108,6 +108,7 @@ bool hemlock::overlaps(Versions a, Versions b) {
                 default:
                     break;
             }
+            break;
         case VersionsKind::MINIMUM:
             switch (b.kind) {
                 case VersionsKind::LIST:
@@ -121,6 +122,7 @@ bool hemlock::overlaps(Versions a, Versions b) {
                 default:
                     break;
             }
+            break;
         case VersionsKind::MAXIMUM:
             switch (b.kind) {
                 case VersionsKind::LIST:
@@ -134,6 +136,7 @@ bool hemlock::overlaps(Versions a, Versions b) {
                 default:
                     break;
             }
+            break;
         default:
             break;
     }
