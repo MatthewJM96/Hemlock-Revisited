@@ -30,6 +30,12 @@
 #include <regex>
 #include <string>
 
+// UUID
+#define BOOST_UUID_NO_TYPE_TRAITS
+#include <boost/uuid/uuid.hpp>
+#include <boost/uuid/uuid_generators.hpp>
+#include <boost/uuid/uuid_io.hpp>
+
 // Generics
 #include <algorithm>
 #include <functional>
