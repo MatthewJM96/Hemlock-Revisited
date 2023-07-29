@@ -12,11 +12,11 @@
 \****************************************/
 
 #if !defined(H_POD_STRUCT)
-#  define H_POD_STRUCT 1
+#  define H_POD_STRUCT 3
 #endif  // !defined(H_POD_STRUCT)
 
 #if !defined(H_NON_POD_TYPE)
-#  define H_NON_POD_TYPE 0
+#  define H_NON_POD_TYPE 2
 #endif  // !defined(H_NON_POD_TYPE)
 
 /*************************************\
@@ -68,7 +68,7 @@
 
 #  if !defined(H_WRITE_UNION_ENTRY)
 #    define H_WRITE_UNION_ENTRY(IS_POD_STRUCT, NAME, ...)                              \
-      IF_ELSE(BOOL(IS_POD_STRUCT))                                                     \
+      PRIMED_IF_ELSE(PRIMED_BOOL(IS_POD_STRUCT))                                       \
       (H_WRITE_UNION_POD_STRUCT_ENTRY(__VA_ARGS__),                                    \
        H_WRITE_UNION_NON_POD_TYPE_ENTRY(__VA_ARGS__))
 #  endif  // !defined(H_WRITE_UNION_ENTRY)
@@ -89,7 +89,7 @@
 
 #  if !defined(H_DEFAULT_INITIALISE_FIELDS)
 #    define H_DEFAULT_INITIALISE_FIELDS(IS_POD_STRUCT, NAME, ...)                      \
-      IF_ELSE(BOOL(IS_POD_STRUCT))                                                     \
+      PRIMED_IF_ELSE(PRIMED_BOOL(IS_POD_STRUCT))                                       \
       (H_DEFAULT_INITIALISE_POD_STRUCT_ENTRY(__VA_ARGS__),                             \
        H_DEFAULT_INITIALISE_NON_POD_TYPE_ENTRY(__VA_ARGS__))
 #  endif  // !defined(H_DEFAULT_INITIALISE_FIELDS)
@@ -166,14 +166,14 @@ break;                                                                          
 
 #  if !defined(H_WRITE_UNION_FIELD_CONSTRUCT_PARAMS)
 #    define H_WRITE_UNION_FIELD_CONSTRUCT_PARAMS(IS_POD_STRUCT, NAME, ...)             \
-      IF_ELSE(BOOL(IS_POD_STRUCT))                                                     \
+      PRIMED_IF_ELSE(PRIMED_BOOL(IS_POD_STRUCT))                                       \
       (H_WRITE_UNION_POD_STRUCT_FIELD_CONSTRUCT_PARAMS(__VA_ARGS__),                   \
        H_WRITE_UNION_NON_POD_TYPE_FIELD_CONSTRUCT_PARAMS(__VA_ARGS__))
 #  endif  // !defined(H_WRITE_UNION_FIELD_CONSTRUCT_PARAMS)
 
 #  if !defined(H_WRITE_UNION_FIELD_CONSTRUCT_BODY)
 #    define H_WRITE_UNION_FIELD_CONSTRUCT_BODY(IS_POD_STRUCT, NAME, ...)               \
-      IF_ELSE(BOOL(IS_POD_STRUCT))                                                     \
+      PRIMED_IF_ELSE(PRIMED_BOOL(IS_POD_STRUCT))                                       \
       (H_WRITE_UNION_POD_STRUCT_FIELD_CONSTRUCT_BODY(NAME, __VA_ARGS__),               \
        H_WRITE_UNION_NON_POD_TYPE_FIELD_CONSTRUCT_BODY(NAME, __VA_ARGS__))
 #  endif  // !defined(H_WRITE_UNION_FIELD_CONSTRUCT_BODY)

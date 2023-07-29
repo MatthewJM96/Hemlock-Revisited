@@ -223,6 +223,14 @@
 #define PROBE()       ~, 1
 
 /**
+ * Primed version of IS_PROBE and PROBE useful as the unprimed version is used in
+ * deciding to exist MAP iterations, but sometimes we may want to switch between two
+ * actions on data being iterated over.
+ */
+#define PRIMED_IS_PROBE(...) SECOND(__VA_ARGS__, 2)
+#define PRIMED_PROBE()       ~, 3
+
+/**
  * Logical negation. 0 is defined as false and everything else as true.
  *
  * When 0, _NOT_0 will be found which evaluates to the PROBE. When 1 (or any other
@@ -234,10 +242,25 @@
 #define _NOT_0      PROBE()
 
 /**
+ * Primed version of NOT and _NOT_0 useful as the unprimed version is used in
+ * deciding to exist MAP iterations, but sometimes we may want to switch between two
+ * actions on data being iterated over.
+ */
+#define PRIMED_NOT(x, ...) PRIMED_IS_PROBE(CAT(_PRIMED_NOT_, x))
+#define _PRIMED_NOT_2      PRIMED_PROBE()
+
+/**
  * Macro version of C's famous "cast to bool" operator (i.e. !!) which takes
  * anything and casts it to 0 if it is 0 and 1 otherwise.
  */
 #define BOOL(x) NOT(NOT(x))
+
+/**
+ * Primed version of BOOL useful as the unprimed version is used in
+ * deciding to exist MAP iterations, but sometimes we may want to switch between two
+ * actions on data being iterated over.
+ */
+#define PRIMED_BOOL(x) PRIMED_NOT(PRIMED_NOT(x))
 
 /**
  * Logical OR. Simply performs a lookup.
@@ -278,6 +301,16 @@
 #define _IF_1(...) __VA_ARGS__
 
 /**
+ * Primed version of IF useful as the unprimed version is used in
+ * deciding to exist MAP iterations, but sometimes we may want to switch between two
+ * actions on data being iterated over.
+ */
+#define PRIMED_IF(c)  _PRIMED_IF(PRIMED_BOOL(c))
+#define _PRIMED_IF(c) CAT(_PRIMED_IF_, c)
+#define _PRIMED_IF_2(...)
+#define _PRIMED_IF_3(...) __VA_ARGS__
+
+/**
  * Macro if/else statement. Usage:
  *
  *   IF_ELSE(c)( \
@@ -291,6 +324,16 @@
 #define _IF_ELSE(c)      CAT(_IF_ELSE_, c)
 #define _IF_ELSE_0(t, f) f
 #define _IF_ELSE_1(t, f) t
+
+/**
+ * Primed version of IF_ELSE useful as the unprimed version is used in
+ * deciding to exist MAP iterations, but sometimes we may want to switch between two
+ * actions on data being iterated over.
+ */
+#define PRIMED_IF_ELSE(c)       _PRIMED_IF_ELSE(PRIMED_BOOL(c))
+#define _PRIMED_IF_ELSE(c)      CAT(_PRIMED_IF_ELSE_, c)
+#define _PRIMED_IF_ELSE_2(t, f) f
+#define _PRIMED_IF_ELSE_3(t, f) t
 
 /**
  * Macro which checks if it has any arguments. Returns '0' if there are no

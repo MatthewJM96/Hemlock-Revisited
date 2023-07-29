@@ -20,10 +20,10 @@ H_DECL_UNION_WITH_SERIALISATION(
     hemlock,
     Versions,
     ui8,
-    (H_NON_POD_TYPE(), LIST, (list, hemlock::VersionList)),
-    (H_NON_POD_TYPE(), RANGE, (range, hemlock::VersionRange)),
-    (H_NON_POD_TYPE(), MINIMUM, (minimum, hemlock::SemanticVersion)),
-    (H_NON_POD_TYPE(), MAXIMUM, (maximum, hemlock::SemanticVersion)),
+    (H_NON_POD_TYPE, LIST, (list, hemlock::VersionList)),
+    (H_NON_POD_TYPE, RANGE, (range, hemlock::VersionRange)),
+    (H_NON_POD_TYPE, MINIMUM, (minimum, hemlock::VersionMinimum)),
+    (H_NON_POD_TYPE, MAXIMUM, (maximum, hemlock::VersionMaximum))
 )
 
 #endif  // __hemlock_version_validate_h
