@@ -2,19 +2,6 @@
 
 #include "mod/environment.h"
 
-H_DEF_STRUCT_WITH_SERIALISATION(
-    hemlock::mod,
-    LoadOrder,
-    (_version, ui16),
-    (_reserved, ui16),
-    (id, hmod::LoadOrderID),
-    (name, std::string),
-    (mods, std::vector<hmod::ModID>),
-    (description, std::string)
-    // Last updated?
-    // Version?
-)
-
 hmod::ModEnvironment::ModEnvironment() :
     m_is_active(false), m_base_iom(nullptr) { /* Empty. */
 }

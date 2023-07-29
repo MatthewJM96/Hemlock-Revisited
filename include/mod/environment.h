@@ -1,32 +1,11 @@
-#ifndef __hemlock_mod_loader_order_h
-#define __hemlock_mod_loader_order_h
+#ifndef __hemlock_mod_environment_h
+#define __hemlock_mod_environment_h
 
 #include "io/iomanager.h"
-#include "io/serialisation.hpp"
 
+#include "load_order.h"
 #include "mod.h"
 #include "registry.h"
-
-namespace hemlock {
-    namespace mod {
-        // TODO(Matthew): UUID? Can assign a hashable ID at runtime.
-        using LoadOrderID = ui64;
-    }  // namespace mod
-}  // namespace hemlock
-namespace hmod = hemlock::mod;
-
-H_DECL_STRUCT_WITH_SERIALISATION(
-    hemlock::mod,
-    LoadOrder,
-    (_version, ui16),
-    (_reserved, ui16),
-    (id, hmod::LoadOrderID),
-    (name, std::string),
-    (mods, std::vector<hmod::ModID>),
-    (description, std::string)
-    // Last updated?
-    // Version?
-)
 
 namespace hemlock {
     namespace mod {
@@ -61,4 +40,4 @@ namespace hemlock {
 }  // namespace hemlock
 namespace hmod = hemlock::mod;
 
-#endif  // __hemlock_mod_loader_order_h
+#endif  // __hemlock_mod_environment_h
