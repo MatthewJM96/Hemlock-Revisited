@@ -96,4 +96,25 @@ namespace hemlock {
     };
 }  // namespace hemlock
 
+H_DECL_STRUCT_WITH_SERIALISATION(
+    hemlock, VersionedFormat, (_version, ui16), (_reserved, ui16)
+)
+
+H_DECL_STRUCT_WITH_SERIALISATION(
+    hemlock, VersionList, (versions, std::vector<hemlock::SemanticVersion>),
+)
+
+H_DECL_STRUCT_WITH_SERIALISATION(
+    hemlock,
+    VersionRange,
+    (minimum, hemlock::SemanticVersion),
+    (maximum, hemlock::SemanticVersion)
+)
+
+namespace hemlock {
+    struct VersionMinimum : public SemanticVersion { };
+
+    struct VersionMaximum : public SemanticVersion { };
+}  // namespace hemlock
+
 #endif  // __hemlock_version_semver_h

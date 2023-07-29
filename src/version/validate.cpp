@@ -1,5 +1,6 @@
 #include "stdafx.h"
 
+#include "version/semver.h"
 #include "version/validate.h"
 
 H_DEF_STRUCT_WITH_SERIALISATION(
