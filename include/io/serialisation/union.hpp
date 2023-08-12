@@ -105,16 +105,16 @@
 
 #  if !defined(H_WRITE_UNION_COPY)
 #    define H_WRITE_UNION_COPY(IS_POD_STRUCT, NAME, ...)                               \
-NAME:                                                                                  \
-{                                                                                      \
-MAP(H_WRITE_UNION_FIELD_COPY, EMPTY, __VA_ARGS__)                                      \
-break;                                                                                 \
-}
+      MAP(H_WRITE_UNION_FIELD_COPY, EMPTY, __VA_ARGS__)
 #  endif  // !defined(H_WRITE_UNION_COPY)
 
 #  if !defined(H_INDIRECT_WRITE_UNION_COPY)
 #    define H_INDIRECT_WRITE_UNION_COPY(KIND_TYPE, ARGS)                               \
-      case KIND_TYPE ::H_WRITE_UNION_COPY ARGS
+      case KIND_TYPE ::H_UNION_ENTRY_NAME ARGS:                                        \
+      {                                                                                \
+        kind = KIND_TYPE ::H_UNION_ENTRY_NAME ARGS;                                    \
+        H_WRITE_UNION_COPY                    ARGS break;                              \
+      }
 #  endif  // !defined(H_INDIRECT_WRITE_UNION_COPY)
 
 #  if !defined(H_WRITE_UNION_FIELD_MOVE)
@@ -125,16 +125,16 @@ break;                                                                          
 
 #  if !defined(H_WRITE_UNION_MOVE)
 #    define H_WRITE_UNION_MOVE(IS_POD_STRUCT, NAME, ...)                               \
-NAME:                                                                                  \
-{                                                                                      \
-MAP(H_WRITE_UNION_FIELD_MOVE, EMPTY, __VA_ARGS__)                                      \
-break;                                                                                 \
-}
+      MAP(H_WRITE_UNION_FIELD_MOVE, EMPTY, __VA_ARGS__)
 #  endif  // !defined(H_WRITE_UNION_MOVE)
 
 #  if !defined(H_INDIRECT_WRITE_UNION_MOVE)
 #    define H_INDIRECT_WRITE_UNION_MOVE(KIND_TYPE, ARGS)                               \
-      case KIND_TYPE ::H_WRITE_UNION_MOVE ARGS
+      case KIND_TYPE ::H_UNION_ENTRY_NAME ARGS:                                        \
+      {                                                                                \
+        kind = KIND_TYPE ::H_UNION_ENTRY_NAME ARGS;                                    \
+        H_WRITE_UNION_MOVE                    ARGS break;                              \
+      }
 #  endif  // !defined(H_INDIRECT_WRITE_UNION_MOVE)
 
 #  if !defined(H_WRITE_UNION_NON_POD_TYPE_FIELD_CONSTRUCT_PARAMS)
@@ -196,7 +196,7 @@ break;                                                                          
       };                                                                               \
       struct NAME {                                                                    \
         NAME() : H_INDIRECT_DEFAULT_INITIALISE_FIELDS(FIRST(__VA_ARGS__)) { }          \
-        NAME(const NAME& rhs) : NAME() {                                               \
+        NAME(const NAME& rhs) {                                                        \
           if (rhs.kind == NAME##Kind::SENTINEL) {                                      \
             kind = NAME##Kind::SENTINEL;                                               \
             return;                                                                    \
@@ -208,7 +208,7 @@ break;                                                                          
             )                                                                          \
           }                                                                            \
         }                                                                              \
-        NAME(NAME&& rhs) : NAME() {                                                    \
+        NAME(NAME&& rhs) {                                                             \
           if (rhs.kind == NAME##Kind::SENTINEL) {                                      \
             kind = NAME##Kind::SENTINEL;                                               \
             return;                                                                    \
@@ -224,8 +224,6 @@ break;                                                                          
         ~NAME() { }                                                                    \
                                                                                        \
         NAME& operator=(const NAME& rhs) {                                             \
-          *this = {};                                                                  \
-                                                                                       \
           if (rhs.kind == NAME##Kind::SENTINEL) {                                      \
             kind = NAME##Kind::SENTINEL;                                               \
             return *this;                                                              \
@@ -240,8 +238,6 @@ break;                                                                          
           return *this;                                                                \
         }                                                                              \
         NAME& operator=(NAME&& rhs) {                                                  \
-          *this = {};                                                                  \
-                                                                                       \
           if (rhs.kind == NAME##Kind::SENTINEL) {                                      \
             kind = NAME##Kind::SENTINEL;                                               \
             return *this;                                                              \
