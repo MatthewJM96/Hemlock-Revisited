@@ -16,10 +16,7 @@ H_DECL_STRUCT_WITH_SERIALISATION(
 
 namespace hemlock {
     namespace mod {
-        using ModRegistry = std::unordered_map<
-            boost::uuids::uuid,
-            ModMetadata,
-            boost::hash<boost::uuids::uuid>>;
+        using ModRegistry = UUIDMap<ModMetadata>;
     }
 }  // namespace hemlock
 namespace hmod = hemlock::mod;

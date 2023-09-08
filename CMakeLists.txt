@@ -22,7 +22,7 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
 endif()
 
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 option(HEMLOCK_USING_SDL "Whether Hemlock uses the SDL library." ON)
@@ -210,7 +210,12 @@ add_executable(Hemlock_Revisited
     "${PROJECT_SOURCE_DIR}/src/io/iomanager.cpp"
     "${PROJECT_SOURCE_DIR}/src/io/yaml/yaml.cpp"
     "${PROJECT_SOURCE_DIR}/src/mod/environment.cpp"
-    "${PROJECT_SOURCE_DIR}/src/mod/load_order.cpp"
+    "${PROJECT_SOURCE_DIR}/src/mod/load_order/load_order.cpp"
+    "${PROJECT_SOURCE_DIR}/src/mod/load_order/state.cpp"
+    "${PROJECT_SOURCE_DIR}/src/mod/load_order/validate/compatibility.cpp"
+    "${PROJECT_SOURCE_DIR}/src/mod/load_order/validate/consistency.cpp"
+    "${PROJECT_SOURCE_DIR}/src/mod/load_order/validate/cycle.cpp"
+    "${PROJECT_SOURCE_DIR}/src/mod/load_order/validate/order.cpp"
     "${PROJECT_SOURCE_DIR}/src/mod/metadata.cpp"
     "${PROJECT_SOURCE_DIR}/src/mod/mod.cpp"
     "${PROJECT_SOURCE_DIR}/src/mod/registry.cpp"

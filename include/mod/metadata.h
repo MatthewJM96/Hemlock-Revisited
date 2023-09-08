@@ -3,10 +3,7 @@
 
 namespace hemlock {
     namespace mod {
-        using ModCompatibilities = std::unordered_map<
-            boost::uuids::uuid,
-            std::optional<hemlock::Versions>,
-            boost::hash<boost::uuids::uuid>>;
+        using ModCompatibilities = UUIDMap<std::optional<hemlock::Versions>>;
     }  // namespace mod
 }  // namespace hemlock
 namespace hmod = hemlock::mod;

@@ -3,7 +3,7 @@
 
 #include "io/iomanager.h"
 
-#include "load_order.h"
+#include "load_order/load_order.h"
 #include "mod.h"
 #include "registry.h"
 
