@@ -123,6 +123,10 @@ namespace hemlock {
     struct Delegate<ReturnType(Args...)> :
         public std::function<ReturnType(Args...)> { /* Empty. */
     };
+
+    template <typename ValueType>
+    using UUIDMap = std::
+        unordered_map<boost::uuids::uuid, ValueType, boost::hash<boost::uuids::uuid>>;
 }  // namespace hemlock
 
 template <typename Type>
