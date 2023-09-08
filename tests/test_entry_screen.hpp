@@ -195,6 +195,16 @@ public:
             hg::f::TextAlign::TOP_LEFT,
             hg::f::WordWrap::NONE
         );
+        m_sprite_batcher.add_string(
+            "Test Mod screen (M)",
+            f32v4{ 30.0f, 240.0f, 1000.0f, 100.0f },
+            f32v4{ 25.0f, 235.0f, 1010.0f, 110.0f },
+            hg::f::StringSizing{ { f32v2{ 1.0f } } },
+            colour4{ 0, 0, 0, 255 },
+            "fonts/Orbitron-Regular.ttf",
+            hg::f::TextAlign::TOP_LEFT,
+            hg::f::WordWrap::NONE
+        );
         m_sprite_batcher.end();
     }
 protected:
