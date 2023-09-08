@@ -36,8 +36,12 @@
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/uuid/uuid_io.hpp>
 
-// Generics
+// Algorithms
 #include <algorithm>
+#include <boost/graph/depth_first_search.hpp>
+#include <boost/graph/topological_sort.hpp>
+
+// Generics
 #include <functional>
 #include <limits>
 #include <memory>
