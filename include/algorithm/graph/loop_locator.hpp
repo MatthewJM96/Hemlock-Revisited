@@ -40,10 +40,12 @@ namespace hemlock {
             using Edge   = boost::graph_traits<Graph>::edge_descriptor;
             using Vertex = boost::graph_traits<Graph>::vertex_descriptor;
 
-            using Edges     = std::vector<Edge>;
-            using Path      = Edges;
-            using BackEdges = std::unordered_map<Vertex, Edges>;
-            using Loops     = hmem::Handle<std::vector<std::vector<Edge>>>;
+            using Edges         = std::vector<Edge>;
+            using Path          = Edges;
+            using BackEdges     = std::unordered_map<Vertex, Edges>;
+            using Loops         = hmem::Handle<std::vector<std::vector<Edge>>>;
+            using LoopVertexMap = std::unordered_map<Vertex, std::vector<size_t>>;
+            using LoopsVisited  = std::vector<size_t>;
 
             LoopLocator(){ /* Empty. */ };
             LoopLocator(const LoopLocator& rhs);
@@ -110,10 +112,12 @@ namespace hemlock {
              */
             void finish_vertex(Vertex vertex, const Graph& graph);
         protected:
-            Vertex    m_root_vertex;
-            Path      m_curr_path;
-            BackEdges m_back_edges;
-            Loops     m_loops;
+            Vertex        m_root_vertex;
+            Path          m_curr_path;
+            BackEdges     m_back_edges;
+            Loops         m_loops;
+            LoopVertexMap m_loop_vertex_map;
+            LoopsVisited  m_loops_visited;
         };
     }  // namespace algorithm
 }  // namespace hemlock
