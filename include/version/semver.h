@@ -18,7 +18,12 @@ namespace hemlock {
             const char* pre_release,
             const char* build
         );
+        SemanticVersion(const SemanticVersion& ver);
+        SemanticVersion(SemanticVersion&& ver);
         ~SemanticVersion();
+
+        SemanticVersion& operator=(const SemanticVersion& ver);
+        SemanticVersion& operator=(SemanticVersion&& ver);
 
         bool                 operator==(const SemanticVersion& rhs) const;
         std::strong_ordering operator<=>(const SemanticVersion& rhs) const;

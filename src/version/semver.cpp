@@ -38,9 +38,48 @@ hemlock::SemanticVersion::SemanticVersion(
     // Empty.
 }
 
+hemlock::SemanticVersion::SemanticVersion(const SemanticVersion& ver) :
+    m_major(ver.m_major),
+    m_minor(ver.m_minor),
+    m_patch(ver.m_patch),
+    m_pre_release(ver.m_pre_release),
+    m_build(ver.m_build) {
+    // Empty.
+}
+
+hemlock::SemanticVersion::SemanticVersion(SemanticVersion&& ver) :
+    m_major(std::move(ver.m_major)),
+    m_minor(std::move(ver.m_minor)),
+    m_patch(std::move(ver.m_patch)),
+    m_pre_release(std::move(ver.m_pre_release)),
+    m_build(std::move(ver.m_build)) {
+    // Empty.
+}
+
 hemlock::SemanticVersion::~SemanticVersion() {
     if (m_pre_release) delete[] m_pre_release;
     if (m_build) delete[] m_build;
+}
+
+hemlock::SemanticVersion& hemlock::SemanticVersion::operator=(const SemanticVersion& ver
+) {
+    m_major       = ver.m_major;
+    m_minor       = ver.m_minor;
+    m_patch       = ver.m_patch;
+    m_pre_release = ver.m_pre_release;
+    m_build       = ver.m_build;
+
+    return *this;
+}
+
+hemlock::SemanticVersion& hemlock::SemanticVersion::operator=(SemanticVersion&& ver) {
+    m_major       = std::move(ver.m_major);
+    m_minor       = std::move(ver.m_minor);
+    m_patch       = std::move(ver.m_patch);
+    m_pre_release = std::move(ver.m_pre_release);
+    m_build       = std::move(ver.m_build);
+
+    return *this;
 }
 
 bool hemlock::SemanticVersion::operator==(const SemanticVersion& rhs) const {
