@@ -1,13 +1,35 @@
-#ifndef __hemlock_mod_loader_order_state_h
-#define __hemlock_mod_loader_order_state_h
+#ifndef __hemlock_mod_state_h
+#define __hemlock_mod_state_h
 
 #include "io/serialisation.hpp"
+
+namespace hemlock {
+    namespace mod {
+        using ModCompatibilities = UUIDMap<std::optional<hemlock::Versions>>;
+    }  // namespace mod
+}  // namespace hemlock
+namespace hmod = hemlock::mod;
+
+H_DECL_STRUCT_WITH_SERIALISATION(
+    hemlock::mod,
+    ModMetadata,
+    (id, boost::uuids::uuid),
+    (name, std::string),
+    (authors, std::vector<std::string>),
+    (description, std::string),
+    (version, hemlock::SemanticVersion),
+    (last_updated, std::chrono::sys_seconds),
+    (hard_depends, std::optional<hmod::ModCompatibilities>),
+    (soft_depends, std::optional<hmod::ModCompatibilities>),
+    (hard_wanted_by, std::optional<hmod::ModCompatibilities>),
+    (soft_wanted_by, std::optional<hmod::ModCompatibilities>),
+    (compatible, std::optional<hmod::ModCompatibilities>),
+    (incompatible, std::optional<hmod::ModCompatibilities>)
+)
 
 H_DECL_STRUCT_WITH_SERIALISATION(
     hemlock::mod,
     LoadOrder,
-    (_version, ui16),
-    (_reserved, ui16),
     (id, boost::uuids::uuid),
     (name, std::string),
     (mods, std::vector<boost::uuids::uuid>),
@@ -44,4 +66,9 @@ H_DECL_ENUM_WITH_SERIALISATION(
     MISSING_METADATA,
 )
 
-#endif  // __hemlock_mod_loader_order_state_h
+using ModRegistry       = UUIDMap<ModMetadata>;
+using LoadOrderRegistry = UUIDMap<LoadOrder>;
+
+using ModDirectories = std::vector<hio::fs::path>;
+
+#endif  // __hemlock_mod_state_h

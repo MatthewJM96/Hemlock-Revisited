@@ -1,8 +1,7 @@
 #ifndef __hemlock_mod_load_order_validate_compatibility_h
 #define __hemlock_mod_load_order_validate_compatibility_h
 
-#include "mod/load_order/state.h"
-#include "mod/registry.h"
+#include "mod/state.h"
 
 namespace hemlock {
     namespace mod {
@@ -21,6 +20,24 @@ namespace hemlock {
          */
         LoadOrderState is_compatible(
             size_t index, const LoadOrder& load_order, const ModRegistry& registry
+        );
+
+        /**
+         * @brief Validates that a given mod's compatibility conditions are satisfied.
+         *
+         * @param mod_metadata The metadata of the mod to assess the compatibility of.
+         * @param load_order The load order in which the mod resides.
+         * @param registry The registry to refer to for mod metadata.
+         * @return LoadOrderState::COMPATIBLE if the mod's compatibility conditions were
+         * satisfied, LoadOrderState::INCOMPATIBLE if an explicit incompatibility is
+         * found, LoadOrderState::VERSION_MISMATCH if there is an explicit compatibility
+         * with a mod for which the version in the load order is different to the
+         * compatible version range.
+         */
+        LoadOrderState is_compatible(
+            const ModMetadata& metadata,
+            const LoadOrder&   load_order,
+            const ModRegistry& registry
         );
     }  // namespace mod
 }  // namespace hemlock

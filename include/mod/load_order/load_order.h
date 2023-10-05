@@ -1,10 +1,10 @@
-#ifndef __hemlock_mod_loader_order_h
-#define __hemlock_mod_loader_order_h
+#ifndef __hemlock_mod_load_order_load_order_h
+#define __hemlock_mod_load_order_load_order_h
 
 #include "mod/metadata.h"
 #include "mod/registry.h"
 
-#include "state.h"
+#include "state.hpp"
 
 namespace hemlock {
     namespace mod {
@@ -41,4 +41,4 @@ namespace hemlock {
 }  // namespace hemlock
 namespace hmod = hemlock::mod;
 
-#endif  // __hemlock_mod_loader_order_h
+#endif  // __hemlock_mod_load_order_load_order_h

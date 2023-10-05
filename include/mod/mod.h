@@ -3,7 +3,7 @@
 
 #include "io/iomanager.h"
 
-#include "metadata.h"
+#include "state.h"
 
 namespace hemlock {
     namespace mod {

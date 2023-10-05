@@ -74,3 +74,26 @@ hmod::LoadOrderState hmod::is_compatible(
 
     return LoadOrderState::COMPATIBLE;
 }
+
+hmod::LoadOrderState hmod::is_compatible(
+    const ModMetadata& metadata,
+    const LoadOrder&   load_order,
+    const ModRegistry& registry
+) {
+    // If this mod has no stated compatibilities or incompatibilities then it is by
+    // definition compatible to the best of our knowledge.
+    if (!metadata.compatible.has_value() && !metadata.incompatible.has_value())
+        return LoadOrderState::COMPATIBLE;
+
+    // Iterate all other mods and determine if they satisfy the compatibility conditions
+    // of the currently considered mod.
+    for (const auto& other_id : load_order.mods) {
+        const ModMetadata& other_metadata = registry.at(other_id);
+
+        LoadOrderState compatibility = mods_compatible(metadata, other_metadata);
+
+        if (compatibility != LoadOrderState::COMPATIBLE) return compatibility;
+    }
+
+    return LoadOrderState::COMPATIBLE;
+}
