@@ -13,13 +13,8 @@ void hmod::LoadOrderBuilder::init(const ModManager* mod_manager) {
 #endif
 }
 
-void hmod::LoadOrderBuilder::init(
-    const ModManager* mod_manager, const LoadOrder& load_order
-) {
-    init(mod_manager);
-
-    m_load_order = load_order;
-}
+hmod::LoadOrderState hmod::LoadOrderBuilder::set_load_order(const LoadOrder& load_order
+) { }
 
 void hmod::LoadOrderBuilder::dispose() {
     m_mod_manager = nullptr;

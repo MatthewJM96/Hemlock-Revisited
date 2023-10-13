@@ -23,8 +23,9 @@ namespace hemlock {
             }
 
             void init(const ModManager* mod_manager);
-            void init(const ModManager* mod_manager, const LoadOrder& load_order);
             void dispose();
+
+            LoadOrderState set_load_order(const LoadOrder& load_order);
 
             void set_name(std::string&& name);
 
@@ -38,11 +39,20 @@ namespace hemlock {
                 bool                      allow_invaid_order     = true
             );
 
-            // TODO(Matthew): add mod at index in load order.
+            LoadOrderState add_mod(
+                const boost::uuids::uuid& id,
+                size_t                    index,
+                bool                      allow_version_mismatch = false,
+                bool                      allow_invaid_order     = true
+            );
 
-            // TODO(Matthew): capability to change load order manually, to sort mod
-            //                using topological sort, and to get the current mod
-            //                ordering.
+            LoadOrderState remove_mod(const boost::uuids::uuid& id);
+            LoadOrderState remove_mod(size_t index);
+
+            LoadOrderState move_mod(const boost::uuids::uuid& id, size_t index_to);
+            LoadOrderState move_mod(size_t index_from, size_t index_to);
+
+            LoadOrderState sort_mods();
 
             /**
              * @brief Get the load order as the builder currently has it.
