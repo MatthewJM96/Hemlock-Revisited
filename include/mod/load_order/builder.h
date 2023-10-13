@@ -23,6 +23,7 @@ namespace hemlock {
             }
 
             void init(const ModManager* mod_manager);
+            void init(const ModManager* mod_manager, const LoadOrder& load_order);
             void dispose();
 
             void set_name(std::string&& name);

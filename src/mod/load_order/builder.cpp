@@ -11,14 +11,20 @@ void hmod::LoadOrderBuilder::init(const ModManager* mod_manager) {
 #ifdef DEBUG
     assert(mod_manager != nullptr);
 #endif
+}
 
-    m_state = LoadOrderState::VALID;
+void hmod::LoadOrderBuilder::init(
+    const ModManager* mod_manager, const LoadOrder& load_order
+) {
+    init(mod_manager);
+
+    m_load_order = load_order;
 }
 
 void hmod::LoadOrderBuilder::dispose() {
     m_mod_manager = nullptr;
 
-    m_state = LoadOrderState::SENTINEL;
+    m_load_order = {};
 }
 
 void hmod::LoadOrderBuilder::set_name(std::string&& name) {
