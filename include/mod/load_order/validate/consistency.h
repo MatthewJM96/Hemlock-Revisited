@@ -12,7 +12,7 @@ namespace hemlock {
          * @param metadata The metadata of the mod to validate the self-consistency of.
          * @return True if the mod is self-consistent, false otherwise.
          */
-        bool is_self_consistent(const hmod::ModMetadata& metadata);
+        bool is_self_consistent(const ModMetadata& metadata);
     }  // namespace mod
 }  // namespace hemlock
 namespace hmod = hemlock::mod;
