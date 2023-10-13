@@ -11,8 +11,7 @@ namespace hemlock {
             NOT_REGISTERED,
             INCONSISTENT,
             INCOMPATIBLE,
-            VERSION_MISMATCH,
-            IMPOSSIBLE_REQUIREMENT
+            VERSION_MISMATCH
         };
 
         class LoadOrderBuilder {
