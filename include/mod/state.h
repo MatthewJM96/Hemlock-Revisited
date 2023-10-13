@@ -14,7 +14,7 @@ namespace hmod = hemlock::mod;
 H_DECL_STRUCT_WITH_SERIALISATION(
     hemlock::mod,
     ModMetadata,
-    (id, boost::uuids::uuid),
+    (id, hemlock::UUID),
     (name, std::string),
     (authors, std::vector<std::string>),
     (description, std::string),
@@ -31,9 +31,9 @@ H_DECL_STRUCT_WITH_SERIALISATION(
 H_DECL_STRUCT_WITH_SERIALISATION(
     hemlock::mod,
     LoadOrder,
-    (id, boost::uuids::uuid),
+    (id, hemlock::UUID),
     (name, std::string),
-    (mods, std::vector<boost::uuids::uuid>),
+    (mods, std::vector<hemlock::UUID>),
     (description, std::string),
     (version, hemlock::SemanticVersion),
     (last_updated, std::chrono::sys_seconds)

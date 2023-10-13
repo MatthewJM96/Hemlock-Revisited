@@ -76,7 +76,7 @@ hmod::make_load_order_valid(LoadOrder& load_order, const ModRegistry& registry) 
 
     std::unordered_map<UUID, LoadOrderVertex> mod_vertex_map;
 
-    std::unordered_map<LoadOrderVertex, boost::uuids::uuid> vertex_mod_map;
+    std::unordered_map<LoadOrderVertex, hemlock::UUID> vertex_mod_map;
 
     // Tells whether the edge represents a hard depends/wanted-by constraint, or
     // a soft one. If we encounter a cycle involving a hard dependency we cannot

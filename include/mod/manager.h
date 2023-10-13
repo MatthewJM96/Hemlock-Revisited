@@ -62,7 +62,7 @@ namespace hemlock {
              * @return Pointer to the mod's metadata if the UUID named a registered mod,
              * otherwise nullptr.
              */
-            const ModMetadata* get_mod(const boost::uuids::uuid& id) const;
+            const ModMetadata* get_mod(const hemlock::UUID& id) const;
 
             /**
              * @brief Access the map of all mods keyed by their UUIDs.
@@ -90,7 +90,7 @@ namespace hemlock {
              * @return Pointer to the load order if the UUID named a registered load
              * order, otherwise nullptr.
              */
-            const LoadOrder* get_load_order(const boost::uuids::uuid& id) const;
+            const LoadOrder* get_load_order(const hemlock::UUID& id) const;
 
             /**
              * @brief Access the map of all load orders keyed by their UUIDs.

@@ -35,9 +35,9 @@ void hmod::LoadOrderBuilder::set_version(hemlock::SemanticVersion&& version) {
 }
 
 hmod::LoadOrderState hmod::LoadOrderBuilder::add_mod(
-    const boost::uuids::uuid& id,
-    bool                      allow_version_mismatch /*= false*/,
-    bool                      allow_invaid_order = /*true*/
+    const hemlock::UUID& id,
+    bool                 allow_version_mismatch /*= false*/,
+    bool                 allow_invaid_order = /*true*/
 ) {
     const ModMetadata* mod_metadata = m_mod_manager->get_mod(id);
 

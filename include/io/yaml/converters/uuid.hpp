@@ -5,15 +5,15 @@
 
 namespace YAML {
     template <>
-    struct convert<boost::uuids::uuid> {
-        static Node encode(const boost::uuids::uuid& uuid) {
+    struct convert<hemlock::UUID> {
+        static Node encode(const hemlock::UUID& uuid) {
             std::stringstream ss;
             ss << uuid;
 
             return Node{ ss.str() };
         }
 
-        static bool decode(const Node& node, boost::uuids::uuid& result) {
+        static bool decode(const Node& node, hemlock::UUID& result) {
             if (!node.IsScalar()) {
                 return false;
             }

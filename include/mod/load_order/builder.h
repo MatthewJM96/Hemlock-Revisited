@@ -34,22 +34,22 @@ namespace hemlock {
             void set_version(hemlock::SemanticVersion&& version);
 
             LoadOrderState add_mod(
-                const boost::uuids::uuid& id,
-                bool                      allow_version_mismatch = false,
-                bool                      allow_invaid_order     = true
+                const hemlock::UUID& id,
+                bool                 allow_version_mismatch = false,
+                bool                 allow_invaid_order     = true
             );
 
             LoadOrderState add_mod(
-                const boost::uuids::uuid& id,
-                size_t                    index,
-                bool                      allow_version_mismatch = false,
-                bool                      allow_invaid_order     = true
+                const hemlock::UUID& id,
+                size_t               index,
+                bool                 allow_version_mismatch = false,
+                bool                 allow_invaid_order     = true
             );
 
-            LoadOrderState remove_mod(const boost::uuids::uuid& id);
+            LoadOrderState remove_mod(const hemlock::UUID& id);
             LoadOrderState remove_mod(size_t index);
 
-            LoadOrderState move_mod(const boost::uuids::uuid& id, size_t index_to);
+            LoadOrderState move_mod(const hemlock::UUID& id, size_t index_to);
             LoadOrderState move_mod(size_t index_from, size_t index_to);
 
             LoadOrderState sort_mods();
