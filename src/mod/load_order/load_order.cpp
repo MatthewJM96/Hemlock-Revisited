@@ -74,7 +74,7 @@ hmod::make_load_order_valid(LoadOrder& load_order, const ModRegistry& registry) 
 
     LoadOrderGraph g(load_order.mods.size());
 
-    UUIDMap<LoadOrderVertex> mod_vertex_map;
+    std::unordered_map<UUID, LoadOrderVertex> mod_vertex_map;
 
     std::unordered_map<LoadOrderVertex, boost::uuids::uuid> vertex_mod_map;
 

@@ -124,10 +124,17 @@ namespace hemlock {
         public std::function<ReturnType(Args...)> { /* Empty. */
     };
 
-    template <typename ValueType>
-    using UUIDMap = std::
-        unordered_map<boost::uuids::uuid, ValueType, boost::hash<boost::uuids::uuid>>;
+    using UUID = boost::uuids::uuid;
 }  // namespace hemlock
+
+namespace std {
+    template <>
+    struct hash<hemlock::UUID> {
+        size_t operator()(const hemlock::UUID& x) const {
+            return boost::hash<boost::uuids::uuid>(x);
+        }
+    };
+}  // namespace std
 
 template <typename Type>
 const Type& make_const(Type& val) {

@@ -5,7 +5,8 @@
 
 namespace hemlock {
     namespace mod {
-        using ModCompatibilities = UUIDMap<std::optional<hemlock::Versions>>;
+        using ModCompatibilities
+            = std::unordered_map<UUID, std::optional<hemlock::Versions>>;
     }  // namespace mod
 }  // namespace hemlock
 namespace hmod = hemlock::mod;
@@ -72,8 +73,8 @@ H_DECL_ENUM_WITH_SERIALISATION(
 
 namespace hemlock {
     namespace mod {
-        using ModRegistry       = UUIDMap<ModMetadata>;
-        using LoadOrderRegistry = UUIDMap<LoadOrder>;
+        using ModRegistry       = std::unordered_map<UUID, ModMetadata>;
+        using LoadOrderRegistry = std::unordered_map<UUID, LoadOrder>;
 
         using ModDirectories = std::vector<hio::fs::path>;
     }  // namespace mod
