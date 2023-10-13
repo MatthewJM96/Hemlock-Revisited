@@ -64,7 +64,3 @@ hmod::LoadOrderState hmod::LoadOrderBuilder::add_mod(
     // TODO(Matthew): progressively build up dependency graph? if we do this we can run
     //                a topological sort each time to report introduction of a cycle.
 }
-
-hmod::LoadOrderState hmod::LoadOrderBuilder::state() { }
-
-hmod::LoadOrder hmod::LoadOrderBuilder::get() { }

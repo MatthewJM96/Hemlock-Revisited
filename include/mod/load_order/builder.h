@@ -44,13 +44,16 @@ namespace hemlock {
             //                using topological sort, and to get the current mod
             //                ordering.
 
-            LoadOrderState state();
-            LoadOrder      get();
+            /**
+             * @brief Get the load order as the builder currently has it.
+             *
+             * @return The load order the builder is currently holding.
+             */
+            LoadOrder get_load_order() { return m_load_order; }
         protected:
             const ModManager* m_mod_manager;
 
-            LoadOrderState m_state;
-            LoadOrder      m_load_order;
+            LoadOrder m_load_order;
         };
     }  // namespace mod
 }  // namespace hemlock
