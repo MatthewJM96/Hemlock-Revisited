@@ -50,8 +50,11 @@ H_DECL_STRUCT_WITH_SERIALISATION(
  *              explicit incompatibility with another mod for the version that is
  *              present in the load order;
  *          - INVALID_ORDER indicates a load order for which at least one mod's
- *              dependency and wanted-by conditions are not wholly met.
- *          - MISSING_MOD_METADATA indicates a load order for which at least one mod
+ *              dependency and wanted-by conditions are not wholly met;
+ *          - INCONSISTENT indicates a load order for which at least one mod has
+ *              requirements that cannot be satisfied under any condition (e.g. lists
+ *              the same mod as a depends and a wanted-by);
+ *          - MISSING_METADATA indicates a load order for which at least one mod
  *              is missing metadata - likely the mod is missing or malformed.
  */
 H_DECL_ENUM_WITH_SERIALISATION(
@@ -63,12 +66,17 @@ H_DECL_ENUM_WITH_SERIALISATION(
     VERSION_MISMATCH,
     INCOMPATIBLE,
     INVALID_ORDER,
-    MISSING_METADATA,
+    INCONSISTENT,
+    MISSING_METADATA
 )
 
-using ModRegistry       = UUIDMap<ModMetadata>;
-using LoadOrderRegistry = UUIDMap<LoadOrder>;
+namespace hemlock {
+    namespace mod {
+        using ModRegistry       = UUIDMap<ModMetadata>;
+        using LoadOrderRegistry = UUIDMap<LoadOrder>;
 
-using ModDirectories = std::vector<hio::fs::path>;
+        using ModDirectories = std::vector<hio::fs::path>;
+    }  // namespace mod
+}  // namespace hemlock
 
 #endif  // __hemlock_mod_state_h
