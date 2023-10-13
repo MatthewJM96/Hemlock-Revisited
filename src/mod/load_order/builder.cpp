@@ -39,25 +39,27 @@ void hmod::LoadOrderBuilder::set_version(hemlock::SemanticVersion&& version) {
     m_load_order.version = std::forward<hemlock::SemanticVersion>(version);
 }
 
-hmod::ModState hmod::LoadOrderBuilder::
-    add_mod(const boost::uuids::uuid& id, bool allow_version_mismatch /*= false*/) {
+hmod::LoadOrderState hmod::LoadOrderBuilder::add_mod(
+    const boost::uuids::uuid& id,
+    bool                      allow_version_mismatch /*= false*/,
+    bool                      allow_invaid_order = /*true*/
+) {
     const ModMetadata* mod_metadata = m_mod_manager->get_mod(id);
 
-    if (!mod_metadata) return ModState::NOT_REGISTERED;
+    if (!mod_metadata) return LoadOrderState::MISSING_METADATA;
 
-    if (!is_self_consistent(*mod_metadata)) return ModState::INCONSISTENT;
+    if (!is_self_consistent(*mod_metadata)) return LoadOrderState::INCONSISTENT;
 
     LoadOrderState compatiblity
-        = is_compatible(mod_metadata, m_load_order, m_mod_manager->get_mods());
+        = is_compatible(*mod_metadata, m_load_order, m_mod_manager->get_mods());
     if (compatiblity == LoadOrderState::INCOMPATIBLE) {
-        return ModState::INCOMPATIBLE;
-    } else if (!allow_version_mismatch && compatiblity == LoadOrderState::VERSION_MISMATCH)) {
-            return ModState::VERSION_MISMATCH;
-        }
+        return LoadOrderState::INCOMPATIBLE;
+    } else if (!allow_version_mismatch && compatiblity == LoadOrderState::VERSION_MISMATCH)
+    {
+        return LoadOrderState::VERSION_MISMATCH;
+    }
 
-    // TODO(Matthew): check if adding this mod introduces an impossible requirement
-    //                  e.g. mod X requires mod Y with major 1 while mod Z requires mod
-    //                  Y with major 2
+    m_load_order.mods.emplace_back(id);
 
     // TODO(Matthew): progressively build up dependency graph? if we do this we can run
     //                a topological sort each time to report introduction of a cycle.
