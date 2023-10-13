@@ -1,7 +1,7 @@
 #ifndef __hemlock_mod_load_order_validate_consistency_h
 #define __hemlock_mod_load_order_validate_consistency_h
 
-#include "mod/metadata.h"
+#include "mod/state.h"
 
 namespace hemlock {
     namespace mod {
