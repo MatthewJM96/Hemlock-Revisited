@@ -34,24 +34,28 @@ void hmod::LoadOrderBuilder::set_version(hemlock::SemanticVersion&& version) {
     m_load_order.version = std::forward<hemlock::SemanticVersion>(version);
 }
 
-hmod::LoadOrderState hmod::LoadOrderBuilder::add_mod(
+std::pair<bool, LoadOrderState> hmod::LoadOrderBuilder::add_mod(
     const hemlock::UUID& id,
     bool                 allow_version_mismatch /*= false*/,
     bool                 allow_invaid_order = /*true*/
 ) {
+    auto it = std::find(m_load_order.mods.begin(), m_load_order.mods.end(), id);
+    if (it != m_load_order.mods.end()) return { false, LoadOrderState::VALID };
+
     const ModMetadata* mod_metadata = m_mod_manager->get_mod(id);
 
-    if (!mod_metadata) return LoadOrderState::MISSING_METADATA;
+    if (!mod_metadata) return { false, LoadOrderState::MISSING_METADATA };
 
-    if (!is_self_consistent(*mod_metadata)) return LoadOrderState::INCONSISTENT;
+    if (!is_self_consistent(*mod_metadata))
+        return { false, LoadOrderState::INCONSISTENT };
 
     LoadOrderState compatiblity
         = is_compatible(*mod_metadata, m_load_order, m_mod_manager->get_mods());
     if (compatiblity == LoadOrderState::INCOMPATIBLE) {
-        return LoadOrderState::INCOMPATIBLE;
+        return { false, LoadOrderState::INCOMPATIBLE };
     } else if (!allow_version_mismatch && compatiblity == LoadOrderState::VERSION_MISMATCH)
     {
-        return LoadOrderState::VERSION_MISMATCH;
+        return { false, LoadOrderState::VERSION_MISMATCH };
     }
 
     m_load_order.mods.emplace_back(id);
