@@ -26,6 +26,11 @@ namespace hemlock {
 
             void set_version(hemlock::SemanticVersion&& version);
 
+            // TODO(Matthew): Provide details of which mods are incompatible where this
+            //                occurs.
+            // TODO(Matthew): Provide details of which mods have a version mismatch, and
+            //                where this is allowed track those details.
+
             std::pair<bool, LoadOrderState> add_mod(
                 const hemlock::UUID& id,
                 bool                 allow_version_mismatch = false,
