@@ -60,6 +60,52 @@ std::pair<bool, LoadOrderState> hmod::LoadOrderBuilder::add_mod(
 
     m_load_order.mods.emplace_back(id);
 
-    // TODO(Matthew): progressively build up dependency graph? if we do this we can run
-    //                a topological sort each time to report introduction of a cycle.
+    m_mod_vertex_map[id]                   = boost::add_vertex(m_dependecy_graph);
+    m_vertex_mod_map[m_mod_vertex_map[id]] = id;
+
+    if (metadata.hard_depends.has_value()) {
+        for (const auto& [depends_id, _] : metadata.hard_depends.value()) {
+            if (m_mod_vertex_map.contains(depends_id)) {
+                auto [edge, _2] = boost::add_edge(
+                    m_mod_vertex_map[depends_id],
+                    m_mod_vertex_map[id],
+                    m_dependecy_graph
+                );
+            }
+        }
+    }
+
+    if (metadata.soft_depends.has_value()) {
+        for (const auto& [depends_id, _] : metadata.soft_depends.value()) {
+            if (m_mod_vertex_map.contains(depends_id)) {
+                auto [edge, _2] = boost::add_edge(
+                    m_mod_vertex_map[depends_id],
+                    m_mod_vertex_map[id],
+                    m_dependecy_graph
+                );
+            }
+        }
+    }
+
+    if (metadata.hard_wanted_by.has_value()) {
+        for (const auto& [wanted_by_id, _] : metadata.hard_wanted_by.value()) {
+            if (m_mod_vertex_map.contains(wanted_by_id)) {
+                auto [edge, _2] = boost::add_edge(
+                    m_mod_vertex_map[id],
+                    m_mod_vertex_map[wanted_by_id],
+                    m_dependecy_graph
+                );
+            }
+        }
+    }
+
+    if (metadata.soft_wanted_by.has_value()) {
+        for (const auto& [wanted_by_id, _] : metadata.soft_wanted_by.value()) {
+            if (m_mod_vertex_map.contains(wanted_by_id)) {
+                auto [edge, _2] = boost::add_edge(
+                    m_mod_vertex_map[id], m_mod_vertex_map[wanted_by_id], g
+                );
+            }
+        }
+    }
 }
