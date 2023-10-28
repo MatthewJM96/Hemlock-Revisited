@@ -69,12 +69,13 @@ hvox::ChunkGrid::ChunkGrid() :
 }
 
 void hvox::ChunkGrid::init(
-    hmem::WeakHandle<ChunkGrid> self,
-    ui32                        render_distance,
-    ui32                        thread_count,
-    ChunkTaskBuilder            build_load_or_generate_task,
-    ChunkTaskBuilder            build_mesh_task,
-    ChunkTaskBuilder*           build_navmesh_task /* = nullptr*/
+    hmem::WeakHandle<ChunkGrid>  self,
+    ui32                         render_distance,
+    ui32                         thread_count,
+    ChunkTaskBuilder             build_load_or_generate_task,
+    ChunkTaskBuilder             build_mesh_task,
+    ChunkTaskBuilder*            build_navmesh_task /* = nullptr*/,
+    hmem::Handle<entt::registry> chunk_registry /* = nullptr*/
 ) {
     m_self = self;
 
@@ -89,6 +90,13 @@ void hvox::ChunkGrid::init(
 
     m_thread_pool.init(thread_count);
 
+    if (chunk_registry) {
+        m_chunk_registry = chunk_registry;
+    } else {
+        m_chunk_registry = hmem::make_handle<entt::registry>();
+    }
+
+    // TODO(Matthew): want to be able to provide these.
     m_block_pager         = hmem::make_handle<ChunkBlockPager>();
     m_instance_data_pager = hmem::make_handle<ChunkInstanceDataPager>();
 

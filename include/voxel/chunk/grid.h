@@ -41,14 +41,16 @@ namespace hemlock {
              * task to mesh a chunk.
              * @param build_navmesh_task Builder that returns a valid
              * task to navmesh a chunk.
+             * @param chunk_registry Registry in which chunks are allocated as entities.
              */
             void init(
-                hmem::WeakHandle<ChunkGrid> self,
-                ui32                        render_distance,
-                ui32                        thread_count,
-                ChunkTaskBuilder            build_load_or_generate_task,
-                ChunkTaskBuilder            build_mesh_task,
-                ChunkTaskBuilder*           build_navmesh_task = nullptr
+                hmem::WeakHandle<ChunkGrid>  self,
+                ui32                         render_distance,
+                ui32                         thread_count,
+                ChunkTaskBuilder             build_load_or_generate_task,
+                ChunkTaskBuilder             build_mesh_task,
+                ChunkTaskBuilder*            build_navmesh_task = nullptr,
+                hmem::Handle<entt::registry> chunk_registry     = nullptr
             );
             /**
              * @brief Disposes of the chunk grid, ending
@@ -193,7 +195,7 @@ namespace hemlock {
                 m_build_navmesh_task;
             thread::ThreadPool<ChunkTaskContext> m_thread_pool;
 
-            ChunkAllocator m_chunk_allocator;
+            hmem::Handle<entt::registry> m_chunk_registry;
 
             hmem::Handle<ChunkBlockPager>        m_block_pager;
             hmem::Handle<ChunkInstanceDataPager> m_instance_data_pager;
