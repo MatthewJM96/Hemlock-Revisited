@@ -34,10 +34,10 @@ namespace hemlock {
             }
 
             struct {
-                hmem::WeakHandle<Chunk> left, right, top, bottom, front, back;
+                entt::entity left, right, top, bottom, front, back;
             } one;
 
-            hmem::WeakHandle<Chunk> all[8];
+            entt::entity all[8];
         };
 
         /**
