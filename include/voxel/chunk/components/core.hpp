@@ -2,6 +2,7 @@
 #define __hemlock_voxel_chunk_components_core_hpp
 
 #include "voxel/block.hpp"
+#include "voxel/chunk/constants.hpp"
 #include "voxel/chunk/events/block_change.hpp"
 #include "voxel/chunk/events/bulk_block_change.hpp"
 #include "voxel/chunk/state.hpp"
@@ -9,6 +10,8 @@
 
 namespace hemlock {
     namespace voxel {
+        using ChunkBlockPager = hmem::Pager<Block, CHUNK_VOLUME, 3>;
+
         // TODO(Matthew): pointer stability probably can't be relied on, should this
         //                just be the entities directly?
         /**
