@@ -15,14 +15,7 @@
 
 namespace hemlock {
     namespace voxel {
-        // TODO(Matthew): Make chunks & grids either decoratable or else composed? Not
-        //                all chunk grids may want to be navigable, e.g.
-
-        // TODO(Matthew): Does page size want to be made a run-time thing,
-        //                as it may be nice to base this on view distance.
-        using ChunkAllocator = hmem::PagedAllocator<Chunk, 4 * 4 * 4, 3>;
-
-        using Chunks = std::unordered_map<ChunkID, hmem::Handle<Chunk>>;
+        using Chunks = std::unordered_map<ChunkID, entt::entity>;
 
         using ChunkTaskBuilder = Delegate<ChunkTask*(void)>;
 
