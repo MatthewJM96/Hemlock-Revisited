@@ -3,6 +3,8 @@
 
 namespace hemlock {
     namespace voxel {
+        using LODLevel = ui8;
+
         struct LODChangeEvent {
             LODLevel before, after;
         };

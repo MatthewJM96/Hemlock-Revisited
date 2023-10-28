@@ -6,8 +6,6 @@
 
 namespace hemlock {
     namespace voxel {
-        using LODLevel = ui8;
-
         /**
          * Represents a chunk that can be rendered are multiple LODs. The LOD level is
          * represented by an integer 0-255, this should be sufficient for any use-case.
