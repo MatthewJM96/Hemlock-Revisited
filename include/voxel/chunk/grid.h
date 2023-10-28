@@ -44,13 +44,12 @@ namespace hemlock {
              * @param chunk_registry Registry in which chunks are allocated as entities.
              */
             void init(
-                hmem::WeakHandle<ChunkGrid>  self,
-                ui32                         render_distance,
-                ui32                         thread_count,
-                ChunkTaskBuilder             build_load_or_generate_task,
-                ChunkTaskBuilder             build_mesh_task,
-                ChunkTaskBuilder*            build_navmesh_task = nullptr,
-                hmem::Handle<entt::registry> chunk_registry     = nullptr
+                hmem::WeakHandle<ChunkGrid>          self,
+                ui32                                 render_distance,
+                ui32                                 thread_count,
+                hmem::Handle<entt::registry>         chunk_registry      = nullptr,
+                hmem::Handle<ChunkBlockPager>        block_pager         = nullptr,
+                hmem::Handle<ChunkInstanceDataPager> instance_data_pager = nullptr
             );
             /**
              * @brief Disposes of the chunk grid, ending

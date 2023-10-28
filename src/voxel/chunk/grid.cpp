@@ -69,24 +69,18 @@ hvox::ChunkGrid::ChunkGrid() :
 }
 
 void hvox::ChunkGrid::init(
-    hmem::WeakHandle<ChunkGrid>  self,
-    ui32                         render_distance,
-    ui32                         thread_count,
-    ChunkTaskBuilder             build_load_or_generate_task,
-    ChunkTaskBuilder             build_mesh_task,
-    ChunkTaskBuilder*            build_navmesh_task /* = nullptr*/,
-    hmem::Handle<entt::registry> chunk_registry /* = nullptr*/
+    hmem::WeakHandle<ChunkGrid>          self,
+    ui32                                 render_distance,
+    ui32                                 thread_count,
+    hmem::Handle<entt::registry>         chunk_registry /*= nullptr*/,
+    hmem::Handle<ChunkBlockPager>        block_pager /*= nullptr*/,
+    hmem::Handle<ChunkInstanceDataPager> instance_data_pager /*= nullptr*/
 ) {
     m_self = self;
 
-    m_render_distance           = render_distance;
+    m_render_distance = render_distance;
+    // TODO(Matthew): let shaping of rendering be defined by user?
     m_chunks_in_render_distance = render_distance * render_distance * render_distance;
-
-    m_build_load_or_generate_task = build_load_or_generate_task;
-    m_build_mesh_task             = build_mesh_task;
-    if (build_navmesh_task) {
-        m_build_navmesh_task = *build_navmesh_task;
-    }
 
     m_thread_pool.init(thread_count);
 
@@ -96,10 +90,20 @@ void hvox::ChunkGrid::init(
         m_chunk_registry = hmem::make_handle<entt::registry>();
     }
 
-    // TODO(Matthew): want to be able to provide these.
-    m_block_pager         = hmem::make_handle<ChunkBlockPager>();
-    m_instance_data_pager = hmem::make_handle<ChunkInstanceDataPager>();
+    if (block_pager) {
+        m_block_pager = block_pager;
+    } else {
+        m_block_pager = hmem::make_handle<ChunkBlockPager>();
+    }
 
+    if (instance_data_pager) {
+        m_instance_data_pager = instance_data_pager;
+    } else {
+        m_instance_data_pager = hmem::make_handle<ChunkInstanceDataPager>();
+    }
+
+    // TODO(Matthew): move this out of here - can one renderer be made responsible for
+    //                all chunk grids with mesh component?
     // TODO(Matthew): smarter setting of page size - maybe should be dependent on draw
     // distance. m_renderer.init(20, 2);
     m_renderer.init(5, 2);
