@@ -79,6 +79,13 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+// ECS
+// TODO(Matthew): is this necessary? 32-bit feels fine - the only thing that would maybe
+//                be a problem would be blocks being included as entities. Currently
+//                this seems unlikely.
+#define ENTT_ID_TYPE std::uint64_t
+#include <entt/entt.hpp>
+
 // Image Libs
 #include <png.h>
 
