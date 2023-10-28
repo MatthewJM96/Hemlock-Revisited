@@ -80,7 +80,7 @@ namespace hemlock {
             ChunkGridPosition position;
             Neighbours        neighbours;
 
-            std::shared_mutex block_mutex;
+            std::shared_mutex blocks_mutex;
             Block*            blocks;
 
             std::atomic<ChunkState> generation;
