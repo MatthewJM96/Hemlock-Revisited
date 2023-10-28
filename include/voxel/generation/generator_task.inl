@@ -1,6 +1,6 @@
 template <hvox::ChunkGenerationStrategy GenerationStrategy>
 void hvox::ChunkGenerationTask<
-    GenerationStrategy>::execute(ChunkLoadThreadState*, ChunkTaskQueue*) {
+    GenerationStrategy>::execute(ChunkTaskThreadState*, ChunkTaskQueue*) {
     auto chunk = m_chunk.lock();
 
     if (chunk == nullptr) return;

@@ -1,6 +1,7 @@
 template <hvox::ChunkMeshStrategy MeshStrategy>
-void hvox::ChunkMeshTask<
-    MeshStrategy>::execute(ChunkLoadThreadState* state, ChunkTaskQueue* task_queue) {
+void hvox::ChunkMeshTask<MeshStrategy>::execute(
+    ChunkTaskThreadState* state, ChunkTaskQueue* task_queue
+) {
     auto chunk_grid = m_chunk_grid.lock();
     if (chunk_grid == nullptr) return;
 
@@ -11,9 +12,8 @@ void hvox::ChunkMeshTask<
 
     if (!mesh.can_run(chunk_grid, chunk)) {
         // Put copy of this mesh task back onto the load task queue.
-        ChunkMeshTask<MeshStrategy>* mesh_task
-            = new ChunkMeshTask<MeshStrategy>();
-        mesh_task->set_state(m_chunk, m_chunk_grid);
+        ChunkMeshTask<MeshStrategy>* mesh_task = new ChunkMeshTask<MeshStrategy>();
+        mesh_task->set_chunk_state(m_chunk, m_chunk_grid);
         task_queue->enqueue(state->producer_token, { mesh_task, true });
         return;
     }

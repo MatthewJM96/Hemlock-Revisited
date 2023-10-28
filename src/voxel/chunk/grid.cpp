@@ -5,7 +5,7 @@
 #include "voxel/block.hpp"
 #include "voxel/chunk/grid.h"
 
-void hvox::ChunkTask::set_state(
+void hvox::ChunkTask::set_chunk_state(
     hmem::WeakHandle<Chunk> chunk, hmem::WeakHandle<ChunkGrid> chunk_grid
 ) {
     m_chunk      = chunk;
@@ -28,12 +28,12 @@ hvox::ChunkGrid::ChunkGrid() :
         if (chunk == nullptr) return;
 
         auto mesh_task = m_build_mesh_task();
-        mesh_task->set_state(chunk, m_self);
+        mesh_task->set_chunk_state(chunk, m_self);
         m_thread_pool.threadsafe_add_task({ mesh_task, true });
 
         if (m_build_navmesh_task) {
             auto navmesh_task = m_build_navmesh_task();
-            navmesh_task->set_state(chunk, m_self);
+            navmesh_task->set_chunk_state(chunk, m_self);
             m_thread_pool.threadsafe_add_task({ navmesh_task, true });
         }
     } }),
@@ -54,12 +54,12 @@ hvox::ChunkGrid::ChunkGrid() :
             if (chunk == nullptr) return true;
 
             auto mesh_task = m_build_mesh_task();
-            mesh_task->set_state(chunk, m_self);
+            mesh_task->set_chunk_state(chunk, m_self);
             m_thread_pool.add_task({ mesh_task, true });
 
             if (m_build_navmesh_task) {
                 auto navmesh_task = m_build_navmesh_task();
-                navmesh_task->set_state(chunk, m_self);
+                navmesh_task->set_chunk_state(chunk, m_self);
                 m_thread_pool.threadsafe_add_task({ navmesh_task, true });
             }
 
@@ -177,7 +177,7 @@ bool hvox::ChunkGrid::load_chunk_at(ChunkGridPosition chunk_position) {
     }
 
     auto task = m_build_load_or_generate_task();
-    task->set_state(chunk, m_self);
+    task->set_chunk_state(chunk, m_self);
     m_thread_pool.add_task({ task, true });
 
     return true;

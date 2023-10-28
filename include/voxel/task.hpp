@@ -14,7 +14,7 @@ namespace hemlock {
         };
 
         using ChunkTaskContext     = thread::BasicThreadContext;
-        using ChunkLoadThreadState = thread::Thread<ChunkTaskContext>::State;
+        using ChunkTaskThreadState = thread::Thread<ChunkTaskContext>::State;
         using ChunkTaskQueue       = thread::TaskQueue<ChunkTaskContext>;
 
         class ChunkTask : public thread::IThreadTask<ChunkTaskContext> {
@@ -22,7 +22,7 @@ namespace hemlock {
             virtual ~ChunkTask() { /* Empty. */
             }
 
-            void set_state(
+            void set_chunk_state(
                 hmem::WeakHandle<Chunk> chunk, hmem::WeakHandle<ChunkGrid> chunk_grid
             );
         protected:
