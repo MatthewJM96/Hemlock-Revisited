@@ -190,14 +190,23 @@ bool hvox::ChunkGrid::load_chunk_at(ChunkGridPosition chunk_position) {
     auto it = m_chunks.find(chunk_position.id);
     if (it == m_chunks.end()) return false;
 
-    hmem::Handle<Chunk> chunk = (*it).second;
+    auto  chunk      = (*it).second;
+    auto& chunk_core = m_chunk_registry->get<ChunkCore>(chunk);
 
     // If chunk is in the process of being generated, we don't
     // need to add it to the queue again.
     ChunkState chunk_state = ChunkState::NONE;
-    if (!chunk->generation.compare_exchange_strong(chunk_state, ChunkState::PENDING)) {
+    if (!chunk_core.generation.compare_exchange_strong(
+            chunk_state, ChunkState::PENDING
+        ))
+    {
         return false;
     }
+
+    // TODO(Matthew): between loading and unloading, as tasks will be running that query
+    //                and even modify chunk data on threads elsewhere, sat in queues in
+    //                a way that is not tracked, we need to find a way as with smart ptr
+    //                to get guarantees of no UB in those tasks.
 
     auto task = m_build_load_or_generate_task();
     task->set_state(chunk, m_self);
