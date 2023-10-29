@@ -193,6 +193,7 @@ add_executable(Hemlock_Revisited
     "${PROJECT_SOURCE_DIR}/src/camera/basic_first_person_camera.cpp"
     "${PROJECT_SOURCE_DIR}/src/camera/basic_orthographic_camera.cpp"
     "${PROJECT_SOURCE_DIR}/src/debug/heatmap.cpp"
+    "${PROJECT_SOURCE_DIR}/src/ecs/protected_registry.cpp"
     "${PROJECT_SOURCE_DIR}/src/graphics/font/drawable.cpp"
     "${PROJECT_SOURCE_DIR}/src/graphics/font/font.cpp"
     "${PROJECT_SOURCE_DIR}/src/graphics/font/text_align.cpp"
