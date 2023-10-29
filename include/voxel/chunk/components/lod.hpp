@@ -10,8 +10,8 @@ namespace hemlock {
          * Represents a chunk that can be rendered are multiple LODs. The LOD level is
          * represented by an integer 0-255, this should be sufficient for any use-case.
          */
-        struct ChunkLODableComponent {
-            ChunkLODableComponent() : lod_level({}) {
+        struct ChunkLODComponent {
+            ChunkLODComponent() : lod_level({}) {
                 // TODO(Matthew): how are we going to do this? sender as pointer to
                 //                entity stored in grid? what about how to know which
                 //                registry that entity is stored in?

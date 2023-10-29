@@ -172,7 +172,7 @@ bool hvox::ChunkGrid::preload_chunk_at(ChunkGridPosition chunk_position) {
         = m_chunk_registry->emplace<ChunkCoreComponent>(chunk, m_block_pager);
     chunk_core.position = chunk_position;
 
-    m_chunk_registry->emplace<ChunkLODableComponent>(chunk);
+    m_chunk_registry->emplace<ChunkLODComponent>(chunk);
     m_chunk_registry->emplace<ChunkMeshComponent>(chunk, m_instance_data_pager);
     m_chunk_registry->emplace<ChunkNavmeshComponent>(chunk);
 
