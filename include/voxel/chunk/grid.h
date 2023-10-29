@@ -2,6 +2,7 @@
 #define __hemlock_voxel_chunk_grid_h
 
 #include "algorithm/acs/graph/state.hpp"
+#include "thread/resource_guard.hpp"
 #include "timing.h"
 #include "voxel/chunk/events/render_distance_change.hpp"
 #include "voxel/coordinate_system.h"
@@ -199,7 +200,7 @@ namespace hemlock {
                 m_build_navmesh_task;
             thread::ThreadPool<ChunkTaskContext> m_thread_pool;
 
-            hmem::Handle<entt::registry> m_chunk_registry;
+            hthread::ResourceGuard<hmem::Handle<entt::registry>> m_chunk_registry;
 
             hmem::Handle<ChunkBlockPager>        m_block_pager;
             hmem::Handle<ChunkInstanceDataPager> m_instance_data_pager;

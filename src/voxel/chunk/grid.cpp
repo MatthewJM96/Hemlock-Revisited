@@ -89,9 +89,9 @@ void hvox::ChunkGrid::init(
     m_thread_pool.init(thread_count);
 
     if (chunk_registry) {
-        m_chunk_registry = chunk_registry;
+        m_chunk_registry.init(std::move(chunk_registry));
     } else {
-        m_chunk_registry = hmem::make_handle<entt::registry>();
+        m_chunk_registry.init(hmem::make_handle<entt::registry>());
     }
 
     if (block_pager) {
