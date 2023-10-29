@@ -4,7 +4,7 @@
 
 #include "voxel/block.hpp"
 #include "voxel/chunk/component/core.hpp"
-#include "voxel/chunk/component/lodable.hpp"
+#include "voxel/chunk/component/lod.hpp"
 #include "voxel/chunk/component/mesh.hpp"
 #include "voxel/chunk/component/navmesh.hpp"
 #include "voxel/chunk/grid.h"

@@ -1,5 +1,5 @@
-#ifndef __hemlock_voxel_chunk_component_lodable_hpp
-#define __hemlock_voxel_chunk_component_lodable_hpp
+#ifndef __hemlock_voxel_chunk_component_lod_hpp
+#define __hemlock_voxel_chunk_component_lod_hpp
 
 #include "voxel/block.hpp"
 #include "voxel/chunk/event/lod_change.hpp"
@@ -30,4 +30,4 @@ namespace hemlock {
 }  // namespace hemlock
 namespace hvox = hemlock::voxel;
 
-#endif  // __hemlock_voxel_chunk_component_lodable_hpp
+#endif  // __hemlock_voxel_chunk_component_lod_hpp
