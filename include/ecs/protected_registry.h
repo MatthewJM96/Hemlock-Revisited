@@ -52,6 +52,10 @@ namespace hemlock {
             std::unordered_map<entt::entity, EntityControl> m_control_map;
             std::mutex                                      m_control_map_mutex;
 
+            // TODO(Matthew): this may end up being the crux of multiple threads being
+            //                able to control lifetime of entities - if this could be of
+            //                use then perhaps either a parallel impl or just bring
+            //                that support here.
             // Used for revisiting entities to die later should they have been under
             // processing.
             std::queue<entt::entity> m_marked_for_death;
