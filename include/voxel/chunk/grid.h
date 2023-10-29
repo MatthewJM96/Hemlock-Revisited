@@ -4,7 +4,7 @@
 #include "algorithm/acs/graph/state.hpp"
 #include "thread/resource_guard.hpp"
 #include "timing.h"
-#include "voxel/chunk/events/render_distance_change.hpp"
+#include "voxel/chunk/event/render_distance_change.hpp"
 #include "voxel/coordinate_system.h"
 #include "voxel/graphics/renderer.h"
 #include "voxel/task.hpp"

@@ -1,5 +1,5 @@
-#ifndef __hemlock_voxel_chunk_components_mesh_hpp
-#define __hemlock_voxel_chunk_components_mesh_hpp
+#ifndef __hemlock_voxel_chunk_component_mesh_hpp
+#define __hemlock_voxel_chunk_component_mesh_hpp
 
 #include "voxel/chunk/state.hpp"
 #include "voxel/graphics/mesh/instance_manager.h"
@@ -34,4 +34,4 @@ namespace hemlock {
 }  // namespace hemlock
 namespace hvox = hemlock::voxel;
 
-#endif  // __hemlock_voxel_chunk_components_mesh_hpp
+#endif  // __hemlock_voxel_chunk_component_mesh_hpp

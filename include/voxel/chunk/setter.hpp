@@ -1,7 +1,7 @@
 #ifndef __hemlock_voxel_chunk_setter_hpp
 #define __hemlock_voxel_chunk_setter_hpp
 
-#include "voxel/chunk/components/core.hpp"
+#include "voxel/chunk/component/core.hpp"
 #include "voxel/coordinate_system.h"
 
 namespace hemlock {

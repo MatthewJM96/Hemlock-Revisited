@@ -1,5 +1,5 @@
-#ifndef __hemlock_voxel_chunk_components_navmesh_hpp
-#define __hemlock_voxel_chunk_components_navmesh_hpp
+#ifndef __hemlock_voxel_chunk_component_navmesh_hpp
+#define __hemlock_voxel_chunk_component_navmesh_hpp
 
 #include "voxel/ai/navmesh.hpp"
 #include "voxel/chunk/state.hpp"
@@ -37,4 +37,4 @@ namespace hemlock {
 }  // namespace hemlock
 namespace hvox = hemlock::voxel;
 
-#endif  // __hemlock_voxel_chunk_components_navmesh_hpp
+#endif  // __hemlock_voxel_chunk_component_navmesh_hpp

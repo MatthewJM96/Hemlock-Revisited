@@ -1,10 +1,10 @@
-#ifndef __hemlock_voxel_chunk_components_core_hpp
-#define __hemlock_voxel_chunk_components_core_hpp
+#ifndef __hemlock_voxel_chunk_component_core_hpp
+#define __hemlock_voxel_chunk_component_core_hpp
 
 #include "voxel/block.hpp"
 #include "voxel/chunk/constants.hpp"
-#include "voxel/chunk/events/block_change.hpp"
-#include "voxel/chunk/events/bulk_block_change.hpp"
+#include "voxel/chunk/event/block_change.hpp"
+#include "voxel/chunk/event/bulk_block_change.hpp"
 #include "voxel/chunk/state.hpp"
 #include "voxel/coordinate_system.h"
 
@@ -117,4 +117,4 @@ namespace std {
     };
 }  // namespace std
 
-#endif  // __hemlock_voxel_chunk_components_core_hpp
+#endif  // __hemlock_voxel_chunk_component_core_hpp

@@ -1,5 +1,5 @@
-#ifndef __hemlock_voxel_chunk_events_block_change_hpp
-#define __hemlock_voxel_chunk_events_block_change_hpp
+#ifndef __hemlock_voxel_chunk_event_block_change_hpp
+#define __hemlock_voxel_chunk_event_block_change_hpp
 
 #include "voxel/block.hpp"
 #include "voxel/coordinate_system.h"
@@ -15,4 +15,4 @@ namespace hemlock {
 }  // namespace hemlock
 namespace hvox = hemlock::voxel;
 
-#endif  // __hemlock_voxel_chunk_events_block_change_hpp
+#endif  // __hemlock_voxel_chunk_event_block_change_hpp

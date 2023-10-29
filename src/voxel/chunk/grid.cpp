@@ -3,10 +3,10 @@
 #include "graphics/mesh.h"
 
 #include "voxel/block.hpp"
-#include "voxel/chunk/components/core.hpp"
-#include "voxel/chunk/components/lodable.hpp"
-#include "voxel/chunk/components/mesh.hpp"
-#include "voxel/chunk/components/navmesh.hpp"
+#include "voxel/chunk/component/core.hpp"
+#include "voxel/chunk/component/lodable.hpp"
+#include "voxel/chunk/component/mesh.hpp"
+#include "voxel/chunk/component/navmesh.hpp"
 #include "voxel/chunk/grid.h"
 
 void hvox::ChunkTask::set_state(
