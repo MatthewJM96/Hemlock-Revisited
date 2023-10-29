@@ -3,6 +3,10 @@
 #include "graphics/mesh.h"
 
 #include "voxel/block.hpp"
+#include "voxel/chunk/components/core.hpp"
+#include "voxel/chunk/components/lodable.hpp"
+#include "voxel/chunk/components/mesh.hpp"
+#include "voxel/chunk/components/navmesh.hpp"
 #include "voxel/chunk/grid.h"
 
 void hvox::ChunkTask::set_state(
@@ -154,15 +158,22 @@ bool hvox::ChunkGrid::load_chunks(
 }
 
 bool hvox::ChunkGrid::preload_chunk_at(ChunkGridPosition chunk_position) {
-    auto it = m_chunks.find(chunk_position.id);
-    if (it != m_chunks.end()) return false;
+    if (m_chunks.contains(chunk_position.id)) return false;
 
-    hmem::Handle<Chunk> chunk = hmem::allocate_handle<Chunk>(m_chunk_allocator);
-    chunk->position           = chunk_position;
-    chunk->init(chunk, m_block_pager, m_instance_data_pager);
+    // TODO(Matthew): this should actually be done in a way that is less fixed, but for
+    //                now hardcoding components is fine.
 
-    chunk->on_load         += &handle_chunk_load;
-    chunk->on_block_change += &handle_block_change;
+    auto chunk = m_chunk_registry->create();
+
+    auto& chunk_core    = m_chunk_registry->emplace<ChunkCore>(chunk, m_block_pager);
+    chunk_core.position = chunk_position;
+
+    m_chunk_registry->emplace<ChunkLODable>(chunk);
+    m_chunk_registry->emplace<ChunkMesh>(chunk, m_instance_data_pager);
+    m_chunk_registry->emplace<ChunkNavmesh>(chunk);
+
+    chunk_core.on_load         += &handle_chunk_load;
+    chunk_core.on_block_change += &handle_block_change;
 
     establish_chunk_neighbours(chunk, chunk_core);
 
