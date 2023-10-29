@@ -3,6 +3,7 @@
 
 #include "graphics/mesh.h"
 #include "timing.h"
+#include "voxel/chunk/constants.hpp"
 #include "voxel/coordinate_system.h"
 
 namespace hemlock {
