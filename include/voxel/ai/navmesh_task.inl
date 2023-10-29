@@ -1,5 +1,3 @@
-#include "voxel/chunk.h"
-
 template <hvox::ai::ChunkNavmeshStrategy NavmeshStrategy>
 void hvox::ai::ChunkNavmeshTask<
     NavmeshStrategy>::execute(ChunkLoadThreadState*, ChunkTaskQueue*) {
