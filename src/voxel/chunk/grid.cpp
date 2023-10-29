@@ -120,9 +120,12 @@ void hvox::ChunkGrid::dispose() {
 }
 
 void hvox::ChunkGrid::update(FrameTime time) {
-    for (auto chunk : m_chunks) {
-        chunk.second->update(time);
-    }
+    // for (auto chunk : m_chunks) {
+    //     // TODO(Matthew): probably going to update in a different pattern so can
+    //     probs
+    //     //                expect to remove this...
+    //     // chunk.second->update(time);
+    // }
 
     m_renderer.update(time);
 }
