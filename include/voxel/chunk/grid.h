@@ -19,6 +19,8 @@ namespace hemlock {
 
         using ChunkTaskBuilder = Delegate<ChunkTask*(void)>;
 
+        struct ChunkCore;
+
         class ChunkGrid {
         public:
             ChunkGrid();
@@ -185,7 +187,7 @@ namespace hemlock {
              */
             Event<RenderDistanceChangeEvent> on_render_distance_change;
         protected:
-            void establish_chunk_neighbours(hmem::Handle<Chunk> chunk);
+            void establish_chunk_neighbours(entt::entity chunk, ChunkCore& chunk_core);
 
             Delegate<void(Sender)>                   handle_chunk_load;
             Delegate<bool(Sender, BlockChangeEvent)> handle_block_change;

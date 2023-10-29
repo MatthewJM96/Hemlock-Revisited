@@ -164,7 +164,7 @@ bool hvox::ChunkGrid::preload_chunk_at(ChunkGridPosition chunk_position) {
     chunk->on_load         += &handle_chunk_load;
     chunk->on_block_change += &handle_block_change;
 
-    establish_chunk_neighbours(chunk);
+    establish_chunk_neighbours(chunk, chunk_core);
 
     m_chunks[chunk_position.id] = chunk;
 
@@ -225,73 +225,87 @@ hmem::Handle<hvox::Chunk> hvox::ChunkGrid::chunk(ChunkID id) {
     return it->second;
 }
 
-void hvox::ChunkGrid::establish_chunk_neighbours(hmem::Handle<Chunk> chunk) {
+void hvox::ChunkGrid::establish_chunk_neighbours(
+    entt::entity chunk, ChunkCore& chunk_core
+) {
     ChunkGridPosition neighbour_position;
 
     // Update neighbours with info of new chunk.
     // LEFT
-    neighbour_position   = chunk->position;
+    neighbour_position   = chunk_core.position;
     neighbour_position.x -= 1;
     auto it              = m_chunks.find(neighbour_position.id);
     if (it != m_chunks.end()) {
-        chunk->neighbours.one.left         = (*it).second;
-        (*it).second->neighbours.one.right = chunk;
+        chunk_core.neighbours.one.left = (*it).second;
+
+        auto& neighbour_chunk = m_chunk_registry->get<ChunkCore>((*it).second);
+        neighbour_chunk_core.neighbours.one.right = chunk;
     } else {
-        chunk->neighbours.one.left = hmem::WeakHandle<Chunk>();
+        chunk_core.neighbours.one.left = entt::null;
     }
 
     // RIGHT
-    neighbour_position   = chunk->position;
+    neighbour_position   = chunk_core.position;
     neighbour_position.x += 1;
     it                   = m_chunks.find(neighbour_position.id);
     if (it != m_chunks.end()) {
-        chunk->neighbours.one.right       = (*it).second;
-        (*it).second->neighbours.one.left = chunk;
+        chunk_core.neighbours.one.right = (*it).second;
+
+        auto& neighbour_chunk = m_chunk_registry->get<ChunkCore>((*it).second);
+        neighbour_chunk_core.neighbours.one.left = chunk;
     } else {
-        chunk->neighbours.one.right = hmem::WeakHandle<Chunk>();
+        chunk_core.neighbours.one.right = entt::null;
     }
 
     // TOP
-    neighbour_position   = chunk->position;
+    neighbour_position   = chunk_core.position;
     neighbour_position.y += 1;
     it                   = m_chunks.find(neighbour_position.id);
     if (it != m_chunks.end()) {
-        chunk->neighbours.one.top           = (*it).second;
-        (*it).second->neighbours.one.bottom = chunk;
+        chunk_core.neighbours.one.top = (*it).second;
+
+        auto& neighbour_chunk = m_chunk_registry->get<ChunkCore>((*it).second);
+        neighbour_chunk_core.neighbours.one.bottom = chunk;
     } else {
-        chunk->neighbours.one.top = hmem::WeakHandle<Chunk>();
+        chunk_core.neighbours.one.top = entt::null;
     }
 
     // BOTTOM
-    neighbour_position   = chunk->position;
+    neighbour_position   = chunk_core.position;
     neighbour_position.y -= 1;
     it                   = m_chunks.find(neighbour_position.id);
     if (it != m_chunks.end()) {
-        chunk->neighbours.one.bottom     = (*it).second;
-        (*it).second->neighbours.one.top = chunk;
+        chunk_core.neighbours.one.bottom = (*it).second;
+
+        auto& neighbour_chunk = m_chunk_registry->get<ChunkCore>((*it).second);
+        neighbour_chunk_core.neighbours.one.top = chunk;
     } else {
-        chunk->neighbours.one.bottom = hmem::WeakHandle<Chunk>();
+        chunk_core.neighbours.one.bottom = entt::null;
     }
 
     // FRONT
-    neighbour_position   = chunk->position;
+    neighbour_position   = chunk_core.position;
     neighbour_position.z -= 1;
     it                   = m_chunks.find(neighbour_position.id);
     if (it != m_chunks.end()) {
-        chunk->neighbours.one.front       = (*it).second;
-        (*it).second->neighbours.one.back = chunk;
+        chunk_core.neighbours.one.front = (*it).second;
+
+        auto& neighbour_chunk = m_chunk_registry->get<ChunkCore>((*it).second);
+        neighbour_chunk_core.neighbours.one.back = chunk;
     } else {
-        chunk->neighbours.one.front = hmem::WeakHandle<Chunk>();
+        chunk_core.neighbours.one.front = entt::null;
     }
 
     // BACK
-    neighbour_position   = chunk->position;
+    neighbour_position   = chunk_core.position;
     neighbour_position.z += 1;
     it                   = m_chunks.find(neighbour_position.id);
     if (it != m_chunks.end()) {
-        chunk->neighbours.one.back         = (*it).second;
-        (*it).second->neighbours.one.front = chunk;
+        chunk_core.neighbours.one.back = (*it).second;
+
+        auto& neighbour_chunk = m_chunk_registry->get<ChunkCore>((*it).second);
+        neighbour_chunk_core.neighbours.one.front = chunk;
     } else {
-        chunk->neighbours.one.back = hmem::WeakHandle<Chunk>();
+        chunk_core.neighbours.one.back = entt::null;
     }
 }
