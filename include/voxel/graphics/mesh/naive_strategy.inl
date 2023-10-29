@@ -4,8 +4,9 @@
 #include "voxel/face_check.hpp"
 
 template <hvox::IdealBlockComparator MeshComparator>
-bool hvox::NaiveMeshStrategy<
-    MeshComparator>::can_run(hmem::Handle<ChunkGrid>, hmem::Handle<Chunk>) const {
+bool hvox::NaiveMeshStrategy<MeshComparator>::can_run(
+    hmem::Handle<ChunkGrid>, entt::entity
+) const {
     // Only execute if all preloaded neighbouring chunks have at least been
     // generated.
     // TODO(Matthew): Revisit this. query_all_neighbour_states has been removed, do we
@@ -20,7 +21,7 @@ bool hvox::NaiveMeshStrategy<
 
 template <hvox::IdealBlockComparator MeshComparator>
 void hvox::NaiveMeshStrategy<MeshComparator>::operator()(
-    hmem::Handle<ChunkGrid>, hmem::Handle<Chunk> chunk
+    hmem::Handle<ChunkGrid>, entt::entity chunk
 ) const {
     // TODO(Matthew): Better guess work should be possible and expand only when
     // needed.

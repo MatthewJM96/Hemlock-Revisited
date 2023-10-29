@@ -3,7 +3,6 @@
 
 #include "algorithm/acs/graph/state.hpp"
 #include "timing.h"
-#include "voxel/chunk.h"
 #include "voxel/chunk/events/render_distance_change.hpp"
 #include "voxel/coordinate_system.h"
 #include "voxel/graphics/renderer.h"
@@ -19,7 +18,7 @@ namespace hemlock {
 
         using ChunkTaskBuilder = Delegate<ChunkTask*(void)>;
 
-        struct ChunkCore;
+        struct ChunkCoreComponent;
 
         class ChunkGrid {
         public:
@@ -93,6 +92,8 @@ namespace hemlock {
              * calling this when not already suspended.
              */
             void resume_chunk_tasks() { m_thread_pool.resume(); }
+
+            hmem::Handle<entt::registry> registry() { return m_chunk_registry; }
 
             ChunkRenderer* renderer() { return &m_renderer; }
 
@@ -187,7 +188,9 @@ namespace hemlock {
              */
             Event<RenderDistanceChangeEvent> on_render_distance_change;
         protected:
-            void establish_chunk_neighbours(entt::entity chunk, ChunkCore& chunk_core);
+            void establish_chunk_neighbours(
+                entt::entity chunk, ChunkCoreComponent& chunk_core
+            );
 
             Delegate<void(Sender)>                   handle_chunk_load;
             Delegate<bool(Sender, BlockChangeEvent)> handle_block_change;

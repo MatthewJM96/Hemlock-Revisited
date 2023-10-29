@@ -10,9 +10,11 @@ namespace hemlock {
         namespace ai {
             template <hvox::IdealBlockConstraint IsSolid>
             struct NaiveNavmeshStrategy {
-                void do_bulk(hmem::Handle<ChunkGrid> chunk_grid, hmem::Handle<Chunk> chunk) const;
+                void
+                do_bulk(hmem::Handle<ChunkGrid> chunk_grid, entt::entity chunk) const;
 
-                void do_stitch(hmem::Handle<ChunkGrid> chunk_grid, hmem::Handle<Chunk> chunk) const;
+                void
+                do_stitch(hmem::Handle<ChunkGrid> chunk_grid, entt::entity chunk) const;
             };
         }  // namespace ai
     }      // namespace voxel

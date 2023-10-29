@@ -6,8 +6,9 @@
 
 namespace hemlock {
     namespace voxel {
-        struct ChunkNavmesh {
-            ChunkNavmesh() : navmesh_stitch({}), bulk_navmeshing({}), navmeshing({}) {
+        struct ChunkNavmeshComponent {
+            ChunkNavmeshComponent() :
+                navmesh_stitch({}), bulk_navmeshing({}), navmeshing({}) {
                 // TODO(Matthew): how are we going to do this? sender as pointer to
                 //                entity stored in grid? what about how to know which
                 //                registry that entity is stored in?

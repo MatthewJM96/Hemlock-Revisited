@@ -165,12 +165,13 @@ bool hvox::ChunkGrid::preload_chunk_at(ChunkGridPosition chunk_position) {
 
     auto chunk = m_chunk_registry->create();
 
-    auto& chunk_core    = m_chunk_registry->emplace<ChunkCore>(chunk, m_block_pager);
+    auto& chunk_core
+        = m_chunk_registry->emplace<ChunkCoreComponent>(chunk, m_block_pager);
     chunk_core.position = chunk_position;
 
-    m_chunk_registry->emplace<ChunkLODable>(chunk);
-    m_chunk_registry->emplace<ChunkMesh>(chunk, m_instance_data_pager);
-    m_chunk_registry->emplace<ChunkNavmesh>(chunk);
+    m_chunk_registry->emplace<ChunkLODableComponent>(chunk);
+    m_chunk_registry->emplace<ChunkMeshComponent>(chunk, m_instance_data_pager);
+    m_chunk_registry->emplace<ChunkNavmeshComponent>(chunk);
 
     chunk_core.on_load         += &handle_chunk_load;
     chunk_core.on_block_change += &handle_block_change;
@@ -191,7 +192,7 @@ bool hvox::ChunkGrid::load_chunk_at(ChunkGridPosition chunk_position) {
     if (it == m_chunks.end()) return false;
 
     auto  chunk      = (*it).second;
-    auto& chunk_core = m_chunk_registry->get<ChunkCore>(chunk);
+    auto& chunk_core = m_chunk_registry->get<ChunkCoreComponent>(chunk);
 
     // If chunk is in the process of being generated, we don't
     // need to add it to the queue again.
@@ -246,7 +247,7 @@ hmem::Handle<hvox::Chunk> hvox::ChunkGrid::chunk(ChunkID id) {
 }
 
 void hvox::ChunkGrid::establish_chunk_neighbours(
-    entt::entity chunk, ChunkCore& chunk_core
+    entt::entity chunk, ChunkCoreComponent& chunk_core
 ) {
     ChunkGridPosition neighbour_position;
 
@@ -258,7 +259,7 @@ void hvox::ChunkGrid::establish_chunk_neighbours(
     if (it != m_chunks.end()) {
         chunk_core.neighbours.one.left = (*it).second;
 
-        auto& neighbour_chunk = m_chunk_registry->get<ChunkCore>((*it).second);
+        auto& neighbour_chunk = m_chunk_registry->get<ChunkCoreComponent>((*it).second);
         neighbour_chunk_core.neighbours.one.right = chunk;
     } else {
         chunk_core.neighbours.one.left = entt::null;
@@ -271,7 +272,7 @@ void hvox::ChunkGrid::establish_chunk_neighbours(
     if (it != m_chunks.end()) {
         chunk_core.neighbours.one.right = (*it).second;
 
-        auto& neighbour_chunk = m_chunk_registry->get<ChunkCore>((*it).second);
+        auto& neighbour_chunk = m_chunk_registry->get<ChunkCoreComponent>((*it).second);
         neighbour_chunk_core.neighbours.one.left = chunk;
     } else {
         chunk_core.neighbours.one.right = entt::null;
@@ -284,7 +285,7 @@ void hvox::ChunkGrid::establish_chunk_neighbours(
     if (it != m_chunks.end()) {
         chunk_core.neighbours.one.top = (*it).second;
 
-        auto& neighbour_chunk = m_chunk_registry->get<ChunkCore>((*it).second);
+        auto& neighbour_chunk = m_chunk_registry->get<ChunkCoreComponent>((*it).second);
         neighbour_chunk_core.neighbours.one.bottom = chunk;
     } else {
         chunk_core.neighbours.one.top = entt::null;
@@ -297,7 +298,7 @@ void hvox::ChunkGrid::establish_chunk_neighbours(
     if (it != m_chunks.end()) {
         chunk_core.neighbours.one.bottom = (*it).second;
 
-        auto& neighbour_chunk = m_chunk_registry->get<ChunkCore>((*it).second);
+        auto& neighbour_chunk = m_chunk_registry->get<ChunkCoreComponent>((*it).second);
         neighbour_chunk_core.neighbours.one.top = chunk;
     } else {
         chunk_core.neighbours.one.bottom = entt::null;
@@ -310,7 +311,7 @@ void hvox::ChunkGrid::establish_chunk_neighbours(
     if (it != m_chunks.end()) {
         chunk_core.neighbours.one.front = (*it).second;
 
-        auto& neighbour_chunk = m_chunk_registry->get<ChunkCore>((*it).second);
+        auto& neighbour_chunk = m_chunk_registry->get<ChunkCoreComponent>((*it).second);
         neighbour_chunk_core.neighbours.one.back = chunk;
     } else {
         chunk_core.neighbours.one.front = entt::null;
@@ -323,7 +324,7 @@ void hvox::ChunkGrid::establish_chunk_neighbours(
     if (it != m_chunks.end()) {
         chunk_core.neighbours.one.back = (*it).second;
 
-        auto& neighbour_chunk = m_chunk_registry->get<ChunkCore>((*it).second);
+        auto& neighbour_chunk = m_chunk_registry->get<ChunkCoreComponent>((*it).second);
         neighbour_chunk_core.neighbours.one.front = chunk;
     } else {
         chunk_core.neighbours.one.back = entt::null;

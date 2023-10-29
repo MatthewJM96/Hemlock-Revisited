@@ -18,7 +18,8 @@ namespace hemlock {
          *
          * @return True if the block was set, false otherwise.
          */
-        bool set_block(ChunkCore& chunk, BlockChunkPosition position, Block block);
+        bool
+        set_block(ChunkCoreComponent& chunk, BlockChunkPosition position, Block block);
 
         /**
          * @brief Set all points in a rectangular cuboid of the passed in chunk to a
@@ -35,10 +36,10 @@ namespace hemlock {
          * @return True if the blocks were set, false otherwise.
          */
         bool set_blocks(
-            ChunkCore&         chunk,
-            BlockChunkPosition start,
-            BlockChunkPosition end,
-            Block              block
+            ChunkCoreComponent& chunk,
+            BlockChunkPosition  start,
+            BlockChunkPosition  end,
+            Block               block
         );
 
         /**
@@ -58,10 +59,10 @@ namespace hemlock {
          * @return True if the blocks were set, false otherwise.
          */
         bool set_blocks(
-            ChunkCore&         chunk,
-            BlockChunkPosition start,
-            BlockChunkPosition end,
-            Block*             blocks
+            ChunkCoreComponent& chunk,
+            BlockChunkPosition  start,
+            BlockChunkPosition  end,
+            Block*              blocks
         );
 
         /**

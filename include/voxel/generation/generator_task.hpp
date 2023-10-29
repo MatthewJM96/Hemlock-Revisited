@@ -11,12 +11,12 @@ namespace hemlock {
          * @brief Defines a struct whose opeartor() sets the blocks of a chunk.
          */
         template <typename StrategyCandidate>
-        concept ChunkGenerationStrategy
-            = requires (StrategyCandidate s, hmem::Handle<Chunk> c) {
-                  {
-                      s.operator()(c)
-                      } -> std::same_as<void>;
-              };
+        concept ChunkGenerationStrategy = requires (StrategyCandidate s, entt
+                                                    : entity          c) {
+                                              {
+                                                  s.operator()(c)
+                                                  } -> std::same_as<void>;
+                                          };
 
         template <hvox::ChunkGenerationStrategy GenerationStrategy>
         class ChunkGenerationTask : public ChunkTask {

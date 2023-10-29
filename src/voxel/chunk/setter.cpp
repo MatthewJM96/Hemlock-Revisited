@@ -2,7 +2,9 @@
 
 #include "voxel/chunk/setter.hpp"
 
-bool hvox::set_block(ChunkCore& chunk, BlockChunkPosition block_position, Block block) {
+bool hvox::set_block(
+    ChunkCoreComponent& chunk, BlockChunkPosition block_position, Block block
+) {
     auto block_idx = block_index(block_position);
 
     {
@@ -26,10 +28,10 @@ bool hvox::set_block(ChunkCore& chunk, BlockChunkPosition block_position, Block 
 }
 
 bool hvox::set_blocks(
-    ChunkCore&         chunk,
-    BlockChunkPosition start_block_position,
-    BlockChunkPosition end_block_position,
-    Block              block
+    ChunkCoreComponent& chunk,
+    BlockChunkPosition  start_block_position,
+    BlockChunkPosition  end_block_position,
+    Block               block
 ) {
     {
         std::shared_lock lock(chunk.blocks_mutex);
@@ -52,10 +54,10 @@ bool hvox::set_blocks(
 }
 
 bool hvox::set_blocks(
-    ChunkCore&         chunk,
-    BlockChunkPosition start_block_position,
-    BlockChunkPosition end_block_position,
-    Block*             blocks
+    ChunkCoreComponent& chunk,
+    BlockChunkPosition  start_block_position,
+    BlockChunkPosition  end_block_position,
+    Block*              blocks
 ) {
     {
         std::shared_lock lock(chunk.blocks_mutex);

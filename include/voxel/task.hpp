@@ -22,11 +22,9 @@ namespace hemlock {
             virtual ~ChunkTask() { /* Empty. */
             }
 
-            void set_state(
-                hmem::WeakHandle<Chunk> chunk, hmem::WeakHandle<ChunkGrid> chunk_grid
-            );
+            void set_state(entt::entity chunk, hmem::WeakHandle<ChunkGrid> chunk_grid);
         protected:
-            hmem::WeakHandle<Chunk>     m_chunk;
+            entt::entity                m_chunk;
             hmem::WeakHandle<ChunkGrid> m_chunk_grid;
         };
     }  // namespace voxel

@@ -6,8 +6,9 @@
 
 namespace hemlock {
     namespace voxel {
-        struct ChunkMesh {
-            ChunkMesh(hmem::Handle<ChunkInstanceDataPager> instance_data_pager) :
+        struct ChunkMeshComponent {
+            ChunkMeshComponent(hmem::Handle<ChunkInstanceDataPager> instance_data_pager
+            ) :
                 meshing({}), mesh_uploading({}) {
                 instance.init(instance_data_pager);
 
@@ -21,7 +22,7 @@ namespace hemlock {
                 on_mesh_change.set_sender(Sender());
             }
 
-            ~ChunkMesh() { instance.dispose(); }
+            ~ChunkMeshComponent() { instance.dispose(); }
 
             ChunkInstanceManager instance;
 

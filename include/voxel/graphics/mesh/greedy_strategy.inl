@@ -4,12 +4,16 @@
 #include "voxel/chunk/grid.h"
 
 template <hvox::IdealBlockComparator MeshComparator>
-bool hvox::GreedyMeshStrategy<MeshComparator>::can_run(hmem::Handle<ChunkGrid>, hmem::Handle<Chunk>) const {
+bool hvox::GreedyMeshStrategy<MeshComparator>::can_run(
+    hmem::Handle<ChunkGrid>, entt::entity
+) const {
     return true;
 }
 
 template <hvox::IdealBlockComparator MeshComparator>
-void hvox::GreedyMeshStrategy<MeshComparator>::operator()(hmem::Handle<ChunkGrid>, hmem::Handle<Chunk> chunk) const {
+void hvox::GreedyMeshStrategy<MeshComparator>::operator()(
+    hmem::Handle<ChunkGrid>, entt::entity chunk
+) const {
     // TODO(Matthew): Better guess work should be possible and expand only when
     // needed.
     //                  Maybe in addition to managing how all chunk's transformations

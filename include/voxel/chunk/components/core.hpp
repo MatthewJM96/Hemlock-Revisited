@@ -44,8 +44,8 @@ namespace hemlock {
          * A chunk MUST be constructed with this component as a basic requirement. Other
          * components are all optionals.
          */
-        struct ChunkCore {
-            ChunkCore(hmem::Handle<ChunkBlockPager> block_pager) :
+        struct ChunkCoreComponent {
+            ChunkCoreComponent(hmem::Handle<ChunkBlockPager> block_pager) :
                 position({}), neighbours({}) {
                 blocks        = block_pager->get_page();
                 m_block_pager = block_pager;
@@ -63,7 +63,7 @@ namespace hemlock {
                 on_unload.set_sender(Sender());
             }
 
-            ~ChunkCore() {
+            ~ChunkCoreComponent() {
                 if (blocks) m_block_pager->free_page(blocks);
                 blocks = nullptr;
 
@@ -109,8 +109,8 @@ namespace hvox = hemlock::voxel;
 
 namespace std {
     template <>
-    struct hash<hvox::ChunkCore> {
-        std::size_t operator()(const hvox::ChunkCore& chunk) const {
+    struct hash<hvox::ChunkCoreComponent> {
+        std::size_t operator()(const hvox::ChunkCoreComponent& chunk) const {
             std::hash<hvox::ColumnID> _hash;
             return _hash(chunk.id());
         }

@@ -7,9 +7,10 @@ namespace hemlock {
     namespace voxel {
         template <hvox::IdealBlockComparator MeshComparator>
         struct NaiveMeshStrategy {
-            bool can_run(hmem::Handle<ChunkGrid> chunk_grid, hmem::Handle<Chunk> chunk) const;
+            bool can_run(hmem::Handle<ChunkGrid> chunk_grid, entt::entity chunk) const;
 
-            void operator()(hmem::Handle<ChunkGrid> chunk_grid, hmem::Handle<Chunk> chunk) const;
+            void
+            operator()(hmem::Handle<ChunkGrid> chunk_grid, entt::entity chunk) const;
         };
     }  // namespace voxel
 }  // namespace hemlock
