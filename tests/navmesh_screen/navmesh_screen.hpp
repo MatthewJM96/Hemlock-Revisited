@@ -600,13 +600,14 @@ public:
 
         handle_key_down = hemlock::Subscriber<hui::KeyboardButtonEvent>{
             [&](hemlock::Sender, hui::KeyboardButtonEvent ev) {
-                if (ev.physical_key == hui::PhysicalKey::H_RETURN) {
+                /*if (ev.physical_key == hui::PhysicalKey::H_RETURN) {
                     m_capture_mouse = true;
                     SDL_SetRelativeMouseMode(SDL_TRUE);
                 } else if (ev.physical_key == hui::PhysicalKey::H_ESCAPE) {
                     m_capture_mouse = false;
                     SDL_SetRelativeMouseMode(SDL_FALSE);
-                } else if (ev.physical_key == hui::PhysicalKey::H_L) {
+                } else */
+                if (ev.physical_key == hui::PhysicalKey::H_L) {
                     m_draw_chunk_outlines = !m_draw_chunk_outlines;
                 } else if (ev.physical_key == hui::PhysicalKey::H_T) {
                     if (m_nav_test_mode == 0) m_nav_test_mode = 1;
@@ -617,17 +618,25 @@ public:
         };
         hui::InputDispatcher::instance()->on_keyboard.button_down += &handle_key_down;
 
-        handle_mouse_move
-            = hemlock::Subscriber<hui::MouseMoveEvent>{ [&](hemlock::Sender,
-                                                            hui::MouseMoveEvent ev) {
-                  if (m_capture_mouse) {
-                      m_camera.rotate_from_mouse_with_absolute_up(
-                          -1.0f * static_cast<f32>(ev.dx),
-                          -1.0f * static_cast<f32>(ev.dy),
-                          0.005f
-                      );
-                  }
-              } };
+        handle_mouse_move = hemlock::Subscriber<hui::MouseMoveEvent>{
+            [&](hemlock::Sender, hui::MouseMoveEvent ev) {
+                if (m_input_manager->is_pressed(static_cast<ui8>(hui::MouseButton::LEFT)
+                    )) {
+                    m_camera.rotate_from_mouse_with_absolute_up(
+                        -1.0f * static_cast<f32>(ev.dx),
+                        -1.0f * static_cast<f32>(ev.dy),
+                        0.005f
+                    );
+                }
+                // if (m_capture_mouse) {
+                //     m_camera.rotate_from_mouse_with_absolute_up(
+                //         -1.0f * static_cast<f32>(ev.dx),
+                //         -1.0f * static_cast<f32>(ev.dy),
+                //         0.005f
+                //     );
+                // }
+            }
+        };
     }
 protected:
     hemlock::Subscriber<hui::MouseMoveEvent>      handle_mouse_move;
