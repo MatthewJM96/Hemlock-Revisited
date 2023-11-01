@@ -26,9 +26,8 @@ void hvox::GreedyMeshStrategy<MeshComparator>::operator()(
     //                      further improve performance and also remove the difficulty
     //                      of the above TODO.
 
-    std::shared_lock block_lock(chunk->blocks_mutex);
-
-    Block* blocks = chunk->blocks;
+    std::shared_lock<std::shared_mutex> block_lock;
+    auto                                blocks = chunk->blocks.get(block_lock);
 
     std::queue<BlockChunkPosition> queued_for_visit;
 
