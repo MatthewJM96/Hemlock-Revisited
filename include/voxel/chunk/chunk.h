@@ -71,8 +71,6 @@ namespace hemlock {
             Event<>               on_unload;
         protected:
             void init_events(hmem::WeakHandle<Chunk> self);
-
-            hmem::Handle<ChunkBlockPager> m_block_pager;
         };
     }  // namespace voxel
 }  // namespace hemlock

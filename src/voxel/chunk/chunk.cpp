@@ -36,8 +36,7 @@ void hvox::Chunk::init(
 ) {
     init_events(self);
 
-    blocks        = block_pager->get_page();
-    m_block_pager = block_pager;
+    blocks.init(block_pager);
 
     instance.init(instance_data_pager);
 
