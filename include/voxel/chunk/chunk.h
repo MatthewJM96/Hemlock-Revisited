@@ -1,5 +1,5 @@
-#ifndef __hemlock_voxel_chunk_h
-#define __hemlock_voxel_chunk_h
+#ifndef __hemlock_voxel_chunk_chunk_h
+#define __hemlock_voxel_chunk_chunk_h
 
 #include "graphics/mesh.h"
 #include "timing.h"
@@ -89,4 +89,4 @@ namespace std {
     };
 }  // namespace std
 
-#endif  // __hemlock_voxel_chunk_h
+#endif  // __hemlock_voxel_chunk_chunk_h
