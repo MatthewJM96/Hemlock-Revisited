@@ -2,7 +2,7 @@
 
 #include "voxel/block.hpp"
 
-#include "voxel/chunk.h"
+#include "voxel/chunk/chunk.h"
 
 hvox::Chunk::Chunk() :
     neighbours({}),

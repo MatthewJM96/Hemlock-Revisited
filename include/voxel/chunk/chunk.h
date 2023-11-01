@@ -156,6 +156,6 @@ namespace std {
     };
 }  // namespace std
 
-#include "voxel/chunk.inl"
+#include "voxel/chunk/chunk.inl"
 
 #endif  // __hemlock_voxel_chunk_h

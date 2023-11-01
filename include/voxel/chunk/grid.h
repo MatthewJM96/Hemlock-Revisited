@@ -3,7 +3,7 @@
 
 #include "algorithm/acs/graph/state.hpp"
 #include "timing.h"
-#include "voxel/chunk.h"
+#include "voxel/chunk/chunk.h"
 #include "voxel/coordinate_system.h"
 #include "voxel/graphics/renderer.h"
 #include "voxel/task.hpp"
@@ -195,7 +195,8 @@ namespace hemlock {
             Delegate<void(Sender)>                   handle_chunk_load;
             Delegate<bool(Sender, BlockChangeEvent)> handle_block_change;
 
-            ChunkTaskBuilder m_build_load_or_generate_task, m_build_mesh_task, m_build_navmesh_task;
+            ChunkTaskBuilder m_build_load_or_generate_task, m_build_mesh_task,
+                m_build_navmesh_task;
             thread::ThreadPool<ChunkTaskContext> m_thread_pool;
 
             ChunkAllocator m_chunk_allocator;

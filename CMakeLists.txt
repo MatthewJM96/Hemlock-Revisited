@@ -211,7 +211,7 @@ add_executable(Hemlock_Revisited
     "${PROJECT_SOURCE_DIR}/src/thread/thread_workflow_builder.cpp"
     "${PROJECT_SOURCE_DIR}/src/ui/input/dispatcher.cpp"
     "${PROJECT_SOURCE_DIR}/src/ui/input/manager.cpp"
-    "${PROJECT_SOURCE_DIR}/src/voxel/chunk.cpp"
+    "${PROJECT_SOURCE_DIR}/src/voxel/chunk/chunk.cpp"
     "${PROJECT_SOURCE_DIR}/src/voxel/chunk/grid.cpp"
     "${PROJECT_SOURCE_DIR}/src/voxel/coordinate_system.cpp"
     "${PROJECT_SOURCE_DIR}/src/voxel/graphics/renderer.cpp"

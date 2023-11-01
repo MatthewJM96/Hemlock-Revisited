@@ -1,4 +1,4 @@
-#include "voxel/chunk.h"
+#include "voxel/chunk/chunk.h"
 
 template <hvox::ai::ChunkNavmeshStrategy NavmeshStrategy>
 void hvox::ai::ChunkNavmeshTask<
