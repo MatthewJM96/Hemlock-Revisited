@@ -5,6 +5,7 @@
 #include "timing.h"
 #include "voxel/ai/navmesh.hpp"
 #include "voxel/block.hpp"
+#include "voxel/block_manager.h"
 #include "voxel/chunk/constants.hpp"
 #include "voxel/chunk/events.hpp"
 #include "voxel/chunk/state.hpp"
@@ -34,7 +35,7 @@ namespace hemlock {
             ChunkGridPosition position;
             Neighbours        neighbours;
 
-            hthread::ResourceGuard<Block*> blocks;
+            BlockManager blocks;
 
             hthread::ResourceGuard<ai::ChunkNavmesh> navmesh;
 

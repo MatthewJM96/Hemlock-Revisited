@@ -6,7 +6,8 @@
 
 hvox::Chunk::Chunk() :
     neighbours({}),
-    blocks(nullptr),
+    blocks({}),
+    navmesh({}),
     lod_level(0),
     generation(ChunkState::NONE),
     meshing(ChunkState::NONE),
@@ -22,9 +23,7 @@ hvox::Chunk::~Chunk() {
     // debug_printf("Unloading chunk at (%d, %d, %d).\n", position.x, position.y,
     // position.z);
 
-    if (blocks) m_block_pager->free_page(blocks);
-    blocks = nullptr;
-
+    blocks.dispose();
     instance.dispose();
 
     neighbours = {};
