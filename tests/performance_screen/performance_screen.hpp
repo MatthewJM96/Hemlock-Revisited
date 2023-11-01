@@ -160,9 +160,10 @@ public:
                     hemlock::global_unitary_rand<f32>() * static_cast<f32>(CHUNK_VOLUME)
                 ));
 
-                std::cout << "    - "
-                          << chunks[rand_chunk_idx]->blocks[rand_block_idx].id
-                          << std::endl;
+                std::shared_lock<std::shared_mutex> lock;
+                auto blocks = chunks[rand_chunk_idx]->blocks.get(lock);
+
+                std::cout << "    - " << blocks[rand_block_idx].id << std::endl;
             }
 
             const hvox::NaiveMeshStrategy<htest::performance_screen::BlockComparator>
@@ -339,8 +340,10 @@ public:
                     hemlock::global_unitary_rand<f32>() * static_cast<f32>(iterations)
                 ));
 
-                std::cout << "    - "
-                          << boost::num_vertices(chunks[rand_chunk_idx]->navmesh.graph)
+                std::shared_lock<std::shared_mutex> lock;
+                auto navmesh = chunks[rand_chunk_idx]->navmesh.get(lock);
+
+                std::cout << "    - " << boost::num_vertices(navmesh.graph)
                           << std::endl;
             }
 
