@@ -45,8 +45,6 @@ namespace hemlock {
 
             hmem::WeakHandle<Chunk> all[8];
         };
-
-        using ChunkBlockPager = hmem::Pager<Block, CHUNK_VOLUME, 3>;
     }  // namespace voxel
 }  // namespace hemlock
 namespace hvox = hemlock::voxel;
