@@ -6,7 +6,7 @@ namespace hemlock {
         template <typename ResourceType>
         class ResourceGuard {
         public:
-            ResourceGuard() {
+            ResourceGuard() : m_resource({}) {
                 // Empty.
             }
 
