@@ -1,6 +1,7 @@
 #ifndef __hemlock_voxel_graphics_mesh_instance_manager_h
 #define __hemlock_voxel_graphics_mesh_instance_manager_h
 
+#include "thread/resource_guard.hpp"
 #include "voxel/block.hpp"
 #include "voxel/chunk/constants.hpp"
 
@@ -19,26 +20,15 @@ namespace hemlock {
         // expand on demand.
         using ChunkInstanceDataPager = hmem::Pager<ChunkInstanceData, CHUNK_VOLUME, 3>;
 
-        class ChunkInstanceManager {
+        class ChunkInstanceManager : public hthread::ResourceGuard<ChunkInstance> {
         public:
-            ChunkInstanceManager();
-
-            ~ChunkInstanceManager() { /* Empty. */
-            }
-
             void init(hmem::Handle<ChunkInstanceDataPager> data_pager);
             void dispose();
-
-            ChunkInstance&       get(std::unique_lock<std::shared_mutex>& lock);
-            const ChunkInstance& get(std::shared_lock<std::shared_mutex>& lock);
 
             void generate_buffer();
             void free_buffer();
         protected:
             hmem::Handle<ChunkInstanceDataPager> m_data_pager;
-
-            std::shared_mutex m_mutex;
-            ChunkInstance     m_instance;
         };
     }  // namespace voxel
 }  // namespace hemlock
