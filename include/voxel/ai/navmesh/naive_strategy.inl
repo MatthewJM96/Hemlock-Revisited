@@ -47,7 +47,8 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_bulk(
 ) const {
     auto chunk_pos = chunk->position;
 
-    std::shared_lock block_lock(chunk->blocks_mutex);
+    std::shared_lock<std::shared_mutex> block_lock;
+    const Block*                        chunk_blocks = chunk->blocks.get(block_lock);
 
     const IsSolid is_solid{};
 

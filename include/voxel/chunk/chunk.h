@@ -34,11 +34,9 @@ namespace hemlock {
             ChunkGridPosition position;
             Neighbours        neighbours;
 
-            std::shared_mutex blocks_mutex;
-            Block*            blocks;
+            hthread::ResourceGuard<Block*> blocks;
 
-            std::shared_mutex navmesh_mutex;
-            ai::ChunkNavmesh  navmesh;
+            hthread::ResourceGuard<ai::ChunkNavmesh> navmesh;
 
             ChunkInstanceManager instance;
 
