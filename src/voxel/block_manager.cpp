@@ -2,29 +2,27 @@
 
 #include "voxel/block_manager.h"
 
-void hvox::ChunkInstanceManager::init(hmem::Handle<ChunkBlockPager> block_pager) {
+void hvox::BlockManager::init(hmem::Handle<ChunkBlockPager> block_pager) {
     m_block_pager = block_pager;
 
     generate_buffer();
 }
 
-void hvox::ChunkInstanceManager::dispose() {
+void hvox::BlockManager::dispose() {
     free_buffer();
 
     m_block_pager = nullptr;
 }
 
-void hvox::ChunkInstanceManager::generate_buffer() {
+void hvox::BlockManager::generate_buffer() {
     std::unique_lock lock(m_mutex);
 
-    m_resource.count = 0;
-    if (!m_resource.data) m_resource.data = m_block_pager->get_page();
+    if (!m_resource) m_resource = m_block_pager->get_page();
 }
 
-void hvox::ChunkInstanceManager::free_buffer() {
+void hvox::BlockManager::free_buffer() {
     std::unique_lock lock(m_mutex);
 
-    m_resource.count = 0;
-    if (m_resource.data) m_block_pager->free_page(m_resource.data);
-    m_resource.data = nullptr;
+    if (m_resource) m_block_pager->free_page(m_resource);
+    m_resource = nullptr;
 }
