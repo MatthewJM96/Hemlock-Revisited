@@ -12,7 +12,7 @@ namespace hemlock {
                 const std::remove_pointer_t<std::decay_t<ResourceType>>* const,
                 const std::decay_t<ResourceType>>;
 
-            ResourceGuard() : m_resource({}) {
+            ResourceGuard() : m_resource{} {
                 // Empty.
             }
 
