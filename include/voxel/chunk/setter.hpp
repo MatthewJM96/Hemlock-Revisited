@@ -9,37 +9,41 @@ namespace hemlock {
         struct Chunk;
 
         /**
-         * @brief Set the block at the given position in the chunk
-         * passed in.
+         * @brief Set the block at the given position in the given chunk.
+         *
+         * NOTE: This call is unsafe! Only call from a context where the corresponding
+         * chunk entity is guaranteed to remain alive until the call returns.
          *
          * @param chunk The chunk in which to set the block.
-         * @param block_position The position at which to set the block.
+         * @param position The position at which to set the block.
          * @param block The block to set.
          *
          * @return True if the block was set, false otherwise.
          */
-        bool set_block(
-            hmem::Handle<Chunk> chunk, BlockChunkPosition block_position, Block block
-        );
+        bool
+        set_block(hmem::Handle<Chunk> chunk, BlockChunkPosition position, Block block);
+
         /**
-         * @brief Set all points in a rectangular cuboid of the
-         * passed in chunk to a specific block.
+         * @brief Set all points in a rectangular cuboid of the passed in chunk to a
+         * specific block.
+         *
+         * NOTE: This call is unsafe! Only call from a context where the corresponding
+         * chunk entity is guaranteed to remain alive until the call returns.
          *
          * @param chunk The chunk in which to set the block.
-         * @param block_position The position marking the start of
-         * the rectangular cuboid to set blocks in.
-         * @param block_position The position marking the end of
-         * the rectangular cuboid to set blocks in.
+         * @param start The starting position of the range to set blocks for.
+         * @param end The end position of the range to set blocks for.
          * @param block The block to set.
          *
          * @return True if the blocks were set, false otherwise.
          */
         bool set_blocks(
             hmem::Handle<Chunk> chunk,
-            BlockChunkPosition  start_block_position,
-            BlockChunkPosition  end_block_position,
+            BlockChunkPosition  start,
+            BlockChunkPosition  end,
             Block               block
         );
+
         /**
          * @brief Set all points in a rectangular cuboid of the
          * passed in chunk to each block in a buffer. Note, the
@@ -47,31 +51,58 @@ namespace hemlock {
          * from the near bottom left of the chunk.
          *
          * @param chunk The chunk in which to set the block.
-         * @param block_position The position at which to set the block.
-         * @param block The blocks to set.
+         * @param start The starting position of the range to set blocks for.
+         * @param end The end position of the range to set blocks for.
+         * @param blocks The blocks to set.
          *
          * @return True if the blocks were set, false otherwise.
          */
         bool set_blocks(
             hmem::Handle<Chunk> chunk,
-            BlockChunkPosition  start_block_position,
-            BlockChunkPosition  end_block_position,
+            BlockChunkPosition  start,
+            BlockChunkPosition  end,
             Block*              blocks
         );
 
+        /**
+         * @brief Sets elements of the given buffer that lie within the range of the
+         * start and end block positions specified to the data value provided.
+         *
+         * NOTE: This call is unsafe! Only call from a context where the corresponding
+         * buffer is guaranteed to remain alive until the call returns.
+         *
+         * @tparam DataType The type of the data to be set.
+         * @param buffer The buffer to set data within.
+         * @param start The starting position of the range to set data for.
+         * @param end The end position of the range to set data for.
+         * @param data The data to set.
+         */
         template <typename DataType>
         void set_per_block_data(
             DataType*                buffer,
-            hvox::BlockChunkPosition start_block_position,
-            hvox::BlockChunkPosition end_block_position,
+            hvox::BlockChunkPosition start,
+            hvox::BlockChunkPosition end,
             DataType                 data
         );
 
+        /**
+         * @brief Sets elements of the given buffer that lie within the range of the
+         * start and end block positions specified to the data value provided.
+         *
+         * NOTE: This call is unsafe! Only call from a context where the corresponding
+         * buffer is guaranteed to remain alive until the call returns.
+         *
+         * @tparam DataType The type of the data to be set.
+         * @param buffer The buffer to set data within.
+         * @param start The starting position of the range to set data for.
+         * @param end The end position of the range to set data for.
+         * @param data Pointer to the data to set.
+         */
         template <typename DataType>
         void set_per_block_data(
             DataType*                buffer,
-            hvox::BlockChunkPosition start_block_position,
-            hvox::BlockChunkPosition end_block_position,
+            hvox::BlockChunkPosition start,
+            hvox::BlockChunkPosition end,
             DataType*                data
         );
     }  // namespace voxel
