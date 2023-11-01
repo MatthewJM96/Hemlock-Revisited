@@ -2,6 +2,7 @@
 #include "voxel/block.hpp"
 #include "voxel/chunk/chunk.h"
 #include "voxel/chunk/grid.h"
+#include "voxel/chunk/setter.hpp"
 
 template <hvox::IdealBlockComparator MeshComparator>
 bool hvox::GreedyMeshStrategy<
