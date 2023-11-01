@@ -10,21 +10,22 @@ bool hvox::set_block(
     auto block_idx = block_index(position);
 
     {
-        std::shared_lock lock(chunk->blocks_mutex);
+        std::shared_lock<std::shared_mutex> lock;
+        auto                                blocks = chunk->blocks.get(lock);
 
         bool gen_task_active
             = chunk->generation.load(std::memory_order_acquire) == ChunkState::ACTIVE;
         if (!gen_task_active) {
-            bool should_cancel = chunk->on_block_change(
-                { chunk, chunk->blocks[block_idx], block, position }
-            );
+            bool should_cancel
+                = chunk->on_block_change({ blocks[block_idx], block, position });
             if (should_cancel) return false;
         }
     }
 
-    std::lock_guard lock(chunk->blocks_mutex);
+    std::unique_lock<std::shared_mutex> lock;
+    auto                                blocks = chunk->blocks.get(lock);
 
-    chunk->blocks[block_idx] = block;
+    blocks[block_idx] = block;
 
     return true;
 }
@@ -36,20 +37,19 @@ bool hvox::set_blocks(
     Block               block
 ) {
     {
-        std::shared_lock lock(chunk->blocks_mutex);
-
         bool gen_task_active
             = chunk->generation.load(std::memory_order_acquire) == ChunkState::ACTIVE;
         if (!gen_task_active) {
             bool should_cancel
-                = chunk->on_bulk_block_change({ chunk, &block, true, start, end });
+                = chunk->on_bulk_block_change({ &block, true, start, end });
             if (should_cancel) return false;
         }
     }
 
-    std::lock_guard lock(chunk->blocks_mutex);
+    std::unique_lock<std::shared_mutex> lock;
+    auto                                chunk_blocks = chunk->blocks.get(lock);
 
-    set_per_block_data(chunk->blocks, start, end, block);
+    set_per_block_data(chunk_blocks, start, end, block);
 
     return true;
 }
@@ -61,20 +61,19 @@ bool hvox::set_blocks(
     Block*              blocks
 ) {
     {
-        std::shared_lock lock(chunk->blocks_mutex);
-
         bool gen_task_active
             = chunk->generation.load(std::memory_order_acquire) == ChunkState::ACTIVE;
         if (!gen_task_active) {
             bool should_cancel
-                = chunk->on_bulk_block_change({ chunk, blocks, false, start, end });
+                = chunk->on_bulk_block_change({ blocks, false, start, end });
             if (should_cancel) return false;
         }
     }
 
-    std::lock_guard lock(chunk->blocks_mutex);
+    std::unique_lock<std::shared_mutex> lock;
+    auto                                chunk_blocks = chunk->blocks.get(lock);
 
-    set_per_block_data(chunk->blocks, start, end, blocks);
+    set_per_block_data(chunk_blocks, start, end, blocks);
 
     return true;
 }
