@@ -16,18 +16,16 @@ namespace hemlock {
         };
 
         struct BlockChangeEvent {
-            hmem::Handle<Chunk> chunk;
-            Block               old_block;
-            Block               new_block;
-            BlockChunkPosition  block_position;
+            Block              old_block;
+            Block              new_block;
+            BlockChunkPosition block_position;
         };
 
         struct BulkBlockChangeEvent {
-            hmem::Handle<Chunk> chunk;
-            Block*              new_blocks;
-            bool                single_block;
-            BlockChunkPosition  start_position;
-            BlockChunkPosition  end_position;
+            Block*             new_blocks;
+            bool               single_block;
+            BlockChunkPosition start_position;
+            BlockChunkPosition end_position;
         };
     }  // namespace voxel
 }  // namespace hemlock
