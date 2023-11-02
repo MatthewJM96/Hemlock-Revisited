@@ -27,6 +27,9 @@
 // TODO(Matthew): To efficiently handle changes in a neighbour affecting bulk
 //                navmeshing, implement an on_X_face_change event in chunks?
 
+// TODO(Matthew): Notably slowed down stitch time in access pattern change... visit
+// this.
+
 namespace hemlock::voxel::ai::impl {
     inline ChunkNavmeshVertexDescriptor
     get_vertex(hvox::ai::ChunkNavmesh& navmesh, const ChunkNavmeshNode& coord) {
