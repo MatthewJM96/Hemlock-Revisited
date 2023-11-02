@@ -1317,7 +1317,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
     const Block*                        chunk_blocks = chunk->blocks.get(block_lock);
 
     std::unique_lock<std::shared_mutex> navmesh_lock;
-    hvox::ai::ChunkNavmesh chunk_navmesh = chunk->navmesh.get(navmesh_lock);
+    hvox::ai::ChunkNavmesh& chunk_navmesh = chunk->navmesh.get(navmesh_lock);
 
     const IsSolid is_solid{};
 
@@ -1420,7 +1420,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
             std::shared_lock<std::shared_mutex> neighbour_block_lock;
             auto neighbour_blocks = neighbour->blocks.get(neighbour_block_lock);
             std::unique_lock<std::shared_mutex> neighbour_navmesh_lock;
-            auto neighbour_navmesh = neighbour->navmesh.get(neighbour_navmesh_lock);
+            auto& neighbour_navmesh = neighbour->navmesh.get(neighbour_navmesh_lock);
 
             for (BlockChunkPositionCoord z = 0; z < CHUNK_LENGTH; ++z) {
                 for (BlockChunkPositionCoord y = 1; y < CHUNK_LENGTH - 2; ++y) {
@@ -1478,7 +1478,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                 auto                                below_neighbour_blocks
                     = below_neighbour->blocks.get(below_neighbour_block_lock);
                 std::unique_lock<std::shared_mutex> below_neighbour_navmesh_lock;
-                auto                                below_neighbour_navmesh
+                auto&                               below_neighbour_navmesh
                     = below_neighbour->navmesh.get(below_neighbour_navmesh_lock);
 
                 for (BlockChunkPositionCoord z = 0; z < CHUNK_LENGTH; ++z) {
@@ -1582,7 +1582,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
             std::shared_lock<std::shared_mutex> neighbour_block_lock;
             auto neighbour_blocks = neighbour->blocks.get(neighbour_block_lock);
             std::unique_lock<std::shared_mutex> neighbour_navmesh_lock;
-            auto neighbour_navmesh = neighbour->navmesh.get(neighbour_navmesh_lock);
+            auto& neighbour_navmesh = neighbour->navmesh.get(neighbour_navmesh_lock);
 
             for (BlockChunkPositionCoord z = 0; z < CHUNK_LENGTH; ++z) {
                 for (BlockChunkPositionCoord y = 1; y < CHUNK_LENGTH - 2; ++y) {
@@ -1640,7 +1640,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                 auto                                below_neighbour_blocks
                     = below_neighbour->blocks.get(below_neighbour_block_lock);
                 std::unique_lock<std::shared_mutex> below_neighbour_navmesh_lock;
-                auto                                below_neighbour_navmesh
+                auto&                               below_neighbour_navmesh
                     = below_neighbour->navmesh.get(below_neighbour_navmesh_lock);
 
                 for (BlockChunkPositionCoord z = 0; z < CHUNK_LENGTH; ++z) {
@@ -1744,7 +1744,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
             std::shared_lock<std::shared_mutex> neighbour_block_lock;
             auto neighbour_blocks = neighbour->blocks.get(neighbour_block_lock);
             std::unique_lock<std::shared_mutex> neighbour_navmesh_lock;
-            auto neighbour_navmesh = neighbour->navmesh.get(neighbour_navmesh_lock);
+            auto& neighbour_navmesh = neighbour->navmesh.get(neighbour_navmesh_lock);
 
             for (BlockChunkPositionCoord x = 0; x < CHUNK_LENGTH; ++x) {
                 for (BlockChunkPositionCoord y = 1; y < CHUNK_LENGTH - 2; ++y) {
@@ -1802,7 +1802,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                 auto                                below_neighbour_blocks
                     = below_neighbour->blocks.get(below_neighbour_block_lock);
                 std::unique_lock<std::shared_mutex> below_neighbour_navmesh_lock;
-                auto                                below_neighbour_navmesh
+                auto&                               below_neighbour_navmesh
                     = below_neighbour->navmesh.get(below_neighbour_navmesh_lock);
 
                 for (BlockChunkPositionCoord x = 0; x < CHUNK_LENGTH; ++x) {
@@ -1907,7 +1907,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
             std::shared_lock<std::shared_mutex> neighbour_block_lock;
             auto neighbour_blocks = neighbour->blocks.get(neighbour_block_lock);
             std::unique_lock<std::shared_mutex> neighbour_navmesh_lock;
-            auto neighbour_navmesh = neighbour->navmesh.get(neighbour_navmesh_lock);
+            auto& neighbour_navmesh = neighbour->navmesh.get(neighbour_navmesh_lock);
 
             for (BlockChunkPositionCoord x = 0; x < CHUNK_LENGTH; ++x) {
                 for (BlockChunkPositionCoord y = 1; y < CHUNK_LENGTH - 2; ++y) {
@@ -1965,7 +1965,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                 auto                                below_neighbour_blocks
                     = below_neighbour->blocks.get(below_neighbour_block_lock);
                 std::unique_lock<std::shared_mutex> below_neighbour_navmesh_lock;
-                auto                                below_neighbour_navmesh
+                auto&                               below_neighbour_navmesh
                     = below_neighbour->navmesh.get(below_neighbour_navmesh_lock);
 
                 for (BlockChunkPositionCoord x = 0; x < CHUNK_LENGTH; ++x) {
@@ -2068,7 +2068,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
             std::shared_lock<std::shared_mutex> neighbour_block_lock;
             auto neighbour_blocks = neighbour->blocks.get(neighbour_block_lock);
             std::unique_lock<std::shared_mutex> neighbour_navmesh_lock;
-            auto neighbour_navmesh = neighbour->navmesh.get(neighbour_navmesh_lock);
+            auto& neighbour_navmesh = neighbour->navmesh.get(neighbour_navmesh_lock);
 
             for (BlockChunkPositionCoord x = 1; x < CHUNK_LENGTH - 1; ++x) {
                 for (BlockChunkPositionCoord z = 1; z < CHUNK_LENGTH - 1; ++z) {
@@ -2625,7 +2625,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                     auto                                left_of_neighbour_blocks
                         = left_of_neighbour->blocks.get(left_of_neighbour_block_lock);
                     std::unique_lock<std::shared_mutex> left_of_neighbour_navmesh_lock;
-                    auto                                left_of_neighbour_navmesh
+                    auto&                               left_of_neighbour_navmesh
                         = left_of_neighbour->navmesh.get(left_of_neighbour_navmesh_lock
                         );
 
@@ -2736,7 +2736,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                     auto                                right_of_neighbour_blocks
                         = right_of_neighbour->blocks.get(right_of_neighbour_block_lock);
                     std::unique_lock<std::shared_mutex> right_of_neighbour_navmesh_lock;
-                    auto right_of_neighbour_navmesh = right_of_neighbour->navmesh.get(
+                    auto& right_of_neighbour_navmesh = right_of_neighbour->navmesh.get(
                         right_of_neighbour_navmesh_lock
                     );
 
@@ -2850,7 +2850,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                     auto                                front_of_neighbour_blocks
                         = front_of_neighbour->blocks.get(front_of_neighbour_block_lock);
                     std::unique_lock<std::shared_mutex> front_of_neighbour_navmesh_lock;
-                    auto front_of_neighbour_navmesh = front_of_neighbour->navmesh.get(
+                    auto& front_of_neighbour_navmesh = front_of_neighbour->navmesh.get(
                         front_of_neighbour_navmesh_lock
                     );
 
@@ -2963,7 +2963,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                     auto                                back_of_neighbour_blocks
                         = back_of_neighbour->blocks.get(back_of_neighbour_block_lock);
                     std::unique_lock<std::shared_mutex> back_of_neighbour_navmesh_lock;
-                    auto                                back_of_neighbour_navmesh
+                    auto&                               back_of_neighbour_navmesh
                         = back_of_neighbour->navmesh.get(back_of_neighbour_navmesh_lock
                         );
 
@@ -3081,19 +3081,20 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                     auto                                left_neighbour_blocks
                         = left_neighbour->blocks.get(left_neighbour_block_lock);
                     std::unique_lock<std::shared_mutex> left_neighbour_navmesh_lock;
-                    auto                                left_neighbour_navmesh
+                    auto&                               left_neighbour_navmesh
                         = left_neighbour->navmesh.get(left_neighbour_navmesh_lock);
 
                     std::shared_lock<std::shared_mutex> above_left_neighbour_block_lock;
                     auto above_left_neighbour_blocks = above_left_neighbour->blocks.get(
                         above_left_neighbour_block_lock
                     );
-                    std::unique_lock<std::shared_mutex>
-                         above_left_neighbour_navmesh_lock;
-                    auto above_left_neighbour_navmesh
-                        = above_left_neighbour->navmesh.get(
-                            above_left_neighbour_navmesh_lock
-                        );
+                    // TODO(Matthew): check that we don't need this in order to stitch
+                    // to
+                    //                above-left neighbour.
+                    // std::unique_lock<std::shared_mutex>
+                    //      above_left_neighbour_navmesh_lock;
+                    // auto& above_left_neighbour_navmesh =
+                    // above_left_neighbour->navmesh.get(above_left_neighbour_navmesh_lock);
 
                     // Step up from y == CHUNK_LENGTH - 2
                     for (BlockChunkPositionCoord z = 0; z < CHUNK_LENGTH; ++z) {
@@ -3327,7 +3328,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                     auto                                right_neighbour_blocks
                         = right_neighbour->blocks.get(right_neighbour_block_lock);
                     std::unique_lock<std::shared_mutex> right_neighbour_navmesh_lock;
-                    auto                                right_neighbour_navmesh
+                    auto&                               right_neighbour_navmesh
                         = right_neighbour->navmesh.get(right_neighbour_navmesh_lock);
 
                     std::shared_lock<std::shared_mutex>
@@ -3336,12 +3337,13 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                         = above_right_neighbour->blocks.get(
                             above_right_neighbour_block_lock
                         );
-                    std::unique_lock<std::shared_mutex>
-                         above_right_neighbour_navmesh_lock;
-                    auto above_right_neighbour_navmesh
-                        = above_right_neighbour->navmesh.get(
-                            above_right_neighbour_navmesh_lock
-                        );
+                    // TODO(Matthew): check that we don't need this in order to stitch
+                    // to
+                    //                above-right neighbour.
+                    // std::unique_lock<std::shared_mutex>
+                    //      above_right_neighbour_navmesh_lock;
+                    // auto& above_right_neighbour_navmesh =
+                    // above_right_neighbour->navmesh.get(above_right_neighbour_navmesh_lock);
 
                     // Step up from y == CHUNK_LENGTH - 2
                     for (BlockChunkPositionCoord z = 0; z < CHUNK_LENGTH; ++z) {
@@ -3575,7 +3577,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                     auto                                front_neighbour_blocks
                         = front_neighbour->blocks.get(front_neighbour_block_lock);
                     std::unique_lock<std::shared_mutex> front_neighbour_navmesh_lock;
-                    auto                                front_neighbour_navmesh
+                    auto&                               front_neighbour_navmesh
                         = front_neighbour->navmesh.get(front_neighbour_navmesh_lock);
 
                     std::shared_lock<std::shared_mutex>
@@ -3584,12 +3586,13 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                         = above_front_neighbour->blocks.get(
                             above_front_neighbour_block_lock
                         );
-                    std::unique_lock<std::shared_mutex>
-                         above_front_neighbour_navmesh_lock;
-                    auto above_front_neighbour_navmesh
-                        = above_front_neighbour->navmesh.get(
-                            above_front_neighbour_navmesh_lock
-                        );
+                    // TODO(Matthew): check that we don't need this in order to stitch
+                    // to
+                    //                above-front neighbour.
+                    // std::unique_lock<std::shared_mutex>
+                    //      above_front_neighbour_navmesh_lock;
+                    // auto& above_front_neighbour_navmesh =
+                    // above_front_neighbour->navmesh.get(above_front_neighbour_navmesh_lock);
 
                     // Step up from y == CHUNK_LENGTH - 2
                     for (BlockChunkPositionCoord x = 0; x < CHUNK_LENGTH; ++x) {
@@ -3823,19 +3826,20 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                     auto                                back_neighbour_blocks
                         = back_neighbour->blocks.get(back_neighbour_block_lock);
                     std::unique_lock<std::shared_mutex> back_neighbour_navmesh_lock;
-                    auto                                back_neighbour_navmesh
+                    auto&                               back_neighbour_navmesh
                         = back_neighbour->navmesh.get(back_neighbour_navmesh_lock);
 
                     std::shared_lock<std::shared_mutex> above_back_neighbour_block_lock;
                     auto above_back_neighbour_blocks = above_back_neighbour->blocks.get(
                         above_back_neighbour_block_lock
                     );
-                    std::unique_lock<std::shared_mutex>
-                         above_back_neighbour_navmesh_lock;
-                    auto above_back_neighbour_navmesh
-                        = above_back_neighbour->navmesh.get(
-                            above_back_neighbour_navmesh_lock
-                        );
+                    // TODO(Matthew): check that we don't need this in order to stitch
+                    // to
+                    //                above-back neighbour.
+                    // std::unique_lock<std::shared_mutex>
+                    //      above_back_neighbour_navmesh_lock;
+                    // auto& above_back_neighbour_navmesh =
+                    // above_back_neighbour->navmesh.get(above_back_neighbour_navmesh_lock);
 
                     // Step up from y == CHUNK_LENGTH - 2
                     for (BlockChunkPositionCoord x = 0; x < CHUNK_LENGTH; ++x) {
@@ -4069,7 +4073,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
             std::shared_lock<std::shared_mutex> neighbour_block_lock;
             auto neighbour_blocks = neighbour->blocks.get(neighbour_block_lock);
             std::unique_lock<std::shared_mutex> neighbour_navmesh_lock;
-            auto neighbour_navmesh = neighbour->navmesh.get(neighbour_navmesh_lock);
+            auto& neighbour_navmesh = neighbour->navmesh.get(neighbour_navmesh_lock);
 
             for (BlockChunkPositionCoord x = 1; x < CHUNK_LENGTH - 1; ++x) {
                 for (BlockChunkPositionCoord z = 1; z < CHUNK_LENGTH - 1; ++z) {
@@ -4632,17 +4636,17 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                     std::shared_lock<std::shared_mutex> left_neighbour_block_lock;
                     auto                                left_neighbour_blocks
                         = left_neighbour->blocks.get(left_neighbour_block_lock);
-                    std::unique_lock<std::shared_mutex> left_neighbour_navmesh_lock;
-                    auto                                left_neighbour_navmesh
-                        = left_neighbour->navmesh.get(left_neighbour_navmesh_lock);
+                    // std::unique_lock<std::shared_mutex> left_neighbour_navmesh_lock;
+                    // auto& left_neighbour_navmesh =
+                    // left_neighbour->navmesh.get(left_neighbour_navmesh_lock);
 
                     std::shared_lock<std::shared_mutex> below_left_neighbour_block_lock;
                     auto below_left_neighbour_blocks = below_left_neighbour->blocks.get(
                         below_left_neighbour_block_lock
                     );
                     std::unique_lock<std::shared_mutex>
-                         below_left_neighbour_navmesh_lock;
-                    auto below_left_neighbour_navmesh
+                          below_left_neighbour_navmesh_lock;
+                    auto& below_left_neighbour_navmesh
                         = below_left_neighbour->navmesh.get(
                             below_left_neighbour_navmesh_lock
                         );
@@ -4863,12 +4867,12 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                             boost::add_edge(
                                 neighbour_block_vertex.in_below_left_neighbour,
                                 candidate_block_vertex.in_below_left_neighbour,
-                                left_neighbour_navmesh.graph
+                                below_left_neighbour_navmesh.graph
                             );
                             boost::add_edge(
                                 candidate_block_vertex.in_below_left_neighbour,
                                 neighbour_block_vertex.in_below_left_neighbour,
-                                left_neighbour_navmesh.graph
+                                below_left_neighbour_navmesh.graph
                             );
                         }
                     }
@@ -4896,9 +4900,9 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                     std::shared_lock<std::shared_mutex> right_neighbour_block_lock;
                     auto                                right_neighbour_blocks
                         = right_neighbour->blocks.get(right_neighbour_block_lock);
-                    std::unique_lock<std::shared_mutex> right_neighbour_navmesh_lock;
-                    auto                                right_neighbour_navmesh
-                        = right_neighbour->navmesh.get(right_neighbour_navmesh_lock);
+                    // std::unique_lock<std::shared_mutex> right_neighbour_navmesh_lock;
+                    // auto& right_neighbour_navmesh =
+                    // right_neighbour->navmesh.get(right_neighbour_navmesh_lock);
 
                     std::shared_lock<std::shared_mutex>
                          below_right_neighbour_block_lock;
@@ -4907,8 +4911,8 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                             below_right_neighbour_block_lock
                         );
                     std::unique_lock<std::shared_mutex>
-                         below_right_neighbour_navmesh_lock;
-                    auto below_right_neighbour_navmesh
+                          below_right_neighbour_navmesh_lock;
+                    auto& below_right_neighbour_navmesh
                         = below_right_neighbour->navmesh.get(
                             below_right_neighbour_navmesh_lock
                         );
@@ -4948,7 +4952,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                         } neighbour_block_vertex = {
                             impl::get_vertex(neighbour_navmesh, neighbour_block_coord),
                             impl::get_vertex(
-                                right_neighbour_navmesh, neighbour_block_coord
+                                below_right_neighbour_navmesh, neighbour_block_coord
                             )
                         };
 
@@ -5163,9 +5167,9 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                     std::shared_lock<std::shared_mutex> front_neighbour_block_lock;
                     auto                                front_neighbour_blocks
                         = front_neighbour->blocks.get(front_neighbour_block_lock);
-                    std::unique_lock<std::shared_mutex> front_neighbour_navmesh_lock;
-                    auto                                front_neighbour_navmesh
-                        = front_neighbour->navmesh.get(front_neighbour_navmesh_lock);
+                    // std::unique_lock<std::shared_mutex> front_neighbour_navmesh_lock;
+                    // auto& front_neighbour_navmesh =
+                    // front_neighbour->navmesh.get(front_neighbour_navmesh_lock);
 
                     std::shared_lock<std::shared_mutex>
                          below_front_neighbour_block_lock;
@@ -5174,8 +5178,8 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                             below_front_neighbour_block_lock
                         );
                     std::unique_lock<std::shared_mutex>
-                         below_front_neighbour_navmesh_lock;
-                    auto below_front_neighbour_navmesh
+                          below_front_neighbour_navmesh_lock;
+                    auto& below_front_neighbour_navmesh
                         = below_front_neighbour->navmesh.get(
                             below_front_neighbour_navmesh_lock
                         );
@@ -5430,17 +5434,17 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                     std::shared_lock<std::shared_mutex> back_neighbour_block_lock;
                     auto                                back_neighbour_blocks
                         = back_neighbour->blocks.get(back_neighbour_block_lock);
-                    std::unique_lock<std::shared_mutex> back_neighbour_navmesh_lock;
-                    auto                                back_neighbour_navmesh
-                        = back_neighbour->navmesh.get(back_neighbour_navmesh_lock);
+                    // std::unique_lock<std::shared_mutex> back_neighbour_navmesh_lock;
+                    // auto& back_neighbour_navmesh =
+                    // back_neighbour->navmesh.get(back_neighbour_navmesh_lock);
 
                     std::shared_lock<std::shared_mutex> below_back_neighbour_block_lock;
                     auto below_back_neighbour_blocks = below_back_neighbour->blocks.get(
                         below_back_neighbour_block_lock
                     );
                     std::unique_lock<std::shared_mutex>
-                         below_back_neighbour_navmesh_lock;
-                    auto below_back_neighbour_navmesh
+                          below_back_neighbour_navmesh_lock;
+                    auto& below_back_neighbour_navmesh
                         = below_back_neighbour->navmesh.get(
                             below_back_neighbour_navmesh_lock
                         );
