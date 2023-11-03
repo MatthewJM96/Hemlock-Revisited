@@ -6,7 +6,6 @@
 namespace hemlock {
     namespace voxel {
         class ChunkGrid;
-        struct Chunk;
 
         namespace ai {
             /**

@@ -1,5 +1,5 @@
-#ifndef __hemlock_voxel_chunk_load_task_hpp
-#define __hemlock_voxel_chunk_load_task_hpp
+#ifndef __hemlock_voxel_task_hpp
+#define __hemlock_voxel_task_hpp
 
 namespace hemlock {
     namespace voxel {
@@ -33,4 +33,4 @@ namespace hemlock {
 }  // namespace hemlock
 namespace hvox = hemlock::voxel;
 
-#endif  // __hemlock_voxel_chunk_load_task_hpp
+#endif  // __hemlock_voxel_task_hpp
