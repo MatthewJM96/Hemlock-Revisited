@@ -3,6 +3,7 @@
 
 #include "algorithm/acs/graph/view.hpp"
 #include "state.hpp"
+#include "voxel/chunk/grid.h"
 
 namespace hemlock {
     namespace voxel {
