@@ -263,7 +263,7 @@ void hvox::ChunkGrid::establish_chunk_neighbours(hmem::Handle<Chunk> chunk) {
 
     // FRONT
     neighbour_position   = chunk->position;
-    neighbour_position.z -= 1;
+    neighbour_position.z += 1;
     it                   = m_chunks.find(neighbour_position.id);
     if (it != m_chunks.end()) {
         chunk->neighbours.one.front       = (*it).second;
@@ -274,7 +274,7 @@ void hvox::ChunkGrid::establish_chunk_neighbours(hmem::Handle<Chunk> chunk) {
 
     // BACK
     neighbour_position   = chunk->position;
-    neighbour_position.z += 1;
+    neighbour_position.z -= 1;
     it                   = m_chunks.find(neighbour_position.id);
     if (it != m_chunks.end()) {
         chunk->neighbours.one.back         = (*it).second;
