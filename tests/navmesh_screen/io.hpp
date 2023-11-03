@@ -1,6 +1,8 @@
 #ifndef __hemlock_tests_navmesh_screen_io_hpp
 #define __hemlock_tests_navmesh_screen_io_hpp
 
+#include "camera/basic_first_person_camera.h"
+
 namespace hemlock {
     namespace test {
         namespace navmesh_screen {

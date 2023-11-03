@@ -2,6 +2,22 @@
 
 #include "graphics/glsl_program.h"
 
+H_DEF_ENUM_WITH_SERIALISATION(hemlock::graphics, ShaderType)
+H_DEF_STRUCT_WITH_SERIALISATION(
+    hemlock::graphics,
+    ShaderInfo,
+    (type, hemlock::graphics::ShaderType),
+    (filepath, std::string)
+)
+H_DEF_ENUM_WITH_SERIALISATION(hemlock::graphics, ShaderCreationResult)
+H_DEF_STRUCT_WITH_SERIALISATION(
+    hemlock::graphics,
+    ShaderCreationResults,
+    (vertex, hemlock::graphics::ShaderCreationResult),
+    (fragment, hemlock::graphics::ShaderCreationResult)
+)
+H_DEF_ENUM_WITH_SERIALISATION(hemlock::graphics, ShaderLinkResult)
+
 GLuint hg::GLSLProgram::current = 0;
 
 hg::GLSLProgram::GLSLProgram() :
@@ -62,6 +78,12 @@ hg::ShaderCreationResult hg::GLSLProgram::add_shader(const ShaderInfo& shader) {
             }
             break;
         default:
+            debug_printf(
+                "Unknow shader type in add_shader: %i",
+                static_cast<std::underlying_type<decltype(shader.type)>::type>(
+                    shader.type
+                )
+            );
             on_shader_add_fail(ShaderCreationResult::INVALID_STAGE);
             return ShaderCreationResult::INVALID_STAGE;
     }
@@ -113,6 +135,15 @@ hg::ShaderCreationResult hg::GLSLProgram::add_shader(const ShaderInfo& shader) {
         case ShaderType::FRAGMENT:
             m_frag_id = shader_id;
             break;
+        default:
+            debug_printf(
+                "Previously known shader type has become unknown: %i",
+                static_cast<std::underlying_type<decltype(shader.type)>::type>(
+                    shader.type
+                )
+            );
+            on_shader_add_fail(ShaderCreationResult::INVALID_STAGE);
+            return ShaderCreationResult::INVALID_STAGE;
     }
 
     return ShaderCreationResult::SUCCESS;

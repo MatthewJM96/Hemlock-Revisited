@@ -14,6 +14,15 @@ namespace hemlock {
 
             template <typename Closure, typename ReturnType, typename... Parameters>
             i32 invoke_closure(LuaHandle state);
+
+            template <typename ReturnType, typename... Parameters>
+            i32 invoke_yieldable_delegate(LuaHandle state);
+
+            template <typename ReturnType, typename... Parameters>
+            i32 invoke_yieldable_function(LuaHandle state);
+
+            template <typename Closure, typename ReturnType, typename... Parameters>
+            i32 invoke_yieldable_closure(LuaHandle state);
         }  // namespace lua
     }      // namespace script
 }  // namespace hemlock

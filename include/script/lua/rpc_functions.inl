@@ -1,8 +1,8 @@
 #include "lua_value.hpp"
 
-template <bool HasRPCManager, size_t CallBufferSize>
+template <size_t CallBufferSize>
 i32 hscript::lua::call_foreign(LuaHandle state) {
-    using _Environment = Environment<HasRPCManager, CallBufferSize>;
+    using _Environment = Environment<true, CallBufferSize>;
 
     // Get the captured environment pointer.
     _Environment* env = LuaValue<_Environment*>::retrieve_upvalue(state, 1);
@@ -68,9 +68,9 @@ i32 hscript::lua::call_foreign(LuaHandle state) {
     return 1;
 }
 
-template <bool HasRPCManager, size_t CallBufferSize>
+template <size_t CallBufferSize>
 i32 hscript::lua::query_foreign_call(LuaHandle state) {
-    using _Environment = Environment<HasRPCManager, CallBufferSize>;
+    using _Environment = Environment<true, CallBufferSize>;
 
     // Get the captured environment pointer.
     _Environment* env = LuaValue<_Environment*>::retrieve_upvalue(state, 1);
@@ -114,9 +114,9 @@ i32 hscript::lua::query_foreign_call(LuaHandle state) {
     return 1;
 }
 
-template <bool HasRPCManager, size_t CallBufferSize>
+template <size_t CallBufferSize>
 i32 hscript::lua::get_foreign_call_results(LuaHandle state) {
-    using _Environment = Environment<HasRPCManager, CallBufferSize>;
+    using _Environment = Environment<true, CallBufferSize>;
 
     // Get the captured environment pointer.
     _Environment* env = LuaValue<_Environment*>::retrieve_upvalue(state, 1);
@@ -179,9 +179,9 @@ i32 hscript::lua::get_foreign_call_results(LuaHandle state) {
     return static_cast<i32>(return_values.size());
 }
 
-template <bool HasRPCManager, size_t CallBufferSize>
+template <size_t CallBufferSize>
 i32 hscript::lua::set_manual_command_buffer_pump(LuaHandle state) {
-    using _Environment = Environment<HasRPCManager, CallBufferSize>;
+    using _Environment = Environment<true, CallBufferSize>;
 
     // Get the captured environment pointer.
     _Environment* env = LuaValue<_Environment*>::retrieve_upvalue(state, 1);
@@ -208,9 +208,9 @@ i32 hscript::lua::set_manual_command_buffer_pump(LuaHandle state) {
     return 1;
 }
 
-template <bool HasRPCManager, size_t CallBufferSize>
+template <size_t CallBufferSize>
 i32 hscript::lua::pump_command_buffer(LuaHandle state) {
-    using _Environment = Environment<HasRPCManager, CallBufferSize>;
+    using _Environment = Environment<true, CallBufferSize>;
 
     _Environment* env = LuaValue<_Environment*>::retrieve_upvalue(state, 1);
 

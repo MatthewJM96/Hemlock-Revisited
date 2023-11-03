@@ -4,7 +4,10 @@
 #include <FastNoise/FastNoise.h>
 
 #include "algorithm/acs/acs.hpp"
+#include "graphics/glsl_program.h"
+#include "graphics/texture.hpp"
 #include "memory/handle.hpp"
+#include "ui/input/dispatcher.h"
 #include "voxel/ai/navmesh.hpp"
 #include "voxel/ai/navmesh/view.hpp"
 #include "voxel/generation/generator_task.hpp"

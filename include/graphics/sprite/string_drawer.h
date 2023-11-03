@@ -1,7 +1,7 @@
 #ifndef __hemlock_graphics_sprite_string_drawer_h
 #define __hemlock_graphics_sprite_string_drawer_h
 
-#include "graphics/font/drawable.hpp"
+#include "graphics/font/drawable.h"
 #include "graphics/font/text_align.h"
 
 namespace hemlock {

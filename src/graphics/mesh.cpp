@@ -8,6 +8,8 @@
 #  include "graphics/mesh/gl.hpp"
 #endif  // defined(HEMLOCK_USING_OPENGL)
 
+H_DEF_ENUM_WITH_SERIALISATION(hemlock::graphics, MeshDataVolatility)
+
 GEN_MESH_UPLOADER_DEFS(Point_2D_32, MAKE_POS2D(32))
 
 GEN_MESH_UPLOADER_DEFS(Point_3D_32, MAKE_POS3D(32))

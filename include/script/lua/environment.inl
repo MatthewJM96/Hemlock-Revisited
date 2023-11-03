@@ -24,9 +24,9 @@ void hscript::lua::Environment<HasRPCManager, CallBufferSize>::init(
     lua_newtable(m_state);
     lua_setfield(m_state, LUA_REGISTRYINDEX, HEMLOCK_LUA_SCRIPT_FUNCTION_TABLE);
 
-    // TODO(Matthew): Revisit namespace handling as it looks like Lua stack
-    //                may keep growing (dangerous) if we don't track and
-    //                pop namespaces.
+    // Create a table for storing threads.
+    lua_newtable(m_state);
+    lua_setfield(m_state, LUA_REGISTRYINDEX, HEMLOCK_LUA_THREAD_TABLE);
 
     // Set global namespace.
     set_global_namespace();
@@ -42,25 +42,17 @@ void hscript::lua::Environment<HasRPCManager, CallBufferSize>::init(
         _Base::rpc.init(this);
 
         set_namespaces("foreign");
-        add_c_function("call", &call_foreign<HasRPCManager, CallBufferSize>, this);
-        add_c_function(
-            "query", &query_foreign_call<HasRPCManager, CallBufferSize>, this
-        );
-        add_c_function(
-            "get_results",
-            &get_foreign_call_results<HasRPCManager, CallBufferSize>,
-            this
-        );
+        add_c_function("call", &call_foreign<CallBufferSize>, this);
+        add_c_function("query", &query_foreign_call<CallBufferSize>, this);
+        add_c_function("get_results", &get_foreign_call_results<CallBufferSize>, this);
 
         add_c_function(
             "set_manual_command_buffer_pump",
-            &set_manual_command_buffer_pump<HasRPCManager, CallBufferSize>,
+            &set_manual_command_buffer_pump<CallBufferSize>,
             this
         );
         add_c_function(
-            "pump_command_buffer",
-            &pump_command_buffer<HasRPCManager, CallBufferSize>,
-            this
+            "pump_command_buffer", &pump_command_buffer<CallBufferSize>, this
         );
         set_global_namespace();
     }
@@ -70,10 +62,7 @@ void hscript::lua::Environment<HasRPCManager, CallBufferSize>::init(
 
 template <bool HasRPCManager, size_t CallBufferSize>
 void hscript::lua::Environment<HasRPCManager, CallBufferSize>::init(
-    EnvironmentBase<
-        Environment<HasRPCManager, CallBufferSize>,
-        HasRPCManager,
-        CallBufferSize>*               parent,
+    _Base*                             parent,
     hio::IOManagerBase*                io_manager,
     EnvironmentRegistry<_Environment>* registry /*= nullptr*/,
     ui32 max_script_length /*= HEMLOCK_DEFAULT_MAX_SCRIPT_LENGTH*/
@@ -194,6 +183,8 @@ void hscript::lua::Environment<HasRPCManager, CallBufferSize>::push_namespace(
         // value on the stack).
         lua_getfield(m_state, -1, _namespace.c_str());
     }
+
+    ++m_namespace_depth;
 }
 
 template <bool HasRPCManager, size_t CallBufferSize>
@@ -348,13 +339,14 @@ void hscript::lua::Environment<HasRPCManager, CallBufferSize>::add_value(
         // Make sure to pop the namespace we pushed, to avoid side
         // effects on the Lua stack.
         lua_pop(m_state, 1);
+        --m_namespace_depth;
     }
 }
 
 template <bool HasRPCManager, size_t CallBufferSize>
 template <typename ReturnType, typename... Parameters>
 void hscript::lua::Environment<HasRPCManager, CallBufferSize>::add_c_delegate(
-    std::string_view name, Delegate<ReturnType, Parameters...>* delegate
+    std::string_view name, Delegate<ReturnType(Parameters...)>* delegate
 ) {
     if (m_parent) return m_parent->add_c_delegate(name, delegate);
 
@@ -423,6 +415,69 @@ void hscript::lua::Environment<HasRPCManager, CallBufferSize>::add_c_closure(
 
 template <bool HasRPCManager, size_t CallBufferSize>
 template <typename ReturnType, typename... Parameters>
+void hscript::lua::Environment<HasRPCManager, CallBufferSize>::add_yieldable_c_delegate(
+    std::string_view                                      name,
+    Delegate<YieldableResult<ReturnType>(Parameters...)>* delegate
+) {
+    if (m_parent)
+        return m_parent->add_yieldable_c_delegate<ReturnType, Parameters...>(
+            name, delegate
+        );
+
+    lua_pushlstring(m_state, name.data(), name.size());
+
+    LuaValue<void*>::push(m_state, reinterpret_cast<void*>(delegate));
+
+    lua_pushcclosure(m_state, invoke_yieldable_delegate<ReturnType, Parameters...>, 1);
+
+    lua_settable(m_state, -3);
+}
+
+template <bool HasRPCManager, size_t CallBufferSize>
+template <typename ReturnType, typename... Parameters>
+void hscript::lua::Environment<HasRPCManager, CallBufferSize>::add_yieldable_c_function(
+    std::string_view name, YieldableResult<ReturnType> (*func)(Parameters...)
+) {
+    if (m_parent)
+        return m_parent->add_yieldable_c_function<ReturnType, Parameters...>(
+            name, func
+        );
+
+    lua_pushlstring(m_state, name.data(), name.size());
+
+    LuaValue<void*>::push(m_state, reinterpret_cast<void*>(func));
+
+    lua_pushcclosure(m_state, invoke_yieldable_function<ReturnType, Parameters...>, 1);
+
+    lua_settable(m_state, -3);
+}
+
+template <bool HasRPCManager, size_t CallBufferSize>
+template <std::invocable Closure, typename ReturnType, typename... Parameters>
+void hscript::lua::Environment<HasRPCManager, CallBufferSize>::add_yieldable_c_closure(
+    std::string_view name,
+    Closure*         closure,
+    YieldableResult<ReturnType> (Closure::*func)(Parameters...)
+) {
+    if (m_parent)
+        return m_parent->add_yieldable_c_closure<ReturnType, Parameters...>(
+            name, closure, func
+        );
+
+    lua_pushlstring(m_state, name.data(), name.size());
+
+    LuaValue<void*>::push(m_state, reinterpret_cast<void*>(closure));
+    LuaValue<decltype(func)>::push(m_state, func);
+
+    lua_pushcclosure(
+        m_state, invoke_yieldable_closure<Closure, ReturnType, Parameters...>, 2
+    );
+
+    lua_settable(m_state, -3);
+}
+
+template <bool HasRPCManager, size_t CallBufferSize>
+template <typename ReturnType, typename... Parameters>
 bool hscript::lua::Environment<HasRPCManager, CallBufferSize>::get_script_function(
     std::string&& name, OUT ScriptDelegate<ReturnType, Parameters...>& delegate
 ) {
@@ -446,4 +501,58 @@ bool hscript::lua::Environment<HasRPCManager, CallBufferSize>::get_script_functi
     }
 
     return true;
+}
+
+template <bool HasRPCManager, size_t CallBufferSize>
+bool hscript::lua::Environment<HasRPCManager, CallBufferSize>::
+    get_continuable_script_function(
+        std::string&&               name,
+        OUT LuaContinuableFunction& continuable_function,
+        bool                        attached_to_thread /*= false*/
+    ) {
+    // Try to obtain the named Lua function, registering it
+    // if it was not already registered. If we could not
+    // obtain it, report failure.
+    LuaFunctionState lua_func_state;
+    if (!register_lua_function(std::move(name), &lua_func_state)) {
+        return false;
+    }
+
+    continuable_function = {};
+    continuable_function.init(lua_func_state);
+
+    if (attached_to_thread) {
+        LuaThreadState thread = make_thread();
+        continuable_function.attach_to_thread(thread);
+    }
+
+    return true;
+}
+
+template <bool HasRPCManager, size_t CallBufferSize>
+hscript::lua::LuaThreadState
+hscript::lua::Environment<HasRPCManager, CallBufferSize>::make_thread() {
+    // Get thread registry table.
+    lua_getfield(m_state, LUA_REGISTRYINDEX, HEMLOCK_LUA_THREAD_TABLE);
+
+    // Create thread and put reference to it in thread registry.
+    LuaThreadState thread_state
+        = { .thread = lua_newthread(m_state), .index = luaL_ref(m_state, -2) };
+
+    // Pop thread registry table.
+    lua_pop(m_state, 1);
+
+    return thread_state;
+}
+
+template <bool HasRPCManager, size_t CallBufferSize>
+void hscript::lua::Environment<HasRPCManager, CallBufferSize>::destroy_thread(
+    LuaThreadState thread
+) {
+    // Get thread registry table.
+    lua_getfield(m_state, LUA_REGISTRYINDEX, HEMLOCK_LUA_THREAD_TABLE);
+
+    luaL_unref(m_state, -1, thread.index);
+
+    thread = { nullptr, 0 };
 }

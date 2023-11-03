@@ -3,6 +3,10 @@
 
 #include "script/environment_base_decl.hpp"
 
+#if !defined(HEMLOCK_SCRIPT_RETURN_TYPE_ERR)
+#  define HEMLOCK_SCRIPT_RETURN_TYPE_ERR 9
+#endif  // !defined(HEMLOCK_SCRIPT_RETURN_TYPE_ERR)
+
 namespace hemlock {
     namespace script {
         using CallID = i64;

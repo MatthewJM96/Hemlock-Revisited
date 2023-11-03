@@ -2,6 +2,28 @@
 #define __hemlock_graphics_font_instance_hpp
 
 #include "io/image.h"
+#include "io/serialisation.hpp"
+
+/**
+ * @brief Enumeration of styles of fonts.
+ */
+H_DECL_VENUM_WITH_SERIALISATION(
+    hemlock::graphics::font,
+    FontStyle,
+    ui32,
+    (BOLD, TTF_STYLE_BOLD),
+    (ITALIC, TTF_STYLE_ITALIC),
+    (UNDERLINE, TTF_STYLE_UNDERLINE),
+    (STRIKETHROUGH, TTF_STYLE_STRIKETHROUGH),
+    (NORMAL, TTF_STYLE_NORMAL)
+)
+
+/**
+ * @brief Enumeration of styles of font rendering.
+ */
+H_DECL_ENUM_WITH_SERIALISATION(
+    hemlock::graphics::font, FontRenderStyle, ui8, SOLID, BLENDED
+)
 
 namespace hemlock {
     namespace graphics {
@@ -17,25 +39,6 @@ namespace hemlock {
              * and font size for unordered map storage.
              */
             using FontSize = ui16;
-
-            /**
-             * @brief Enumeration of styles of fonts.
-             */
-            enum class FontStyle : ui32 {
-                BOLD          = TTF_STYLE_BOLD,
-                ITALIC        = TTF_STYLE_ITALIC,
-                UNDERLINE     = TTF_STYLE_UNDERLINE,
-                STRIKETHROUGH = TTF_STYLE_STRIKETHROUGH,
-                NORMAL        = TTF_STYLE_NORMAL
-            };
-
-            /**
-             * @brief Enumeration of styles of font rendering.
-             */
-            enum class FontRenderStyle : ui8 {
-                SOLID,   // -> No anti-aliasing, glyph edges will look jagged.
-                BLENDED  // -> Anti-aliased, glyph edges will look smooth.
-            };
 
             using FontInstanceHash = ui64;
             FontInstanceHash

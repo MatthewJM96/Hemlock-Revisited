@@ -1,6 +1,8 @@
 #ifndef __hemlock_script_state_hpp
 #define __hemlock_script_state_hpp
 
+#include "call_state.hpp"
+
 namespace hemlock {
     namespace script {
         template <typename ReturnType, typename... Parameters>
