@@ -32,6 +32,23 @@
 
 namespace hemlock::voxel::ai::impl {
     inline ChunkNavmeshVertexDescriptor
+    get_vertex(hmem::Handle<Chunk>& chunk, const ChunkNavmeshNode& coord) {
+        try {
+            std::shared_lock<std::shared_mutex> navmesh_lock;
+            const hvox::ai::ChunkNavmesh& navmesh = chunk->navmesh.get(navmesh_lock);
+
+            return navmesh.coord_vertex_map.at(coord);
+        } catch (std::out_of_range&) {
+            std::unique_lock<std::shared_mutex> navmesh_lock;
+            hvox::ai::ChunkNavmesh& navmesh = chunk->navmesh.get(navmesh_lock);
+
+            auto vertex                     = boost::add_vertex(navmesh.graph);
+            navmesh.coord_vertex_map[coord] = vertex;
+            return vertex;
+        }
+    }
+
+    inline ChunkNavmeshVertexDescriptor
     get_vertex(hvox::ai::ChunkNavmesh& navmesh, const ChunkNavmeshNode& coord) {
         try {
             return navmesh.coord_vertex_map.at(coord);
@@ -51,8 +68,6 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_bulk(
 
     std::shared_lock<std::shared_mutex> block_lock;
     const Block*                        chunk_blocks = chunk->blocks.get(block_lock);
-    std::unique_lock<std::shared_mutex> navmesh_lock;
-    hvox::ai::ChunkNavmesh& chunk_navmesh = chunk->navmesh.get(navmesh_lock);
 
     const IsSolid is_solid{};
 
@@ -117,14 +132,20 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_bulk(
 
                 // Ensure node exists for this block.
                 ChunkNavmeshVertexDescriptor candidate_block_vertex
-                    = impl::get_vertex(chunk_navmesh, candidate_block_coord);
+                    = impl::get_vertex(chunk, candidate_block_coord);
 
-                boost::add_edge(
-                    block_vertex, candidate_block_vertex, chunk_navmesh.graph
-                );
-                boost::add_edge(
-                    candidate_block_vertex, block_vertex, chunk_navmesh.graph
-                );
+                {
+                    std::unique_lock<std::shared_mutex> navmesh_lock;
+                    hvox::ai::ChunkNavmesh&             chunk_navmesh
+                        = chunk->navmesh.get(navmesh_lock);
+
+                    boost::add_edge(
+                        block_vertex, candidate_block_vertex, chunk_navmesh.graph
+                    );
+                    boost::add_edge(
+                        candidate_block_vertex, block_vertex, chunk_navmesh.graph
+                    );
+                }
             }
         }
     };
@@ -155,7 +176,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_bulk(
                     chunk_pos
                 };
                 ChunkNavmeshVertexDescriptor block_vertex
-                    = impl::get_vertex(chunk_navmesh, block_coord);
+                    = impl::get_vertex(chunk, block_coord);
 
                 // Left
                 do_navigable_check(block_vertex, { x, y, z }, { x - 1, y, z }, 2, -1);
@@ -191,7 +212,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_bulk(
                     chunk_pos
                 };
                 ChunkNavmeshVertexDescriptor block_vertex
-                    = impl::get_vertex(chunk_navmesh, block_coord);
+                    = impl::get_vertex(chunk, block_coord);
 
                 // Left
                 do_navigable_check(
@@ -259,7 +280,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_bulk(
                     chunk_pos
                 };
                 ChunkNavmeshVertexDescriptor block_vertex
-                    = impl::get_vertex(chunk_navmesh, block_coord);
+                    = impl::get_vertex(chunk, block_coord);
 
                 // Right
                 do_navigable_check(block_vertex, { 0, y, z }, { 1, y, z }, 2, -1);
@@ -292,7 +313,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_bulk(
                     chunk_pos
                 };
                 ChunkNavmeshVertexDescriptor block_vertex
-                    = impl::get_vertex(chunk_navmesh, block_coord);
+                    = impl::get_vertex(chunk, block_coord);
 
                 // Left
                 do_navigable_check(
@@ -346,7 +367,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_bulk(
                     chunk_pos
                 };
                 ChunkNavmeshVertexDescriptor block_vertex
-                    = impl::get_vertex(chunk_navmesh, block_coord);
+                    = impl::get_vertex(chunk, block_coord);
 
                 // Right
                 do_navigable_check(
@@ -398,7 +419,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_bulk(
                     chunk_pos
                 };
                 ChunkNavmeshVertexDescriptor block_vertex
-                    = impl::get_vertex(chunk_navmesh, block_coord);
+                    = impl::get_vertex(chunk, block_coord);
 
                 // Left
                 do_navigable_check(
@@ -458,7 +479,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_bulk(
                     chunk_pos
                 };
                 ChunkNavmeshVertexDescriptor block_vertex
-                    = impl::get_vertex(chunk_navmesh, block_coord);
+                    = impl::get_vertex(chunk, block_coord);
 
                 // Left
                 do_navigable_check(
@@ -508,7 +529,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_bulk(
                     chunk_pos
                 };
                 ChunkNavmeshVertexDescriptor block_vertex
-                    = impl::get_vertex(chunk_navmesh, block_coord);
+                    = impl::get_vertex(chunk, block_coord);
 
                 // Left
                 do_navigable_check(block_vertex, { x, y, 0 }, { x - 1, y, 0 }, 2, -1);
@@ -545,7 +566,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_bulk(
                     chunk_pos
                 };
                 ChunkNavmeshVertexDescriptor block_vertex
-                    = impl::get_vertex(chunk_navmesh, block_coord);
+                    = impl::get_vertex(chunk, block_coord);
 
                 // Left
                 do_navigable_check(
@@ -581,7 +602,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_bulk(
                 chunk_pos
             };
             ChunkNavmeshVertexDescriptor block_vertex
-                = impl::get_vertex(chunk_navmesh, block_coord);
+                = impl::get_vertex(chunk, block_coord);
 
             // Left
             do_navigable_check(
@@ -639,7 +660,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_bulk(
                     chunk_pos
                 };
                 ChunkNavmeshVertexDescriptor block_vertex
-                    = impl::get_vertex(chunk_navmesh, block_coord);
+                    = impl::get_vertex(chunk, block_coord);
 
                 // Left
                 do_navigable_check(block_vertex, { x, 0, z }, { x - 1, 0, z }, 2, 0);
@@ -683,7 +704,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_bulk(
                 chunk_pos
             };
             ChunkNavmeshVertexDescriptor block_vertex
-                = impl::get_vertex(chunk_navmesh, block_coord);
+                = impl::get_vertex(chunk, block_coord);
 
             // Right
             do_navigable_check(
@@ -726,7 +747,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_bulk(
                 chunk_pos
             };
             ChunkNavmeshVertexDescriptor block_vertex
-                = impl::get_vertex(chunk_navmesh, block_coord);
+                = impl::get_vertex(chunk, block_coord);
 
             // Left
             do_navigable_check(
@@ -767,7 +788,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_bulk(
                 chunk_pos
             };
             ChunkNavmeshVertexDescriptor block_vertex
-                = impl::get_vertex(chunk_navmesh, block_coord);
+                = impl::get_vertex(chunk, block_coord);
 
             // Right
             do_navigable_check(block_vertex, { 0, y, 0 }, { 1, y, 0 }, 2, -1);
@@ -797,7 +818,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_bulk(
                 chunk_pos
             };
             ChunkNavmeshVertexDescriptor block_vertex
-                = impl::get_vertex(chunk_navmesh, block_coord);
+                = impl::get_vertex(chunk, block_coord);
 
             // Left
             do_navigable_check(
@@ -838,7 +859,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_bulk(
                 chunk_pos
             };
             ChunkNavmeshVertexDescriptor block_vertex
-                = impl::get_vertex(chunk_navmesh, block_coord);
+                = impl::get_vertex(chunk, block_coord);
 
             // Right
             do_navigable_check(
@@ -880,7 +901,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_bulk(
                 chunk_pos
             };
             ChunkNavmeshVertexDescriptor block_vertex
-                = impl::get_vertex(chunk_navmesh, block_coord);
+                = impl::get_vertex(chunk, block_coord);
 
             // Left
             do_navigable_check(
@@ -918,7 +939,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_bulk(
                 chunk_pos
             };
             ChunkNavmeshVertexDescriptor block_vertex
-                = impl::get_vertex(chunk_navmesh, block_coord);
+                = impl::get_vertex(chunk, block_coord);
 
             // Right
             do_navigable_check(
@@ -958,7 +979,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_bulk(
                 chunk_pos
             };
             ChunkNavmeshVertexDescriptor block_vertex
-                = impl::get_vertex(chunk_navmesh, block_coord);
+                = impl::get_vertex(chunk, block_coord);
 
             // Left
             do_navigable_check(
@@ -1008,7 +1029,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_bulk(
                 chunk_pos
             };
             ChunkNavmeshVertexDescriptor block_vertex
-                = impl::get_vertex(chunk_navmesh, block_coord);
+                = impl::get_vertex(chunk, block_coord);
 
             // Left
             do_navigable_check(
@@ -1058,7 +1079,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_bulk(
                 chunk_pos
             };
             ChunkNavmeshVertexDescriptor block_vertex
-                = impl::get_vertex(chunk_navmesh, block_coord);
+                = impl::get_vertex(chunk, block_coord);
 
             // Left
             do_navigable_check(block_vertex, { x, 0, 0 }, { x - 1, 0, 0 }, 2, 0);
@@ -1093,7 +1114,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_bulk(
                 chunk_pos
             };
             ChunkNavmeshVertexDescriptor block_vertex
-                = impl::get_vertex(chunk_navmesh, block_coord);
+                = impl::get_vertex(chunk, block_coord);
 
             // Right
             do_navigable_check(block_vertex, { 0, 0, z }, { 1, 0, z }, 2, 0);
@@ -1126,7 +1147,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_bulk(
                 chunk_pos
             };
             ChunkNavmeshVertexDescriptor block_vertex
-                = impl::get_vertex(chunk_navmesh, block_coord);
+                = impl::get_vertex(chunk, block_coord);
 
             // Left
             do_navigable_check(
@@ -1180,7 +1201,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_bulk(
                 chunk_pos
             };
             ChunkNavmeshVertexDescriptor block_vertex
-                = impl::get_vertex(chunk_navmesh, block_coord);
+                = impl::get_vertex(chunk, block_coord);
 
             // Right
             do_navigable_check(
@@ -1218,7 +1239,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_bulk(
                 chunk_pos
             };
             ChunkNavmeshVertexDescriptor block_vertex
-                = impl::get_vertex(chunk_navmesh, block_coord);
+                = impl::get_vertex(chunk, block_coord);
 
             // Right
             do_navigable_check(block_vertex, { 0, 0, 0 }, { 1, 0, 0 }, 2, 0);
@@ -1246,7 +1267,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_bulk(
                 chunk_pos
             };
             ChunkNavmeshVertexDescriptor block_vertex
-                = impl::get_vertex(chunk_navmesh, block_coord);
+                = impl::get_vertex(chunk, block_coord);
 
             // Left
             do_navigable_check(
@@ -1284,7 +1305,7 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_bulk(
                 chunk_pos
             };
             ChunkNavmeshVertexDescriptor block_vertex
-                = impl::get_vertex(chunk_navmesh, block_coord);
+                = impl::get_vertex(chunk, block_coord);
 
             // Left
             do_navigable_check(
