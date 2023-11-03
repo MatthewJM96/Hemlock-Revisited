@@ -103,9 +103,6 @@ bool hphys::ChunkGridCollider::determine_candidate_colliding_voxels(
                     old_chunk_coord = new_chunk_coord;
                 }
 
-                // At this point, chunk exists, get lock on blocks.
-                auto& blocks = chunk->blocks.get(lock);
-
                 auto block_idx
                     = hvox::block_index(hvox::block_chunk_position({ x, y, z }));
                 auto block = blocks[block_idx];

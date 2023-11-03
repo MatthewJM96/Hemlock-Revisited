@@ -1,22 +1,24 @@
 #ifndef __hemlock_voxel_ai_navmesh_navmesh_manager_h
 #define __hemlock_voxel_ai_navmesh_navmesh_manager_h
 
-#include "memory/resource_manager.hpp"
+#include "thread/resource_guard.hpp"
 
 #include "state.hpp"
 
 namespace hemlock {
     namespace voxel {
         namespace ai {
-            using ChunkNavmeshPaged = hmem::PagedResource<ChunkNavmesh>;
-
             using ChunkNavmeshPager = hmem::Pager<ChunkNavmesh, 1, 3>;
 
-            class ChunkNavmeshManager :
-                public hmem::ResourceManager<ChunkNavmesh, ChunkNavmeshPager> {
+            class ChunkNavmeshManager : public hthread::ResourceGuard<ChunkNavmesh*> {
             public:
-                virtual void generate_buffer() override final;
-                virtual void free_buffer() override final;
+                void init(hmem::Handle<ChunkNavmeshPager> navmesh_pager);
+                void dispose();
+
+                void generate_buffer();
+                void free_buffer();
+            protected:
+                hmem::Handle<ChunkNavmeshPager> m_navmesh_pager;
             };
         }  // namespace ai
     }      // namespace voxel

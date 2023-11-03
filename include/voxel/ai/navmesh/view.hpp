@@ -27,10 +27,10 @@ namespace hemlock {
                     //                navmesh data, which we want to be able to do. Not
                     //                so easy as the API needs to be general, and
                     //                locking isn't always required.
-                    hmem::UniqueResourceLock lock;
-                    auto                     navmesh = chunk->navmesh.get(lock);
+                    std::unique_lock<std::shared_mutex> lock;
+                    auto navmesh = chunk->navmesh.get(lock);
 
-                    return { navmesh.data->coord_vertex_map[node], navmesh.data };
+                    return { navmesh->coord_vertex_map[node], navmesh };
                 }
             protected:
                 hmem::WeakHandle<ChunkGrid> m_grid;

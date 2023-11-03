@@ -2,25 +2,26 @@
 
 #include "voxel/ai/navmesh/navmesh_manager.h"
 
+void hvox::ai::ChunkNavmeshManager::init(hmem::Handle<ChunkNavmeshPager> navmesh_pager
+) {
+    m_navmesh_pager = navmesh_pager;
+}
+
+void hvox::ai::ChunkNavmeshManager::dispose() {
+    free_buffer();
+
+    m_navmesh_pager = nullptr;
+}
+
 void hvox::ai::ChunkNavmeshManager::generate_buffer() {
-    hmem::UniqueResourceLock lock;
-    auto&                    resource = get(lock);
+    std::unique_lock lock(m_mutex);
 
-    resource.count = 1;
-    if (!resource.data) {
-        resource.data = m_pager->get_page();
-
-        new (resource.data) ChunkNavmesh{};
-    }
+    if (!m_resource) m_resource = m_navmesh_pager->get_page();
 }
 
 void hvox::ai::ChunkNavmeshManager::free_buffer() {
-    hmem::UniqueResourceLock lock;
-    auto&                    resource = get(lock);
+    std::unique_lock lock(m_mutex);
 
-    resource.data->~ChunkNavmesh();
-
-    resource.count = 0;
-    if (resource.data) m_pager->free_page(resource.data);
-    resource.data = nullptr;
+    if (m_resource) m_navmesh_pager->free_page(m_resource);
+    m_resource = nullptr;
 }

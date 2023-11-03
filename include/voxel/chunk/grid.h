@@ -202,9 +202,9 @@ namespace hemlock {
 
             ChunkAllocator m_chunk_allocator;
 
-            hmem::Handle<ChunkBlockPager>       m_block_pager;
-            hmem::Handle<ChunkMeshPager>        m_mesh_pager;
-            hmem::Handle<ai::ChunkNavmeshPager> m_navmesh_pager;
+            hmem::Handle<ChunkBlockPager>        m_block_pager;
+            hmem::Handle<ChunkInstanceDataPager> m_instance_pager;
+            hmem::Handle<ai::ChunkNavmeshPager>  m_navmesh_pager;
 
             ChunkRenderer m_renderer;
             ui32          m_render_distance, m_chunks_in_render_distance;

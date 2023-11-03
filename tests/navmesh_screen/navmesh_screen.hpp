@@ -8,7 +8,8 @@
 #include "graphics/texture.hpp"
 #include "memory/handle.hpp"
 #include "ui/input/dispatcher.h"
-#include "voxel/ai/navmesh.hpp"
+#include "voxel/ai/navmesh/navmesh_task.hpp"
+#include "voxel/ai/navmesh/strategy/naive/strategy.hpp"
 #include "voxel/ai/navmesh/view.hpp"
 #include "voxel/generation/generator_task.hpp"
 #include "voxel/graphics/mesh/greedy_strategy.hpp"
@@ -150,7 +151,7 @@ public:
             auto chunk_start = m_nav_test_start.chunk.lock();
             auto chunk_end   = m_nav_test_end.chunk.lock();
             if (chunk_start != nullptr && chunk_end != nullptr) {
-                // hmem::SharedResourceLock lock_start, lock_end;
+                // std::shared_lock<std::shared_mutex> lock_start, lock_end;
                 // auto                     navmesh_start
                 //     = chunk_start->navmesh.get(lock_start, std::defer_lock);
                 // auto& navmesh_end = chunk_end->navmesh.get(lock_end,

@@ -195,7 +195,7 @@ bool hvox::Ray::cast_to_block(
         old_chunk_pos = new_chunk_pos;
 
         std::shared_lock<std::shared_mutex> lock;
-        auto                                chunk_blocks = chunk->blocks.get(lock);
+        auto                                chunk_blocks = chunk_tmp->blocks.get(lock);
 
         auto idx = block_index(block_chunk_position(position));
 
@@ -290,7 +290,7 @@ bool hvox::Ray::cast_to_block_before(
         old_chunk_pos = new_chunk_pos;
 
         std::shared_lock<std::shared_mutex> lock;
-        auto                                chunk_blocks = chunk->blocks.get(lock);
+        auto                                chunk_blocks = chunk_tmp->blocks.get(lock);
 
         auto idx = block_index(block_chunk_position(block_position));
 
