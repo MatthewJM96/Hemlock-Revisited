@@ -35,16 +35,16 @@ void hvox::NaiveMeshStrategy<MeshComparator>::operator()(
     //                      further improve performance and also remove the difficulty
     //                      of the above TODO.
 
-    chunk->instance.generate_buffer();
+    chunk->mesh.generate_buffer();
 
-    std::unique_lock<std::shared_mutex> instance_lock;
-    auto&                               instance = chunk->instance.get(instance_lock);
+    std::unique_lock<std::shared_mutex> mesh_lock;
+    auto&                               mesh = chunk->mesh.get(mesh_lock);
 
     // Determines if block is meshable.
     const MeshComparator meshable{};
 
     auto add_block = [&](BlockWorldPosition pos) {
-        instance.data[instance.count++] = { f32v3(pos), f32v3(1.0f) };
+        mesh.data[mesh.count++] = { f32v3(pos), f32v3(1.0f) };
     };
 
     Chunk* raw_chunk_ptr = chunk.get();
@@ -162,69 +162,65 @@ void hvox::NaiveMeshStrategy<MeshComparator>::operator()(
                         &blocks[i + CHUNK_LENGTH],
                         &blocks[i + CHUNK_LENGTH],
                         block_chunk_position(i),
-                        raw_chunk_ptr
-                    ))
-                {
+                    continue;
+            }
+        }
+
+        // FRONT
+        if (is_at_front_face(i)) {
+            // Get corresponding neighbour index in neighbour chunk and check.
+            BlockIndex j = index_at_back_face(i);
+            neighbour    = chunk->neighbours.one.front.lock();
+            if (neighbour) {
+                auto neighbour_blocks = neighbour->blocks.get(neighbour_lock);
+                if (neighbour_blocks[j] == NULL_BLOCK) {
                     add_block(block_position);
                     continue;
                 }
             }
+        } else {
+            // Get corresponding neighbour index in this chunk and check.
+            if (meshable(
+                    &blocks[i - (CHUNK_AREA)],
+                    &blocks[i - (CHUNK_AREA)],
+                    block_chunk_position(i),
+                    raw_chunk_ptr
+                ))
+            {
+                add_block(block_position);
+                continue;
+            }
+        }
 
-            // FRONT
-            if (is_at_front_face(i)) {
-                // Get corresponding neighbour index in neighbour chunk and check.
-                BlockIndex j = index_at_back_face(i);
-                neighbour    = chunk->neighbours.one.front.lock();
-                if (neighbour) {
-                    auto neighbour_blocks = neighbour->blocks.get(neighbour_lock);
-                    if (neighbour_blocks[j] == NULL_BLOCK) {
-                        add_block(block_position);
-                        continue;
-                    }
-                }
-            } else {
-                // Get corresponding neighbour index in this chunk and check.
-                if (meshable(
-                        &blocks[i - (CHUNK_AREA)],
-                        &blocks[i - (CHUNK_AREA)],
-                        block_chunk_position(i),
-                        raw_chunk_ptr
-                    ))
-                {
+        // BACK
+        if (is_at_back_face(i)) {
+            // Get corresponding neighbour index in neighbour chunk and check.
+            BlockIndex j = index_at_front_face(i);
+            neighbour    = chunk->neighbours.one.back.lock();
+            if (neighbour) {
+                auto neighbour_blocks = neighbour->blocks.get(neighbour_lock);
+                if (neighbour_blocks[j] == NULL_BLOCK) {
                     add_block(block_position);
                     continue;
                 }
             }
-
-            // BACK
-            if (is_at_back_face(i)) {
-                // Get corresponding neighbour index in neighbour chunk and check.
-                BlockIndex j = index_at_front_face(i);
-                neighbour    = chunk->neighbours.one.back.lock();
-                if (neighbour) {
-                    auto neighbour_blocks = neighbour->blocks.get(neighbour_lock);
-                    if (neighbour_blocks[j] == NULL_BLOCK) {
-                        add_block(block_position);
-                        continue;
-                    }
-                }
-            } else {
-                // Get corresponding neighbour index in this chunk and check.
-                if (meshable(
-                        &blocks[i + (CHUNK_AREA)],
-                        &blocks[i + (CHUNK_AREA)],
-                        block_chunk_position(i),
-                        raw_chunk_ptr
-                    ))
-                {
-                    add_block(block_position);
-                    continue;
-                }
+        } else {
+            // Get corresponding neighbour index in this chunk and check.
+            if (meshable(
+                    &blocks[i + (CHUNK_AREA)],
+                    &blocks[i + (CHUNK_AREA)],
+                    block_chunk_position(i),
+                    raw_chunk_ptr
+                ))
+            {
+                add_block(block_position);
+                continue;
             }
         }
     }
+}
 
-    chunk->meshing.store(ChunkState::COMPLETE, std::memory_order_release);
+chunk->meshing.store(ChunkState::COMPLETE, std::memory_order_release);
 
-    chunk->on_mesh_change();
+chunk->on_mesh_change();
 }

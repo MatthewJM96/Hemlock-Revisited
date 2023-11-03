@@ -50,16 +50,36 @@ namespace hemlock {
         using Vertex_Normal2D_64 = f64v2;
         using Vertex_Normal3D_32 = f32v3;
         using Vertex_Normal3D_64 = f32v3;
+        using Vertex_RGB_8       = ui8v3;
         using Vertex_RGB_32      = f32v3;
         using Vertex_RGB_64      = f64v3;
-        using Vertex_RGBA_64     = f64v4;
+        using Vertex_RGBA_8      = ui8v4;
         using Vertex_RGBA_32     = f32v4;
+        using Vertex_RGBA_64     = f64v4;
         using Vertex_UV_32       = f32v2;
         using Vertex_UV_64       = f64v2;
 
         struct IndexData {
             ui32* indices;
             ui32  index_count;
+        };
+
+        struct ConstIndexData {
+            ui32 const* indices;
+            ui32        index_count;
+
+            ConstIndexData() : indices(nullptr), index_count(0) { /* Empty. */
+            }
+
+            ConstIndexData(ui32 const* indices_, ui32 index_count_) :
+                indices(indices_), index_count(index_count_) {
+                /* Empty. */
+            }
+
+            ConstIndexData(const IndexData& rhs) {
+                indices     = rhs.indices;
+                index_count = rhs.index_count;
+            }
         };
 
 #define VERTEX_FIELD_TYPE(                                                             \
@@ -107,12 +127,30 @@ namespace hemlock {
   struct PREFIX##_MeshData {                                                           \
     PREFIX##_Vertex* vertices;                                                         \
     ui32             vertex_count;                                                     \
+  };                                                                                   \
+  struct Const##PREFIX##_MeshData {                                                    \
+    PREFIX##_Vertex const* vertices;                                                   \
+    ui32                   vertex_count;                                               \
+    Const##PREFIX##_MeshData() : vertices(nullptr), vertex_count(0) { /* Empty. */     \
+    }                                                                                  \
+    Const##PREFIX##_MeshData(PREFIX##_Vertex const* vertices_, ui32 vertex_count_) :   \
+        vertices(vertices_), vertex_count(vertex_count_) {                             \
+      /* Empty. */                                                                     \
+    }                                                                                  \
+    Const##PREFIX##_MeshData(const PREFIX##_MeshData& rhs) {                           \
+      vertices     = rhs.vertices;                                                     \
+      vertex_count = rhs.vertex_count;                                                 \
+    }                                                                                  \
   };
 
 #define GEN_INDEXED_MESH_DATA_STRUCT(PREFIX)                                           \
   struct PREFIX##_IndexedMeshData :                                                    \
       public PREFIX##_MeshData,                                                        \
       public IndexData { /* Empty. */                                                  \
+  };                                                                                   \
+  struct Const##PREFIX##_IndexedMeshData :                                             \
+      public Const##PREFIX##_MeshData,                                                 \
+      public ConstIndexData { /* Empty. */                                             \
   };
 
 #define GEN_MESH_DATA_STRUCT_DEFS(PREFIX)                                              \
@@ -121,16 +159,16 @@ namespace hemlock {
 
 #define GEN_UNINDEXED_MESH_UPLOADER_DECL(PREFIX)                                       \
   bool upload_mesh(                                                                    \
-      const PREFIX##_MeshData& mesh_data,                                              \
-      OUT MeshHandles&         handles,                                                \
-      MeshDataVolatility       volatility = MeshDataVolatility::DYNAMIC                \
+      const Const##PREFIX##_MeshData& mesh_data,                                       \
+      IN OUT MeshHandles&             handles,                                         \
+      MeshDataVolatility              volatility = MeshDataVolatility::DYNAMIC         \
   );
 
 #define GEN_INDEXED_MESH_UPLOADER_DECL(PREFIX)                                         \
   bool upload_mesh(                                                                    \
-      const PREFIX##_IndexedMeshData& mesh_data,                                       \
-      OUT IndexedMeshHandles&         handles,                                         \
-      MeshDataVolatility              volatility = MeshDataVolatility::DYNAMIC         \
+      const Const##PREFIX##_IndexedMeshData& mesh_data,                                \
+      IN OUT IndexedMeshHandles&             handles,                                  \
+      MeshDataVolatility                     volatility = MeshDataVolatility::DYNAMIC  \
   );
 
 #define GEN_MESH_UPLOADER_DEFS(PREFIX, ...)                                            \
@@ -161,6 +199,38 @@ namespace hemlock {
         GEN_MESH_CASE_STRUCT_DEFS_AND_FUNC_DECLS(Point_3D_64, MAKE_POS3D(64))
 
         GEN_MESH_CASE_STRUCT_DEFS_AND_FUNC_DECLS(
+            RGB_Point_2D_32, MAKE_POS2D(32), MAKE_RGB(8)
+        )
+
+        GEN_MESH_CASE_STRUCT_DEFS_AND_FUNC_DECLS(
+            RGB_Point_3D_32, MAKE_POS3D(32), MAKE_RGB(8)
+        )
+
+        GEN_MESH_CASE_STRUCT_DEFS_AND_FUNC_DECLS(
+            RGB_Point_2D_64, MAKE_POS2D(64), MAKE_RGB(8)
+        )
+
+        GEN_MESH_CASE_STRUCT_DEFS_AND_FUNC_DECLS(
+            RGB_Point_3D_64, MAKE_POS3D(64), MAKE_RGB(8)
+        )
+
+        GEN_MESH_CASE_STRUCT_DEFS_AND_FUNC_DECLS(
+            RGBA_Point_2D_32, MAKE_POS2D(32), MAKE_RGBA(8)
+        )
+
+        GEN_MESH_CASE_STRUCT_DEFS_AND_FUNC_DECLS(
+            RGBA_Point_3D_32, MAKE_POS3D(32), MAKE_RGBA(8)
+        )
+
+        GEN_MESH_CASE_STRUCT_DEFS_AND_FUNC_DECLS(
+            RGBA_Point_2D_64, MAKE_POS2D(64), MAKE_RGBA(8)
+        )
+
+        GEN_MESH_CASE_STRUCT_DEFS_AND_FUNC_DECLS(
+            RGBA_Point_3D_64, MAKE_POS3D(64), MAKE_RGBA(8)
+        )
+
+        GEN_MESH_CASE_STRUCT_DEFS_AND_FUNC_DECLS(
             Colourless_2D_32, MAKE_POS2D(32), MAKE_UV(32)
         )
 
@@ -177,35 +247,35 @@ namespace hemlock {
         )
 
         GEN_MESH_CASE_STRUCT_DEFS_AND_FUNC_DECLS(
-            RGB_2D_32, MAKE_POS2D(32), MAKE_UV(32), MAKE_RGB(32)
+            RGB_2D_32, MAKE_POS2D(32), MAKE_UV(32), MAKE_RGB(8)
         )
 
         GEN_MESH_CASE_STRUCT_DEFS_AND_FUNC_DECLS(
-            RGB_3D_32, MAKE_POS3D(32), MAKE_UV(32), MAKE_RGB(32)
+            RGB_3D_32, MAKE_POS3D(32), MAKE_UV(32), MAKE_RGB(8)
         )
 
         GEN_MESH_CASE_STRUCT_DEFS_AND_FUNC_DECLS(
-            RGB_2D_64, MAKE_POS2D(64), MAKE_UV(64), MAKE_RGB(64)
+            RGB_2D_64, MAKE_POS2D(64), MAKE_UV(64), MAKE_RGB(8)
         )
 
         GEN_MESH_CASE_STRUCT_DEFS_AND_FUNC_DECLS(
-            RGB_3D_64, MAKE_POS3D(64), MAKE_UV(64), MAKE_RGB(64)
+            RGB_3D_64, MAKE_POS3D(64), MAKE_UV(64), MAKE_RGB(8)
         )
 
         GEN_MESH_CASE_STRUCT_DEFS_AND_FUNC_DECLS(
-            RGBA_2D_32, MAKE_POS2D(32), MAKE_UV(32), MAKE_RGBA(32)
+            RGBA_2D_32, MAKE_POS2D(32), MAKE_UV(32), MAKE_RGBA(8)
         )
 
         GEN_MESH_CASE_STRUCT_DEFS_AND_FUNC_DECLS(
-            RGBA_3D_32, MAKE_POS3D(32), MAKE_UV(32), MAKE_RGBA(32)
+            RGBA_3D_32, MAKE_POS3D(32), MAKE_UV(32), MAKE_RGBA(8)
         )
 
         GEN_MESH_CASE_STRUCT_DEFS_AND_FUNC_DECLS(
-            RGBA_2D_64, MAKE_POS2D(64), MAKE_UV(64), MAKE_RGBA(64)
+            RGBA_2D_64, MAKE_POS2D(64), MAKE_UV(64), MAKE_RGBA(8)
         )
 
         GEN_MESH_CASE_STRUCT_DEFS_AND_FUNC_DECLS(
-            RGBA_3D_64, MAKE_POS3D(64), MAKE_UV(64), MAKE_RGBA(64)
+            RGBA_3D_64, MAKE_POS3D(64), MAKE_UV(64), MAKE_RGBA(8)
         )
 
         GEN_MESH_CASE_STRUCT_DEFS_AND_FUNC_DECLS(
@@ -228,7 +298,7 @@ namespace hemlock {
             RGB_2D_32_Normal,
             MAKE_POS2D(32),
             MAKE_UV(32),
-            MAKE_RGB(32),
+            MAKE_RGB(8),
             MAKE_NORMAL2D(32)
         )
 
@@ -236,7 +306,7 @@ namespace hemlock {
             RGB_3D_32_Normal,
             MAKE_POS3D(32),
             MAKE_UV(32),
-            MAKE_RGB(32),
+            MAKE_RGB(8),
             MAKE_NORMAL3D(32)
         )
 
@@ -244,7 +314,7 @@ namespace hemlock {
             RGB_2D_64_Normal,
             MAKE_POS2D(64),
             MAKE_UV(64),
-            MAKE_RGB(64),
+            MAKE_RGB(8),
             MAKE_NORMAL2D(64)
         )
 
@@ -252,7 +322,7 @@ namespace hemlock {
             RGB_3D_64_Normal,
             MAKE_POS3D(64),
             MAKE_UV(64),
-            MAKE_RGB(64),
+            MAKE_RGB(8),
             MAKE_NORMAL3D(64)
         )
 
@@ -260,7 +330,7 @@ namespace hemlock {
             RGBA_2D_32_Normal,
             MAKE_POS2D(32),
             MAKE_UV(32),
-            MAKE_RGBA(32),
+            MAKE_RGBA(8),
             MAKE_NORMAL2D(32)
         )
 
@@ -268,7 +338,7 @@ namespace hemlock {
             RGBA_3D_32_Normal,
             MAKE_POS3D(32),
             MAKE_UV(32),
-            MAKE_RGBA(32),
+            MAKE_RGBA(8),
             MAKE_NORMAL3D(32)
         )
 
@@ -276,7 +346,7 @@ namespace hemlock {
             RGBA_2D_64_Normal,
             MAKE_POS2D(64),
             MAKE_UV(64),
-            MAKE_RGBA(64),
+            MAKE_RGBA(8),
             MAKE_NORMAL2D(64)
         )
 
@@ -284,7 +354,7 @@ namespace hemlock {
             RGBA_3D_64_Normal,
             MAKE_POS3D(64),
             MAKE_UV(64),
-            MAKE_RGBA(64),
+            MAKE_RGBA(8),
             MAKE_NORMAL3D(64)
         )
 

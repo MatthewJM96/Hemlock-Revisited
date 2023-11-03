@@ -3,6 +3,7 @@
 
 #include "algorithm/acs/graph/state.hpp"
 #include "timing.h"
+#include "voxel/ai/navmesh/navmesh_manager.h"
 #include "voxel/chunk/chunk.h"
 #include "voxel/coordinate_system.h"
 #include "voxel/graphics/renderer.h"
@@ -201,8 +202,9 @@ namespace hemlock {
 
             ChunkAllocator m_chunk_allocator;
 
-            hmem::Handle<ChunkBlockPager>        m_block_pager;
-            hmem::Handle<ChunkInstanceDataPager> m_instance_data_pager;
+            hmem::Handle<ChunkBlockPager>       m_block_pager;
+            hmem::Handle<ChunkMeshPager>        m_mesh_pager;
+            hmem::Handle<ai::ChunkNavmeshPager> m_navmesh_pager;
 
             ChunkRenderer m_renderer;
             ui32          m_render_distance, m_chunks_in_render_distance;

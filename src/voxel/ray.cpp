@@ -125,7 +125,8 @@ bool hvox::Ray::cast_to_block(
     Block                       target_block,
     ui32                        max_steps,
     OUT BlockWorldPosition&     position,
-    OUT f32&                    distance
+    OUT f32&                    distance,
+    OUT hmem::WeakHandle<Chunk>* chunk /*= nullptr*/
 ) {
     return cast_to_block(
         start,
@@ -136,7 +137,8 @@ bool hvox::Ray::cast_to_block(
         } },
         max_steps,
         position,
-        distance
+        distance,
+        chunk
     );
 }
 
@@ -147,7 +149,8 @@ bool hvox::Ray::cast_to_block(
     BlockTest                   block_is_target,
     ui32                        max_steps,
     OUT BlockWorldPosition&     position,
-    OUT f32&                    distance
+    OUT f32&                    distance,
+    OUT hmem::WeakHandle<Chunk>* chunk /*= nullptr*/
 ) {
     auto chunk_grid = chunk_handle.lock();
 
@@ -171,9 +174,9 @@ bool hvox::Ray::cast_to_block(
 
     ChunkGridPosition old_chunk_pos = chunk_grid_position(position);
 
-    auto chunk = chunk_grid->chunk(old_chunk_pos);
+    auto chunk_tmp = chunk_grid->chunk(old_chunk_pos);
 
-    if (chunk == nullptr) return false;
+    if (chunk_tmp == nullptr) return false;
 
     do {
         step_to_next_block_position(
@@ -183,10 +186,10 @@ bool hvox::Ray::cast_to_block(
         ChunkGridPosition new_chunk_pos = chunk_grid_position(position);
 
         if (new_chunk_pos != old_chunk_pos) {
-            chunk = chunk_grid->chunk(new_chunk_pos);
+            chunk_tmp = chunk_grid->chunk(new_chunk_pos);
 
             // TODO(Matthew): do we want to allow "seeing through" unloaded chunks?
-            if (chunk == nullptr) return false;
+            if (chunk_tmp == nullptr) return false;
         }
 
         old_chunk_pos = new_chunk_pos;
@@ -198,7 +201,11 @@ bool hvox::Ray::cast_to_block(
 
         block = chunk_blocks[idx];
 
-        if (block_is_target(block)) return true;
+        if (block_is_target(block)) {
+            if (chunk) *chunk = chunk_tmp;
+
+            return true;
+        }
     } while (++steps < max_steps);
 
     return false;
@@ -211,7 +218,8 @@ bool hvox::Ray::cast_to_block_before(
     Block                       target_block,
     ui32                        max_steps,
     OUT BlockWorldPosition&     position,
-    OUT f32&                    distance
+    OUT f32&                    distance,
+    OUT hmem::WeakHandle<Chunk>* chunk /*= nullptr*/
 ) {
     return cast_to_block_before(
         start,
@@ -222,7 +230,8 @@ bool hvox::Ray::cast_to_block_before(
         } },
         max_steps,
         position,
-        distance
+        distance,
+        chunk
     );
 }
 
@@ -233,7 +242,8 @@ bool hvox::Ray::cast_to_block_before(
     BlockTest                   block_is_target,
     ui32                        max_steps,
     OUT BlockWorldPosition&     position,
-    OUT f32&                    distance
+    OUT f32&                    distance,
+    OUT hmem::WeakHandle<Chunk>* chunk /*= nullptr*/
 ) {
     auto chunk_grid = chunk_handle.lock();
 
@@ -258,9 +268,9 @@ bool hvox::Ray::cast_to_block_before(
 
     ChunkGridPosition old_chunk_pos = chunk_grid_position(block_position);
 
-    auto chunk = chunk_grid->chunk(old_chunk_pos);
+    auto chunk_tmp = chunk_grid->chunk(old_chunk_pos);
 
-    if (chunk == nullptr) return false;
+    if (chunk_tmp == nullptr) return false;
 
     do {
         f32 step_distance = 0.0f;
@@ -271,10 +281,10 @@ bool hvox::Ray::cast_to_block_before(
         ChunkGridPosition new_chunk_pos = chunk_grid_position(block_position);
 
         if (new_chunk_pos != old_chunk_pos) {
-            chunk = chunk_grid->chunk(new_chunk_pos);
+            chunk_tmp = chunk_grid->chunk(new_chunk_pos);
 
             // TODO(Matthew): do we want to allow "seeing through" unloaded chunks?
-            if (chunk == nullptr) return false;
+            if (chunk_tmp == nullptr) return false;
         }
 
         old_chunk_pos = new_chunk_pos;
@@ -286,7 +296,11 @@ bool hvox::Ray::cast_to_block_before(
 
         block = chunk_blocks[idx];
 
-        if (block_is_target(block)) return true;
+        if (block_is_target(block)) {
+            if (chunk) *chunk = chunk_tmp;
+
+            return true;
+        }
 
         distance += step_distance;
         position = block_position;

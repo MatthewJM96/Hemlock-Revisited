@@ -9,11 +9,11 @@
 #include "memory/handle.hpp"
 #include "rand.h"
 #include "ui/input/dispatcher.h"
-#include "voxel/ai/navmesh/naive_strategy.hpp"
+#include "voxel/ai/navmesh.hpp"
 #include "voxel/chunk/state.hpp"
 #include "voxel/generation/generator_task.hpp"
 #include "voxel/graphics/mesh/greedy_strategy.hpp"
-#include "voxel/graphics/mesh/instance_manager.h"
+#include "voxel/graphics/mesh/mesh_manager.hpp"
 #include "voxel/graphics/mesh/naive_strategy.hpp"
 
 #include "tests/iomanager.hpp"
@@ -63,8 +63,10 @@ public:
 
             hmem::Handle<hvox::ChunkBlockPager> block_pager
                 = hmem::make_handle<hvox::ChunkBlockPager>();
-            hmem::Handle<hvox::ChunkInstanceDataPager> instance_data_pager
-                = hmem::make_handle<hvox::ChunkInstanceDataPager>();
+            hmem::Handle<hvox::ChunkMeshPager> mesh_pager
+                = hmem::make_handle<hvox::ChunkMeshPager>();
+            hmem::Handle<hvox::ai::ChunkNavmeshPager> navmesh_pager
+                = hmem::make_handle<hvox::ai::ChunkNavmeshPager>();
 
             hmem::PagedAllocator<hvox::Chunk, 4 * 4 * 4, 3> chunk_allocator;
 
@@ -85,7 +87,7 @@ public:
                             {x, y, z}
                         };
                         chunks[idx]->init(
-                            chunks[idx], block_pager, instance_data_pager
+                            chunks[idx], block_pager, mesh_pager, navmesh_pager
                         );
                     }
                 }
@@ -206,7 +208,7 @@ public:
                 ));
 
                 std::shared_lock<std::shared_mutex> lock;
-                auto instance = chunks[rand_chunk_idx]->instance.get(lock);
+                auto instance = chunks[rand_chunk_idx]->mesh.get(lock);
 
                 ui32 rand_instance_idx = static_cast<ui32>(std::floor(
                     hemlock::global_unitary_rand<f32>()
@@ -261,7 +263,7 @@ public:
                 ));
 
                 std::shared_lock<std::shared_mutex> lock;
-                auto instance = chunks[rand_chunk_idx]->instance.get(lock);
+                auto instance = chunks[rand_chunk_idx]->mesh.get(lock);
 
                 ui32 rand_instance_idx = static_cast<ui32>(std::floor(
                     hemlock::global_unitary_rand<f32>()
@@ -349,7 +351,7 @@ public:
 
             {
                 size_t allocated_bytes = block_pager->allocated_bytes()
-                                         + instance_data_pager->allocated_bytes()
+                                         + mesh_pager->allocated_bytes()
                                          + chunk_allocator.allocated_bytes();
                 size_t allocated_MB = allocated_bytes / 1000000;
 
@@ -373,7 +375,7 @@ public:
 
             delete[] chunks;
             block_pager->dispose();
-            instance_data_pager->dispose();
+            mesh_pager->dispose();
 
             m_do_profile.store(false);
         }

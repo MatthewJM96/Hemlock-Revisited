@@ -25,7 +25,8 @@ namespace hemlock {
             void init(
                 hmem::WeakHandle<Chunk>              self,
                 hmem::Handle<ChunkBlockPager>        block_pager,
-                hmem::Handle<ChunkInstanceDataPager> instance_data_pager
+                hmem::Handle<ChunkInstanceDataPager> instance_data_pager,
+                hmem::Handle<ai::ChunkNavmeshPager>  navmesh_pager
             );
 
             void update(FrameTime);
@@ -37,7 +38,9 @@ namespace hemlock {
 
             BlockManager blocks;
 
-            hthread::ResourceGuard<ai::ChunkNavmesh> navmesh;
+            // TODO(Matthew): navmesh wants to probably be paged in some amount of bulk
+            //                and divied out, that or we need to stack allocate.
+            ai::ChunkNavmeshManager navmesh;
 
             ChunkInstanceManager instance;
 

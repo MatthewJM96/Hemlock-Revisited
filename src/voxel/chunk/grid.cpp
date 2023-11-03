@@ -53,6 +53,11 @@ hvox::ChunkGrid::ChunkGrid() :
             // an unload event for this chunk.
             if (chunk == nullptr) return true;
 
+            // TODO(Matthew): These tasks are being added in the wrong event - this
+            //                is the pre-block change event checking if the change may
+            //                occur, in fact we should do this only after the block
+            //                change has occurred.
+
             auto mesh_task = m_build_mesh_task();
             mesh_task->set_state(chunk, m_self);
             m_thread_pool.add_task({ mesh_task, true });
@@ -89,8 +94,9 @@ void hvox::ChunkGrid::init(
 
     m_thread_pool.init(thread_count);
 
-    m_block_pager         = hmem::make_handle<ChunkBlockPager>();
-    m_instance_data_pager = hmem::make_handle<ChunkInstanceDataPager>();
+    m_block_pager   = hmem::make_handle<ChunkBlockPager>();
+    m_mesh_pager    = hmem::make_handle<ChunkMeshPager>();
+    m_navmesh_pager = hmem::make_handle<ai::ChunkNavmeshPager>();
 
     // TODO(Matthew): smarter setting of page size - maybe should be dependent on draw
     // distance. m_renderer.init(20, 2);
@@ -147,7 +153,7 @@ bool hvox::ChunkGrid::preload_chunk_at(ChunkGridPosition chunk_position) {
 
     hmem::Handle<Chunk> chunk = hmem::allocate_handle<Chunk>(m_chunk_allocator);
     chunk->position           = chunk_position;
-    chunk->init(chunk, m_block_pager, m_instance_data_pager);
+    chunk->init(chunk, m_block_pager, m_mesh_pager, m_navmesh_pager);
 
     chunk->on_load         += &handle_chunk_load;
     chunk->on_block_change += &handle_block_change;

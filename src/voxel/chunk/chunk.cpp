@@ -25,6 +25,7 @@ hvox::Chunk::~Chunk() {
 
     blocks.dispose();
     instance.dispose();
+    navmesh.dispose();
 
     neighbours = {};
 }
@@ -32,13 +33,16 @@ hvox::Chunk::~Chunk() {
 void hvox::Chunk::init(
     hmem::WeakHandle<Chunk>              self,
     hmem::Handle<ChunkBlockPager>        block_pager,
-    hmem::Handle<ChunkInstanceDataPager> instance_data_pager
+    hmem::Handle<ChunkInstanceDataPager> instance_data_pager,
+    hmem::Handle<ai::ChunkNavmeshPager>  navmesh_pager
 ) {
     init_events(self);
 
     blocks.init(block_pager);
 
     instance.init(instance_data_pager);
+
+    navmesh.init(navmesh_pager);
 
     neighbours = {};
 }

@@ -22,10 +22,9 @@ namespace hemlock {
              * reaching.
              * @param max_steps The maximum number of steps the ray should take
              * before failing.
-             * @param position The position of the block the ray met, unchanged
-             * if the ray was not incident on the target block.
-             * @param distance The distance to the block the ray met, unchanged
-             * if the ray was not incident on the target block.
+             * @param position The position of the block the ray met.
+             * @param distance The distance to the block the ray met.
+             * @param chunk The chunk inside which the ray met a target block.
              * @return True if the ray was incident on a block matching the
              * target within max_steps, false otherwise.
              */
@@ -36,7 +35,8 @@ namespace hemlock {
                 Block                       target_block,
                 ui32                        max_steps,
                 OUT BlockWorldPosition&     position,
-                OUT f32&                    distance
+                OUT f32&                    distance,
+                OUT hmem::WeakHandle<Chunk>* chunk = nullptr
             );
 
             /**
@@ -51,10 +51,9 @@ namespace hemlock {
              * except for a block considered a target of the ray.
              * @param max_steps The maximum number of steps the ray should take
              * before failing.
-             * @param position The position of the block the ray met, unchanged
-             * if the ray was not incident on the target block.
-             * @param distance The distance to the block the ray met, unchanged
-             * if the ray was not incident on the target block.
+             * @param position The position of the block the ray met.
+             * @param distance The distance to the block the ray met.
+             * @param chunk The chunk inside which the ray met a target block.
              * @return True if the ray was incident on a block matching the
              * target within max_steps, false otherwise.
              */
@@ -65,7 +64,8 @@ namespace hemlock {
                 BlockTest                   block_is_target,
                 ui32                        max_steps,
                 OUT BlockWorldPosition&     position,
-                OUT f32&                    distance
+                OUT f32&                    distance,
+                OUT hmem::WeakHandle<Chunk>* chunk = nullptr
             );
 
             /**
@@ -81,10 +81,9 @@ namespace hemlock {
              * reaching.
              * @param max_steps The maximum number of steps the ray should take
              * before failing.
-             * @param position The position of the block the ray met, unchanged
-             * if the ray was not incident on the target block.
-             * @param distance The distance to the block the ray met, unchanged
-             * if the ray was not incident on the target block.
+             * @param position The position of the block the ray met.
+             * @param distance The distance to the block the ray met.
+             * @param chunk The chunk inside which the ray met a target block.
              * @return True if the ray was incident on a block matching the
              * target within max_steps, false otherwise.
              */
@@ -95,7 +94,8 @@ namespace hemlock {
                 Block                       target_block,
                 ui32                        max_steps,
                 OUT BlockWorldPosition&     position,
-                OUT f32&                    distance
+                OUT f32&                    distance,
+                OUT hmem::WeakHandle<Chunk>* chunk = nullptr
             );
 
             /**
@@ -111,10 +111,9 @@ namespace hemlock {
              * except for a block considered a target of the ray.
              * @param max_steps The maximum number of steps the ray should take
              * before failing.
-             * @param position The position of the block the ray met, unchanged
-             * if the ray was not incident on the target block.
-             * @param distance The distance to the block the ray met, unchanged
-             * if the ray was not incident on the target block.
+             * @param position The position of the block the ray met.
+             * @param distance The distance to the block the ray met.
+             * @param chunk The chunk inside which the ray met a target block.
              * @return True if the ray was incident on a block matching the
              * target within max_steps, false otherwise.
              */
@@ -125,7 +124,8 @@ namespace hemlock {
                 BlockTest                   block_is_target,
                 ui32                        max_steps,
                 OUT BlockWorldPosition&     position,
-                OUT f32&                    distance
+                OUT f32&                    distance,
+                OUT hmem::WeakHandle<Chunk>* chunk = nullptr
             );
         }  // namespace Ray
     }      // namespace voxel

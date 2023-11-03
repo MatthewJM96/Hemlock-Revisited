@@ -82,6 +82,7 @@ bool hphys::ChunkGridCollider::determine_candidate_colliding_voxels(
     hmem::Handle<hvox::Chunk>           chunk;
     std::shared_lock<std::shared_mutex> lock;
     const hvox::Block*                  blocks;
+
     for (auto x = min_world_block_coord.x; x < max_world_block_coord.x; ++x) {
         for (auto y = min_world_block_coord.y; y < max_world_block_coord.y; ++y) {
             for (auto z = min_world_block_coord.z; z < max_world_block_coord.z; ++z) {
@@ -95,10 +96,15 @@ bool hphys::ChunkGridCollider::determine_candidate_colliding_voxels(
                     // chunk and check it at least exists.
                     chunk = chunk_grid->chunk(new_chunk_coord);
                     if (chunk == nullptr) continue;
+
                     // Chunk exists, get lock on blocks.
-                    blocks          = chunk->blocks.get(lock);
+                    blocks = chunk->blocks.get(lock);
+
                     old_chunk_coord = new_chunk_coord;
                 }
+
+                // At this point, chunk exists, get lock on blocks.
+                auto& blocks = chunk->blocks.get(lock);
 
                 auto block_idx
                     = hvox::block_index(hvox::block_chunk_position({ x, y, z }));

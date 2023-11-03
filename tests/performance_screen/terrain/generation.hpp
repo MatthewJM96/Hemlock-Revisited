@@ -6,16 +6,25 @@ namespace hemlock {
         namespace performance_screen {
             struct VoxelGenerator {
                 void operator()(hmem::Handle<hvox::Chunk> chunk) const {
-                    auto simplex_1      = FastNoise::New<FastNoise::Simplex>();
-                    auto fractal_1      = FastNoise::New<FastNoise::FractalFBm>();
-                    auto domain_scale_1 = FastNoise::New<FastNoise::DomainScale>();
-                    auto position_output_1
-                        = FastNoise::New<FastNoise::PositionOutput>();
-                    auto add_1 = FastNoise::New<FastNoise::Add>();
+                    auto simplex_1
+                        = FastNoise::New<FastNoise::Simplex>(FastSIMD::Level_AVX512);
+                    auto fractal_1
+                        = FastNoise::New<FastNoise::FractalFBm>(FastSIMD::Level_AVX512);
+                    auto domain_scale_1
+                        = FastNoise::New<FastNoise::DomainScale>(FastSIMD::Level_AVX512
+                        );
+                    auto position_output_1 = FastNoise::New<FastNoise::PositionOutput>(
+                        FastSIMD::Level_AVX512
+                    );
+                    auto add_1 = FastNoise::New<FastNoise::Add>(FastSIMD::Level_AVX512);
                     auto domain_warp_grad_1
-                        = FastNoise::New<FastNoise::DomainWarpGradient>();
+                        = FastNoise::New<FastNoise::DomainWarpGradient>(
+                            FastSIMD::Level_AVX512
+                        );
                     auto domain_warp_fract_prog_1
-                        = FastNoise::New<FastNoise::DomainWarpFractalProgressive>();
+                        = FastNoise::New<FastNoise::DomainWarpFractalProgressive>(
+                            FastSIMD::Level_AVX512
+                        );
 
                     fractal_1->SetSource(simplex_1);
                     fractal_1->SetOctaveCount(4);
