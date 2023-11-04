@@ -43,6 +43,7 @@ void hvox::Chunk::init(
     instance.init(instance_data_pager);
 
     navmesh.init(navmesh_pager);
+    navmesh.generate_buffer();
 
     neighbours = {};
 }

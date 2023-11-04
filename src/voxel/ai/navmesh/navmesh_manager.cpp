@@ -16,12 +16,21 @@ void hvox::ai::ChunkNavmeshManager::dispose() {
 void hvox::ai::ChunkNavmeshManager::generate_buffer() {
     std::unique_lock lock(m_mutex);
 
-    if (!m_resource) m_resource = m_navmesh_pager->get_page();
+    if (!m_resource) {
+        m_resource = m_navmesh_pager->get_page();
+
+        new (m_resource) ChunkNavmesh{};
+    }
 }
 
 void hvox::ai::ChunkNavmeshManager::free_buffer() {
     std::unique_lock lock(m_mutex);
 
-    if (m_resource) m_navmesh_pager->free_page(m_resource);
+    if (m_resource) {
+        m_resource->~ChunkNavmesh();
+
+        m_navmesh_pager->free_page(m_resource);
+    }
+
     m_resource = nullptr;
 }
