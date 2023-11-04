@@ -1,12 +1,11 @@
-#ifndef __hemlock_voxel_ai_navmesh_task_hpp
-#define __hemlock_voxel_ai_navmesh_task_hpp
+#ifndef __hemlock_voxel_ai_navmesh_navmesh_task_hpp
+#define __hemlock_voxel_ai_navmesh_navmesh_task_hpp
 
 #include "voxel/task.hpp"
 
 namespace hemlock {
     namespace voxel {
         class ChunkGrid;
-        struct Chunk;
 
         namespace ai {
             /**
@@ -30,9 +29,8 @@ namespace hemlock {
                 virtual ~ChunkNavmeshTask() { /* Empty. */
                 }
 
-                virtual void execute(
-                    ChunkTaskThreadState* state, ChunkTaskQueue* task_queue
-                ) override;
+                virtual void
+                execute(ChunkThreadState* state, ChunkTaskQueue* task_queue) override;
             };
         }  // namespace ai
     }      // namespace voxel
@@ -41,4 +39,4 @@ namespace hvox = hemlock::voxel;
 
 #include "navmesh_task.inl"
 
-#endif  // __hemlock_voxel_ai_navmesh_task_hpp
+#endif  // __hemlock_voxel_ai_navmesh_navmesh_task_hpp

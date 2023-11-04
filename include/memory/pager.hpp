@@ -1,15 +1,10 @@
 #ifndef __hemlock_memory_pager_hpp
 #define __hemlock_memory_pager_hpp
 
+#include "page.hpp"
+
 namespace hemlock {
     namespace memory {
-        template <typename DataType>
-        using Page = DataType*;
-
-        template <typename DataType, size_t MaxFreePages>
-            requires (MaxFreePages > 0)
-        using Pages = std::array<Page<DataType>, MaxFreePages>;
-
         template <typename DataType, size_t PageSize, size_t MaxFreePages>
             requires (PageSize > 0 && MaxFreePages > 0)
         class Pager {

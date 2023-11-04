@@ -1,9 +1,11 @@
-template <hvox::ChunkOutlinePredicate Pred>
+#include "voxel/chunk/grid.h"
+
+template <hvox::OutlinePredicate Pred>
 hg::MeshHandles hvox::ConditionalChunkOutlineRenderer<Pred>::chunk_mesh_handles = {};
-template <hvox::ChunkOutlinePredicate Pred>
+template <hvox::OutlinePredicate Pred>
 std::atomic<ui32> hvox::ConditionalChunkOutlineRenderer<Pred>::ref_count = 0;
 
-template <hvox::ChunkOutlinePredicate Pred>
+template <hvox::OutlinePredicate Pred>
 hvox::ConditionalChunkOutlineRenderer<Pred>::ConditionalChunkOutlineRenderer() :
     handle_render_distance_change(Delegate<void(Sender, RenderDistanceChangeEvent)>{
         [&](Sender, RenderDistanceChangeEvent ev) {
@@ -18,12 +20,14 @@ hvox::ConditionalChunkOutlineRenderer<Pred>::ConditionalChunkOutlineRenderer() :
             //                the only thread to ever call draw for a call to which a
             //                race condition would otherwise occur with how this is
             //                implemented.
+            if (m_chunk_outline_conditions) delete[] m_chunk_outline_conditions;
+
             m_chunk_outline_conditions
-                = new ChunkOutlineCondition[ev.after.chunks_in_render_distance];
+                = new OutlineData[ev.after.chunks_in_render_distance];
 
             glNamedBufferData(
                 m_instance_vbo,
-                ev.after.chunks_in_render_distance * sizeof(ChunkOutlineCondition),
+                ev.after.chunks_in_render_distance * sizeof(OutlineData),
                 nullptr,
                 GL_DYNAMIC_DRAW
             );
@@ -31,7 +35,7 @@ hvox::ConditionalChunkOutlineRenderer<Pred>::ConditionalChunkOutlineRenderer() :
     // Empty.
 }
 
-template <hvox::ChunkOutlinePredicate Pred>
+template <hvox::OutlinePredicate Pred>
 void hvox::ConditionalChunkOutlineRenderer<Pred>::init(
     Pred predicate, hmem::Handle<ChunkGrid> chunk_grid
 ) {
@@ -39,12 +43,12 @@ void hvox::ConditionalChunkOutlineRenderer<Pred>::init(
     m_chunk_grid = chunk_grid;
 
     m_chunk_outline_conditions
-        = new ChunkOutlineCondition[chunk_grid->chunks_in_render_distance()];
+        = new OutlineData[chunk_grid->chunks_in_render_distance()];
 
     glCreateBuffers(1, &m_instance_vbo);
     glNamedBufferData(
         m_instance_vbo,
-        chunk_grid->chunks_in_render_distance() * sizeof(ChunkOutlineCondition),
+        chunk_grid->chunks_in_render_distance() * sizeof(OutlineData),
         nullptr,
         GL_DYNAMIC_DRAW
     );
@@ -69,7 +73,7 @@ void hvox::ConditionalChunkOutlineRenderer<Pred>::init(
     }
 }
 
-template <hvox::ChunkOutlinePredicate Pred>
+template <hvox::OutlinePredicate Pred>
 void hvox::ConditionalChunkOutlineRenderer<Pred>::dispose() {
     m_chunk_grid.reset();
 
@@ -83,7 +87,7 @@ void hvox::ConditionalChunkOutlineRenderer<Pred>::dispose() {
     }
 }
 
-template <hvox::ChunkOutlinePredicate Pred>
+template <hvox::OutlinePredicate Pred>
 void hvox::ConditionalChunkOutlineRenderer<Pred>::draw(FrameTime) {
     m_chunk_outline_condition_count = 0;
 
@@ -92,9 +96,8 @@ void hvox::ConditionalChunkOutlineRenderer<Pred>::draw(FrameTime) {
 
         if (should_draw) {
             m_chunk_outline_conditions[m_chunk_outline_condition_count++]
-                = ChunkOutlineCondition{
-                      f32v3(block_world_position(chunk->position, 0)), colour
-                  };
+                = OutlineData{ f32v3(block_world_position(chunk->position, 0)),
+                               colour };
         }
     }
 
@@ -104,14 +107,14 @@ void hvox::ConditionalChunkOutlineRenderer<Pred>::draw(FrameTime) {
     glNamedBufferSubData(
         m_instance_vbo,
         0,
-        m_chunk_outline_condition_count * sizeof(ChunkOutlineCondition),
+        m_chunk_outline_condition_count * sizeof(OutlineData),
         reinterpret_cast<void*>(m_chunk_outline_conditions)
     );
 
     glBindVertexArray(chunk_mesh_handles.vao);
 
     glVertexArrayVertexBuffer(
-        chunk_mesh_handles.vao, 1, m_instance_vbo, 0, sizeof(ChunkOutlineCondition)
+        chunk_mesh_handles.vao, 1, m_instance_vbo, 0, sizeof(OutlineData)
     );
 
     glDrawArraysInstanced(

@@ -30,7 +30,7 @@ namespace hemlock {
             }
 
             virtual void
-            execute(ChunkTaskThreadState* state, ChunkTaskQueue* task_queue) override;
+            execute(ChunkThreadState* state, ChunkTaskQueue* task_queue) override;
         };
     }  // namespace voxel
 }  // namespace hemlock

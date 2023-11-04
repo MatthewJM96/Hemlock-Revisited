@@ -100,8 +100,7 @@ void map::maze2d::print_map(const Map& map) {
     std::cout << "\n";
 }
 
-halgo::GraphMap<size_t, false>
-map::maze2d::map_to_graph(Map map, float initial_weight) {
+halgo::GraphMap<size_t, false> map::maze2d::map_to_graph(Map map) {
     using _VertexDescriptor = halgo::VertexDescriptor<size_t, false>;
 
     halgo::GraphMap<size_t, false> graph_map;
@@ -128,15 +127,8 @@ map::maze2d::map_to_graph(Map map, float initial_weight) {
         }
         _VertexDescriptor v_origin = graph_map.coord_vertex_map[origin_node];
 
-        auto [e_o_to_t, e_o_to_t_made]
-            = boost::add_edge(v_origin, v_target, graph_map.graph);
-        auto [e_t_to_o, e_t_to_o_made]
-            = boost::add_edge(v_target, v_origin, graph_map.graph);
-
-        // Bool flags should always be true, better check would fail
-        // graph building on a false.
-        if (e_o_to_t_made) graph_map.pheromone_map[e_o_to_t] = initial_weight;
-        if (e_t_to_o_made) graph_map.pheromone_map[e_t_to_o] = initial_weight;
+        boost::add_edge(v_origin, v_target, graph_map.graph);
+        boost::add_edge(v_target, v_origin, graph_map.graph);
 
         graph_map.vertex_coord_map[v_target]    = target_node;
         graph_map.coord_vertex_map[target_node] = v_target;

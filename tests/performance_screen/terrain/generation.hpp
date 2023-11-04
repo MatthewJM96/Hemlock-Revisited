@@ -6,16 +6,25 @@ namespace hemlock {
         namespace performance_screen {
             struct VoxelGenerator {
                 void operator()(hmem::Handle<hvox::Chunk> chunk) const {
-                    auto simplex_1      = FastNoise::New<FastNoise::Simplex>();
-                    auto fractal_1      = FastNoise::New<FastNoise::FractalFBm>();
-                    auto domain_scale_1 = FastNoise::New<FastNoise::DomainScale>();
-                    auto position_output_1
-                        = FastNoise::New<FastNoise::PositionOutput>();
-                    auto add_1 = FastNoise::New<FastNoise::Add>();
+                    auto simplex_1
+                        = FastNoise::New<FastNoise::Simplex>(FastSIMD::Level_AVX512);
+                    auto fractal_1
+                        = FastNoise::New<FastNoise::FractalFBm>(FastSIMD::Level_AVX512);
+                    auto domain_scale_1
+                        = FastNoise::New<FastNoise::DomainScale>(FastSIMD::Level_AVX512
+                        );
+                    auto position_output_1 = FastNoise::New<FastNoise::PositionOutput>(
+                        FastSIMD::Level_AVX512
+                    );
+                    auto add_1 = FastNoise::New<FastNoise::Add>(FastSIMD::Level_AVX512);
                     auto domain_warp_grad_1
-                        = FastNoise::New<FastNoise::DomainWarpGradient>();
+                        = FastNoise::New<FastNoise::DomainWarpGradient>(
+                            FastSIMD::Level_AVX512
+                        );
                     auto domain_warp_fract_prog_1
-                        = FastNoise::New<FastNoise::DomainWarpFractalProgressive>();
+                        = FastNoise::New<FastNoise::DomainWarpFractalProgressive>(
+                            FastSIMD::Level_AVX512
+                        );
 
                     fractal_1->SetSource(simplex_1);
                     fractal_1->SetOctaveCount(4);
@@ -57,13 +66,14 @@ namespace hemlock {
                     );
 
                     {
-                        std::lock_guard lock(chunk->blocks_mutex);
+                        std::unique_lock<std::shared_mutex> lock;
+                        auto blocks = chunk->blocks.get(lock);
 
                         ui64 noise_idx = 0;
                         for (ui8 z = 0; z < CHUNK_LENGTH; ++z) {
                             for (ui8 y = 0; y < CHUNK_LENGTH; ++y) {
                                 for (ui8 x = 0; x < CHUNK_LENGTH; ++x) {
-                                    chunk->blocks[hvox::block_index(
+                                    blocks[hvox::block_index(
                                         { x, CHUNK_LENGTH - y - 1, z }
                                     )] = data[noise_idx++] > 0 ? hvox::Block{ 1 } :
                                                                  hvox::Block{ 0 };
@@ -75,14 +85,11 @@ namespace hemlock {
                     delete[] data;
                 }
             };
-            struct VoxelGeneratorV2 {
-                VoxelGeneratorV2() {
-                    m_data = new f32[CHUNK_VOLUME];
-                }
 
-                ~VoxelGeneratorV2() {
-                    delete[] m_data;
-                }
+            struct VoxelGeneratorV2 {
+                VoxelGeneratorV2() { m_data = new f32[CHUNK_VOLUME]; }
+
+                ~VoxelGeneratorV2() { delete[] m_data; }
 
                 void operator()(hmem::Handle<hvox::Chunk> chunk) const {
                     auto simplex_1      = FastNoise::New<FastNoise::Simplex>();
@@ -134,13 +141,14 @@ namespace hemlock {
                     );
 
                     {
-                        std::lock_guard lock(chunk->blocks_mutex);
+                        std::unique_lock<std::shared_mutex> lock;
+                        auto blocks = chunk->blocks.get(lock);
 
                         ui64 noise_idx = 0;
                         for (ui8 z = 0; z < CHUNK_LENGTH; ++z) {
                             for (ui8 y = 0; y < CHUNK_LENGTH; ++y) {
                                 for (ui8 x = 0; x < CHUNK_LENGTH; ++x) {
-                                    chunk->blocks[hvox::block_index(
+                                    blocks[hvox::block_index(
                                         { x, CHUNK_LENGTH - y - 1, z }
                                     )] = m_data[noise_idx++] > 0 ? hvox::Block{ 1 } :
                                                                    hvox::Block{ 0 };

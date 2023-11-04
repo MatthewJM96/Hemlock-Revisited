@@ -498,4 +498,6 @@ protected:
     std::vector<hmem::WeakHandle<hvox::Chunk>> m_unloading_chunks;
 };
 
+#undef VIEW_DIST
+
 #endif  // __hemlock_tests_test_voxel_screen_hpp
