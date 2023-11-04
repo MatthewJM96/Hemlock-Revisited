@@ -9,7 +9,9 @@ namespace hemlock {
          * @brief
          */
         struct InstancedMeshDecorator {
-            // void init(hmem::Handle<ChunkInstanceDataPager> instance_data_pager);
+            void
+            set_instance_pager(hmem::Handle<ChunkInstanceDataPager> instance_data_pager
+            );
 
             ChunkInstanceManager instance;
         protected:
