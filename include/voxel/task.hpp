@@ -13,9 +13,9 @@ namespace hemlock {
             MESH_UPLOAD,
         };
 
-        using ChunkTaskContext     = thread::BasicThreadContext;
-        using ChunkLoadThreadState = thread::Thread<ChunkTaskContext>::State;
-        using ChunkTaskQueue       = thread::TaskQueue<ChunkTaskContext>;
+        using ChunkTaskContext = thread::BasicThreadContext;
+        using ChunkThreadState = thread::Thread<ChunkTaskContext>::State;
+        using ChunkTaskQueue   = thread::TaskQueue<ChunkTaskContext>;
 
         class ChunkTask : public thread::IThreadTask<ChunkTaskContext> {
         public:

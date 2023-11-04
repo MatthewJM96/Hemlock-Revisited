@@ -29,9 +29,8 @@ namespace hemlock {
                 virtual ~ChunkNavmeshTask() { /* Empty. */
                 }
 
-                virtual void execute(
-                    ChunkLoadThreadState* state, ChunkTaskQueue* task_queue
-                ) override;
+                virtual void
+                execute(ChunkThreadState* state, ChunkTaskQueue* task_queue) override;
             };
         }  // namespace ai
     }      // namespace voxel
