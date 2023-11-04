@@ -9,3 +9,6 @@ data/
 
 # Artifacts
 build/
+
+# Other Stuff
+notes/
