@@ -212,9 +212,6 @@ namespace hemlock {
             Chunks m_chunks;
 
             hmem::WeakHandle<ChunkGrid> m_self;
-
-            // TODO(Matthew): MOVE IT
-            GLuint m_grid_vao, m_grid_vbo;
         };
     }  // namespace voxel
 }  // namespace hemlock
