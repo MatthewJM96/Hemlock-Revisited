@@ -15,7 +15,7 @@
 #include "voxel/graphics/mesh/greedy_strategy.hpp"
 #include "voxel/graphics/mesh/mesh_task.hpp"
 #include "voxel/graphics/outline_renderer.hpp"
-#include "voxel/ray.h"
+#include "voxel/ray.hpp"
 
 #include "tests/iomanager.hpp"
 
@@ -25,11 +25,12 @@
 #  define VIEW_DIST 10
 #endif
 
+#include "tests/navmesh_screen/chunk.hpp"
 #include "tests/navmesh_screen/io.hpp"
 #include "tests/navmesh_screen/terrain.hpp"
 
 struct TNS_ChunkOutlinePredicate {
-    std::tuple<bool, colour4> operator()(hmem::Handle<hvox::Chunk>) {
+    std::tuple<bool, colour4> operator()(hmem::Handle<htest::navmesh_screen::Chunk>) {
         return {
             true, {255, 255, 255, 255}
         };
@@ -455,22 +456,22 @@ public:
 
         m_default_texture = hg::load_texture("test_tex.png");
 
-        static auto navmesh_task_builder = hvox::ChunkTaskBuilder{ []() {
+        static auto navmesh_task_builder = hvox::ChunkTaskBuilder<>{ []() {
             return new hvox::ai::ChunkNavmeshTask<
                 hvox::ai::NaiveNavmeshStrategy<htest::navmesh_screen::BlockSolidCheck>>(
             );
         } };
 
-        m_chunk_grid = hmem::make_handle<hvox::ChunkGrid>();
+        m_chunk_grid = hmem::make_handle<htest::navmesh_screen::ChunkGrid>();
         m_chunk_grid->init(
             m_chunk_grid,
             VIEW_DIST * 2 + 1,
             28,
-            hvox::ChunkTaskBuilder{ []() {
+            hvox::ChunkTaskBuilder<>{ []() {
                 return new hvox::ChunkGenerationTask<
                     htest::navmesh_screen::VoxelGenerator>();
             } },
-            hvox::ChunkTaskBuilder{ []() {
+            hvox::ChunkTaskBuilder<>{ []() {
                 return new hvox::ChunkMeshTask<
                     hvox::GreedyMeshStrategy<htest::navmesh_screen::BlockComparator>>();
             } },
@@ -509,11 +510,11 @@ public:
             hui::MouseButtonEvent>{ [&](hemlock::Sender, hui::MouseButtonEvent ev) {
             if (ev.button_id == static_cast<ui8>(hui::MouseButton::LEFT)) {
                 if (m_nav_test_mode > 0 && m_nav_test_mode < 3) {
-                    hvox::BlockWorldPosition      position;
-                    f32                           distance;
-                    hmem::WeakHandle<hvox::Chunk> chunk;
+                    hvox::BlockWorldPosition                       position;
+                    f32                                            distance;
+                    hmem::WeakHandle<htest::navmesh_screen::Chunk> chunk;
 
-                    if (hvox::Ray::cast_to_block(
+                    if (hvox::Ray::cast_to_block<>(
                             m_camera.position(),
                             m_camera.direction(),
                             m_chunk_grid,
@@ -587,7 +588,8 @@ public:
                          ))
                      {
                          auto chunk
-                             = m_chunk_grid->chunk(hvox::chunk_grid_position(position
+                             =
+                 m_chunk_grid->chunk(htest::navmesh_screen::Chunk_grid_position(position
                              ));
 
                          if (chunk != nullptr) {
@@ -649,11 +651,11 @@ protected:
 
     ui32 m_default_texture;
 
-    MyIOManager                   m_iom;
-    hg::ShaderCache               m_shader_cache;
-    hcam::BasicFirstPersonCamera  m_camera;
-    hui::InputManager*            m_input_manager;
-    hmem::Handle<hvox::ChunkGrid> m_chunk_grid;
+    MyIOManager                                    m_iom;
+    hg::ShaderCache                                m_shader_cache;
+    hcam::BasicFirstPersonCamera                   m_camera;
+    hui::InputManager*                             m_input_manager;
+    hmem::Handle<htest::navmesh_screen::ChunkGrid> m_chunk_grid;
     hg::GLSLProgram m_shader, m_line_shader, m_outline_shader, m_navmesh_outline_shader;
 
     bool m_capture_mouse;
@@ -665,20 +667,20 @@ protected:
     hvox::BlockOutlineRenderer m_block_outline_renderer;
     bool                       m_draw_block_outlines;
 
-    hvox::NavmeshOutlineRenderer m_navmesh_outline_renderer;
-    bool                         m_draw_navmesh_outlines;
+    hvox::NavmeshOutlineRenderer<> m_navmesh_outline_renderer;
+    bool                           m_draw_navmesh_outlines;
 
     ui32 m_nav_test_mode;
 
     struct {
-        size_t                        outline_id;
-        hvox::BlockWorldPosition      pos;
-        hmem::WeakHandle<hvox::Chunk> chunk;
+        size_t                                         outline_id;
+        hvox::BlockWorldPosition                       pos;
+        hmem::WeakHandle<htest::navmesh_screen::Chunk> chunk;
     } m_nav_test_start, m_nav_test_end;
 
     GLuint m_crosshair_vao, m_crosshair_vbo;
 
-    std::vector<hmem::WeakHandle<hvox::Chunk>> m_unloading_chunks;
+    std::vector<hmem::WeakHandle<htest::navmesh_screen::Chunk>> m_unloading_chunks;
 };
 
 #undef VIEW_DIST

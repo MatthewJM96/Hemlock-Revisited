@@ -11,7 +11,7 @@
 #include "ui/input/dispatcher.h"
 #include "ui/input/keys.hpp"
 #include "ui/input/manager.h"
-#include "voxel/chunk/grid.h"
+#include "voxel/chunk/grid.hpp"
 #include "voxel/generation/generator_task.hpp"
 #include "voxel/graphics/mesh/greedy_strategy.hpp"
 #include "voxel/graphics/mesh/mesh_task.hpp"
@@ -20,14 +20,14 @@
 
 struct TRS_BlockComparator {
     bool
-    operator()(const hvox::Block* source, const hvox::Block* target, hvox::BlockChunkPosition, hvox::Chunk*)
+    operator()(const hvox::Block* source, const hvox::Block* target, hvox::BlockChunkPosition, hvox::Chunk<>*)
         const {
         return (source->id == target->id) && (source->id != 0);
     }
 };
 
 struct TRS_VoxelGenerator {
-    void operator()(hmem::Handle<hvox::Chunk> chunk) const {
+    void operator()(hmem::Handle<hvox::Chunk<>> chunk) const {
         set_blocks(
             chunk,
             hvox::BlockChunkPosition{ 0 },
@@ -281,15 +281,15 @@ public:
             workflow_builder.init(&m_chunk_load_dag);
             workflow_builder.chain_tasks(2);
         }
-        m_chunk_grid = hmem::make_handle<hvox::ChunkGrid>();
+        m_chunk_grid = hmem::make_handle<hvox::ChunkGrid<>>();
         m_chunk_grid->init(
             m_chunk_grid,
             6 * 2 + 1,
             10,
-            hvox::ChunkTaskBuilder{ []() {
+            hvox::ChunkTaskBuilder<>{ []() {
                 return new hvox::ChunkGenerationTask<TRS_VoxelGenerator>();
             } },
-            hvox::ChunkTaskBuilder{ []() {
+            hvox::ChunkTaskBuilder<>{ []() {
                 return new hvox::ChunkMeshTask<
                     hvox::GreedyMeshStrategy<TRS_BlockComparator>>();
             } }
@@ -338,15 +338,15 @@ protected:
 
     ui32 m_default_texture;
 
-    MyIOManager                   m_iom;
-    hg::ShaderCache               m_shader_cache;
-    hg::f::FontCache              m_font_cache;
-    hg::s::SpriteBatcher          m_sprite_batcher;
-    hcam::BasicFirstPersonCamera  m_camera;
-    hui::InputManager*            m_input_manager;
-    hmem::Handle<hvox::ChunkGrid> m_chunk_grid;
-    hg::GLSLProgram               m_shader;
-    hthread::ThreadWorkflowDAG    m_chunk_load_dag;
+    MyIOManager                     m_iom;
+    hg::ShaderCache                 m_shader_cache;
+    hg::f::FontCache                m_font_cache;
+    hg::s::SpriteBatcher            m_sprite_batcher;
+    hcam::BasicFirstPersonCamera    m_camera;
+    hui::InputManager*              m_input_manager;
+    hmem::Handle<hvox::ChunkGrid<>> m_chunk_grid;
+    hg::GLSLProgram                 m_shader;
+    hthread::ThreadWorkflowDAG      m_chunk_load_dag;
 };
 
 #endif  // __hemlock_tests_test_render_screen_hpp

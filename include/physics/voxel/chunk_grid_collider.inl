@@ -1,11 +1,13 @@
-#include "voxel/chunk/grid.h"
+#include "voxel/chunk/grid.hpp"
 
-template <hphys::VoxelShapeEvaluator ShapeEvaluator>
+template <
+    hphys::VoxelShapeEvaluator ShapeEvaluator,
+    hvox::ChunkDecorator... Decorations>
 bool hphys::ChunkGridCollider::determine_candidate_colliding_voxels(
-    AnchoredComponent   ac,
-    DynamicComponent    dc,
-    CollidableComponent cc,
-    btCompoundShape*    voxels
+    AnchoredComponent<Decorations...> ac,
+    DynamicComponent                  dc,
+    CollidableComponent               cc,
+    btCompoundShape*                  voxels
 ) {
     const ShapeEvaluator shape_evaluator = {};
 
@@ -79,9 +81,9 @@ bool hphys::ChunkGridCollider::determine_candidate_colliding_voxels(
 
     bool any_collidable = false;
 
-    hmem::Handle<hvox::Chunk>           chunk;
-    std::shared_lock<std::shared_mutex> lock;
-    const hvox::Block*                  blocks;
+    hmem::Handle<hvox::Chunk<Decorations...>> chunk;
+    std::shared_lock<std::shared_mutex>       lock;
+    const hvox::Block*                        blocks;
 
     for (auto x = min_world_block_coord.x; x < max_world_block_coord.x; ++x) {
         for (auto y = min_world_block_coord.y; y < max_world_block_coord.y; ++y) {

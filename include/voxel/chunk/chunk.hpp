@@ -1,5 +1,5 @@
-#ifndef __hemlock_voxel_chunk_chunk_h
-#define __hemlock_voxel_chunk_chunk_h
+#ifndef __hemlock_voxel_chunk_chunk_hpp
+#define __hemlock_voxel_chunk_chunk_hpp
 
 #include "graphics/mesh.h"
 #include "timing.h"
@@ -22,7 +22,10 @@ namespace hemlock {
         /**
          * @brief
          */
-        struct Chunk {
+        template <ChunkDecorator... Decorations>
+        struct Chunk : public Decorations::type... {
+            using _Neighbours = Neighbours<Decorations...>;
+
             Chunk();
             ~Chunk();
 
@@ -38,7 +41,7 @@ namespace hemlock {
             ChunkID id() const { return position.id; }
 
             ChunkGridPosition position;
-            Neighbours        neighbours;
+            _Neighbours       neighbours;
 
             BlockManager blocks;
 
@@ -84,13 +87,15 @@ namespace hemlock {
 namespace hvox = hemlock::voxel;
 
 namespace std {
-    template <>
-    struct hash<hvox::Chunk> {
-        std::size_t operator()(const hvox::Chunk& chunk) const {
+    template <hvox::ChunkDecorator... Decorations>
+    struct hash<hvox::Chunk<Decorations...>> {
+        std::size_t operator()(const hvox::Chunk<Decorations...>& chunk) const {
             std::hash<hvox::ColumnID> _hash;
             return _hash(chunk.id());
         }
     };
 }  // namespace std
 
-#endif  // __hemlock_voxel_chunk_chunk_h
+#include "voxel/chunk/chunk.inl"
+
+#endif  // __hemlock_voxel_chunk_chunk_hpp

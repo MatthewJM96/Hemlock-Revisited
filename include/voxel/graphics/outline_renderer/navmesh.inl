@@ -1,18 +1,19 @@
 #include "stdafx.h"
 
-#include "voxel/chunk/chunk.h"
-#include "voxel/graphics/outline_renderer/navmesh.h"
+#include "voxel/chunk/chunk.hpp"
+#include "voxel/graphics/outline_renderer/navmesh.hpp"
 
 #include "maths/powers.hpp"
 
-hvox::NavmeshOutlineRenderer::NavmeshOutlineRenderer() :
+template <hvox::ChunkDecorator... Decorations>
+hvox::NavmeshOutlineRenderer<Decorations...>::NavmeshOutlineRenderer() :
     handle_chunk_navmesh_change(Delegate<void(Sender)>{ [&](Sender sender) {
-        auto chunk = sender.get_handle<Chunk>().lock();
+        auto chunk = sender.get_handle<Chunk<Decorations...>>().lock();
 
         m_navmesh_outlines[chunk->position.id].is_dirty.store(true);
     } }),
     handle_chunk_unload(Delegate<void(Sender)>{ [&](Sender sender) {
-        auto chunk = sender.get_handle<Chunk>().lock();
+        auto chunk = sender.get_handle<Chunk<Decorations...>>().lock();
 
         m_navmesh_outlines[chunk->position.id].is_dead.store(true);
     } }),
@@ -20,7 +21,8 @@ hvox::NavmeshOutlineRenderer::NavmeshOutlineRenderer() :
     // Empty.
 }
 
-void hvox::NavmeshOutlineRenderer::init() {
+template <hvox::ChunkDecorator... Decorations>
+void hvox::NavmeshOutlineRenderer<Decorations...>::init() {
     hg::MeshHandles tmp = { .vao = 0, .vbo = static_cast<GLuint>(-1) };
     hg::upload_mesh(
         hg::RGBA_Point_3D_32_MeshData{ nullptr, 0 }, tmp, hg::MeshDataVolatility::STATIC
@@ -28,7 +30,8 @@ void hvox::NavmeshOutlineRenderer::init() {
     m_navmesh_outline_vao = tmp.vao;
 }
 
-void hvox::NavmeshOutlineRenderer::dispose() {
+template <hvox::ChunkDecorator... Decorations>
+void hvox::NavmeshOutlineRenderer<Decorations...>::dispose() {
     for (auto& [chunk_id, navmesh] : m_navmesh_outlines) {
         hg::dispose_mesh(hg::MeshHandles{ 0, navmesh.mesh_handles.vbo });
     }
@@ -39,7 +42,8 @@ void hvox::NavmeshOutlineRenderer::dispose() {
     NavmeshOutlinesPerChunk().swap(m_navmesh_outlines);
 }
 
-void hvox::NavmeshOutlineRenderer::update(FrameTime) {
+template <hvox::ChunkDecorator... Decorations>
+void hvox::NavmeshOutlineRenderer<Decorations...>::update(FrameTime) {
     for (auto& [chunk_id, navmesh] : m_navmesh_outlines) {
         if (navmesh.is_dirty.load()) {
             if (__calculate_outlines(navmesh)) navmesh.is_updated = true;
@@ -48,7 +52,8 @@ void hvox::NavmeshOutlineRenderer::update(FrameTime) {
     }
 }
 
-void hvox::NavmeshOutlineRenderer::draw(FrameTime) {
+template <hvox::ChunkDecorator... Decorations>
+void hvox::NavmeshOutlineRenderer<Decorations...>::draw(FrameTime) {
     for (auto& [chunk_id, navmesh] : m_navmesh_outlines) {
         if (navmesh.is_updated && !navmesh.is_dead.load()) {
             size_t last_size = hmaths::next_power_2(navmesh.last_size);
@@ -91,7 +96,10 @@ void hvox::NavmeshOutlineRenderer::draw(FrameTime) {
     }
 }
 
-void hvox::NavmeshOutlineRenderer::register_chunk(hmem::Handle<Chunk> chunk) {
+template <hvox::ChunkDecorator... Decorations>
+void hvox::NavmeshOutlineRenderer<Decorations...>::register_chunk(
+    hmem::Handle<Chunk<Decorations...>> chunk
+) {
     NavmeshOutlines tmp = {};
     tmp.chunk           = chunk;
     auto [it, success]  = m_navmesh_outlines.try_emplace(chunk->position.id, tmp);
@@ -107,8 +115,11 @@ void hvox::NavmeshOutlineRenderer::register_chunk(hmem::Handle<Chunk> chunk) {
     }
 }
 
-bool hvox::NavmeshOutlineRenderer::__calculate_outlines(NavmeshOutlines& navmesh) {
-    hmem::Handle<Chunk> chunk = navmesh.chunk.lock();
+template <hvox::ChunkDecorator... Decorations>
+bool hvox::NavmeshOutlineRenderer<Decorations...>::__calculate_outlines(
+    NavmeshOutlines& navmesh
+) {
+    hmem::Handle<Chunk<Decorations...>> chunk = navmesh.chunk.lock();
 
     if (chunk == nullptr) {
         navmesh.is_dead.store(true);

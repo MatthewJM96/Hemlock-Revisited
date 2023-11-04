@@ -5,17 +5,20 @@
 
 namespace hemlock {
     namespace voxel {
+        template <ChunkDecorator... Decorations>
         struct Chunk;
 
         namespace ai {
-            template <hvox::IdealBlockConstraint IsSolid>
+            template <hvox::IdealBlockConstraint IsSolid, ChunkDecorator... Decorations>
             struct NaiveNavmeshStrategy {
                 void do_bulk(
-                    hmem::Handle<ChunkGrid> chunk_grid, hmem::Handle<Chunk> chunk
+                    hmem::Handle<ChunkGrid<Decorations...>> chunk_grid,
+                    hmem::Handle<Chunk<Decorations...>>     chunk
                 ) const;
 
                 void do_stitch(
-                    hmem::Handle<ChunkGrid> chunk_grid, hmem::Handle<Chunk> chunk
+                    hmem::Handle<ChunkGrid<Decorations...>> chunk_grid,
+                    hmem::Handle<Chunk<Decorations...>>     chunk
                 ) const;
             };
         }  // namespace ai

@@ -5,11 +5,19 @@
 
 namespace hemlock {
     namespace voxel {
-        template <hvox::IdealBlockComparator MeshComparator>
+        template <
+            hvox::IdealBlockComparator MeshComparator,
+            ChunkDecorator... Decorations>
         struct GreedyMeshStrategy {
-            bool can_run(hmem::Handle<ChunkGrid> chunk_grid, hmem::Handle<Chunk> chunk) const;
+            bool can_run(
+                hmem::Handle<ChunkGrid<Decorations...>> chunk_grid,
+                hmem::Handle<Chunk<Decorations...>>     chunk
+            ) const;
 
-            void operator()(hmem::Handle<ChunkGrid> chunk_grid, hmem::Handle<Chunk> chunk) const;
+            void operator()(
+                hmem::Handle<ChunkGrid<Decorations...>> chunk_grid,
+                hmem::Handle<Chunk<Decorations...>>     chunk
+            ) const;
         };
     }  // namespace voxel
 }  // namespace hemlock

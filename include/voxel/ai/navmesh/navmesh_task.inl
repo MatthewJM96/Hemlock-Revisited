@@ -1,13 +1,15 @@
-#include "voxel/chunk/chunk.h"
+#include "voxel/chunk/chunk.hpp"
 #include "voxel/chunk/state.hpp"
 
-template <hvox::ai::ChunkNavmeshStrategy NavmeshStrategy>
-void hvox::ai::ChunkNavmeshTask<
-    NavmeshStrategy>::execute(ChunkThreadState*, ChunkTaskQueue*) {
-    auto chunk_grid = m_chunk_grid.lock();
+template <
+    hvox::ai::ChunkNavmeshStrategy NavmeshStrategy,
+    hvox::ChunkDecorator... Decorations>
+void hvox::ai::ChunkNavmeshTask<NavmeshStrategy, Decorations...>::
+    execute(ChunkThreadState*, ChunkTaskQueue*) {
+    auto chunk_grid = ChunkTask<Decorations...>::m_chunk_grid.lock();
     if (chunk_grid == nullptr) return;
 
-    auto chunk = m_chunk.lock();
+    auto chunk = ChunkTask<Decorations...>::m_chunk.lock();
     if (chunk == nullptr) return;
 
     const NavmeshStrategy navmesh{};

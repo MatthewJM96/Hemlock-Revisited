@@ -3,8 +3,6 @@
 
 namespace hemlock {
     namespace voxel {
-        struct Chunk;
-
         template <typename ChunkDecoratorCandidate>
         concept ChunkDecorator = requires (ChunkDecoratorCandidate d) {
                                      typename ChunkDecoratorCandidate::type;

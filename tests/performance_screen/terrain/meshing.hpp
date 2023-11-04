@@ -6,7 +6,7 @@ namespace hemlock {
         namespace performance_screen {
             struct BlockComparator {
                 bool
-                operator()(const hvox::Block* source, const hvox::Block* target, hvox::BlockChunkPosition, hvox::Chunk*)
+                operator()(const hvox::Block* source, const hvox::Block* target, hvox::BlockChunkPosition, Chunk*)
                     const {
                     return (source->id == target->id) && (source->id != 0);
                 }

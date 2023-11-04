@@ -10,7 +10,7 @@ namespace hemlock {
         namespace voxel_screen {
             struct PlayerData {
                 hphys::CollidableComponent cc;
-                hphys::AnchoredComponent   ac;
+                hphys::AnchoredComponent<> ac;
                 hphys::DynamicComponent    dc;
                 btRigidBody*               body;
                 btDefaultMotionState*      motion_state;
@@ -20,7 +20,7 @@ namespace hemlock {
                 PlayerData&                         player,
                 PhysicsData&                        phys,
                 const hcam::BasicFirstPersonCamera& camera,
-                hmem::Handle<hvox::ChunkGrid>       chunk_grid
+                hmem::Handle<ChunkGrid>             chunk_grid
             ) {
                 player.ac.position = hvox::EntityWorldPosition{
                     0, static_cast<hvox::EntityWorldPositionCoord>(60) << 32, 0

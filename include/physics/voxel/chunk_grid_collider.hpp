@@ -21,12 +21,14 @@ namespace hemlock {
               };
 
         namespace ChunkGridCollider {
-            template <hphys::VoxelShapeEvaluator ShapeEvaluator>
+            template <
+                hphys::VoxelShapeEvaluator ShapeEvaluator,
+                hvox::ChunkDecorator... Decorations>
             bool determine_candidate_colliding_voxels(
-                AnchoredComponent   ac,
-                DynamicComponent    dc,
-                CollidableComponent cc,
-                btCompoundShape*    voxels
+                AnchoredComponent<Decorations...> ac,
+                DynamicComponent                  dc,
+                CollidableComponent               cc,
+                btCompoundShape*                  voxels
             );
         }
     }  // namespace physics

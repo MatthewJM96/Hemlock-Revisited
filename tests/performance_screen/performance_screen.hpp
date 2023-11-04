@@ -19,6 +19,7 @@
 
 #include "tests/iomanager.hpp"
 
+#include "tests/performance_screen/chunk.hpp"
 #include "tests/performance_screen/terrain.hpp"
 
 // Note(Matthew): Some thoughts about chunk prep timings. If we think of modern trains,
@@ -69,10 +70,11 @@ public:
             hmem::Handle<hvox::ai::ChunkNavmeshPager> navmesh_pager
                 = hmem::make_handle<hvox::ai::ChunkNavmeshPager>();
 
-            hmem::PagedAllocator<hvox::Chunk, 4 * 4 * 4, 3> chunk_allocator;
+            hmem::PagedAllocator<htest::performance_screen::Chunk, 4 * 4 * 4, 3>
+                chunk_allocator;
 
-            hmem::Handle<hvox::Chunk>* chunks
-                = new hmem::Handle<hvox::Chunk>[iterations];
+            hmem::Handle<htest::performance_screen::Chunk>* chunks
+                = new hmem::Handle<htest::performance_screen::Chunk>[iterations];
 
             auto chunk_idx = [](ui32 x, ui32 y, ui32 z) {
                 return x + y * xyz_len + z * xyz_len * xyz_len;
@@ -83,7 +85,9 @@ public:
                     for (ui32 z = 0; z < xyz_len; ++z) {
                         ui32 idx = chunk_idx(x, y, z);
                         chunks[idx]
-                            = hmem::allocate_handle<hvox::Chunk>(chunk_allocator);
+                            = hmem::allocate_handle<htest::performance_screen::Chunk>(
+                                chunk_allocator
+                            );
                         chunks[idx]->position = {
                             {x, y, z}
                         };

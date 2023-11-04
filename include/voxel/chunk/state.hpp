@@ -1,9 +1,10 @@
 #ifndef __hemlock_voxel_chunk_state_hpp
 #define __hemlock_voxel_chunk_state_hpp
 
+#include "voxel/chunk/decorator/decorator.hpp"
+
 namespace hemlock {
     namespace voxel {
-        struct Chunk;
 
         enum class ChunkState : ui8 {
             NONE     = 0,
@@ -17,6 +18,10 @@ namespace hemlock {
             DEAD
         };
 
+        template <ChunkDecorator... Decorations>
+        struct Chunk;
+
+        template <ChunkDecorator... Decorations>
         union Neighbours {
             Neighbours() : all{} { /* Empty. */
             }
@@ -34,10 +39,11 @@ namespace hemlock {
             }
 
             struct {
-                hmem::WeakHandle<Chunk> left, right, top, bottom, front, back;
+                hmem::WeakHandle<Chunk<Decorations...>> left, right, top, bottom, front,
+                    back;
             } one;
 
-            hmem::WeakHandle<Chunk> all[8];
+            hmem::WeakHandle<Chunk<Decorations...>> all[8];
         };
     }  // namespace voxel
 }  // namespace hemlock

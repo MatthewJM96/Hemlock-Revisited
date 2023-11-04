@@ -5,26 +5,31 @@
 
 namespace hemlock {
     namespace voxel {
+        template <ChunkDecorator... Decorations>
         class ChunkGrid;
+        template <ChunkDecorator... Decorations>
         struct Chunk;
 
         /**
          * @brief Defines a struct whose opeartor() sets the blocks of a chunk.
          */
-        template <typename StrategyCandidate>
-        concept ChunkMeshStrategy = requires (
-            StrategyCandidate s, hmem::Handle<ChunkGrid> g, hmem::Handle<Chunk> c
-        ) {
-                                        {
-                                            s.can_run(g, c)
-                                            } -> std::same_as<bool>;
-                                        {
-                                            s.operator()(g, c)
-                                            } -> std::same_as<void>;
-                                    };
+        template <typename StrategyCandidate, typename... Decorations>
+        concept ChunkMeshStrategy = (ChunkDecorator<Decorations> && ...)
+                                    && requires (
+                                        StrategyCandidate                       s,
+                                        hmem::Handle<ChunkGrid<Decorations...>> g,
+                                        hmem::Handle<Chunk<Decorations...>>     c
+                                    ) {
+                                           {
+                                               s.can_run(g, c)
+                                               } -> std::same_as<bool>;
+                                           {
+                                               s.operator()(g, c)
+                                               } -> std::same_as<void>;
+                                       };
 
-        template <hvox::ChunkMeshStrategy MeshStrategy>
-        class ChunkMeshTask : public ChunkTask {
+        template <hvox::ChunkMeshStrategy MeshStrategy, ChunkDecorator... Decorations>
+        class ChunkMeshTask : public ChunkTask<Decorations...> {
         public:
             virtual ~ChunkMeshTask() { /* Empty. */
             }

@@ -1,11 +1,14 @@
 #include "graphics/mesh.h"
 #include "voxel/block.hpp"
-#include "voxel/chunk/grid.h"
+#include "voxel/chunk/grid.hpp"
 #include "voxel/face_check.hpp"
 
-template <hvox::IdealBlockComparator MeshComparator>
-bool hvox::NaiveMeshStrategy<
-    MeshComparator>::can_run(hmem::Handle<ChunkGrid>, hmem::Handle<Chunk>) const {
+template <
+    hvox::IdealBlockComparator MeshComparator,
+    hvox::ChunkDecorator... Decorations>
+bool hvox::NaiveMeshStrategy<MeshComparator, Decorations...>::
+    can_run(hmem::Handle<ChunkGrid<Decorations...>>, hmem::Handle<Chunk<Decorations...>>)
+        const {
     // Only execute if all preloaded neighbouring chunks have at least been
     // generated.
     // TODO(Matthew): Revisit this. query_all_neighbour_states has been removed, do we
@@ -18,9 +21,11 @@ bool hvox::NaiveMeshStrategy<
     return false;
 }
 
-template <hvox::IdealBlockComparator MeshComparator>
-void hvox::NaiveMeshStrategy<MeshComparator>::operator()(
-    hmem::Handle<ChunkGrid>, hmem::Handle<Chunk> chunk
+template <
+    hvox::IdealBlockComparator MeshComparator,
+    hvox::ChunkDecorator... Decorations>
+void hvox::NaiveMeshStrategy<MeshComparator, Decorations...>::operator()(
+    hmem::Handle<ChunkGrid<Decorations...>>, hmem::Handle<Chunk<Decorations...>> chunk
 ) const {
     // TODO(Matthew): Better guess work should be possible and expand only when
     // needed.
@@ -47,7 +52,7 @@ void hvox::NaiveMeshStrategy<MeshComparator>::operator()(
         mesh.data[mesh.count++] = { f32v3(pos), f32v3(1.0f) };
     };
 
-    Chunk* raw_chunk_ptr = chunk.get();
+    Chunk<Decorations...>* raw_chunk_ptr = chunk.get();
 
     std::shared_lock<std::shared_mutex> block_lock;
     auto                                blocks = chunk->blocks.get(block_lock);
@@ -63,7 +68,7 @@ void hvox::NaiveMeshStrategy<MeshComparator>::operator()(
             BlockWorldPosition block_position
                 = block_world_position(chunk->position, i);
 
-            hmem::Handle<Chunk> neighbour;
+            hmem::Handle<Chunk<Decorations...>> neighbour;
 
             // Check its neighbours, to decide whether to add its quads.
             // LEFT

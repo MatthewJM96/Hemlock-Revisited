@@ -6,19 +6,23 @@
 namespace hemlock {
     namespace voxel {
         struct Block;
+        template <ChunkDecorator... Decorations>
         struct Chunk;
 
         /**
          * @brief Defines a struct whose opeartor() determines if a block at a
          * specified location satisfies a certain constraint.
          */
-        template <typename ConstraintCandidate>
+        template <typename ConstraintCandidate, typename... Decorations>
         concept ActualBlockConstraint
-            = requires (ConstraintCandidate s, BlockChunkPosition p, Chunk* c) {
-                  {
-                      s.operator()(p, c)
-                      } -> std::same_as<bool>;
-              };
+            = (ChunkDecorator<Decorations> && ...)
+              && requires (
+                  ConstraintCandidate s, BlockChunkPosition p, Chunk<Decorations...>* c
+              ) {
+                     {
+                         s.operator()(p, c)
+                         } -> std::same_as<bool>;
+                 };
 
         /**
          * @brief Defines a struct whose opeartor() determines if a block type satisfies
@@ -36,13 +40,16 @@ namespace hemlock {
          * @brief Defines a struct whose opeartor() determines if two blocks at
          * specified locations satisfy a certain constraint.
          */
-        template <typename ComparatorCandidate>
+        template <typename ComparatorCandidate, typename... Decorations>
         concept ActualBlockComparator
-            = requires (ComparatorCandidate s, BlockChunkPosition p, Chunk* c) {
-                  {
-                      s.operator()(p, p, c)
-                      } -> std::same_as<bool>;
-              };
+            = (ChunkDecorator<Decorations> && ...)
+              && requires (
+                  ComparatorCandidate s, BlockChunkPosition p, Chunk<Decorations...>* c
+              ) {
+                     {
+                         s.operator()(p, p, c)
+                         } -> std::same_as<bool>;
+                 };
 
         /**
          * @brief Defines a struct whose opeartor() determines if a block at
@@ -52,14 +59,18 @@ namespace hemlock {
          * is the actual block at the specified position within the specified
          * chunk.
          */
-        template <typename ComparatorCandidate>
-        concept IdealBlockComparator = requires (
-            ComparatorCandidate s, const Block* b, BlockChunkPosition p, Chunk* c
-        ) {
-                                           {
-                                               s.operator()(b, b, p, c)
-                                               } -> std::same_as<bool>;
-                                       };
+        template <typename ComparatorCandidate, typename... Decorations>
+        concept IdealBlockComparator = (ChunkDecorator<Decorations> && ...)
+                                       && requires (
+                                           ComparatorCandidate    s,
+                                           const Block*           b,
+                                           BlockChunkPosition     p,
+                                           Chunk<Decorations...>* c
+                                       ) {
+                                              {
+                                                  s.operator()(b, b, p, c)
+                                                  } -> std::same_as<bool>;
+                                          };
     }  // namespace voxel
 }  // namespace hemlock
 namespace hvox = hemlock::voxel;

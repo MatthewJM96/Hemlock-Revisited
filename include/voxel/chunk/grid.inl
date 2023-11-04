@@ -3,23 +3,16 @@
 #include "graphics/mesh.h"
 
 #include "voxel/block.hpp"
-#include "voxel/chunk/grid.h"
 
-void hvox::ChunkTask::set_state(
-    hmem::WeakHandle<Chunk> chunk, hmem::WeakHandle<ChunkGrid> chunk_grid
-) {
-    m_chunk      = chunk;
-    m_chunk_grid = chunk_grid;
-}
-
-hvox::ChunkGrid::ChunkGrid() :
+template <hvox::ChunkDecorator... Decorations>
+hvox::ChunkGrid<Decorations...>::ChunkGrid() :
     // TODO(Matthew): both of these are rather inefficient, we remesh literally every
     // block change, rather than
     //                once per update loop, likewise with chunk loads.
     // TODO(Matthew): as these are called in threadpool threads, we'd like them to
     //                be able to use the appropriate producer tokens.
     handle_chunk_load(Delegate<void(Sender)>{ [&](Sender sender) {
-        hmem::WeakHandle<Chunk> handle = sender.get_handle<Chunk>();
+        hmem::WeakHandle<_Chunk> handle = sender.get_handle<_Chunk>();
 
         auto chunk = handle.lock();
         // If chunk is nullptr, then there's no point
@@ -45,7 +38,7 @@ hvox::ChunkGrid::ChunkGrid() :
     //                  i.e. stop queuing here.
     handle_block_change(Delegate<bool(Sender, BlockChangeEvent)>{
         [&](Sender sender, BlockChangeEvent) {
-            hmem::WeakHandle<Chunk> handle = sender.get_handle<Chunk>();
+            hmem::WeakHandle<_Chunk> handle = sender.get_handle<_Chunk>();
 
             auto chunk = handle.lock();
             // If chunk is nullptr, then there's no point
@@ -73,13 +66,14 @@ hvox::ChunkGrid::ChunkGrid() :
     // Empty.
 }
 
-void hvox::ChunkGrid::init(
-    hmem::WeakHandle<ChunkGrid> self,
-    ui32                        render_distance,
-    ui32                        thread_count,
-    ChunkTaskBuilder            build_load_or_generate_task,
-    ChunkTaskBuilder            build_mesh_task,
-    ChunkTaskBuilder*           build_navmesh_task /* = nullptr*/
+template <hvox::ChunkDecorator... Decorations>
+void hvox::ChunkGrid<Decorations...>::init(
+    hmem::WeakHandle<_ChunkGrid> self,
+    ui32                         render_distance,
+    ui32                         thread_count,
+    _ChunkTaskBuilder            build_load_or_generate_task,
+    _ChunkTaskBuilder            build_mesh_task,
+    _ChunkTaskBuilder*           build_navmesh_task /* = nullptr*/
 ) {
     m_self = self;
 
@@ -103,13 +97,15 @@ void hvox::ChunkGrid::init(
     m_renderer.init(5, 2);
 }
 
-void hvox::ChunkGrid::dispose() {
+template <hvox::ChunkDecorator... Decorations>
+void hvox::ChunkGrid<Decorations...>::dispose() {
     m_thread_pool.dispose();
 
     m_renderer.dispose();
 }
 
-void hvox::ChunkGrid::update(FrameTime time) {
+template <hvox::ChunkDecorator... Decorations>
+void hvox::ChunkGrid<Decorations...>::update(FrameTime time) {
     for (auto chunk : m_chunks) {
         chunk.second->update(time);
     }
@@ -117,11 +113,13 @@ void hvox::ChunkGrid::update(FrameTime time) {
     m_renderer.update(time);
 }
 
-void hvox::ChunkGrid::draw(FrameTime time) {
+template <hvox::ChunkDecorator... Decorations>
+void hvox::ChunkGrid<Decorations...>::draw(FrameTime time) {
     m_renderer.draw(time);
 }
 
-void hvox::ChunkGrid::set_render_distance(ui32 render_distance) {
+template <hvox::ChunkDecorator... Decorations>
+void hvox::ChunkGrid<Decorations...>::set_render_distance(ui32 render_distance) {
     // TODO(Matthew): Allow chunk grids with non-standard render shapes?
     ui32 chunks_in_render_distance
         = render_distance * render_distance * render_distance;
@@ -135,7 +133,8 @@ void hvox::ChunkGrid::set_render_distance(ui32 render_distance) {
     m_chunks_in_render_distance = chunks_in_render_distance;
 }
 
-bool hvox::ChunkGrid::load_chunks(
+template <hvox::ChunkDecorator... Decorations>
+bool hvox::ChunkGrid<Decorations...>::load_chunks(
     ChunkGridPosition* chunk_positions, ui32 chunk_count
 ) {
     bool any_chunk_failed = false;
@@ -147,12 +146,14 @@ bool hvox::ChunkGrid::load_chunks(
     return any_chunk_failed;
 }
 
-bool hvox::ChunkGrid::preload_chunk_at(ChunkGridPosition chunk_position) {
+template <hvox::ChunkDecorator... Decorations>
+bool hvox::ChunkGrid<Decorations...>::preload_chunk_at(ChunkGridPosition chunk_position
+) {
     auto it = m_chunks.find(chunk_position.id);
     if (it != m_chunks.end()) return false;
 
-    hmem::Handle<Chunk> chunk = hmem::allocate_handle<Chunk>(m_chunk_allocator);
-    chunk->position           = chunk_position;
+    hmem::Handle<_Chunk> chunk = hmem::allocate_handle<_Chunk>(m_chunk_allocator);
+    chunk->position            = chunk_position;
     chunk->init(chunk, m_block_pager, m_instance_pager, m_navmesh_pager);
 
     chunk->on_load         += &handle_chunk_load;
@@ -167,13 +168,14 @@ bool hvox::ChunkGrid::preload_chunk_at(ChunkGridPosition chunk_position) {
     return true;
 }
 
-bool hvox::ChunkGrid::load_chunk_at(ChunkGridPosition chunk_position) {
+template <hvox::ChunkDecorator... Decorations>
+bool hvox::ChunkGrid<Decorations...>::load_chunk_at(ChunkGridPosition chunk_position) {
     preload_chunk_at(chunk_position);
 
     auto it = m_chunks.find(chunk_position.id);
     if (it == m_chunks.end()) return false;
 
-    hmem::Handle<Chunk> chunk = (*it).second;
+    hmem::Handle<_Chunk> chunk = (*it).second;
 
     // If chunk is in the process of being generated, we don't
     // need to add it to the queue again.
@@ -189,8 +191,9 @@ bool hvox::ChunkGrid::load_chunk_at(ChunkGridPosition chunk_position) {
     return true;
 }
 
-bool hvox::ChunkGrid::unload_chunk_at(
-    ChunkGridPosition chunk_position, hmem::WeakHandle<Chunk>* handle /*= nullptr*/
+template <hvox::ChunkDecorator... Decorations>
+bool hvox::ChunkGrid<Decorations...>::unload_chunk_at(
+    ChunkGridPosition chunk_position, hmem::WeakHandle<_Chunk>* handle /*= nullptr*/
 ) {
     auto it = m_chunks.find(chunk_position.id);
     if (it == m_chunks.end()) return false;
@@ -211,7 +214,9 @@ bool hvox::ChunkGrid::unload_chunk_at(
     return true;
 }
 
-hmem::Handle<hvox::Chunk> hvox::ChunkGrid::chunk(ChunkID id) {
+template <hvox::ChunkDecorator... Decorations>
+hmem::Handle<hvox::Chunk<Decorations...>>
+hvox::ChunkGrid<Decorations...>::chunk(ChunkID id) {
     auto it = m_chunks.find(id);
 
     if (it == m_chunks.end()) return nullptr;
@@ -219,7 +224,10 @@ hmem::Handle<hvox::Chunk> hvox::ChunkGrid::chunk(ChunkID id) {
     return it->second;
 }
 
-void hvox::ChunkGrid::establish_chunk_neighbours(hmem::Handle<Chunk> chunk) {
+template <hvox::ChunkDecorator... Decorations>
+void hvox::ChunkGrid<Decorations...>::establish_chunk_neighbours(
+    hmem::Handle<_Chunk> chunk
+) {
     ChunkGridPosition neighbour_position;
 
     // Update neighbours with info of new chunk.
@@ -231,7 +239,7 @@ void hvox::ChunkGrid::establish_chunk_neighbours(hmem::Handle<Chunk> chunk) {
         chunk->neighbours.one.left         = (*it).second;
         (*it).second->neighbours.one.right = chunk;
     } else {
-        chunk->neighbours.one.left = hmem::WeakHandle<Chunk>();
+        chunk->neighbours.one.left = hmem::WeakHandle<_Chunk>();
     }
 
     // RIGHT
@@ -242,7 +250,7 @@ void hvox::ChunkGrid::establish_chunk_neighbours(hmem::Handle<Chunk> chunk) {
         chunk->neighbours.one.right       = (*it).second;
         (*it).second->neighbours.one.left = chunk;
     } else {
-        chunk->neighbours.one.right = hmem::WeakHandle<Chunk>();
+        chunk->neighbours.one.right = hmem::WeakHandle<_Chunk>();
     }
 
     // TOP
@@ -253,7 +261,7 @@ void hvox::ChunkGrid::establish_chunk_neighbours(hmem::Handle<Chunk> chunk) {
         chunk->neighbours.one.top           = (*it).second;
         (*it).second->neighbours.one.bottom = chunk;
     } else {
-        chunk->neighbours.one.top = hmem::WeakHandle<Chunk>();
+        chunk->neighbours.one.top = hmem::WeakHandle<_Chunk>();
     }
 
     // BOTTOM
@@ -264,7 +272,7 @@ void hvox::ChunkGrid::establish_chunk_neighbours(hmem::Handle<Chunk> chunk) {
         chunk->neighbours.one.bottom     = (*it).second;
         (*it).second->neighbours.one.top = chunk;
     } else {
-        chunk->neighbours.one.bottom = hmem::WeakHandle<Chunk>();
+        chunk->neighbours.one.bottom = hmem::WeakHandle<_Chunk>();
     }
 
     // FRONT
@@ -275,7 +283,7 @@ void hvox::ChunkGrid::establish_chunk_neighbours(hmem::Handle<Chunk> chunk) {
         chunk->neighbours.one.front       = (*it).second;
         (*it).second->neighbours.one.back = chunk;
     } else {
-        chunk->neighbours.one.front = hmem::WeakHandle<Chunk>();
+        chunk->neighbours.one.front = hmem::WeakHandle<_Chunk>();
     }
 
     // BACK
@@ -286,6 +294,6 @@ void hvox::ChunkGrid::establish_chunk_neighbours(hmem::Handle<Chunk> chunk) {
         chunk->neighbours.one.back         = (*it).second;
         (*it).second->neighbours.one.front = chunk;
     } else {
-        chunk->neighbours.one.back = hmem::WeakHandle<Chunk>();
+        chunk->neighbours.one.back = hmem::WeakHandle<_Chunk>();
     }
 }

@@ -10,7 +10,7 @@
 #include "voxel/graphics/mesh/greedy_strategy.hpp"
 #include "voxel/graphics/mesh/mesh_task.hpp"
 #include "voxel/graphics/outline_renderer.hpp"
-#include "voxel/ray.h"
+#include "voxel/ray.hpp"
 
 #include "physics/voxel/chunk_grid_collider.hpp"
 
@@ -22,13 +22,14 @@
 #  define VIEW_DIST 10
 #endif
 
+#include "tests/voxel_screen/chunk.hpp"
 #include "tests/voxel_screen/io.hpp"
 #include "tests/voxel_screen/physics.hpp"
 #include "tests/voxel_screen/player.hpp"
 #include "tests/voxel_screen/terrain.hpp"
 
 struct TVS_ChunkOutlinePredicate {
-    std::tuple<bool, colour4> operator()(hmem::Handle<hvox::Chunk>) {
+    std::tuple<bool, colour4> operator()(hmem::Handle<htest::voxel_screen::Chunk>) {
         return {
             true, {255, 0, 0, 255}
         };
@@ -388,16 +389,16 @@ public:
             workflow_builder.init(&m_chunk_load_dag);
             workflow_builder.chain_tasks(2);
         }
-        m_chunk_grid = hmem::make_handle<hvox::ChunkGrid>();
+        m_chunk_grid = hmem::make_handle<htest::voxel_screen::ChunkGrid>();
         m_chunk_grid->init(
             m_chunk_grid,
             VIEW_DIST * 2 + 1,
             28,
-            hvox::ChunkTaskBuilder{ []() {
+            hvox::ChunkTaskBuilder<>{ []() {
                 return new hvox::ChunkGenerationTask<
                     htest::voxel_screen::TVS_VoxelGenerator>();
             } },
-            hvox::ChunkTaskBuilder{ []() {
+            hvox::ChunkTaskBuilder<>{ []() {
                 return new hvox::ChunkMeshTask<
                     hvox::GreedyMeshStrategy<htest::voxel_screen::TVS_BlockComparator>>(
                 );
@@ -433,7 +434,7 @@ public:
                     hvox::BlockWorldPosition position;
                     f32                      distance;
 
-                    if (hvox::Ray::cast_to_block_before(
+                    if (hvox::Ray::cast_to_block_before<>(
                             m_camera.position(),
                             m_camera.direction(),
                             m_chunk_grid,
@@ -480,11 +481,11 @@ protected:
 
     ui32 m_default_texture;
 
-    MyIOManager                      m_iom;
-    hg::ShaderCache                  m_shader_cache;
-    hcam::BasicFirstPersonCamera     m_camera;
-    hui::InputManager*               m_input_manager;
-    hmem::Handle<hvox::ChunkGrid>    m_chunk_grid;
+    MyIOManager                                  m_iom;
+    hg::ShaderCache                              m_shader_cache;
+    hcam::BasicFirstPersonCamera                 m_camera;
+    hui::InputManager*                           m_input_manager;
+    hmem::Handle<htest::voxel_screen::ChunkGrid> m_chunk_grid;
     hg::GLSLProgram                  m_shader, m_line_shader, m_chunk_outline_shader;
     hthread::ThreadWorkflowDAG       m_chunk_load_dag;
     htest::voxel_screen::PlayerData  m_player;
@@ -495,7 +496,7 @@ protected:
 
     GLuint m_crosshair_vao, m_crosshair_vbo;
 
-    std::vector<hmem::WeakHandle<hvox::Chunk>> m_unloading_chunks;
+    std::vector<hmem::WeakHandle<htest::voxel_screen::Chunk>> m_unloading_chunks;
 };
 
 #undef VIEW_DIST

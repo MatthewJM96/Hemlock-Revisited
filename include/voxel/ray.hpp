@@ -1,11 +1,15 @@
-#ifndef __hemlock_voxel_ray_h
-#define __hemlock_voxel_ray_h
+#ifndef __hemlock_voxel_ray_hpp
+#define __hemlock_voxel_ray_hpp
 
 #include "block.hpp"
 #include "coordinate_system.h"
 
 namespace hemlock {
     namespace voxel {
+        template <ChunkDecorator... Decorations>
+        struct Chunk;
+
+        template <ChunkDecorator... Decorations>
         class ChunkGrid;
 
         namespace Ray {
@@ -28,15 +32,16 @@ namespace hemlock {
              * @return True if the ray was incident on a block matching the
              * target within max_steps, false otherwise.
              */
+            template <ChunkDecorator... Decorations>
             bool cast_to_block(
-                f32v3                       start,
-                f32v3                       direction,
-                hmem::WeakHandle<ChunkGrid> grid_handle,
-                Block                       target_block,
-                ui32                        max_steps,
-                OUT BlockWorldPosition&     position,
-                OUT f32&                    distance,
-                OUT hmem::WeakHandle<Chunk>* chunk = nullptr
+                f32v3                                   start,
+                f32v3                                   direction,
+                hmem::Handle<ChunkGrid<Decorations...>> grid_handle,
+                Block                                   target_block,
+                ui32                                    max_steps,
+                OUT BlockWorldPosition&                 position,
+                OUT f32&                                distance,
+                OUT hmem::WeakHandle<Chunk<Decorations...>>* chunk = nullptr
             );
 
             /**
@@ -57,15 +62,16 @@ namespace hemlock {
              * @return True if the ray was incident on a block matching the
              * target within max_steps, false otherwise.
              */
+            template <ChunkDecorator... Decorations>
             bool cast_to_block(
-                f32v3                       start,
-                f32v3                       direction,
-                hmem::WeakHandle<ChunkGrid> grid_handle,
-                BlockTest                   block_is_target,
-                ui32                        max_steps,
-                OUT BlockWorldPosition&     position,
-                OUT f32&                    distance,
-                OUT hmem::WeakHandle<Chunk>* chunk = nullptr
+                f32v3                                   start,
+                f32v3                                   direction,
+                hmem::Handle<ChunkGrid<Decorations...>> grid_handle,
+                BlockTest                               block_is_target,
+                ui32                                    max_steps,
+                OUT BlockWorldPosition&                 position,
+                OUT f32&                                distance,
+                OUT hmem::WeakHandle<Chunk<Decorations...>>* chunk = nullptr
             );
 
             /**
@@ -87,15 +93,16 @@ namespace hemlock {
              * @return True if the ray was incident on a block matching the
              * target within max_steps, false otherwise.
              */
+            template <ChunkDecorator... Decorations>
             bool cast_to_block_before(
-                f32v3                       start,
-                f32v3                       direction,
-                hmem::WeakHandle<ChunkGrid> grid_handle,
-                Block                       target_block,
-                ui32                        max_steps,
-                OUT BlockWorldPosition&     position,
-                OUT f32&                    distance,
-                OUT hmem::WeakHandle<Chunk>* chunk = nullptr
+                f32v3                                   start,
+                f32v3                                   direction,
+                hmem::Handle<ChunkGrid<Decorations...>> grid_handle,
+                Block                                   target_block,
+                ui32                                    max_steps,
+                OUT BlockWorldPosition&                 position,
+                OUT f32&                                distance,
+                OUT hmem::WeakHandle<Chunk<Decorations...>>* chunk = nullptr
             );
 
             /**
@@ -117,19 +124,22 @@ namespace hemlock {
              * @return True if the ray was incident on a block matching the
              * target within max_steps, false otherwise.
              */
+            template <ChunkDecorator... Decorations>
             bool cast_to_block_before(
-                f32v3                       start,
-                f32v3                       direction,
-                hmem::WeakHandle<ChunkGrid> grid_handle,
-                BlockTest                   block_is_target,
-                ui32                        max_steps,
-                OUT BlockWorldPosition&     position,
-                OUT f32&                    distance,
-                OUT hmem::WeakHandle<Chunk>* chunk = nullptr
+                f32v3                                   start,
+                f32v3                                   direction,
+                hmem::Handle<ChunkGrid<Decorations...>> grid_handle,
+                BlockTest                               block_is_target,
+                ui32                                    max_steps,
+                OUT BlockWorldPosition&                 position,
+                OUT f32&                                distance,
+                OUT hmem::WeakHandle<Chunk<Decorations...>>* chunk = nullptr
             );
         }  // namespace Ray
     }      // namespace voxel
 }  // namespace hemlock
 namespace hvox = hemlock::voxel;
 
-#endif  // __hemlock_voxel_ray_h
+#include "voxel/ray.inl"
+
+#endif  // __hemlock_voxel_ray_hpp

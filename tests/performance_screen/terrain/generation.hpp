@@ -5,7 +5,7 @@ namespace hemlock {
     namespace test {
         namespace performance_screen {
             struct VoxelGenerator {
-                void operator()(hmem::Handle<hvox::Chunk> chunk) const {
+                void operator()(hmem::Handle<Chunk> chunk) const {
                     auto simplex_1
                         = FastNoise::New<FastNoise::Simplex>(FastSIMD::Level_AVX512);
                     auto fractal_1
@@ -91,7 +91,7 @@ namespace hemlock {
 
                 ~VoxelGeneratorV2() { delete[] m_data; }
 
-                void operator()(hmem::Handle<hvox::Chunk> chunk) const {
+                void operator()(hmem::Handle<Chunk> chunk) const {
                     auto simplex_1      = FastNoise::New<FastNoise::Simplex>();
                     auto fractal_1      = FastNoise::New<FastNoise::FractalFBm>();
                     auto domain_scale_1 = FastNoise::New<FastNoise::DomainScale>();

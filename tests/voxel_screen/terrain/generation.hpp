@@ -5,7 +5,7 @@ namespace hemlock {
     namespace test {
         namespace voxel_screen {
             struct TVS_VoxelGenerator {
-                void operator()(hmem::Handle<hvox::Chunk> chunk) const {
+                void operator()(hmem::Handle<Chunk> chunk) const {
                     auto simplex_1
                         = FastNoise::New<FastNoise::Simplex>(FastSIMD::Level_AVX512);
                     auto fractal_1
@@ -116,7 +116,7 @@ namespace hemlock {
                 }
             };
 
-            void load_chunks(hmem::Handle<hvox::ChunkGrid> chunk_grid) {
+            void load_chunks(hmem::Handle<ChunkGrid> chunk_grid) {
                 for (auto x = -VIEW_DIST; x <= VIEW_DIST; ++x) {
                     for (auto z = -VIEW_DIST; z <= VIEW_DIST; ++z) {
                         for (auto y = -2; y < 6; ++y) {
@@ -137,8 +137,7 @@ namespace hemlock {
                 }
             }
 
-            void
-            unload_chunks(hmem::Handle<hvox::ChunkGrid> chunk_grid, f32 frame_time) {
+            void unload_chunks(hmem::Handle<ChunkGrid> chunk_grid, f32 frame_time) {
                 static f32 t = 0.0f;
                 t            += frame_time;
                 for (auto x = -VIEW_DIST; x < VIEW_DIST; ++x) {
@@ -162,10 +161,10 @@ namespace hemlock {
             }
 
             void unload_x_chunks(
-                hmem::Handle<hvox::ChunkGrid>               chunk_grid,
-                std::vector<hmem::WeakHandle<hvox::Chunk>>& unloading_chunks,
-                const f32v3&                                current_pos,
-                const f32v3&                                last_pos
+                hmem::Handle<ChunkGrid>               chunk_grid,
+                std::vector<hmem::WeakHandle<Chunk>>& unloading_chunks,
+                const f32v3&                          current_pos,
+                const f32v3&                          last_pos
             ) {
                 i32 x_step
                     = static_cast<i32>(current_pos.x) - static_cast<i32>(last_pos.x);
@@ -175,9 +174,7 @@ namespace hemlock {
                          ++z)
                     {
                         for (auto y = -2; y < 6; ++y) {
-                            unloading_chunks.emplace_back(
-                                hmem::WeakHandle<hvox::Chunk>{}
-                            );
+                            unloading_chunks.emplace_back(hmem::WeakHandle<Chunk>{});
                             auto& handle = unloading_chunks.back();
                             chunk_grid->unload_chunk_at(
                                 {
@@ -221,10 +218,10 @@ static_cast<i32>(current_pos.x) + VIEW_DIST,
             }
 
             void unload_z_chunks(
-                hmem::Handle<hvox::ChunkGrid>               chunk_grid,
-                std::vector<hmem::WeakHandle<hvox::Chunk>>& unloading_chunks,
-                const f32v3&                                current_pos,
-                const f32v3&                                last_pos
+                hmem::Handle<ChunkGrid>               chunk_grid,
+                std::vector<hmem::WeakHandle<Chunk>>& unloading_chunks,
+                const f32v3&                          current_pos,
+                const f32v3&                          last_pos
             ) {
                 i32 z_step
                     = static_cast<i32>(current_pos.z) - static_cast<i32>(last_pos.z);
@@ -234,9 +231,7 @@ static_cast<i32>(current_pos.x) + VIEW_DIST,
                          ++x)
                     {
                         for (auto y = -2; y < 6; ++y) {
-                            unloading_chunks.emplace_back(
-                                hmem::WeakHandle<hvox::Chunk>{}
-                            );
+                            unloading_chunks.emplace_back(hmem::WeakHandle<Chunk>{});
                             auto& handle = unloading_chunks.back();
                             chunk_grid->unload_chunk_at(
                                 {

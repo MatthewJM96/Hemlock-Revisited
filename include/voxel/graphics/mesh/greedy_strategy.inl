@@ -1,18 +1,23 @@
 #include "graphics/mesh.h"
 #include "voxel/block.hpp"
-#include "voxel/chunk/chunk.h"
-#include "voxel/chunk/grid.h"
+#include "voxel/chunk/chunk.hpp"
+#include "voxel/chunk/grid.hpp"
 #include "voxel/chunk/setter.hpp"
 
-template <hvox::IdealBlockComparator MeshComparator>
-bool hvox::GreedyMeshStrategy<
-    MeshComparator>::can_run(hmem::Handle<ChunkGrid>, hmem::Handle<Chunk>) const {
+template <
+    hvox::IdealBlockComparator MeshComparator,
+    hvox::ChunkDecorator... Decorations>
+bool hvox::GreedyMeshStrategy<MeshComparator, Decorations...>::
+    can_run(hmem::Handle<ChunkGrid<Decorations...>>, hmem::Handle<Chunk<Decorations...>>)
+        const {
     return true;
 }
 
-template <hvox::IdealBlockComparator MeshComparator>
-void hvox::GreedyMeshStrategy<MeshComparator>::operator()(
-    hmem::Handle<ChunkGrid>, hmem::Handle<Chunk> chunk
+template <
+    hvox::IdealBlockComparator MeshComparator,
+    hvox::ChunkDecorator... Decorations>
+void hvox::GreedyMeshStrategy<MeshComparator, Decorations...>::operator()(
+    hmem::Handle<ChunkGrid<Decorations...>>, hmem::Handle<Chunk<Decorations...>> chunk
 ) const {
     // TODO(Matthew): Better guess work should be possible and expand only when
     // needed.
@@ -74,7 +79,7 @@ void hvox::GreedyMeshStrategy<MeshComparator>::operator()(
               }
           };
 
-    Chunk* raw_chunk_ptr = chunk.get();
+    Chunk<Decorations...>* raw_chunk_ptr = chunk.get();
 
     bool blocks_to_consider = true;
     while (blocks_to_consider) {

@@ -3,15 +3,19 @@
 
 #include "algorithm/acs/graph/view.hpp"
 #include "state.hpp"
-#include "voxel/chunk/grid.h"
+#include "voxel/chunk/decorator/decorator.hpp"
+#include "voxel/chunk/grid.hpp"
 
 namespace hemlock {
     namespace voxel {
         namespace ai {
+            template <ChunkDecorator... Decorations>
             class ChunkGridGraphMapView :
                 public halgo::GraphMapView<ChunkNavmeshNode, false> {
             public:
-                void init(hmem::WeakHandle<ChunkGrid> grid) { m_grid = grid; }
+                void init(hmem::WeakHandle<ChunkGrid<Decorations...>> grid) {
+                    m_grid = grid;
+                }
 
                 std::tuple<ChunkNavmeshVertexDescriptor, ChunkNavmesh*>
                 vertex(ChunkNavmeshNode node) override final {
@@ -33,7 +37,7 @@ namespace hemlock {
                     return { navmesh->coord_vertex_map[node], navmesh };
                 }
             protected:
-                hmem::WeakHandle<ChunkGrid> m_grid;
+                hmem::WeakHandle<ChunkGrid<Decorations...>> m_grid;
             };
         }  // namespace ai
     }      // namespace voxel

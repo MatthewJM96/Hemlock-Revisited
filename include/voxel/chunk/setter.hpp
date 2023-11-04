@@ -2,10 +2,12 @@
 #define __hemlock_voxel_chunk_setter_hpp
 
 #include "voxel/block.hpp"
+#include "voxel/chunk/decorator/decorator.hpp"
 #include "voxel/coordinate_system.h"
 
 namespace hemlock {
     namespace voxel {
+        template <ChunkDecorator... Decorations>
         struct Chunk;
 
         /**
@@ -20,8 +22,12 @@ namespace hemlock {
          *
          * @return True if the block was set, false otherwise.
          */
-        bool
-        set_block(hmem::Handle<Chunk> chunk, BlockChunkPosition position, Block block);
+        template <ChunkDecorator... Decorations>
+        bool set_block(
+            hmem::Handle<Chunk<Decorations...>> chunk,
+            BlockChunkPosition                  position,
+            Block                               block
+        );
 
         /**
          * @brief Set all points in a rectangular cuboid of the passed in chunk to a
@@ -37,11 +43,12 @@ namespace hemlock {
          *
          * @return True if the blocks were set, false otherwise.
          */
+        template <ChunkDecorator... Decorations>
         bool set_blocks(
-            hmem::Handle<Chunk> chunk,
-            BlockChunkPosition  start,
-            BlockChunkPosition  end,
-            Block               block
+            hmem::Handle<Chunk<Decorations...>> chunk,
+            BlockChunkPosition                  start,
+            BlockChunkPosition                  end,
+            Block                               block
         );
 
         /**
@@ -57,11 +64,12 @@ namespace hemlock {
          *
          * @return True if the blocks were set, false otherwise.
          */
+        template <ChunkDecorator... Decorations>
         bool set_blocks(
-            hmem::Handle<Chunk> chunk,
-            BlockChunkPosition  start,
-            BlockChunkPosition  end,
-            Block*              blocks
+            hmem::Handle<Chunk<Decorations...>> chunk,
+            BlockChunkPosition                  start,
+            BlockChunkPosition                  end,
+            Block*                              blocks
         );
 
         /**

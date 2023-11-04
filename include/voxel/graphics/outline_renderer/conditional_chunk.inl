@@ -1,12 +1,16 @@
-#include "voxel/chunk/grid.h"
+#include "voxel/chunk/grid.hpp"
 
-template <hvox::OutlinePredicate Pred>
-hg::MeshHandles hvox::ConditionalChunkOutlineRenderer<Pred>::chunk_mesh_handles = {};
-template <hvox::OutlinePredicate Pred>
-std::atomic<ui32> hvox::ConditionalChunkOutlineRenderer<Pred>::ref_count = 0;
+template <hvox::OutlinePredicate Pred, hvox::ChunkDecorator... Decorations>
+hg::MeshHandles
+    hvox::ConditionalChunkOutlineRenderer<Pred, Decorations...>::chunk_mesh_handles
+    = {};
+template <hvox::OutlinePredicate Pred, hvox::ChunkDecorator... Decorations>
+std::atomic<ui32> hvox::ConditionalChunkOutlineRenderer<Pred, Decorations...>::ref_count
+    = 0;
 
-template <hvox::OutlinePredicate Pred>
-hvox::ConditionalChunkOutlineRenderer<Pred>::ConditionalChunkOutlineRenderer() :
+template <hvox::OutlinePredicate Pred, hvox::ChunkDecorator... Decorations>
+hvox::ConditionalChunkOutlineRenderer<Pred, Decorations...>::
+    ConditionalChunkOutlineRenderer() :
     handle_render_distance_change(Delegate<void(Sender, RenderDistanceChangeEvent)>{
         [&](Sender, RenderDistanceChangeEvent ev) {
             // NOTE(Matthew): Could reduce new calls but really render distance of a
@@ -35,9 +39,9 @@ hvox::ConditionalChunkOutlineRenderer<Pred>::ConditionalChunkOutlineRenderer() :
     // Empty.
 }
 
-template <hvox::OutlinePredicate Pred>
-void hvox::ConditionalChunkOutlineRenderer<Pred>::init(
-    Pred predicate, hmem::Handle<ChunkGrid> chunk_grid
+template <hvox::OutlinePredicate Pred, hvox::ChunkDecorator... Decorations>
+void hvox::ConditionalChunkOutlineRenderer<Pred, Decorations...>::init(
+    Pred predicate, hmem::Handle<_ChunkGrid> chunk_grid
 ) {
     m_predicate  = predicate;
     m_chunk_grid = chunk_grid;
@@ -73,8 +77,8 @@ void hvox::ConditionalChunkOutlineRenderer<Pred>::init(
     }
 }
 
-template <hvox::OutlinePredicate Pred>
-void hvox::ConditionalChunkOutlineRenderer<Pred>::dispose() {
+template <hvox::OutlinePredicate Pred, hvox::ChunkDecorator... Decorations>
+void hvox::ConditionalChunkOutlineRenderer<Pred, Decorations...>::dispose() {
     m_chunk_grid.reset();
 
     delete[] m_chunk_outline_conditions;
@@ -87,8 +91,8 @@ void hvox::ConditionalChunkOutlineRenderer<Pred>::dispose() {
     }
 }
 
-template <hvox::OutlinePredicate Pred>
-void hvox::ConditionalChunkOutlineRenderer<Pred>::draw(FrameTime) {
+template <hvox::OutlinePredicate Pred, hvox::ChunkDecorator... Decorations>
+void hvox::ConditionalChunkOutlineRenderer<Pred, Decorations...>::draw(FrameTime) {
     m_chunk_outline_condition_count = 0;
 
     for (auto& [id, chunk] : m_chunk_grid->chunks()) {

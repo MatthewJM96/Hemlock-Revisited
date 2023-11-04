@@ -5,14 +5,15 @@
 
 namespace hemlock {
     namespace voxel {
+        template <ChunkDecorator... Decorations>
         class ChunkGrid;
     }
 
     namespace physics {
-
+        template <hvox::ChunkDecorator... Decorations>
         struct AnchoredComponent {
-            hmem::WeakHandle<voxel::ChunkGrid> chunk_grid;
-            hvox::EntityWorldPosition          position;
+            hmem::WeakHandle<voxel::ChunkGrid<Decorations...>> chunk_grid;
+            hvox::EntityWorldPosition                          position;
         };
 
     }  // namespace physics

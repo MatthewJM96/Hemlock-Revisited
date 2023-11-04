@@ -1,36 +1,40 @@
-#ifndef __hemlock_voxel_chunk_grid_h
-#define __hemlock_voxel_chunk_grid_h
+#ifndef __hemlock_voxel_chunk_grid_hpp
+#define __hemlock_voxel_chunk_grid_hpp
 
-#include "algorithm/acs/graph/state.hpp"
 #include "timing.h"
-#include "voxel/ai/navmesh/navmesh_manager.h"
-#include "voxel/chunk/chunk.h"
+#include "voxel/chunk/chunk.hpp"
+#include "voxel/chunk/decorator/decorator.hpp"
 #include "voxel/coordinate_system.h"
-#include "voxel/graphics/renderer.h"
+#include "voxel/graphics/renderer.hpp"
 #include "voxel/task.hpp"
-
-// TODO(Matthew): Do we want to make Grid and Chunk composable? Or else some other way
-//                of better letting user express what should be done when with regards
-//                to loading, generation, meshing, navmeshing and so on.
 
 namespace hemlock {
     namespace voxel {
-        // TODO(Matthew): Make chunks & grids either decoratable or else composed? Not
-        //                all chunk grids may want to be navigable, e.g.
-
         // TODO(Matthew): Does page size want to be made a run-time thing,
         //                as it may be nice to base this on view distance.
-        using ChunkAllocator = hmem::PagedAllocator<Chunk, 4 * 4 * 4, 3>;
+        template <ChunkDecorator... Decorations>
+        using ChunkAllocator
+            = hmem::PagedAllocator<Chunk<Decorations...>, 4 * 4 * 4, 3>;
 
-        using Chunks = std::unordered_map<ChunkID, hmem::Handle<Chunk>>;
+        template <ChunkDecorator... Decorations>
+        using Chunks = std::unordered_map<ChunkID, hmem::Handle<Chunk<Decorations...>>>;
 
-        using ChunkTaskBuilder = Delegate<ChunkTask*(void)>;
+        template <ChunkDecorator... Decorations>
+        using ChunkTaskBuilder = Delegate<ChunkTask<Decorations...>*(void)>;
 
+        template <ChunkDecorator... Decorations>
         class ChunkGrid {
         public:
+            using _ChunkAllocator   = ChunkAllocator<Decorations...>;
+            using _Chunk            = Chunk<Decorations...>;
+            using _Chunks           = Chunks<Decorations...>;
+            using _ChunkGrid        = ChunkGrid<Decorations...>;
+            using _ChunkTaskBuilder = ChunkTaskBuilder<Decorations...>;
+
             ChunkGrid();
 
-            ~ChunkGrid() { /* Empty. */
+            ~ChunkGrid() {
+                // Empty.
             }
 
             /**
@@ -50,12 +54,12 @@ namespace hemlock {
              * task to navmesh a chunk.
              */
             void init(
-                hmem::WeakHandle<ChunkGrid> self,
-                ui32                        render_distance,
-                ui32                        thread_count,
-                ChunkTaskBuilder            build_load_or_generate_task,
-                ChunkTaskBuilder            build_mesh_task,
-                ChunkTaskBuilder*           build_navmesh_task = nullptr
+                hmem::WeakHandle<_ChunkGrid> self,
+                ui32                         render_distance,
+                ui32                         thread_count,
+                _ChunkTaskBuilder            build_load_or_generate_task,
+                _ChunkTaskBuilder            build_mesh_task,
+                _ChunkTaskBuilder*           build_navmesh_task = nullptr
             );
             /**
              * @brief Disposes of the chunk grid, ending
@@ -98,7 +102,7 @@ namespace hemlock {
              */
             void resume_chunk_tasks() { m_thread_pool.resume(); }
 
-            ChunkRenderer* renderer() { return &m_renderer; }
+            ChunkRenderer<Decorations...>* renderer() { return &m_renderer; }
 
             /**
              * @brief Loads chunks with the assumption none specified
@@ -157,8 +161,8 @@ namespace hemlock {
              * of work will be done to unload it.
              */
             bool unload_chunk_at(
-                ChunkGridPosition        chunk_position,
-                hmem::WeakHandle<Chunk>* handle = nullptr
+                ChunkGridPosition         chunk_position,
+                hmem::WeakHandle<_Chunk>* handle = nullptr
             );
 
             /**
@@ -169,7 +173,7 @@ namespace hemlock {
              * @return hmem::Handle<Chunk> Handle on the
              * requested chunk, nullptr otherwise.
              */
-            hmem::Handle<Chunk> chunk(ChunkID id);
+            hmem::Handle<_Chunk> chunk(ChunkID id);
 
             /**
              * @brief Returns a handle on the identified chunk
@@ -179,11 +183,11 @@ namespace hemlock {
              * @return hmem::Handle<Chunk> Handle on the
              * requested chunk, nullptr otherwise.
              */
-            hmem::Handle<Chunk> chunk(ChunkGridPosition position) {
+            hmem::Handle<_Chunk> chunk(ChunkGridPosition position) {
                 return chunk(position.id);
             }
 
-            const Chunks& chunks() const { return m_chunks; }
+            const _Chunks& chunks() const { return m_chunks; }
 
             /**
              * @brief Triggered whenever the render distance of this chunk grid
@@ -191,30 +195,33 @@ namespace hemlock {
              */
             Event<RenderDistanceChangeEvent> on_render_distance_change;
         protected:
-            void establish_chunk_neighbours(hmem::Handle<Chunk> chunk);
+            void establish_chunk_neighbours(hmem::Handle<_Chunk> chunk);
 
             Delegate<void(Sender)>                   handle_chunk_load;
             Delegate<bool(Sender, BlockChangeEvent)> handle_block_change;
 
-            ChunkTaskBuilder m_build_load_or_generate_task, m_build_mesh_task,
+            _ChunkTaskBuilder m_build_load_or_generate_task, m_build_mesh_task,
                 m_build_navmesh_task;
             thread::ThreadPool<ChunkTaskContext> m_thread_pool;
 
-            ChunkAllocator m_chunk_allocator;
+            _ChunkAllocator m_chunk_allocator;
 
             hmem::Handle<ChunkBlockPager>        m_block_pager;
             hmem::Handle<ChunkInstanceDataPager> m_instance_pager;
             hmem::Handle<ai::ChunkNavmeshPager>  m_navmesh_pager;
 
-            ChunkRenderer m_renderer;
-            ui32          m_render_distance, m_chunks_in_render_distance;
+            // TODO(Matthew): move this out of here?
+            ChunkRenderer<Decorations...> m_renderer;
+            ui32 m_render_distance, m_chunks_in_render_distance;
 
-            Chunks m_chunks;
+            _Chunks m_chunks;
 
-            hmem::WeakHandle<ChunkGrid> m_self;
+            hmem::WeakHandle<_ChunkGrid> m_self;
         };
     }  // namespace voxel
 }  // namespace hemlock
 namespace hvox = hemlock::voxel;
 
-#endif  // __hemlock_voxel_chunk_grid_h
+#include "voxel/chunk/grid.inl"
+
+#endif  // __hemlock_voxel_chunk_grid_hpp

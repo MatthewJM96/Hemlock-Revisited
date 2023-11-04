@@ -5,26 +5,33 @@
 
 namespace hemlock {
     namespace voxel {
+        template <ChunkDecorator... Decorations>
         class ChunkGrid;
 
         namespace ai {
             /**
              * @brief Defines a struct whose opeartor() sets the blocks of a chunk.
              */
-            template <typename StrategyCandidate>
-            concept ChunkNavmeshStrategy = requires (
-                StrategyCandidate s, hmem::Handle<ChunkGrid> g, hmem::Handle<Chunk> c
-            ) {
-                                               {
-                                                   s.do_bulk(g, c)
-                                                   } -> std::same_as<void>;
-                                               {
-                                                   s.do_stitch(g, c)
-                                                   } -> std::same_as<void>;
-                                           };
+            template <typename StrategyCandidate, typename... Decorations>
+            concept ChunkNavmeshStrategy
+                = (ChunkDecorator<Decorations> && ...)
+                  && requires (
+                      StrategyCandidate                       s,
+                      hmem::Handle<ChunkGrid<Decorations...>> g,
+                      hmem::Handle<Chunk<Decorations...>>     c
+                  ) {
+                         {
+                             s.do_bulk(g, c)
+                             } -> std::same_as<void>;
+                         {
+                             s.do_stitch(g, c)
+                             } -> std::same_as<void>;
+                     };
 
-            template <hvox::ai::ChunkNavmeshStrategy NavmeshStrategy>
-            class ChunkNavmeshTask : public ChunkTask {
+            template <
+                hvox::ai::ChunkNavmeshStrategy NavmeshStrategy,
+                ChunkDecorator... Decorations>
+            class ChunkNavmeshTask : public ChunkTask<Decorations...> {
             public:
                 virtual ~ChunkNavmeshTask() { /* Empty. */
                 }

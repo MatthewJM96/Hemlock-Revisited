@@ -5,13 +5,16 @@
 
 namespace hemlock {
     namespace voxel {
+        template <ChunkDecorator... Decorations>
         class ChunkGrid;
 
         // TODO(Matthew): Add bit more niceness to rendering, thicker extremity edges
         // and some cross-hatching thinner lines on faces.
-        template <OutlinePredicate Pred>
+        template <OutlinePredicate Pred, ChunkDecorator... Decorations>
         class ConditionalChunkOutlineRenderer {
         public:
+            using _ChunkGrid = ChunkGrid<Decorations...>;
+
             ConditionalChunkOutlineRenderer();
 
             ~ConditionalChunkOutlineRenderer() { /* Empty. */
@@ -25,7 +28,7 @@ namespace hemlock {
              * @param chunk_grid The chunk grid for which the outlines
              * are rendered.
              */
-            void init(Pred predicate, hmem::Handle<ChunkGrid> chunk_grid);
+            void init(Pred predicate, hmem::Handle<_ChunkGrid> chunk_grid);
             /**
              * @brief Initialises voxel outline renderer.
              *
@@ -47,7 +50,7 @@ namespace hemlock {
 
             Pred m_predicate;
 
-            hmem::Handle<ChunkGrid> m_chunk_grid;
+            hmem::Handle<_ChunkGrid> m_chunk_grid;
 
             OutlineData* m_chunk_outline_conditions;
             ui32         m_chunk_outline_condition_count;

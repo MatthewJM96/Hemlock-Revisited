@@ -1,6 +1,6 @@
 #include "memory/handle.hpp"
 #include "voxel/ai/navmesh/state.hpp"
-#include "voxel/chunk/chunk.h"
+#include "voxel/chunk/chunk.hpp"
 #include "voxel/coordinate_system.h"
 
 // TODO(Matthew): right now we are hardcoding in what gets added to the navmesh. This is
@@ -29,8 +29,10 @@
 //                navmeshing, implement an on_X_face_change event in chunks?
 
 namespace hemlock::voxel::ai::impl {
-    inline ChunkNavmeshVertexDescriptor
-    get_vertex(hmem::Handle<Chunk>& chunk, const ChunkNavmeshNode& coord) {
+    template <ChunkDecorator... Decorations>
+    inline ChunkNavmeshVertexDescriptor get_vertex(
+        hmem::Handle<Chunk<Decorations...>>& chunk, const ChunkNavmeshNode& coord
+    ) {
         try {
             std::shared_lock<std::shared_mutex> navmesh_lock;
             const hvox::ai::ChunkNavmesh* navmesh = chunk->navmesh.get(navmesh_lock);
@@ -60,9 +62,9 @@ namespace hemlock::voxel::ai::impl {
     }
 }  // namespace hemlock::voxel::ai::impl
 
-template <hvox::IdealBlockConstraint IsSolid>
-void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_bulk(
-    hmem::Handle<ChunkGrid>, hmem::Handle<Chunk> chunk
+template <hvox::IdealBlockConstraint IsSolid, hvox::ChunkDecorator... Decorations>
+void hvox::ai::NaiveNavmeshStrategy<IsSolid, Decorations...>::do_bulk(
+    hmem::Handle<ChunkGrid<Decorations...>>, hmem::Handle<Chunk<Decorations...>> chunk
 ) const {
     auto chunk_pos = chunk->position;
 
@@ -1331,9 +1333,9 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_bulk(
 ////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////
 
-template <hvox::IdealBlockConstraint IsSolid>
-void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
-    hmem::Handle<ChunkGrid>, hmem::Handle<Chunk> chunk
+template <hvox::IdealBlockConstraint IsSolid, hvox::ChunkDecorator... Decorations>
+void hvox::ai::NaiveNavmeshStrategy<IsSolid, Decorations...>::do_stitch(
+    hmem::Handle<ChunkGrid<Decorations...>>, hmem::Handle<Chunk<Decorations...>> chunk
 ) const {
     auto chunk_pos = chunk->position;
 
@@ -1354,86 +1356,87 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
     \******************************************/
 
     // TODO(Matthew): Is this optimised well by compiler?
-    auto do_side_stitch_navigable_check = [&](memory::Handle<Chunk>& neighbour,
-                                              BlockChunkPosition     this_offset,
-                                              BlockChunkPosition     neighbour_offset,
-                                              i64                    start,
-                                              i64                    end) {
-        std::shared_lock<std::shared_mutex> neighbour_block_lock;
-        auto& neighbour_blocks = neighbour->blocks.get(neighbour_block_lock);
+    auto do_side_stitch_navigable_check =
+        [&](memory::Handle<Chunk<Decorations...>>& neighbour,
+            BlockChunkPosition                     this_offset,
+            BlockChunkPosition                     neighbour_offset,
+            i64                                    start,
+            i64                                    end) {
+            std::shared_lock<std::shared_mutex> neighbour_block_lock;
+            auto& neighbour_blocks = neighbour->blocks.get(neighbour_block_lock);
 
-        BlockIndex   this_block_index = hvox::block_index(this_offset);
-        const Block* this_block       = &blocks[this_block_index];
+            BlockIndex   this_block_index = hvox::block_index(this_offset);
+            const Block* this_block       = &blocks[this_block_index];
 
-        BlockIndex above_this_block_index
-            = hvox::block_index(this_offset + BlockChunkPosition{ 0, 1, 0 });
-        const Block* above_this_block = &blocks[above_this_block_index];
+            BlockIndex above_this_block_index
+                = hvox::block_index(this_offset + BlockChunkPosition{ 0, 1, 0 });
+            const Block* above_this_block = &blocks[above_this_block_index];
 
-        if (!is_solid(this_block) || is_solid(above_this_block)) return;
+            if (!is_solid(this_block) || is_solid(above_this_block)) return;
 
-        ChunkNavmeshNode this_block_coord = { this_offset, chunk_pos };
-        struct {
-            ChunkNavmeshVertexDescriptor here, in_neighbour;
-        } this_block_vertex = { impl::get_vertex(chunk, this_block_coord),
-                                impl::get_vertex(neighbour, this_block_coord) };
+            ChunkNavmeshNode this_block_coord = { this_offset, chunk_pos };
+            struct {
+                ChunkNavmeshVertexDescriptor here, in_neighbour;
+            } this_block_vertex = { impl::get_vertex(chunk, this_block_coord),
+                                    impl::get_vertex(neighbour, this_block_coord) };
 
-        for (i64 y_off = start; y_off > end; --y_off) {
-            BlockIndex above_candidate_index = hvox::block_index(
-                static_cast<i64v3>(neighbour_offset) + i64v3{ 0, y_off, 0 }
-            );
-            const Block* above_candidate_block
-                = &neighbour_blocks[above_candidate_index];
+            for (i64 y_off = start; y_off > end; --y_off) {
+                BlockIndex above_candidate_index = hvox::block_index(
+                    static_cast<i64v3>(neighbour_offset) + i64v3{ 0, y_off, 0 }
+                );
+                const Block* above_candidate_block
+                    = &neighbour_blocks[above_candidate_index];
 
-            BlockIndex candidate_index = hvox::block_index(
-                static_cast<i64v3>(neighbour_offset) + i64v3{ 0, y_off - 1, 0 }
-            );
-            const Block* candidate_block = &neighbour_blocks[candidate_index];
+                BlockIndex candidate_index = hvox::block_index(
+                    static_cast<i64v3>(neighbour_offset) + i64v3{ 0, y_off - 1, 0 }
+                );
+                const Block* candidate_block = &neighbour_blocks[candidate_index];
 
-            if (is_solid(candidate_block) && !is_solid(above_candidate_block)) {
-                ChunkNavmeshNode candidate_block_coord = {
-                    static_cast<i64v3>(neighbour_offset) + i64v3{0, y_off - 1, 0},
-                    neighbour->position
-                };
-                struct {
-                    ChunkNavmeshVertexDescriptor here, in_neighbour;
-                } candidate_block_vertex
-                    = { impl::get_vertex(chunk, candidate_block_coord),
-                        impl::get_vertex(neighbour, candidate_block_coord) };
+                if (is_solid(candidate_block) && !is_solid(above_candidate_block)) {
+                    ChunkNavmeshNode candidate_block_coord = {
+                        static_cast<i64v3>(neighbour_offset) + i64v3{0, y_off - 1, 0},
+                        neighbour->position
+                    };
+                    struct {
+                        ChunkNavmeshVertexDescriptor here, in_neighbour;
+                    } candidate_block_vertex
+                        = { impl::get_vertex(chunk, candidate_block_coord),
+                            impl::get_vertex(neighbour, candidate_block_coord) };
 
-                {
-                    std::unique_lock<std::shared_mutex> lock;
-                    auto& navmesh = chunk->navmesh.get(lock);
+                    {
+                        std::unique_lock<std::shared_mutex> lock;
+                        auto& navmesh = chunk->navmesh.get(lock);
 
-                    boost::add_edge(
-                        this_block_vertex.here,
-                        candidate_block_vertex.here,
-                        navmesh->graph
-                    );
-                    boost::add_edge(
-                        candidate_block_vertex.here,
-                        this_block_vertex.here,
-                        navmesh->graph
-                    );
-                }
+                        boost::add_edge(
+                            this_block_vertex.here,
+                            candidate_block_vertex.here,
+                            navmesh->graph
+                        );
+                        boost::add_edge(
+                            candidate_block_vertex.here,
+                            this_block_vertex.here,
+                            navmesh->graph
+                        );
+                    }
 
-                {
-                    std::unique_lock<std::shared_mutex> lock;
-                    auto& navmesh = neighbour->navmesh.get(lock);
+                    {
+                        std::unique_lock<std::shared_mutex> lock;
+                        auto& navmesh = neighbour->navmesh.get(lock);
 
-                    boost::add_edge(
-                        this_block_vertex.in_neighbour,
-                        candidate_block_vertex.in_neighbour,
-                        navmesh->graph
-                    );
-                    boost::add_edge(
-                        candidate_block_vertex.in_neighbour,
-                        this_block_vertex.in_neighbour,
-                        navmesh->graph
-                    );
+                        boost::add_edge(
+                            this_block_vertex.in_neighbour,
+                            candidate_block_vertex.in_neighbour,
+                            navmesh->graph
+                        );
+                        boost::add_edge(
+                            candidate_block_vertex.in_neighbour,
+                            this_block_vertex.in_neighbour,
+                            navmesh->graph
+                        );
+                    }
                 }
             }
-        }
-    };
+        };
 
     /*********************************\
      * Try to stitch left neighbour. *

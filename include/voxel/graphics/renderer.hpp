@@ -1,5 +1,5 @@
-#ifndef __hemlock_voxel_graphics_renderer_h
-#define __hemlock_voxel_graphics_renderer_h
+#ifndef __hemlock_voxel_graphics_renderer_hpp
+#define __hemlock_voxel_graphics_renderer_hpp
 
 #include "graphics/mesh.h"
 #include "timing.h"
@@ -7,11 +7,15 @@
 
 namespace hemlock {
     namespace voxel {
+        template <ChunkDecorator... Decorations>
         struct Chunk;
 
+        template <ChunkDecorator... Decorations>
         class ChunkGrid;
 
-        using AllPagedChunks = std::unordered_map<ChunkID, hmem::WeakHandle<Chunk>>;
+        template <ChunkDecorator... Decorations>
+        using AllPagedChunks
+            = std::unordered_map<ChunkID, hmem::WeakHandle<Chunk<Decorations...>>>;
 
         using PagedChunks = std::vector<ChunkID>;
 
@@ -27,12 +31,15 @@ namespace hemlock {
 
         using PagedChunksMetadata = std::unordered_map<ChunkID, PagedChunkMetadata>;
 
+        template <ChunkDecorator... Decorations>
         struct HandleAndID {
-            hmem::WeakHandle<Chunk> handle;
-            ChunkID                 id;
+            hmem::WeakHandle<Chunk<Decorations...>> handle;
+            ChunkID                                 id;
         };
 
-        using PagedChunkQueue = moodycamel::ConcurrentQueue<HandleAndID>;
+        template <ChunkDecorator... Decorations>
+        using PagedChunkQueue
+            = moodycamel::ConcurrentQueue<HandleAndID<Decorations...>>;
 
         struct ChunkRenderPage {
             PagedChunks chunks;
@@ -44,11 +51,19 @@ namespace hemlock {
 
         using ChunkRenderPages = std::vector<ChunkRenderPage*>;
 
+        template <ChunkDecorator... Decorations>
         class ChunkRenderer {
         public:
+            using _Chunk           = Chunk<Decorations...>;
+            using _ChunkGrid       = ChunkGrid<Decorations...>;
+            using _AllPagedChunks  = AllPagedChunks<Decorations...>;
+            using _HandleAndID     = HandleAndID<Decorations...>;
+            using _PagedChunkQueue = PagedChunkQueue<Decorations...>;
+
             ChunkRenderer();
 
-            ~ChunkRenderer() { /* Empty. */
+            ~ChunkRenderer() {
+                // Empty.
             }
 
             /**
@@ -85,7 +100,7 @@ namespace hemlock {
              *
              * @param handle Weak handle on chunk to add.
              */
-            void add_chunk(hmem::WeakHandle<Chunk> handle);
+            void add_chunk(hmem::WeakHandle<_Chunk> handle);
         protected:
             static hg::MeshHandles block_mesh_handles;
 
@@ -122,11 +137,11 @@ namespace hemlock {
              */
             void process_pages();
 
-            AllPagedChunks      m_all_paged_chunks;
+            _AllPagedChunks     m_all_paged_chunks;
             ChunkRenderPages    m_chunk_pages;
             PagedChunksMetadata m_chunk_metadata;
-            PagedChunkQueue     m_chunk_removal_queue;
-            PagedChunkQueue     m_chunk_dirty_queue;
+            _PagedChunkQueue    m_chunk_removal_queue;
+            _PagedChunkQueue    m_chunk_dirty_queue;
 
             ui32 m_page_size;
             ui32 m_max_unused_pages;
@@ -135,4 +150,6 @@ namespace hemlock {
 }  // namespace hemlock
 namespace hvox = hemlock::voxel;
 
-#endif  // __hemlock_voxel_graphics_renderer_h
+#include "voxel/graphics/renderer.inl"
+
+#endif  // __hemlock_voxel_graphics_renderer_hpp

@@ -1,15 +1,16 @@
 #include "stdafx.h"
 
 #include "voxel/block.hpp"
-#include "voxel/chunk/chunk.h"
+#include "voxel/chunk/chunk.hpp"
 
-#include "voxel/graphics/renderer.h"
+template <hvox::ChunkDecorator... Decorations>
+hg::MeshHandles hvox::ChunkRenderer<Decorations...>::block_mesh_handles = {};
 
-hg::MeshHandles hvox::ChunkRenderer::block_mesh_handles = {};
-
-hvox::ChunkRenderer::ChunkRenderer() :
+template <hvox::ChunkDecorator... Decorations>
+hvox::ChunkRenderer<Decorations...>::ChunkRenderer() :
     handle_chunk_mesh_change(Subscriber<>{ [&](Sender sender) {
-        hmem::WeakHandle<Chunk> handle = sender.get_handle<Chunk>();
+        hmem::WeakHandle<Chunk<Decorations...>> handle
+            = sender.get_handle<Chunk<Decorations...>>();
 
         auto chunk = handle.lock();
         // If chunk is nullptr, then there's no point
@@ -20,7 +21,8 @@ hvox::ChunkRenderer::ChunkRenderer() :
         m_chunk_dirty_queue.enqueue({ handle, chunk->id() });
     } }),
     handle_chunk_unload(Subscriber<>{ [&](Sender sender) {
-        hmem::WeakHandle<Chunk> handle = sender.get_handle<Chunk>();
+        hmem::WeakHandle<Chunk<Decorations...>> handle
+            = sender.get_handle<Chunk<Decorations...>>();
 
         auto chunk = handle.lock();
         // If chunk is nullptr, then we have
@@ -33,7 +35,8 @@ hvox::ChunkRenderer::ChunkRenderer() :
     m_page_size(0) { /* Empty. */
 }
 
-void hvox::ChunkRenderer::init(ui32 page_size, ui32 max_unused_pages) {
+template <hvox::ChunkDecorator... Decorations>
+void hvox::ChunkRenderer<Decorations...>::init(ui32 page_size, ui32 max_unused_pages) {
     if (block_mesh_handles.vao == 0) {
         hg::upload_mesh(BLOCK_MESH, block_mesh_handles, hg::MeshDataVolatility::STATIC);
 
@@ -58,7 +61,8 @@ void hvox::ChunkRenderer::init(ui32 page_size, ui32 max_unused_pages) {
     create_pages(m_max_unused_pages);
 }
 
-void hvox::ChunkRenderer::dispose() {
+template <hvox::ChunkDecorator... Decorations>
+void hvox::ChunkRenderer<Decorations...>::dispose() {
     m_page_size = 0;
 
     for (auto& chunk_page : m_chunk_pages) {
@@ -73,11 +77,13 @@ void hvox::ChunkRenderer::dispose() {
     //                  renderer in existence, and it's all very cheap.
 }
 
-void hvox::ChunkRenderer::set_page_size(ui32 page_size) {
+template <hvox::ChunkDecorator... Decorations>
+void hvox::ChunkRenderer<Decorations...>::set_page_size(ui32 page_size) {
     m_page_size = page_size;
 }
 
-void hvox::ChunkRenderer::update(FrameTime) {
+template <hvox::ChunkDecorator... Decorations>
+void hvox::ChunkRenderer<Decorations...>::update(FrameTime) {
     // TODO(Matthew): Do we really want to de-dirty pages every update?
     //                Perhaps track how long since we last did and try
     //                to spread this out. But likewise do we want to
@@ -87,7 +93,8 @@ void hvox::ChunkRenderer::update(FrameTime) {
     process_pages();
 }
 
-void hvox::ChunkRenderer::draw(FrameTime) {
+template <hvox::ChunkDecorator... Decorations>
+void hvox::ChunkRenderer<Decorations...>::draw(FrameTime) {
     glBindVertexArray(block_mesh_handles.vao);
     for (auto& chunk_page : m_chunk_pages) {
         if (chunk_page->voxel_count == 0) continue;
@@ -102,7 +109,10 @@ void hvox::ChunkRenderer::draw(FrameTime) {
     }
 }
 
-void hvox::ChunkRenderer::add_chunk(hmem::WeakHandle<Chunk> handle) {
+template <hvox::ChunkDecorator... Decorations>
+void hvox::ChunkRenderer<Decorations...>::add_chunk(
+    hmem::WeakHandle<Chunk<Decorations...>> handle
+) {
     auto chunk = handle.lock();
 
     if (chunk == nullptr) return;
@@ -114,7 +124,8 @@ void hvox::ChunkRenderer::add_chunk(hmem::WeakHandle<Chunk> handle) {
     m_chunk_metadata[chunk->id()]   = PagedChunkMetadata{};
 }
 
-hvox::ChunkRenderPage* hvox::ChunkRenderer::create_pages(ui32 count) {
+template <hvox::ChunkDecorator... Decorations>
+hvox::ChunkRenderPage* hvox::ChunkRenderer<Decorations...>::create_pages(ui32 count) {
     m_chunk_pages.reserve(m_chunk_pages.size() + count);
 
     /*
@@ -164,7 +175,8 @@ hvox::ChunkRenderPage* hvox::ChunkRenderer::create_pages(ui32 count) {
     return first_new_page;
 }
 
-void hvox::ChunkRenderer::put_chunk_in_page(
+template <hvox::ChunkDecorator... Decorations>
+void hvox::ChunkRenderer<Decorations...>::put_chunk_in_page(
     ChunkID chunk_id, ui32 instance_count, ui32 first_page_idx
 ) {
     PagedChunkMetadata& metadata = m_chunk_metadata[chunk_id];
@@ -199,8 +211,9 @@ void hvox::ChunkRenderer::put_chunk_in_page(
     metadata.paged     = true;
 }
 
-void hvox::ChunkRenderer::process_pages() {
-    HandleAndID handle_and_id;
+template <hvox::ChunkDecorator... Decorations>
+void hvox::ChunkRenderer<Decorations...>::process_pages() {
+    _HandleAndID handle_and_id;
 
     /*****************\
      * Remove Chunks *

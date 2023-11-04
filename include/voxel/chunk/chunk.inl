@@ -2,9 +2,8 @@
 
 #include "voxel/block.hpp"
 
-#include "voxel/chunk/chunk.h"
-
-hvox::Chunk::Chunk() :
+template <hvox::ChunkDecorator... Decorations>
+hvox::Chunk<Decorations...>::Chunk() :
     neighbours({}),
     blocks({}),
     navmesh({}),
@@ -19,7 +18,8 @@ hvox::Chunk::Chunk() :
                     ChunkState::NONE, ChunkState::NONE } { /* Empty. */
 }
 
-hvox::Chunk::~Chunk() {
+template <hvox::ChunkDecorator... Decorations>
+hvox::Chunk<Decorations...>::~Chunk() {
     // debug_printf("Unloading chunk at (%d, %d, %d).\n", position.x, position.y,
     // position.z);
 
@@ -30,7 +30,8 @@ hvox::Chunk::~Chunk() {
     neighbours = {};
 }
 
-void hvox::Chunk::init(
+template <hvox::ChunkDecorator... Decorations>
+void hvox::Chunk<Decorations...>::init(
     hmem::WeakHandle<Chunk>              self,
     hmem::Handle<ChunkBlockPager>        block_pager,
     hmem::Handle<ChunkInstanceDataPager> instance_data_pager,
@@ -48,11 +49,13 @@ void hvox::Chunk::init(
     neighbours = {};
 }
 
-void hvox::Chunk::update(FrameTime) {
+template <hvox::ChunkDecorator... Decorations>
+void hvox::Chunk<Decorations...>::update(FrameTime) {
     // Empty for now.
 }
 
-void hvox::Chunk::init_events(hmem::WeakHandle<Chunk> self) {
+template <hvox::ChunkDecorator... Decorations>
+void hvox::Chunk<Decorations...>::init_events(hmem::WeakHandle<Chunk> self) {
     on_block_change.set_sender(Sender(self));
     on_bulk_block_change.set_sender(Sender(self));
     on_load.set_sender(Sender(self));

@@ -1,5 +1,5 @@
-#ifndef __hemlock_voxel_graphics_outline_renderer_navmesh_h
-#define __hemlock_voxel_graphics_outline_renderer_navmesh_h
+#ifndef __hemlock_voxel_graphics_outline_renderer_navmesh_hpp
+#define __hemlock_voxel_graphics_outline_renderer_navmesh_hpp
 
 #include "state.hpp"
 
@@ -7,7 +7,10 @@
 
 namespace hemlock {
     namespace voxel {
+        template <ChunkDecorator... Decorations>
         class NavmeshOutlineRenderer {
+        public:
+            using _Chunk = Chunk<Decorations...>;
         protected:
             struct NavmeshOutlineDatum {
                 f32v3   pos;
@@ -25,7 +28,7 @@ namespace hemlock {
                 bool                            is_updated;
                 size_t                          last_size;
                 hg::MeshHandles                 mesh_handles;
-                hmem::WeakHandle<Chunk>         chunk;
+                hmem::WeakHandle<_Chunk>        chunk;
 
                 NavmeshOutlines() :
                     outlines{},
@@ -76,7 +79,7 @@ namespace hemlock {
 
             void draw(FrameTime);
 
-            void register_chunk(hmem::Handle<Chunk> chunk);
+            void register_chunk(hmem::Handle<_Chunk> chunk);
         protected:
             bool __calculate_outlines(NavmeshOutlines& navmesh);
 
@@ -91,4 +94,6 @@ namespace hemlock {
 }  // namespace hemlock
 namespace hvox = hemlock::voxel;
 
-#endif  // __hemlock_voxel_graphics_outline_renderer_navmesh_h
+#include "voxel/graphics/outline_renderer/navmesh.inl"
+
+#endif  // __hemlock_voxel_graphics_outline_renderer_navmesh_hpp

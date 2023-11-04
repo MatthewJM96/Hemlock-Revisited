@@ -1,11 +1,11 @@
-template <hvox::ChunkMeshStrategy MeshStrategy>
-void hvox::ChunkMeshTask<MeshStrategy>::execute(
+template <hvox::ChunkMeshStrategy MeshStrategy, hvox::ChunkDecorator... Decorations>
+void hvox::ChunkMeshTask<MeshStrategy, Decorations...>::execute(
     ChunkThreadState* state, ChunkTaskQueue* task_queue
 ) {
-    auto chunk_grid = m_chunk_grid.lock();
+    auto chunk_grid = ChunkTask<Decorations...>::m_chunk_grid.lock();
     if (chunk_grid == nullptr) return;
 
-    auto chunk = m_chunk.lock();
+    auto chunk = ChunkTask<Decorations...>::m_chunk.lock();
     if (chunk == nullptr) return;
 
     const MeshStrategy mesh{};
@@ -13,7 +13,9 @@ void hvox::ChunkMeshTask<MeshStrategy>::execute(
     if (!mesh.can_run(chunk_grid, chunk)) {
         // Put copy of this mesh task back onto the load task queue.
         ChunkMeshTask<MeshStrategy>* mesh_task = new ChunkMeshTask<MeshStrategy>();
-        mesh_task->set_state(m_chunk, m_chunk_grid);
+        mesh_task->set_state(
+            ChunkTask<Decorations...>::m_chunk, ChunkTask<Decorations...>::m_chunk_grid
+        );
         task_queue->enqueue(state->producer_token, { mesh_task, true });
         return;
     }
