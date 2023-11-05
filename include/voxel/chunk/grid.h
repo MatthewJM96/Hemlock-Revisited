@@ -33,11 +33,6 @@ namespace hemlock {
 
         using ChunkTaskBuilder = Delegate<ChunkTask*(void)>;
 
-        struct ChunkRegistry {
-            entt::registry registry;
-            std::mutex     mutex;
-        };
-
         class ChunkGrid {
         public:
             ChunkGrid();
@@ -62,13 +57,13 @@ namespace hemlock {
              * task to navmesh a chunk.
              */
             void init(
-                hmem::WeakHandle<ChunkGrid> self,
-                ui32                        render_distance,
-                ui32                        thread_count,
-                ChunkTaskBuilder            build_load_or_generate_task,
-                ChunkTaskBuilder            build_mesh_task,
-                ChunkTaskBuilder*           build_navmesh_task = nullptr,
-                ChunkRegistry*              chunk_registry     = nullptr
+                hmem::WeakHandle<ChunkGrid>           self,
+                ui32                                  render_distance,
+                ui32                                  thread_count,
+                ChunkTaskBuilder                      build_load_or_generate_task,
+                ChunkTaskBuilder                      build_mesh_task,
+                ChunkTaskBuilder*                     build_navmesh_task = nullptr,
+                hmem::Handle<hecs::ProtectedRegistry> chunk_registry     = nullptr
             );
             /**
              * @brief Disposes of the chunk grid, ending
@@ -222,9 +217,8 @@ namespace hemlock {
             ChunkRenderer m_renderer;
             ui32          m_render_distance, m_chunks_in_render_distance;
 
-            bool           m_owns_chunk_registry;
-            ChunkRegistry* m_chunk_registry;
-            Chunks         m_chunks;
+            hmem::Handle<hecs::ProtectedRegistry> m_chunk_registry;
+            Chunks                                m_chunks;
 
             hmem::WeakHandle<ChunkGrid> m_self;
         };

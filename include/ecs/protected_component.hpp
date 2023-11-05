@@ -8,29 +8,41 @@ namespace hemlock {
         //                integrate this more closely with EnTT such that we can have a
         //                single lock per thread per entity?
 
+        struct ProtectedRegistry {
+            ~ProtectedRegistry() {
+                // NOTE(Matthew): pretty sure we can guarantee in correct usage no
+                //                no thread will ever be accessing this except the one
+                //                processing this destructor.
+
+                // Empty.
+            }
+
+            entt::registry registry;
+            std::mutex     mutex;
+        };
+
         class ProtectedComponentDeletor {
         public:
+            ProtectedComponentDeletor() : m_registry(nullptr), m_entity{} {
+                // Empty.
+            }
+
             ProtectedComponentDeletor(
-                entt::registry* registry,
-                std::mutex&     registry_mutex,
-                entt::entity    entity
+                hmem::Handle<ProtectedRegistry> registry, entt::entity entity
             ) :
-                m_registry(registry),
-                m_registry_mutex(registry_mutex),
-                m_entity(entity) {
+                m_registry(registry), m_entity(entity) {
                 // Empty.
             }
 
             ~ProtectedComponentDeletor() {
-                std::lock_guard lock(m_registry_mutex);
+                std::lock_guard lock(m_registry->mutex);
 
-                m_registry->destroy(m_entity);
+                m_registry->registry.destroy(m_entity);
                 m_registry = nullptr;
             }
         protected:
-            entt::registry* m_registry;
-            std::mutex&     m_registry_mutex;
-            entt::entity    m_entity;
+            hmem::Handle<ProtectedRegistry> m_registry;
+            entt::entity                    m_entity;
         };
 
         template <typename ComponentData>
