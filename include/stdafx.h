@@ -85,6 +85,9 @@
 // YAML
 #include <yaml-cpp/yaml.h>
 
+// ECS
+#include <entt/entt.hpp>
+
 // Scripting Libs
 #if defined(HEMLOCK_USING_LUA)
 #  include <lua.hpp>
