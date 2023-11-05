@@ -44,9 +44,19 @@ namespace hemlock {
                 // Empty.
             }
 
+            ProtectedComponentLock(const ProtectedComponentLock& rhs) :
+                m_deletor(rhs.m_deletor) {
+                // Empty.
+            }
+
             ProtectedComponentLock(ProtectedComponentLock&& rhs) :
                 m_deletor(std::move(rhs.m_deletor)) {
                 // Empty.
+            }
+
+            ProtectedComponentLock& operator=(const ProtectedComponentLock& rhs) {
+                m_deletor = rhs.m_deletor;
+                return *this;
             }
 
             ProtectedComponentLock& operator=(ProtectedComponentLock&& rhs) {
