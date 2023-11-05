@@ -49,8 +49,6 @@ namespace hemlock {
         class ProtectedComponent;
 
         class ProtectedComponentLock {
-            template <typename ComponentData>
-            friend class ProtectedComponent;
         public:
             ProtectedComponentLock() : m_deletor(nullptr) {
                 // Empty.
@@ -63,6 +61,12 @@ namespace hemlock {
 
             ProtectedComponentLock(ProtectedComponentLock&& rhs) :
                 m_deletor(std::move(rhs.m_deletor)) {
+                // Empty.
+            }
+
+            ProtectedComponentLock(hmem::WeakHandle<ProtectedComponentDeletor> deletor
+            ) :
+                m_deletor(deletor) {
                 // Empty.
             }
 
@@ -80,12 +84,6 @@ namespace hemlock {
 
             void release() { m_deletor = nullptr; }
         protected:
-            ProtectedComponentLock(hmem::WeakHandle<ProtectedComponentDeletor> deletor
-            ) :
-                m_deletor(deletor) {
-                // Empty.
-            }
-
             hmem::Handle<ProtectedComponentDeletor> m_deletor;
         };
 

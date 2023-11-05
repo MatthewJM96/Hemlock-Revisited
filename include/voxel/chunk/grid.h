@@ -24,9 +24,10 @@ namespace hemlock {
         using ChunkAllocator = hmem::PagedAllocator<Chunk, 4 * 4 * 4, 3>;
 
         struct ChunkAndDeletor {
-            entt::entity                    entity;
-            hecs::ProtectedComponentLock    lock;
-            hecs::ProtectedComponentDeletor __deletor;
+            entt::entity                 entity;
+            hecs::ProtectedComponentLock lock;
+
+            hmem::WeakHandle<hecs::ProtectedComponentDeletor> deletor;
         };
 
         using Chunks = std::unordered_map<ChunkID, ChunkAndDeletor>;

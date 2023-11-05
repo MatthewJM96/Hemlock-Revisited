@@ -166,18 +166,34 @@ bool hvox::ChunkGrid::preload_chunk_at(ChunkGridPosition chunk_position) {
     auto it = m_chunks.find(chunk_position.id);
     if (it != m_chunks.end()) return false;
 
-    hmem::Handle<Chunk> chunk = hmem::allocate_handle<Chunk>(m_chunk_allocator);
-    chunk->position           = chunk_position;
-    chunk->init(chunk, m_block_pager, m_instance_pager, m_navmesh_pager);
+    {
+        std::lock_guard lock(m_chunk_registry->mutex);
+        entt::entity    chunk_entity = m_chunk_registry->registry.create();
 
-    chunk->on_load         += &handle_chunk_load;
-    chunk->on_block_change += &handle_block_change;
+        // TODO(Matthew): set up the various components.
 
-    establish_chunk_neighbours(chunk);
+        hmem::Handle<hecs::ProtectedComponentDeletor> deletor
+            = hmem::make_handle<hecs::ProtectedComponentDeletor>(
+                m_chunk_registry, chunk_entity
+            );
 
-    m_chunks[chunk_position.id] = chunk;
+        m_chunks[chunk_position.id] = ChunkAndDeletor{
+            chunk_entity, hecs::ProtectedComponentLock(deletor), deletor
+        };
+    }
 
-    m_renderer.add_chunk(chunk);
+    // hmem::Handle<Chunk> chunk = hmem::allocate_handle<Chunk>(m_chunk_allocator);
+    // chunk->position           = chunk_position;
+    // chunk->init(chunk, m_block_pager, m_instance_pager, m_navmesh_pager);
+
+    // chunk->on_load         += &handle_chunk_load;
+    // chunk->on_block_change += &handle_block_change;
+
+    // establish_chunk_neighbours(chunk);
+
+    // m_chunks[chunk_position.id] = chunk;
+
+    // m_renderer.add_chunk(chunk);
 
     return true;
 }
@@ -188,7 +204,10 @@ bool hvox::ChunkGrid::load_chunk_at(ChunkGridPosition chunk_position) {
     auto it = m_chunks.find(chunk_position.id);
     if (it == m_chunks.end()) return false;
 
-    hmem::Handle<Chunk> chunk = (*it).second;
+    auto& [id, chunk] = *it;
+
+    // TODO(Matthew): acquire lock. but probably not as this stuff should be done via
+    //                events...
 
     // If chunk is in the process of being generated, we don't
     // need to add it to the queue again.
