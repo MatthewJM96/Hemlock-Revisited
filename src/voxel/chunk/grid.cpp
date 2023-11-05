@@ -158,7 +158,9 @@ bool hvox::ChunkGrid::load_chunks(
     bool any_chunk_failed = false;
 
     for (ui32 i = 0; i < chunk_count; ++i) {
-        any_chunk_failed = any_chunk_failed || load_chunk_at(chunk_positions[i]);
+        any_chunk_failed = load_chunk_at(chunk_positions[i]);
+
+        if (any_chunk_failed) break;
     }
 
     return any_chunk_failed;
