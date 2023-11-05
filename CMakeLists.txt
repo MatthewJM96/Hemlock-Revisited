@@ -215,6 +215,7 @@ add_executable(Hemlock_Revisited
     "${PROJECT_SOURCE_DIR}/src/voxel/coordinate_system.cpp"
     "${PROJECT_SOURCE_DIR}/src/voxel/ray.cpp"
     "${PROJECT_SOURCE_DIR}/src/voxel/ai/navmesh/navmesh_manager.cpp"
+    "${PROJECT_SOURCE_DIR}/src/voxel/chunk/builder.cpp"
     "${PROJECT_SOURCE_DIR}/src/voxel/chunk/grid.cpp"
     "${PROJECT_SOURCE_DIR}/src/voxel/chunk/setter.cpp"
     "${PROJECT_SOURCE_DIR}/src/voxel/graphics/renderer.cpp"
