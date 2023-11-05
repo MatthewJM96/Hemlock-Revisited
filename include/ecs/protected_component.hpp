@@ -54,6 +54,8 @@ namespace hemlock {
                 // Empty.
             }
 
+            ~ProtectedComponentLock() { m_deletor = nullptr; }
+
             ProtectedComponentLock& operator=(const ProtectedComponentLock& rhs) {
                 m_deletor = rhs.m_deletor;
                 return *this;
@@ -63,6 +65,8 @@ namespace hemlock {
                 m_deletor = std::move(rhs.m_deletor);
                 return *this;
             }
+
+            void release() { m_deletor = nullptr; }
         protected:
             ProtectedComponentLock(hmem::WeakHandle<ProtectedComponentDeletor> deletor
             ) :
