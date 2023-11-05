@@ -10,36 +10,85 @@
 #include "voxel/graphics/renderer.h"
 #include "voxel/task.hpp"
 
+// TODO(Matthew): Do we want to make Grid and Chunk composable? Or else some other way
+//                of better letting user express what should be done when with regards
+//                to loading, generation, meshing, navmeshing and so on.
+
 namespace hemlock {
     namespace voxel {
-        using Chunks = std::unordered_map<ChunkID, entt::entity>;
+        // TODO(Matthew): Make chunks & grids either decoratable or else composed? Not
+        //                all chunk grids may want to be navigable, e.g.
+
+        // TODO(Matthew): Does page size want to be made a run-time thing,
+        //                as it may be nice to base this on view distance.
+        using ChunkAllocator = hmem::PagedAllocator<Chunk, 4 * 4 * 4, 3>;
+
+        struct ChunkAndDeletor {
+            entt::entity                 entity;
+            hecs::ProtectedComponentLock lock;
+
+            hmem::WeakHandle<hecs::ProtectedComponentDeletor> deletor;
+        };
+
+        using Chunks = std::unordered_map<ChunkID, ChunkAndDeletor>;
+
+        using ChunkTaskBuilder = Delegate<ChunkTask*(void)>;
 
         class ChunkGrid {
         public:
-            ChunkGrid() {
-                // Empty.
-            }
+            ChunkGrid();
 
-            ~ChunkGrid() {
-                // Empty.
+            ~ChunkGrid() { /* Empty. */
             }
 
             /**
-             * @brief
+             * @brief Initialises the chunk grid and the
+             * underlying thread pool.
+             *
+             * @param self A weak handle on this grid instance.
+             * @param render_distance The render distance the grid starts with.
+             * @param thread_count The number of threads
+             * that the grid can use for loading tasks.
+             * @param build_load_or_generate_task Builder that returns
+             * a valid task to load a chunk from disk if present or
+             * otherwise generate it.
+             * @param build_mesh_task Builder that returns a valid
+             * task to mesh a chunk.
+             * @param build_navmesh_task Builder that returns a valid
+             * task to navmesh a chunk.
              */
-            void init();
+            void init(
+                hmem::WeakHandle<ChunkGrid>           self,
+                ui32                                  render_distance,
+                ui32                                  thread_count,
+                ChunkTaskBuilder                      build_load_or_generate_task,
+                ChunkTaskBuilder                      build_mesh_task,
+                ChunkTaskBuilder*                     build_navmesh_task = nullptr,
+                hmem::Handle<hecs::ProtectedRegistry> chunk_registry     = nullptr
+            );
             /**
-             * @brief
+             * @brief Disposes of the chunk grid, ending
+             * the tasks on the thread pool and unloading
+             * all chunks.
              */
             void dispose();
 
-            // TODO(Matthew): here probably but need to decide how to enforce ideas of
-            //                load/sim/render.
-            // void set_load_distance(ui32 render_distance);
-            // void set_render_distance(ui32 render_distance);
+            /**
+             * @brief Update loop for chunks.
+             *
+             * @param time The time data for the frame.
+             */
+            void update(FrameTime time);
+            /**
+             * @brief Draw loop for chunks.
+             *
+             * @param time The time data for the frame.
+             */
+            void draw(FrameTime time);
 
-            // ui32 load_distance() const { return m_load_distance; }
-            // ui32 render_distance() const { return m_render_distance; }
+            void set_render_distance(ui32 render_distance);
+
+            ui32 render_distance() const { return m_render_distance; }
 
             ui32 chunks_in_render_distance() const {
                 return m_chunks_in_render_distance;
@@ -156,6 +205,27 @@ namespace hemlock {
             Event<> on_chunk_unload;
         protected:
             void establish_chunk_neighbours(hmem::Handle<Chunk> chunk);
+
+            Delegate<void(Sender)>                   handle_chunk_load;
+            Delegate<bool(Sender, BlockChangeEvent)> handle_block_change;
+
+            ChunkTaskBuilder m_build_load_or_generate_task, m_build_mesh_task,
+                m_build_navmesh_task;
+            thread::ThreadPool<ChunkTaskContext> m_thread_pool;
+
+            ChunkAllocator m_chunk_allocator;
+
+            hmem::Handle<ChunkBlockPager>        m_block_pager;
+            hmem::Handle<ChunkInstanceDataPager> m_instance_pager;
+            hmem::Handle<ai::ChunkNavmeshPager>  m_navmesh_pager;
+
+            ChunkRenderer m_renderer;
+            ui32          m_render_distance, m_chunks_in_render_distance;
+
+            hmem::Handle<hecs::ProtectedRegistry> m_chunk_registry;
+            Chunks                                m_chunks;
+
+            hmem::WeakHandle<ChunkGrid> m_self;
         };
     }  // namespace voxel
 }  // namespace hemlock
