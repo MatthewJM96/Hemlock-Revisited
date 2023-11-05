@@ -107,6 +107,15 @@ namespace hemlock {
         template <typename ComponentData>
         class ProtectedComponent {
         public:
+            // Cannot have component pointers being invalidated by entities destroyed by
+            // the ProtectedComponentDeletor.
+            // TODO(Matthew): That said, until we implement either periodic compaction,
+            //                or some other means of cleaning up tombstones in
+            //                entt::registry, this will constitute a memory leak.
+            // TODO(Matthew): Notable this also prevents groups being created on such
+            //                components, something we don't want to enforce everywhere.
+            static constexpr auto in_place_delete = true;
+
             ProtectedComponent(
                 hmem::WeakHandle<ProtectedComponentDeletor> deletor, ComponentData data
             ) :
