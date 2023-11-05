@@ -170,40 +170,38 @@ bool hvox::ChunkGrid::preload_chunk_at(ChunkGridPosition chunk_position) {
     auto it = m_chunks.find(chunk_position.id);
     if (it != m_chunks.end()) return false;
 
-    {
-        std::lock_guard lock(m_chunk_registry->mutex);
-        auto&           registry = m_chunk_registry->registry;
+    std::lock_guard lock(m_chunk_registry->mutex);
+    auto&           registry = m_chunk_registry->registry;
 
-        entt::entity chunk_entity = registry.create();
+    entt::entity chunk_entity = registry.create();
 
-        hmem::Handle<hecs::ProtectedComponentDeletor> deletor
-            = hmem::make_handle<hecs::ProtectedComponentDeletor>(
-                m_chunk_registry, chunk_entity
-            );
-
-        // Core
-        ChunkCoreComponent core_component(chunk_position, m_block_pager);
-        // TODO(Matthew): this is not quite how we want to do this down the line. We
-        //                want composer to decide whether to add listeners to any events
-        //                for things like meshing after generation.
-        core_component.on_generation += &handle_chunk_load;
-        // TODO(Matthew): this we really don't want to do, but we're aiming to restore
-        //                previous behaviour first before moving on.
-        core_component.on_before_block_change += &handle_block_change;
-
-        establish_chunk_neighbours(chunk_core);
-
-        registry.emplace<hecs::ProtectedComponent<ChunkCoreComponent>>(
-            chunk_entity, deletor, std::move(core_component)
+    hmem::Handle<hecs::ProtectedComponentDeletor> deletor
+        = hmem::make_handle<hecs::ProtectedComponentDeletor>(
+            m_chunk_registry, chunk_entity
         );
 
-        m_chunks[chunk_position.id] = ChunkAndDeletor{
-            chunk_entity, hecs::ProtectedComponentLock(deletor), deletor
-        };
+    // Core
+    ChunkCoreComponent core_component(chunk_position, m_block_pager);
+    // TODO(Matthew): this is not quite how we want to do this down the line. We
+    //                want composer to decide whether to add listeners to any events
+    //                for things like meshing after generation.
+    core_component.on_generation += &handle_chunk_load;
+    // TODO(Matthew): this we really don't want to do, but we're aiming to restore
+    //                previous behaviour first before moving on.
+    core_component.on_before_block_change += &handle_block_change;
 
-        // TODO(Matthew): not clear yet but probably not how we want to do this.
-        m_renderer.add_chunk(chunk);
-    }
+    establish_chunk_neighbours(chunk_core);
+
+    registry.emplace<hecs::ProtectedComponent<ChunkCoreComponent>>(
+        chunk_entity, deletor, std::move(core_component)
+    );
+
+    m_chunks[chunk_position.id] = ChunkAndDeletor{
+        chunk_entity, hecs::ProtectedComponentLock(deletor), deletor
+    };
+
+    // TODO(Matthew): not clear yet but probably not how we want to do this.
+    m_renderer.add_chunk(chunk);
 
     return true;
 }
