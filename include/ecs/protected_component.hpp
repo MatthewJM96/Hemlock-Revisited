@@ -10,17 +10,26 @@ namespace hemlock {
 
         class ProtectedComponentDeletor {
         public:
-            ProtectedComponentDeletor(entt::registry* registry, entt::entity entity) :
-                m_registry(registry), m_entity(entity) {
+            ProtectedComponentDeletor(
+                entt::registry* registry,
+                std::mutex&     registry_mutex,
+                entt::entity    entity
+            ) :
+                m_registry(registry),
+                m_registry_mutex(registry_mutex),
+                m_entity(entity) {
                 // Empty.
             }
 
             ~ProtectedComponentDeletor() {
+                std::lock_guard lock(m_registry_mutex);
+
                 m_registry->destroy(m_entity);
                 m_registry = nullptr;
             }
         protected:
             entt::registry* m_registry;
+            std::mutex&     m_registry_mutex;
             entt::entity    m_entity;
         };
 
