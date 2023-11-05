@@ -1,8 +1,7 @@
-#ifndef __hemlock_voxel_chunk_decorator_navmesh_hpp
-#define __hemlock_voxel_chunk_decorator_navmesh_hpp
+#ifndef __hemlock_voxel_chunk_component_navmesh_hpp
+#define __hemlock_voxel_chunk_component_navmesh_hpp
 
-#include "thread/resource_guard.hpp"
-#include "voxel/ai/navmesh.hpp"
+#include "voxel/ai/navmesh/navmesh_manager.h"
 #include "voxel/chunk/state.hpp"
 
 namespace hemlock {
@@ -10,8 +9,10 @@ namespace hemlock {
         /**
          * @brief
          */
-        struct NavmeshDecorator {
-            hthread::ResourceGuard<ai::ChunkNavmesh> navmesh;
+        struct ChunkNavmeshComponent {
+            // TODO(Matthew): navmesh wants to probably be paged in some amount of bulk
+            //                and divied out, that or we need to stack allocate.
+            ai::ChunkNavmeshManager navmesh;
 
             std::atomic<ChunkState> bulk_navmeshing, navmeshing;
 
@@ -28,4 +29,4 @@ namespace hemlock {
 }  // namespace hemlock
 namespace hvox = hemlock::voxel;
 
-#endif  // __hemlock_voxel_chunk_decorator_navmesh_hpp
+#endif  // __hemlock_voxel_chunk_component_navmesh_hpp
