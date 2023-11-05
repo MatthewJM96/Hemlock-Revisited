@@ -199,6 +199,10 @@ namespace hemlock {
              * changes.
              */
             Event<RenderDistanceChangeEvent> on_render_distance_change;
+
+            // TODO(Matthew): make these useful events.
+            Event<> on_chunk_load;
+            Event<> on_chunk_unload;
         protected:
             void establish_chunk_neighbours(hmem::Handle<Chunk> chunk);
 
