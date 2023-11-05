@@ -2,6 +2,7 @@
 #define __hemlock_voxel_chunk_grid_h
 
 #include "algorithm/acs/graph/state.hpp"
+#include "ecs/protected_component.hpp"
 #include "timing.h"
 #include "voxel/ai/navmesh/navmesh_manager.h"
 #include "voxel/chunk/chunk.h"
@@ -22,9 +23,20 @@ namespace hemlock {
         //                as it may be nice to base this on view distance.
         using ChunkAllocator = hmem::PagedAllocator<Chunk, 4 * 4 * 4, 3>;
 
-        using Chunks = std::unordered_map<ChunkID, hmem::Handle<Chunk>>;
+        struct ChunkAndDeletor {
+            entt::entity                    entity;
+            hecs::ProtectedComponentLock    lock;
+            hecs::ProtectedComponentDeletor __deletor;
+        };
+
+        using Chunks = std::unordered_map<ChunkID, ChunkAndDeletor>;
 
         using ChunkTaskBuilder = Delegate<ChunkTask*(void)>;
+
+        struct ChunkRegistry {
+            entt::registry registry;
+            std::mutex     mutex;
+        };
 
         class ChunkGrid {
         public:
@@ -55,7 +67,8 @@ namespace hemlock {
                 ui32                        thread_count,
                 ChunkTaskBuilder            build_load_or_generate_task,
                 ChunkTaskBuilder            build_mesh_task,
-                ChunkTaskBuilder*           build_navmesh_task = nullptr
+                ChunkTaskBuilder*           build_navmesh_task = nullptr,
+                ChunkRegistry*              chunk_registry     = nullptr
             );
             /**
              * @brief Disposes of the chunk grid, ending
@@ -209,7 +222,9 @@ namespace hemlock {
             ChunkRenderer m_renderer;
             ui32          m_render_distance, m_chunks_in_render_distance;
 
-            Chunks m_chunks;
+            bool           m_owns_chunk_registry;
+            ChunkRegistry* m_chunk_registry;
+            Chunks         m_chunks;
 
             hmem::WeakHandle<ChunkGrid> m_self;
         };

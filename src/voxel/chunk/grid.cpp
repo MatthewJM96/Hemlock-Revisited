@@ -79,9 +79,18 @@ void hvox::ChunkGrid::init(
     ui32                        thread_count,
     ChunkTaskBuilder            build_load_or_generate_task,
     ChunkTaskBuilder            build_mesh_task,
-    ChunkTaskBuilder*           build_navmesh_task /* = nullptr*/
+    ChunkTaskBuilder*           build_navmesh_task /* = nullptr*/,
+    ChunkRegistry*              chunk_registry /* = nullptr*/
 ) {
     m_self = self;
+
+    if (chunk_registry) {
+        m_owns_chunk_registry = false;
+        m_chunk_registry      = chunk_registry;
+    } else {
+        m_owns_chunk_registry = true;
+        m_chunk_registry      = new ChunkRegistry{};
+    }
 
     m_render_distance           = render_distance;
     m_chunks_in_render_distance = render_distance * render_distance * render_distance;
@@ -107,12 +116,28 @@ void hvox::ChunkGrid::dispose() {
     m_thread_pool.dispose();
 
     m_renderer.dispose();
+
+    for (auto& [id, chunk] : m_chunks) {
+        chunk.lock.release();
+    }
+
+    if (m_owns_chunk_registry) {
+        // TODO(Matthew): we want to dispose of the registry but can't until all
+        //                components are released and so all chunks are destroyed.
+        //                perhaps we can use a smart pointer held by all deletors on
+        //                registry, likewise in chunk grid?
+    } else {
+        m_chunk_registry = nullptr;
+    }
 }
 
 void hvox::ChunkGrid::update(FrameTime time) {
-    for (auto chunk : m_chunks) {
-        chunk.second->update(time);
-    }
+    // TODO(Matthew): might not want to even do this here?
+    // for (auto [id, chunk] : m_chunks) {
+    //     auto& chunk_core = m_chunk_registry->registry.get<ChunkCore>(chunk.entity);
+    //     // lock chunk_core
+    //     chunk_core.update(time);
+    // }
 
     m_renderer.update(time);
 }
