@@ -1,4 +1,3 @@
-#include "voxel/chunk/chunk.h"
 #include "voxel/chunk/state.hpp"
 
 template <hvox::ai::ChunkNavmeshStrategy NavmeshStrategy>

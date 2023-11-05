@@ -1,6 +1,5 @@
 #include "stdafx.h"
 
-#include "voxel/chunk/chunk.h"
 #include "voxel/graphics/outline_renderer/navmesh.h"
 
 #include "maths/powers.hpp"

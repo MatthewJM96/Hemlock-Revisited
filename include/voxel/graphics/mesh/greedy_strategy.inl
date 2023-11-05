@@ -1,6 +1,5 @@
 #include "graphics/mesh.h"
 #include "voxel/block.hpp"
-#include "voxel/chunk/chunk.h"
 #include "voxel/chunk/grid.h"
 #include "voxel/chunk/setter.hpp"
 

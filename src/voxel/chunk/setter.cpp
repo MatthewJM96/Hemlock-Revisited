@@ -1,7 +1,5 @@
 #include "stdafx.h"
 
-#include "voxel/chunk/chunk.h"
-
 #include "voxel/chunk/setter.hpp"
 
 bool hvox::set_block(

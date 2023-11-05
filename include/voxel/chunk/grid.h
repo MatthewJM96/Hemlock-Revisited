@@ -1,14 +1,8 @@
 #ifndef __hemlock_voxel_chunk_grid_h
 #define __hemlock_voxel_chunk_grid_h
 
-#include "algorithm/acs/graph/state.hpp"
-#include "ecs/protected_component.hpp"
-#include "timing.h"
-#include "voxel/ai/navmesh/navmesh_manager.h"
-#include "voxel/chunk/chunk.h"
+#include "voxel/chunk/builder.h"
 #include "voxel/coordinate_system.h"
-#include "voxel/graphics/renderer.h"
-#include "voxel/task.hpp"
 
 namespace hemlock {
     namespace voxel {
@@ -27,7 +21,11 @@ namespace hemlock {
             /**
              * @brief
              */
-            void init();
+            void init(
+                hmem::WeakHandle<ChunkGrid>  self,
+                ChunkBuilder*                chunk_builder,
+                hmem::Handle<entt::registry> chunk_registry = nullptr
+            );
             /**
              * @brief
              */
@@ -41,25 +39,20 @@ namespace hemlock {
             // ui32 load_distance() const { return m_load_distance; }
             // ui32 render_distance() const { return m_render_distance; }
 
-            ui32 chunks_in_render_distance() const {
-                return m_chunks_in_render_distance;
-            }
+            // ui32 chunks_in_render_distance() const {
+            //     return m_chunks_in_render_distance;
+            // }
 
             /**
-             * @brief Suspends chunk tasks. This is a hammer, but
-             * for testing it can definitely be useful. Probably
-             * don't ever call this in practise.
+             * @brief Loads a chunk. This entails saying it exists
+             * and determining its neighbours - letting it and them
+             * know of each other's existence.
+             *
+             * @param chunk_position The coords of the chunk to load.
+             * @return True if the chunk was loaded into the grid,
+             * false if the chunk is already loaded.
              */
-            void suspend_chunk_tasks() { m_thread_pool.suspend(); }
-
-            /**
-             * @brief Resumes chunk tasks. No consequences for
-             * calling this when not already suspended.
-             */
-            void resume_chunk_tasks() { m_thread_pool.resume(); }
-
-            ChunkRenderer* renderer() { return &m_renderer; }
-
+            bool load_chunk(ChunkGridPosition chunk_position);
             /**
              * @brief Loads chunks with the assumption none specified
              * have even been preloaded. This is useful as it assures
@@ -75,29 +68,6 @@ namespace hemlock {
              * chunk did not.
              */
             bool load_chunks(ChunkGridPosition* chunk_positions, ui32 chunk_count);
-
-            /**
-             * @brief Preloads a chunk, this entails saying it exists
-             * and determining its neighbours - letting it and them
-             * know of each other's existence.
-             *
-             * @param chunk_position The coords of the chunk to preload.
-             * @return True if the chunk was preloaded, false otherwise.
-             * False usually will mean that the chunk was at least already
-             * in a preloaded state.
-             */
-            bool preload_chunk_at(ChunkGridPosition chunk_position);
-            /**
-             * @brief Loads a chunk, this entails queueing the
-             * provided workflow to run.
-             *
-             * @param chunk_position The coords of the chunk to load.
-             * @return True if the chunk's load task was queued, false
-             * otherwise. False usually will mean that the chunk was
-             * either not yet preloaded, or at least already in a loaded
-             * state.
-             */
-            bool load_chunk_at(ChunkGridPosition chunk_position);
             /**
              * @brief Unloads a chunk, this entails ending all
              * pending tasks for this chunk and releasing memory
@@ -108,38 +78,32 @@ namespace hemlock {
              * actions are completed.
              *
              * @param chunk_position The coords of the chunk to unload.
-             * @param handle Optional weak handle into which the chunk
-             * will be placed. Useful to detect when the chunk is finally
-             * fully released.
              * @return True if the chunk was unloaded, false otherwise.
              * False usually will mean that the chunk was not yet
              * existent, as if it is in any existing state some degree
              * of work will be done to unload it.
              */
-            bool unload_chunk_at(
-                ChunkGridPosition        chunk_position,
-                hmem::WeakHandle<Chunk>* handle = nullptr
-            );
+            bool unload_chunk(ChunkGridPosition chunk_position);
 
             /**
              * @brief Returns a handle on the identified chunk
              * if it is held by the chunk grid.
              *
              * @param id The ID of the chunk to fetch.
-             * @return hmem::Handle<Chunk> Handle on the
-             * requested chunk, nullptr otherwise.
+             * @return entt::entity Entity identifying the
+             * requested chunk, entt::null otherwise.
              */
-            hmem::Handle<Chunk> chunk(ChunkID id);
+            entt::entity chunk(ChunkID id);
 
             /**
              * @brief Returns a handle on the identified chunk
              * if it is held by the chunk grid.
              *
              * @param position The position of the chunk.
-             * @return hmem::Handle<Chunk> Handle on the
-             * requested chunk, nullptr otherwise.
+             * @return entt::entity Entity identifying the
+             * requested chunk, entt::null otherwise.
              */
-            hmem::Handle<Chunk> chunk(ChunkGridPosition position) {
+            entt::entity chunk(ChunkGridPosition position) {
                 return chunk(position.id);
             }
 
@@ -155,7 +119,14 @@ namespace hemlock {
             Event<> on_chunk_load;
             Event<> on_chunk_unload;
         protected:
-            void establish_chunk_neighbours(hmem::Handle<Chunk> chunk);
+            void establish_chunk_neighbours(entt::entity chunk);
+
+            hmem::WeakHandle<ChunkGrid> m_self;
+
+            ChunkBuilder* m_chunk_builder;
+
+            entt::registry m_chunk_registry;
+            Chunks         m_chunks;
         };
     }  // namespace voxel
 }  // namespace hemlock

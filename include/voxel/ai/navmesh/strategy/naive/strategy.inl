@@ -1,6 +1,5 @@
 #include "memory/handle.hpp"
 #include "voxel/ai/navmesh/state.hpp"
-#include "voxel/chunk/chunk.h"
 #include "voxel/coordinate_system.h"
 
 // TODO(Matthew): right now we are hardcoding in what gets added to the navmesh. This is
