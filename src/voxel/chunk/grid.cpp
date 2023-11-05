@@ -261,73 +261,74 @@ hmem::Handle<hvox::Chunk> hvox::ChunkGrid::chunk(ChunkID id) {
     return it->second;
 }
 
-void hvox::ChunkGrid::establish_chunk_neighbours(hmem::Handle<Chunk> chunk) {
+void hvox::ChunkGrid::establish_chunk_neighbours(ChunkCoreComponent chunk) {
     ChunkGridPosition neighbour_position;
 
     // Update neighbours with info of new chunk.
     // LEFT
-    neighbour_position   = chunk->position;
+    neighbour_position   = chunk.position;
     neighbour_position.x -= 1;
     auto it              = m_chunks.find(neighbour_position.id);
     if (it != m_chunks.end()) {
-        chunk->neighbours.one.left         = (*it).second;
+        auto& [id, neighbour]              = *it;
+        chunk.neighbours.one.left          = neighbour.entity;
         (*it).second->neighbours.one.right = chunk;
     } else {
-        chunk->neighbours.one.left = hmem::WeakHandle<Chunk>();
+        chunk.neighbours.one.left = hmem::WeakHandle<Chunk>();
     }
 
     // RIGHT
-    neighbour_position   = chunk->position;
+    neighbour_position   = chunk.position;
     neighbour_position.x += 1;
     it                   = m_chunks.find(neighbour_position.id);
     if (it != m_chunks.end()) {
-        chunk->neighbours.one.right       = (*it).second;
+        chunk.neighbours.one.right        = (*it).second;
         (*it).second->neighbours.one.left = chunk;
     } else {
-        chunk->neighbours.one.right = hmem::WeakHandle<Chunk>();
+        chunk.neighbours.one.right = hmem::WeakHandle<Chunk>();
     }
 
     // TOP
-    neighbour_position   = chunk->position;
+    neighbour_position   = chunk.position;
     neighbour_position.y += 1;
     it                   = m_chunks.find(neighbour_position.id);
     if (it != m_chunks.end()) {
-        chunk->neighbours.one.top           = (*it).second;
+        chunk.neighbours.one.top            = (*it).second;
         (*it).second->neighbours.one.bottom = chunk;
     } else {
-        chunk->neighbours.one.top = hmem::WeakHandle<Chunk>();
+        chunk.neighbours.one.top = hmem::WeakHandle<Chunk>();
     }
 
     // BOTTOM
-    neighbour_position   = chunk->position;
+    neighbour_position   = chunk.position;
     neighbour_position.y -= 1;
     it                   = m_chunks.find(neighbour_position.id);
     if (it != m_chunks.end()) {
-        chunk->neighbours.one.bottom     = (*it).second;
+        chunk.neighbours.one.bottom      = (*it).second;
         (*it).second->neighbours.one.top = chunk;
     } else {
-        chunk->neighbours.one.bottom = hmem::WeakHandle<Chunk>();
+        chunk.neighbours.one.bottom = hmem::WeakHandle<Chunk>();
     }
 
     // FRONT
-    neighbour_position   = chunk->position;
+    neighbour_position   = chunk.position;
     neighbour_position.z += 1;
     it                   = m_chunks.find(neighbour_position.id);
     if (it != m_chunks.end()) {
-        chunk->neighbours.one.front       = (*it).second;
+        chunk.neighbours.one.front        = (*it).second;
         (*it).second->neighbours.one.back = chunk;
     } else {
-        chunk->neighbours.one.front = hmem::WeakHandle<Chunk>();
+        chunk.neighbours.one.front = hmem::WeakHandle<Chunk>();
     }
 
     // BACK
-    neighbour_position   = chunk->position;
+    neighbour_position   = chunk.position;
     neighbour_position.z -= 1;
     it                   = m_chunks.find(neighbour_position.id);
     if (it != m_chunks.end()) {
-        chunk->neighbours.one.back         = (*it).second;
+        chunk.neighbours.one.back          = (*it).second;
         (*it).second->neighbours.one.front = chunk;
     } else {
-        chunk->neighbours.one.back = hmem::WeakHandle<Chunk>();
+        chunk.neighbours.one.back = hmem::WeakHandle<Chunk>();
     }
 }
