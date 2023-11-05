@@ -21,7 +21,10 @@ namespace hemlock {
             std::mutex     mutex;
         };
 
+        class ProtectedComponentLock;
+
         class ProtectedComponentDeletor {
+            friend class ProtectedComponentLock;
         public:
             ProtectedComponentDeletor() : m_registry(nullptr), m_entity{} {
                 // Empty.
@@ -64,12 +67,6 @@ namespace hemlock {
                 // Empty.
             }
 
-            ProtectedComponentLock(hmem::WeakHandle<ProtectedComponentDeletor> deletor
-            ) :
-                m_deletor(deletor) {
-                // Empty.
-            }
-
             ~ProtectedComponentLock() { m_deletor = nullptr; }
 
             ProtectedComponentLock& operator=(const ProtectedComponentLock& rhs) {
@@ -80,6 +77,26 @@ namespace hemlock {
             ProtectedComponentLock& operator=(ProtectedComponentLock&& rhs) {
                 m_deletor = std::move(rhs.m_deletor);
                 return *this;
+            }
+
+            bool lock(hmem::WeakHandle<ProtectedComponentDeletor> deletor) {
+                // TODO(Matthew): this isn't saving us anything over separate locks per
+                //                component so clearly we need to do something else.
+                //                probably just allow a get_unsafe that becomes safe so
+                //                long as the caller has already got hold of a lock on
+                //                the handle.
+                if (m_deletor != nullptr) {
+                    hmem::Handle<ProtectedComponentDeletor> tmp = deletor.lock();
+
+                    if (tmp == nullptr) return false;
+
+                    return (m_deletor->m_entity == tmp->m_entity)
+                           && (m_deletor->m_registry == tmp->m_registry);
+                }
+
+                m_deletor = deletor.lock();
+
+                return m_deletor != nullptr;
             }
 
             void release() { m_deletor = nullptr; }
@@ -105,9 +122,12 @@ namespace hemlock {
                 // Empty.
             }
 
-            ComponentData& get(ProtectedComponentLock& lock) {
-                lock = ProtectedComponentLock(m_deletor);
-                return m_data;
+            ComponentData* get(ProtectedComponentLock& lock) {
+                if (lock.lock(m_deletor)) {
+                    return &m_data;
+                }
+
+                return nullptr;
             }
         protected:
             hmem::WeakHandle<ProtectedComponentDeletor> m_deletor;
