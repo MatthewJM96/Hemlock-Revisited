@@ -1,11 +1,11 @@
-template <hthread::InterruptibleState ThreadState>
+template <hthread::IsThreadState ThreadState>
 void hthread::IThreadWorkflowTask<ThreadState>::dispose() {
     m_tasks                  = {};
     m_dag                    = nullptr;
     m_task_completion_states = {};
 }
 
-template <hthread::InterruptibleState ThreadState>
+template <hthread::IsThreadState ThreadState>
 void hthread::IThreadWorkflowTask<ThreadState>::set_workflow_metadata(
     ThreadWorkflowTasksView<ThreadState> tasks,
     ThreadWorkflowTaskID                 task_idx,
@@ -18,7 +18,7 @@ void hthread::IThreadWorkflowTask<ThreadState>::set_workflow_metadata(
     m_task_completion_states = task_completion_states;
 }
 
-template <hthread::InterruptibleState ThreadState>
+template <hthread::IsThreadState ThreadState>
 void hthread::IThreadWorkflowTask<ThreadState>::execute(
     typename Thread<ThreadState>::State* state, TaskQueue<ThreadState>* task_queue
 ) {
@@ -46,7 +46,7 @@ void hthread::IThreadWorkflowTask<ThreadState>::execute(
     }
 }
 
-template <hthread::InterruptibleState ThreadState>
+template <hthread::IsThreadState ThreadState>
 void hthread::ThreadWorkflow<ThreadState>::init(
     ThreadWorkflowDAG* dag, ThreadPool<ThreadState>* thread_pool
 ) {
@@ -57,13 +57,13 @@ void hthread::ThreadWorkflow<ThreadState>::init(
     m_thread_pool = thread_pool;
 }
 
-template <hthread::InterruptibleState ThreadState>
+template <hthread::IsThreadState ThreadState>
 void hthread::ThreadWorkflow<ThreadState>::dispose() {
     m_dag         = nullptr;
     m_thread_pool = nullptr;
 }
 
-template <hthread::InterruptibleState ThreadState>
+template <hthread::IsThreadState ThreadState>
 void hthread::ThreadWorkflow<ThreadState>::run(
     ThreadWorkflowTasksView<ThreadState> tasks
 ) {

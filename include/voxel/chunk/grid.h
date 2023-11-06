@@ -198,7 +198,7 @@ namespace hemlock {
 
             ChunkTaskBuilder m_build_load_or_generate_task, m_build_mesh_task,
                 m_build_navmesh_task;
-            thread::ThreadPool<ChunkTaskContext> m_thread_pool;
+            thread::ThreadPool<ChunkThreadState> m_thread_pool;
 
             ChunkAllocator m_chunk_allocator;
 

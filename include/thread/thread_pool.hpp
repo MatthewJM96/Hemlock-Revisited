@@ -3,44 +3,55 @@
 
 namespace hemlock {
     namespace thread {
-        template <typename ThreadState>
-        concept InterruptibleState = requires (ThreadState state) {
-                                         std::is_same_v<decltype(state.stop), bool>;
-                                         std::is_same_v<decltype(state.suspend), bool>;
-                                     };
+        enum class ThreadpoolTimingResolution {
+            NONE,
+            ON_SUSPEND,
+            ON_TASK_COMPLETION
+        };
 
-        struct BasicThreadContext {
+        template <typename Candidate>
+        concept IsThreadState = requires (Candidate state) {
+                                    std::is_same_v<
+                                        decltype(state.consumer_token),
+                                        moodycamel::ConsumerToken>;
+                                    std::is_same_v<
+                                        decltype(state.producer_token),
+                                        moodycamel::ProducerToken>;
+                                    std::is_same_v<decltype(state.stop), bool>;
+                                    std::is_same_v<decltype(state.suspend), bool>;
+                                };
+
+        struct BasicThreadState {
+            moodycamel::ConsumerToken consumer_token;
+            moodycamel::ProducerToken producer_token;
+
             volatile bool stop;
             volatile bool suspend;
         };
 
-        template <InterruptibleState ThreadState>
+        template <IsThreadState ThreadState>
         class IThreadTask;
 
-        template <InterruptibleState ThreadState>
+        template <IsThreadState ThreadState>
         struct HeldTask {
             IThreadTask<ThreadState>* task;
             bool                      should_delete;
         };
 
-        template <InterruptibleState ThreadState>
+        template <IsThreadState ThreadState>
         using TaskQueue = moodycamel::BlockingConcurrentQueue<HeldTask<ThreadState>>;
 
-        template <InterruptibleState ThreadState>
+        template <IsThreadState ThreadState>
         struct Thread {
             std::thread thread;
 
-            struct State {
-                ThreadState               context = {};
-                moodycamel::ConsumerToken consumer_token;
-                moodycamel::ProducerToken producer_token;
-            } state;
+            ThreadState state;
         };
 
-        template <InterruptibleState ThreadState>
+        template <IsThreadState ThreadState>
         using Threads = std::vector<Thread<ThreadState>>;
 
-        template <InterruptibleState ThreadState>
+        template <IsThreadState ThreadState>
         class IThreadTask {
         public:
             IThreadTask() { /* Empty. */
@@ -66,10 +77,8 @@ namespace hemlock {
              * @param task_queue The task queue, can be interacted with
              * for example if a task needs to chain a follow-up task.
              */
-            virtual void execute(
-                typename Thread<ThreadState>::State* state,
-                TaskQueue<ThreadState>*              task_queue
-            ) = 0;
+            virtual void execute(ThreadState* state, TaskQueue<ThreadState>* task_queue)
+                = 0;
 
             /**
              * @brief Tracks completion state of the task.
@@ -77,29 +86,17 @@ namespace hemlock {
             volatile bool is_finished = false;
         };
 
-        template <InterruptibleState ThreadState>
+        template <
+            IsThreadState              ThreadState,
+            ThreadpoolTimingResolution Timing = ThreadpoolTimingResolution::NONE>
         class ThreadPool;
 
-        template <InterruptibleState ThreadState>
-        using ThreadMainFunc = Delegate<
-            void(typename Thread<ThreadState>::State*, TaskQueue<ThreadState>*)>;
+        template <IsThreadState ThreadState, ThreadpoolTimingResolution Timing>
+        using ThreadMainFunc = Delegate<void(ThreadState*, TaskQueue<ThreadState>*)>;
 
-        /**
-         * @brief A basic main function of threads.
-         *
-         * @param state The thread state, including tokens for
-         * interacting with task queue, and thread pool specific
-         * context.
-         * @param task_queue The task queue, can be interacted with
-         * for example if a task needs to chain a follow-up task.
-         */
-        template <InterruptibleState ThreadState>
-        void basic_thread_main(
-            typename Thread<ThreadState>::State* state,
-            TaskQueue<ThreadState>*              task_queue
-        );
+#include "thread/basic_thread_main.hpp"
 
-        template <InterruptibleState ThreadState>
+        template <IsThreadState ThreadState, ThreadpoolTimingResolution Timing>
         class ThreadPool {
         public:
             ThreadPool() :
@@ -117,9 +114,10 @@ namespace hemlock {
              * possess.
              */
             void init(
-                ui32                        thread_count,
-                ThreadMainFunc<ThreadState> thread_main_func
-                = ThreadMainFunc<ThreadState>{ basic_thread_main<ThreadState> }
+                ui32                                thread_count,
+                ThreadMainFunc<ThreadState, Timing> thread_main_func = ThreadMainFunc<
+                    ThreadState,
+                    Timing>{ basic_thread_main<ThreadState, Timing> }
             );
             /**
              * @brief Cleans up the thread pool, bringing all threads
@@ -192,10 +190,10 @@ namespace hemlock {
         protected:
             bool m_is_initialised;
 
-            ThreadMainFunc<ThreadState> m_thread_main_func;
-            Threads<ThreadState>        m_threads;
-            TaskQueue<ThreadState>      m_tasks;
-            moodycamel::ProducerToken   m_producer_token;
+            ThreadMainFunc<ThreadState, Timing> m_thread_main_func;
+            Threads<ThreadState>                m_threads;
+            TaskQueue<ThreadState>              m_tasks;
+            moodycamel::ProducerToken           m_producer_token;
         };
     }  // namespace thread
 }  // namespace hemlock
