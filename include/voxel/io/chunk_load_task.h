@@ -8,7 +8,7 @@ namespace hemlock {
         // class ChunkLoadTask : public ChunkFileTask {
         // public:
         //     virtual void execute(ChunkFileTaskThreadState* state,
-        //     ChunkFileTaskTaskQueue* task_queue) override;
+        //     ChunkFileTaskQueue* task_queue) override;
         // };
     }
 }  // namespace hemlock

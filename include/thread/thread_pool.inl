@@ -1,9 +1,11 @@
 template <
-    hthread::IsThreadState              ThreadState,
+    hthread::IsThreadState ThreadState,
+    typename TaskQueue,
     hthread::ThreadpoolTimingResolution Timing>
-void hthread::ThreadPool<ThreadState, Timing>::init(
-    ui32                                thread_count,
-    ThreadMainFunc<ThreadState, Timing> thread_main_func /*= {basic_thread_main}*/
+void hthread::ThreadPool<ThreadState, TaskQueue, Timing>::init(
+    ui32 thread_count,
+    ThreadMainFunc<ThreadState, TaskQueue, Timing>
+        thread_main_func /*= {basic_thread_main}*/
 ) {
     if (m_is_initialised) return;
     m_is_initialised = true;
@@ -32,9 +34,10 @@ void hthread::ThreadPool<ThreadState, Timing>::init(
 }
 
 template <
-    hthread::IsThreadState              ThreadState,
+    hthread::IsThreadState ThreadState,
+    typename TaskQueue,
     hthread::ThreadpoolTimingResolution Timing>
-void hthread::ThreadPool<ThreadState, Timing>::dispose() {
+void hthread::ThreadPool<ThreadState, TaskQueue, Timing>::dispose() {
     if (!m_is_initialised) return;
     m_is_initialised = false;
 
@@ -47,55 +50,61 @@ void hthread::ThreadPool<ThreadState, Timing>::dispose() {
 
     for (auto& thread : m_threads) thread.thread.join();
 
-    TaskQueue<ThreadState>().swap(m_tasks);
+    TaskQueue().swap(m_tasks);
 
     Threads<ThreadState>().swap(m_threads);
 }
 
 template <
-    hthread::IsThreadState              ThreadState,
+    hthread::IsThreadState ThreadState,
+    typename TaskQueue,
     hthread::ThreadpoolTimingResolution Timing>
-void hthread::ThreadPool<ThreadState, Timing>::suspend() {
+void hthread::ThreadPool<ThreadState, TaskQueue, Timing>::suspend() {
     for (auto& thread : m_threads) thread.state.suspend = true;
 }
 
 template <
-    hthread::IsThreadState              ThreadState,
+    hthread::IsThreadState ThreadState,
+    typename TaskQueue,
     hthread::ThreadpoolTimingResolution Timing>
-void hthread::ThreadPool<ThreadState, Timing>::resume() {
+void hthread::ThreadPool<ThreadState, TaskQueue, Timing>::resume() {
     for (auto& thread : m_threads) thread.state.suspend = false;
 }
 
 template <
-    hthread::IsThreadState              ThreadState,
+    hthread::IsThreadState ThreadState,
+    typename TaskQueue,
     hthread::ThreadpoolTimingResolution Timing>
-void hthread::ThreadPool<ThreadState, Timing>::add_task(HeldTask<ThreadState> task) {
+void hthread::ThreadPool<ThreadState, TaskQueue, Timing>::add_task(HeldTask task) {
     m_tasks.enqueue(m_producer_token, task);
 }
 
 template <
-    hthread::IsThreadState              ThreadState,
+    hthread::IsThreadState ThreadState,
+    typename TaskQueue,
     hthread::ThreadpoolTimingResolution Timing>
-void hthread::ThreadPool<ThreadState, Timing>::add_tasks(
-    HeldTask<ThreadState> tasks[], size_t task_count
+void hthread::ThreadPool<ThreadState, TaskQueue, Timing>::add_tasks(
+    HeldTask tasks[], size_t task_count
 ) {
     m_tasks.enqueue_bulk(m_producer_token, tasks, task_count);
 }
 
 template <
-    hthread::IsThreadState              ThreadState,
+    hthread::IsThreadState ThreadState,
+    typename TaskQueue,
     hthread::ThreadpoolTimingResolution Timing>
-void hthread::ThreadPool<ThreadState, Timing>::threadsafe_add_task(
-    HeldTask<ThreadState> task
+void hthread::ThreadPool<ThreadState, TaskQueue, Timing>::threadsafe_add_task(
+    HeldTask task
 ) {
     m_tasks.enqueue(task);
 }
 
 template <
-    hthread::IsThreadState              ThreadState,
+    hthread::IsThreadState ThreadState,
+    typename TaskQueue,
     hthread::ThreadpoolTimingResolution Timing>
-void hthread::ThreadPool<ThreadState, Timing>::threadsafe_add_tasks(
-    HeldTask<ThreadState> tasks[], size_t task_count
+void hthread::ThreadPool<ThreadState, TaskQueue, Timing>::threadsafe_add_tasks(
+    HeldTask tasks[], size_t task_count
 ) {
     m_tasks.enqueue_bulk(tasks, task_count);
 }

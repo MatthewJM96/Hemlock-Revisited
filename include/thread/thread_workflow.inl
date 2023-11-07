@@ -20,7 +20,7 @@ void hthread::IThreadWorkflowTask<ThreadState>::set_workflow_metadata(
 
 template <hthread::IsThreadState ThreadState>
 void hthread::IThreadWorkflowTask<ThreadState>::execute(
-    typename Thread<ThreadState>::State* state, TaskQueue<ThreadState>* task_queue
+    typename Thread<ThreadState>::State* state, BasicTaskQueue<ThreadState>* task_queue
 ) {
     if (run_task(state, task_queue) && m_dag) {
         auto [start, last] = m_dag->graph.equal_range(m_task_idx);

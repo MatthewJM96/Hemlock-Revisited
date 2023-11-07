@@ -29,17 +29,23 @@ namespace hemlock {
             volatile bool suspend;
         };
 
-        template <IsThreadState ThreadState>
-        class IThreadTask;
+        class IThreadTask {
+        public:
+            virtual ~IThreadTask() {
+                // Empty.
+            }
+        };
 
-        template <IsThreadState ThreadState>
+        template <IsThreadState ThreadState, typename TaskQueue>
+        class ThreadTaskBase;
+
         struct HeldTask {
-            IThreadTask<ThreadState>* task;
-            bool                      should_delete;
+            IThreadTask* task;
+            bool         should_delete;
         };
 
         template <IsThreadState ThreadState>
-        using TaskQueue = moodycamel::BlockingConcurrentQueue<HeldTask<ThreadState>>;
+        using BasicTaskQueue = moodycamel::BlockingConcurrentQueue<HeldTask>;
 
         template <IsThreadState ThreadState>
         struct Thread {
@@ -51,20 +57,23 @@ namespace hemlock {
         template <IsThreadState ThreadState>
         using Threads = std::vector<Thread<ThreadState>>;
 
-        template <IsThreadState ThreadState>
-        class IThreadTask {
+        template <IsThreadState ThreadState, typename TaskQueue>
+        class ThreadTaskBase : public IThreadTask {
         public:
-            IThreadTask() { /* Empty. */
+            ThreadTaskBase() {
+                // Empty.
             }
 
-            virtual ~IThreadTask() { /* Empty. */
+            virtual ~ThreadTaskBase() {
+                // Empty.
             }
 
             /**
              * @brief If any special handling is needed to clean
              * up task, override this.
              */
-            virtual void dispose() { /* Empty */
+            virtual void dispose() {
+                // Empty.
             }
 
             /**
@@ -79,17 +88,20 @@ namespace hemlock {
              * @return True if the task completed, false if it needs to
              * be re-queued.
              */
-            virtual bool execute(ThreadState* state, TaskQueue<ThreadState>* task_queue)
-                = 0;
+            virtual bool execute(ThreadState* state, TaskQueue* task_queue) = 0;
         };
 
         template <
-            IsThreadState              ThreadState,
+            IsThreadState ThreadState,
+            typename TaskQueue                = BasicTaskQueue<ThreadState>,
             ThreadpoolTimingResolution Timing = ThreadpoolTimingResolution::NONE>
         class ThreadPool;
 
-        template <IsThreadState ThreadState, ThreadpoolTimingResolution Timing>
-        using ThreadMainFunc = Delegate<void(ThreadState*, TaskQueue<ThreadState>*)>;
+        template <
+            IsThreadState ThreadState,
+            typename TaskQueue,
+            ThreadpoolTimingResolution Timing>
+        using ThreadMainFunc = Delegate<void(ThreadState*, TaskQueue*)>;
     }  // namespace thread
 }  // namespace hemlock
 namespace hthread = hemlock::thread;
@@ -98,9 +110,14 @@ namespace hthread = hemlock::thread;
 
 namespace hemlock {
     namespace thread {
-        template <IsThreadState ThreadState, ThreadpoolTimingResolution Timing>
+        template <
+            IsThreadState ThreadState,
+            typename TaskQueue,
+            ThreadpoolTimingResolution Timing>
         class ThreadPool {
         public:
+            using _ThreadMainFunc = ThreadMainFunc<ThreadState, TaskQueue, Timing>;
+
             ThreadPool() :
                 m_is_initialised(false),
                 m_producer_token(moodycamel::ProducerToken(m_tasks)) { /* Empty. */
@@ -116,10 +133,12 @@ namespace hemlock {
              * possess.
              */
             void init(
-                ui32                                thread_count,
-                ThreadMainFunc<ThreadState, Timing> thread_main_func = ThreadMainFunc<
+                ui32                                           thread_count,
+                ThreadMainFunc<ThreadState, TaskQueue, Timing> thread_main_func
+                = ThreadMainFunc<
                     ThreadState,
-                    Timing>{ basic_thread_main<ThreadState, Timing> }
+                    TaskQueue,
+                    Timing>{ basic_thread_main<ThreadState, TaskQueue, Timing> }
             );
             /**
              * @brief Cleans up the thread pool, bringing all threads
@@ -148,7 +167,7 @@ namespace hemlock {
              *
              * @param task The task to add.
              */
-            void add_task(HeldTask<ThreadState> task);
+            void add_task(HeldTask task);
             /**
              * @brief Adds a set of tasks to the task queue.
              *
@@ -157,7 +176,7 @@ namespace hemlock {
              *
              * @param task The tasks to add.
              */
-            void add_tasks(HeldTask<ThreadState> tasks[], size_t task_count);
+            void add_tasks(HeldTask tasks[], size_t task_count);
 
             /**
              * @brief Adds a task to the task queue.
@@ -168,7 +187,7 @@ namespace hemlock {
              *
              * @param task The task to add.
              */
-            void threadsafe_add_task(HeldTask<ThreadState> task);
+            void threadsafe_add_task(HeldTask task);
             /**
              * @brief Adds a set of tasks to the task queue.
              *
@@ -178,7 +197,7 @@ namespace hemlock {
              *
              * @param task The tasks to add.
              */
-            void threadsafe_add_tasks(HeldTask<ThreadState> tasks[], size_t task_count);
+            void threadsafe_add_tasks(HeldTask tasks[], size_t task_count);
 
             /**
              * @brief The number of threads held by the thread pool.
@@ -192,10 +211,10 @@ namespace hemlock {
         protected:
             bool m_is_initialised;
 
-            ThreadMainFunc<ThreadState, Timing> m_thread_main_func;
-            Threads<ThreadState>                m_threads;
-            TaskQueue<ThreadState>              m_tasks;
-            moodycamel::ProducerToken           m_producer_token;
+            _ThreadMainFunc           m_thread_main_func;
+            Threads<ThreadState>      m_threads;
+            TaskQueue                 m_tasks;
+            moodycamel::ProducerToken m_producer_token;
         };
     }  // namespace thread
 }  // namespace hemlock

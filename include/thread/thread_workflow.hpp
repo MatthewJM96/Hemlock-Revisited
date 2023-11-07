@@ -6,7 +6,8 @@
 namespace hemlock {
     namespace thread {
         template <IsThreadState ThreadState>
-        class IThreadWorkflowTask : public IThreadTask<ThreadState> {
+        class IThreadWorkflowTask :
+            public ThreadTaskBase<ThreadState, BasicTaskQueue<ThreadState>> {
         public:
             IThreadWorkflowTask() : m_task_idx(0), m_dag(nullptr) { /* Empty. */
             }
@@ -49,7 +50,7 @@ namespace hemlock {
              */
             void execute(
                 typename Thread<ThreadState>::State* state,
-                TaskQueue<ThreadState>*              task_queue
+                BasicTaskQueue<ThreadState>*         task_queue
             ) final;
 
             /**
@@ -66,7 +67,7 @@ namespace hemlock {
              */
             virtual bool run_task(
                 typename Thread<ThreadState>::State* state,
-                TaskQueue<ThreadState>*              task_queue
+                BasicTaskQueue<ThreadState>*         task_queue
             ) = 0;
         protected:
             ThreadWorkflowTasksView<ThreadState> m_tasks;
