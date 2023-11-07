@@ -93,9 +93,14 @@ namespace hemlock {
 
         template <IsThreadState ThreadState, ThreadpoolTimingResolution Timing>
         using ThreadMainFunc = Delegate<void(ThreadState*, TaskQueue<ThreadState>*)>;
+    }  // namespace thread
+}  // namespace hemlock
+namespace hthread = hemlock::thread;
 
 #include "thread/basic_thread_main.hpp"
 
+namespace hemlock {
+    namespace thread {
         template <IsThreadState ThreadState, ThreadpoolTimingResolution Timing>
         class ThreadPool {
         public:
