@@ -2,13 +2,13 @@
 #include "voxel/chunk/state.hpp"
 
 template <hvox::ai::ChunkNavmeshStrategy NavmeshStrategy>
-void hvox::ai::ChunkNavmeshTask<
+bool hvox::ai::ChunkNavmeshTask<
     NavmeshStrategy>::execute(ChunkThreadState*, ChunkTaskQueue*) {
     auto chunk_grid = m_chunk_grid.lock();
-    if (chunk_grid == nullptr) return;
+    if (chunk_grid == nullptr) return true;
 
     auto chunk = m_chunk.lock();
-    if (chunk == nullptr) return;
+    if (chunk == nullptr) return true;
 
     const NavmeshStrategy navmesh{};
 
@@ -24,4 +24,6 @@ void hvox::ai::ChunkNavmeshTask<
     chunk->navmeshing.store(ChunkState::COMPLETE, std::memory_order_release);
 
     chunk->on_navmesh_change();
+
+    return true;
 }

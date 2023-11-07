@@ -24,7 +24,7 @@ namespace hemlock {
             virtual ~ChunkGenerationTask() { /* Empty. */
             }
 
-            virtual void
+            virtual bool
             execute(ChunkThreadState* state, ChunkTaskQueue* task_queue) override;
         };
     }  // namespace voxel

@@ -1,9 +1,9 @@
 template <hvox::ChunkGenerationStrategy GenerationStrategy>
-void hvox::ChunkGenerationTask<
+bool hvox::ChunkGenerationTask<
     GenerationStrategy>::execute(ChunkThreadState*, ChunkTaskQueue*) {
     auto chunk = m_chunk.lock();
 
-    if (chunk == nullptr) return;
+    if (chunk == nullptr) return true;
 
     chunk->generation.store(ChunkState::ACTIVE, std::memory_order_release);
 
@@ -14,4 +14,6 @@ void hvox::ChunkGenerationTask<
     chunk->generation.store(ChunkState::COMPLETE, std::memory_order_release);
 
     chunk->on_load();
+
+    return true;
 }

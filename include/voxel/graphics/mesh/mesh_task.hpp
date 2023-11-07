@@ -29,7 +29,7 @@ namespace hemlock {
             virtual ~ChunkMeshTask() { /* Empty. */
             }
 
-            virtual void
+            virtual bool
             execute(ChunkThreadState* state, ChunkTaskQueue* task_queue) override;
         };
     }  // namespace voxel

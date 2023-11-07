@@ -41,11 +41,13 @@ namespace hemlock {
                     continue;
                 }
 
-                held.task->execute(state, task_queue);
-                held.task->is_finished = true;
-                held.task->dispose();
-                if (held.should_delete) delete held.task;
-                held.task = nullptr;
+                if (held.task->execute(state, task_queue)) {
+                    held.task->dispose();
+                    if (held.should_delete) delete held.task;
+                    held.task = nullptr;
+                } else {
+                    task_queue->enqueue(state->producer_token, std::move(held));
+                }
             }
         }
     }  // namespace thread

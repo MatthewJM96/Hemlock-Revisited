@@ -76,14 +76,11 @@ namespace hemlock {
              * context.
              * @param task_queue The task queue, can be interacted with
              * for example if a task needs to chain a follow-up task.
+             * @return True if the task completed, false if it needs to
+             * be re-queued.
              */
-            virtual void execute(ThreadState* state, TaskQueue<ThreadState>* task_queue)
+            virtual bool execute(ThreadState* state, TaskQueue<ThreadState>* task_queue)
                 = 0;
-
-            /**
-             * @brief Tracks completion state of the task.
-             */
-            volatile bool is_finished = false;
         };
 
         template <
