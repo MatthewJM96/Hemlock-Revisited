@@ -1,47 +1,16 @@
 #ifndef __hemlock_thread_thread_pool_hpp
 #define __hemlock_thread_thread_pool_hpp
 
+#include "thread/task.hpp"
+#include "thread/task_queue.hpp"
+#include "thread/thread_state.hpp"
+
 namespace hemlock {
     namespace thread {
         enum class ThreadpoolTimingResolution {
             NONE,
             ON_SUSPEND,
             ON_TASK_COMPLETION
-        };
-
-        template <typename Candidate>
-        concept IsThreadState = requires (Candidate state) {
-                                    std::is_same_v<
-                                        decltype(state.consumer_token),
-                                        moodycamel::ConsumerToken>;
-                                    std::is_same_v<
-                                        decltype(state.producer_token),
-                                        moodycamel::ProducerToken>;
-                                    std::is_same_v<decltype(state.stop), bool>;
-                                    std::is_same_v<decltype(state.suspend), bool>;
-                                };
-
-        struct BasicThreadState {
-            moodycamel::ConsumerToken consumer_token;
-            moodycamel::ProducerToken producer_token;
-
-            volatile bool stop;
-            volatile bool suspend;
-        };
-
-        class IThreadTask {
-        public:
-            virtual ~IThreadTask() {
-                // Empty.
-            }
-        };
-
-        template <IsThreadState ThreadState, typename TaskQueue>
-        class ThreadTaskBase;
-
-        struct HeldTask {
-            IThreadTask* task;
-            bool         should_delete;
         };
 
         template <IsThreadState ThreadState>
@@ -56,40 +25,6 @@ namespace hemlock {
 
         template <IsThreadState ThreadState>
         using Threads = std::vector<Thread<ThreadState>>;
-
-        template <IsThreadState ThreadState, typename TaskQueue>
-        class ThreadTaskBase : public IThreadTask {
-        public:
-            ThreadTaskBase() {
-                // Empty.
-            }
-
-            virtual ~ThreadTaskBase() {
-                // Empty.
-            }
-
-            /**
-             * @brief If any special handling is needed to clean
-             * up task, override this.
-             */
-            virtual void dispose() {
-                // Empty.
-            }
-
-            /**
-             * @brief Executes the task, this must be implemented
-             * by inheriting tasks.
-             *
-             * @param state The thread state, including tokens for
-             * interacting with task queue, and thread pool specific
-             * context.
-             * @param task_queue The task queue, can be interacted with
-             * for example if a task needs to chain a follow-up task.
-             * @return True if the task completed, false if it needs to
-             * be re-queued.
-             */
-            virtual bool execute(ThreadState* state, TaskQueue* task_queue) = 0;
-        };
 
         template <
             IsThreadState ThreadState,
