@@ -32,6 +32,10 @@ namespace hemlock {
 
             HeldTask held = { nullptr, false };
             while (!state->stop) {
+                // TODO(Matthew): have this dequeue the HeldTask and a pointer to the
+                //                underlying queue it was dequeued from (require this
+                //                to be moodycamel?) and then use the latter if we need
+                //                to requeue.
                 task_queue->wait_dequeue_timed(
                     state->consumer_token, held, std::chrono::seconds(1)
                 );
