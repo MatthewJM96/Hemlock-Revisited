@@ -37,7 +37,7 @@ namespace hemlock {
                 //                to be moodycamel?) and then use the latter if we need
                 //                to requeue.
                 task_queue->wait_dequeue_timed(
-                    state->consumer_token, held, std::chrono::seconds(1)
+                    state->consumer_token, held, std::chrono::milliseconds(1)
                 );
 
                 while (state->suspend)
