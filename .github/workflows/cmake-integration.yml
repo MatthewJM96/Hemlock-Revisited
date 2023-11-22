@@ -97,6 +97,7 @@ jobs:
         -DCMAKE_CXX_COMPILER=${{ matrix.c_compiler }}
         -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
         -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+        -DHEMLOCK_CI_BUILD=On
         -S ${{ github.workspace }}
 
     - name: Build
@@ -181,6 +182,7 @@ jobs:
         -DCMAKE_CXX_COMPILER=cl
         -DCMAKE_C_COMPILER=cl
         -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+        -DHEMLOCK_CI_BUILD=On
         -S ${{ github.workspace }}
 
     - name: Build
@@ -267,6 +269,7 @@ jobs:
         -DCMAKE_CXX_COMPILER=clang
         -DCMAKE_C_COMPILER=clang
         -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+        -DHEMLOCK_CI_BUILD=On
         -S ${{ github.workspace }}
 
     - name: Build
