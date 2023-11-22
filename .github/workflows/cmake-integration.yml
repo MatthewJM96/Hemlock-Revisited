@@ -109,7 +109,7 @@ jobs:
 
     - name: Install conan
       run: >
-        python3 -m venv ${{ github.workspace }}/.venv ;
+        python3 -m venv ${{ github.workspace }}\.venv ;
         cd ${{ github.workspace }} ;
         .\.venv\Scripts\activate ;
         pip install conan==1.62.0 ;
@@ -121,19 +121,18 @@ jobs:
       id: strings
       shell: bash
       run: |
-        echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
+        echo "build-output-dir=${{ github.workspace }}\build" >> "$GITHUB_OUTPUT"
 
     - name: Install non-conan dependencies
       run: >
-        mkdir -p ${{ github.workspace }}/deps ;
-        mkdir -p ${{ github.workspace }}/tmp ;
-        cd ${{ github.workspace }}/tmp ;
+        mkdir -p ${{ github.workspace }}\deps ;
+        mkdir -p ${{ github.workspace }}\tmp ;
+        cd ${{ github.workspace }}\tmp ;
         curl.exe -o FastNoise2-v0.10.0-alpha-Win64-MSVC.zip https://github.com/Auburn/FastNoise2/releases/download/v0.10.0-alpha/FastNoise2-v0.10.0-alpha-Win64-MSVC.zip ;
-        ls ; echo "curl done" ;
-        tar -xvf ${{ github.workspace }}/tmp/FastNoise2-v0.10.0-alpha-Win64-MSVC.zip ;
+        Expand-Archive ${{ github.workspace }}\tmp\FastNoise2-v0.10.0-alpha-Win64-MSVC.zip -DestinationPath ${{ github.workspace }}\tmp ;
         ls ;
-        mv FastNoise2/* ${{ github.workspace }}/deps ;
-        ls ${{ github.workspace }}/deps
+        mv FastNoise2/* ${{ github.workspace }}\deps ;
+        ls ${{ github.workspace }}\deps
 
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
