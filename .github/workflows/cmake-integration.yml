@@ -54,6 +54,7 @@ jobs:
         cd ${{ github.workspace }}/tmp ;
         wget https://github.com/Auburn/FastNoise2/archive/refs/tags/v0.10.0-alpha.zip ;
         unzip v0.10.0-alpha.zip ;
+        cd FastNoise2-0.10.0-alpha ;
         cmake -B FastNoise2-0.10.0-alpha/build
         -DCMAKE_CXX_COMPILER=${{ matrix.c_compiler }}
         -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
