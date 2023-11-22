@@ -43,6 +43,19 @@ jobs:
       run: |
         echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
 
+    - name: Install non-conan dependencies
+      run: >
+        mkdir -p ${{ github.workspace }}/deps ;
+        wget https://github.com/Auburn/FastNoise2/archive/refs/tags/v0.10.0-alpha.zip ;
+        tar -xf v0.10.0-alpha.zip ;
+        cmake -B FastNoise2-0.10.0-alpha/build
+        -DCMAKE_CXX_COMPILER=${{ matrix.c_compiler }}
+        -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
+        -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} ;
+        cmake --build FastNoise2-0.10.0-alpha/build --config ${{ matrix.build_type }} ;
+        cmake --install ${{ github.workspace }}/deps --config ${{ matrix.build_type }} ;
+        ls ${{ github.workspace }}/deps
+
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
       # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
@@ -100,6 +113,14 @@ jobs:
       shell: bash
       run: |
         echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
+
+    - name: Install non-conan dependencies
+      run: >
+        mkdir -p ${{ github.workspace }}/deps ;
+        curl.exe -o FastNoise2-v0.10.0-alpha-Win64-MSVC.zip https://github.com/Auburn/FastNoise2/releases/download/v0.10.0-alpha/FastNoise2-v0.10.0-alpha-Win64-MSVC.zip ;
+        tar.exe -xf FastNoise2-v0.10.0-alpha-Win64-MSVC.zip ;
+        mv FastNoise2/* ${{ github.workspace }}/deps ;
+        ls ${{ github.workspace }}/deps
 
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
@@ -161,6 +182,14 @@ jobs:
       shell: bash
       run: |
         echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
+
+    - name: Install non-conan dependencies
+      run: >
+        mkdir -p ${{ github.workspace }}/deps ;
+        wget https://github.com/Auburn/FastNoise2/releases/download/v0.10.0-alpha/FastNoise2-v0.10.0-alpha-MacOS64-Clang.zip ;
+        tar -xf FastNoise2-v0.10.0-alpha-MacOS64-Clang.zip ;
+        mv FastNoise2/* ${{ github.workspace }}/deps ;
+        ls ${{ github.workspace }}/deps
 
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
