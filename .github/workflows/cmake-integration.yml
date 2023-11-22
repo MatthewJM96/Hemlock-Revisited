@@ -132,11 +132,8 @@ jobs:
         mkdir -p ${{ github.workspace }}\tmp ;
         cd ${{ github.workspace }}\tmp ;
         Invoke-WebRequest 'https://github.com/Auburn/FastNoise2/releases/download/v0.10.0-alpha/FastNoise2-v0.10.0-alpha-Win64-MSVC.zip' -OutFile FastNoise2.zip ;
-        ls ;
         Expand-Archive -Path FastNoise2.zip -DestinationPath ${{ github.workspace }}\tmp ;
-        ls ;
-        mv FastNoise2/* ${{ github.workspace }}\deps ;
-        ls ${{ github.workspace }}\deps
+        mv FastNoise2/* ${{ github.workspace }}\deps
 
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
