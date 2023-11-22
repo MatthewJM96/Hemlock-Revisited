@@ -78,6 +78,7 @@ jobs:
         cd ${{ github.workspace }}/tmp ;
         git clone https://github.com/lucasb-eyer/libheatmap.git ;
         cd libheatmap ;
+        sed -i '' -e 's/-Wextra -Wa,-ahl=\$(@:\.o=\.s)/-Wextra/' Makefile ;
         make CC=${{ matrix.c_compiler }} ;
         mv libheatmap.a ${{ github.workspace }}/deps/lib ;
         mkdir -p ${{ github.workspace }}/deps/include/libheatmap ;
