@@ -158,7 +158,8 @@ jobs:
         Expand-Archive -Path libheatmap.zip -DestinationPath ${{ github.workspace }}\tmp ;
         cd libheatmap-master ;
         msbuild heatmap.sln /p:PlatformToolset=v143 ;
-        mv libheatmap.so ${{ github.workspace }}/deps/lib ;
+        ls ;
+        mv libheatmap.dll ${{ github.workspace }}/deps/lib ;
         mkdir -p ${{ github.workspace }}/deps/include/libheatmap ;
         cp heatmap.h ${{ github.workspace }}/deps/include/libheatmap ;
         mkdir -p ${{ github.workspace }}/deps/include/libheatmap/colorschemes ;
