@@ -30,7 +30,8 @@ jobs:
       run: >
         python3 -m venv ${{ github.workspace }}/.venv ;
         source ${{ github.workspace }}/.venv/bin/activate ;
-        pip install conan
+        pip install conan ;
+        conan profile detect
 
     - name: Set reusable strings
       # Turn repeated input strings (such as the build output directory) into step outputs. These step outputs can be used throughout the workflow file.
@@ -84,8 +85,9 @@ jobs:
     - name: Install conan
       run: >
         python3 -m venv ${{ github.workspace }}/.venv ;
-        source ${{ github.workspace }}/.venv/bin/activate ;
-        pip install conan
+        ${{ github.workspace }}/.venv/bin/activate ;
+        pip install conan ;
+        conan profile detect
 
     - name: Set reusable strings
       # Turn repeated input strings (such as the build output directory) into step outputs. These step outputs can be used throughout the workflow file.
@@ -138,8 +140,10 @@ jobs:
 
     - name: Install conan
       run: >
-        brew update ;
-        brew install conan
+        python3 -m venv ${{ github.workspace }}/.venv ;
+        source ${{ github.workspace }}/.venv/bin/activate ;
+        pip install conan ;
+        conan profile detect
 
     - name: Set reusable strings
       # Turn repeated input strings (such as the build output directory) into step outputs. These step outputs can be used throughout the workflow file.
@@ -152,6 +156,7 @@ jobs:
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
       # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
       run: >
+        source ${{ github.workspace }}/.venv/bin/activate ;
         cmake -B ${{ steps.strings.outputs.build-output-dir }}
         -DCMAKE_CXX_COMPILER=cl
         -DCMAKE_C_COMPILER=cl
@@ -160,12 +165,14 @@ jobs:
 
     - name: Build
       # Build your program with the given configuration. Note that --config is needed because the default Windows generator is a multi-config generator (Visual Studio generator).
-      run: |
+      run: >
+        source ${{ github.workspace }}/.venv/bin/activate ;
         cmake --build ${{ steps.strings.outputs.build-output-dir }} --config ${{ matrix.build_type }}
 
     - name: Test
       working-directory: ${{ steps.strings.outputs.build-output-dir }}
       # Execute tests defined by the CMake configuration. Note that --build-config is needed because the default Windows generator is a multi-config generator (Visual Studio generator).
       # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
-      run: |
+      run: >
+        source ${{ github.workspace }}/.venv/bin/activate ;
         ctest --build-config ${{ matrix.build_type }}
