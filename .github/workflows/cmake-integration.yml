@@ -231,6 +231,7 @@ jobs:
         cd ${{ github.workspace }}/tmp ;
         git clone https://github.com/lucasb-eyer/libheatmap.git ;
         cd libheatmap ;
+        sed -i 's/-fopenmp -Wall -Wextra -Wa,-ahl=\$(@:\.o=\.s)/-Wall -Wextra/' Makefile
         make ;
         mv libheatmap.so ${{ github.workspace }}/deps/lib ;
         mkdir -p ${{ github.workspace }}/deps/include/libheatmap ;
