@@ -125,6 +125,9 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
+    - name: setup-msbuild
+      uses: microsoft/setup-msbuild@v1.3.1
+
     - name: Install conan
       run: >
         python3 -m venv ${{ github.workspace }}\.venv ;
