@@ -66,8 +66,7 @@ jobs:
         -DFASTNOISE2_TESTS=OFF
         -B .;
         cmake --build . --config ${{ matrix.build_type }} ;
-        cmake --install . --prefix ${{ github.workspace }}/deps;
-        ls ${{ github.workspace }}/deps
+        cmake --install . --prefix ${{ github.workspace }}/deps
 
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
