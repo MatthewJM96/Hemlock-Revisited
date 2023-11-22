@@ -76,7 +76,7 @@ jobs:
         cd ${{ github.workspace }}/tmp ;
         git clone https://github.com/lucasb-eyer/libheatmap.git ;
         cd libheatmap ;
-        make ;
+        make CC=${{ matrix.c_compiler }} ;
         mv libheatmap.a ${{ github.workspace }}/deps/lib ;
         mkdir -p ${{ github.workspace }}/deps/include/libheatmap ;
         cp heatmap.h ${{ github.workspace }}/deps/include/libheatmap ;
@@ -247,7 +247,7 @@ jobs:
         cd libheatmap ;
         sed -i '' -e 's/-fopenmp -Wall -Wextra -Wa,-ahl=\$(@:\.o=\.s)/-Wall -Wextra/' Makefile ;
         sed -i '' -e 's/DEFAULT_LDFLAGS=-fopenmp/DEFAULT_LDFLAGS=/' Makefile ;
-        make ;
+        make CC=clang ;
         mv libheatmap.so ${{ github.workspace }}/deps/lib ;
         mkdir -p ${{ github.workspace }}/deps/include/libheatmap ;
         cp heatmap.h ${{ github.workspace }}/deps/include/libheatmap ;
