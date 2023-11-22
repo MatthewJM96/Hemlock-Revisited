@@ -132,9 +132,9 @@ jobs:
         mkdir -p ${{ github.workspace }}\deps ;
         mkdir -p ${{ github.workspace }}\tmp ;
         cd ${{ github.workspace }}\tmp ;
-        curl.exe -o .\ https://github.com/Auburn/FastNoise2/releases/download/v0.10.0-alpha/FastNoise2-v0.10.0-alpha-Win64-MSVC.zip ;
-        ls ; ls FastNoise2-v0.10.0-alpha-Win64-MSVC.zip ;
-        Expand-Archive -LiteralPath '${{ github.workspace }}\tmp\FastNoise2-v0.10.0-alpha-Win64-MSVC.zip' -DestinationPath ${{ github.workspace }}\tmp ;
+        curl.exe -o FastNoise2.zip https://github.com/Auburn/FastNoise2/releases/download/v0.10.0-alpha/FastNoise2-v0.10.0-alpha-Win64-MSVC.zip ;
+        ls ; ls FastNoise2.zip ;
+        Expand-Archive -LiteralPath '${{ github.workspace }}\tmp\FastNoise2.zip' -DestinationPath ${{ github.workspace }}\tmp ;
         ls ;
         mv FastNoise2/* ${{ github.workspace }}\deps ;
         ls ${{ github.workspace }}\deps
