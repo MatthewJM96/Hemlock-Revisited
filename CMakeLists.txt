@@ -106,7 +106,7 @@ set(Hemlock_Requirements
     sdl_ttf/2.20.1
     libpng/1.6.39
     concurrentqueue/1.0.3
-    boost/1.78.0
+    boost/1.83.0
     bullet3/3.24
     entt/3.10.1
     yaml-cpp/0.7.0
