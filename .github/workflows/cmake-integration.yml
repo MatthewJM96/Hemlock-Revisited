@@ -136,6 +136,7 @@ jobs:
 
       matrix:
         build_type: [Release, Debug]
+        c_compiler: [clang]
 
     steps:
     - uses: actions/checkout@v3
@@ -159,8 +160,8 @@ jobs:
       run: >
         source ${{ github.workspace }}/.venv/bin/activate ;
         cmake -B ${{ steps.strings.outputs.build-output-dir }}
-        -DCMAKE_CXX_COMPILER=cl
-        -DCMAKE_C_COMPILER=cl
+        -DCMAKE_CXX_COMPILER=clang
+        -DCMAKE_C_COMPILER=clang
         -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
         -S ${{ github.workspace }}
 
