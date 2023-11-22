@@ -83,7 +83,7 @@ jobs:
         mkdir -p ${{ github.workspace }}/deps/include/libheatmap ;
         cp heatmap.h ${{ github.workspace }}/deps/include/libheatmap ;
         mkdir -p ${{ github.workspace }}/deps/include/libheatmap/colorschemes ;
-        cp colorschemes/*.h ${{ github.workspace }}/deps/include/libheatmap ;
+        cp colorschemes/*.h ${{ github.workspace }}/deps/include/libheatmap/colorschemes ;
         ls ${{ github.workspace }}/deps/include ;
         ls ${{ github.workspace }}/deps/include/libheatmap ;
 
@@ -166,7 +166,7 @@ jobs:
         mkdir -p ${{ github.workspace }}/deps/include/libheatmap ;
         cp heatmap.h ${{ github.workspace }}/deps/include/libheatmap ;
         mkdir -p ${{ github.workspace }}/deps/include/libheatmap/colorschemes ;
-        cp colorschemes/*.h ${{ github.workspace }}/deps/include/libheatmap ;
+        cp colorschemes/*.h ${{ github.workspace }}/deps/include/libheatmap/colorschemes ;
         ls ${{ github.workspace }}/deps/include/libheatmap
 
     - name: Configure CMake
@@ -254,7 +254,7 @@ jobs:
         mkdir -p ${{ github.workspace }}/deps/include/libheatmap ;
         cp heatmap.h ${{ github.workspace }}/deps/include/libheatmap ;
         mkdir -p ${{ github.workspace }}/deps/include/libheatmap/colorschemes ;
-        cp colorschemes/*.h ${{ github.workspace }}/deps/include/libheatmap ;
+        cp colorschemes/*.h ${{ github.workspace }}/deps/include/libheatmap/colorschemes ;
         ls ${{ github.workspace }}/deps/include/libheatmap
 
     - name: Configure CMake
