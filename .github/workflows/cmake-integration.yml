@@ -143,7 +143,9 @@ jobs:
 
     - name: Install non-conan dependencies
       run: >
-        mkdir -p ${{ github.workspace }}\deps ;
+        mkdir -p ${{ github.workspace }}/deps/bin ;
+        mkdir -p ${{ github.workspace }}/deps/include ;
+        mkdir -p ${{ github.workspace }}/deps/lib ;
         mkdir -p ${{ github.workspace }}\tmp ;
         cd ${{ github.workspace }}\tmp ;
         Invoke-WebRequest 'https://github.com/Auburn/FastNoise2/releases/download/v0.10.0-alpha/FastNoise2-v0.10.0-alpha-Win64-MSVC.zip' -OutFile FastNoise2.zip ;
@@ -151,7 +153,15 @@ jobs:
         mv FastNoise2/* ${{ github.workspace }}\deps ;
         Invoke-WebRequest 'https://github.com/lucasb-eyer/libheatmap/archive/refs/heads/master.zip' -OutFile libheatmap.zip ;
         Expand-Archive -Path libheatmap.zip -DestinationPath ${{ github.workspace }}\tmp ;
-        ls
+        cd libheatmap-master ;
+        make ;
+        mv libheatmap.so ${{ github.workspace }}/deps/lib ;
+        mkdir -p ${{ github.workspace }}/deps/include/libheatmap ;
+        cp heatmap.h ${{ github.workspace }}/deps/include/libheatmap ;
+        mkdir -p ${{ github.workspace }}/deps/include/libheatmap/colorschemes ;
+        cp colorschemes/*.h ${{ github.workspace }}/deps/include/libheatmap ;
+        ls ${{ github.workspace }}/deps/include/libheatmap
+
 
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
