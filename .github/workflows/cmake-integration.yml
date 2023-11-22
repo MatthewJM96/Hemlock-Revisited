@@ -165,9 +165,9 @@ jobs:
         msbuild heatmap.sln /p:PlatformToolset=v143 /property:Configuration=${{ matrix.build_type }} ;
         mv ${{ matrix.build_type }}/heatmap.lib ${{ github.workspace }}/deps/lib ;
         mkdir -p ${{ github.workspace }}/deps/include/libheatmap ;
-        cp heatmap.h ${{ github.workspace }}/deps/include/libheatmap ;
+        copy heatmap.h ${{ github.workspace }}/deps/include/libheatmap ;
         mkdir -p ${{ github.workspace }}/deps/include/libheatmap/colorschemes ;
-        cp colorschemes/*.h ${{ github.workspace }}/deps/include/libheatmap/colorschemes ;
+        copy colorschemes/*.h ${{ github.workspace }}/deps/include/libheatmap/colorschemes ;
         ls ${{ github.workspace }}/deps/include/libheatmap
 
     - name: Configure CMake
@@ -252,7 +252,6 @@ jobs:
         sed -i '' -e 's/DEFAULT_LDFLAGS=-fopenmp/DEFAULT_LDFLAGS=/' Makefile ;
         make CC=clang ;
         mv libheatmap.a ${{ github.workspace }}/deps/lib ;
-        mv libheatmap.so ${{ github.workspace }}/deps/lib ;
         mkdir -p ${{ github.workspace }}/deps/include/libheatmap ;
         cp heatmap.h ${{ github.workspace }}/deps/include/libheatmap ;
         mkdir -p ${{ github.workspace }}/deps/include/libheatmap/colorschemes ;
