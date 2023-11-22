@@ -62,7 +62,7 @@ jobs:
         -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
         -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} ;
         cmake --build FastNoise2-0.10.0-alpha/build --target FastNoise --config ${{ matrix.build_type }} ;
-        cmake --install ${{ github.workspace }}/deps --config ${{ matrix.build_type }} ;
+        cmake --install FastNoise2-0.10.0-alpha/build --prefix ${{ github.workspace }}/deps --config ${{ matrix.build_type }} ;
         ls ${{ github.workspace }}/deps
 
     - name: Configure CMake
