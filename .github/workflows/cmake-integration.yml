@@ -62,8 +62,10 @@ jobs:
         -DCMAKE_CXX_COMPILER=${{ matrix.c_compiler }}
         -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
         -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+        -DFASTNOISE2_NOISETOOL=OFF
+        -DFASTNOISE2_TESTS=OFF
         -B .;
-        cmake --build . --target FastNoise --config ${{ matrix.build_type }} ;
+        cmake --build . --config ${{ matrix.build_type }} ;
         cmake --install . --prefix ${{ github.workspace }}/deps;
         ls ${{ github.workspace }}/deps
 
