@@ -123,7 +123,7 @@ endif()
 if (HEMLOCK_USING_LUA)
     set(Hemlock_Requirements
         ${Hemlock_Requirements}
-        luajit/2.0.5
+        luajit/2.1.0-beta3
     )
 endif()
 
