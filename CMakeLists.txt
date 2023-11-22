@@ -368,8 +368,6 @@ if(HEMLOCK_ENABLE_GPERF_PROFILER)
     target_link_libraries(Hemlock_Revisited profiler)
 endif()
 
-target_compile_definitions(Boost::iostreams INTERFACE BOOST_SYSTEM_NO_DEPRECATED=1)
-
 target_link_libraries(Hemlock_Revisited
     PNG::PNG
     SDL2::SDL2main
