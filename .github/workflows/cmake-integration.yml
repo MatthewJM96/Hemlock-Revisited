@@ -245,6 +245,7 @@ jobs:
         git clone https://github.com/lucasb-eyer/libheatmap.git ;
         cd libheatmap ;
         sed -i '' -e 's/-fopenmp -Wall -Wextra -Wa,-ahl=\$(@:\.o=\.s)/-Wall -Wextra/' Makefile ;
+        sed -i '' -e 's/DEFAULT_LDFLAGS=-fopenmp/DEFAULT_LDFLAGS=/' Makefile ;
         make ;
         mv libheatmap.so ${{ github.workspace }}/deps/lib ;
         mkdir -p ${{ github.workspace }}/deps/include/libheatmap ;
