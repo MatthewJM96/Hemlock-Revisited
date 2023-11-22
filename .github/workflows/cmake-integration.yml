@@ -56,13 +56,14 @@ jobs:
         cd ${{ github.workspace }}/tmp ;
         wget https://github.com/Auburn/FastNoise2/archive/refs/tags/v0.10.0-alpha.zip ;
         unzip v0.10.0-alpha.zip ;
-        cd FastNoise2-0.10.0-alpha ;
-        cmake -B FastNoise2-0.10.0-alpha/build
-        -DCMAKE_CXX_COMPILER=${{ matrix.c_compiler }}
+        mkdir -p FastNoise2-0.10.0-alpha/build ;
+        cd FastNoise2-0.10.0-alpha/build ;
+        cmake -DCMAKE_CXX_COMPILER=${{ matrix.c_compiler }}
         -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
-        -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} ;
-        cmake --build FastNoise2-0.10.0-alpha/build --target FastNoise --config ${{ matrix.build_type }} ;
-        cmake --install FastNoise2-0.10.0-alpha/build --prefix ${{ github.workspace }}/deps --config ${{ matrix.build_type }} ;
+        -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+        --prefix ${{ github.workspace }}/deps ..;
+        cmake --build . --target FastNoise --config ${{ matrix.build_type }} ;
+        cmake --install . ;
         ls ${{ github.workspace }}/deps
 
     - name: Configure CMake
