@@ -21,16 +21,20 @@ jobs:
 
       matrix:
         build_type: [Release, Debug]
-        c_compiler: [gcc, clang]
+        c_compiler: [gcc13, clang-17]
 
     steps:
     - uses: actions/checkout@v3
 
     - name: Install system dependencies
       run: >
+        sudo add-apt-repository ppa:ubuntu-toolchain-r/ppa -y ;
         sudo apt update ;
-        sudo apt install unzip libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev
-        freeglut3-dev
+        sudo apt install g++-13 gcc-13 unzip libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev
+        freeglut3-dev ;
+        wget https://apt.llvm.org/llvm.sh ;
+        chmod u+x llvm.sh ;
+        sudo ./llvm.sh 17
 
     - name: Install conan
       run: >
