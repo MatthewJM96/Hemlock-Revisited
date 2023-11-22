@@ -129,7 +129,7 @@ jobs:
         cd ${{ github.workspace }}/tmp ;
         curl.exe -o FastNoise2-v0.10.0-alpha-Win64-MSVC.zip https://github.com/Auburn/FastNoise2/releases/download/v0.10.0-alpha/FastNoise2-v0.10.0-alpha-Win64-MSVC.zip ;
         ls ; echo "curl done" ;
-        tar -xf ${{ github.workspace }}/tmp/FastNoise2-v0.10.0-alpha-Win64-MSVC.zip
+        tar -xf ${{ github.workspace }}/tmp/FastNoise2-v0.10.0-alpha-Win64-MSVC.zip ;
         ls ;
         mv FastNoise2/* ${{ github.workspace }}/deps ;
         ls ${{ github.workspace }}/deps
