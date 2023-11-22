@@ -127,7 +127,7 @@ jobs:
         mkdir -p ${{ github.workspace }}/tmp ;
         cd ${{ github.workspace }}/tmp ;
         curl.exe -o FastNoise2-v0.10.0-alpha-Win64-MSVC.zip https://github.com/Auburn/FastNoise2/releases/download/v0.10.0-alpha/FastNoise2-v0.10.0-alpha-Win64-MSVC.zip ;
-        tar.exe -xf FastNoise2-v0.10.0-alpha-Win64-MSVC.zip ;
+        powershell -command "Expand-Archive -Force '${{ github.workspace }}/tmp/FastNoise2-v0.10.0-alpha-Win64-MSVC.zip' '${{ github.workspace }}/tmp'"  ;
         ls ;
         mv FastNoise2/* ${{ github.workspace }}/deps ;
         ls ${{ github.workspace }}/deps
