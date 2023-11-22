@@ -29,7 +29,7 @@ jobs:
     - name: Install system dependencies
       run: |
         sudo apt update ;
-        sudo apt install unzip libxrandr-dev
+        sudo apt install unzip libxrandr-dev libxinerama-dev
 
     - name: Install conan
       run: >
