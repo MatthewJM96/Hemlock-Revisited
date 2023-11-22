@@ -26,6 +26,10 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
+    - name: Install system dependencies
+      run: |
+        sudo apt install unzip
+
     - name: Install conan
       run: >
         python3 -m venv ${{ github.workspace }}/.venv ;
@@ -46,8 +50,10 @@ jobs:
     - name: Install non-conan dependencies
       run: >
         mkdir -p ${{ github.workspace }}/deps ;
+        mkdir -p ${{ github.workspace }}/tmp ;
+        cd ${{ github.workspace }}/tmp ;
         wget https://github.com/Auburn/FastNoise2/archive/refs/tags/v0.10.0-alpha.zip ;
-        tar -xf v0.10.0-alpha.zip ;
+        unzip v0.10.0-alpha.zip ;
         cmake -B FastNoise2-0.10.0-alpha/build
         -DCMAKE_CXX_COMPILER=${{ matrix.c_compiler }}
         -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
@@ -117,8 +123,11 @@ jobs:
     - name: Install non-conan dependencies
       run: >
         mkdir -p ${{ github.workspace }}/deps ;
+        mkdir -p ${{ github.workspace }}/tmp ;
+        cd ${{ github.workspace }}/tmp ;
         curl.exe -o FastNoise2-v0.10.0-alpha-Win64-MSVC.zip https://github.com/Auburn/FastNoise2/releases/download/v0.10.0-alpha/FastNoise2-v0.10.0-alpha-Win64-MSVC.zip ;
         tar.exe -xf FastNoise2-v0.10.0-alpha-Win64-MSVC.zip ;
+        ls ;
         mv FastNoise2/* ${{ github.workspace }}/deps ;
         ls ${{ github.workspace }}/deps
 
@@ -168,6 +177,10 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
+    - name: Install system dependencies
+      run: |
+        brew install unzip
+
     - name: Install conan
       run: >
         python3 -m venv ${{ github.workspace }}/.venv ;
@@ -186,8 +199,10 @@ jobs:
     - name: Install non-conan dependencies
       run: >
         mkdir -p ${{ github.workspace }}/deps ;
+        mkdir -p ${{ github.workspace }}/tmp ;
+        cd ${{ github.workspace }}/tmp ;
         wget https://github.com/Auburn/FastNoise2/releases/download/v0.10.0-alpha/FastNoise2-v0.10.0-alpha-MacOS64-Clang.zip ;
-        tar -xf FastNoise2-v0.10.0-alpha-MacOS64-Clang.zip ;
+        unzip FastNoise2-v0.10.0-alpha-MacOS64-Clang.zip ;
         mv FastNoise2/* ${{ github.workspace }}/deps ;
         ls ${{ github.workspace }}/deps
 
