@@ -5,87 +5,38 @@
 
 namespace hemlock {
     namespace thread {
-        // TODO(Matthew): this constrains the threadpool to still be aware of producer
-        //                and consumer tokens. We should come up with an API that allows
-        //                a moodycamel::ConcurrentQueue to be used under the hood but
-        //                with token choice being handled in the abstraction layer
-        //                around it. We also need this API to support blocking for some
-        //                time - a straightforward 1:1 with moodycamel::
-        //                BlockingConcurrentQueue no doubt works for this.
-        //                  remember that the API needs to handle a few different queue
-        //                  algorithms, including a prioritised queue (EEVDF?), a
-        //                  checkerboard queue, and maybe a pipelined queue
+        class IThreadTask {
+        public:
+            virtual ~IThreadTask() {
+                // Empty.
+            }
+        };
 
-        template <typename Candidate, typename ItemType>
-        concept IsTaskQueue = requires (
-            Candidate                 t,
-            ItemType                  i,
-            moodycamel::ProducerToken p,
-            moodycamel::ConsumerToken c,
-            size_t                    n
-        ) {
-                                  {
-                                      t.enqueue(i)
-                                      } -> std::same_as<bool>;
-                                  {
-                                      t.enqueue(std::move(i))
-                                      } -> std::same_as<bool>;
-                                  {
-                                      t.enqueue(p, i)
-                                      } -> std::same_as<bool>;
-                                  {
-                                      t.enqueue(p, std::move(i))
-                                      } -> std::same_as<bool>;
-                                  {
-                                      t.enqueue_bulk(&i, n)
-                                      } -> std::same_as<bool>;
-                                  {
-                                      t.enqueue_bulk(p, &i, n)
-                                      } -> std::same_as<bool>;
+        struct QueuedTask {
+            IThreadTask* task;
+            bool         delete_on_complete;
+        };
 
-                                  {
-                                      t.try_enqueue(i)
-                                      } -> std::same_as<bool>;
-                                  {
-                                      t.try_enqueue(std::move(i))
-                                      } -> std::same_as<bool>;
-                                  {
-                                      t.try_enqueue(p, i)
-                                      } -> std::same_as<bool>;
-                                  {
-                                      t.try_enqueue(p, std::move(i))
-                                      } -> std::same_as<bool>;
-                                  {
-                                      t.try_enqueue_bulk(&i, n)
-                                      } -> std::same_as<bool>;
-                                  {
-                                      t.try_enqueue_bulk(p, &i, n)
-                                      } -> std::same_as<bool>;
+        using QueueDelegate = Delegate<bool(QueuedTask&&)>;
 
-                                  {
-                                      t.try_dequeue(i)
-                                      } -> std::same_as<bool>;
-                                  {
-                                      t.try_dequeue(c, i)
-                                      } -> std::same_as<bool>;
-                                  {
-                                      t.try_dequeue_bulk(&i, n)
-                                      } -> std::same_as<size_t>;
-                                  {
-                                      t.try_dequeue_bulk(c, &i, n)
-                                      } -> std::same_as<size_t>;
+        class BasicTaskQueue : public moodycamel::BlockingConcurrentQueue<QueuedTask> {
+        public:
+            QueueDelegate dequeue(QueuedTask& task, std::chrono::microseconds timeout) {
+                wait_dequeue_timed(task, timeout);
 
-                                  {
-                                      t.try_dequeue_from_producer(p, i)
-                                      } -> std::same_as<bool>;
-                                  {
-                                      t.try_dequeue_bulk_from_producer(p, &i, n)
-                                      } -> std::same_as<size_t>;
+                return QueueDelegate{ [this](QueuedTask&& task) {
+                    return this->enqueue(std::forward<QueuedTask>(task));
+                } };
+            }
+        };
 
-                                  {
-                                      t.size_approx()
-                                      } -> std::same_as<size_t>;
-                              };
+        template <typename Candidate>
+        concept IsTaskQueue
+            = requires (Candidate c, QueuedTask& i, std::chrono::microseconds t) {
+                  {
+                      c.dequeue(i, t)
+                      } -> std::same_as<QueueDelegate>;
+              };
     }  // namespace thread
 }  // namespace hemlock
 namespace hthread = hemlock::thread;

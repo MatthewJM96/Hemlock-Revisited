@@ -11,7 +11,7 @@ namespace hemlock {
         template <IsThreadState ThreadState>
         struct HeldWorkflowTask {
             IThreadWorkflowTask<ThreadState>* task;
-            bool                              should_delete;
+            bool                              delete_on_complete;
         };
 
         using ThreadWorkflowTaskID = i32;

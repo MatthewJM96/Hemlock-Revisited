@@ -14,9 +14,6 @@ namespace hemlock {
         };
 
         template <IsThreadState ThreadState>
-        using BasicTaskQueue = moodycamel::BlockingConcurrentQueue<HeldTask>;
-
-        template <IsThreadState ThreadState>
         struct Thread {
             std::thread thread;
 
@@ -27,14 +24,14 @@ namespace hemlock {
         using Threads = std::vector<Thread<ThreadState>>;
 
         template <
-            IsThreadState ThreadState,
-            typename TaskQueue                = BasicTaskQueue<ThreadState>,
-            ThreadpoolTimingResolution Timing = ThreadpoolTimingResolution::NONE>
+            IsThreadState              ThreadState,
+            IsTaskQueue                TaskQueue = BasicTaskQueue,
+            ThreadpoolTimingResolution Timing    = ThreadpoolTimingResolution::NONE>
         class ThreadPool;
 
         template <
-            IsThreadState ThreadState,
-            typename TaskQueue,
+            IsThreadState              ThreadState,
+            IsTaskQueue                TaskQueue,
             ThreadpoolTimingResolution Timing>
         using ThreadMainFunc = Delegate<void(ThreadState*, TaskQueue*)>;
     }  // namespace thread
@@ -46,8 +43,8 @@ namespace hthread = hemlock::thread;
 namespace hemlock {
     namespace thread {
         template <
-            IsThreadState ThreadState,
-            typename TaskQueue,
+            IsThreadState              ThreadState,
+            IsTaskQueue                TaskQueue,
             ThreadpoolTimingResolution Timing>
         class ThreadPool {
         public:
@@ -102,7 +99,7 @@ namespace hemlock {
              *
              * @param task The task to add.
              */
-            void add_task(HeldTask task);
+            void add_task(QueuedTask task);
             /**
              * @brief Adds a set of tasks to the task queue.
              *
@@ -111,7 +108,7 @@ namespace hemlock {
              *
              * @param task The tasks to add.
              */
-            void add_tasks(HeldTask tasks[], size_t task_count);
+            void add_tasks(QueuedTask tasks[], size_t task_count);
 
             /**
              * @brief Adds a task to the task queue.
@@ -122,7 +119,7 @@ namespace hemlock {
              *
              * @param task The task to add.
              */
-            void threadsafe_add_task(HeldTask task);
+            void threadsafe_add_task(QueuedTask task);
             /**
              * @brief Adds a set of tasks to the task queue.
              *
@@ -132,7 +129,7 @@ namespace hemlock {
              *
              * @param task The tasks to add.
              */
-            void threadsafe_add_tasks(HeldTask tasks[], size_t task_count);
+            void threadsafe_add_tasks(QueuedTask tasks[], size_t task_count);
 
             /**
              * @brief The number of threads held by the thread pool.

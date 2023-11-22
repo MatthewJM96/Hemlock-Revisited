@@ -20,7 +20,7 @@ void hthread::IThreadWorkflowTask<ThreadState>::set_workflow_metadata(
 
 template <hthread::IsThreadState ThreadState>
 void hthread::IThreadWorkflowTask<ThreadState>::execute(
-    typename Thread<ThreadState>::State* state, BasicTaskQueue<ThreadState>* task_queue
+    typename Thread<ThreadState>::State* state, BasicTaskQueue* task_queue
 ) {
     if (run_task(state, task_queue) && m_dag) {
         auto [start, last] = m_dag->graph.equal_range(m_task_idx);
@@ -39,7 +39,7 @@ void hthread::IThreadWorkflowTask<ThreadState>::execute(
                 task_queue->enqueue(
                     state->producer_token,
                     { m_tasks.tasks.get()[next_task_idx].task,
-                      m_tasks.tasks.get()[next_task_idx].should_delete }
+                      m_tasks.tasks.get()[next_task_idx].delete_on_complete }
                 );
             }
         }
@@ -81,6 +81,6 @@ void hthread::ThreadWorkflow<ThreadState>::run(
             tasks, entry_task, m_dag, task_completion_states
         );
         m_thread_pool->add_task({ tasks.tasks.get()[entry_task].task,
-                                  tasks.tasks.get()[entry_task].should_delete });
+                                  tasks.tasks.get()[entry_task].delete_on_complete });
     }
 }

@@ -6,9 +6,8 @@ namespace hemlock {
         class IOManagerBase;
 
         using IOTaskThreadState = thread::BasicThreadState;
-        using IOTaskQueue       = thread::BasicTaskQueue<IOTaskThreadState>;
 
-        class IOTask : public thread::ThreadTaskBase<IOTaskThreadState, IOTaskQueue> {
+        class IOTask : public thread::ThreadTaskBase<IOTaskThreadState> {
         public:
             void init(IOManagerBase* iomanager) { m_iomanager = iomanager; }
         protected:

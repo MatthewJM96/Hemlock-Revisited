@@ -14,10 +14,8 @@ namespace hemlock {
         };
 
         using ChunkThreadState = thread::BasicThreadState;
-        using ChunkTaskQueue   = thread::BasicTaskQueue<ChunkThreadState>;
 
-        class ChunkTask :
-            public thread::ThreadTaskBase<ChunkThreadState, ChunkTaskQueue> {
+        class ChunkTask : public thread::ThreadTaskBase<ChunkThreadState> {
         public:
             virtual ~ChunkTask() { /* Empty. */
             }

@@ -1,6 +1,6 @@
 template <
-    hthread::IsThreadState ThreadState,
-    typename TaskQueue,
+    hthread::IsThreadState              ThreadState,
+    hthread::IsTaskQueue                TaskQueue,
     hthread::ThreadpoolTimingResolution Timing>
 void hthread::ThreadPool<ThreadState, TaskQueue, Timing>::init(
     ui32 thread_count,
@@ -25,17 +25,14 @@ void hthread::ThreadPool<ThreadState, TaskQueue, Timing>::init(
                 ),
                 &m_tasks
             ),
-            .state{.consumer_token = moodycamel::ConsumerToken(m_tasks),
-                   .producer_token = moodycamel::ProducerToken(m_tasks),
-                   .stop           = false,
-                   .suspend        = false}
+            .state{.stop = false, .suspend = false}
         });
     }
 }
 
 template <
-    hthread::IsThreadState ThreadState,
-    typename TaskQueue,
+    hthread::IsThreadState              ThreadState,
+    hthread::IsTaskQueue                TaskQueue,
     hthread::ThreadpoolTimingResolution Timing>
 void hthread::ThreadPool<ThreadState, TaskQueue, Timing>::dispose() {
     if (!m_is_initialised) return;
@@ -56,55 +53,55 @@ void hthread::ThreadPool<ThreadState, TaskQueue, Timing>::dispose() {
 }
 
 template <
-    hthread::IsThreadState ThreadState,
-    typename TaskQueue,
+    hthread::IsThreadState              ThreadState,
+    hthread::IsTaskQueue                TaskQueue,
     hthread::ThreadpoolTimingResolution Timing>
 void hthread::ThreadPool<ThreadState, TaskQueue, Timing>::suspend() {
     for (auto& thread : m_threads) thread.state.suspend = true;
 }
 
 template <
-    hthread::IsThreadState ThreadState,
-    typename TaskQueue,
+    hthread::IsThreadState              ThreadState,
+    hthread::IsTaskQueue                TaskQueue,
     hthread::ThreadpoolTimingResolution Timing>
 void hthread::ThreadPool<ThreadState, TaskQueue, Timing>::resume() {
     for (auto& thread : m_threads) thread.state.suspend = false;
 }
 
 template <
-    hthread::IsThreadState ThreadState,
-    typename TaskQueue,
+    hthread::IsThreadState              ThreadState,
+    hthread::IsTaskQueue                TaskQueue,
     hthread::ThreadpoolTimingResolution Timing>
-void hthread::ThreadPool<ThreadState, TaskQueue, Timing>::add_task(HeldTask task) {
+void hthread::ThreadPool<ThreadState, TaskQueue, Timing>::add_task(QueuedTask task) {
     m_tasks.enqueue(m_producer_token, task);
 }
 
 template <
-    hthread::IsThreadState ThreadState,
-    typename TaskQueue,
+    hthread::IsThreadState              ThreadState,
+    hthread::IsTaskQueue                TaskQueue,
     hthread::ThreadpoolTimingResolution Timing>
 void hthread::ThreadPool<ThreadState, TaskQueue, Timing>::add_tasks(
-    HeldTask tasks[], size_t task_count
+    QueuedTask tasks[], size_t task_count
 ) {
     m_tasks.enqueue_bulk(m_producer_token, tasks, task_count);
 }
 
 template <
-    hthread::IsThreadState ThreadState,
-    typename TaskQueue,
+    hthread::IsThreadState              ThreadState,
+    hthread::IsTaskQueue                TaskQueue,
     hthread::ThreadpoolTimingResolution Timing>
 void hthread::ThreadPool<ThreadState, TaskQueue, Timing>::threadsafe_add_task(
-    HeldTask task
+    QueuedTask task
 ) {
     m_tasks.enqueue(task);
 }
 
 template <
-    hthread::IsThreadState ThreadState,
-    typename TaskQueue,
+    hthread::IsThreadState              ThreadState,
+    hthread::IsTaskQueue                TaskQueue,
     hthread::ThreadpoolTimingResolution Timing>
 void hthread::ThreadPool<ThreadState, TaskQueue, Timing>::threadsafe_add_tasks(
-    HeldTask tasks[], size_t task_count
+    QueuedTask tasks[], size_t task_count
 ) {
     m_tasks.enqueue_bulk(tasks, task_count);
 }

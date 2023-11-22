@@ -13,8 +13,8 @@ namespace hemlock {
          * for example if a task needs to chain a follow-up task.
          */
         template <
-            IsThreadState ThreadState,
-            typename TaskQueue,
+            IsThreadState              ThreadState,
+            IsTaskQueue                TaskQueue,
             ThreadpoolTimingResolution Timing>
         void basic_thread_main(ThreadState* state, TaskQueue* task_queue) {
             state->stop    = false;
@@ -30,33 +30,32 @@ namespace hemlock {
             //                  spin pattern used in lightweight semaphore is
             //                  doing anything bad to us. This is doubtful.
 
-            HeldTask held = { nullptr, false };
+            QueuedTask current_task = { nullptr, false };
             while (!state->stop) {
-                // TODO(Matthew): have this dequeue the HeldTask and a pointer to the
-                //                underlying queue it was dequeued from (require this
-                //                to be moodycamel?) and then use the latter if we need
-                //                to requeue.
-                task_queue->wait_dequeue_timed(
-                    state->consumer_token, held, std::chrono::milliseconds(1)
-                );
+                auto queue
+                    = task_queue->dequeue(current_task, std::chrono::microseconds(100));
 
                 while (state->suspend)
-                    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                    std::this_thread::sleep_for(std::chrono::milliseconds(1));
 
-                if (!held.task) {
+                if (!current_task.task) {
                     std::this_thread::yield();
                     continue;
                 }
 
-                auto* task = reinterpret_cast<ThreadTaskBase<ThreadState, TaskQueue>*>(
-                    held.task
-                );
-                if (task->execute(state, task_queue)) {
+                auto task
+                    = reinterpret_cast<ThreadTaskBase<ThreadState>*>(current_task.task);
+
+                if (task->execute(state, &queue)) {
+                    // Task completed, handle disposal.
+
                     task->dispose();
-                    if (held.should_delete) delete task;
-                    held.task = nullptr;
+                    if (current_task.delete_on_complete) delete task;
+                    current_task.task = nullptr;
                 } else {
-                    task_queue->enqueue(state->producer_token, std::move(held));
+                    // Task did not complete, requeue it.
+
+                    queue(std::move(current_task));
                 }
             }
         }

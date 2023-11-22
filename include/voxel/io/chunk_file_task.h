@@ -8,7 +8,6 @@ namespace hemlock {
         struct Chunk;
 
         using ChunkFileTaskThreadState = io::IOTaskThreadState;
-        using ChunkFileTaskQueue       = io::IOTaskQueue;
 
         class ChunkFileTask : public io::IOTask {
         public:

@@ -1,23 +1,12 @@
 #ifndef __hemlock_thread_task_hpp
 #define __hemlock_thread_task_hpp
 
+#include "thread/task_queue.hpp"
 #include "thread/thread_state.hpp"
 
 namespace hemlock {
     namespace thread {
-        class IThreadTask {
-        public:
-            virtual ~IThreadTask() {
-                // Empty.
-            }
-        };
-
-        struct HeldTask {
-            IThreadTask* task;
-            bool         should_delete;
-        };
-
-        template <IsThreadState ThreadState, typename TaskQueue>
+        template <IsThreadState ThreadState>
         class ThreadTaskBase : public IThreadTask {
         public:
             ThreadTaskBase() {
@@ -48,7 +37,7 @@ namespace hemlock {
              * @return True if the task completed, false if it needs to
              * be re-queued.
              */
-            virtual bool execute(ThreadState* state, TaskQueue* task_queue) = 0;
+            virtual bool execute(ThreadState* state, QueueDelegate* task_queue) = 0;
         };
     }  // namespace thread
 }  // namespace hemlock
