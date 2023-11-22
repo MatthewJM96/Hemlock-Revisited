@@ -154,7 +154,7 @@ jobs:
         Invoke-WebRequest 'https://github.com/lucasb-eyer/libheatmap/archive/refs/heads/master.zip' -OutFile libheatmap.zip ;
         Expand-Archive -Path libheatmap.zip -DestinationPath ${{ github.workspace }}\tmp ;
         cd libheatmap-master ;
-        make ;
+        msbuild heatmap.sln;
         mv libheatmap.so ${{ github.workspace }}/deps/lib ;
         mkdir -p ${{ github.workspace }}/deps/include/libheatmap ;
         cp heatmap.h ${{ github.workspace }}/deps/include/libheatmap ;
