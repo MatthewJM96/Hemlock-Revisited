@@ -40,7 +40,7 @@ jobs:
         conan profile new default --detect ;
         conan profile update conf.tools.system.package_manager:mode=install default ;
         conan profile update conf.tools.system.package_manager:sudo=True default ;
-        conan profile update settings.compiler.libcxx=libstdc++11 default
+        conan profile update settings.compiler.libcxx=libstdc++ default
 
     - name: Set reusable strings
       # Turn repeated input strings (such as the build output directory) into step outputs. These step outputs can be used throughout the workflow file.
