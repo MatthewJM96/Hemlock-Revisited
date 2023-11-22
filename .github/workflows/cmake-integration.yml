@@ -30,7 +30,7 @@ jobs:
       run: >
         sudo add-apt-repository ppa:ubuntu-toolchain-r/ppa -y ;
         sudo apt update ;
-        sudo apt install g++-13 gcc-13 unzip libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev libomp-dev
+        sudo apt install g++-13 gcc-13 unzip libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev
         freeglut3-dev ;
         wget https://apt.llvm.org/llvm.sh ;
         chmod u+x llvm.sh ;
@@ -78,7 +78,8 @@ jobs:
         cd ${{ github.workspace }}/tmp ;
         git clone https://github.com/lucasb-eyer/libheatmap.git ;
         cd libheatmap ;
-        sed -i 's/-Wextra -Wa,-ahl=\$(@:\.o=\.s)/-Wextra/' Makefile ;
+        sed -i 's/-fopenmp -Wall -Wextra -Wa,-ahl=\$(@:\.o=\.s)/-Wall -Wextra/' Makefile ;
+        sed -i 's/DEFAULT_LDFLAGS=-fopenmp/DEFAULT_LDFLAGS=/' Makefile ;
         make CC=${{ matrix.c_compiler }} ;
         mv libheatmap.a ${{ github.workspace }}/deps/lib ;
         mkdir -p ${{ github.workspace }}/deps/include/libheatmap ;
