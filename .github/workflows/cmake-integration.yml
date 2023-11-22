@@ -30,7 +30,7 @@ jobs:
       run: >
         python3 -m venv ${{ github.workspace }}/.venv ;
         source ${{ github.workspace }}/.venv/bin/activate ;
-        pip install conan ;
+        pip install conan==1.62.0 ;
         conan profile detect
 
     - name: Set reusable strings
@@ -87,7 +87,7 @@ jobs:
         python3 -m venv ${{ github.workspace }}/.venv ;
         cd ${{ github.workspace }} ;
         .\.venv\bin\activate ;
-        pip install conan ;
+        pip install conan==1.62.0 ;
         conan profile detect
 
     - name: Set reusable strings
@@ -146,7 +146,7 @@ jobs:
       run: >
         python3 -m venv ${{ github.workspace }}/.venv ;
         source ${{ github.workspace }}/.venv/bin/activate ;
-        pip install conan ;
+        pip install conan==1.62.0 ;
         conan profile detect
 
     - name: Set reusable strings
