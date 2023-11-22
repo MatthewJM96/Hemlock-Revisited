@@ -77,7 +77,7 @@ jobs:
         git clone https://github.com/lucasb-eyer/libheatmap.git ;
         cd libheatmap ;
         make ;
-        mv libheatmap.so ${{ github.workspace }}/deps/lib ;
+        mv libheatmap.a ${{ github.workspace }}/deps/lib ;
         mkdir -p ${{ github.workspace }}/deps/include/libheatmap ;
         cp heatmap.h ${{ github.workspace }}/deps/include/libheatmap ;
         mkdir -p ${{ github.workspace }}/deps/include/libheatmap/colorschemes ;
