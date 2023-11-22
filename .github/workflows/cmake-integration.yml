@@ -21,7 +21,7 @@ jobs:
 
       matrix:
         build_type: [Release, Debug]
-        c_compiler: [gcc13, clang-17]
+        c_compiler: [gcc-13, clang-17]
 
     steps:
     - uses: actions/checkout@v3
