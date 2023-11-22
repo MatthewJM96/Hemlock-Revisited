@@ -31,7 +31,7 @@ jobs:
         python3 -m venv ${{ github.workspace }}/.venv ;
         source ${{ github.workspace }}/.venv/bin/activate ;
         pip install conan==1.62.0 ;
-        conan profile update conf "tools.system.package_manager:mode=install" default
+        conan profile update conf.tools.system.package_manager:mode=install default
 
     - name: Set reusable strings
       # Turn repeated input strings (such as the build output directory) into step outputs. These step outputs can be used throughout the workflow file.
@@ -88,7 +88,7 @@ jobs:
         cd ${{ github.workspace }} ;
         .\.venv\Scripts\activate ;
         pip install conan==1.62.0 ;
-        conan profile update conf "tools.system.package_manager:mode=install" default
+        conan profile update conf.tools.system.package_manager:mode=install default
 
     - name: Set reusable strings
       # Turn repeated input strings (such as the build output directory) into step outputs. These step outputs can be used throughout the workflow file.
@@ -148,7 +148,7 @@ jobs:
         python3 -m venv ${{ github.workspace }}/.venv ;
         source ${{ github.workspace }}/.venv/bin/activate ;
         pip install conan==1.62.0 ;
-        conan profile update conf "tools.system.package_manager:mode=install" default
+        conan profile update conf.tools.system.package_manager:mode=install default
 
     - name: Set reusable strings
       # Turn repeated input strings (such as the build output directory) into step outputs. These step outputs can be used throughout the workflow file.
