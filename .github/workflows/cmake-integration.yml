@@ -89,7 +89,7 @@ jobs:
         cd libheatmap ;
         sed -i 's/-fopenmp -Wall -Wextra -Wa,-ahl=\$(@:\.o=\.s)/-Wall -Wextra/' Makefile ;
         sed -i 's/DEFAULT_LDFLAGS=-fopenmp/DEFAULT_LDFLAGS=/' Makefile ;
-        make CC=${{ matrix.c_compiler }} ;
+        make CC=${{ matrix.c_compiler }} CXX=${{ matrix.cpp_compiler }} ;
         mv libheatmap.a ${{ github.workspace }}/deps/lib ;
         mkdir -p ${{ github.workspace }}/deps/include/libheatmap ;
         cp heatmap.h ${{ github.workspace }}/deps/include/libheatmap ;
@@ -261,7 +261,7 @@ jobs:
         cd libheatmap ;
         sed -i '' -e 's/-fopenmp -Wall -Wextra -Wa,-ahl=\$(@:\.o=\.s)/-Wall -Wextra/' Makefile ;
         sed -i '' -e 's/DEFAULT_LDFLAGS=-fopenmp/DEFAULT_LDFLAGS=/' Makefile ;
-        make CC=clang ;
+        make CC=clang CXX=clang ;
         mv libheatmap.a ${{ github.workspace }}/deps/lib ;
         mkdir -p ${{ github.workspace }}/deps/include/libheatmap ;
         cp heatmap.h ${{ github.workspace }}/deps/include/libheatmap ;
