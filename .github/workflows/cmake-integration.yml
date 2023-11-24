@@ -25,8 +25,8 @@ jobs:
         include:
           - c_compiler: gcc-13
             cpp_compiler: g++-13
-          - c_compiler: clang++-17
-            cpp_compiler: clang-17
+          - c_compiler: clang-17
+            cpp_compiler: clang++-17
           - c_compiler: clang-16
             cpp_compiler: clang++-16
           - c_compiler: clang-15
