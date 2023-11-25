@@ -80,6 +80,7 @@ happ::WindowError happ::Window::init(WindowSettings settings /*= {}*/) {
         return WindowError::SDL_GL_CONTEXT;
     }
 
+#    if !defined(HEMLOCK_OS_MAC)
     GLenum error = glewInit();
     if (error != GLEW_OK) {
         debug_printf("Couldn't initialise Glew.\n");
@@ -88,6 +89,7 @@ happ::WindowError happ::Window::init(WindowSettings settings /*= {}*/) {
 
         return WindowError::GLEW_INIT;
     }
+#    endif  // if defined(HEMLOCK_OS_MAC)
 
     // TODO(Matthew): Do we do this here? For multiple windows do these need resetting
     //                each time we change which window we are working on?
@@ -266,7 +268,7 @@ void happ::Window::set_dimensions(WindowDimensions dimensions) {
 
 #if defined(HEMLOCK_USING_SDL)
     SDL_SetWindowSize(m_window, dimensions.width, dimensions.height);
-#endif    // defined(HEMLOCK_USING_SDL)
+#endif  // defined(HEMLOCK_USING_SDL)
 
     set_internal_dimensions(dimensions);
 }
