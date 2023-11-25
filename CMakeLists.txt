@@ -315,7 +315,7 @@ set(Hemlock_Libraries
     ${SDL2_ttf_LIBRARIES}
     ${PNG_LIBRARIES}
     ${concurrentqueue_LIBRARIES}
-    ${Boost_LIBRARIES}
+    ${Boost_iostreams_LIBRARY}
     ${Bullet_LIBRARIES}
     ${EnTT_LIBRARIES}
     ${yaml-cpp_LIBRARIES}
