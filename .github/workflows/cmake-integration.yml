@@ -85,12 +85,16 @@ jobs:
         cmake --build . --config ${{ matrix.build_type }} ;
         cmake --install . --prefix ${{ github.workspace }}/deps ;
         cd ${{ github.workspace }}/tmp ;
-        git clone https://github.com/lucasb-eyer/libheatmap.git ;
+        git clone https://github.com/MatthewJM96/libheatmap.git ;
         cd libheatmap ;
-        sed -i 's/-fopenmp -Wall -Wextra -Wa,-ahl=\$(@:\.o=\.s)/-Wall -Wextra/' Makefile ;
-        sed -i 's/DEFAULT_LDFLAGS=-fopenmp/DEFAULT_LDFLAGS=/' Makefile ;
-        make CC=${{ matrix.c_compiler }} CXX=${{ matrix.cpp_compiler }} ;
-        mv libheatmap.a ${{ github.workspace }}/deps/lib ;
+        cmake -B build
+        -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}
+        -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
+        -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+        -A x64
+        -S ${{ github.workspace }} ;
+        cmake --build build --config ${{ matrix.build_type }} ;
+        mv build/libheatmap.a ${{ github.workspace }}/deps/lib ;
         mkdir -p ${{ github.workspace }}/deps/include/libheatmap ;
         cp heatmap.h ${{ github.workspace }}/deps/include/libheatmap ;
         mkdir -p ${{ github.workspace }}/deps/include/libheatmap/colorschemes ;
@@ -168,14 +172,18 @@ jobs:
         Invoke-WebRequest 'https://github.com/Auburn/FastNoise2/releases/download/v0.10.0-alpha/FastNoise2-v0.10.0-alpha-Win64-MSVC.zip' -OutFile FastNoise2.zip ;
         Expand-Archive -Path FastNoise2.zip -DestinationPath ${{ github.workspace }}\tmp ;
         mv FastNoise2/* ${{ github.workspace }}\deps ;
-        Invoke-WebRequest 'https://github.com/lucasb-eyer/libheatmap/archive/refs/heads/master.zip' -OutFile libheatmap.zip ;
+        Invoke-WebRequest 'https://github.com/MatthewJM96/libheatmap/archive/refs/heads/master.zip' -OutFile libheatmap.zip ;
         Expand-Archive -Path libheatmap.zip -DestinationPath ${{ github.workspace }}\tmp ;
         cd libheatmap-master ;
-        msbuild heatmap.sln /p:Platform=x64 /p:PlatformToolset=v143 /p:Configuration=${{ matrix.build_type }} ;
-        ls ;
-        ls ${{ matrix.build_type }} ;
-        ls x64-${{ matrix.build_type }} ;
-        mv ${{ matrix.build_type }}/heatmap.lib ${{ github.workspace }}/deps/lib ;
+        cmake -B build
+        -DCMAKE_CXX_COMPILER=cl
+        -DCMAKE_C_COMPILER=cl
+        -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+        -A x64
+        -S ${{ github.workspace }} ;
+        cmake --build build --config ${{ matrix.build_type }} ;
+        ls build ;
+        mv build/libheatmap.lib ${{ github.workspace }}/deps/lib ;
         mkdir -p ${{ github.workspace }}/deps/include/libheatmap ;
         copy heatmap.h ${{ github.workspace }}/deps/include/libheatmap ;
         mkdir -p ${{ github.workspace }}/deps/include/libheatmap/colorschemes ;
@@ -258,12 +266,16 @@ jobs:
         unzip FastNoise2-v0.10.0-alpha-MacOS64-Clang.zip ;
         mv FastNoise2/* ${{ github.workspace }}/deps ;
         cd ${{ github.workspace }}/tmp ;
-        git clone https://github.com/lucasb-eyer/libheatmap.git ;
+        git clone https://github.com/MatthewJM96/libheatmap.git ;
         cd libheatmap ;
-        sed -i '' -e 's/-fopenmp -Wall -Wextra -Wa,-ahl=\$(@:\.o=\.s)/-Wall -Wextra/' Makefile ;
-        sed -i '' -e 's/DEFAULT_LDFLAGS=-fopenmp/DEFAULT_LDFLAGS=/' Makefile ;
-        make CC=clang CXX=clang++ ;
-        mv libheatmap.a ${{ github.workspace }}/deps/lib ;
+        cmake -B build
+        -DCMAKE_CXX_COMPILER=clang++
+        -DCMAKE_C_COMPILER=clang
+        -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+        -A x64
+        -S ${{ github.workspace }} ;
+        cmake --build build --config ${{ matrix.build_type }} ;
+        mv build/libheatmap.a ${{ github.workspace }}/deps/lib ;
         mkdir -p ${{ github.workspace }}/deps/include/libheatmap ;
         cp heatmap.h ${{ github.workspace }}/deps/include/libheatmap ;
         mkdir -p ${{ github.workspace }}/deps/include/libheatmap/colorschemes ;
