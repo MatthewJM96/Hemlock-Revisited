@@ -353,7 +353,7 @@ if (HEMLOCK_USING_OPENGL)
         )
         set(Hemlock_Libraries
             ${Hemlock_Libraries}
-            ${GLEW_LIBRARIES}
+            GLEW::GLEW
         )
     endif()
 elseif(HEMLOCK_USING_VULKAN)
