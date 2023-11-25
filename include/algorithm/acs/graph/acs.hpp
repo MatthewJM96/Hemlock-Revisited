@@ -107,7 +107,7 @@ namespace hemlock {
                           );
 
                     try {
-                        auto source_pheromones = pheromone_map.at(_source);
+                        auto& source_pheromones = pheromone_map.at(_source);
                         try {
                             return source_pheromones.at(_destination);
                         } catch (std::out_of_range&) {
