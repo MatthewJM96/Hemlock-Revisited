@@ -73,6 +73,8 @@
 #if defined(HEMLOCK_USING_OPENGL)
 // OpenGL SDK (using Glew where extension wrangling needed).
 #  if defined(HEMLOCK_OS_MAC)
+//   Apple deprecated OpenGL entirely...
+#    define GL_SILENCE_DEPRECATION
 #    include <OpenGL/gl.h>
 #    include <OpenGL/glu.h>
 #  else  // defined(HEMLOCK_OS_MAC)
