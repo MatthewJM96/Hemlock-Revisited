@@ -66,6 +66,7 @@ jobs:
 
     - name: Install non-conan dependencies
       run: >
+        source ${{ github.workspace }}/.venv/bin/activate ;
         mkdir -p ${{ github.workspace }}/deps/bin ;
         mkdir -p ${{ github.workspace }}/deps/include ;
         mkdir -p ${{ github.workspace }}/deps/lib ;
@@ -163,6 +164,8 @@ jobs:
 
     - name: Install non-conan dependencies
       run: >
+        cd ${{ github.workspace }} ;
+        .\.venv\Scripts\activate ;
         mkdir -p ${{ github.workspace }}/deps/bin ;
         mkdir -p ${{ github.workspace }}/deps/include ;
         mkdir -p ${{ github.workspace }}/deps/lib ;
@@ -256,6 +259,7 @@ jobs:
 
     - name: Install non-conan dependencies
       run: >
+        source ${{ github.workspace }}/.venv/bin/activate ;
         mkdir -p ${{ github.workspace }}/deps/bin ;
         mkdir -p ${{ github.workspace }}/deps/include ;
         mkdir -p ${{ github.workspace }}/deps/lib ;
