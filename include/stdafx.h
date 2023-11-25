@@ -1,14 +1,12 @@
 #ifndef __hemlock_stdafx_h
 #define __hemlock_stdafx_h
 
-// Basics
-#include <cstdlib>
-
-// Our generic preprocessor macros.
-#include "preprocessor.hpp"
-
 // Our compatibility definitions.
 #include "compat.hpp"
+
+// Basics
+#include <cstdint>
+#include <cstdlib>
 
 // Containers
 #include <boost/circular_buffer.hpp>
@@ -106,6 +104,9 @@
 #    define lua_pushglobaltable(L) lua_pushvalue(L, LUA_GLOBALSINDEX)
 #  endif  // lua_pushglobaltable
 #endif    // defined(HELOCK_USING_LUA)
+
+// Our generic preprocessor macros.
+#include "preprocessor.hpp"
 
 // Our constants.
 #include "constants.hpp"
