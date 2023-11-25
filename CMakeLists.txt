@@ -1,5 +1,11 @@
 cmake_minimum_required(VERSION 3.22)
 
+########################################################################################
+
+#######################
+#     Setup Conan     #
+#######################
+
 message(STATUS "Downloading conan.cmake from https://github.com/conan-io/cmake-conan")
 file(DOWNLOAD "https://raw.githubusercontent.com/conan-io/cmake-conan/0.18.1/conan.cmake"
             "${CMAKE_BINARY_DIR}/cmake/conan.cmake"
@@ -15,6 +21,12 @@ else()
 endif()
 
 include(${CMAKE_BINARY_DIR}/cmake/conan.cmake)
+
+########################################################################################
+
+###########################
+#     Hemlock Options     #
+###########################
 
 project(Hemlock_Revisited)
 
@@ -102,6 +114,15 @@ endif()
 #     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fmodules -fprebuilt-module-path=${PROJECT_BINARY_DIR}/clm/${CMAKE_BUILD_TYPE}/")
 # endif()
 
+########################################################################################
+
+################################
+#     Hemlock Dependencies     #
+################################
+
+# Here we specify libraries we require that Conan will be responsible for
+# obtaining.
+
 set(Hemlock_Requirements
     glm/0.9.9.8
     sdl/2.26.1
@@ -115,7 +136,7 @@ set(Hemlock_Requirements
     zlib/1.2.13
 )
 
-if (HEMLOCK_USING_OPENGL)
+if (HEMLOCK_USING_OPENGL AND NOT APPLE)
     set(Hemlock_Requirements
         ${Hemlock_Requirements}
         glew/2.2.0
@@ -129,6 +150,15 @@ if (HEMLOCK_USING_LUA)
     )
 endif()
 
+########################################################################################
+
+########################################
+#     Hemlock Depency Installation     #
+########################################
+
+# Here we get Conan to install all those dependencies we have specified, using the same
+# release mode, compiler, std library and so on that we will use to build Hemlock.
+
 conan_cmake_configure(REQUIRES ${Hemlock_Requirements}
                       GENERATORS cmake_find_package)
 
@@ -141,9 +171,22 @@ conan_cmake_install(PATH_OR_REFERENCE .
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_BINARY_DIR}")
 
+########################################################################################
+
+########################################
+#     Hemlock Dependency Discovery     #
+########################################
+
+# Now all dependencies are built, we "discover them", i.e. set up some useful variables
+# containing include directories and libraries we will add to our target.
+
 if (HEMLOCK_USING_OPENGL)
     find_package(OpenGL REQUIRED)
-    find_package(GLEW REQUIRED)
+    if (NOT APPLE)
+        find_package(GLEW REQUIRED)
+    endif()
+elseif (HEMLOCK_USING_VULKAN)
+    find_package(Vulkan REQUIRED)
 endif()
 find_package(glm REQUIRED)
 find_package(SDL2 REQUIRED)
@@ -157,6 +200,12 @@ find_package(yaml-cpp REQUIRED)
 if (HEMLOCK_USING_LUA)
     find_package(luajit REQUIRED)
 endif()
+
+########################################################################################
+
+#######################################
+#     Hemlock Compile Definitions     #
+#######################################
 
 if (HEMLOCK_USING_SDL)
     add_compile_definitions(HEMLOCK_USING_SDL=1)
@@ -181,6 +230,12 @@ endif()
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     add_compile_definitions(DEBUG=1)
 endif()
+
+########################################################################################
+
+###############################
+#     Hemlock Source Tree     #
+###############################
 
 add_executable(Hemlock_Revisited
     "${PROJECT_SOURCE_DIR}/src/stdafx.cpp"
@@ -235,6 +290,14 @@ target_precompile_headers(Hemlock_Revisited
         include/stdafx.h
 )
 
+########################################################################################
+
+###################################################
+#     Hemlock Include and Library Directories     #
+###################################################
+
+# Globally used includes and libraries.
+
 set(Hemlock_Include_Dirs
     ${glm_INCLUDE_DIRS}
     ${SDL2_INCLUDE_DIRS}
@@ -246,20 +309,93 @@ set(Hemlock_Include_Dirs
     ${EnTT_INCLUDE_DIRS}
     ${yaml-cpp_INCLUDE_DIRS}
 )
+set(Hemlock_Libraries
+    ${glm_LIBRARIES}
+    ${SDL2_LIBRARIES}
+    ${SDL2_ttf_LIBRARIES}
+    ${PNG_LIBRARIES}
+    ${concurrentqueue_LIBRARIES}
+    ${Boost_LIBRARIES}
+    ${Bullet_LIBRARIES}
+    ${EnTT_LIBRARIES}
+    ${yaml-cpp_LIBRARIES}
+    heatmap
+)
+
+# Noise generation library.
+
+if(CMAKE_BUILD_TYPE STREQUAL "Release" OR HEMLOCK_FAST_DEBUG)
+    set(Hemlock_Libraries
+        ${Hemlock_Libraries}
+        FastNoise
+    )
+else()
+    set(Hemlock_Libraries
+        ${Hemlock_Libraries}
+        FastNoiseD
+    )
+endif()
+
+# Rendering API includes and libraries.
 
 if (HEMLOCK_USING_OPENGL)
     set(Hemlock_Include_Dirs
         ${Hemlock_Include_Dirs}
-        ${glew_INCLUDE_DIRS}
+        ${OPENGL_INCLUDE_DIRS}
+    )
+    set(Hemlock_Libraries
+        ${Hemlock_Libraries}
+        ${OPENGL_LIBRARIES}
+    )
+
+    if (NOT APPLE)
+        set(Hemlock_Include_Dirs
+            ${Hemlock_Include_Dirs}
+            ${GLEW_INCLUDE_DIRS}
+        )
+        set(Hemlock_Libraries
+            ${Hemlock_Libraries}
+            ${GLEW_LIBRARIES}
+        )
+    endif()
+elseif(HEMLOCK_USING_VULKAN)
+    set(Hemlock_Include_Dirs
+        ${Hemlock_Include_Dirs}
+        ${Vulkan_INCLUDE_DIRS}
+    )
+    set(Hemlock_Libraries
+        ${Hemlock_Libraries}
+        ${Vulkan_LIBRARIES}
     )
 endif()
+
+# Scripting includes and directories.
 
 if (HEMLOCK_USING_LUA)
     set(Hemlock_Include_Dirs
         ${Hemlock_Include_Dirs}
-        ${luajit_Include_Dirs}
+        ${luajit_INCLUDE_DIRS}
+    )
+    set(Hemlock_Libraries
+        ${Hemlock_Libraries}
+        ${luajit_LIBRARIES}
     )
 endif()
+
+# Gperf profiler.
+
+if(HEMLOCK_ENABLE_GPERF_PROFILER)
+    set(Hemlock_Libraries
+        ${Hemlock_Libraries}
+        profiler
+    )
+endif()
+
+########################################################################################
+
+###################################################
+#     Hemlock Include and Library Directories     #
+###################################################
 
 # TODO(Matthew): remove the "${PROJECT_SOURCE_DIR}" line and properly build
 #                engine and tests separately.
@@ -275,6 +411,19 @@ target_include_directories(Hemlock_Revisited
     ${Hemlock_Include_Dirs}
 )
 
+target_link_libraries(Hemlock_Revisited
+    ${Hemlock_Libraries}
+)
+
+# TODO(Matthew): can we make the below better, it doesn't allow multiple compiler
+#                choices on Windows and Mac, and on Linux at most one choice of GCC and
+#                clang respectively.
+
+# Bit of a mess but below is how we store dependencies that we are currently manually
+# compiling. On Linux we support release and debug compilations with GCC and clang, on
+# MacOS and Windows just release and debug with a single version of apple-clang and msvc
+# respectively.
+
 if (HEMLOCK_CI_BUILD)
     target_include_directories(Hemlock_Revisited
         SYSTEM
@@ -287,7 +436,31 @@ if (HEMLOCK_CI_BUILD)
         "${PROJECT_SOURCE_DIR}/deps/lib"
     )
 else()
-    if (UNIX OR MINGW)
+    if (APPLE OR MSVC)
+        if(CMAKE_BUILD_TYPE STREQUAL "Release" OR HEMLOCK_FAST_DEBUG)
+            target_include_directories(Hemlock_Revisited
+                SYSTEM
+                PUBLIC
+                "${PROJECT_SOURCE_DIR}/deps/Release/include"
+            )
+
+            target_link_directories(Hemlock_Revisited
+                PUBLIC
+                "${PROJECT_SOURCE_DIR}/deps/Release/lib"
+            )
+        else()
+            target_include_directories(Hemlock_Revisited
+                SYSTEM
+                PUBLIC
+                "${PROJECT_SOURCE_DIR}/deps/Debug/include"
+            )
+
+            target_link_directories(Hemlock_Revisited
+                PUBLIC
+                "${PROJECT_SOURCE_DIR}/deps/Debug/lib"
+            )
+        endif()
+    else()
         if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
             if(CMAKE_BUILD_TYPE STREQUAL "Release" OR HEMLOCK_FAST_DEBUG)
                 target_include_directories(Hemlock_Revisited
@@ -337,71 +510,5 @@ else()
                 )
             endif()
         endif()
-    else()
-        if(CMAKE_BUILD_TYPE STREQUAL "Release" OR HEMLOCK_FAST_DEBUG)
-            target_include_directories(Hemlock_Revisited
-                SYSTEM
-                PUBLIC
-                "${PROJECT_SOURCE_DIR}/deps/Release/include"
-            )
-
-            target_link_directories(Hemlock_Revisited
-                PUBLIC
-                "${PROJECT_SOURCE_DIR}/deps/Release/lib"
-            )
-        else()
-            target_include_directories(Hemlock_Revisited
-                SYSTEM
-                PUBLIC
-                "${PROJECT_SOURCE_DIR}/deps/Debug/include"
-            )
-
-            target_link_directories(Hemlock_Revisited
-                PUBLIC
-                "${PROJECT_SOURCE_DIR}/deps/Debug/lib"
-            )
-        endif()
     endif()
-endif()
-
-if (HEMLOCK_USING_OPENGL)
-    target_link_libraries(Hemlock_Revisited GLEW::GLEW)
-    if (APPLE)
-        target_link_libraries(Hemlock_Revisited OpenGL)
-    elseif (UNIX OR MINGW)
-        target_link_libraries(Hemlock_Revisited GL)
-    elseif (MSVC)
-        target_link_libraries(Hemlock_Revisited OpenGL32)
-    endif()
-elseif (HEMLOCK_USING_VULKAN)
-    target_link_libraries(Hemlock_Revisited vulkan)
-endif()
-
-if (HEMLOCK_USING_LUA)
-    target_link_libraries(Hemlock_Revisited luajit::luajit)
-endif()
-
-if(HEMLOCK_ENABLE_GPERF_PROFILER)
-    target_link_libraries(Hemlock_Revisited profiler)
-endif()
-
-target_link_libraries(Hemlock_Revisited
-    PNG::PNG
-    SDL2::SDL2main
-    SDL2::SDL2
-    SDL2_ttf::SDL2_ttf
-    Boost::iostreams
-    Bullet::Bullet
-    yaml-cpp
-    heatmap
-)
-
-if(CMAKE_BUILD_TYPE STREQUAL "Release" OR HEMLOCK_FAST_DEBUG)
-    target_link_libraries(Hemlock_Revisited
-        FastNoise
-    )
-else()
-    target_link_libraries(Hemlock_Revisited
-        FastNoiseD
-    )
 endif()

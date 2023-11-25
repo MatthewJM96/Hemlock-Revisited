@@ -65,9 +65,14 @@
 #endif  // defined(HEMLOCK_USING_VULKAN)
 
 #if defined(HEMLOCK_USING_OPENGL)
+#  if defined(HEMLOCK_OS_MAC)
+#    include <OpenGL/gl.h>
+#    include <OpenGL/glu.h>
+#  else  // defined(HEMLOCK_OS_MAC)
 // OpenGL SDK
-#  include <GL/glew.h>
-#endif  // defined(HEMLOCK_USING_OPENGL)
+#    include <GL/glew.h>
+#  endif  // defined(HEMLOCK_OS_MAC)
+#endif    // defined(HEMLOCK_USING_OPENGL)
 
 #if defined(HEMLOCK_USING_VULKAN)
 // Vulkan SDK
