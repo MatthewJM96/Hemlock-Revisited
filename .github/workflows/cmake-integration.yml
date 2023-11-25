@@ -92,7 +92,7 @@ jobs:
         -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}
         -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
         -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
-        -S ${{ github.workspace }} ;
+        -S . ;
         cmake --build build --config ${{ matrix.build_type }} ;
         mv build/libheatmap.a ${{ github.workspace }}/deps/lib ;
         mkdir -p ${{ github.workspace }}/deps/include/libheatmap ;
@@ -182,7 +182,7 @@ jobs:
         -DCMAKE_C_COMPILER=cl
         -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
         -A x64
-        -S ${{ github.workspace }} ;
+        -S . ;
         cmake --build build --config ${{ matrix.build_type }} ;
         ls build ;
         mv build/libheatmap.lib ${{ github.workspace }}/deps/lib ;
@@ -275,7 +275,7 @@ jobs:
         -DCMAKE_CXX_COMPILER=clang++
         -DCMAKE_C_COMPILER=clang
         -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
-        -S ${{ github.workspace }} ;
+        -S . ;
         cmake --build build --config ${{ matrix.build_type }} ;
         mv build/libheatmap.a ${{ github.workspace }}/deps/lib ;
         mkdir -p ${{ github.workspace }}/deps/include/libheatmap ;
