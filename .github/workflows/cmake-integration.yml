@@ -184,7 +184,9 @@ jobs:
         -A x64
         -S . ;
         cmake --build build --config ${{ matrix.build_type }} ;
-        ls build ;
+        ls build/${{ matrix.build_type }} ;
+        ls build/x64 ;
+        ls build/heatmap.dir ;
         mv build/libheatmap.lib ${{ github.workspace }}/deps/lib ;
         mkdir -p ${{ github.workspace }}/deps/include/libheatmap ;
         copy heatmap.h ${{ github.workspace }}/deps/include/libheatmap ;
