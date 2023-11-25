@@ -310,15 +310,13 @@ set(Hemlock_Include_Dirs
     ${yaml-cpp_INCLUDE_DIRS}
 )
 set(Hemlock_Libraries
-    ${glm_LIBRARIES}
-    ${SDL2_LIBRARIES}
-    ${SDL2_ttf_LIBRARIES}
-    ${PNG_LIBRARIES}
-    ${concurrentqueue_LIBRARIES}
+    SDL2::SDL2main
+    SDL2::SDL2
+    SDL2_ttf::SDL2_ttf
+    PNG::PNG
     Boost::iostreams
-    ${Bullet_LIBRARIES}
-    ${EnTT_LIBRARIES}
-    ${yaml-cpp_LIBRARIES}
+    Bullet::Bullet
+    yaml-cpp
     heatmap
 )
 
@@ -378,7 +376,7 @@ if (HEMLOCK_USING_LUA)
     )
     set(Hemlock_Libraries
         ${Hemlock_Libraries}
-        ${luajit_LIBRARIES}
+        luajit::luajit
     )
 endif()
 
