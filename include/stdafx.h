@@ -1,6 +1,12 @@
 #ifndef __hemlock_stdafx_h
 #define __hemlock_stdafx_h
 
+// Our generic preprocessor macros.
+#include "preprocessor.hpp"
+
+// Our compatibility definitions.
+#include "compat.hpp"
+
 // Basics
 #include <cstdlib>
 #include <random>
@@ -65,11 +71,11 @@
 #endif  // defined(HEMLOCK_USING_VULKAN)
 
 #if defined(HEMLOCK_USING_OPENGL)
+// OpenGL SDK (using Glew where extension wrangling needed).
 #  if defined(HEMLOCK_OS_MAC)
 #    include <OpenGL/gl.h>
 #    include <OpenGL/glu.h>
 #  else  // defined(HEMLOCK_OS_MAC)
-// OpenGL SDK
 #    include <GL/glew.h>
 #  endif  // defined(HEMLOCK_OS_MAC)
 #endif    // defined(HEMLOCK_USING_OPENGL)
@@ -98,12 +104,6 @@
 #    define lua_pushglobaltable(L) lua_pushvalue(L, LUA_GLOBALSINDEX)
 #  endif  // lua_pushglobaltable
 #endif    // defined(HELOCK_USING_LUA)
-
-// Our generic preprocessor macros.
-#include "preprocessor.hpp"
-
-// Our compatibility definitions.
-#include "compat.hpp"
 
 // Our constants.
 #include "constants.hpp"
