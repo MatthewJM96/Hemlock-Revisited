@@ -513,6 +513,32 @@
 #define _BIND_MAP_WITH_ID_2_INNER() BIND_MAP_WITH_ID_2_INNER
 
 /**
+ * Like MAP_WITH_ID but binds extra state to each call of op. The macro
+ * being called as op(binding1, binding2, val, id).
+ */
+#define BIND2_MAP_WITH_ID(op, binding1, binding2, sep, ...)                            \
+  IF(HAS_ARGS(__VA_ARGS__))                                                            \
+  (EVAL(BIND2_MAP_WITH_ID_INNER(op, binding1, binding2, sep, I, ##__VA_ARGS__)))
+#define BIND2_MAP_WITH_ID_INNER(op, binding1, binding2, sep, id, cur_val, ...)         \
+  op(binding1, binding2, cur_val, id) IF(HAS_ARGS(__VA_ARGS__))(sep(                   \
+  ) DEFER2(_BIND2_MAP_WITH_ID_INNER)()(                                                \
+    op, binding1, binding2, sep, CAT(id, I), ##__VA_ARGS__))
+#define _BIND2_MAP_WITH_ID_INNER() BIND2_MAP_WITH_ID_INNER
+
+/**
+ * The same as BIND2_MAP_WITH_ID, except first-level MAP macro may be safely nested
+ * inside this.
+ */
+#define BIND2_MAP_WITH_ID_2(op, binding1, binding2, sep, ...)                          \
+  IF(HAS_ARGS(__VA_ARGS__))                                                            \
+  (EVAL2(BIND2_MAP_WITH_ID_2_INNER(op, binding1, binding2, sep, I, ##__VA_ARGS__)))
+#define BIND2_MAP_WITH_ID_2_INNER(op, binding1, binding2, sep, id, cur_val, ...)       \
+  op(binding1, binding2, cur_val, id) IF(HAS_ARGS(__VA_ARGS__))(sep(                   \
+  ) DEFER2(_BIND2_MAP_WITH_ID_2_INNER)()(                                              \
+    op, binding1, binding2, sep, CAT(id, I), ##__VA_ARGS__))
+#define _BIND2_MAP_WITH_ID_2_INNER() BIND2_MAP_WITH_ID_2_INNER
+
+/**
  * This is a variant of the MAP macro which also includes as an argument to the
  * operation a macro acc(val, curr) such that curr is accumulated to appropriately
  * by val.
@@ -596,6 +622,40 @@
 #define _BIND_MAP_WITH_ACCUMULATE_2_INNER() BIND_MAP_WITH_ACCUMULATE_2_INNER
 
 /**
+ * Like MAP_WITH_ACCUMULATE but binds extra state to each call of op. The
+ * macro being called as op(binding1, binding2, val, curr).
+ */
+#define BIND2_MAP_WITH_ACCUMULATE(op, binding1, binding2, sep, initial, acc, ...)      \
+  IF(HAS_ARGS(__VA_ARGS__))                                                            \
+  (EVAL(BIND2_MAP_WITH_ACCUMULATE_INNER(                                               \
+    op, binding1, binding2, sep, initial, acc, ##__VA_ARGS__)))
+#define BIND2_MAP_WITH_ACCUMULATE_INNER(                                               \
+    op, binding1, binding2, sep, curr_acc, acc, map_entry, ...                         \
+)                                                                                      \
+  op(binding1, binding2, map_entry, curr_acc                                           \
+  ) IF(HAS_ARGS(__VA_ARGS__))(sep() DEFER2(_BIND2_MAP_WITH_ACCUMULATE_INNER            \
+  )()(op, binding1, binding2, sep, acc(map_entry, curr_acc), acc, ##__VA_ARGS__))
+#define _BIND2_MAP_WITH_ACCUMULATE_INNER() BIND2_MAP_WITH_ACCUMULATE_INNER
+
+/**
+ * The same as BIND2_MAP_WITH_ACCUMULATE, except any first-level MAP macro may be safely
+ * nested inside this.
+ */
+#define BIND2_MAP_WITH_ACCUMULATE_2(op, binding1, binding2, sep, initial, acc, ...)    \
+  IF(HAS_ARGS(__VA_ARGS__))                                                            \
+  (EVAL2(                                                                              \
+      BIND2_MAP_WITH_ACCUMULATE_2_INNER(                                               \
+        op, binding1, binding2, sep, initial, acc, ##__VA_ARGS__)                      \
+  ))
+#define BIND2_MAP_WITH_ACCUMULATE_2_INNER(                                             \
+    op, binding1, binding2, sep, curr_acc, acc, map_entry, ...                         \
+)                                                                                      \
+  op(binding1, binding2, map_entry, curr_acc                                           \
+  ) IF(HAS_ARGS(__VA_ARGS__))(sep() DEFER2(_BIND2_MAP_WITH_ACCUMULATE_2_INNER          \
+  )()(op, binding1, binding2, sep, acc(map_entry, curr_acc), acc, ##__VA_ARGS__))
+#define _BIND2_MAP_WITH_ACCUMULATE_2_INNER() BIND2_MAP_WITH_ACCUMULATE_2_INNER
+
+/**
  * This is a variant of the MAP macro which iterates over pairs rather than
  * singletons.
  *
@@ -654,6 +714,30 @@
   op(binding, cur_val_1, cur_val_2) IF(HAS_ARGS(__VA_ARGS__))(sep(                     \
   ) DEFER2(_BIND_MAP_PAIRS_2_INNER)()(op, binding, sep, __VA_ARGS__))
 #define _BIND_MAP_PAIRS_2_INNER() BIND_MAP_PAIRS_2_INNER
+
+/**
+ * Like MAP_PAIRS but binds extra state to each call of op. The
+ * macro being called as op(binding1, binding2, val_1, val_2).
+ */
+#define BIND2_MAP_PAIRS(op, binding1, binding2, sep, ...)                              \
+  IF(HAS_ARGS(__VA_ARGS__)) (EVAL(BIND2_MAP_PAIRS_INNER(op, sep, __VA_ARGS__)))
+#define BIND2_MAP_PAIRS_INNER(op, binding1, binding2, sep, cur_val_1, cur_val_2, ...)  \
+  op(binding1, binding2, cur_val_1, cur_val_2) IF(HAS_ARGS(__VA_ARGS__))(sep(          \
+  ) DEFER2(_BIND2_MAP_PAIRS_INNER)()(op, binding1, binding2, sep, __VA_ARGS__))
+#define _BIND2_MAP_PAIRS_INNER() BIND2_MAP_PAIRS_INNER
+
+/**
+ * The same as BIND2_MAP_PAIRS, except any first-level MAP macro may be safely nested
+ * inside this.
+ */
+#define BIND2_MAP_PAIRS_2(op, binding1, binding2, sep, ...)                            \
+  IF(HAS_ARGS(__VA_ARGS__)) (EVAL2(BIND2_MAP_PAIRS_2_INNER(op, sep, __VA_ARGS__)))
+#define BIND2_MAP_PAIRS_2_INNER(                                                       \
+  op, binding1, binding2, sep, cur_val_1, cur_val_2, ...                               \
+)                                                                                      \
+  op(binding1, binding2, cur_val_1, cur_val_2) IF(HAS_ARGS(__VA_ARGS__))(sep(          \
+  ) DEFER2(_BIND2_MAP_PAIRS_2_INNER)()(op, binding1, binding2, sep, __VA_ARGS__))
+#define _BIND2_MAP_PAIRS_2_INNER() BIND2_MAP_PAIRS_2_INNER
 
 /**
  * This is a variant of the MAP macro which iterates over a two-element sliding
@@ -733,6 +817,37 @@
   ) IF(HAS_ARGS(__VA_ARGS__))(sep() DEFER2(_BIND_MAP_SLIDE_2_INNER                     \
   )()(op, binding, last_op, sep, __VA_ARGS__))
 #define _BIND_MAP_SLIDE_2_INNER() BIND_MAP_SLIDE_2_INNER
+
+/**
+ * Like MAP_SLIDE but binds extra state to each call of op and
+ * last_op. The macros being called as op(binding1, binding2, val_1, val_2)
+ * and last_op(binding1, binding2, final_val).
+ */
+#define BIND2_MAP_SLIDE(op, binding1, binding2, last_op, sep, ...)                     \
+  IF(HAS_ARGS(__VA_ARGS__))                                                            \
+  (EVAL(BIND2_MAP_SLIDE_INNER(op, binding1, binding2, last_op, sep, __VA_ARGS__)))
+#define BIND2_MAP_SLIDE_INNER(op, binding1, binding2, last_op, sep, cur_val, ...)      \
+  IF(HAS_ARGS(__VA_ARGS__))                                                            \
+  (op(binding1, binding2, cur_val, FIRST(__VA_ARGS__))                                 \
+  ) IF(NOT(HAS_ARGS(__VA_ARGS__)))(last_op(binding1, binding2, cur_val)                \
+  ) IF(HAS_ARGS(__VA_ARGS__))(sep() DEFER2(_BIND2_MAP_SLIDE_INNER                      \
+  )()(op, binding1, binding2, last_op, sep, __VA_ARGS__))
+#define _BIND2_MAP_SLIDE_INNER() BIND2_MAP_SLIDE_INNER
+
+/**
+ * The same as BIND2_MAP_SLIDE, except any first-level MAP macro may be safely nested
+ * inside this.
+ */
+#define BIND2_MAP_SLIDE_2(op, binding1, binding2, last_op, sep, ...)                   \
+  IF(HAS_ARGS(__VA_ARGS__))                                                            \
+  (EVAL2(BIND2_MAP_SLIDE_2_INNER(op, binding1, binding2, last_op, sep, __VA_ARGS__)))
+#define BIND2_MAP_SLIDE_2_INNER(op, binding1, binding2, last_op, sep, cur_val, ...)    \
+  IF(HAS_ARGS(__VA_ARGS__))                                                            \
+  (op(binding1, binding2, cur_val, FIRST(__VA_ARGS__))                                 \
+  ) IF(NOT(HAS_ARGS(__VA_ARGS__)))(last_op(binding1, binding2, cur_val)                \
+  ) IF(HAS_ARGS(__VA_ARGS__))(sep() DEFER2(_BIND2_MAP_SLIDE_2_INNER                    \
+  )()(op, binding1, binding2, last_op, sep, __VA_ARGS__))
+#define _BIND2_MAP_SLIDE_2_INNER() BIND2_MAP_SLIDE_2_INNER
 
 /**
  * Strip any excess commas from a set of arguments.
