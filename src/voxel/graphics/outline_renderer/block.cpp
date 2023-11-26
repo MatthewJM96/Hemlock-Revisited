@@ -13,6 +13,7 @@ hvox::BlockOutlineRenderer::BlockOutlineRenderer() :
 }
 
 void hvox::BlockOutlineRenderer::init() {
+#if !defined(HEMLOCK_OS_MAC)
     glCreateBuffers(1, &m_instance_vbo);
 
     ui32 prev_ref_count = ref_count.fetch_add(1);
@@ -33,6 +34,45 @@ void hvox::BlockOutlineRenderer::init() {
 
         glVertexArrayBindingDivisor(block_mesh_handles.vao, 1, 1);
     }
+#else   // !defined(HEMLOCK_OS_MAC)
+    glGenBuffers(1, &m_instance_vbo);
+
+    ui32 prev_ref_count = ref_count.fetch_add(1);
+    if (prev_ref_count == 0) {
+        hg::upload_mesh(
+            BLOCK_OUTLINE_MESH, block_mesh_handles, hg::MeshDataVolatility::STATIC
+        );
+
+        glBindVertexArray(block_mesh_handles.vao);
+        glBindBuffer(GL_ARRAY_BUFFER, m_instance_vbo);
+
+        glVertexAttribPointer(
+            1,
+            3,
+            GL_FLOAT,
+            GL_FALSE,
+            sizeof(OutlineData),
+            reinterpret_cast<void*>(offsetof(OutlineData, position))
+        );
+        glEnableVertexAttribArray(1);
+
+        glVertexAttribPointer(
+            2,
+            4,
+            GL_UNSIGNED_BYTE,
+            GL_TRUE,
+            sizeof(OutlineData),
+            reinterpret_cast<void*>(offsetof(OutlineData, position))
+        );
+        glEnableVertexAttribArray(2);
+
+        glVertexAttribDivisor(1, 1);
+        glVertexAttribDivisor(2, 1);
+
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        glBindVertexArray(0);
+    }
+#endif  // !defined(HEMLOCK_OS_MAC)
 }
 
 void hvox::BlockOutlineRenderer::dispose() {
@@ -51,6 +91,9 @@ void hvox::BlockOutlineRenderer::draw(FrameTime) {
     size_t last_size = hmaths::next_power_2(m_last_outline_count);
     size_t this_size = hmaths::next_power_2(m_block_outlines.size());
 
+    glBindVertexArray(block_mesh_handles.vao);
+
+#if !defined(HEMLOCK_OS_MAC)
     // If VBO buffer needs to be increased to fit in all outlines, then do so.
     // TODO(Matthew): shrink this also?
     if (last_size < this_size) {
@@ -69,15 +112,41 @@ void hvox::BlockOutlineRenderer::draw(FrameTime) {
         reinterpret_cast<void*>(m_block_outlines.data())
     );
 
-    glBindVertexArray(block_mesh_handles.vao);
-
     glVertexArrayVertexBuffer(
         block_mesh_handles.vao, 1, m_instance_vbo, 0, sizeof(OutlineData)
     );
+#else   // !defined(HEMLOCK_OS_MAC)
+    glBindBuffer(GL_ARRAY_BUFFER, m_instance_vbo);
+
+    // If VBO buffer needs to be increased to fit in all outlines, then do so.
+    // TODO(Matthew): shrink this also?
+    if (last_size < this_size) {
+        glBufferData(
+            GL_ARRAY_BUFFER, this_size * sizeof(OutlineData), nullptr, GL_DYNAMIC_DRAW
+        );
+    }
+
+    // TODO(Matthew): We are sending this data every frame?! Might be fine
+    //                for debug purposes, but we gotta be sure this is
+    //                all people want to use this for.
+    glBufferSubData(
+        GL_ARRAY_BUFFER,
+        0,
+        m_block_outlines.size() * sizeof(OutlineData),
+        reinterpret_cast<void*>(m_block_outlines.data())
+    );
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+#endif  // !defined(HEMLOCK_OS_MAC)
 
     glDrawArraysInstanced(
-        GL_LINES, 0, BLOCK_OUTLINE_VERTEX_COUNT, static_cast<GLsizei>(m_block_outlines.size())
+        GL_LINES,
+        0,
+        BLOCK_OUTLINE_VERTEX_COUNT,
+        static_cast<GLsizei>(m_block_outlines.size())
     );
+
+    glBindVertexArray(0);
 }
 
 size_t hvox::BlockOutlineRenderer::add_outline(OutlineData&& outline) {

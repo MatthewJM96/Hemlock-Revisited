@@ -237,21 +237,43 @@ GLuint hg::GLSLProgram::uniform_location(const std::string& name) const {
 }
 
 void hg::GLSLProgram::enable_vertex_attrib_arrays(GLuint vao) const {
+#if !defined(HEMLOCK_OS_MAC)
     for (auto& attribute : m_attributes) {
         glEnableVertexArrayAttrib(vao, attribute.second);
     }
+#else   // !defined(HEMLOCK_OS_MAC)
+    glBindVertexArray(vao);
+    for (auto& attribute : m_attributes) {
+        glEnableVertexAttribArray(attribute.second);
+    }
+    glBindVertexArray(0);
+#endif  // !defined(HEMLOCK_OS_MAC)
 }
 
 void hg::GLSLProgram::disable_vertex_attrib_arrays(GLuint vao) const {
+#if !defined(HEMLOCK_OS_MAC)
     for (auto& attribute : m_attributes) {
         glDisableVertexArrayAttrib(vao, attribute.second);
     }
+#else   // !defined(HEMLOCK_OS_MAC)
+    glBindVertexArray(vao);
+    for (auto& attribute : m_attributes) {
+        glDisableVertexAttribArray(attribute.second);
+    }
+    glBindVertexArray(0);
+#endif  // !defined(HEMLOCK_OS_MAC)
 }
 
 bool hg::GLSLProgram::enable_vertex_attrib_array(GLuint vao, const std::string& name)
     const {
     try {
+#if !defined(HEMLOCK_OS_MAC)
         glEnableVertexArrayAttrib(vao, m_attributes.at(name));
+#else   // !defined(HEMLOCK_OS_MAC)
+        glBindVertexArray(vao);
+        glEnableVertexAttribArray(m_attributes.at(name));
+        glBindVertexArray(0);
+#endif  // !defined(HEMLOCK_OS_MAC)
     } catch (std::out_of_range&) {
         return false;
     }
@@ -261,7 +283,13 @@ bool hg::GLSLProgram::enable_vertex_attrib_array(GLuint vao, const std::string& 
 bool hg::GLSLProgram::disable_vertex_attrib_array(GLuint vao, const std::string& name)
     const {
     try {
+#if !defined(HEMLOCK_OS_MAC)
         glDisableVertexArrayAttrib(vao, m_attributes.at(name));
+#else   // !defined(HEMLOCK_OS_MAC)
+        glBindVertexArray(vao);
+        glDisableVertexAttribArray(m_attributes.at(name));
+        glBindVertexArray(0);
+#endif  // !defined(HEMLOCK_OS_MAC)
     } catch (std::out_of_range&) {
         return false;
     }

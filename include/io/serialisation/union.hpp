@@ -40,7 +40,7 @@
 \************************************/
 
 #  if !defined(H_UNION_ENTRY_NAME)
-#    define H_UNION_ENTRY_NAME(IS_POD_STRUCT, NAME, ...) NAME
+#    define H_UNION_ENTRY_NAME(NAME, IS_POD_STRUCT, ...) NAME
 #  endif  //! defined(H_UNION_ENTRY_NAME)
 
 #  if !defined(H_INDIRECT_UNION_ENTRY_NAME)
@@ -64,7 +64,7 @@
 #  endif  // !defined(H_WRITE_UNION_NON_POD_TYPE_ENTRY)
 
 #  if !defined(H_WRITE_UNION_ENTRY)
-#    define H_WRITE_UNION_ENTRY(IS_POD_STRUCT, NAME, ...)                              \
+#    define H_WRITE_UNION_ENTRY(NAME, IS_POD_STRUCT, ...)                              \
       IF_ELSE(BOOL(IS_POD_STRUCT))                                                     \
       (H_WRITE_UNION_POD_STRUCT_ENTRY(__VA_ARGS__),                                    \
        H_WRITE_UNION_NON_POD_TYPE_ENTRY(__VA_ARGS__))
