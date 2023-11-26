@@ -79,7 +79,7 @@
         );)                                                                            \
                                                                                        \
     if (setup_vao) {                                                                   \
-      constexpr vertex_size = sizeof(PREFIX##_Vertex);                                 \
+      constexpr GLsizei vertex_size = sizeof(PREFIX##_Vertex);                         \
                                                                                        \
       BIND_MAP_WITH_ACCUMULATE(                                                        \
         GEN_VERTEX_ATTRIB,                                                             \
