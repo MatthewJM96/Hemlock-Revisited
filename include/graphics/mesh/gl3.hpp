@@ -12,8 +12,8 @@
           GL_FLOAT                                                                     \
           : GL_DOUBLE),                                                                \
       VERTEX_NORMALISED VERTEX_INFO == 1 ? GL_TRUE : GL_FALSE,                         \
-      OFFSET,                                                                          \
-      nullptr                                                                          \
+      vertex_size,                                                                     \
+      static_cast<void*>(OFFSET)                                                       \
   );                                                                                   \
   glEnableVertexAttribArray(                                                           \
       static_cast<GLuint>(PREFIX##_MeshAttribID::VERTEX_ENUM_NAME VERTEX_INFO)         \
@@ -64,9 +64,6 @@
         static_cast<GLenum>(volatility)                                                \
       );                                                                               \
                                                                                        \
-    if (mesh_data.vertices)                                                            \
-      glBindVertexBuffer(0, handles.vbo, 0, sizeof(PREFIX##_Vertex));                  \
-                                                                                       \
     IF(INDEXED)                                                                        \
       (if (handles.ibo == 0)                                                           \
         glGenBuffers(1, &handles.ibo);                                                 \
@@ -82,6 +79,8 @@
         );                                                                             \
                                                                                        \
     if (setup_vao) {                                                                   \
+      constexpr vertex_size = sizeof(PREFIX##_Vertex);                                 \
+                                                                                       \
       BIND_MAP_WITH_ACCUMULATE(                                                        \
         GEN_VERTEX_ATTRIB,                                                             \
         PREFIX,                                                                        \
