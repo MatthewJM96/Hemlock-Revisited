@@ -2,9 +2,9 @@ name: CMake Build on Ubuntu, Windows and MacOS
 
 on:
   push:
-    branches: [ "dev_v1" ]
+    branches: [ "improvement/ci_caching" ]
   pull_request:
-    branches: [ "dev_v1" ]
+    branches: [ "improvement/ci_caching" ]
 
 jobs:
 
