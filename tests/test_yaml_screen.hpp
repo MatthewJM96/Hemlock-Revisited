@@ -19,16 +19,16 @@ H_DECL_UNION_WITH_SERIALISATION(
     ,
     TestUnion,
     ui8,
-    (H_NON_POD_TYPE(), SCALED, (scaling, f32v2)),
-    (H_POD_STRUCT(), FIXED, (scale_x, f32), (target_height, f32)),
+    (SCALED, H_NON_POD_TYPE(), (scaling, f32v2)),
+    (FIXED, H_POD_STRUCT(), (scale_x, f32), (target_height, f32)),
 )
 
 H_DEF_UNION_WITH_SERIALISATION(
     ,
     TestUnion,
     ui8,
-    (H_NON_POD_TYPE(), SCALED, (scaling, f32v2)),
-    (H_POD_STRUCT(), FIXED, (scale_x, f32), (target_height, f32)),
+    (SCALED, H_NON_POD_TYPE(), (scaling, f32v2)),
+    (FIXED, H_POD_STRUCT(), (scale_x, f32), (target_height, f32)),
 )
 
 class TestYAMLScreen : public happ::ScreenBase {

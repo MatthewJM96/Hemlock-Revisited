@@ -53,14 +53,14 @@
       }
 #  endif  //! defined(H_WRITE_UNION_FIELD_DECODE)
 
-#  define H_WRITE_UNION_ENCODE(IS_POD_STRUCT, NAME, ...)                               \
+#  define H_WRITE_UNION_ENCODE(NAME, IS_POD_STRUCT, ...)                               \
 NAME:                                                                                  \
 {                                                                                      \
 MAP(H_WRITE_UNION_FIELD_ENCODE, EMPTY, __VA_ARGS__)                                    \
 break;                                                                                 \
 }
 
-#  define H_WRITE_UNION_DECODE(IS_POD_STRUCT, NAME, ...)                               \
+#  define H_WRITE_UNION_DECODE(NAME, IS_POD_STRUCT, ...)                               \
 NAME:                                                                                  \
 {                                                                                      \
 MAP(H_WRITE_UNION_FIELD_DECODE, EMPTY, __VA_ARGS__)                                    \
