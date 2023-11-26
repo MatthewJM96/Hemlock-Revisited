@@ -31,7 +31,7 @@ jobs:
       run: >
         sudo add-apt-repository ppa:ubuntu-toolchain-r/ppa -y ;
         sudo apt update ;
-        sudo apt install g++-13 gcc-13 unzip libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev libx11-xcb-dev libfontenc-dev libxaw7-dev libxcomposite-dev libxdamage-dev libxmu-dev libxmuu-dev libxres-dev libxkbfile-dev libxss-dev libxv-dev libxvmc-dev libxcb-xkb-dev libxcb-icccm4-dev libxcb-image0-dev libxcb-keysyms1-dev libxcb-render-util0-dev libxcb-xinerama0-dev libxcb-util-dev libxcb-util0-dev freeglut3-dev ;
+        sudo apt install g++-13 gcc-13 unzip libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev freeglut3-dev ;
         wget https://apt.llvm.org/llvm.sh ;
         chmod u+x llvm.sh ;
         sudo ./llvm.sh 17 ;
@@ -98,7 +98,9 @@ jobs:
       env:
         cache-name: cache-conan
       with:
-        path: ${{ steps.strings.outputs.home }}/.conan
+        path: |
+          ${{ steps.strings.outputs.home }}/.conan
+          /usr
         key: ${{ runner.os }}-${{ env.cache-name }}-${{ matrix.build_type }}-${{ matrix.c_compiler }}-${{ hashFiles('CMakeLists.txt') }}
 
     - name: Configure CMake
