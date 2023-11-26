@@ -170,8 +170,8 @@ jobs:
       # Turn repeated input strings (such as the build output directory) into step outputs. These step outputs can be used throughout the workflow file.
       id: strings
       run: >
-        echo "home=$HOME" >> "$GITHUB_OUTPUT" ;
-        echo "build-output-dir=${{ github.workspace }}\build" >> "$GITHUB_OUTPUT"
+        echo "home=$HOME" >> $env:GITHUB_OUTPUT ;
+        echo "build-output-dir=${{ github.workspace }}\build" >> $env:GITHUB_OUTPUT
 
     - name: Install non-conan dependencies
       run: >
