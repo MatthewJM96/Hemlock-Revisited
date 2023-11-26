@@ -127,4 +127,3 @@ jobs:
       run: >
         source ${{ github.workspace }}/.venv/bin/activate ;
         ctest --build-config ${{ matrix.build_type }}
-
