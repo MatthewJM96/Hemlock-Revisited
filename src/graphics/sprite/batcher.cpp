@@ -72,6 +72,7 @@ void hg::s::SpriteBatcher::init(
      * Create the VAO *
     \******************/
 
+#if !defined(HEMLOCK_OS_MAC)
     // Create the vertex array object and bind it.
     glCreateVertexArrays(1, &m_vao);
 
@@ -161,6 +162,96 @@ void hg::s::SpriteBatcher::init(
     glTextureParameteri(m_default_texture, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTextureParameteri(m_default_texture, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTextureParameteri(m_default_texture, GL_TEXTURE_WRAP_R, GL_REPEAT);
+#else   // !defined(HEMLOCK_OS_MAC)
+    // Create the vertex array object and bind it.
+    glCreateVertexArrays(1, &m_vao);
+
+    // Create vertex & index buffers.
+    glCreateBuffers(1, &m_vbo);
+    glCreateBuffers(1, &m_ibo);
+
+    // Enable the attributes in our shader.
+    m_default_shader.enable_vertex_attrib_arrays(m_vao);
+
+    // Bind VAO and VBO.
+    glBindVertexArray(m_vao);
+    glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
+
+    // Connect the vertex attributes in the shader (e.g. vPosition) to its
+    // corresponding chunk of memory inside the SpriteVertex struct.
+    //     We first tell OpenGL the ID of the attribute within the shader (as we set
+    //     earlier), then the number of values and their type.
+    //
+    //     After that, we tell OpenGL whether that data should be normalised (e.g.
+    //     unsigned bytes that need normalising will be converted to a float divided
+    //     through by 255.0f and by OpenGL - so that colours, e.g., are represented by
+    //     values between 0.0f and 1.0f per R/G/B/A channel rather than the usual 0 to
+    //     255).
+    //
+    //     We then pass the size of the data representing a vertex followed by how
+    //     many bytes into that data the value is stored - we use offset rather than
+    //     manually writing this to give us flexibility in changing the order of the
+    //     SpriteVertex struct.
+    glVertexAttribPointer(
+        SpriteShaderAttribID::POSITION,
+        3,
+        GL_FLOAT,
+        false,
+        sizeof(SpriteVertex),
+        offsetof(SpriteVertex, position)
+    );
+    glVertexAttribPointer(
+        SpriteShaderAttribID::RELATIVE_POSITION,
+        2,
+        GL_FLOAT,
+        false,
+        sizeof(SpriteVertex),
+        offsetof(SpriteVertex, relative_position)
+    );
+    glVertexAttribPointer(
+        SpriteShaderAttribID::UV_DIMENSIONS,
+        4,
+        GL_FLOAT,
+        false,
+        sizeof(SpriteVertex),
+        offsetof(SpriteVertex, uv_rect)
+    );
+    glVertexAttribPointer(
+        SpriteShaderAttribID::COLOUR,
+        4,
+        GL_UNSIGNED_BYTE,
+        true,
+        sizeof(SpriteVertex),
+        offsetof(SpriteVertex, colour)
+    );
+
+    // Unbind VAO and VBO.
+    glBindVertexArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    /***********************************\
+     * Create a default white texture. *
+    \***********************************/
+
+    // Generate and bind texture.
+    glGenTextures(1, &m_default_texture);
+    glBindTexture(GL_TEXTURE_2D, m_default_texture);
+
+    // Set texture to be just a 1x1 image of a pure white pixel.
+    ui32 pix = 0xffffffff;
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, &pix);
+
+    // Set texture parameters to repeat our pixel as needed and to not do any
+    // averaging of pixels.
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_REPEAT);
+
+    // Unbind texture.
+    glBindTexture(GL_TEXTURE_2D, 0);
+#endif  // !defined(HEMLOCK_OS_MAC)
 }
 
 void hg::s::SpriteBatcher::dispose() {
@@ -252,7 +343,9 @@ void hg::s::SpriteBatcher::add_sprite(
     f32v4       uv_rect /*= f32v4(0.0f, 0.0f, 1.0f, 1.0f)*/
 ) {
     m_sprites.emplace_back(Sprite{
-        { texture, position, size, depth, uv_rect, c1, c2, gradient }, builder });
+        {texture, position, size, depth, uv_rect, c1, c2, gradient},
+        builder
+    });
 }
 
 void hg::s::SpriteBatcher::add_sprite(
@@ -266,7 +359,9 @@ void hg::s::SpriteBatcher::add_sprite(
     f32v4       uv_rect /*= f32v4(0.0f, 0.0f, 1.0f, 1.0f)*/
 ) {
     m_sprites.emplace_back(Sprite{
-        { m_default_texture, position, size, depth, uv_rect, c1, c2, gradient }, builder });
+        {m_default_texture, position, size, depth, uv_rect, c1, c2, gradient},
+        builder
+    });
 }
 
 void hg::s::SpriteBatcher::add_sprite(
@@ -279,15 +374,10 @@ void hg::s::SpriteBatcher::add_sprite(
     f32      depth /*= 0.0f*/,
     f32v4    uv_rect /*= f32v4(0.0f, 0.0f, 1.0f, 1.0f)*/
 ) {
-    m_sprites.emplace_back(Sprite{ { texture,
-                                   position,
-                                   size,
-                                   depth,
-                                   uv_rect,
-                                   c1,
-                                   c2,
-                                   gradient },
-                                   { &impl::basic_build_quad } });
+    m_sprites.emplace_back(Sprite{
+        { texture, position, size, depth, uv_rect, c1, c2, gradient },
+        { &impl::basic_build_quad }
+    });
 }
 
 void hg::s::SpriteBatcher::add_sprite(
@@ -299,15 +389,10 @@ void hg::s::SpriteBatcher::add_sprite(
     f32      depth /*= 0.0f*/,
     f32v4    uv_rect /*= f32v4(0.0f, 0.0f, 1.0f, 1.0f)*/
 ) {
-    m_sprites.emplace_back(Sprite{ { m_default_texture,
-                                   position,
-                                   size,
-                                   depth,
-                                   uv_rect,
-                                   c1,
-                                   c2,
-                                   gradient },
-                                   { &impl::basic_build_quad } });
+    m_sprites.emplace_back(Sprite{
+        { m_default_texture, position, size, depth, uv_rect, c1, c2, gradient },
+        { &impl::basic_build_quad }
+    });
 }
 
 void hg::s::SpriteBatcher::add_string(
@@ -511,6 +596,11 @@ void hg::s::SpriteBatcher::render(f32m4 world_projection, f32m4 view_projection)
     // Bind our vertex array.
     glBindVertexArray(m_vao);
 
+#if defined(HEMLOCK_OS_MAC)
+    // Bind our index buffer.
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ibo);
+#endif  // defined(HEMLOCK_OS_MAC)
+
     // Set texture uniform in our shader to look at texture unit 0.
     //   OpenGL needs to know that texture unit is active to do so,
     //   which glActiveTexture achieves.
@@ -534,7 +624,12 @@ void hg::s::SpriteBatcher::render(f32m4 world_projection, f32m4 view_projection)
         );
     }
 
-    // Unbind out vertex array.
+#if defined(HEMLOCK_OS_MAC)
+    // Unbind our index buffer.
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+#endif  // defined(HEMLOCK_OS_MAC)
+
+    // Unbind our vertex array.
     glBindVertexArray(0);
 
     // Deactivate our shader.
@@ -677,16 +772,34 @@ void hg::s::SpriteBatcher::generate_batches() {
             v += 4;
         }
 
+#if !defined(HEMLOCK_OS_MAC)
         // Send the indices over to the GPU.
         glNamedBufferData(m_ibo, m_index_count * sizeof(ui32), indices, m_usage_hint);
+#else   // !defined(HEMLOCK_OS_MAC)
+        // Send the indices over to the GPU.
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ibo);
+        glBufferData(
+            GL_ELEMENT_ARRAY_BUFFER, m_index_count * sizeof(ui32), indices, m_usage_hint
+        );
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+#endif  // !defined(HEMLOCK_OS_MAC)
 
         delete[] indices;
     }
 
+#if !defined(HEMLOCK_OS_MAC)
     // Write our data to GPU.
     glNamedBufferData(
         m_vbo, vertex_count * sizeof(SpriteVertex), vertices, m_usage_hint
     );
+#else   // !defined(HEMLOCK_OS_MAC)
+    // Write our data to GPU.
+    glBindBuffer(GL_ARRAY_BUFFER, m_ibo);
+    glBufferData(
+        GL_ARRAY_BUFFER, vertex_count * sizeof(SpriteVertex), vertices, m_usage_hint
+    );
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+#endif  // !defined(HEMLOCK_OS_MAC)
 
     // Clear up memory.
     delete[] vertices;
