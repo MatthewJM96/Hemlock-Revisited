@@ -211,7 +211,7 @@ jobs:
         cache-name: cache-conan
       with:
         path: ${{ steps.strings.outputs.home }}/.conan
-        key: ${{ runner.os }}-${{ env.cache-name }}-${{ matrix.build_type }}-${{ matrix.c_compiler }}-${{ hashFiles('CMakeLists.txt') }}
+        key: ${{ runner.os }}-${{ env.cache-name }}-${{ matrix.build_type }}--${{ hashFiles('CMakeLists.txt') }}
 
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
@@ -220,6 +220,10 @@ jobs:
         cd ${{ github.workspace }} ;
         .\.venv\Scripts\activate ;
         conan remove --system-reqs '*' ;
+        Get-ChildItem ${{ steps.strings.outputs.home }}\.conan\data\boost
+        -File -Include conan_sources.tgz -Recurse -Force
+        | Remove-Item -Recurse -Force ;
+        rm 
         cmake -B ${{ steps.strings.outputs.build-output-dir }}
         -DCMAKE_CXX_COMPILER=cl
         -DCMAKE_C_COMPILER=cl
