@@ -14,7 +14,7 @@
       VERTEX_NORMALISED VERTEX_INFO == 1 ? GL_TRUE : GL_FALSE,                         \
       OFFSET,                                                                          \
       nullptr                                                                          \
-  ); \
+  );                                                                                   \
   glEnableVertexAttribArray(                                                           \
       static_cast<GLuint>(PREFIX##_MeshAttribID::VERTEX_ENUM_NAME VERTEX_INFO)         \
   );
@@ -53,9 +53,9 @@
     if (handles.vbo == 0)                                                              \
       glGenBuffers(1, &handles.vbo);                                                   \
                                                                                        \
-    glBindVertexArray(handles.vao);       \
-    glBindBuffer(GL_ARRAY_BUFFER, handles.vbo); \
-    \
+    glBindVertexArray(handles.vao);                                                    \
+    glBindBuffer(GL_ARRAY_BUFFER, handles.vbo);                                        \
+                                                                                       \
     if (mesh_data.vertices)                                                            \
       glBufferData(                                                                    \
         GL_ARRAY_BUFFER,                                                               \
