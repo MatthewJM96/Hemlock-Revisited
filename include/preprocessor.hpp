@@ -422,7 +422,7 @@
 
 /**
  * Like MAP but binds extra state to each call of op. The macro
- * being called as op(binding, arg).
+ * being called as op(binding1, binding2, arg).
  */
 
 #define BIND2_MAP(op, binding1, binding2, sep, ...)                                    \
@@ -436,7 +436,7 @@
 #define _BIND2_MAP_INNER() BIND2_MAP_INNER
 
 /**
- * The same as BIND_MAP, except first-level MAP macro may be safely nested inside this.
+ * The same as BIND2_MAP, except first-level MAP macro may be safely nested inside this.
  */
 #define BIND2_MAP_2(op, binding1, binding2, sep, ...)                                  \
   IF(HAS_ARGS(__VA_ARGS__)) (                                                          \
