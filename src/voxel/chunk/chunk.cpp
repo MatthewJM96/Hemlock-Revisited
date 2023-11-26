@@ -6,8 +6,8 @@
 
 hvox::Chunk::Chunk() :
     neighbours({}),
-    blocks({}),
-    navmesh({}),
+    blocks{},
+    navmesh{},
     lod_level(0),
     generation(ChunkState::NONE),
     meshing(ChunkState::NONE),

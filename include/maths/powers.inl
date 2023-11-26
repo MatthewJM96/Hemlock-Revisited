@@ -43,3 +43,17 @@ constexpr ui64 hmaths::next_power_2(ui64 value) {
     value |= value >> 32;
     return ++value;
 }
+
+#if defined(HEMLOCK_OS_MAC)
+// Note that size_t is uniquely defined independent of uint64_t on Mac.
+constexpr size_t hmaths::next_power_2(size_t value) {
+    --value;
+    value |= value >> 1;
+    value |= value >> 2;
+    value |= value >> 4;
+    value |= value >> 8;
+    value |= value >> 16;
+    value |= value >> 32;
+    return ++value;
+}
+#endif  // defined(HEMLOCK_OS_MAC)

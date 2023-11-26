@@ -5,8 +5,12 @@
 #include "graphics/mesh/common_vertices_def.hpp"
 
 #if defined(HEMLOCK_USING_OPENGL)
-#  include "graphics/mesh/gl.hpp"
-#endif  // defined(HEMLOCK_USING_OPENGL)
+#  if defined(HEMLOCK_OS_MAC)
+#    include "graphics/mesh/gl3.hpp"
+#  else  // defined(HEMLOCK_OS_MAC)
+#    include "graphics/mesh/gl.hpp"
+#  endif  // defined(HEMLOCK_OS_MAC)
+#endif    // defined(HEMLOCK_USING_OPENGL)
 
 H_DEF_ENUM_WITH_SERIALISATION(hemlock::graphics, MeshDataVolatility)
 
