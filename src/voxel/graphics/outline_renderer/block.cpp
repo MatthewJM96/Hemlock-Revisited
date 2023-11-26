@@ -54,7 +54,7 @@ void hvox::BlockOutlineRenderer::init() {
             sizeof(OutlineData),
             reinterpret_cast<void*>(offsetof(OutlineData, position))
         );
-        glEnableVertexArrayAttrib(1);
+        glEnableVertexAttribArray(1);
 
         glVertexAttribPointer(
             2,
@@ -64,7 +64,7 @@ void hvox::BlockOutlineRenderer::init() {
             sizeof(OutlineData),
             reinterpret_cast<void*>(offsetof(OutlineData, position))
         );
-        glEnableVertexArrayAttrib(2);
+        glEnableVertexAttribArray(2);
 
         glVertexAttribDivisor(1, 1);
         glVertexAttribDivisor(2, 1);
