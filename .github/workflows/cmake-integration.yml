@@ -113,7 +113,7 @@ jobs:
         path: ${{ steps.strings.outputs.home }}/.conan
         key: ${{ runner.os }}-${{ env.cache-name }}-${{ matrix.build_type }}-${{ matrix.c_compiler }}-${{ hashFiles('CMakeLists.txt') }}
 
-    - if: ${{ steps.cache-conan.outputs.cache-hit != 'true' }}
+    - if: ${{ steps.cache-conan.outputs.cache-hit == 'true' }}
       name: Remove conan system-reqs cache
       continue-on-error: true
       run: >
@@ -219,7 +219,7 @@ jobs:
         path: ${{ steps.strings.outputs.home }}/.conan
         key: ${{ runner.os }}-${{ env.cache-name }}-${{ matrix.build_type }}--${{ hashFiles('CMakeLists.txt') }}
 
-    - if: ${{ steps.cache-conan.outputs.cache-hit != 'true' }}
+    - if: ${{ steps.cache-conan.outputs.cache-hit == 'true' }}
       name: Remove conan system-reqs cache and delete boost conan_sources.tgz
       continue-on-error: true
       run: >
@@ -332,7 +332,7 @@ jobs:
         path: ${{ steps.strings.outputs.home }}/.conan
         key: ${{ runner.os }}-${{ env.cache-name }}-${{ matrix.build_type }}-${{ matrix.c_compiler }}-${{ hashFiles('CMakeLists.txt') }}
 
-    - if: ${{ steps.cache-conan.outputs.cache-hit != 'true' }}
+    - if: ${{ steps.cache-conan.outputs.cache-hit == 'true' }}
       name: Remove conan system-reqs cache
       continue-on-error: true
       run: >
