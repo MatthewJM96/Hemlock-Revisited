@@ -1,0 +1,119 @@
+name: CMake Build for testing caching
+
+on:
+  push:
+    branches: [ "improvement/ci_caching" ]
+
+jobs:
+
+#################
+#     Linux     #
+#################
+
+  build-linux:
+    runs-on: ubuntu-22.04
+
+    strategy:
+      # Set fail-fast to false to ensure that feedback is delivered for all matrix combinations. Consider changing this to true when your workflow is stable.
+      fail-fast: false
+
+      matrix:
+        build_type: [Release]
+        c_compiler: [gcc-13]
+        include:
+          - c_compiler: gcc-13
+            cpp_compiler: g++-13
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install system dependencies
+      run: >
+        sudo add-apt-repository ppa:ubuntu-toolchain-r/ppa -y ;
+        sudo apt update ;
+        sudo apt install g++-13 gcc-13 unzip libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev
+        freeglut3-dev ;
+        wget https://apt.llvm.org/llvm.sh ;
+        chmod u+x llvm.sh ;
+        sudo ./llvm.sh 17 ;
+        sudo ./llvm.sh 16 ;
+        sudo ./llvm.sh 15
+
+    - name: Install conan
+      run: >
+        python3 -m venv ${{ github.workspace }}/.venv ;
+        source ${{ github.workspace }}/.venv/bin/activate ;
+        pip install conan==1.62.0 ;
+        conan profile new default --detect ;
+        conan profile update conf.tools.system.package_manager:mode=install default ;
+        conan profile update conf.tools.system.package_manager:sudo=True default ;
+        conan profile update settings.compiler.libcxx=libstdc++11 default
+
+    - name: Set reusable strings
+      # Turn repeated input strings (such as the build output directory) into step outputs. These step outputs can be used throughout the workflow file.
+      id: strings
+      shell: bash
+      run: |
+        echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
+
+    - name: Install non-conan dependencies
+      run: >
+        source ${{ github.workspace }}/.venv/bin/activate ;
+        mkdir -p ${{ github.workspace }}/deps/bin ;
+        mkdir -p ${{ github.workspace }}/deps/include ;
+        mkdir -p ${{ github.workspace }}/deps/lib ;
+        mkdir -p ${{ github.workspace }}/tmp ;
+        cd ${{ github.workspace }}/tmp ;
+        wget https://github.com/Auburn/FastNoise2/archive/refs/tags/v0.10.0-alpha.zip ;
+        unzip v0.10.0-alpha.zip ;
+        mkdir -p FastNoise2-0.10.0-alpha/build ;
+        cd FastNoise2-0.10.0-alpha/build ;
+        cmake -S ..
+        -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}
+        -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
+        -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+        -DFASTNOISE2_NOISETOOL=OFF
+        -DFASTNOISE2_TESTS=OFF
+        -B .;
+        cmake --build . --config ${{ matrix.build_type }} ;
+        cmake --install . --prefix ${{ github.workspace }}/deps ;
+        cd ${{ github.workspace }}/tmp ;
+        git clone https://github.com/MatthewJM96/libheatmap.git ;
+        cd libheatmap ;
+        cmake -B build
+        -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}
+        -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
+        -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+        -S . ;
+        cmake --build build --config ${{ matrix.build_type }} ;
+        mv build/libheatmap.a ${{ github.workspace }}/deps/lib ;
+        mkdir -p ${{ github.workspace }}/deps/include/libheatmap ;
+        cp heatmap.h ${{ github.workspace }}/deps/include/libheatmap ;
+        mkdir -p ${{ github.workspace }}/deps/include/libheatmap/colorschemes ;
+        cp colorschemes/*.h ${{ github.workspace }}/deps/include/libheatmap/colorschemes
+
+    - name: Configure CMake
+      # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
+      # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
+      run: >
+        source ${{ github.workspace }}/.venv/bin/activate ;
+        cmake -B ${{ steps.strings.outputs.build-output-dir }}
+        -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}
+        -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
+        -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+        -DHEMLOCK_CI_BUILD=On
+        -S ${{ github.workspace }}
+
+    - name: Build
+      # Build your program with the given configuration. Note that --config is needed because the default Windows generator is a multi-config generator (Visual Studio generator).
+      run: >
+        source ${{ github.workspace }}/.venv/bin/activate ;
+        cmake --build ${{ steps.strings.outputs.build-output-dir }} --config ${{ matrix.build_type }}
+
+    - name: Test
+      working-directory: ${{ steps.strings.outputs.build-output-dir }}
+      # Execute tests defined by the CMake configuration. Note that --build-config is needed because the default Windows generator is a multi-config generator (Visual Studio generator).
+      # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
+      run: >
+        source ${{ github.workspace }}/.venv/bin/activate ;
+        ctest --build-config ${{ matrix.build_type }}
