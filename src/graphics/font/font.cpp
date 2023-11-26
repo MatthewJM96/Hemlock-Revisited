@@ -225,7 +225,17 @@ bool hg::f::Font::generate(
     glGenTextures(1, &font_instance.texture);
     glBindTexture(GL_TEXTURE_2D, font_instance.texture);
     // Set the texture's size and pixel format.
-    glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA8, best_width, best_height);
+    glTexImage2D(
+        GL_TEXTURE_2D,
+        0,
+        GL_RGBA8,
+        best_width,
+        best_height,
+        0,
+        GL_RGBA,
+        GL_UNSIGNED_BYTE,
+        nullptr
+    );
 
     // Note that by default MAG_FILTER, WRAP_* are as we are setting them,
     // the crucial parameter to set is MIN_FILTER that defaults to a
