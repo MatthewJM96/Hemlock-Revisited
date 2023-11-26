@@ -54,7 +54,7 @@ jobs:
       id: strings
       shell: bash
       run: >
-        echo "home=$HOME" >> "$GITHUB_OUTPUT"
+        echo "home=$HOME" >> "$GITHUB_OUTPUT" ;
         echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
 
     - name: Install non-conan dependencies
