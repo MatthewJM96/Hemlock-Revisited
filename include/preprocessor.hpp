@@ -421,6 +421,34 @@
 #define _BIND_MAP_2_INNER() BIND_MAP_2_INNER
 
 /**
+ * Like MAP but binds extra state to each call of op. The macro
+ * being called as op(binding, arg).
+ */
+
+#define BIND2_MAP(op, binding1, binding2, sep, ...)                                    \
+  IF(HAS_ARGS(__VA_ARGS__)) (                                                          \
+    EVAL(BIND2_MAP_INNER(op, binding1, binding2, sep, __VA_ARGS__))                    \
+  )
+#define BIND2_MAP_INNER(op, binding1, binding2, sep, cur_val, ...)                     \
+  op(binding1, binding2, cur_val) IF(HAS_ARGS(__VA_ARGS__))(                           \
+    sep() DEFER2(_BIND2_MAP_INNER)()(op, binding1. binding2, sep, ##__VA_ARGS__)       \
+  )
+#define _BIND2_MAP_INNER() BIND2_MAP_INNER
+
+/**
+ * The same as BIND_MAP, except first-level MAP macro may be safely nested inside this.
+ */
+#define BIND2_MAP_2(op, binding1, binding2, sep, ...)                                  \
+  IF(HAS_ARGS(__VA_ARGS__)) (                                                          \
+    EVAL2(BIND2_MAP_2_INNER(op, binding1, binding2, sep, __VA_ARGS__))                 \
+  )
+#define BIND2_MAP_2_INNER(op, binding1, binding2, sep, cur_val, ...)                   \
+  op(binding1, binding2, cur_val) IF(HAS_ARGS(__VA_ARGS__))(                           \
+    sep() DEFER2(_BIND2_MAP_2_INNER)()(op, binding1, binding2, sep, ##__VA_ARGS__)     \
+  )
+#define _BIND2_MAP_2_INNER() BIND2_MAP_2_INNER
+
+/**
  * This is a variant of the MAP macro which also includes as an argument to the
  * operation a valid C variable name which is different for each iteration.
  *
