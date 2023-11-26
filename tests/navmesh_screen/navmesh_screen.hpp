@@ -317,8 +317,13 @@ public:
             &m_camera.view_projection_matrix()[0][0]
         );
 
+#if !defined(HEMLOCK_OS_MAC)
         glBindTextureUnit(0, m_default_texture);
+
         glUniform1i(m_shader.uniform_location("tex"), 0);
+#else   // !defined(HEMLOCK_OS_MAC)
+        glBindTexture(GL_TEXTURE_2D, m_default_texture);
+#endif  // !defined(HEMLOCK_OS_MAC)
 
         m_chunk_grid->draw(time);
 
@@ -343,12 +348,23 @@ public:
             lines.emplace_back(f32v3{
                 dims.width / 2.0f, dims.height / 2.0f + 20.0f, 0.0f });
 
+#if !defined(HEMLOCK_OS_MAC)
             glNamedBufferSubData(
                 m_crosshair_vbo,
                 0,
                 lines.size() * sizeof(f32v3),
                 reinterpret_cast<void*>(&lines[0])
             );
+#else   // !defined(HEMLOCK_OS_MAC)
+            glBindBuffer(GL_ARRAY_BUFFER, m_crosshair_vbo);
+            glBufferSubData(
+                GL_ARRAY_BUFFER,
+                0,
+                lines.size() * sizeof(f32v3),
+                reinterpret_cast<void*>(&lines[0])
+            );
+            glBindBuffer(GL_ARRAY_BUFFER, 0);
+#endif  // !defined(HEMLOCK_OS_MAC)
         }
 
         f32m4 mvp = glm::ortho(
@@ -487,6 +503,7 @@ public:
 
         m_navmesh_outline_renderer.init();
 
+#if !defined(HEMLOCK_OS_MAC)
         glCreateVertexArrays(1, &m_crosshair_vao);
 
         glCreateBuffers(1, &m_crosshair_vbo);
@@ -504,6 +521,23 @@ public:
         glEnableVertexArrayAttrib(m_crosshair_vao, 0);
         glVertexArrayAttribFormat(m_crosshair_vao, 0, 3, GL_FLOAT, GL_FALSE, 0);
         glVertexArrayAttribBinding(m_crosshair_vao, 0, 0);
+#else   // !defined(HEMLOCK_OS_MAC)
+        glGenVertexArrays(1, &m_crosshair_vao);
+        glBindVertexArray(m_crosshair_vao);
+
+        glGenBuffers(1, &m_crosshair_vbo);
+        glBindBuffer(GL_ARRAY_BUFFER, m_crosshair_vbo);
+
+        glBufferData(
+            GL_ARRAY_BUFFER,
+            sizeof(f32v3) * 2 * 2,  // 2 points per line, 2 lines for crosshair.
+            nullptr,
+            GL_DYNAMIC_DRAW
+        );
+
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(f32v3), nullptr);
+#endif  // !defined(HEMLOCK_OS_MAC)
 
         handle_mouse_button = hemlock::Subscriber<
             hui::MouseButtonEvent>{ [&](hemlock::Sender, hui::MouseButtonEvent ev) {

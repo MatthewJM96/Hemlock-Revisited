@@ -55,6 +55,7 @@ void hvox::NavmeshOutlineRenderer::draw(FrameTime) {
             size_t this_size = hmaths::next_power_2(navmesh.outlines.size());
 
             if (last_size < this_size) {
+#if !defined(HEMLOCK_OS_MAC)
                 glNamedBufferData(
                     navmesh.mesh_handles.vbo,
                     this_size * sizeof(NavmeshOutlineData),
@@ -68,6 +69,25 @@ void hvox::NavmeshOutlineRenderer::draw(FrameTime) {
                     navmesh.outlines.size() * sizeof(NavmeshOutlineData),
                     reinterpret_cast<void*>(navmesh.outlines.data())
                 );
+#else   // !defined(HEMLOCK_OS_MAC)
+                glBindBuffer(GL_ARRAY_BUFFER, navmesh.mesh_handles.vbo);
+
+                glBufferData(
+                    GL_ARRAY_BUFFER,
+                    this_size * sizeof(NavmeshOutlineData),
+                    nullptr,
+                    GL_DYNAMIC_DRAW
+                );
+
+                glBufferSubData(
+                    GL_ARRAY_BUFFER,
+                    0,
+                    navmesh.outlines.size() * sizeof(NavmeshOutlineData),
+                    reinterpret_cast<void*>(navmesh.outlines.data())
+                );
+
+                glBindBuffer(GL_ARRAY_BUFFER, 0);
+#endif  // !defined(HEMLOCK_OS_MAC)
 
                 navmesh.last_size = this_size;
             }
@@ -79,6 +99,7 @@ void hvox::NavmeshOutlineRenderer::draw(FrameTime) {
 
         glBindVertexArray(navmesh.mesh_handles.vao);
 
+#if !defined(HEMLOCK_OS_MAC)
         glVertexArrayVertexBuffer(
             navmesh.mesh_handles.vao,
             0,
@@ -86,6 +107,7 @@ void hvox::NavmeshOutlineRenderer::draw(FrameTime) {
             0,
             sizeof(NavmeshOutlineDatum)
         );
+#endif  // !defined(HEMLOCK_OS_MAC)
 
         glDrawArrays(GL_LINES, 0, static_cast<GLsizei>(navmesh.outlines.size() * 2));
     }
