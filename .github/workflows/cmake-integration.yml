@@ -100,11 +100,21 @@ jobs:
         mkdir -p ${{ github.workspace }}/deps/include/libheatmap/colorschemes ;
         cp colorschemes/*.h ${{ github.workspace }}/deps/include/libheatmap/colorschemes
 
+    - name: Cache conan dependencies
+      id: cache-conan
+      uses: actions/cache@v3
+      env:
+        cache-name: cache-conan
+      with:
+        path: ${{ steps.strings.outputs.home }}/.conan
+        key: ${{ runner.os }}-${{ env.cache-name }}-${{ matrix.build_type }}-${{ matrix.c_compiler }}-${{ hashFiles('CMakeLists.txt') }}
+
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
       # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
       run: >
         source ${{ github.workspace }}/.venv/bin/activate ;
+        conan remove --system-reqs '*' ;
         cmake -B ${{ steps.strings.outputs.build-output-dir }}
         -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}
         -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
@@ -190,12 +200,22 @@ jobs:
         mkdir -p ${{ github.workspace }}/deps/include/libheatmap/colorschemes ;
         copy colorschemes/*.h ${{ github.workspace }}/deps/include/libheatmap/colorschemes
 
+    - name: Cache conan dependencies
+      id: cache-conan
+      uses: actions/cache@v3
+      env:
+        cache-name: cache-conan
+      with:
+        path: ${{ steps.strings.outputs.home }}/.conan
+        key: ${{ runner.os }}-${{ env.cache-name }}-${{ matrix.build_type }}-${{ matrix.c_compiler }}-${{ hashFiles('CMakeLists.txt') }}
+
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
       # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
       run: >
         cd ${{ github.workspace }} ;
         .\.venv\Scripts\activate ;
+        conan remove --system-reqs '*' ;
         cmake -B ${{ steps.strings.outputs.build-output-dir }}
         -DCMAKE_CXX_COMPILER=cl
         -DCMAKE_C_COMPILER=cl
@@ -282,11 +302,21 @@ jobs:
         mkdir -p ${{ github.workspace }}/deps/include/libheatmap/colorschemes ;
         cp colorschemes/*.h ${{ github.workspace }}/deps/include/libheatmap/colorschemes
 
+    - name: Cache conan dependencies
+      id: cache-conan
+      uses: actions/cache@v3
+      env:
+        cache-name: cache-conan
+      with:
+        path: ${{ steps.strings.outputs.home }}/.conan
+        key: ${{ runner.os }}-${{ env.cache-name }}-${{ matrix.build_type }}-${{ matrix.c_compiler }}-${{ hashFiles('CMakeLists.txt') }}
+
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
       # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
       run: >
         source ${{ github.workspace }}/.venv/bin/activate ;
+        conan remove --system-reqs '*' ;
         cmake -B ${{ steps.strings.outputs.build-output-dir }}
         -DCMAKE_CXX_COMPILER=clang++
         -DCMAKE_C_COMPILER=clang
