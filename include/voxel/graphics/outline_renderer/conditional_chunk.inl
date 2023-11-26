@@ -160,6 +160,7 @@ void hvox::ConditionalChunkOutlineRenderer<Pred>::draw(FrameTime) {
         }
     }
 
+    glBindVertexArray(chunk_mesh_handles.vao);
     // TODO(Matthew): We are sending this data every frame?! Might be fine
     //                for debug purposes, but we gotta be sure this is
     //                all people want to use this for.
@@ -171,17 +172,10 @@ void hvox::ConditionalChunkOutlineRenderer<Pred>::draw(FrameTime) {
         reinterpret_cast<void*>(m_chunk_outline_conditions)
     );
 
-    glBindVertexArray(chunk_mesh_handles.vao);
-
     glVertexArrayVertexBuffer(
         chunk_mesh_handles.vao, 1, m_instance_vbo, 0, sizeof(OutlineData)
     );
-
-    glDrawArraysInstanced(
-        GL_LINES, 0, CHUNK_OUTLINE_VERTEX_COUNT, m_chunk_outline_condition_count
-    );
 #else   // !defined(HEMLOCK_OS_MAC)
-    glBindVertexArray(chunk_mesh_handles.vao);
     glBindBuffer(GL_ARRAY_BUFFER, m_instance_vbo);
 
     glBufferSubData(
@@ -190,9 +184,9 @@ void hvox::ConditionalChunkOutlineRenderer<Pred>::draw(FrameTime) {
         m_chunk_outline_condition_count * sizeof(OutlineData),
         reinterpret_cast<void*>(m_chunk_outline_conditions)
     );
+#endif  // !defined(HEMLOCK_OS_MAC)
 
     glDrawArraysInstanced(
         GL_LINES, 0, CHUNK_OUTLINE_VERTEX_COUNT, m_chunk_outline_condition_count
     );
-#endif  // !defined(HEMLOCK_OS_MAC)
 }
