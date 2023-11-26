@@ -76,7 +76,6 @@
 //   Apple deprecated OpenGL entirely...
 #    define GL_SILENCE_DEPRECATION
 #    include <OpenGL/gl3.h>
-#    include <OpenGL/glu3.h>
 #  else  // defined(HEMLOCK_OS_MAC)
 #    include <GL/glew.h>
 #  endif  // defined(HEMLOCK_OS_MAC)
