@@ -76,7 +76,7 @@
           sizeof(mesh_data.indices[0]) * mesh_data.index_count,                        \
           mesh_data.indices,                                                           \
           static_cast<GLenum>(volatility)                                              \
-        );                                                                             \
+        );)                                                                            \
                                                                                        \
     if (setup_vao) {                                                                   \
       constexpr vertex_size = sizeof(PREFIX##_Vertex);                                 \
