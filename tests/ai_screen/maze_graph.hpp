@@ -17,8 +17,7 @@ void __do_maze_graph_test(ui32 map_dim, size_t count) {
                   << " maps, with ideal solution length " << map.solution_length << ":"
                   << std::endl;
 
-        halgo::GraphMap<size_t, false> graph_map
-            = map::maze2d::map_to_graph(map, 0.01f);
+        halgo::GraphMap<size_t, false> graph_map = map::maze2d::map_to_graph(map);
 
         // size_t num_vertices = boost::num_vertices(graph_map.graph);
         // std::cout << "Num Vertices: " << num_vertices << std::endl;
@@ -38,10 +37,20 @@ void __do_maze_graph_test(ui32 map_dim, size_t count) {
             }
         );
 
-        size_t* path        = nullptr;
-        size_t  path_length = 0;
+        halgo::PheromoneMap<size_t> pheromone_map;
+
+        size_t*                                 path        = nullptr;
+        size_t                                  path_length = 0;
+        halgo::DummyGraphMapView<size_t, false> map_view;
+        map_view.init(graph_map);
         halgo::GraphACS::find_path<size_t, false, Config>(
-            graph_map, map.start_idx, map.finish_idx, path, path_length, &debugger
+            map_view,
+            pheromone_map,
+            map.start_idx,
+            map.finish_idx,
+            path,
+            path_length,
+            &debugger
         );
         delete[] path;
 
@@ -79,9 +88,11 @@ void __do_maze_graph_timing_test(size_t iterations, ui32 map_dim, size_t map_idx
               << " maps, with ideal solution length " << map.solution_length << ":"
               << std::endl;
 
-    halgo::GraphMap<size_t, false> graph_map = map::maze2d::map_to_graph(map, 0.01f);
+    halgo::GraphMap<size_t, false> graph_map = map::maze2d::map_to_graph(map);
 
     constexpr halgo::ACSConfig Config = { .max_steps = 300, .debug = { .on = false } };
+
+    halgo::PheromoneMap<size_t> pheromone_map;
 
     size_t** paths = new size_t*[iterations];
 
@@ -89,8 +100,15 @@ void __do_maze_graph_timing_test(size_t iterations, ui32 map_dim, size_t map_idx
     for (size_t iteration = 0; iteration < iterations; ++iteration) {
         auto   start       = std::chrono::steady_clock::now();
         size_t path_length = 0;
+        halgo::DummyGraphMapView<size_t, false> map_view;
+        map_view.init(graph_map);
         halgo::GraphACS::find_path<size_t, false, Config>(
-            graph_map, map.start_idx, map.finish_idx, paths[iteration], path_length
+            map_view,
+            pheromone_map,
+            map.start_idx,
+            map.finish_idx,
+            paths[iteration],
+            path_length
         );
         duration += std::chrono::steady_clock::now() - start;
     }

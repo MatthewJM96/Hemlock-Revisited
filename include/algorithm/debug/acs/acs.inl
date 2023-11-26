@@ -52,9 +52,7 @@ void halgo::deb::ACSHeatmap2D<Node, IsWeighted>::initialise_heatmaps(
 
 template <typename Node, bool IsWeighted>
 void halgo::deb::ACSHeatmap2D<Node, IsWeighted>::create_heatmaps(
-    Ant<VertexDescriptor<Node, IsWeighted>>* ants,
-    size_t                                   ant_count,
-    GraphMap<Node, IsWeighted>&              map
+    _Ant* ants, size_t ant_count, GraphMap<Node, IsWeighted>& map
 ) {
     create_pheromone_heatmap_frame(map);
 
@@ -116,9 +114,7 @@ void halgo::deb::ACSHeatmap2D<Node, IsWeighted>::create_pheromone_heatmap_frame(
 
 template <typename Node, bool IsWeighted>
 void halgo::deb::ACSHeatmap2D<Node, IsWeighted>::create_ant_count_heatmap_frame(
-    Ant<VertexDescriptor<Node, IsWeighted>>* ants,
-    size_t                                   ant_count,
-    GraphMap<Node, IsWeighted>&              map
+    _Ant* ants, size_t ant_count, GraphMap<Node, IsWeighted>& map
 ) {
     if (m_protoheatmap == nullptr) return;
 

@@ -2,11 +2,12 @@
 #define __hemlock_mod_load_order_builder_h
 
 #include "mod/dependency_graph.hpp"
-#include "mod/manager.h"
 #include "mod/state.h"
 
 namespace hemlock {
     namespace mod {
+        class ModManager;
+
         class LoadOrderBuilder {
         public:
             LoadOrderBuilder() { /* Empty. */
@@ -65,9 +66,9 @@ namespace hemlock {
 
             LoadOrder m_load_order;
 
-            ModDependencyGraph                        m_dependency_graph;
-            std::unordered_map<UUID, LoadOrderVertex> m_mod_vertex_map;
-            std::unordered_map<LoadOrderVertex, UUID> m_vertex_mod_map;
+            ModDependencyGraph                                 m_dependency_graph;
+            std::unordered_map<UUID, ModDependencyGraphVertex> m_mod_vertex_map;
+            std::unordered_map<ModDependencyGraphVertex, UUID> m_vertex_mod_map;
         };
     }  // namespace mod
 }  // namespace hemlock

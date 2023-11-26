@@ -4,8 +4,6 @@
 #include "mod/load_order/validate/compatibility.h"
 #include "mod/load_order/validate/consistency.h"
 #include "mod/load_order/validate/order.h"
-#include "mod/metadata.h"
-#include "mod/registry.h"
 
 hmod::LoadOrderState
 hmod::validate_load_order(const LoadOrder& load_order, const ModRegistry& registry) {

@@ -14,7 +14,11 @@ void hmod::LoadOrderBuilder::init(const ModManager* mod_manager) {
 }
 
 hmod::LoadOrderState hmod::LoadOrderBuilder::set_load_order(const LoadOrder& load_order
-) { }
+) {
+    (void)load_order;
+
+    return hmod::LoadOrderState::SENTINEL;
+}
 
 void hmod::LoadOrderBuilder::dispose() {
     m_mod_manager = nullptr;
@@ -34,11 +38,14 @@ void hmod::LoadOrderBuilder::set_version(hemlock::SemanticVersion&& version) {
     m_load_order.version = std::forward<hemlock::SemanticVersion>(version);
 }
 
-std::pair<bool, LoadOrderState> hmod::LoadOrderBuilder::add_mod(
+std::pair<bool, hmod::LoadOrderState> hmod::LoadOrderBuilder::add_mod(
     const hemlock::UUID& id,
     bool                 allow_version_mismatch /*= false*/,
-    bool                 allow_invaid_order = /*true*/
+    bool                 allow_invalid_order /*= true*/
 ) {
+    // TODO(Matthew): remove me
+    (void)allow_invalid_order;
+
     auto it = std::find(m_load_order.mods.begin(), m_load_order.mods.end(), id);
     if (it != m_load_order.mods.end()) return { false, LoadOrderState::VALID };
 
@@ -60,52 +67,69 @@ std::pair<bool, LoadOrderState> hmod::LoadOrderBuilder::add_mod(
 
     m_load_order.mods.emplace_back(id);
 
-    m_mod_vertex_map[id]                   = boost::add_vertex(m_dependecy_graph);
+    m_mod_vertex_map[id]                   = boost::add_vertex(m_dependency_graph);
     m_vertex_mod_map[m_mod_vertex_map[id]] = id;
 
-    if (metadata.hard_depends.has_value()) {
-        for (const auto& [depends_id, _] : metadata.hard_depends.value()) {
+    if (mod_metadata->hard_depends.has_value()) {
+        for (const auto& [depends_id, _] : mod_metadata->hard_depends.value()) {
             if (m_mod_vertex_map.contains(depends_id)) {
                 auto [edge, _2] = boost::add_edge(
                     m_mod_vertex_map[depends_id],
                     m_mod_vertex_map[id],
-                    m_dependecy_graph
+                    m_dependency_graph
                 );
+
+                (void)edge;
+                (void)_2;
             }
         }
     }
 
-    if (metadata.soft_depends.has_value()) {
-        for (const auto& [depends_id, _] : metadata.soft_depends.value()) {
+    if (mod_metadata->soft_depends.has_value()) {
+        for (const auto& [depends_id, _] : mod_metadata->soft_depends.value()) {
             if (m_mod_vertex_map.contains(depends_id)) {
                 auto [edge, _2] = boost::add_edge(
                     m_mod_vertex_map[depends_id],
                     m_mod_vertex_map[id],
-                    m_dependecy_graph
+                    m_dependency_graph
                 );
+
+                (void)edge;
+                (void)_2;
             }
         }
     }
 
-    if (metadata.hard_wanted_by.has_value()) {
-        for (const auto& [wanted_by_id, _] : metadata.hard_wanted_by.value()) {
+    if (mod_metadata->hard_wanted_by.has_value()) {
+        for (const auto& [wanted_by_id, _] : mod_metadata->hard_wanted_by.value()) {
             if (m_mod_vertex_map.contains(wanted_by_id)) {
                 auto [edge, _2] = boost::add_edge(
                     m_mod_vertex_map[id],
                     m_mod_vertex_map[wanted_by_id],
-                    m_dependecy_graph
+                    m_dependency_graph
                 );
+
+                (void)edge;
+                (void)_2;
             }
         }
     }
 
-    if (metadata.soft_wanted_by.has_value()) {
-        for (const auto& [wanted_by_id, _] : metadata.soft_wanted_by.value()) {
+    if (mod_metadata->soft_wanted_by.has_value()) {
+        for (const auto& [wanted_by_id, _] : mod_metadata->soft_wanted_by.value()) {
             if (m_mod_vertex_map.contains(wanted_by_id)) {
                 auto [edge, _2] = boost::add_edge(
-                    m_mod_vertex_map[id], m_mod_vertex_map[wanted_by_id], g
+                    m_mod_vertex_map[id],
+                    m_mod_vertex_map[wanted_by_id],
+                    m_dependency_graph
                 );
+
+                (void)edge;
+                (void)_2;
             }
         }
     }
+
+    // TODO(Matthew): complete the logic...
+    return { false, LoadOrderState::SENTINEL };
 }

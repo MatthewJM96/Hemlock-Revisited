@@ -1,10 +1,7 @@
 #ifndef __hemlock_mod_load_order_load_order_h
 #define __hemlock_mod_load_order_load_order_h
 
-#include "mod/metadata.h"
-#include "mod/registry.h"
-
-#include "state.hpp"
+#include "mod/state.h"
 
 namespace hemlock {
     namespace mod {

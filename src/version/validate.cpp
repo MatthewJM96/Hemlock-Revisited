@@ -22,10 +22,10 @@ H_DEF_UNION_WITH_SERIALISATION(
     hemlock,
     Versions,
     ui8,
-    (H_NON_POD_TYPE, LIST, (list, hemlock::VersionList)),
-    (H_NON_POD_TYPE, RANGE, (range, hemlock::VersionRange)),
-    (H_NON_POD_TYPE, MINIMUM, (minimum, hemlock::VersionMinimum)),
-    (H_NON_POD_TYPE, MAXIMUM, (maximum, hemlock::VersionMaximum))
+    (LIST, H_NON_POD_TYPE(), (list, hemlock::VersionList)),
+    (RANGE, H_NON_POD_TYPE(), (range, hemlock::VersionRange)),
+    (MINIMUM, H_NON_POD_TYPE(), (minimum, hemlock::VersionMinimum)),
+    (MAXIMUM, H_NON_POD_TYPE(), (maximum, hemlock::VersionMaximum))
 )
 
 static bool lists_overlap(hemlock::Versions a, hemlock::Versions b) {

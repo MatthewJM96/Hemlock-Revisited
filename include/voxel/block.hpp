@@ -17,7 +17,7 @@ namespace hemlock {
         const ui32 BLOCK_VERTEX_COUNT = 36;
 
         using BlockVertex   = hg::Colourless_3D_32_Normal_Vertex;
-        using BlockMeshData = hg::Colourless_3D_32_Normal_MeshData;
+        using BlockMeshData = hg::ConstColourless_3D_32_Normal_MeshData;
 
         // static BlockVertex* const BLOCK_VERTICES = new
         // BlockVertex[BLOCK_VERTEX_COUNT] {
@@ -65,7 +65,7 @@ namespace hemlock {
         //     { { -0.5f,  0.5f,  0.5f }, { 0.0f, 0.0f }, {  0.0f,  1.0f,  1.0f } }
         // };
 
-        static BlockVertex* const BLOCK_VERTICES = new BlockVertex[BLOCK_VERTEX_COUNT]{
+        static const BlockVertex BLOCK_VERTICES[BLOCK_VERTEX_COUNT] = {
   /* FRONT */
             {{ 1.0f, 0.0f, 0.0f }, { 1.0f, 0.0f }, { 0.0f, 0.0f, -1.0f }},
             {{ 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f }, { 0.0f, 0.0f, -1.0f }},
@@ -110,7 +110,7 @@ namespace hemlock {
             {{ 0.0f, 1.0f, 1.0f }, { 0.0f, 0.0f },  { 0.0f, 1.0f, 1.0f }}
         };
 
-        const BlockMeshData BLOCK_MESH = { BLOCK_VERTICES, BLOCK_VERTEX_COUNT };
+        const BlockMeshData BLOCK_MESH = { &BLOCK_VERTICES[0], BLOCK_VERTEX_COUNT };
     }  // namespace voxel
 }  // namespace hemlock
 namespace hvox = hemlock::voxel;

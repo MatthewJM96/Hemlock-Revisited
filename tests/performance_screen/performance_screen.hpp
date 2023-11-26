@@ -9,7 +9,8 @@
 #include "memory/handle.hpp"
 #include "rand.h"
 #include "ui/input/dispatcher.h"
-#include "voxel/ai/navmesh/naive_strategy.hpp"
+#include "voxel/ai/navmesh/navmesh_task.hpp"
+#include "voxel/ai/navmesh/strategy/naive/strategy.hpp"
 #include "voxel/chunk/state.hpp"
 #include "voxel/generation/generator_task.hpp"
 #include "voxel/graphics/mesh/greedy_strategy.hpp"
@@ -63,8 +64,10 @@ public:
 
             hmem::Handle<hvox::ChunkBlockPager> block_pager
                 = hmem::make_handle<hvox::ChunkBlockPager>();
-            hmem::Handle<hvox::ChunkInstanceDataPager> instance_data_pager
+            hmem::Handle<hvox::ChunkInstanceDataPager> instance_pager
                 = hmem::make_handle<hvox::ChunkInstanceDataPager>();
+            hmem::Handle<hvox::ai::ChunkNavmeshPager> navmesh_pager
+                = hmem::make_handle<hvox::ai::ChunkNavmeshPager>();
 
             hmem::PagedAllocator<hvox::Chunk, 4 * 4 * 4, 3> chunk_allocator;
 
@@ -85,7 +88,7 @@ public:
                             {x, y, z}
                         };
                         chunks[idx]->init(
-                            chunks[idx], block_pager, instance_data_pager
+                            chunks[idx], block_pager, instance_pager, navmesh_pager
                         );
                     }
                 }
@@ -159,9 +162,10 @@ public:
                     hemlock::global_unitary_rand<f32>() * static_cast<f32>(CHUNK_VOLUME)
                 ));
 
-                std::cout << "    - "
-                          << chunks[rand_chunk_idx]->blocks[rand_block_idx].id
-                          << std::endl;
+                std::shared_lock<std::shared_mutex> lock;
+                auto blocks = chunks[rand_chunk_idx]->blocks.get(lock);
+
+                std::cout << "    - " << blocks[rand_block_idx].id << std::endl;
             }
 
             const hvox::NaiveMeshStrategy<htest::performance_screen::BlockComparator>
@@ -335,14 +339,16 @@ public:
                     hemlock::global_unitary_rand<f32>() * static_cast<f32>(iterations)
                 ));
 
-                std::cout << "    - "
-                          << boost::num_vertices(chunks[rand_chunk_idx]->navmesh.graph)
+                std::shared_lock<std::shared_mutex> lock;
+                auto navmesh = chunks[rand_chunk_idx]->navmesh.get(lock);
+
+                std::cout << "    - " << boost::num_vertices(navmesh->graph)
                           << std::endl;
             }
 
             {
                 size_t allocated_bytes = block_pager->allocated_bytes()
-                                         + instance_data_pager->allocated_bytes()
+                                         + instance_pager->allocated_bytes()
                                          + chunk_allocator.allocated_bytes();
                 size_t allocated_MB = allocated_bytes / 1000000;
 
@@ -365,7 +371,7 @@ public:
 
             delete[] chunks;
             block_pager->dispose();
-            instance_data_pager->dispose();
+            instance_pager->dispose();
 
             m_do_profile.store(false);
         }

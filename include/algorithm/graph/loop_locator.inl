@@ -34,11 +34,11 @@ void halgo::LoopLocator<Graph>::back_edge(Edge edge, const Graph& graph) {
     // Store a record of the back edge as we will need to know about this to handle
     // forward/cross edges hitting a vertex that has an outbound back edge.
     // TODO(Matthew): do we need to use this here as well, actually?
-    if (m_back_edges.contains(boost::source(edge))) {
-        m_back_edges[boost::source(edge)].emplace_back(edge);
-    } else {
-        m_back_edges[boost::source(edge)] = Edges{ edge };
-    }
+    // if (m_back_edges.contains(boost::source(edge))) {
+    //     m_back_edges[boost::source(edge)].emplace_back(edge);
+    // } else {
+    //     m_back_edges[boost::source(edge)] = Edges{ edge };
+    // }
 
     // Find where in the current path the back edge points to, this is the beginning of
     // the loop we have just identified.

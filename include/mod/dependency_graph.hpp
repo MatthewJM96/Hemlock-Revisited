@@ -14,9 +14,9 @@ namespace hemlock {
             boost::property<boost::edge_weight_t, bool>>;
 
         using ModDependencyGraphEdge
-            = boost::graph_traits<ModDependencyGraphGraph>::edge_descriptor;
+            = boost::graph_traits<ModDependencyGraph>::edge_descriptor;
         using ModDependencyGraphVertex
-            = boost::graph_traits<ModDependencyGraphGraph>::vertex_descriptor;
+            = boost::graph_traits<ModDependencyGraph>::vertex_descriptor;
     }  // namespace mod
 }  // namespace hemlock
 namespace hmod = hemlock::mod;

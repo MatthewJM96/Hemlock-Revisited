@@ -1,6 +1,8 @@
 #ifndef __hemlock_algorithm_acs_state_hpp
 #define __hemlock_algorithm_acs_state_hpp
 
+#include "graph/state.hpp"
+
 namespace hemlock {
     namespace algorithm {
         struct ACSConfig {
@@ -54,21 +56,40 @@ namespace hemlock {
             } debug = {};
         };
 
-        template <typename VertexType>
+        template <typename Candidate, typename Node, bool IsWeighted>
+        concept ACSDistanceCalculator
+            = requires (Candidate s, GraphMap<Node, IsWeighted> g, Node n) {
+                  {
+                      s.operator()(g, n, n, n)
+                      } -> std::same_as<f32>;
+              };
+
+        template <typename Node, bool IsWeighted>
+        struct NullACSDistanceCalculator {
+            f32
+            operator()(const GraphMap<Node, IsWeighted>&, const Node&, const Node&, const Node&)
+                const {
+                return 0.0f;
+            }
+        };
+
+        template <typename VertexType, typename Node, bool IsWeighted>
         struct Ant {
             bool   found_food   = false;
             bool   did_backstep = false;
             size_t steps_taken  = 0;
             size_t group        = 0;
 
-            VertexType* previous_vertices = nullptr;
-            VertexType  current_vertex    = {};
+            std::pair<VertexType, VertexType>* previous_vertices = nullptr;
+            GraphMap<Node, IsWeighted>**       previous_maps     = nullptr;
+            std::pair<VertexType, VertexType>  current_vertex    = {};
+            GraphMap<Node, IsWeighted>*        current_map       = nullptr;
         };
 
-        template <typename VertexType, size_t AntCount>
+        template <typename VertexType, typename Node, bool IsWeighted, size_t AntCount>
         struct AntGroup {
-            Ant<VertexType>* ants[AntCount] = {};
-            size_t           size           = 0;
+            Ant<VertexType, Node, IsWeighted>* ants[AntCount] = {};
+            size_t                             size           = 0;
         };
     }  // namespace algorithm
 }  // namespace hemlock

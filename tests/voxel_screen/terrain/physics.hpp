@@ -22,6 +22,7 @@ namespace hemlock {
                     m_camera      = camera;
                     m_line_shader = shader;
 
+#if !defined(HEMLOCK_OS_MAC)
                     glCreateVertexArrays(1, &m_vao);
 
                     glCreateBuffers(1, &m_vbo);
@@ -34,6 +35,25 @@ namespace hemlock {
                     glEnableVertexArrayAttrib(m_vao, 0);
                     glVertexArrayAttribFormat(m_vao, 0, 3, GL_FLOAT, GL_FALSE, 0);
                     glVertexArrayAttribBinding(m_vao, 0, 0);
+#else   // !defined(HEMLOCK_OS_MAC)
+                    glGenVertexArrays(1, &m_vao);
+                    glBindVertexArray(m_vao);
+
+                    glGenBuffers(1, &m_vbo);
+                    glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
+
+                    glBufferData(
+                        GL_ARRAY_BUFFER, sizeof(f32v3) * 2, nullptr, GL_DYNAMIC_DRAW
+                    );
+
+                    glEnableVertexAttribArray(0);
+                    glVertexAttribPointer(
+                        0, 3, GL_FLOAT, GL_FALSE, sizeof(f32v3), nullptr
+                    );
+
+                    glBindBuffer(GL_ARRAY_BUFFER, 0);
+                    glBindVertexArray(0);
+#endif  // !defined(HEMLOCK_OS_MAC)
                 }
 
                 virtual ~VoxelPhysDrawer() { /* Empty. */
@@ -51,9 +71,20 @@ namespace hemlock {
                               to.z() /* + m_camera->position().z*/  }
                     };
 
+#if !defined(HEMLOCK_OS_MAC)
                     glNamedBufferSubData(
                         m_vbo, 0, 2 * sizeof(f32v3), reinterpret_cast<void*>(&points[0])
                     );
+#else   // !defined(HEMLOCK_OS_MAC)
+                    glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
+                    glBufferSubData(
+                        GL_ARRAY_BUFFER,
+                        0,
+                        2 * sizeof(f32v3),
+                        reinterpret_cast<void*>(&points[0])
+                    );
+                    glBindBuffer(GL_ARRAY_BUFFER, 0);
+#endif  // !defined(HEMLOCK_OS_MAC)
 
                     f32v3 _colour = f32v3{ 1.0f, 1.0f, 0.0f };
                     glUniformMatrix4fv(

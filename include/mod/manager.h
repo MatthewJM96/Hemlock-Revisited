@@ -3,10 +3,13 @@
 
 #include "io/iomanager.h"
 
+#include "load_order/builder.h"
 #include "state.h"
 
 namespace hemlock {
     namespace mod {
+        class LoadOrderBuilder;
+
         /**
          * @brief Responsible for the registration of mods, and the validation,
          * correction, and registration of load orders.

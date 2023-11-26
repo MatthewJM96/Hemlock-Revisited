@@ -131,7 +131,7 @@ namespace std {
     template <>
     struct hash<hemlock::UUID> {
         size_t operator()(const hemlock::UUID& x) const {
-            return boost::hash<boost::uuids::uuid>(x);
+            return boost::hash<boost::uuids::uuid>()(x);
         }
     };
 }  // namespace std

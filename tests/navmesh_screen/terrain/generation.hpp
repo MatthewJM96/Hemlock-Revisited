@@ -6,16 +6,25 @@ namespace hemlock {
         namespace navmesh_screen {
             struct VoxelGenerator {
                 void operator()(hmem::Handle<hvox::Chunk> chunk) const {
-                    auto simplex_1      = FastNoise::New<FastNoise::Simplex>();
-                    auto fractal_1      = FastNoise::New<FastNoise::FractalFBm>();
-                    auto domain_scale_1 = FastNoise::New<FastNoise::DomainScale>();
-                    auto position_output_1
-                        = FastNoise::New<FastNoise::PositionOutput>();
-                    auto add_1 = FastNoise::New<FastNoise::Add>();
+                    auto simplex_1
+                        = FastNoise::New<FastNoise::Simplex>(FastSIMD::Level_AVX512);
+                    auto fractal_1
+                        = FastNoise::New<FastNoise::FractalFBm>(FastSIMD::Level_AVX512);
+                    auto domain_scale_1
+                        = FastNoise::New<FastNoise::DomainScale>(FastSIMD::Level_AVX512
+                        );
+                    auto position_output_1 = FastNoise::New<FastNoise::PositionOutput>(
+                        FastSIMD::Level_AVX512
+                    );
+                    auto add_1 = FastNoise::New<FastNoise::Add>(FastSIMD::Level_AVX512);
                     auto domain_warp_grad_1
-                        = FastNoise::New<FastNoise::DomainWarpGradient>();
+                        = FastNoise::New<FastNoise::DomainWarpGradient>(
+                            FastSIMD::Level_AVX512
+                        );
                     auto domain_warp_fract_prog_1
-                        = FastNoise::New<FastNoise::DomainWarpFractalProgressive>();
+                        = FastNoise::New<FastNoise::DomainWarpFractalProgressive>(
+                            FastSIMD::Level_AVX512
+                        );
 
                     fractal_1->SetSource(simplex_1);
                     fractal_1->SetOctaveCount(4);
@@ -56,13 +65,14 @@ namespace hemlock {
                     );
 
                     {
-                        std::lock_guard lock(chunk->blocks_mutex);
+                        std::unique_lock<std::shared_mutex> lock;
+                        auto blocks = chunk->blocks.get(lock);
 
                         ui64 noise_idx = 0;
                         for (ui8 z = 0; z < CHUNK_LENGTH; ++z) {
                             for (ui8 y = 0; y < CHUNK_LENGTH; ++y) {
                                 for (ui8 x = 0; x < CHUNK_LENGTH; ++x) {
-                                    chunk->blocks[hvox::block_index(
+                                    blocks[hvox::block_index(
                                         { x, CHUNK_LENGTH - y - 1, z }
                                     )] = data[noise_idx++] > 0 ? hvox::Block{ 1 } :
                                                                  hvox::Block{ 0 };
@@ -75,19 +85,28 @@ namespace hemlock {
                 }
             };
 
-            void load_chunks(hmem::Handle<hvox::ChunkGrid> chunk_grid) {
+            void load_chunks(
+                hmem::Handle<hvox::ChunkGrid> chunk_grid,
+                hvox::NavmeshOutlineRenderer* navmesh_outline_renderer
+            ) {
                 for (auto x = -VIEW_DIST; x <= VIEW_DIST; ++x) {
                     for (auto z = -VIEW_DIST; z <= VIEW_DIST; ++z) {
-                        for (auto y = -2; y < 6; ++y) {
-                            chunk_grid->preload_chunk_at({
+                        for (auto y = -2; y < std::min(6, VIEW_DIST * 2 - 1); ++y) {
+                            hvox::ChunkGridPosition pos = {
                                 {x, y, z}
-                            });
+                            };
+
+                            chunk_grid->preload_chunk_at(pos);
+
+                            navmesh_outline_renderer->register_chunk(
+                                chunk_grid->chunk(pos)
+                            );
                         }
                     }
                 }
                 for (auto x = -VIEW_DIST; x <= VIEW_DIST; ++x) {
                     for (auto z = -VIEW_DIST; z <= VIEW_DIST; ++z) {
-                        for (auto y = -2; y < 6; ++y) {
+                        for (auto y = -2; y < std::min(6, VIEW_DIST * 2 - 1); ++y) {
                             chunk_grid->load_chunk_at({
                                 {x, y, z}
                             });
@@ -96,12 +115,12 @@ namespace hemlock {
                 }
             }
 
-            
             void unload_x_chunks(
                 hmem::Handle<hvox::ChunkGrid>               chunk_grid,
                 std::vector<hmem::WeakHandle<hvox::Chunk>>& unloading_chunks,
                 const f32v3&                                current_pos,
-                const f32v3&                                last_pos
+                const f32v3&                                last_pos,
+                hvox::NavmeshOutlineRenderer*               navmesh_outline_renderer
             ) {
                 i32 x_step
                     = static_cast<i32>(current_pos.x) - static_cast<i32>(last_pos.x);
@@ -110,7 +129,7 @@ namespace hemlock {
                          z <= static_cast<i32>(current_pos.z) + VIEW_DIST;
                          ++z)
                     {
-                        for (auto y = -2; y < 6; ++y) {
+                        for (auto y = -2; y < std::min(6, VIEW_DIST * 2 - 1); ++y) {
                             unloading_chunks.emplace_back(
                                 hmem::WeakHandle<hvox::Chunk>{}
                             );
@@ -131,20 +150,26 @@ static_cast<i32>(current_pos.x)
                          z <= static_cast<i32>(current_pos.z) + VIEW_DIST;
                          ++z)
                     {
-                        for (auto y = -2; y < 6; ++y) {
-                            chunk_grid->preload_chunk_at({
+                        for (auto y = -2; y < std::min(6, VIEW_DIST * 2 - 1); ++y) {
+                            hvox::ChunkGridPosition pos = {
                                 {x_step < 0 ?
 static_cast<i32>(current_pos.x) - VIEW_DIST :
 static_cast<i32>(current_pos.x) + VIEW_DIST,
                                  y, z}
-                            });
+                            };
+
+                            chunk_grid->preload_chunk_at(pos);
+
+                            navmesh_outline_renderer->register_chunk(
+                                chunk_grid->chunk(pos)
+                            );
                         }
                     }
                     for (auto z = static_cast<i32>(current_pos.z) - VIEW_DIST;
                          z <= static_cast<i32>(current_pos.z) + VIEW_DIST;
                          ++z)
                     {
-                        for (auto y = -2; y < 6; ++y) {
+                        for (auto y = -2; y < std::min(6, VIEW_DIST * 2 - 1); ++y) {
                             chunk_grid->load_chunk_at({
                                 {x_step < 0 ?
 static_cast<i32>(current_pos.x) - VIEW_DIST :
@@ -160,7 +185,8 @@ static_cast<i32>(current_pos.x) + VIEW_DIST,
                 hmem::Handle<hvox::ChunkGrid>               chunk_grid,
                 std::vector<hmem::WeakHandle<hvox::Chunk>>& unloading_chunks,
                 const f32v3&                                current_pos,
-                const f32v3&                                last_pos
+                const f32v3&                                last_pos,
+                hvox::NavmeshOutlineRenderer*               navmesh_outline_renderer
             ) {
                 i32 z_step
                     = static_cast<i32>(current_pos.z) - static_cast<i32>(last_pos.z);
@@ -169,7 +195,7 @@ static_cast<i32>(current_pos.x) + VIEW_DIST,
                          x <= static_cast<i32>(current_pos.x) + VIEW_DIST;
                          ++x)
                     {
-                        for (auto y = -2; y < 6; ++y) {
+                        for (auto y = -2; y < std::min(6, VIEW_DIST * 2 - 1); ++y) {
                             unloading_chunks.emplace_back(
                                 hmem::WeakHandle<hvox::Chunk>{}
                             );
@@ -190,20 +216,26 @@ static_cast<i32>(current_pos.x) + VIEW_DIST,
                          x <= static_cast<i32>(current_pos.x) + VIEW_DIST;
                          ++x)
                     {
-                        for (auto y = -2; y < 6; ++y) {
-                            chunk_grid->preload_chunk_at({
+                        for (auto y = -2; y < std::min(6, VIEW_DIST * 2 - 1); ++y) {
+                            hvox::ChunkGridPosition pos = {
                                 {x,
                                  y, z_step < 0 ?
  static_cast<i32>(current_pos.z) - VIEW_DIST :
  static_cast<i32>(current_pos.z) + VIEW_DIST}
-                            });
+                            };
+
+                            chunk_grid->preload_chunk_at(pos);
+
+                            navmesh_outline_renderer->register_chunk(
+                                chunk_grid->chunk(pos)
+                            );
                         }
                     }
                     for (auto x = static_cast<i32>(current_pos.x) - VIEW_DIST;
                          x <= static_cast<i32>(current_pos.x) + VIEW_DIST;
                          ++x)
                     {
-                        for (auto y = -2; y < 6; ++y) {
+                        for (auto y = -2; y < std::min(6, VIEW_DIST * 2 - 1); ++y) {
                             chunk_grid->load_chunk_at({
                                 {x,
                                  y, z_step < 0 ?
