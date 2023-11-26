@@ -13,7 +13,7 @@
           : GL_DOUBLE),                                                                \
       VERTEX_NORMALISED VERTEX_INFO == 1 ? GL_TRUE : GL_FALSE,                         \
       vertex_size,                                                                     \
-      static_cast<void*>(OFFSET)                                                       \
+      reinterpret_cast<void*>(OFFSET)                                                  \
   );                                                                                   \
   glEnableVertexAttribArray(                                                           \
       static_cast<GLuint>(PREFIX##_MeshAttribID::VERTEX_ENUM_NAME VERTEX_INFO)         \

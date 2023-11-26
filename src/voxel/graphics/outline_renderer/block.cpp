@@ -52,7 +52,7 @@ void hvox::BlockOutlineRenderer::init() {
             GL_FLOAT,
             GL_FALSE,
             sizeof(OutlineData),
-            static_cast<void*>(offsetof(OutlineData, position))
+            reinterpret_cast<void*>(offsetof(OutlineData, position))
         );
         glEnableVertexArrayAttrib(1);
 
@@ -62,7 +62,7 @@ void hvox::BlockOutlineRenderer::init() {
             GL_UNSIGNED_BYTE,
             GL_TRUE,
             sizeof(OutlineData),
-            static_cast<void*>(offsetof(OutlineData, position))
+            reinterpret_cast<void*>(offsetof(OutlineData, position))
         );
         glEnableVertexArrayAttrib(2);
 

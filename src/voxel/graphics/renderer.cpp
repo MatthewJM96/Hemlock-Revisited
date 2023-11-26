@@ -120,7 +120,7 @@ void hvox::ChunkRenderer::draw(FrameTime) {
             GL_FLOAT,
             GL_FALSE,
             sizeof(ChunkInstanceData),
-            static_cast<void*>(offsetof(ChunkInstanceData, translation))
+            reinterpret_cast<void*>(offsetof(ChunkInstanceData, translation))
         );
         glVertexAttribPointer(
             4,
@@ -128,7 +128,7 @@ void hvox::ChunkRenderer::draw(FrameTime) {
             GL_FLOAT,
             GL_FALSE,
             sizeof(ChunkInstanceData),
-            static_cast<void*>(offsetof(ChunkInstanceData, scaling))
+            reinterpret_cast<void*>(offsetof(ChunkInstanceData, scaling))
         );
 #endif  // !defined(HEMLOCK_OS_MAC)
 
