@@ -164,11 +164,11 @@ void hg::s::SpriteBatcher::init(
     glTextureParameteri(m_default_texture, GL_TEXTURE_WRAP_R, GL_REPEAT);
 #else   // !defined(HEMLOCK_OS_MAC)
     // Create the vertex array object and bind it.
-    glCreateVertexArrays(1, &m_vao);
+    glGenVertexArrays(1, &m_vao);
 
     // Create vertex & index buffers.
-    glCreateBuffers(1, &m_vbo);
-    glCreateBuffers(1, &m_ibo);
+    glGenBuffers(1, &m_vbo);
+    glGenBuffers(1, &m_ibo);
 
     // Enable the attributes in our shader.
     m_default_shader.enable_vertex_attrib_arrays(m_vao);
@@ -198,7 +198,7 @@ void hg::s::SpriteBatcher::init(
         GL_FLOAT,
         false,
         sizeof(SpriteVertex),
-        offsetof(SpriteVertex, position)
+        reinterpret_cast<void*>(offsetof(SpriteVertex, position))
     );
     glVertexAttribPointer(
         SpriteShaderAttribID::RELATIVE_POSITION,
@@ -206,7 +206,7 @@ void hg::s::SpriteBatcher::init(
         GL_FLOAT,
         false,
         sizeof(SpriteVertex),
-        offsetof(SpriteVertex, relative_position)
+        reinterpret_cast<void*>(offsetof(SpriteVertex, relative_position))
     );
     glVertexAttribPointer(
         SpriteShaderAttribID::UV_DIMENSIONS,
@@ -214,7 +214,7 @@ void hg::s::SpriteBatcher::init(
         GL_FLOAT,
         false,
         sizeof(SpriteVertex),
-        offsetof(SpriteVertex, uv_rect)
+        reinterpret_cast<void*>(offsetof(SpriteVertex, uv_rect))
     );
     glVertexAttribPointer(
         SpriteShaderAttribID::COLOUR,
@@ -222,7 +222,7 @@ void hg::s::SpriteBatcher::init(
         GL_UNSIGNED_BYTE,
         true,
         sizeof(SpriteVertex),
-        offsetof(SpriteVertex, colour)
+        reinterpret_cast<void*>(offsetof(SpriteVertex, colour))
     );
 
     // Unbind VAO and VBO.
@@ -610,7 +610,11 @@ void hg::s::SpriteBatcher::render(f32m4 world_projection, f32m4 view_projection)
     // For each batch, bind its texture, set the sampler state (have to do this each
     // time), and draw the triangles in that batch.
     for (auto& batch : m_batches) {
+#if !defined(HEMLOCK_OS_MAC)
         glBindTextureUnit(0, batch.texture);
+#else   // !defined(HEMLOCK_OS_MAC)
+        glBindTexture(GL_TEXTURE_2D, batch.texture);
+#endif  // !defined(HEMLOCK_OS_MAC)
 
         // Note that we pass an offset as the final argument despite glDrawElements
         // expecting a pointer as we have already uploaded the data to the buffer on
@@ -702,7 +706,13 @@ void hg::s::SpriteBatcher::generate_batches() {
 
     // If we have no sprites, just tell the GPU we have nothing.
     if (m_sprite_ptrs.empty()) {
+#if !defined(HEMLOCK_OS_MAC)
         glNamedBufferData(m_vbo, 0, nullptr, m_usage_hint);
+#else   // !defined(HEMLOCK_OS_MAC)
+        glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
+        glBufferData(GL_ARRAY_BUFFER, 0, nullptr, m_usage_hint);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+#endif  // !defined(HEMLOCK_OS_MAC)
         return;
     }
 
