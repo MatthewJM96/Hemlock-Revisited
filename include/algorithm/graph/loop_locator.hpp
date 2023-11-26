@@ -80,18 +80,6 @@ namespace hemlock {
             void back_edge(Edge edge, const Graph& graph);
 
             /**
-             * @brief Called whenever DFS iterates a forward or cross edge. In order
-             * that we detect all loops whether connected or disconnected from one
-             * another, we here inspect whether the edge we've just iterated joins an
-             * existing loop.
-             *
-             * @param edge The edge that has just been traversed, constituting either a
-             * forward or cross edge.
-             * @param graph The graph being traversed.
-             */
-            void forward_or_cross_edge(Edge edge, const Graph& graph);
-
-            /**
              * @brief Called before DFS traversal to denote the root vertex on which the
              * traversal will be performed. We use this to capture cases where a loop
              * travels through this root vertex, as some times there'll be no edge to

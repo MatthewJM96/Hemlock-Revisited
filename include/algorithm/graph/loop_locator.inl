@@ -27,7 +27,6 @@ template <typename Graph>
 void halgo::LoopLocator<Graph>::dispose() {
     m_root_vertex = 0;
     m_curr_path   = {};
-    m_back_edges  = {};
     m_loops       = {};
 }
 

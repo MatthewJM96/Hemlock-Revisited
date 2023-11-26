@@ -226,8 +226,13 @@ public:
             &m_camera.view_projection_matrix()[0][0]
         );
 
+#if !defined(HEMLOCK_OS_MAC)
         glBindTextureUnit(0, m_default_texture);
+
         glUniform1i(m_shader.uniform_location("tex"), 0);
+#else   // !defined(HEMLOCK_OS_MAC)
+        glBindTexture(GL_TEXTURE_2D, m_default_texture);
+#endif  // !defined(HEMLOCK_OS_MAC)
 
         m_chunk_grid->draw(time);
 

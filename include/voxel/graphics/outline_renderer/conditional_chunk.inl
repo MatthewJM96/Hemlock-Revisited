@@ -1,9 +1,11 @@
-template <hvox::ChunkOutlinePredicate Pred>
+#include "voxel/chunk/grid.h"
+
+template <hvox::OutlinePredicate Pred>
 hg::MeshHandles hvox::ConditionalChunkOutlineRenderer<Pred>::chunk_mesh_handles = {};
-template <hvox::ChunkOutlinePredicate Pred>
+template <hvox::OutlinePredicate Pred>
 std::atomic<ui32> hvox::ConditionalChunkOutlineRenderer<Pred>::ref_count = 0;
 
-template <hvox::ChunkOutlinePredicate Pred>
+template <hvox::OutlinePredicate Pred>
 hvox::ConditionalChunkOutlineRenderer<Pred>::ConditionalChunkOutlineRenderer() :
     handle_render_distance_change(Delegate<void(Sender, RenderDistanceChangeEvent)>{
         [&](Sender, RenderDistanceChangeEvent ev) {
@@ -18,20 +20,32 @@ hvox::ConditionalChunkOutlineRenderer<Pred>::ConditionalChunkOutlineRenderer() :
             //                the only thread to ever call draw for a call to which a
             //                race condition would otherwise occur with how this is
             //                implemented.
-            m_chunk_outline_conditions
-                = new ChunkOutlineCondition[ev.after.chunks_in_render_distance];
+            if (m_chunk_outline_conditions) delete[] m_chunk_outline_conditions;
 
+            m_chunk_outline_conditions
+                = new OutlineData[ev.after.chunks_in_render_distance];
+#if !defined(HEMLOCK_OS_MAC)
             glNamedBufferData(
                 m_instance_vbo,
-                ev.after.chunks_in_render_distance * sizeof(ChunkOutlineCondition),
+                ev.after.chunks_in_render_distance * sizeof(OutlineData),
                 nullptr,
                 GL_DYNAMIC_DRAW
             );
+#else   // !defined(HEMLOCK_OS_MAC)
+            glBindBuffer(GL_ARRAY_BUFFER, m_instance_vbo);
+            glBufferData(
+                GL_ARRAY_BUFFER,
+                ev.after.chunks_in_render_distance * sizeof(OutlineData),
+                nullptr,
+                GL_DYNAMIC_DRAW
+            );
+            glBindBuffer(GL_ARRAY_BUFFER, 0);
+#endif  // !defined(HEMLOCK_OS_MAC)
         } }) {
     // Empty.
 }
 
-template <hvox::ChunkOutlinePredicate Pred>
+template <hvox::OutlinePredicate Pred>
 void hvox::ConditionalChunkOutlineRenderer<Pred>::init(
     Pred predicate, hmem::Handle<ChunkGrid> chunk_grid
 ) {
@@ -39,12 +53,13 @@ void hvox::ConditionalChunkOutlineRenderer<Pred>::init(
     m_chunk_grid = chunk_grid;
 
     m_chunk_outline_conditions
-        = new ChunkOutlineCondition[chunk_grid->chunks_in_render_distance()];
+        = new OutlineData[chunk_grid->chunks_in_render_distance()];
 
+#if !defined(HEMLOCK_OS_MAC)
     glCreateBuffers(1, &m_instance_vbo);
     glNamedBufferData(
         m_instance_vbo,
-        chunk_grid->chunks_in_render_distance() * sizeof(ChunkOutlineCondition),
+        chunk_grid->chunks_in_render_distance() * sizeof(OutlineData),
         nullptr,
         GL_DYNAMIC_DRAW
     );
@@ -67,9 +82,57 @@ void hvox::ConditionalChunkOutlineRenderer<Pred>::init(
 
         glVertexArrayBindingDivisor(chunk_mesh_handles.vao, 1, 1);
     }
+#else   // !defined(HEMLOCK_OS_MAC)
+    glGenBuffers(1, &m_instance_vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, m_instance_vbo);
+
+    glBufferData(
+        GL_ARRAY_BUFFER,
+        chunk_grid->chunks_in_render_distance() * sizeof(OutlineData),
+        nullptr,
+        GL_DYNAMIC_DRAW
+    );
+
+    ui32 prev_ref_count = ref_count.fetch_add(1);
+    if (prev_ref_count == 0) {
+        hg::upload_mesh(
+            CHUNK_OUTLINE_MESH, chunk_mesh_handles, hg::MeshDataVolatility::STATIC
+        );
+
+        glBindVertexArray(chunk_mesh_handles.vao);
+        glBindBuffer(GL_ARRAY_BUFFER, m_instance_vbo);
+
+        glVertexAttribPointer(
+            1,
+            3,
+            GL_FLOAT,
+            GL_FALSE,
+            sizeof(OutlineData),
+            reinterpret_cast<void*>(offsetof(OutlineData, position))
+        );
+        glEnableVertexAttribArray(1);
+
+        glVertexAttribPointer(
+            2,
+            4,
+            GL_UNSIGNED_BYTE,
+            GL_TRUE,
+            sizeof(OutlineData),
+            reinterpret_cast<void*>(offsetof(OutlineData, colour))
+        );
+        glEnableVertexAttribArray(2);
+
+        glVertexAttribDivisor(1, 1);
+        glVertexAttribDivisor(2, 1);
+
+        glBindVertexArray(0);
+    }
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+#endif  // !defined(HEMLOCK_OS_MAC)
 }
 
-template <hvox::ChunkOutlinePredicate Pred>
+template <hvox::OutlinePredicate Pred>
 void hvox::ConditionalChunkOutlineRenderer<Pred>::dispose() {
     m_chunk_grid.reset();
 
@@ -83,7 +146,7 @@ void hvox::ConditionalChunkOutlineRenderer<Pred>::dispose() {
     }
 }
 
-template <hvox::ChunkOutlinePredicate Pred>
+template <hvox::OutlinePredicate Pred>
 void hvox::ConditionalChunkOutlineRenderer<Pred>::draw(FrameTime) {
     m_chunk_outline_condition_count = 0;
 
@@ -92,27 +155,36 @@ void hvox::ConditionalChunkOutlineRenderer<Pred>::draw(FrameTime) {
 
         if (should_draw) {
             m_chunk_outline_conditions[m_chunk_outline_condition_count++]
-                = ChunkOutlineCondition{
-                      f32v3(block_world_position(chunk->position, 0)), colour
-                  };
+                = OutlineData{ f32v3(block_world_position(chunk->position, 0)),
+                               colour };
         }
     }
 
+    glBindVertexArray(chunk_mesh_handles.vao);
     // TODO(Matthew): We are sending this data every frame?! Might be fine
     //                for debug purposes, but we gotta be sure this is
     //                all people want to use this for.
+#if !defined(HEMLOCK_OS_MAC)
     glNamedBufferSubData(
         m_instance_vbo,
         0,
-        m_chunk_outline_condition_count * sizeof(ChunkOutlineCondition),
+        m_chunk_outline_condition_count * sizeof(OutlineData),
         reinterpret_cast<void*>(m_chunk_outline_conditions)
     );
 
-    glBindVertexArray(chunk_mesh_handles.vao);
-
     glVertexArrayVertexBuffer(
-        chunk_mesh_handles.vao, 1, m_instance_vbo, 0, sizeof(ChunkOutlineCondition)
+        chunk_mesh_handles.vao, 1, m_instance_vbo, 0, sizeof(OutlineData)
     );
+#else   // !defined(HEMLOCK_OS_MAC)
+    glBindBuffer(GL_ARRAY_BUFFER, m_instance_vbo);
+
+    glBufferSubData(
+        GL_ARRAY_BUFFER,
+        0,
+        m_chunk_outline_condition_count * sizeof(OutlineData),
+        reinterpret_cast<void*>(m_chunk_outline_conditions)
+    );
+#endif  // !defined(HEMLOCK_OS_MAC)
 
     glDrawArraysInstanced(
         GL_LINES, 0, CHUNK_OUTLINE_VERTEX_COUNT, m_chunk_outline_condition_count

@@ -2,7 +2,7 @@
 #define __hemlock_mod_load_order_validate_cycle_h
 
 #include "mod/load_order/load_order.h"
-#include "mod/registry.h"
+#include "mod/state.h"
 
 namespace hemlock {
     namespace mod {

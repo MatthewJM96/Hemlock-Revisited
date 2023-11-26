@@ -1,5 +1,5 @@
-#ifndef __hemlock_threading_thread_pool_hpp
-#define __hemlock_threading_thread_pool_hpp
+#ifndef __hemlock_thread_thread_pool_hpp
+#define __hemlock_thread_thread_pool_hpp
 
 namespace hemlock {
     namespace thread {
@@ -203,4 +203,4 @@ namespace hthread = hemlock::thread;
 
 #include "thread/thread_pool.inl"
 
-#endif  // __hemlock_threading_thread_pool_hpp
+#endif  // __hemlock_thread_thread_pool_hpp

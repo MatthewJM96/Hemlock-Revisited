@@ -42,16 +42,16 @@ namespace hemlock {
             return std::allocate_shared<DataType>(allocator, u);
         }
 
-        template <typename DataType, typename Allocator>
-        Handle<DataType> allocate_handle_for_overwrite(const Allocator& allocator) {
-            return std::allocate_shared_for_overwrite<DataType>(allocator);
-        }
+        // template <typename DataType, typename Allocator>
+        // Handle<DataType> allocate_handle_for_overwrite(const Allocator& allocator) {
+        //     return std::allocate_shared_for_overwrite<DataType>(allocator);
+        // }
 
-        template <typename DataType, typename Allocator>
-        Handle<DataType>
-        allocate_handle_for_overwrite(const Allocator& allocator, std::size_t N) {
-            return std::allocate_shared_for_overwrite<DataType>(allocator, N);
-        }
+        // template <typename DataType, typename Allocator>
+        // Handle<DataType>
+        // allocate_handle_for_overwrite(const Allocator& allocator, std::size_t N) {
+        //     return std::allocate_shared_for_overwrite<DataType>(allocator, N);
+        // }
 
         template <typename DataType, class... Args>
         Handle<DataType> make_handle(Args&&... args) {
@@ -79,15 +79,15 @@ namespace hemlock {
             return std::make_shared<DataType>(u);
         }
 
-        template <typename DataType>
-        Handle<DataType> make_handle_for_overwrite() {
-            return std::make_shared_for_overwrite<DataType>();
-        }
+        // template <typename DataType>
+        // Handle<DataType> make_handle_for_overwrite() {
+        //     return std::make_shared_for_overwrite<DataType>();
+        // }
 
-        template <typename DataType>
-        Handle<DataType> make_handle_for_overwrite(std::size_t N) {
-            return std::make_shared_for_overwrite<DataType>(N);
-        }
+        // template <typename DataType>
+        // Handle<DataType> make_handle_for_overwrite(std::size_t N) {
+        //     return std::make_shared_for_overwrite<DataType>(N);
+        // }
     }  // namespace memory
 }  // namespace hemlock
 namespace hmem = hemlock::memory;

@@ -2,7 +2,7 @@
 #define __hemlock_tests_test_mod_screen_hpp
 
 #include "app/screen_base.h"
-#include "mod/metadata.h"
+#include "mod/state.h"
 
 #include "iomanager.hpp"
 

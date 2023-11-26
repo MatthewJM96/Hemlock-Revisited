@@ -12,11 +12,11 @@
 \****************************************/
 
 #if !defined(H_POD_STRUCT)
-#  define H_POD_STRUCT 3
+#  define H_POD_STRUCT 1
 #endif  // !defined(H_POD_STRUCT)
 
 #if !defined(H_NON_POD_TYPE)
-#  define H_NON_POD_TYPE 2
+#  define H_NON_POD_TYPE 0
 #endif  // !defined(H_NON_POD_TYPE)
 
 /*************************************\
@@ -43,7 +43,7 @@
 \************************************/
 
 #  if !defined(H_UNION_ENTRY_NAME)
-#    define H_UNION_ENTRY_NAME(IS_POD_STRUCT, NAME, ...) NAME
+#    define H_UNION_ENTRY_NAME(NAME, IS_POD_STRUCT, ...) NAME
 #  endif  //! defined(H_UNION_ENTRY_NAME)
 
 #  if !defined(H_INDIRECT_UNION_ENTRY_NAME)
@@ -67,8 +67,8 @@
 #  endif  // !defined(H_WRITE_UNION_NON_POD_TYPE_ENTRY)
 
 #  if !defined(H_WRITE_UNION_ENTRY)
-#    define H_WRITE_UNION_ENTRY(IS_POD_STRUCT, NAME, ...)                              \
-      PRIMED_IF_ELSE(PRIMED_BOOL(IS_POD_STRUCT))                                       \
+#    define H_WRITE_UNION_ENTRY(NAME, IS_POD_STRUCT, ...)                              \
+      IF_ELSE(BOOL(IS_POD_STRUCT))                                                     \
       (H_WRITE_UNION_POD_STRUCT_ENTRY(__VA_ARGS__),                                    \
        H_WRITE_UNION_NON_POD_TYPE_ENTRY(__VA_ARGS__))
 #  endif  // !defined(H_WRITE_UNION_ENTRY)
@@ -88,8 +88,8 @@
 #  endif  // !defined(H_DEFAULT_INITIALISE_POD_STRUCT_ENTRY)
 
 #  if !defined(H_DEFAULT_INITIALISE_FIELDS)
-#    define H_DEFAULT_INITIALISE_FIELDS(IS_POD_STRUCT, NAME, ...)                      \
-      PRIMED_IF_ELSE(PRIMED_BOOL(IS_POD_STRUCT))                                       \
+#    define H_DEFAULT_INITIALISE_FIELDS(Name, IS_POD_STRUCT, ...)                      \
+      IF_ELSE(BOOL(IS_POD_STRUCT))                                                     \
       (H_DEFAULT_INITIALISE_POD_STRUCT_ENTRY(__VA_ARGS__),                             \
        H_DEFAULT_INITIALISE_NON_POD_TYPE_ENTRY(__VA_ARGS__))
 #  endif  // !defined(H_DEFAULT_INITIALISE_FIELDS)
@@ -104,7 +104,7 @@
 #  endif  // !defined(H_INDIRECT_WRITE_UNION_COPY)
 
 #  if !defined(H_WRITE_UNION_COPY)
-#    define H_WRITE_UNION_COPY(IS_POD_STRUCT, NAME, ...)                               \
+#    define H_WRITE_UNION_COPY(NAME, IS_POD_STRUCT, ...)                               \
       MAP(H_WRITE_UNION_FIELD_COPY, EMPTY, __VA_ARGS__)
 #  endif  // !defined(H_WRITE_UNION_COPY)
 
@@ -124,7 +124,7 @@
 #  endif  // !defined(H_INDIRECT_WRITE_UNION_MOVE)
 
 #  if !defined(H_WRITE_UNION_MOVE)
-#    define H_WRITE_UNION_MOVE(IS_POD_STRUCT, NAME, ...)                               \
+#    define H_WRITE_UNION_MOVE(NAME, IS_POD_STRUCT, ...)                               \
       MAP(H_WRITE_UNION_FIELD_MOVE, EMPTY, __VA_ARGS__)
 #  endif  // !defined(H_WRITE_UNION_MOVE)
 
@@ -165,15 +165,15 @@
 #  endif  // !defined(H_WRITE_UNION_POD_STRUCT_FIELD_CONSTRUCT_BODY)
 
 #  if !defined(H_WRITE_UNION_FIELD_CONSTRUCT_PARAMS)
-#    define H_WRITE_UNION_FIELD_CONSTRUCT_PARAMS(IS_POD_STRUCT, NAME, ...)             \
-      PRIMED_IF_ELSE(PRIMED_BOOL(IS_POD_STRUCT))                                       \
+#    define H_WRITE_UNION_FIELD_CONSTRUCT_PARAMS(NAME, IS_POD_STRUCT, ...)             \
+      IF_ELSE(BOOL(IS_POD_STRUCT))                                                     \
       (H_WRITE_UNION_POD_STRUCT_FIELD_CONSTRUCT_PARAMS(__VA_ARGS__),                   \
        H_WRITE_UNION_NON_POD_TYPE_FIELD_CONSTRUCT_PARAMS(__VA_ARGS__))
 #  endif  // !defined(H_WRITE_UNION_FIELD_CONSTRUCT_PARAMS)
 
 #  if !defined(H_WRITE_UNION_FIELD_CONSTRUCT_BODY)
-#    define H_WRITE_UNION_FIELD_CONSTRUCT_BODY(IS_POD_STRUCT, NAME, ...)               \
-      PRIMED_IF_ELSE(PRIMED_BOOL(IS_POD_STRUCT))                                       \
+#    define H_WRITE_UNION_FIELD_CONSTRUCT_BODY(NAME, IS_POD_STRUCT, ...)               \
+      IF_ELSE(BOOL(IS_POD_STRUCT))                                                     \
       (H_WRITE_UNION_POD_STRUCT_FIELD_CONSTRUCT_BODY(NAME, __VA_ARGS__),               \
        H_WRITE_UNION_NON_POD_TYPE_FIELD_CONSTRUCT_BODY(NAME, __VA_ARGS__))
 #  endif  // !defined(H_WRITE_UNION_FIELD_CONSTRUCT_BODY)

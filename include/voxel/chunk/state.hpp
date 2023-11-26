@@ -17,12 +17,6 @@ namespace hemlock {
             DEAD
         };
 
-        using LODLevel = ui8;
-
-        struct LODChangeEvent {
-            LODLevel before, after;
-        };
-
         union Neighbours {
             Neighbours() : all{} { /* Empty. */
             }

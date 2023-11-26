@@ -1,8 +1,11 @@
-#ifndef __hemlock_voxel_chunk_navmesh_hpp
-#define __hemlock_voxel_chunk_navmesh_hpp
+#ifndef __hemlock_voxel_chunk_navmesh_state_hpp
+#define __hemlock_voxel_chunk_navmesh_state_hpp
 
 #include "algorithm/acs/graph/state.hpp"
+#include "voxel/chunk/constants.hpp"
 #include "voxel/coordinate_system.h"
+
+#define DEFAULT_PHEROMONE_LEVEL 0.1
 
 namespace hemlock {
     namespace voxel {
@@ -41,14 +44,18 @@ namespace std {
                     i64 chunk_x : 19;
                     i64 chunk_y : 11;
                     i64 chunk_z : 19;
-                }) coords;
+                })
+                coords;
 
                 ui64 id;
             } packed_node;
 
-            packed_node.coords.block_x = node.block_pos.x;
-            packed_node.coords.block_y = node.block_pos.y;
-            packed_node.coords.block_z = node.block_pos.z;
+            packed_node.coords.block_x
+                = static_cast<i64>(node.block_pos.x) - (CHUNK_LENGTH / 2);
+            packed_node.coords.block_y
+                = static_cast<i64>(node.block_pos.y) - (CHUNK_LENGTH / 2);
+            packed_node.coords.block_z
+                = static_cast<i64>(node.block_pos.z) - (CHUNK_LENGTH / 2);
 
             packed_node.coords.chunk_x = node.chunk_pos.x;
             packed_node.coords.chunk_y = node.chunk_pos.y;
@@ -59,4 +66,4 @@ namespace std {
     };
 }  // namespace std
 
-#endif  // __hemlock_voxel_chunk_navmesh_hpp
+#endif  // __hemlock_voxel_chunk_navmesh_state_hpp

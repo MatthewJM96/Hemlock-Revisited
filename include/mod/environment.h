@@ -5,7 +5,7 @@
 
 #include "load_order/load_order.h"
 #include "mod.h"
-#include "registry.h"
+#include "state.h"
 
 namespace hemlock {
     namespace mod {

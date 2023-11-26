@@ -34,6 +34,7 @@ bool hg::f::FontInstance::save(std::string filepath, hio::image::Saver save) {
     ui8* pixels = new ui8[texture_size.x * texture_size.y * 4];
 
     // Bind the texture, load it into our buffer, and then unbind it.
+#if !defined(HEMLOCK_OS_MAC)
     glGetTextureImage(
         texture,
         0,
@@ -42,6 +43,11 @@ bool hg::f::FontInstance::save(std::string filepath, hio::image::Saver save) {
         texture_size.x * texture_size.y * 4,
         pixels
     );
+#else   // !defined(HEMLOCK_OS_MAC)
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+    glBindTexture(GL_TEXTURE_2D, 0);
+#endif  // !defined(HEMLOCK_OS_MAC)
 
     return save(filepath, pixels, texture_size, hio::image::PixelFormat::RGBA_UI8);
 }
@@ -199,6 +205,7 @@ bool hg::f::Font::generate(
     // Set texture size in font instance.
     font_instance.texture_size = ui32v2(best_width, best_height);
 
+#if !defined(HEMLOCK_OS_MAC)
     // Create the texture we will put each glyph into.
     glCreateTextures(GL_TEXTURE_2D, 1, &font_instance.texture);
     // Set the texture's size and pixel format.
@@ -213,6 +220,33 @@ bool hg::f::Font::generate(
     glTextureParameteri(font_instance.texture, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTextureParameteri(font_instance.texture, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTextureParameteri(font_instance.texture, GL_TEXTURE_WRAP_R, GL_REPEAT);
+#else   // !defined(HEMLOCK_OS_MAC)
+    // Create the texture we will put each glyph into.
+    glGenTextures(1, &font_instance.texture);
+    glBindTexture(GL_TEXTURE_2D, font_instance.texture);
+    // Set the texture's size and pixel format.
+    glTexImage2D(
+        GL_TEXTURE_2D,
+        0,
+        GL_RGBA8,
+        best_width,
+        best_height,
+        0,
+        GL_RGBA,
+        GL_UNSIGNED_BYTE,
+        nullptr
+    );
+
+    // Note that by default MAG_FILTER, WRAP_* are as we are setting them,
+    // the crucial parameter to set is MIN_FILTER that defaults to a
+    // mip mapping setting that won't work for these textures, causing
+    // OpenGL to treat pixels all as RGBA{0,0,0,255}.
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_REPEAT);
+#endif  // !defined(HEMLOCK_OS_MAC)
 
     // This represents the current V-coordinate we are into the texture.
     //    UV are the coordinates we use for textures (i.e. the X & Y coords of the
@@ -271,6 +305,7 @@ bool hg::f::Font::generate(
             }
             if (actual_pixels == nullptr) return false;
 
+#if !defined(HEMLOCK_OS_MAC)
             // Stitch the glyph we just generated into our texture.
             glTextureSubImage2D(
                 font_instance.texture,
@@ -283,6 +318,20 @@ bool hg::f::Font::generate(
                 GL_UNSIGNED_BYTE,
                 actual_pixels
             );
+#else   // !defined(HEMLOCK_OS_MAC)
+        // Stitch the glyph we just generated into our texture.
+            glTexSubImage2D(
+                GL_TEXTURE_2D,
+                0,
+                current_u,
+                current_v,
+                glyph_surface->w,
+                glyph_surface->h,
+                GL_RGBA,
+                GL_UNSIGNED_BYTE,
+                actual_pixels
+            );
+#endif  // !defined(HEMLOCK_OS_MAC)
 
             // Update the size of the glyph with what we rendered - there can be
             // variance between this and what we obtained in the glyph metric stage!
@@ -312,6 +361,10 @@ bool hg::f::Font::generate(
         // Update current_v.
         current_v += best_rows[row_index].first + padding;
     }
+
+#if defined(HEMLOCK_OS_MAC)
+    glBindTexture(GL_TEXTURE_2D, 0);
+#endif  // !defined(HEMLOCK_OS_MAC)
 
     // Clean up.
     delete[] best_rows;

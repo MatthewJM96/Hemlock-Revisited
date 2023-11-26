@@ -2,9 +2,6 @@
 
 #include "mod/load_order/validate/order.h"
 
-#include "mod/load_order/load_order.h"
-#include "mod/metadata.h"
-
 bool hmod::validate_depends(
     size_t index, const hmod::LoadOrder& load_order, const hmod::ModRegistry& registry
 ) {

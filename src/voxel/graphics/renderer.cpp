@@ -1,7 +1,7 @@
 #include "stdafx.h"
 
 #include "voxel/block.hpp"
-#include "voxel/chunk.h"
+#include "voxel/chunk/chunk.h"
 
 #include "voxel/graphics/renderer.h"
 
@@ -37,6 +37,7 @@ void hvox::ChunkRenderer::init(ui32 page_size, ui32 max_unused_pages) {
     if (block_mesh_handles.vao == 0) {
         hg::upload_mesh(BLOCK_MESH, block_mesh_handles, hg::MeshDataVolatility::STATIC);
 
+#if !defined(HEMLOCK_OS_MAC)
         glEnableVertexArrayAttrib(block_mesh_handles.vao, 3);
         glVertexArrayAttribFormat(block_mesh_handles.vao, 3, 3, GL_FLOAT, GL_FALSE, 0);
         glVertexArrayAttribBinding(block_mesh_handles.vao, 3, 1);
@@ -48,6 +49,20 @@ void hvox::ChunkRenderer::init(ui32 page_size, ui32 max_unused_pages) {
         glVertexArrayAttribBinding(block_mesh_handles.vao, 4, 1);
 
         glVertexArrayBindingDivisor(block_mesh_handles.vao, 1, 1);
+#else   // !defined(HEMLOCK_OS_MAC)
+        glBindVertexArray(block_mesh_handles.vao);
+        glBindBuffer(GL_ARRAY_BUFFER, block_mesh_handles.vbo);
+
+        glEnableVertexAttribArray(3);
+        glEnableVertexAttribArray(4);
+
+        // We'd call glVertexAttribPointer here except in pre-4.3 OpenGL format and vbo
+        // choice are bound to each other, we must call it for each VBO of each chunk...
+        // Mac is going to suffer.
+
+        glVertexAttribDivisor(3, 1);
+        glVertexAttribDivisor(4, 1);
+#endif  // !defined(HEMLOCK_OS_MAC)
     }
 
     m_page_size        = page_size;
@@ -92,14 +107,39 @@ void hvox::ChunkRenderer::draw(FrameTime) {
     for (auto& chunk_page : m_chunk_pages) {
         if (chunk_page->voxel_count == 0) continue;
 
+#if !defined(HEMLOCK_OS_MAC)
         glVertexArrayVertexBuffer(
             block_mesh_handles.vao, 1, chunk_page->vbo, 0, sizeof(ChunkInstanceData)
         );
+#else   // !defined(HEMLOCK_OS_MAC)
+        glBindBuffer(GL_ARRAY_BUFFER, chunk_page->vbo);
+
+        glVertexAttribPointer(
+            3,
+            3,
+            GL_FLOAT,
+            GL_FALSE,
+            sizeof(ChunkInstanceData),
+            reinterpret_cast<void*>(offsetof(ChunkInstanceData, translation))
+        );
+        glVertexAttribPointer(
+            4,
+            3,
+            GL_FLOAT,
+            GL_FALSE,
+            sizeof(ChunkInstanceData),
+            reinterpret_cast<void*>(offsetof(ChunkInstanceData, scaling))
+        );
+#endif  // !defined(HEMLOCK_OS_MAC)
 
         glDrawArraysInstanced(
             GL_TRIANGLES, 0, BLOCK_VERTEX_COUNT, chunk_page->voxel_count
         );
     }
+
+#if defined(HEMLOCK_OS_MAC)
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+#endif  // defined(HEMLOCK_OS_MAC)
 }
 
 void hvox::ChunkRenderer::add_chunk(hmem::WeakHandle<Chunk> handle) {
@@ -131,6 +171,7 @@ hvox::ChunkRenderPage* hvox::ChunkRenderer::create_pages(ui32 count) {
 
     ChunkRenderPage* first_new_page = m_chunk_pages.back();
 
+#if !defined(HEMLOCK_OS_MAC)
     glCreateBuffers(1, &first_new_page->vbo);
     glNamedBufferData(
         first_new_page->vbo,
@@ -138,6 +179,17 @@ hvox::ChunkRenderPage* hvox::ChunkRenderer::create_pages(ui32 count) {
         nullptr,
         GL_DYNAMIC_DRAW
     );
+#else   // !defined(HEMLOCK_OS_MAC)
+    glGenBuffers(1, &first_new_page->vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, first_new_page->vbo);
+
+    glBufferData(
+        GL_ARRAY_BUFFER,
+        block_page_size() * sizeof(ChunkInstanceData),
+        nullptr,
+        GL_DYNAMIC_DRAW
+    );
+#endif  // !defined(HEMLOCK_OS_MAC)
 
     first_new_page->chunks.reserve(m_page_size);
 
@@ -149,6 +201,7 @@ hvox::ChunkRenderPage* hvox::ChunkRenderer::create_pages(ui32 count) {
 
         ChunkRenderPage* new_page = m_chunk_pages.back();
 
+#if !defined(HEMLOCK_OS_MAC)
         glCreateBuffers(1, &new_page->vbo);
         glNamedBufferData(
             new_page->vbo,
@@ -156,9 +209,24 @@ hvox::ChunkRenderPage* hvox::ChunkRenderer::create_pages(ui32 count) {
             nullptr,
             GL_DYNAMIC_DRAW
         );
+#else   // !defined(HEMLOCK_OS_MAC)
+        glGenBuffers(1, &new_page->vbo);
+        glBindBuffer(GL_ARRAY_BUFFER, new_page->vbo);
+
+        glBufferData(
+            GL_ARRAY_BUFFER,
+            block_page_size() * sizeof(ChunkInstanceData),
+            nullptr,
+            GL_DYNAMIC_DRAW
+        );
+#endif  // !defined(HEMLOCK_OS_MAC)
 
         new_page->chunks.reserve(m_page_size);
     }
+
+#if defined(HEMLOCK_OS_MAC)
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+#endif  // defined(HEMLOCK_OS_MAC)
 
     // Return pointer to the first page created.
     return first_new_page;
@@ -309,6 +377,7 @@ void hvox::ChunkRenderer::process_pages() {
 
         assert(page.first_dirtied_chunk_idx < page.chunks.size());
 
+#if !defined(HEMLOCK_OS_MAC)
         // Create a new on-GPU buffer to populate.
         glCreateBuffers(1, &new_vbos[page_idx]);
         glNamedBufferData(
@@ -317,6 +386,21 @@ void hvox::ChunkRenderer::process_pages() {
             nullptr,
             GL_DYNAMIC_DRAW
         );
+#else   // !defined(HEMLOCK_OS_MAC)
+        // Bind old buffer to COPY_READ.
+        glBindBuffer(GL_COPY_READ_BUFFER, page.vbo);
+
+        // Create a new on-GPU buffer to populate.
+        glGenBuffers(1, &new_vbos[page_idx]);
+        glBindBuffer(GL_COPY_WRITE_BUFFER, new_vbos[page_idx]);
+
+        glBufferData(
+            GL_COPY_WRITE_BUFFER,
+            block_page_size() * sizeof(ChunkInstanceData),
+            nullptr,
+            GL_DYNAMIC_DRAW
+        );
+#endif  // !defined(HEMLOCK_OS_MAC)
 
         ui32 voxels_instanced = 0;
         for (ui32 chunk_idx = 0; chunk_idx < page.first_dirtied_chunk_idx; ++chunk_idx)
@@ -325,6 +409,7 @@ void hvox::ChunkRenderer::process_pages() {
                 += m_chunk_metadata[page.chunks[chunk_idx]].on_gpu_voxel_count;
         }
 
+#if !defined(HEMLOCK_OS_MAC)
         // Copy unchanged original data into new buffer.
         glCopyNamedBufferSubData(
             page.vbo,
@@ -333,6 +418,16 @@ void hvox::ChunkRenderer::process_pages() {
             0,
             voxels_instanced * sizeof(ChunkInstanceData)
         );
+#else   // !defined(HEMLOCK_OS_MAC)
+        // Copy unchanged original data into new buffer.
+        glCopyBufferSubData(
+            GL_COPY_READ_BUFFER,
+            GL_COPY_WRITE_BUFFER,
+            0,
+            0,
+            voxels_instanced * sizeof(ChunkInstanceData)
+        );
+#endif  // !defined(HEMLOCK_OS_MAC)
 
         for (ui32 chunk_idx = page.first_dirtied_chunk_idx;
              chunk_idx < page.chunks.size();)
@@ -381,12 +476,22 @@ void hvox::ChunkRenderer::process_pages() {
                     continue;
                 }
 
+#if !defined(HEMLOCK_OS_MAC)
                 glNamedBufferSubData(
                     new_vbos[page_idx],
                     voxels_instanced * sizeof(ChunkInstanceData),
                     instance.count * sizeof(ChunkInstanceData),
                     reinterpret_cast<void*>(instance.data)
                 );
+#else   // !defined(HEMLOCK_OS_MAC)
+                glBufferSubData(
+                    GL_COPY_WRITE_BUFFER,
+                    voxels_instanced * sizeof(ChunkInstanceData),
+                    instance.count * sizeof(ChunkInstanceData),
+                    reinterpret_cast<void*>(instance.data)
+                );
+#endif  // !defined(HEMLOCK_OS_MAC)
+
                 metadata.on_gpu_offset      = voxels_instanced;
                 metadata.on_gpu_page_idx    = page_idx;
                 metadata.on_gpu_voxel_count = instance.count;
@@ -395,6 +500,7 @@ void hvox::ChunkRenderer::process_pages() {
 
                 metadata.dirty = false;
             } else {
+#if !defined(HEMLOCK_OS_MAC)
                 glCopyNamedBufferSubData(
                     m_chunk_pages[metadata.on_gpu_page_idx]->vbo,
                     new_vbos[page_idx],
@@ -402,6 +508,21 @@ void hvox::ChunkRenderer::process_pages() {
                     voxels_instanced * sizeof(ChunkInstanceData),
                     metadata.on_gpu_voxel_count * sizeof(ChunkInstanceData)
                 );
+#else   // !defined(HEMLOCK_OS_MAC)
+        // Bind old buffer to COPY_READ.
+                glBindBuffer(
+                    GL_COPY_READ_BUFFER, m_chunk_pages[metadata.on_gpu_page_idx]->vbo
+                );
+
+                glCopyBufferSubData(
+                    GL_COPY_READ_BUFFER,
+                    GL_COPY_WRITE_BUFFER,
+                    metadata.on_gpu_offset * sizeof(ChunkInstanceData),
+                    voxels_instanced * sizeof(ChunkInstanceData),
+                    metadata.on_gpu_voxel_count * sizeof(ChunkInstanceData)
+                );
+#endif  // !defined(HEMLOCK_OS_MAC)
+
                 metadata.on_gpu_offset   = voxels_instanced;
                 metadata.on_gpu_page_idx = page_idx;
 
@@ -417,6 +538,12 @@ void hvox::ChunkRenderer::process_pages() {
         page.dirty                   = false;
         page.first_dirtied_chunk_idx = std::numeric_limits<ui32>::max();
     }
+
+#if defined(HEMLOCK_OS_MAC)
+    // Clean up.
+    glBindBuffer(GL_COPY_READ_BUFFER, 0);
+    glBindBuffer(GL_COPY_WRITE_BUFFER, 0);
+#endif  // defined(HEMLOCK_OS_MAC)
 
     for (ui32 page_idx = 0; page_idx < new_vbos.size(); ++page_idx) {
         if (new_vbos[page_idx] != m_chunk_pages[page_idx]->vbo) {

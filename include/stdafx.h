@@ -1,9 +1,12 @@
 #ifndef __hemlock_stdafx_h
 #define __hemlock_stdafx_h
 
+// Our compatibility definitions.
+#include "compat.hpp"
+
 // Basics
+#include <cstdint>
 #include <cstdlib>
-#include <random>
 
 // Containers
 #include <boost/circular_buffer.hpp>
@@ -71,6 +74,9 @@
 #include <iostream>
 #include <sstream>
 
+// Random
+#include <random>
+
 // SDL2
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
@@ -79,9 +85,15 @@
 #endif  // defined(HEMLOCK_USING_VULKAN)
 
 #if defined(HEMLOCK_USING_OPENGL)
-// OpenGL SDK
-#  include <GL/glew.h>
-#endif  // defined(HEMLOCK_USING_OPENGL)
+// OpenGL SDK (using Glew where extension wrangling needed).
+#  if defined(HEMLOCK_OS_MAC)
+//   Apple deprecated OpenGL entirely...
+#    define GL_SILENCE_DEPRECATION
+#    include <OpenGL/gl3.h>
+#  else  // defined(HEMLOCK_OS_MAC)
+#    include <GL/glew.h>
+#  endif  // defined(HEMLOCK_OS_MAC)
+#endif    // defined(HEMLOCK_USING_OPENGL)
 
 #if defined(HEMLOCK_USING_VULKAN)
 // Vulkan SDK
@@ -110,9 +122,6 @@
 
 // Our generic preprocessor macros.
 #include "preprocessor.hpp"
-
-// Our compatibility definitions.
-#include "compat.hpp"
 
 // Our constants.
 #include "constants.hpp"

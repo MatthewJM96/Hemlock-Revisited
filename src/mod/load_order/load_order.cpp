@@ -4,8 +4,6 @@
 #include "mod/load_order/validate/compatibility.h"
 #include "mod/load_order/validate/consistency.h"
 #include "mod/load_order/validate/order.h"
-#include "mod/metadata.h"
-#include "mod/registry.h"
 
 hmod::LoadOrderState
 hmod::validate_load_order(const LoadOrder& load_order, const ModRegistry& registry) {
@@ -74,9 +72,9 @@ hmod::make_load_order_valid(LoadOrder& load_order, const ModRegistry& registry) 
 
     LoadOrderGraph g(load_order.mods.size());
 
-    UUIDMap<LoadOrderVertex> mod_vertex_map;
+    std::unordered_map<UUID, LoadOrderVertex> mod_vertex_map;
 
-    std::unordered_map<LoadOrderVertex, boost::uuids::uuid> vertex_mod_map;
+    std::unordered_map<LoadOrderVertex, hemlock::UUID> vertex_mod_map;
 
     // Tells whether the edge represents a hard depends/wanted-by constraint, or
     // a soft one. If we encounter a cycle involving a hard dependency we cannot
