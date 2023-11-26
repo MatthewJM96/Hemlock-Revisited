@@ -457,8 +457,8 @@ public:
             GL_DYNAMIC_DRAW
         );
 
-        glEnableVertexArrayAttrib(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, sizeof(f32v3), nullptr);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(f32v3), nullptr);
 #endif  // !defined(HEMLOCK_OS_MAC)
 
         handle_mouse_button = hemlock::Subscriber<hui::MouseButtonEvent>{

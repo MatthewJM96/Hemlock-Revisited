@@ -75,8 +75,8 @@ namespace hemlock {
                     max_mipmaps = level + 1;
                 }
 
-                width  = max(1, width / 2);
-                height = max(1, height / 2);
+                width  = std::max(1, width / 2);
+                height = std::max(1, height / 2);
             }
 
             glTexSubImage2D(
@@ -91,7 +91,7 @@ namespace hemlock {
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_REPEAT);
 
-            glGenerateTexMipmap(GL_TEXTURE_2D);
+            glGenerateMipmap(GL_TEXTURE_2D);
 
             // ui8* pixels = new ui8[dims.x * dims.y * 4];
 
