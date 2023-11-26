@@ -381,8 +381,8 @@
  *   future productions of itself.
  */
 
-#define MAP(...)                                                                       \
-  IF(HAS_ARGS(__VA_ARGS__)) (EVAL(MAP_INNER(__VA_ARGS__)))
+#define MAP(op, sep, ...)                                                              \
+  IF(HAS_ARGS(__VA_ARGS__)) (EVAL(MAP_INNER(op, sep, __VA_ARGS__)))
 #define MAP_INNER(op, sep, cur_val, ...)                                               \
   op(cur_val                                                                           \
   ) IF(HAS_ARGS(__VA_ARGS__))(sep() DEFER2(_MAP_INNER)()(op, sep, ##__VA_ARGS__))
@@ -391,8 +391,8 @@
 /**
  * The same as MAP, except any first-level MAP macro may be safely nested inside this.
  */
-#define MAP_2(...)                                                                     \
-  IF(HAS_ARGS(__VA_ARGS__)) (EVAL2(MAP_2_INNER(__VA_ARGS__)))
+#define MAP_2(op, sep, ...)                                                            \
+  IF(HAS_ARGS(__VA_ARGS__)) (EVAL2(MAP_2_INNER(op, sep, __VA_ARGS__)))
 #define MAP_2_INNER(op, sep, cur_val, ...)                                             \
   op(cur_val                                                                           \
   ) IF(HAS_ARGS(__VA_ARGS__))(sep() DEFER2(_MAP_2_INNER)()(op, sep, ##__VA_ARGS__))
@@ -403,8 +403,8 @@
  * being called as op(binding, arg).
  */
 
-#define BIND_MAP(op, ...)                                                              \
-  IF(HAS_ARGS(__VA_ARGS__)) (EVAL(BIND_MAP_INNER(op, __VA_ARGS__)))
+#define BIND_MAP(op, binding, sep, ...)                                                \
+  IF(HAS_ARGS(__VA_ARGS__)) (EVAL(BIND_MAP_INNER(op, binding, sep, __VA_ARGS__)))
 #define BIND_MAP_INNER(op, binding, sep, cur_val, ...)                                 \
   op(binding, cur_val) IF(HAS_ARGS(__VA_ARGS__))(sep() DEFER2(_BIND_MAP_INNER          \
   )()(op, binding, sep, ##__VA_ARGS__))
@@ -413,8 +413,8 @@
 /**
  * The same as BIND_MAP, except first-level MAP macro may be safely nested inside this.
  */
-#define BIND_MAP_2(op, ...)                                                            \
-  IF(HAS_ARGS(__VA_ARGS__)) (EVAL2(BIND_MAP_2_INNER(op, __VA_ARGS__)))
+#define BIND_MAP_2(op, binding, sep, ...)                                              \
+  IF(HAS_ARGS(__VA_ARGS__)) (EVAL2(BIND_MAP_2_INNER(op, binding, sep, __VA_ARGS__)))
 #define BIND_MAP_2_INNER(op, binding, sep, cur_val, ...)                               \
   op(binding, cur_val) IF(HAS_ARGS(__VA_ARGS__))(sep() DEFER2(_BIND_MAP_2_INNER        \
   )()(op, binding, sep, ##__VA_ARGS__))
