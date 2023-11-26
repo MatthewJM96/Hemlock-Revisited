@@ -46,7 +46,7 @@ bool hg::f::FontInstance::save(std::string filepath, hio::image::Saver save) {
 #else   // !defined(HEMLOCK_OS_MAC)
     glBindTexture(GL_TEXTURE_2D, texture);
     glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
-    glBindTexture(GL_TEXTURE_2D, 0)
+    glBindTexture(GL_TEXTURE_2D, 0);
 #endif  // !defined(HEMLOCK_OS_MAC)
 
     return save(filepath, pixels, texture_size, hio::image::PixelFormat::RGBA_UI8);
