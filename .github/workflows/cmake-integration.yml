@@ -288,7 +288,7 @@ jobs:
       run: >
         source ${{ github.workspace }}/.venv/bin/activate ;
         cmake -B ${{ steps.strings.outputs.build-output-dir }}
-        -DCMAKE_CXX_COMPILER=clang
+        -DCMAKE_CXX_COMPILER=clang++
         -DCMAKE_C_COMPILER=clang
         -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
         -DHEMLOCK_CI_BUILD=On
