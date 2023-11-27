@@ -1,6 +1,6 @@
 #include "stdafx.h"
 
-#include "thread/thread_workflow_builder.h"
+#include "thread/workflow/builder.h"
 
 hthread::ThreadWorkflowBuilder::ThreadWorkflowBuilder() : m_dag(nullptr) { /* Empty. */
 }

@@ -8,6 +8,8 @@
 #include "graphics/sprite/batcher.h"
 #include "graphics/texture.hpp"
 #include "memory/handle.hpp"
+#include "thread/workflow/builder.h"
+#include "thread/workflow/workflow.hpp"
 #include "ui/input/dispatcher.h"
 #include "ui/input/keys.hpp"
 #include "ui/input/manager.h"

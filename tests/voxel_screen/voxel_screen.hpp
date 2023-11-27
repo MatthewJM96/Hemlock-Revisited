@@ -6,6 +6,8 @@
 #include <bullet/btBulletDynamicsCommon.h>
 
 #include "memory/handle.hpp"
+#include "thread/workflow/builder.h"
+#include "thread/workflow/workflow.hpp"
 #include "voxel/generation/generator_task.hpp"
 #include "voxel/graphics/mesh/greedy_strategy.hpp"
 #include "voxel/graphics/mesh/mesh_task.hpp"

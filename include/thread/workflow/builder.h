@@ -1,7 +1,7 @@
-#ifndef __hemlock_thread_thread_workflow_builder_h
-#define __hemlock_thread_thread_workflow_builder_h
+#ifndef __hemlock_thread_workflow_builder_h
+#define __hemlock_thread_workflow_builder_h
 
-#include "thread/thread_workflow_state.hpp"
+#include "thread/workflow/state.hpp"
 
 namespace hemlock {
     namespace thread {
@@ -163,4 +163,4 @@ namespace hemlock {
 }  // namespace hemlock
 namespace hthread = hemlock::thread;
 
-#endif  // __hemlock_thread_thread_workflow_builder_h
+#endif  // __hemlock_thread_workflow_builder_h
