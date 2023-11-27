@@ -20,4 +20,4 @@ namespace hemlock {
 }  // namespace hemlock
 namespace hthread = hemlock::thread;
 
-#endif  // __hemlock_thread_ queue_basic_hpp
+#endif  // __hemlock_thread_queue_basic_hpp
