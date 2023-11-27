@@ -12,9 +12,7 @@ namespace hemlock {
          * @param task_queue The task queue, can be interacted with
          * for example if a task needs to chain a follow-up task.
          */
-        template <
-            IsTaskQueue                TaskQueue,
-            ThreadpoolTimingResolution Timing>
+        template <IsTaskQueue TaskQueue, bool Timing>
         void basic_thread_main(ThreadState* state, TaskQueue* task_queue) {
             state->stop    = false;
             state->suspend = false;
@@ -31,7 +29,7 @@ namespace hemlock {
 
             QueuedTask current_task = { nullptr, false };
             while (!state->stop) {
-                auto queue
+                auto [queue_task, register_timing]
                     = task_queue->dequeue(current_task, std::chrono::microseconds(100));
 
                 while (state->suspend)
@@ -44,16 +42,28 @@ namespace hemlock {
 
                 auto task = reinterpret_cast<ThreadTaskBase*>(current_task.task);
 
-                if (task->execute(&queue)) {
-                    // Task completed, handle disposal.
+                bool task_completion = false;
+                if constexpr (Timing) {
+                    auto before = std::chrono::system_clock::now();
+                    task_completion = task->execute(&queue_task);
+                    auto duration = std::chrono::system_clock::now() - before;
 
+                    register_timing(task_completion, duration.count());
+                } else {
+                    task_completion = task->execute(&queue_task);
+
+                    (void)register_timing;
+                }
+
+                if (task_completion) {
+                    // Task completed, handle disposal.
                     task->dispose();
                     if (current_task.delete_on_complete) delete task;
                     current_task.task = nullptr;
                 } else {
                     // Task did not complete, requeue it.
 
-                    queue(std::move(current_task));
+                    queue_task(std::move(current_task));
                 }
             }
         }

@@ -4,29 +4,11 @@
 #include "thread/state.hpp"
 #include "thread/task.hpp"
 #include "thread/queue/basic.hpp"
-
-namespace hemlock {
-    namespace thread {
-        template <
-            IsTaskQueue                TaskQueue = BasicTaskQueue,
-            ThreadpoolTimingResolution Timing    = ThreadpoolTimingResolution::NONE>
-        class ThreadPool;
-
-        template <
-            IsTaskQueue                TaskQueue,
-            ThreadpoolTimingResolution Timing>
-        using ThreadMainFunc = Delegate<void(ThreadState*, TaskQueue*)>;
-    }  // namespace thread
-}  // namespace hemlock
-namespace hthread = hemlock::thread;
-
 #include "thread/basic_thread_main.hpp"
 
 namespace hemlock {
     namespace thread {
-        template <
-            IsTaskQueue                TaskQueue,
-            ThreadpoolTimingResolution Timing>
+        template <IsTaskQueue TaskQueue = BasicTaskQueue, bool Timing = false>
         class ThreadPool {
         public:
             using _ThreadMainFunc = ThreadMainFunc<TaskQueue, Timing>;

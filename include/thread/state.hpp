@@ -63,13 +63,33 @@ namespace hemlock {
         using QueueDelegate = Delegate<bool(QueuedTask&&)>;
 
         /**
+         * @brief Delegate for registering with a task queue the time to execute the
+         * associated task.
+         *
+         * @param timing The time taken to execute the task.
+         */
+        using RegisterTimingDelegate = Delegate<void(bool, std::chrono::system_clock::rep)>;
+
+        /**
+         * @brief Wrapper for the delergates returned by a task queue's dequeue
+         * function.
+         */
+        using DequeueDelegates = std::tuple<QueueDelegate, RegisterTimingDelegate>;
+
+        // TODO(Matthew): how we've done this is fine for now, but maybe we want to
+        //                do an optimisation pass in general. Namely the default of a
+        //                light wrapper over moodycamel::BlockingConcurrentQueue is
+        //                easily optimised with a specific thread pool implementation.
+        //                Likewise timing currently is presumed except up to whether
+        //                a thread's main function does anything with it. We probably
+        //                should avoid this and do something more sensible there too.
+
+        /**
          * @brief Defines the requirements on a satisfactory task queue type.
          *
          * NOTE: this is specifically different to the moodycamel API as it is expected
          * that many task queues will simply be an extension of that queue type
          * returning a simple functor that queues a task onto itself.
-         * TODO(Matthew): should we modify this to be more performant in the common
-         *                case?
          *
          * @tparam Candidate The candidate typename for being a valid task queue type.
          */
@@ -78,26 +98,21 @@ namespace hemlock {
             = requires (Candidate c, QueuedTask& i, std::chrono::microseconds t) {
                   {
                       c.dequeue(i, t)
-                      } -> std::same_as<QueueDelegate>;
+                      } -> std::same_as<DequeueDelegates>;
               };
 
         ////////////////////////////////////////////////////////////////////////////////
         // Threadpool
 
         /**
-         * @brief Describes the resolution of timing that should be tracked inside a
-         * threadpool.
+         * @brief Delegate definition for any valid thread main function.
          *
-         * NOTE: this is in order to implement prioritisation and fair sharing using an
-         * algorithm such as EEVDF.
-         * TODO(Matthew): do we even need this? I suspect we only ever want to do timing
-         *                at task resolution or else not at all.
+         * @tparam TaskQueue A valid task queue type that the threadpool dequeues tasks
+         * from.
+         * @tparam Timing Switch for enabling timing.
          */
-        enum class ThreadpoolTimingResolution {
-            NONE,
-            ON_SUSPEND,
-            ON_TASK_COMPLETION
-        };
+        template <IsTaskQueue TaskQueue, bool Timing>
+        using ThreadMainFunc = Delegate<void(ThreadState*, TaskQueue*)>;
     }  // namespace thread
 }  // namespace hemlock
 namespace hthread = hemlock::thread;
