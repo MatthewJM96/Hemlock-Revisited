@@ -1,7 +1,7 @@
 #ifndef __hemlock_thread_task_hpp
 #define __hemlock_thread_task_hpp
 
-#include "thread/task_queue.hpp"
+#include "thread/queue/basic.hpp"
 
 namespace hemlock {
     namespace thread {

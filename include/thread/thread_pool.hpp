@@ -1,30 +1,12 @@
 #ifndef __hemlock_thread_thread_pool_hpp
 #define __hemlock_thread_thread_pool_hpp
 
+#include "thread/state.hpp"
 #include "thread/task.hpp"
-#include "thread/task_queue.hpp"
+#include "thread/queue/basic.hpp"
 
 namespace hemlock {
     namespace thread {
-        enum class ThreadpoolTimingResolution {
-            NONE,
-            ON_SUSPEND,
-            ON_TASK_COMPLETION
-        };
-
-        struct ThreadState {
-            volatile bool stop;
-            volatile bool suspend;
-        };
-
-        struct Thread {
-            std::thread thread;
-
-            ThreadState state;
-        };
-
-        using Threads = std::vector<Thread>;
-
         template <
             IsTaskQueue                TaskQueue = BasicTaskQueue,
             ThreadpoolTimingResolution Timing    = ThreadpoolTimingResolution::NONE>
