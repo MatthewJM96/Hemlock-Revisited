@@ -1,6 +1,6 @@
 template <
     hthread::IsTaskQueue                TaskQueue,
-    hthread::ThreadpoolTimingResolution Timing>
+    bool Timing>
 void hthread::ThreadPool<TaskQueue, Timing>::init(
     ui32 thread_count,
     ThreadMainFunc<TaskQueue, Timing>
@@ -31,7 +31,7 @@ void hthread::ThreadPool<TaskQueue, Timing>::init(
 
 template <
     hthread::IsTaskQueue                TaskQueue,
-    hthread::ThreadpoolTimingResolution Timing>
+    bool Timing>
 void hthread::ThreadPool<TaskQueue, Timing>::dispose() {
     if (!m_is_initialised) return;
     m_is_initialised = false;
@@ -52,28 +52,28 @@ void hthread::ThreadPool<TaskQueue, Timing>::dispose() {
 
 template <
     hthread::IsTaskQueue                TaskQueue,
-    hthread::ThreadpoolTimingResolution Timing>
+    bool Timing>
 void hthread::ThreadPool<TaskQueue, Timing>::suspend() {
     for (auto& thread : m_threads) thread.state.suspend = true;
 }
 
 template <
     hthread::IsTaskQueue                TaskQueue,
-    hthread::ThreadpoolTimingResolution Timing>
+    bool Timing>
 void hthread::ThreadPool<TaskQueue, Timing>::resume() {
     for (auto& thread : m_threads) thread.state.suspend = false;
 }
 
 template <
     hthread::IsTaskQueue                TaskQueue,
-    hthread::ThreadpoolTimingResolution Timing>
+    bool Timing>
 void hthread::ThreadPool<TaskQueue, Timing>::add_task(QueuedTask task) {
     m_tasks.enqueue(m_producer_token, task);
 }
 
 template <
     hthread::IsTaskQueue                TaskQueue,
-    hthread::ThreadpoolTimingResolution Timing>
+    bool Timing>
 void hthread::ThreadPool<TaskQueue, Timing>::add_tasks(
     QueuedTask tasks[], size_t task_count
 ) {
@@ -82,7 +82,7 @@ void hthread::ThreadPool<TaskQueue, Timing>::add_tasks(
 
 template <
     hthread::IsTaskQueue                TaskQueue,
-    hthread::ThreadpoolTimingResolution Timing>
+    bool Timing>
 void hthread::ThreadPool<TaskQueue, Timing>::threadsafe_add_task(
     QueuedTask task
 ) {
@@ -91,7 +91,7 @@ void hthread::ThreadPool<TaskQueue, Timing>::threadsafe_add_task(
 
 template <
     hthread::IsTaskQueue                TaskQueue,
-    hthread::ThreadpoolTimingResolution Timing>
+    bool Timing>
 void hthread::ThreadPool<TaskQueue, Timing>::threadsafe_add_tasks(
     QueuedTask tasks[], size_t task_count
 ) {

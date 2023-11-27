@@ -8,12 +8,12 @@ namespace hemlock {
     namespace thread {
         class BasicTaskQueue : public moodycamel::BlockingConcurrentQueue<QueuedTask> {
         public:
-            QueueDelegate dequeue(QueuedTask& task, std::chrono::microseconds timeout) {
+            DequeueDelegates dequeue(QueuedTask& task, std::chrono::microseconds timeout) {
                 wait_dequeue_timed(task, timeout);
 
-                return QueueDelegate{ [this](QueuedTask&& task) {
+                return { QueueDelegate{ [this](QueuedTask&& task) {
                     return this->enqueue(std::forward<QueuedTask>(task));
-                } };
+                } }, RegisterTimingDelegate{ [this](bool, std::chrono::system_clock::rep) {} } };
             }
         };
     }  // namespace thread
