@@ -19,18 +19,21 @@ jobs:
       # Set fail-fast to false to ensure that feedback is delivered for all matrix combinations. Consider changing this to true when your workflow is stable.
       fail-fast: false
 
+      # TODO(Matthew): chase up with conan regarding clang and pulseaudio issues. For
+      #                now just target compilation with GCC.
       matrix:
         build_type: [Release, Debug]
-        c_compiler: [gcc-13, clang-17, clang-16, clang-15]
+        # c_compiler: [gcc-13, clang-17, clang-16, clang-15]
+        c_compiler: [gcc-13]
         include:
           - c_compiler: gcc-13
             cpp_compiler: g++-13
-          - c_compiler: clang-17
-            cpp_compiler: clang++-17
-          - c_compiler: clang-16
-            cpp_compiler: clang++-16
-          - c_compiler: clang-15
-            cpp_compiler: clang++-15
+          # - c_compiler: clang-17
+          #   cpp_compiler: clang++-17
+          # - c_compiler: clang-16
+          #   cpp_compiler: clang++-16
+          # - c_compiler: clang-15
+          #   cpp_compiler: clang++-15
 
     steps:
     - uses: actions/checkout@v3
@@ -61,7 +64,8 @@ jobs:
       # Turn repeated input strings (such as the build output directory) into step outputs. These step outputs can be used throughout the workflow file.
       id: strings
       shell: bash
-      run: |
+      run: >
+        echo "home=$HOME" >> "$GITHUB_OUTPUT" ;
         echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
 
     - name: Install non-conan dependencies
@@ -99,6 +103,22 @@ jobs:
         cp heatmap.h ${{ github.workspace }}/deps/include/libheatmap ;
         mkdir -p ${{ github.workspace }}/deps/include/libheatmap/colorschemes ;
         cp colorschemes/*.h ${{ github.workspace }}/deps/include/libheatmap/colorschemes
+
+    - name: Cache conan dependencies
+      id: cache-conan
+      uses: actions/cache@v3
+      env:
+        cache-name: cache-conan
+      with:
+        path: ${{ steps.strings.outputs.home }}/.conan
+        key: ${{ runner.os }}-${{ env.cache-name }}-${{ matrix.build_type }}-${{ matrix.c_compiler }}-${{ hashFiles('CMakeLists.txt') }}
+
+    - if: ${{ steps.cache-conan.outputs.cache-hit == 'true' }}
+      name: Remove conan system-reqs cache
+      continue-on-error: true
+      run: >
+        source ${{ github.workspace }}/.venv/bin/activate ;
+        conan remove --system-reqs '*'
 
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
@@ -158,9 +178,9 @@ jobs:
     - name: Set reusable strings
       # Turn repeated input strings (such as the build output directory) into step outputs. These step outputs can be used throughout the workflow file.
       id: strings
-      shell: bash
-      run: |
-        echo "build-output-dir=${{ github.workspace }}\build" >> "$GITHUB_OUTPUT"
+      run: >
+        echo "home=$HOME" >> $env:GITHUB_OUTPUT ;
+        echo "build-output-dir=${{ github.workspace }}\build" >> $env:GITHUB_OUTPUT
 
     - name: Install non-conan dependencies
       run: >
@@ -189,6 +209,26 @@ jobs:
         copy heatmap.h ${{ github.workspace }}/deps/include/libheatmap ;
         mkdir -p ${{ github.workspace }}/deps/include/libheatmap/colorschemes ;
         copy colorschemes/*.h ${{ github.workspace }}/deps/include/libheatmap/colorschemes
+
+    - name: Cache conan dependencies
+      id: cache-conan
+      uses: actions/cache@v3
+      env:
+        cache-name: cache-conan
+      with:
+        path: ${{ steps.strings.outputs.home }}/.conan
+        key: ${{ runner.os }}-${{ env.cache-name }}-${{ matrix.build_type }}--${{ hashFiles('CMakeLists.txt') }}
+
+    - if: ${{ steps.cache-conan.outputs.cache-hit == 'true' }}
+      name: Remove conan system-reqs cache and delete boost conan_sources.tgz
+      continue-on-error: true
+      run: >
+        cd ${{ github.workspace }} ;
+        .\.venv\Scripts\activate ;
+        conan remove --system-reqs '*' ;
+        Get-ChildItem ${{ steps.strings.outputs.home }}\.conan\data\boost
+        -File -Include conan_sources.tgz -Recurse -Force
+        | Remove-Item -Recurse -Force
 
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
@@ -253,7 +293,8 @@ jobs:
       # Turn repeated input strings (such as the build output directory) into step outputs. These step outputs can be used throughout the workflow file.
       id: strings
       shell: bash
-      run: |
+      run: >
+        echo "home=$HOME" >> "$GITHUB_OUTPUT" ;
         echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
 
     - name: Install non-conan dependencies
@@ -282,6 +323,22 @@ jobs:
         mkdir -p ${{ github.workspace }}/deps/include/libheatmap/colorschemes ;
         cp colorschemes/*.h ${{ github.workspace }}/deps/include/libheatmap/colorschemes
 
+    - name: Cache conan dependencies
+      id: cache-conan
+      uses: actions/cache@v3
+      env:
+        cache-name: cache-conan
+      with:
+        path: ${{ steps.strings.outputs.home }}/.conan
+        key: ${{ runner.os }}-${{ env.cache-name }}-${{ matrix.build_type }}-${{ matrix.c_compiler }}-${{ hashFiles('CMakeLists.txt') }}
+
+    - if: ${{ steps.cache-conan.outputs.cache-hit == 'true' }}
+      name: Remove conan system-reqs cache
+      continue-on-error: true
+      run: >
+        source ${{ github.workspace }}/.venv/bin/activate ;
+        conan remove --system-reqs '*'
+  
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
       # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
