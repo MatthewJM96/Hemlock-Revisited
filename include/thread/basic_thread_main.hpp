@@ -13,7 +13,6 @@ namespace hemlock {
          * for example if a task needs to chain a follow-up task.
          */
         template <
-            IsThreadState              ThreadState,
             IsTaskQueue                TaskQueue,
             ThreadpoolTimingResolution Timing>
         void basic_thread_main(ThreadState* state, TaskQueue* task_queue) {
@@ -43,10 +42,9 @@ namespace hemlock {
                     continue;
                 }
 
-                auto task
-                    = reinterpret_cast<ThreadTaskBase<ThreadState>*>(current_task.task);
+                auto task = reinterpret_cast<ThreadTaskBase*>(current_task.task);
 
-                if (task->execute(state, &queue)) {
+                if (task->execute(&queue)) {
                     // Task completed, handle disposal.
 
                     task->dispose();

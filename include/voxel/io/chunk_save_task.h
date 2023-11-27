@@ -7,8 +7,7 @@ namespace hemlock {
     namespace voxel {
         // class ChunkSaveTask : public ChunkFileTask {
         // public:
-        //     virtual void execute(ChunkFileTaskThreadState* state,
-        //     ChunkFileTaskQueue* task_queue) override;
+        //     virtual void execute(ChunkFileTaskQueue* task_queue) override;
         // };
     }
 }  // namespace hemlock

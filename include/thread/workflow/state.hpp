@@ -5,20 +5,17 @@
 
 namespace hemlock {
     namespace thread {
-        template <IsThreadState ThreadState>
         class IThreadWorkflowTask;
 
-        template <IsThreadState ThreadState>
         struct HeldWorkflowTask {
-            IThreadWorkflowTask<ThreadState>* task;
+            IThreadWorkflowTask* task;
             bool                              delete_on_complete;
         };
 
-        using ThreadWorkflowTaskID = i32;
+        using ThreadWorkflowTaskID = ui32;
 
-        template <IsThreadState ThreadState>
         struct ThreadWorkflowTasksView {
-            hmem::Handle<HeldWorkflowTask<ThreadState>[]> tasks;
+            hmem::Handle<HeldWorkflowTask[]> tasks;
             ui32                                          count;
         };
 

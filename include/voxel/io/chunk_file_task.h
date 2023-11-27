@@ -7,8 +7,6 @@ namespace hemlock {
     namespace voxel {
         struct Chunk;
 
-        using ChunkFileTaskThreadState = io::IOTaskThreadState;
-
         class ChunkFileTask : public io::IOTask {
         public:
             void init(hmem::WeakHandle<Chunk> chunk, io::IOManagerBase* iomanager) {

@@ -1,13 +1,11 @@
-template <hthread::IsThreadState ThreadState>
-void hthread::IThreadWorkflowTask<ThreadState>::dispose() {
+void hthread::IThreadWorkflowTask::dispose() {
     m_tasks                  = {};
     m_dag                    = nullptr;
     m_task_completion_states = {};
 }
 
-template <hthread::IsThreadState ThreadState>
-void hthread::IThreadWorkflowTask<ThreadState>::set_workflow_metadata(
-    ThreadWorkflowTasksView<ThreadState> tasks,
+void hthread::IThreadWorkflowTask::set_workflow_metadata(
+    ThreadWorkflowTasksView tasks,
     ThreadWorkflowTaskID                 task_idx,
     ThreadWorkflowDAG*                   dag,
     ThreadWorkflowTaskCompletionView     task_completion_states
@@ -18,11 +16,10 @@ void hthread::IThreadWorkflowTask<ThreadState>::set_workflow_metadata(
     m_task_completion_states = task_completion_states;
 }
 
-template <hthread::IsThreadState ThreadState>
-void hthread::IThreadWorkflowTask<ThreadState>::execute(
-    typename Thread<ThreadState>::State* state, BasicTaskQueue* task_queue
+bool hthread::IThreadWorkflowTask::execute(
+    QueueDelegate* queue_task
 ) {
-    if (run_task(state, task_queue) && m_dag) {
+    if (run_task(queue_task) && m_dag) {
         auto [start, last] = m_dag->graph.equal_range(m_task_idx);
         for (; start != last; ++start) {
             auto next_task_idx = (*start).second;
@@ -36,19 +33,22 @@ void hthread::IThreadWorkflowTask<ThreadState>::execute(
                 m_tasks.tasks.get()[next_task_idx].task->set_workflow_metadata(
                     m_tasks, next_task_idx, m_dag, m_task_completion_states
                 );
-                task_queue->enqueue(
-                    state->producer_token,
+                (*queue_task)(
                     { m_tasks.tasks.get()[next_task_idx].task,
                       m_tasks.tasks.get()[next_task_idx].delete_on_complete }
                 );
             }
         }
     }
+
+    // TODO(Matthew): allow workflow tasks to return need for continuation, failure, or
+    //                success.
+
+    return false;
 }
 
-template <hthread::IsThreadState ThreadState>
-void hthread::ThreadWorkflow<ThreadState>::init(
-    ThreadWorkflowDAG* dag, ThreadPool<ThreadState>* thread_pool
+void hthread::ThreadWorkflow::init(
+    ThreadWorkflowDAG* dag, ThreadPool<>* thread_pool
 ) {
     assert(dag != nullptr);
     assert(thread_pool != nullptr);
@@ -57,15 +57,13 @@ void hthread::ThreadWorkflow<ThreadState>::init(
     m_thread_pool = thread_pool;
 }
 
-template <hthread::IsThreadState ThreadState>
-void hthread::ThreadWorkflow<ThreadState>::dispose() {
+void hthread::ThreadWorkflow::dispose() {
     m_dag         = nullptr;
     m_thread_pool = nullptr;
 }
 
-template <hthread::IsThreadState ThreadState>
-void hthread::ThreadWorkflow<ThreadState>::run(
-    ThreadWorkflowTasksView<ThreadState> tasks
+void hthread::ThreadWorkflow::run(
+    ThreadWorkflowTasksView tasks
 ) {
     ThreadWorkflowTaskCompletionView task_completion_states;
     task_completion_states.completion_states

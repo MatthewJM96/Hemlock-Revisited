@@ -37,6 +37,8 @@ hthread::ThreadWorkflowTaskID hthread::ThreadWorkflowBuilder::add_tasks(ui32 cou
 }
 
 hthread::ThreadWorkflowTaskID hthread::ThreadWorkflowBuilder::chain_task() {
+    // TODO(Matthew): this logic looks likely to underflow...
+
     ThreadWorkflowTaskID new_id  = m_dag->task_count;
     ThreadWorkflowTaskID prev_id = new_id - 1;
 

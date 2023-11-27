@@ -5,8 +5,7 @@
 
 namespace hemlock {
     namespace thread {
-        template <IsThreadState ThreadState>
-        class IThreadWorkflowTask : public ThreadTaskBase<ThreadState> {
+        class IThreadWorkflowTask : public ThreadTaskBase {
         public:
             IThreadWorkflowTask() : m_task_idx(0), m_dag(nullptr) { /* Empty. */
             }
@@ -31,7 +30,7 @@ namespace hemlock {
              * tasks feeding into each task.
              */
             void set_workflow_metadata(
-                ThreadWorkflowTasksView<ThreadState> tasks,
+                ThreadWorkflowTasksView tasks,
                 ThreadWorkflowTaskID                 task_idx,
                 ThreadWorkflowDAG*                   dag,
                 ThreadWorkflowTaskCompletionView     task_completion_states
@@ -41,39 +40,32 @@ namespace hemlock {
              * @brief Handles firing off the run_task function and
              * putting the next task on the queue on completion.
              *
-             * @param state The thread state, including tokens for
-             * interacting with task queue, and thread pool specific
-             * context.
-             * @param task_queue The task queue, can be interacted with
-             * for example if a task needs to chain a follow-up task.
+             * @param queue_task Delegate that when called will queue the
+             * passed task.
              */
-            void execute(
-                typename Thread<ThreadState>::State* state, BasicTaskQueue* task_queue
+            virtual bool execute(
+                QueueDelegate* queue_task
             ) final;
 
             /**
              * @brief Executes the task, this must be implemented
              * by inheriting tasks.
              *
-             * @param state The thread state, including tokens for
-             * interacting with task queue, and thread pool specific
-             * context.
-             * @param task_queue The task queue, can be interacted with
-             * for example if a task needs to chain a follow-up task.
+             * @param queue_task Delegate that when called will queue the
+             * passed task.
              * @return True if the next tasks in the workflow should fire,
              * false otherwise.
              */
             virtual bool run_task(
-                typename Thread<ThreadState>::State* state, BasicTaskQueue* task_queue
+                QueueDelegate* queue_task
             ) = 0;
         protected:
-            ThreadWorkflowTasksView<ThreadState> m_tasks;
+            ThreadWorkflowTasksView m_tasks;
             ThreadWorkflowTaskID                 m_task_idx;
             ThreadWorkflowDAG*                   m_dag;
             ThreadWorkflowTaskCompletionView     m_task_completion_states;
         };
 
-        template <IsThreadState ThreadState>
         class ThreadWorkflow {
         public:
             ThreadWorkflow() { /* Empty. */
@@ -82,13 +74,13 @@ namespace hemlock {
             ~ThreadWorkflow() { /* Empty. */
             }
 
-            void init(ThreadWorkflowDAG* dag, ThreadPool<ThreadState>* thread_pool);
+            void init(ThreadWorkflowDAG* dag, ThreadPool<>* thread_pool);
             void dispose();
 
-            void run(ThreadWorkflowTasksView<ThreadState> tasks);
+            void run(ThreadWorkflowTasksView tasks);
         protected:
             ThreadWorkflowDAG*       m_dag;
-            ThreadPool<ThreadState>* m_thread_pool;
+            ThreadPool<>* m_thread_pool;
         };
     }  // namespace thread
 }  // namespace hemlock

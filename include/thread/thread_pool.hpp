@@ -3,7 +3,6 @@
 
 #include "thread/task.hpp"
 #include "thread/task_queue.hpp"
-#include "thread/thread_state.hpp"
 
 namespace hemlock {
     namespace thread {
@@ -13,24 +12,25 @@ namespace hemlock {
             ON_TASK_COMPLETION
         };
 
-        template <IsThreadState ThreadState>
+        struct ThreadState {
+            volatile bool stop;
+            volatile bool suspend;
+        };
+
         struct Thread {
             std::thread thread;
 
             ThreadState state;
         };
 
-        template <IsThreadState ThreadState>
-        using Threads = std::vector<Thread<ThreadState>>;
+        using Threads = std::vector<Thread>;
 
         template <
-            IsThreadState              ThreadState,
             IsTaskQueue                TaskQueue = BasicTaskQueue,
             ThreadpoolTimingResolution Timing    = ThreadpoolTimingResolution::NONE>
         class ThreadPool;
 
         template <
-            IsThreadState              ThreadState,
             IsTaskQueue                TaskQueue,
             ThreadpoolTimingResolution Timing>
         using ThreadMainFunc = Delegate<void(ThreadState*, TaskQueue*)>;
@@ -43,12 +43,11 @@ namespace hthread = hemlock::thread;
 namespace hemlock {
     namespace thread {
         template <
-            IsThreadState              ThreadState,
             IsTaskQueue                TaskQueue,
             ThreadpoolTimingResolution Timing>
         class ThreadPool {
         public:
-            using _ThreadMainFunc = ThreadMainFunc<ThreadState, TaskQueue, Timing>;
+            using _ThreadMainFunc = ThreadMainFunc<TaskQueue, Timing>;
 
             ThreadPool() :
                 m_is_initialised(false),
@@ -66,11 +65,8 @@ namespace hemlock {
              */
             void init(
                 ui32                                           thread_count,
-                ThreadMainFunc<ThreadState, TaskQueue, Timing> thread_main_func
-                = ThreadMainFunc<
-                    ThreadState,
-                    TaskQueue,
-                    Timing>{ basic_thread_main<ThreadState, TaskQueue, Timing> }
+                ThreadMainFunc<TaskQueue, Timing> thread_main_func
+                = ThreadMainFunc<TaskQueue, Timing>{ basic_thread_main<TaskQueue, Timing> }
             );
             /**
              * @brief Cleans up the thread pool, bringing all threads
@@ -134,7 +130,7 @@ namespace hemlock {
             /**
              * @brief The number of threads held by the thread pool.
              */
-            void num_threads() { return m_threads.size(); }
+            size_t num_threads() { return m_threads.size(); }
 
             /**
              * @brief The approximate number of tasks held by the thread pool.
@@ -144,7 +140,7 @@ namespace hemlock {
             bool m_is_initialised;
 
             _ThreadMainFunc           m_thread_main_func;
-            Threads<ThreadState>      m_threads;
+            Threads                   m_threads;
             TaskQueue                 m_tasks;
             moodycamel::ProducerToken m_producer_token;
         };

@@ -25,7 +25,7 @@ namespace hemlock {
             }
 
             virtual bool
-            execute(ChunkThreadState* state, hthread::QueueDelegate* queue_task) override;
+            execute(hthread::QueueDelegate* queue_task) override;
         };
     }  // namespace voxel
 }  // namespace hemlock

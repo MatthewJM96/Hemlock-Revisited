@@ -13,9 +13,7 @@ namespace hemlock {
             MESH_UPLOAD,
         };
 
-        using ChunkThreadState = thread::BasicThreadState;
-
-        class ChunkTask : public thread::ThreadTaskBase<ChunkThreadState> {
+        class ChunkTask : public thread::ThreadTaskBase {
         public:
             virtual ~ChunkTask() { /* Empty. */
             }

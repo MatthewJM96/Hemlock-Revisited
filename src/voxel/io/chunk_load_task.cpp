@@ -6,8 +6,7 @@
 
 // static const char* REMOVE_ME = "REMOVE_ME_ASAAAAP";
 
-// void hvox::ChunkLoadTask::execute(ChunkFileTaskThreadState*,
-// ChunkFileTaskQueue*) {
+// void hvox::ChunkLoadTask::execute(ChunkFileTaskQueue*) {
 //     if (!chunk_data_file.is_open()) {
 //         m_iomanager->memory_map_file(hio::fs::path(REMOVE_ME), chunk_data_file);
 //     }
