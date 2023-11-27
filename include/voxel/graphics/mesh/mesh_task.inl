@@ -1,5 +1,5 @@
 template <hvox::ChunkMeshStrategy MeshStrategy>
-bool hvox::ChunkMeshTask<MeshStrategy>::execute(ChunkThreadState*, ChunkTaskQueue*) {
+bool hvox::ChunkMeshTask<MeshStrategy>::execute(ChunkThreadState*, hthread::QueueDelegate*) {
     auto chunk_grid = m_chunk_grid.lock();
     if (chunk_grid == nullptr) return true;
 

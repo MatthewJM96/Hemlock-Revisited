@@ -32,12 +32,12 @@ namespace hemlock {
              * @param state The thread state, including tokens for
              * interacting with task queue, and thread pool specific
              * context.
-             * @param task_queue The task queue, can be interacted with
-             * for example if a task needs to chain a follow-up task.
+             * @param queue_task Delegate that when called will queue the
+             * passed task.
              * @return True if the task completed, false if it needs to
              * be re-queued.
              */
-            virtual bool execute(ThreadState* state, QueueDelegate* task_queue) = 0;
+            virtual bool execute(ThreadState* state, QueueDelegate* queue_task) = 0;
         };
     }  // namespace thread
 }  // namespace hemlock

@@ -3,7 +3,7 @@
 
 template <hvox::ai::ChunkNavmeshStrategy NavmeshStrategy>
 bool hvox::ai::ChunkNavmeshTask<
-    NavmeshStrategy>::execute(ChunkThreadState*, ChunkTaskQueue*) {
+    NavmeshStrategy>::execute(ChunkThreadState*, hthread::QueueDelegate*) {
     auto chunk_grid = m_chunk_grid.lock();
     if (chunk_grid == nullptr) return true;
 
