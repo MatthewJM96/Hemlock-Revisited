@@ -129,6 +129,9 @@
 #include "memory/heterogenous_pager.hpp"
 #include "memory/paged_allocator.hpp"
 #include "memory/pager.hpp"
+#include "memory/ring_buffer/dynamic.hpp"
+#include "memory/ring_buffer/fixed_capacity.hpp"
+#include "memory/ring_buffer/stack_allocated.hpp"
 
 // Our Thread Handling
 #include "thread/thread_pool.hpp"
