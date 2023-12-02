@@ -1,6 +1,9 @@
 #ifndef __hemlock_thread_basic_thread_main_hpp
 #define __hemlock_thread_basic_thread_main_hpp
 
+#include "thread/state.hpp"
+#include "thread/queue/state.hpp"
+
 namespace hemlock {
     namespace thread {
         /**
@@ -12,8 +15,8 @@ namespace hemlock {
          * @param task_queue The task queue, can be interacted with
          * for example if a task needs to chain a follow-up task.
          */
-        template <IsTaskQueue TaskQueue, bool Timing>
-        void basic_thread_main(ThreadState* state, TaskQueue* task_queue) {
+        template <IsTimedTaskQueue TaskQueue>
+        void timed_thread_main(ThreadState* state, TaskQueue* task_queue) {
             state->stop    = false;
             state->suspend = false;
 
@@ -42,18 +45,11 @@ namespace hemlock {
 
                 auto task = reinterpret_cast<ThreadTaskBase*>(current_task.task);
 
-                bool task_completion = false;
-                if constexpr (Timing) {
-                    auto before = std::chrono::system_clock::now();
-                    task_completion = task->execute(&queue_task);
-                    auto duration = std::chrono::system_clock::now() - before;
+                auto before = std::chrono::system_clock::now();
+                bool task_completion = task->execute(&queue_task);
+                auto duration = std::chrono::system_clock::now() - before;
 
-                    register_timing(task_completion, duration.count());
-                } else {
-                    task_completion = task->execute(&queue_task);
-
-                    (void)register_timing;
-                }
+                register_timing(task_completion, duration.count());
 
                 if (task_completion) {
                     // Task completed, handle disposal.

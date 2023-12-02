@@ -1,17 +1,18 @@
-#ifndef __hemlock_thread_thread_pool_hpp
-#define __hemlock_thread_thread_pool_hpp
+#ifndef __hemlock_thread_thread_pool_basic_hpp
+#define __hemlock_thread_thread_pool_basic_hpp
 
 #include "thread/state.hpp"
 #include "thread/task.hpp"
 #include "thread/queue/basic.hpp"
-#include "thread/basic_thread_main.hpp"
+#include "thread/thread_pool/main/state.hpp"
+#include "thread/thread_pool/main/basic.hpp"
 
 namespace hemlock {
     namespace thread {
-        template <IsTaskQueue TaskQueue = BasicTaskQueue, bool Timing = false>
+        template <IsTaskQueue TaskQueue = BasicTaskQueue>
         class ThreadPool {
         public:
-            using _ThreadMainFunc = ThreadMainFunc<TaskQueue, Timing>;
+            using _ThreadMainFunc = ThreadMainFunc<TaskQueue>;
 
             ThreadPool() :
                 m_is_initialised(false),
@@ -29,8 +30,8 @@ namespace hemlock {
              */
             void init(
                 ui32                                           thread_count,
-                ThreadMainFunc<TaskQueue, Timing> thread_main_func
-                = ThreadMainFunc<TaskQueue, Timing>{ basic_thread_main<TaskQueue, Timing> }
+                ThreadMainFunc<TaskQueue> thread_main_func
+                = ThreadMainFunc<TaskQueue>{ basic_thread_main<TaskQueue> }
             );
             /**
              * @brief Cleans up the thread pool, bringing all threads
@@ -112,6 +113,6 @@ namespace hemlock {
 }  // namespace hemlock
 namespace hthread = hemlock::thread;
 
-#include "thread/thread_pool.inl"
+#include "thread/thread_pool/basic.inl"
 
-#endif  // __hemlock_thread_thread_pool_hpp
+#endif  // __hemlock_thread_thread_pool_basic_hpp

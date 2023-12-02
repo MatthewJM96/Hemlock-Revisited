@@ -1,7 +1,7 @@
 #ifndef __hemlock_thread_workflow_state_hpp
 #define __hemlock_thread_workflow_state_hpp
 
-#include "thread/thread_pool.hpp"
+#include "thread/thread_pool/basic.hpp"
 
 namespace hemlock {
     namespace thread {

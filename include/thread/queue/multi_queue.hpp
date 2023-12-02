@@ -1,7 +1,6 @@
 #ifndef __hemlock_thread_queue_multi_queue_hpp
 #define __hemlock_thread_queue_multi_queue_hpp
 
-#include "basic_concepts.hpp"
 #include "thread/state.hpp"
 
 namespace hemlock {

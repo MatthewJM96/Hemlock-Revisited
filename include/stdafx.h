@@ -134,7 +134,8 @@
 #include "memory/ring_buffer/stack_allocated.hpp"
 
 // Our Thread Handling
-#include "thread/thread_pool.hpp"
+#include "thread/thread_pool/basic.hpp"
+#include "thread/thread_pool/timed.hpp"
 
 // Our File Handling Interface
 #include "io/filesystem.hpp"
