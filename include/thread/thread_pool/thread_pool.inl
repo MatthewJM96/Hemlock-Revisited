@@ -1,8 +1,7 @@
 template <hthread::IsTaskQueue TaskQueue>
 void hthread::ThreadPool<TaskQueue>::init(
-    ui32 thread_count,
-    ThreadMainFunc<TaskQueue>
-        thread_main_func /*= {basic_thread_main}*/
+    ui32                      thread_count,
+    ThreadMainFunc<TaskQueue> thread_main_func /*= {basic_thread_main}*/
 ) {
     if (m_is_initialised) return;
     m_is_initialised = true;
@@ -62,16 +61,12 @@ void hthread::ThreadPool<TaskQueue>::add_task(QueuedTask task) {
 }
 
 template <hthread::IsTaskQueue TaskQueue>
-void hthread::ThreadPool<TaskQueue>::add_tasks(
-    QueuedTask tasks[], size_t task_count
-) {
+void hthread::ThreadPool<TaskQueue>::add_tasks(QueuedTask tasks[], size_t task_count) {
     m_tasks.enqueue_bulk(m_producer_token, tasks, task_count);
 }
 
 template <hthread::IsTaskQueue TaskQueue>
-void hthread::ThreadPool<TaskQueue>::threadsafe_add_task(
-    QueuedTask task
-) {
+void hthread::ThreadPool<TaskQueue>::threadsafe_add_task(QueuedTask task) {
     m_tasks.enqueue(task);
 }
 

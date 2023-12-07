@@ -1,11 +1,11 @@
-#ifndef __hemlock_thread_thread_pool_basic_hpp
-#define __hemlock_thread_thread_pool_basic_hpp
+#ifndef __hemlock_thread_thread_pool_thread_pool_hpp
+#define __hemlock_thread_thread_pool_thread_pool_hpp
 
+#include "thread/queue/basic.hpp"
 #include "thread/state.hpp"
 #include "thread/task.hpp"
-#include "thread/queue/basic.hpp"
-#include "thread/thread_pool/main/state.hpp"
 #include "thread/thread_pool/main/basic.hpp"
+#include "thread/thread_pool/main/state.hpp"
 
 namespace hemlock {
     namespace thread {
@@ -14,9 +14,7 @@ namespace hemlock {
         public:
             using _ThreadMainFunc = ThreadMainFunc<TaskQueue>;
 
-            ThreadPool() :
-                m_is_initialised(false),
-                m_producer_token(moodycamel::ProducerToken(m_tasks)) { /* Empty. */
+            ThreadPool() : m_is_initialised(false) { /* Empty. */
             }
 
             ~ThreadPool() { dispose(); }
@@ -29,9 +27,9 @@ namespace hemlock {
              * possess.
              */
             void init(
-                ui32                                           thread_count,
+                ui32                      thread_count,
                 ThreadMainFunc<TaskQueue> thread_main_func
-                = ThreadMainFunc<TaskQueue>{ basic_thread_main<TaskQueue> }
+                = ThreadMainFunc<TaskQueue>{ default_thread_main<TaskQueue> }
             );
             /**
              * @brief Cleans up the thread pool, bringing all threads
@@ -104,15 +102,14 @@ namespace hemlock {
         protected:
             bool m_is_initialised;
 
-            _ThreadMainFunc           m_thread_main_func;
-            Threads                   m_threads;
-            TaskQueue                 m_tasks;
-            moodycamel::ProducerToken m_producer_token;
+            _ThreadMainFunc m_thread_main_func;
+            Threads         m_threads;
+            TaskQueue       m_tasks;
         };
     }  // namespace thread
 }  // namespace hemlock
 namespace hthread = hemlock::thread;
 
-#include "thread/thread_pool/basic.inl"
+#include "thread/thread_pool/main.hpp"
 
-#endif  // __hemlock_thread_thread_pool_basic_hpp
+#endif  // __hemlock_thread_thread_pool_thread_pool_hpp

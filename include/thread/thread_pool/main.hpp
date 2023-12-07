@@ -1,8 +1,8 @@
-#ifndef __hemlock_thread_basic_thread_main_hpp
-#define __hemlock_thread_basic_thread_main_hpp
+#ifndef __hemlock_thread_thread_pool_main_hpp
+#define __hemlock_thread_thread_pool_main_hpp
 
-#include "thread/state.hpp"
 #include "thread/queue/state.hpp"
+#include "thread/state.hpp"
 
 namespace hemlock {
     namespace thread {
@@ -15,8 +15,8 @@ namespace hemlock {
          * @param task_queue The task queue, can be interacted with
          * for example if a task needs to chain a follow-up task.
          */
-        template <IsTimedTaskQueue TaskQueue>
-        void timed_thread_main(ThreadState* state, TaskQueue* task_queue) {
+        template <IsTaskQueue TaskQueue>
+        void default_thread_main(ThreadState* state, TaskQueue* task_queue) {
             state->stop    = false;
             state->suspend = false;
 
@@ -30,13 +30,16 @@ namespace hemlock {
             //                  spin pattern used in lightweight semaphore is
             //                  doing anything bad to us. This is doubtful.
 
-            QueuedTask current_task = { nullptr, false };
+            TaskQueue::IdentiferType identifier   = {};
+            QueuedTask               current_task = { nullptr, false };
             while (!state->stop) {
-                auto [queue_task, register_timing]
-                    = task_queue->dequeue(current_task, std::chrono::microseconds(100));
+                task_queue->dequeue(
+                    current_task, TimingRep(std::chrono::microseconds(100)), &identifier
+                );
 
                 while (state->suspend)
-                    std::this_thread::sleep_for(std::chrono::milliseconds(1));
+                    std::this_thread::sleep_for(TimingRep(std::chrono::milliseconds(1))
+                    );
 
                 if (!current_task.task) {
                     std::this_thread::yield();
@@ -45,11 +48,13 @@ namespace hemlock {
 
                 auto task = reinterpret_cast<ThreadTaskBase*>(current_task.task);
 
-                auto before = std::chrono::system_clock::now();
+                auto before          = std::chrono::system_clock::now();
                 bool task_completion = task->execute(&queue_task);
-                auto duration = std::chrono::system_clock::now() - before;
+                auto duration        = std::chrono::system_clock::now() - before;
 
-                register_timing(task_completion, duration.count());
+                task_queue->register_timing(
+                    task_completion, TimingRep(duration.count()), &identifier
+                );
 
                 if (task_completion) {
                     // Task completed, handle disposal.
@@ -58,8 +63,7 @@ namespace hemlock {
                     current_task.task = nullptr;
                 } else {
                     // Task did not complete, requeue it.
-
-                    queue_task(std::move(current_task));
+                    task_queue->queue(std::move(current_task), &identifier);
                 }
             }
         }
@@ -67,4 +71,4 @@ namespace hemlock {
 }  // namespace hemlock
 namespace hthread = hemlock::thread;
 
-#endif  // __hemlock_thread_basic_thread_main_hpp
+#endif  // __hemlock_thread_thread_pool_main_hpp

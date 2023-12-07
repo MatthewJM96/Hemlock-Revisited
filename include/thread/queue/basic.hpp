@@ -8,26 +8,16 @@ namespace hemlock {
     namespace thread {
         class BasicTaskQueue : public moodycamel::BlockingConcurrentQueue<QueuedTask> {
         public:
-            QueueDelegate dequeue(QueuedTask& task, std::chrono::microseconds timeout) {
-                wait_dequeue_timed(task, timeout);
+            // Note this is unused but needs to be some type.
+            using IdentiferType = ui8;
 
-                return QueueDelegate{ [this](QueuedTask&& task) {
-                    return this->enqueue(std::forward<QueuedTask>(task));
-                } };
+            bool dequeue(QueuedTask& task, TimingRep timeout, void*) {
+                return wait_dequeue_timed(task, timeout);
             }
-        };
 
-        class TimedBasicTaskQueue : public moodycamel::BlockingConcurrentQueue<QueuedTask> {
-        public:
-            DequeueDelegates dequeue(QueuedTask& task, std::chrono::microseconds timeout) {
-                wait_dequeue_timed(task, timeout);
+            bool queue(QueuedTask& task, void*) { }
 
-                return DequeueDelegates{ QueueDelegate{[this](QueuedTask&& task) {
-                    return this->enqueue(std::forward<QueuedTask>(task));
-                } }, RegisterTimingDelegate{[this](bool, TimingRep timing) {
-                    m_timings.push_back(timing);
-                }} };
-            }
+            void register_timing(QueuedTask& task, TimingRep timing, void*) { }
         protected:
             hmem::StackAllocRingBuffer<TimingRep, 10> m_timings;
         };

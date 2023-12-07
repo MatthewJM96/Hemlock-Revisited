@@ -6,7 +6,8 @@
 namespace hemlock {
     namespace thread {
         template <size_t QueueCount>
-        using FixedCountQueues = std::array<moodycamel::BlockingConcurrentQueue<QueuedTask>, QueueCount>;
+        using FixedCountQueues
+            = std::array<moodycamel::BlockingConcurrentQueue<QueuedTask>, QueueCount>;
 
         template <size_t QueueCount>
         using ChangeQueueQuery = Delegate<bool(FixedCountQueues<QueueCount>, size_t)>;
@@ -47,18 +48,22 @@ namespace hemlock {
         //        note that EEVDF is a per-task algorithm, we are using queues therefore
         //        to represent BOTH a prioritisation and a time-requirement claim.
 
-
         template <size_t QueueCount>
         class MultiTaskQueue {
         public:
-            QueueDelegate dequeue(QueuedTask& task, std::chrono::microseconds timeout) {
-                wait_dequeue_timed(task, timeout);
+            using IdentifierType = size_t;
 
-                return QueueDelegate{ [this](QueuedTask&& task) {
-                    return this->enqueue(std::forward<QueuedTask>(task));
-                } };
+            bool dequeue(QueuedTask& task, TimingRep timeout, void* identifier) {
+                *identifier = m_curr_index;
+
+                return m_queues[m_curr_index].wait_dequeue_timed(task, timeout);
             }
 
+            bool queue(QueuedTask& task, void* identifier) { }
+
+            void register_timing(QueuedTask& task, TimingRep timing, void* identifier) {
+
+            }
         protected:
             ChangeQueueQuery<QueueCount> should_change_queue;
 
