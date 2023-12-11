@@ -1,7 +1,7 @@
 template <hthread::IsTaskQueue TaskQueue>
 void hthread::ThreadPool<TaskQueue>::init(
     ui32                      thread_count,
-    ThreadMainFunc<TaskQueue> thread_main_func /*= {basic_thread_main}*/
+    ThreadMainFunc<TaskQueue> thread_main_func /*= {default_thread_main}*/
 ) {
     if (m_is_initialised) return;
     m_is_initialised = true;

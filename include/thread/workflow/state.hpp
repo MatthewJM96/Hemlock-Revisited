@@ -1,7 +1,7 @@
 #ifndef __hemlock_thread_workflow_state_hpp
 #define __hemlock_thread_workflow_state_hpp
 
-#include "thread/thread_pool/basic.hpp"
+#include "thread/thread_pool/thread_pool.hpp"
 
 namespace hemlock {
     namespace thread {
@@ -9,14 +9,14 @@ namespace hemlock {
 
         struct HeldWorkflowTask {
             IThreadWorkflowTask* task;
-            bool                              delete_on_complete;
+            bool                 delete_on_complete;
         };
 
         using ThreadWorkflowTaskID = ui32;
 
         struct ThreadWorkflowTasksView {
             hmem::Handle<HeldWorkflowTask[]> tasks;
-            ui32                                          count;
+            ui32                             count;
         };
 
         using ThreadWorkflowTaskCompletion = std::atomic<ui32>;

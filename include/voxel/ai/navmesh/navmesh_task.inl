@@ -2,7 +2,7 @@
 #include "voxel/chunk/state.hpp"
 
 template <hvox::ai::ChunkNavmeshStrategy NavmeshStrategy>
-bool hvox::ai::ChunkNavmeshTask<NavmeshStrategy>::execute(hthread::QueueDelegate*) {
+bool hvox::ai::ChunkNavmeshTask<NavmeshStrategy>::execute() {
     auto chunk_grid = m_chunk_grid.lock();
     if (chunk_grid == nullptr) return true;
 

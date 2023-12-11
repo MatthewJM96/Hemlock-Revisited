@@ -24,8 +24,7 @@ namespace hemlock {
             virtual ~ChunkGenerationTask() { /* Empty. */
             }
 
-            virtual bool
-            execute(hthread::QueueDelegate* queue_task) override;
+            virtual bool execute() override;
         };
     }  // namespace voxel
 }  // namespace hemlock

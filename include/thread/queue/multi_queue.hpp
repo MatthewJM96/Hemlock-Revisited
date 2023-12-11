@@ -59,7 +59,7 @@ namespace hemlock {
                 return m_queues[m_curr_index].wait_dequeue_timed(task, timeout);
             }
 
-            bool queue(QueuedTask& task, void* identifier) { }
+            bool queue(QueuedTask task, void* identifier) { }
 
             void register_timing(QueuedTask& task, TimingRep timing, void* identifier) {
 

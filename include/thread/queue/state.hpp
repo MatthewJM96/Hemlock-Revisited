@@ -21,10 +21,8 @@ namespace hemlock {
          */
         template <typename Candidate>
         concept IsTaskQueue
-            = requires (Candidate c, QueuedTask& i, TimingRep t, void* u, bool s) {
-                  {
-                      Candidate::IdentiferType
-                  };
+            = requires (Candidate c, QueuedTask i, TimingRep t, void* u, bool s) {
+                  typename Candidate::IdentifierType;
                   {
                       c.dequeue(i, t, u)
                       } -> std::same_as<bool>;

@@ -1,14 +1,14 @@
-void hthread::IThreadWorkflowTask::dispose() {
+hthread::IThreadWorkflowTask::~IThreadWorkflowTask() {
     m_tasks                  = {};
     m_dag                    = nullptr;
     m_task_completion_states = {};
 }
 
 void hthread::IThreadWorkflowTask::set_workflow_metadata(
-    ThreadWorkflowTasksView tasks,
-    ThreadWorkflowTaskID                 task_idx,
-    ThreadWorkflowDAG*                   dag,
-    ThreadWorkflowTaskCompletionView     task_completion_states
+    ThreadWorkflowTasksView          tasks,
+    ThreadWorkflowTaskID             task_idx,
+    ThreadWorkflowDAG*               dag,
+    ThreadWorkflowTaskCompletionView task_completion_states
 ) {
     m_tasks                  = tasks;
     m_task_idx               = task_idx;
@@ -16,10 +16,8 @@ void hthread::IThreadWorkflowTask::set_workflow_metadata(
     m_task_completion_states = task_completion_states;
 }
 
-bool hthread::IThreadWorkflowTask::execute(
-    QueueDelegate* queue_task
-) {
-    if (run_task(queue_task) && m_dag) {
+bool hthread::IThreadWorkflowTask::execute() {
+    if (run_task() && m_dag) {
         auto [start, last] = m_dag->graph.equal_range(m_task_idx);
         for (; start != last; ++start) {
             auto next_task_idx = (*start).second;
@@ -33,9 +31,11 @@ bool hthread::IThreadWorkflowTask::execute(
                 m_tasks.tasks.get()[next_task_idx].task->set_workflow_metadata(
                     m_tasks, next_task_idx, m_dag, m_task_completion_states
                 );
-                (*queue_task)(
-                    { m_tasks.tasks.get()[next_task_idx].task,
-                      m_tasks.tasks.get()[next_task_idx].delete_on_complete }
+                // TODO(Matthew): need to work out how to enable such chaining of tasks
+                //                but we may also just ditch this as we probably
+                //                just want to do this via events.
+                (*queue_task)({ m_tasks.tasks.get()[next_task_idx].task,
+                                m_tasks.tasks.get()[next_task_idx].delete_on_complete }
                 );
             }
         }
@@ -47,9 +47,7 @@ bool hthread::IThreadWorkflowTask::execute(
     return false;
 }
 
-void hthread::ThreadWorkflow::init(
-    ThreadWorkflowDAG* dag, ThreadPool<>* thread_pool
-) {
+void hthread::ThreadWorkflow::init(ThreadWorkflowDAG* dag, ThreadPool<>* thread_pool) {
     assert(dag != nullptr);
     assert(thread_pool != nullptr);
 
@@ -62,9 +60,7 @@ void hthread::ThreadWorkflow::dispose() {
     m_thread_pool = nullptr;
 }
 
-void hthread::ThreadWorkflow::run(
-    ThreadWorkflowTasksView tasks
-) {
+void hthread::ThreadWorkflow::run(ThreadWorkflowTasksView tasks) {
     ThreadWorkflowTaskCompletionView task_completion_states;
     task_completion_states.completion_states
         = hmem::Handle<ThreadWorkflowTaskCompletion[]>(

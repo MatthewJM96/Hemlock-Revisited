@@ -2,6 +2,7 @@
 #define __hemlock_thread_queue_basic_hpp
 
 #include "memory/ring_buffer/stack_allocated.hpp"
+#include "thread/queue/state.hpp"
 #include "thread/state.hpp"
 
 namespace hemlock {
@@ -9,15 +10,15 @@ namespace hemlock {
         class BasicTaskQueue : public moodycamel::BlockingConcurrentQueue<QueuedTask> {
         public:
             // Note this is unused but needs to be some type.
-            using IdentiferType = ui8;
+            using IdentifierType = ui8;
 
             bool dequeue(QueuedTask& task, TimingRep timeout, void*) {
                 return wait_dequeue_timed(task, timeout);
             }
 
-            bool queue(QueuedTask& task, void*) { }
+            bool queue(QueuedTask task, void*) { }
 
-            void register_timing(QueuedTask& task, TimingRep timing, void*) { }
+            void register_timing(bool task_succeeded, TimingRep timing, void*) { }
         protected:
             hmem::StackAllocRingBuffer<TimingRep, 10> m_timings;
         };

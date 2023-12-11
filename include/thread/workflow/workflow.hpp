@@ -5,19 +5,12 @@
 
 namespace hemlock {
     namespace thread {
-        class IThreadWorkflowTask : public ThreadTaskBase {
+        class IThreadWorkflowTask : public IThreadTask {
         public:
             IThreadWorkflowTask() : m_task_idx(0), m_dag(nullptr) { /* Empty. */
             }
 
-            virtual ~IThreadWorkflowTask() { /* Empty. */
-            }
-
-            /**
-             * @brief If any special handling is needed to clean
-             * up task, override this.
-             */
-            virtual void dispose() override;
+            virtual ~IThreadWorkflowTask();
 
             /**
              * @brief Set up necessary state for task to schedule
@@ -30,40 +23,32 @@ namespace hemlock {
              * tasks feeding into each task.
              */
             void set_workflow_metadata(
-                ThreadWorkflowTasksView tasks,
-                ThreadWorkflowTaskID                 task_idx,
-                ThreadWorkflowDAG*                   dag,
-                ThreadWorkflowTaskCompletionView     task_completion_states
+                ThreadWorkflowTasksView          tasks,
+                ThreadWorkflowTaskID             task_idx,
+                ThreadWorkflowDAG*               dag,
+                ThreadWorkflowTaskCompletionView task_completion_states
             );
 
             /**
              * @brief Handles firing off the run_task function and
              * putting the next task on the queue on completion.
              *
-             * @param queue_task Delegate that when called will queue the
-             * passed task.
              */
-            virtual bool execute(
-                QueueDelegate* queue_task
-            ) final;
+            virtual bool execute() final;
 
             /**
              * @brief Executes the task, this must be implemented
              * by inheriting tasks.
              *
-             * @param queue_task Delegate that when called will queue the
-             * passed task.
              * @return True if the next tasks in the workflow should fire,
              * false otherwise.
              */
-            virtual bool run_task(
-                QueueDelegate* queue_task
-            ) = 0;
+            virtual bool run_task() = 0;
         protected:
-            ThreadWorkflowTasksView m_tasks;
-            ThreadWorkflowTaskID                 m_task_idx;
-            ThreadWorkflowDAG*                   m_dag;
-            ThreadWorkflowTaskCompletionView     m_task_completion_states;
+            ThreadWorkflowTasksView          m_tasks;
+            ThreadWorkflowTaskID             m_task_idx;
+            ThreadWorkflowDAG*               m_dag;
+            ThreadWorkflowTaskCompletionView m_task_completion_states;
         };
 
         class ThreadWorkflow {
@@ -79,8 +64,8 @@ namespace hemlock {
 
             void run(ThreadWorkflowTasksView tasks);
         protected:
-            ThreadWorkflowDAG*       m_dag;
-            ThreadPool<>* m_thread_pool;
+            ThreadWorkflowDAG* m_dag;
+            ThreadPool<>*      m_thread_pool;
         };
     }  // namespace thread
 }  // namespace hemlock

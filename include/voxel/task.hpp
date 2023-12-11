@@ -13,7 +13,7 @@ namespace hemlock {
             MESH_UPLOAD,
         };
 
-        class ChunkTask : public thread::ThreadTaskBase {
+        class ChunkTask : public thread::IThreadTask {
         public:
             virtual ~ChunkTask() { /* Empty. */
             }

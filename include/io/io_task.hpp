@@ -5,7 +5,7 @@ namespace hemlock {
     namespace io {
         class IOManagerBase;
 
-        class IOTask : public thread::ThreadTaskBase {
+        class IOTask : public thread::IThreadTask {
         public:
             void init(IOManagerBase* iomanager) { m_iomanager = iomanager; }
         protected:

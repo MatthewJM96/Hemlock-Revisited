@@ -3,9 +3,8 @@
 
 #include "thread/queue/basic.hpp"
 #include "thread/state.hpp"
-#include "thread/task.hpp"
-#include "thread/thread_pool/main/basic.hpp"
-#include "thread/thread_pool/main/state.hpp"
+#include "thread/thread_pool/main.hpp"
+#include "thread/thread_pool/state.hpp"
 
 namespace hemlock {
     namespace thread {

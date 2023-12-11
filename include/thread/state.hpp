@@ -24,11 +24,12 @@ namespace hemlock {
 
             ThreadState state;
         };
+
         /**
          * @brief Container of threads in a pool.
          */
         using Threads = std::vector<Thread>;
-    
+
         ////////////////////////////////////////////////////////////////////////////////
         // Thread Tasks
 
@@ -40,6 +41,14 @@ namespace hemlock {
             virtual ~IThreadTask() {
                 // Empty.
             }
+
+            /**
+             * @brief Executes the task.
+             *
+             * @return True if the task completed, false if it needs to
+             * be re-queued.
+             */
+            virtual bool execute() = 0;
         };
 
         /**

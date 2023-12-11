@@ -29,7 +29,7 @@ namespace hemlock {
                 virtual ~ChunkNavmeshTask() { /* Empty. */
                 }
 
-                virtual bool execute(hthread::QueueDelegate* queue_task) override;
+                virtual bool execute() override;
             };
         }  // namespace ai
     }      // namespace voxel

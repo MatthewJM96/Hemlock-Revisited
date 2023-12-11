@@ -30,8 +30,8 @@ namespace hemlock {
             //                  spin pattern used in lightweight semaphore is
             //                  doing anything bad to us. This is doubtful.
 
-            TaskQueue::IdentiferType identifier   = {};
-            QueuedTask               current_task = { nullptr, false };
+            typename TaskQueue::IdentifierType identifier   = {};
+            QueuedTask                         current_task = { nullptr, false };
             while (!state->stop) {
                 task_queue->dequeue(
                     current_task, TimingRep(std::chrono::microseconds(100)), &identifier
@@ -46,10 +46,8 @@ namespace hemlock {
                     continue;
                 }
 
-                auto task = reinterpret_cast<ThreadTaskBase*>(current_task.task);
-
                 auto before          = std::chrono::system_clock::now();
-                bool task_completion = task->execute(&queue_task);
+                bool task_completion = current_task.task->execute();
                 auto duration        = std::chrono::system_clock::now() - before;
 
                 task_queue->register_timing(
@@ -58,12 +56,11 @@ namespace hemlock {
 
                 if (task_completion) {
                     // Task completed, handle disposal.
-                    task->dispose();
-                    if (current_task.delete_on_complete) delete task;
+                    if (current_task.delete_on_complete) delete current_task.task;
                     current_task.task = nullptr;
                 } else {
                     // Task did not complete, requeue it.
-                    task_queue->queue(std::move(current_task), &identifier);
+                    task_queue->queue(current_task, &identifier);
                 }
             }
         }
