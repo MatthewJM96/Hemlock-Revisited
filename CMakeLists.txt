@@ -265,7 +265,6 @@ add_executable(Hemlock_Revisited
     "${PROJECT_SOURCE_DIR}/src/io/yaml/yaml.cpp"
     "${PROJECT_SOURCE_DIR}/src/script/lua/continuable_function.cpp"
     "${PROJECT_SOURCE_DIR}/src/script/lua/lua_function.cpp"
-    "${PROJECT_SOURCE_DIR}/src/thread/workflow/builder.cpp"
     "${PROJECT_SOURCE_DIR}/src/ui/input/dispatcher.cpp"
     "${PROJECT_SOURCE_DIR}/src/ui/input/manager.cpp"
     "${PROJECT_SOURCE_DIR}/src/voxel/block_manager.cpp"
