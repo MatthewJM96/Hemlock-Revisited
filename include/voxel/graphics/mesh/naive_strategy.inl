@@ -1,7 +1,7 @@
 #include "graphics/mesh.h"
 #include "voxel/chunk/grid.h"
 #include "voxel/face_check.hpp"
-#include "voxel/state.hpp"
+#include "voxel/state.h"
 
 template <hvox::IdealVoxelComparator MeshComparator>
 bool hvox::NaiveMeshStrategy<

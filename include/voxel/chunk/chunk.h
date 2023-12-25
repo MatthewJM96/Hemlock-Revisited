@@ -13,7 +13,7 @@
 #include "voxel/chunk/state.hpp"
 #include "voxel/coordinate_system.h"
 #include "voxel/graphics/mesh/instance_manager.h"
-#include "voxel/state.hpp"
+#include "voxel/state.h"
 #include "voxel/task.hpp"
 #include "voxel/voxel_manager.h"
 

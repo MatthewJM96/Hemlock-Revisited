@@ -2,7 +2,7 @@
 #include "voxel/chunk/chunk.h"
 #include "voxel/chunk/grid.h"
 #include "voxel/chunk/setter.hpp"
-#include "voxel/state.hpp"
+#include "voxel/state.h"
 
 template <hvox::IdealVoxelComparator MeshComparator>
 bool hvox::GreedyMeshStrategy<

@@ -3,7 +3,7 @@
 #include "graphics/mesh.h"
 
 #include "voxel/chunk/grid.h"
-#include "voxel/state.hpp"
+#include "voxel/state.h"
 
 void hvox::ChunkTask::set_state(
     hmem::WeakHandle<Chunk> chunk, hmem::WeakHandle<ChunkGrid> chunk_grid

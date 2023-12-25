@@ -1,8 +1,8 @@
 #ifndef __hemlock_voxel_ray_h
 #define __hemlock_voxel_ray_h
 
-#include "coordinate_system.h"
-#include "state.hpp"
+#include "voxel/coordinate_system.h"
+#include "voxel/state.h"
 
 namespace hemlock {
     namespace voxel {

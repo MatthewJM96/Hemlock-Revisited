@@ -2,7 +2,7 @@
 
 #include "voxel/chunk/chunk.h"
 #include "voxel/graphics/block_voxel.hpp"
-#include "voxel/state.hpp"
+#include "voxel/state.h"
 
 #include "voxel/graphics/renderer.h"
 

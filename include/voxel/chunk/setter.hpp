@@ -2,7 +2,7 @@
 #define __hemlock_voxel_chunk_setter_hpp
 
 #include "voxel/coordinate_system.h"
-#include "voxel/state.hpp"
+#include "voxel/state.h"
 
 namespace hemlock {
     namespace voxel {
