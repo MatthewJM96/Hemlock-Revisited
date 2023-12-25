@@ -7,14 +7,14 @@
 namespace hemlock {
     namespace physics {
         /**
-         * @brief Defines a struct whose opeartor() determines the shape of a block.
+         * @brief Defines a struct whose opeartor() determines the shape of a voxel.
          *
          * The function returns a pointer to an appropriate btCollisionShape if the
-         * block can be collided with, otherwise nullptr.
+         * voxel can be collided with, otherwise nullptr.
          */
         template <typename EvaluatorCandidate>
         concept VoxelShapeEvaluator
-            = requires (EvaluatorCandidate e, hvox::Block b, btTransform& t) {
+            = requires (EvaluatorCandidate e, hvox::Voxel b, btTransform& t) {
                   {
                       e.operator()(b, t)
                       } -> std::same_as<btCollisionShape*>;
@@ -26,7 +26,7 @@ namespace hemlock {
                 AnchoredComponent   ac,
                 DynamicComponent    dc,
                 CollidableComponent cc,
-                btCompoundShape*    voxels
+                btCompoundShape*    colliders
             );
         }
     }  // namespace physics

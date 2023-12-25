@@ -1,26 +1,26 @@
-#ifndef __hemlock_voxel_block_hpp
-#define __hemlock_voxel_block_hpp
+#ifndef __hemlock_voxel_voxel_hpp
+#define __hemlock_voxel_voxel_hpp
 
 #include "graphics/mesh.h"
 
 namespace hemlock {
     namespace voxel {
-        using BlockID = ui64;
+        using VoxelID = ui64;
 
-        struct Block {
-            BlockID id;
+        struct Voxel {
+            VoxelID id;
             // more stuff
         };
 
-        const Block NULL_BLOCK = Block{ 0 };
+        const Voxel NULL_VOXEL = Voxel{ 0 };
 
-        const ui32 BLOCK_VERTEX_COUNT = 36;
+        const ui32 VOXEL_VERTEX_COUNT = 36;
 
-        using BlockVertex   = hg::Colourless_3D_32_Normal_Vertex;
-        using BlockMeshData = hg::ConstColourless_3D_32_Normal_MeshData;
+        using VoxelVertex   = hg::Colourless_3D_32_Normal_Vertex;
+        using VoxelMeshData = hg::ConstColourless_3D_32_Normal_MeshData;
 
-        // static BlockVertex* const BLOCK_VERTICES = new
-        // BlockVertex[BLOCK_VERTEX_COUNT] {
+        // static VoxelVertex* const VOXEL_VERTICES = new
+        // VoxelVertex[VOXEL_VERTEX_COUNT] {
         //     /* FRONT */
         //     { {  0.5f, -0.5f, -0.5f }, { 1.0f, 0.0f }, {  0.0f,  0.0f, -1.0f } },
         //     { { -0.5f, -0.5f, -0.5f }, { 0.0f, 0.0f }, {  0.0f,  0.0f, -1.0f } },
@@ -65,7 +65,7 @@ namespace hemlock {
         //     { { -0.5f,  0.5f,  0.5f }, { 0.0f, 0.0f }, {  0.0f,  1.0f,  1.0f } }
         // };
 
-        static const BlockVertex BLOCK_VERTICES[BLOCK_VERTEX_COUNT] = {
+        static const VoxelVertex VOXEL_VERTICES[VOXEL_VERTEX_COUNT] = {
   /* FRONT */
             {{ 1.0f, 0.0f, 0.0f }, { 1.0f, 0.0f }, { 0.0f, 0.0f, -1.0f }},
             {{ 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f }, { 0.0f, 0.0f, -1.0f }},
@@ -110,17 +110,17 @@ namespace hemlock {
             {{ 0.0f, 1.0f, 1.0f }, { 0.0f, 0.0f },  { 0.0f, 1.0f, 1.0f }}
         };
 
-        const BlockMeshData BLOCK_MESH = { &BLOCK_VERTICES[0], BLOCK_VERTEX_COUNT };
+        const VoxelMeshData VOXEL_MESH = { &VOXEL_VERTICES[0], VOXEL_VERTEX_COUNT };
     }  // namespace voxel
 }  // namespace hemlock
 namespace hvox = hemlock::voxel;
 
-inline bool operator==(hvox::Block lhs, hvox::Block rhs) {
+inline bool operator==(hvox::Voxel lhs, hvox::Voxel rhs) {
     return lhs.id == rhs.id;
 }
 
-inline bool operator!=(hvox::Block lhs, hvox::Block rhs) {
+inline bool operator!=(hvox::Voxel lhs, hvox::Voxel rhs) {
     return !(lhs == rhs);
 }
 
-#endif  // __hemlock_voxel_block_hpp
+#endif  // __hemlock_voxel_voxel_hpp

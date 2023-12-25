@@ -2,8 +2,8 @@
 
 #include "graphics/mesh.h"
 
-#include "voxel/block.hpp"
 #include "voxel/chunk/grid.h"
+#include "voxel/voxel.hpp"
 
 void hvox::ChunkTask::set_state(
     hmem::WeakHandle<Chunk> chunk, hmem::WeakHandle<ChunkGrid> chunk_grid
@@ -14,7 +14,7 @@ void hvox::ChunkTask::set_state(
 
 hvox::ChunkGrid::ChunkGrid() :
     // TODO(Matthew): both of these are rather inefficient, we remesh literally every
-    // block change, rather than
+    // voxel change, rather than
     //                once per update loop, likewise with chunk loads.
     // TODO(Matthew): as these are called in threadpool threads, we'd like them to
     //                be able to use the appropriate producer tokens.
@@ -23,7 +23,7 @@ hvox::ChunkGrid::ChunkGrid() :
 
         auto chunk = handle.lock();
         // If chunk is nullptr, then there's no point
-        // handling the block change as we will have
+        // handling the voxel change as we will have
         // an unload event for this chunk.
         if (chunk == nullptr) return;
 
@@ -37,25 +37,25 @@ hvox::ChunkGrid::ChunkGrid() :
             m_thread_pool.threadsafe_add_task({ navmesh_task, true });
         }
     } }),
-    // TODO(Matthew): handle bulk block change too.
-    // TODO(Matthew): right now we remesh even if block change is cancelled.
+    // TODO(Matthew): handle bulk voxel change too.
+    // TODO(Matthew): right now we remesh even if voxel change is cancelled.
     //                perhaps we can count changes and if at least 1 change
     //                on end of update loop then schedule remesh, only
-    //                incrementing if block change actually occurs
+    //                incrementing if voxel change actually occurs
     //                  i.e. stop queuing here.
-    handle_block_change(Delegate<bool(Sender, BlockChangeEvent)>{
-        [&](Sender sender, BlockChangeEvent) {
+    handle_voxel_change(Delegate<bool(Sender, VoxelChangeEvent)>{
+        [&](Sender sender, VoxelChangeEvent) {
             hmem::WeakHandle<Chunk> handle = sender.get_handle<Chunk>();
 
             auto chunk = handle.lock();
             // If chunk is nullptr, then there's no point
-            // handling the block change as we will have
+            // handling the voxel change as we will have
             // an unload event for this chunk.
             if (chunk == nullptr) return true;
 
             // TODO(Matthew): These tasks are being added in the wrong event - this
-            //                is the pre-block change event checking if the change may
-            //                occur, in fact we should do this only after the block
+            //                is the pre-voxel change event checking if the change may
+            //                occur, in fact we should do this only after the voxel
             //                change has occurred.
 
             auto mesh_task = m_build_mesh_task();
@@ -94,7 +94,7 @@ void hvox::ChunkGrid::init(
 
     m_thread_pool.init(thread_count);
 
-    m_block_pager    = hmem::make_handle<ChunkBlockPager>();
+    m_voxel_pager    = hmem::make_handle<ChunkVoxelPager>();
     m_instance_pager = hmem::make_handle<ChunkInstanceDataPager>();
     m_navmesh_pager  = hmem::make_handle<ai::ChunkNavmeshPager>();
 
@@ -153,10 +153,10 @@ bool hvox::ChunkGrid::preload_chunk_at(ChunkGridPosition chunk_position) {
 
     hmem::Handle<Chunk> chunk = hmem::allocate_handle<Chunk>(m_chunk_allocator);
     chunk->position           = chunk_position;
-    chunk->init(chunk, m_block_pager, m_instance_pager, m_navmesh_pager);
+    chunk->init(chunk, m_voxel_pager, m_instance_pager, m_navmesh_pager);
 
     chunk->on_load         += &handle_chunk_load;
-    chunk->on_block_change += &handle_block_change;
+    chunk->on_voxel_change += &handle_voxel_change;
 
     establish_chunk_neighbours(chunk);
 

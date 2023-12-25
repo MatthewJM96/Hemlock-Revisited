@@ -11,11 +11,11 @@ namespace hemlock {
     namespace voxel {
         namespace ai {
             struct ChunkNavmeshNode {
-                BlockChunkPosition block_pos;
+                VoxelChunkPosition voxel_pos;
                 ChunkGridPosition  chunk_pos;
 
                 bool operator==(const ChunkNavmeshNode& rhs) const {
-                    return block_pos == rhs.block_pos && chunk_pos == rhs.chunk_pos;
+                    return voxel_pos == rhs.voxel_pos && chunk_pos == rhs.chunk_pos;
                 }
             };
 
@@ -38,9 +38,9 @@ namespace std {
             //                platforms?
             union {
                 HEMLOCK_PACKED_STRUCT(struct {
-                    i64 block_x : 5;
-                    i64 block_y : 5;
-                    i64 block_z : 5;
+                    i64 voxel_x : 5;
+                    i64 voxel_y : 5;
+                    i64 voxel_z : 5;
                     i64 chunk_x : 19;
                     i64 chunk_y : 11;
                     i64 chunk_z : 19;
@@ -50,12 +50,12 @@ namespace std {
                 ui64 id;
             } packed_node;
 
-            packed_node.coords.block_x
-                = static_cast<i64>(node.block_pos.x) - (CHUNK_LENGTH / 2);
-            packed_node.coords.block_y
-                = static_cast<i64>(node.block_pos.y) - (CHUNK_LENGTH / 2);
-            packed_node.coords.block_z
-                = static_cast<i64>(node.block_pos.z) - (CHUNK_LENGTH / 2);
+            packed_node.coords.voxel_x
+                = static_cast<i64>(node.voxel_pos.x) - (CHUNK_LENGTH / 2);
+            packed_node.coords.voxel_y
+                = static_cast<i64>(node.voxel_pos.y) - (CHUNK_LENGTH / 2);
+            packed_node.coords.voxel_z
+                = static_cast<i64>(node.voxel_pos.z) - (CHUNK_LENGTH / 2);
 
             packed_node.coords.chunk_x = node.chunk_pos.x;
             packed_node.coords.chunk_y = node.chunk_pos.y;

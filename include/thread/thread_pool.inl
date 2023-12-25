@@ -8,9 +8,9 @@ void hthread::basic_thread_main(
     // NOTE(Matthew): Technically can get an exception here if we attempt
     //                a dequeue before the queue is fully constructed.
     //                I think as the semaphore wait causes an early return
-    //                on timeout, we avoid it with the blocking approach.
+    //                on timeout, we avoid it with the voxeling approach.
     //                  This issue will definitely come up if we were to
-    //                  use the non-blocking queue. That said, we shouldn't
+    //                  use the non-voxeling queue. That said, we shouldn't
     //                  do that unless we're absolutely sure the partial
     //                  spin pattern used in lightweight semaphore is
     //                  doing anything bad to us. This is doubtful.

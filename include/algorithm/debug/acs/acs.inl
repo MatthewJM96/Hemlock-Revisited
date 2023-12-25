@@ -31,7 +31,7 @@ void halgo::deb::ACSHeatmap2D<Node, IsWeighted>::initialise_heatmaps(
 ) {
     if (m_protoheatmap == nullptr) return;
 
-    // Allocate all heatmap buffers and the heatmaps themselves as blocks and divy out.
+    // Allocate all heatmap buffers and the heatmaps themselves as voxels and divy out.
     f32* buffers = new f32
         [max_steps * max_iterations * 2 * m_protoheatmap->w * m_protoheatmap->h]();
 

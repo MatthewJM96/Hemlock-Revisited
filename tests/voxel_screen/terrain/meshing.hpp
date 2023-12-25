@@ -4,9 +4,9 @@
 namespace hemlock {
     namespace test {
         namespace voxel_screen {
-            struct TVS_BlockComparator {
+            struct TVS_VoxelComparator {
                 bool
-                operator()(const hvox::Block* source, const hvox::Block* target, hvox::BlockChunkPosition, hvox::Chunk*)
+                operator()(const hvox::Voxel* source, const hvox::Voxel* target, hvox::VoxelChunkPosition, hvox::Chunk*)
                     const {
                     return (source->id == target->id) && (source->id != 0);
                 }

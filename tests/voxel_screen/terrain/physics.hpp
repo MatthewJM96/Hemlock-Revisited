@@ -5,8 +5,8 @@ namespace hemlock {
     namespace test {
         namespace voxel_screen {
             struct TVS_VoxelShapeEvaluator {
-                btCollisionShape* operator()(hvox::Block b, btTransform&) const {
-                    if (b == hvox::Block{ 1 }) {
+                btCollisionShape* operator()(hvox::Voxel b, btTransform&) const {
+                    if (b == hvox::Voxel{ 1 }) {
                         return new btBoxShape(btVector3{ 0.5f, 0.5f, 0.5f });
                     }
                     return nullptr;

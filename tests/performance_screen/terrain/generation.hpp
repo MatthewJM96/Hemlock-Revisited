@@ -67,16 +67,16 @@ namespace hemlock {
 
                     {
                         std::unique_lock<std::shared_mutex> lock;
-                        auto blocks = chunk->blocks.get(lock);
+                        auto voxels = chunk->voxels.get(lock);
 
                         ui64 noise_idx = 0;
                         for (ui8 z = 0; z < CHUNK_LENGTH; ++z) {
                             for (ui8 y = 0; y < CHUNK_LENGTH; ++y) {
                                 for (ui8 x = 0; x < CHUNK_LENGTH; ++x) {
-                                    blocks[hvox::block_index(
+                                    voxels[hvox::voxel_index(
                                         { x, CHUNK_LENGTH - y - 1, z }
-                                    )] = data[noise_idx++] > 0 ? hvox::Block{ 1 } :
-                                                                 hvox::Block{ 0 };
+                                    )] = data[noise_idx++] > 0 ? hvox::Voxel{ 1 } :
+                                                                 hvox::Voxel{ 0 };
                                 }
                             }
                         }
@@ -142,16 +142,16 @@ namespace hemlock {
 
                     {
                         std::unique_lock<std::shared_mutex> lock;
-                        auto blocks = chunk->blocks.get(lock);
+                        auto voxels = chunk->voxels.get(lock);
 
                         ui64 noise_idx = 0;
                         for (ui8 z = 0; z < CHUNK_LENGTH; ++z) {
                             for (ui8 y = 0; y < CHUNK_LENGTH; ++y) {
                                 for (ui8 x = 0; x < CHUNK_LENGTH; ++x) {
-                                    blocks[hvox::block_index(
+                                    voxels[hvox::voxel_index(
                                         { x, CHUNK_LENGTH - y - 1, z }
-                                    )] = m_data[noise_idx++] > 0 ? hvox::Block{ 1 } :
-                                                                   hvox::Block{ 0 };
+                                    )] = m_data[noise_idx++] > 0 ? hvox::Voxel{ 1 } :
+                                                                   hvox::Voxel{ 0 };
                                 }
                             }
                         }

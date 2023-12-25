@@ -149,8 +149,8 @@ bool hvox::NavmeshOutlineRenderer::__calculate_outlines(NavmeshOutlines& navmesh
          boost::make_iterator_range(boost::vertices(chunk_navmesh->graph)))
     {
         ai::ChunkNavmeshNode node = chunk_navmesh->vertex_coord_map[vertex];
-        BlockWorldPosition   vert_pos
-            = block_world_position(node.chunk_pos, node.block_pos);
+        VoxelWorldPosition   vert_pos
+            = voxel_world_position(node.chunk_pos, node.voxel_pos);
 
         for (auto edge :
              boost::make_iterator_range(boost::out_edges(vertex, chunk_navmesh->graph)))
@@ -159,8 +159,8 @@ bool hvox::NavmeshOutlineRenderer::__calculate_outlines(NavmeshOutlines& navmesh
 
             ai::ChunkNavmeshNode target_node
                 = chunk_navmesh->vertex_coord_map[target_vertex];
-            BlockWorldPosition target_vert_pos
-                = block_world_position(target_node.chunk_pos, target_node.block_pos);
+            VoxelWorldPosition target_vert_pos
+                = voxel_world_position(target_node.chunk_pos, target_node.voxel_pos);
 
             tmp_outline_buffer.emplace_back(NavmeshOutlineData{
                 NavmeshOutlineDatum{static_cast<f32v3>(vert_pos)

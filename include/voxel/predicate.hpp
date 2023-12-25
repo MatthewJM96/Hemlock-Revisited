@@ -5,56 +5,56 @@
 
 namespace hemlock {
     namespace voxel {
-        struct Block;
+        struct Voxel;
         struct Chunk;
 
         /**
-         * @brief Defines a struct whose opeartor() determines if a block at a
+         * @brief Defines a struct whose opeartor() determines if a voxel at a
          * specified location satisfies a certain constraint.
          */
         template <typename ConstraintCandidate>
-        concept ActualBlockConstraint
-            = requires (ConstraintCandidate s, BlockChunkPosition p, Chunk* c) {
+        concept ActualVoxelConstraint
+            = requires (ConstraintCandidate s, VoxelChunkPosition p, Chunk* c) {
                   {
                       s.operator()(p, c)
                       } -> std::same_as<bool>;
               };
 
         /**
-         * @brief Defines a struct whose opeartor() determines if a block type satisfies
+         * @brief Defines a struct whose opeartor() determines if a voxel type satisfies
          * a certain constraint.
          */
         template <typename ConstraintCandidate>
-        concept IdealBlockConstraint
-            = requires (ConstraintCandidate s, const Block* b) {
+        concept IdealVoxelConstraint
+            = requires (ConstraintCandidate s, const Voxel* b) {
                   {
                       s.operator()(b)
                       } -> std::same_as<bool>;
               };
 
         /**
-         * @brief Defines a struct whose opeartor() determines if two blocks at
+         * @brief Defines a struct whose opeartor() determines if two voxels at
          * specified locations satisfy a certain constraint.
          */
         template <typename ComparatorCandidate>
-        concept ActualBlockComparator
-            = requires (ComparatorCandidate s, BlockChunkPosition p, Chunk* c) {
+        concept ActualVoxelComparator
+            = requires (ComparatorCandidate s, VoxelChunkPosition p, Chunk* c) {
                   {
                       s.operator()(p, p, c)
                       } -> std::same_as<bool>;
               };
 
         /**
-         * @brief Defines a struct whose opeartor() determines if a block at
-         * a specific location satisfies a constraint defined by a specific block type.
+         * @brief Defines a struct whose opeartor() determines if a voxel at
+         * a specific location satisfies a constraint defined by a specific voxel type.
          *
-         * The first block pointer is to the comparator block, while the second
-         * is the actual block at the specified position within the specified
+         * The first voxel pointer is to the comparator voxel, while the second
+         * is the actual voxel at the specified position within the specified
          * chunk.
          */
         template <typename ComparatorCandidate>
-        concept IdealBlockComparator = requires (
-            ComparatorCandidate s, const Block* b, BlockChunkPosition p, Chunk* c
+        concept IdealVoxelComparator = requires (
+            ComparatorCandidate s, const Voxel* b, VoxelChunkPosition p, Chunk* c
         ) {
                                            {
                                                s.operator()(b, b, p, c)

@@ -9,7 +9,7 @@ namespace hemlock {
         struct Chunk;
 
         /**
-         * @brief Defines a struct whose opeartor() sets the blocks of a chunk.
+         * @brief Defines a struct whose opeartor() sets the voxels of a chunk.
          */
         template <typename StrategyCandidate>
         concept ChunkMeshStrategy = requires (

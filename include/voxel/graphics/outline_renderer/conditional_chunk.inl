@@ -155,7 +155,7 @@ void hvox::ConditionalChunkOutlineRenderer<Pred>::draw(FrameTime) {
 
         if (should_draw) {
             m_chunk_outline_conditions[m_chunk_outline_condition_count++]
-                = OutlineData{ f32v3(block_world_position(chunk->position, 0)),
+                = OutlineData{ f32v3(voxel_world_position(chunk->position, 0)),
                                colour };
         }
     }

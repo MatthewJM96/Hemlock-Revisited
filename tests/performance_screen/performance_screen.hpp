@@ -62,8 +62,8 @@ public:
 
             // Prepare chunks.
 
-            hmem::Handle<hvox::ChunkBlockPager> block_pager
-                = hmem::make_handle<hvox::ChunkBlockPager>();
+            hmem::Handle<hvox::ChunkVoxelPager> voxel_pager
+                = hmem::make_handle<hvox::ChunkVoxelPager>();
             hmem::Handle<hvox::ChunkInstanceDataPager> instance_pager
                 = hmem::make_handle<hvox::ChunkInstanceDataPager>();
             hmem::Handle<hvox::ai::ChunkNavmeshPager> navmesh_pager
@@ -88,7 +88,7 @@ public:
                             {x, y, z}
                         };
                         chunks[idx]->init(
-                            chunks[idx], block_pager, instance_pager, navmesh_pager
+                            chunks[idx], voxel_pager, instance_pager, navmesh_pager
                         );
                     }
                 }
@@ -159,17 +159,17 @@ public:
                 ui32 rand_chunk_idx = static_cast<ui32>(std::floor(
                     hemlock::global_unitary_rand<f32>() * static_cast<f32>(iterations)
                 ));
-                ui32 rand_block_idx = static_cast<ui32>(std::floor(
+                ui32 rand_voxel_idx = static_cast<ui32>(std::floor(
                     hemlock::global_unitary_rand<f32>() * static_cast<f32>(CHUNK_VOLUME)
                 ));
 
                 std::shared_lock<std::shared_mutex> lock;
-                auto blocks = chunks[rand_chunk_idx]->blocks.get(lock);
+                auto voxels = chunks[rand_chunk_idx]->voxels.get(lock);
 
-                std::cout << "    - " << blocks[rand_block_idx].id << std::endl;
+                std::cout << "    - " << voxels[rand_voxel_idx].id << std::endl;
             }
 
-            const hvox::NaiveMeshStrategy<htest::performance_screen::BlockComparator>
+            const hvox::NaiveMeshStrategy<htest::performance_screen::VoxelComparator>
                 naive_mesh;
 
             // Do naive meshing profiling.
@@ -220,7 +220,7 @@ public:
                           << std::endl;
             }
 
-            const hvox::GreedyMeshStrategy<htest::performance_screen::BlockComparator>
+            const hvox::GreedyMeshStrategy<htest::performance_screen::VoxelComparator>
                 greedy_mesh;
 
             // Do greedy meshing profiling.
@@ -276,7 +276,7 @@ public:
             }
 
             const hvox::ai::NaiveNavmeshStrategy<
-                htest::performance_screen::BlockSolidCheck>
+                htest::performance_screen::VoxelSolidCheck>
                 naive_navmesh;
 
             // Do naive navmesh profiling.
@@ -351,7 +351,7 @@ public:
             }
 
             {
-                size_t allocated_bytes = block_pager->allocated_bytes()
+                size_t allocated_bytes = voxel_pager->allocated_bytes()
                                          + instance_pager->allocated_bytes()
                                          + chunk_allocator.allocated_bytes();
                 size_t allocated_MB = allocated_bytes / 1000000;
@@ -375,7 +375,7 @@ public:
             std::cout << "Generation profiling complete." << std::endl;
 
             delete[] chunks;
-            block_pager->dispose();
+            voxel_pager->dispose();
             instance_pager->dispose();
 
             m_do_profile.store(false);

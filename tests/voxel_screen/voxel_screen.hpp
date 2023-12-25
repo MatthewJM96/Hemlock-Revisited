@@ -415,7 +415,7 @@ public:
             } },
             hvox::ChunkTaskBuilder{ []() {
                 return new hvox::ChunkMeshTask<
-                    hvox::GreedyMeshStrategy<htest::voxel_screen::TVS_BlockComparator>>(
+                    hvox::GreedyMeshStrategy<htest::voxel_screen::TVS_VoxelComparator>>(
                 );
             } }
         );
@@ -464,14 +464,14 @@ public:
         handle_mouse_button = hemlock::Subscriber<hui::MouseButtonEvent>{
             [&](hemlock::Sender, hui::MouseButtonEvent ev) {
                 if (ev.button_id == static_cast<ui8>(hui::MouseButton::LEFT)) {
-                    hvox::BlockWorldPosition position;
+                    hvox::VoxelWorldPosition position;
                     f32                      distance;
 
-                    if (hvox::Ray::cast_to_block_before(
+                    if (hvox::Ray::cast_to_voxel_before(
                             m_camera.position(),
                             m_camera.direction(),
                             m_chunk_grid,
-                            hvox::Block{ 1 },
+                            hvox::Voxel{ 1 },
                             10,
                             position,
                             distance
@@ -481,10 +481,10 @@ public:
                             = m_chunk_grid->chunk(hvox::chunk_grid_position(position));
 
                         if (chunk != nullptr) {
-                            hvox::set_block(
+                            hvox::set_voxel(
                                 chunk,
-                                hvox::block_chunk_position(position),
-                                hvox::Block{ 1 }
+                                hvox::voxel_chunk_position(position),
+                                hvox::Voxel{ 1 }
                             );
                         }
                     }

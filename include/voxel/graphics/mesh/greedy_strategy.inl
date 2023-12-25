@@ -1,16 +1,16 @@
 #include "graphics/mesh.h"
-#include "voxel/block.hpp"
 #include "voxel/chunk/chunk.h"
 #include "voxel/chunk/grid.h"
 #include "voxel/chunk/setter.hpp"
+#include "voxel/voxel.hpp"
 
-template <hvox::IdealBlockComparator MeshComparator>
+template <hvox::IdealVoxelComparator MeshComparator>
 bool hvox::GreedyMeshStrategy<
     MeshComparator>::can_run(hmem::Handle<ChunkGrid>, hmem::Handle<Chunk>) const {
     return true;
 }
 
-template <hvox::IdealBlockComparator MeshComparator>
+template <hvox::IdealVoxelComparator MeshComparator>
 void hvox::GreedyMeshStrategy<MeshComparator>::operator()(
     hmem::Handle<ChunkGrid>, hmem::Handle<Chunk> chunk
 ) const {
@@ -26,10 +26,10 @@ void hvox::GreedyMeshStrategy<MeshComparator>::operator()(
     //                      further improve performance and also remove the difficulty
     //                      of the above TODO.
 
-    std::shared_lock<std::shared_mutex> block_lock;
-    auto                                blocks = chunk->blocks.get(block_lock);
+    std::shared_lock<std::shared_mutex> voxel_lock;
+    auto                                voxels = chunk->voxels.get(voxel_lock);
 
-    std::queue<BlockChunkPosition> queued_for_visit;
+    std::queue<VoxelChunkPosition> queued_for_visit;
 
     bool* visited = new bool[CHUNK_VOLUME]{ false };
 
@@ -38,17 +38,17 @@ void hvox::GreedyMeshStrategy<MeshComparator>::operator()(
     std::unique_lock<std::shared_mutex> mesh_lock;
     auto&                               mesh = chunk->instance.get(mesh_lock);
 
-    const Block*       source = &blocks[0];
-    BlockChunkPosition start  = BlockChunkPosition{ 0 };
-    BlockChunkPosition end    = BlockChunkPosition{ 0 };
-    BlockChunkPosition target_pos;
+    const Voxel*       source = &voxels[0];
+    VoxelChunkPosition start  = VoxelChunkPosition{ 0 };
+    VoxelChunkPosition end    = VoxelChunkPosition{ 0 };
+    VoxelChunkPosition target_pos;
 
-    // Determines if two blocks are of the same mesheable kind.
+    // Determines if two voxels are of the same mesheable kind.
     const MeshComparator are_same_meshable{};
 
-    auto add_border_blocks_to_queue
-        = [&](BlockChunkPosition _start, BlockChunkPosition _end) {
-              // Add blocks adjacent to X-face to queue.
+    auto add_border_voxels_to_queue
+        = [&](VoxelChunkPosition _start, VoxelChunkPosition _end) {
+              // Add voxels adjacent to X-face to queue.
               if (_end.x != CHUNK_LENGTH - 1) {
                   for (ui32 z = _start.z; z <= _end.z; ++z) {
                       for (ui32 y = _start.y; y <= _end.y; ++y) {
@@ -56,7 +56,7 @@ void hvox::GreedyMeshStrategy<MeshComparator>::operator()(
                       }
                   }
               }
-              // Add blocks adjacent to Z-face to queue.
+              // Add voxels adjacent to Z-face to queue.
               if (_end.z != CHUNK_LENGTH - 1) {
                   for (ui32 x = _start.x; x <= _end.x; ++x) {
                       for (ui32 y = _start.y; y <= _end.y; ++y) {
@@ -64,7 +64,7 @@ void hvox::GreedyMeshStrategy<MeshComparator>::operator()(
                       }
                   }
               }
-              // Add blocks adjacent to Y-face to queue.
+              // Add voxels adjacent to Y-face to queue.
               if (_end.y != CHUNK_LENGTH - 1) {
                   for (ui32 x = _start.x; x <= _end.x; ++x) {
                       for (ui32 z = _start.z; z <= _end.z; ++z) {
@@ -76,8 +76,8 @@ void hvox::GreedyMeshStrategy<MeshComparator>::operator()(
 
     Chunk* raw_chunk_ptr = chunk.get();
 
-    bool blocks_to_consider = true;
-    while (blocks_to_consider) {
+    bool voxels_to_consider = true;
+    while (voxels_to_consider) {
 process_new_source:
         bool found_meshable = are_same_meshable(source, source, {}, raw_chunk_ptr);
 
@@ -87,30 +87,30 @@ process_new_source:
 
         target_pos = start;
         for (; target_pos.x < CHUNK_LENGTH; ++target_pos.x) {
-            auto target_idx = block_index(target_pos);
+            auto target_idx = voxel_index(target_pos);
 
-            const Block* target = &blocks[target_idx];
-            // We are scanning for a new meshable source block.
+            const Voxel* target = &voxels[target_idx];
+            // We are scanning for a new meshable source voxel.
             if (!found_meshable) {
-                // Found a meshable source block that hasn't already
+                // Found a meshable source voxel that hasn't already
                 // been visited.
                 if (are_same_meshable(target, target, target_pos, raw_chunk_ptr)
                     && !visited[target_idx])
                 {
-                    add_border_blocks_to_queue(start, target_pos);
+                    add_border_voxels_to_queue(start, target_pos);
 
                     source = target;
                     start  = target_pos;
                     end    = target_pos;
 
                     goto process_new_source;
-                    // Current block we're looking at is either already visited or
-                    // not an meshable source block. Set it as visited.
+                    // Current voxel we're looking at is either already visited or
+                    // not an meshable source voxel. Set it as visited.
                 } else {
                     visited[target_idx] = true;
                     continue;
                 }
-                // We are scanning for the extent of an meshable source block.
+                // We are scanning for the extent of an meshable source voxel.
             } else {
                 if (!are_same_meshable(source, target, target_pos, raw_chunk_ptr)
                     || visited[target_idx])
@@ -125,17 +125,17 @@ process_new_source:
         // If we scanned all the way, we won't have set end component, so set it.
         if (target_pos.x == CHUNK_LENGTH) end.x = CHUNK_LENGTH - 1;
 
-        // If we were scanning for the extent of an meshable source block,
-        // we now set the visited status of scanned blocks.
+        // If we were scanning for the extent of an meshable source voxel,
+        // we now set the visited status of scanned voxels.
         if (found_meshable) {
-            set_per_block_data(visited, start, end, true);
+            set_per_voxel_data(visited, start, end, true);
         }
 
         /***************\
          * Scan Z - 2D *
         \***************/
 
-        target_pos = start + BlockChunkPosition{ 0, 0, 1 };
+        target_pos = start + VoxelChunkPosition{ 0, 0, 1 };
         for (; target_pos.z < CHUNK_LENGTH; ++target_pos.z) {
             bool done = false;
 
@@ -144,30 +144,30 @@ process_new_source:
             // we reject that Z coord from being in the current extent and start
             // the next scan.
             for (target_pos.x = start.x; target_pos.x <= end.x; ++target_pos.x) {
-                auto target_idx = block_index(target_pos);
+                auto target_idx = voxel_index(target_pos);
 
-                const Block* target = &blocks[target_idx];
-                // We are scanning for a new meshable source block.
+                const Voxel* target = &voxels[target_idx];
+                // We are scanning for a new meshable source voxel.
                 if (!found_meshable) {
-                    // Found a meshable source block that hasn't already
+                    // Found a meshable source voxel that hasn't already
                     // been visited.
                     if (are_same_meshable(target, target, target_pos, raw_chunk_ptr)
                         && !visited[target_idx])
                     {
-                        add_border_blocks_to_queue(start, target_pos);
+                        add_border_voxels_to_queue(start, target_pos);
 
                         source = target;
                         start  = target_pos;
                         end    = target_pos;
 
                         goto process_new_source;
-                        // Current block we're looking at is either already visited or
-                        // not an meshable source block. Set it as visited.
+                        // Current voxel we're looking at is either already visited or
+                        // not an meshable source voxel. Set it as visited.
                     } else {
                         visited[target_idx] = true;
                         continue;
                     }
-                    // We are scanning for the extent of an meshable source block.
+                    // We are scanning for the extent of an meshable source voxel.
                 } else if (!are_same_meshable(source, target, target_pos, raw_chunk_ptr) || visited[target_idx])
                 {
                     end.z = target_pos.z - 1;
@@ -183,11 +183,11 @@ process_new_source:
         // If we scanned all the way, we won't have set end component, so set it.
         if (target_pos.z == CHUNK_LENGTH) end.z = CHUNK_LENGTH - 1;
 
-        // If we were scanning for the extent of an meshable source block,
-        // we now set the visited status of scanned blocks.
+        // If we were scanning for the extent of an meshable source voxel,
+        // we now set the visited status of scanned voxels.
         if (found_meshable) {
-            set_per_block_data(
-                visited, start + BlockChunkPosition{ 0, 0, 1 }, end, true
+            set_per_voxel_data(
+                visited, start + VoxelChunkPosition{ 0, 0, 1 }, end, true
             );
         }
 
@@ -195,7 +195,7 @@ process_new_source:
          * Scan Y - 3D *
         \***************/
 
-        target_pos = start + BlockChunkPosition{ 0, 1, 0 };
+        target_pos = start + VoxelChunkPosition{ 0, 1, 0 };
         for (; target_pos.y < CHUNK_LENGTH; ++target_pos.y) {
             bool done = false;
 
@@ -205,32 +205,32 @@ process_new_source:
             // current extent and start the next scan.
             for (target_pos.z = start.z; target_pos.z <= end.z; ++target_pos.z) {
                 for (target_pos.x = start.x; target_pos.x <= end.x; ++target_pos.x) {
-                    auto target_idx = block_index(target_pos);
+                    auto target_idx = voxel_index(target_pos);
 
-                    const Block* target = &blocks[target_idx];
-                    // We are scanning for a new meshable source block.
+                    const Voxel* target = &voxels[target_idx];
+                    // We are scanning for a new meshable source voxel.
                     if (!found_meshable) {
-                        // Found a meshable source block that hasn't already
+                        // Found a meshable source voxel that hasn't already
                         // been visited.
                         if (are_same_meshable(target, target, target_pos, raw_chunk_ptr)
                             && !visited[target_idx])
                         {
-                            add_border_blocks_to_queue(start, target_pos);
+                            add_border_voxels_to_queue(start, target_pos);
 
                             source = target;
                             start  = target_pos;
                             end    = target_pos;
 
                             goto process_new_source;
-                            // Current block we're looking at is either already
-                            // visited or not an meshable source block. Set it as
+                            // Current voxel we're looking at is either already
+                            // visited or not an meshable source voxel. Set it as
                             // visited.
                         } else {
                             visited[target_idx] = true;
                             continue;
                         }
                         // We are scanning for the extent of an meshable source
-                        // block.
+                        // voxel.
                     } else if (!are_same_meshable(source, target, target_pos, raw_chunk_ptr) || visited[target_idx])
                     {
                         end.y = target_pos.y - 1;
@@ -249,13 +249,13 @@ process_new_source:
         // If we scanned all the way, we won't have set end component, so set it.
         if (target_pos.y == CHUNK_LENGTH) end.y = CHUNK_LENGTH - 1;
 
-        add_border_blocks_to_queue(start, end);
+        add_border_voxels_to_queue(start, end);
 
-        // If we were scanning for the extent of an meshable source block,
-        // we now set the visited status of scanned blocks.
+        // If we were scanning for the extent of an meshable source voxel,
+        // we now set the visited status of scanned voxels.
         if (found_meshable) {
-            set_per_block_data(
-                visited, start + BlockChunkPosition{ 0, 1, 0 }, end, true
+            set_per_voxel_data(
+                visited, start + VoxelChunkPosition{ 0, 1, 0 }, end, true
             );
         }
 
@@ -264,9 +264,9 @@ process_new_source:
         \*******************/
 
         if (found_meshable) {
-            BlockWorldPosition start_mesh
-                = block_world_position(chunk->position, start);
-            BlockWorldPosition end_mesh = block_world_position(chunk->position, end);
+            VoxelWorldPosition start_mesh
+                = voxel_world_position(chunk->position, start);
+            VoxelWorldPosition end_mesh = voxel_world_position(chunk->position, end);
 
             f32v3 scale_of_cuboid
                 = f32v3{ end_mesh } - f32v3{ start_mesh } + f32v3{ 1.0f };
@@ -278,25 +278,25 @@ process_new_source:
          * Pump Queue  *
         \***************/
 
-        // If we have got no more blocks to visit, then we are done.
+        // If we have got no more voxels to visit, then we are done.
         if (queued_for_visit.empty()) break;
 
-        // Pump queue for first block that we have not yet visited.
+        // Pump queue for first voxel that we have not yet visited.
         do {
             start  = queued_for_visit.front();
             end    = start;
-            source = &blocks[block_index(start)];
+            source = &voxels[voxel_index(start)];
 
             queued_for_visit.pop();
 
-            // If we've found a block we have yet to visit, process
+            // If we've found a voxel we have yet to visit, process
             // it next.
-            if (!visited[block_index(start)]) break;
+            if (!visited[voxel_index(start)]) break;
 
-            // If we have emtpied the queue without finding a block
+            // If we have emtpied the queue without finding a voxel
             // we have yet to visit, then we are done.
             if (queued_for_visit.empty()) {
-                blocks_to_consider = false;
+                voxels_to_consider = false;
                 break;
             }
         } while (true);

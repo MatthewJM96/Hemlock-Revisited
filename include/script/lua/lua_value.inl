@@ -110,9 +110,9 @@ ui32 hscript::lua::LuaValue<
          * U(V::*)(...) *
         \****************/
     } else if constexpr (std::is_member_function_pointer<Type>()) {
-        void* block = lua_newuserdata(state, sizeof(Type));
+        void* voxel = lua_newuserdata(state, sizeof(Type));
 
-        std::memcpy(block, reinterpret_cast<void*>(&value), sizeof(Type));
+        std::memcpy(voxel, reinterpret_cast<void*>(&value), sizeof(Type));
     } else {
         debug_printf("Trying to push with an unsupported type.");
     }
@@ -261,8 +261,7 @@ Type hscript::lua::LuaValue<
         // that element and store in tmp for return.
         for (ui32 idx = value_count(); idx != 0; --idx) {
             tmp[idx - 1]
-                = LuaValue<decltype(Type{}[0])>::template __do_retrieve<
-                    RemoveValue>(
+                = LuaValue<decltype(Type{}[0])>::template __do_retrieve<RemoveValue>(
                     state, index + static_cast<i32>(idx) - value_count()
                 );
         }
@@ -306,16 +305,12 @@ Type hscript::lua::LuaValue<
          * String *
         \**********/
     } else if constexpr (std::is_same<Type, std::string>()) {
-        value = std::string(
-            lua_tostring(state, index), lua_strlen(state, index)
-        );
+        value = std::string(lua_tostring(state, index), lua_strlen(state, index));
 
         /************\
          * C-String *
         \************/
-    } else if constexpr (std::is_same<
-                                typename std::remove_const<Type>::type,
-                                char*>())
+    } else if constexpr (std::is_same<typename std::remove_const<Type>::type, char*>())
     {
         auto len = lua_strlen(state, index);
         if (len != 0) {
@@ -330,9 +325,7 @@ Type hscript::lua::LuaValue<
         using Underlying = typename std::underlying_type<Type>::type;
 
         value = static_cast<Type>(
-            LuaValue<Underlying>::template __do_retrieve<false>(
-                state, index
-            )
+            LuaValue<Underlying>::template __do_retrieve<false>(state, index)
         );
 
         /*********\

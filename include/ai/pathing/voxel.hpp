@@ -28,7 +28,7 @@ namespace hemlock {
                 //                solution for this, but implies some gameplay
                 //                limitations as this is sharing knowledge between
                 //                agents. Inevitably test, but keep in mind caching
-                //                opportunities such as in identifying valid blocks to
+                //                opportunities such as in identifying valid voxels to
                 //                step to (perhaps cahce by building up graphs, one
                 //                per evaluation strategy, that can be referred to and
                 //                thus skip the step search stage of pathing).
@@ -51,12 +51,12 @@ namespace hemlock {
                                                  };
 
                 template <StepEvaluationStrategy... Strategies>
-                bool is_valid_step(BlockWorldPosition);
+                bool is_valid_step(VoxelWorldPosition);
 
                 template <StepEvaluationStrategy... Strategies>
                 void find_valid_steps(
-                    BlockWorldPosition step_from,
-                    OUT std::vector<BlockWorldPosition>& valid_steps,
+                    VoxelWorldPosition step_from,
+                    OUT std::vector<VoxelWorldPosition>& valid_steps,
                     hmem::Handle<ChunkGrid>              chunk_grid
                 );
             }  // namespace Voxel

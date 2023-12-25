@@ -8,7 +8,7 @@ namespace hemlock {
         struct Chunk;
 
         namespace ai {
-            template <hvox::IdealBlockConstraint IsSolid>
+            template <hvox::IdealVoxelConstraint IsSolid>
             struct NaiveNavmeshStrategy {
                 void do_bulk(
                     hmem::Handle<ChunkGrid> chunk_grid, hmem::Handle<Chunk> chunk

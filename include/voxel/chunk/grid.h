@@ -143,7 +143,7 @@ namespace hemlock {
              * pending tasks for this chunk and releasing memory
              * associated with it.
              *
-             * NOTE: this is a non-blocking action, and the chunk
+             * NOTE: this is a non-voxeling action, and the chunk
              * will only release memory once all active queries and
              * actions are completed.
              *
@@ -194,7 +194,7 @@ namespace hemlock {
             void establish_chunk_neighbours(hmem::Handle<Chunk> chunk);
 
             Delegate<void(Sender)>                   handle_chunk_load;
-            Delegate<bool(Sender, BlockChangeEvent)> handle_block_change;
+            Delegate<bool(Sender, VoxelChangeEvent)> handle_voxel_change;
 
             ChunkTaskBuilder m_build_load_or_generate_task, m_build_mesh_task,
                 m_build_navmesh_task;
@@ -202,7 +202,7 @@ namespace hemlock {
 
             ChunkAllocator m_chunk_allocator;
 
-            hmem::Handle<ChunkBlockPager>        m_block_pager;
+            hmem::Handle<ChunkVoxelPager>        m_voxel_pager;
             hmem::Handle<ChunkInstanceDataPager> m_instance_pager;
             hmem::Handle<ai::ChunkNavmeshPager>  m_navmesh_pager;
 

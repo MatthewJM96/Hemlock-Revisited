@@ -55,7 +55,7 @@ namespace hemlock {
              * @brief Initialises chunk renderer.
              *
              * @param page_size The number of instances to be stored per
-             * page in units of half a block-volume of a chunk.
+             * page in units of half a voxel-volume of a chunk.
              * @param max_unused_pages The maximum number of pages that
              * will be retained that are not being used.
              */
@@ -66,13 +66,13 @@ namespace hemlock {
              * @brief Set the page size.
              *
              * @param page_size The number of instances to be stored per
-             * page in units of half a block-volume of a chunk.
+             * page in units of half a voxel-volume of a chunk.
              */
             void set_page_size(ui32 page_size);
 
             ui32 page_size() const { return m_page_size; };
 
-            ui32 block_page_size() const { return m_page_size * CHUNK_VOLUME / 2; };
+            ui32 voxel_page_size() const { return m_page_size * CHUNK_VOLUME / 2; };
 
             void update(FrameTime time);
             void draw(FrameTime time);
@@ -87,7 +87,7 @@ namespace hemlock {
              */
             void add_chunk(hmem::WeakHandle<Chunk> handle);
         protected:
-            static hg::MeshHandles block_mesh_handles;
+            static hg::MeshHandles voxel_mesh_handles;
 
             Subscriber<> handle_chunk_mesh_change;
             Subscriber<> handle_chunk_unload;

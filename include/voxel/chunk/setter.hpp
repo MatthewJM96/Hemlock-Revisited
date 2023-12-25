@@ -1,72 +1,72 @@
 #ifndef __hemlock_voxel_chunk_setter_hpp
 #define __hemlock_voxel_chunk_setter_hpp
 
-#include "voxel/block.hpp"
 #include "voxel/coordinate_system.h"
+#include "voxel/voxel.hpp"
 
 namespace hemlock {
     namespace voxel {
         struct Chunk;
 
         /**
-         * @brief Set the block at the given position in the given chunk.
+         * @brief Set the voxel at the given position in the given chunk.
          *
          * NOTE: This call is unsafe! Only call from a context where the corresponding
          * chunk entity is guaranteed to remain alive until the call returns.
          *
-         * @param chunk The chunk in which to set the block.
-         * @param position The position at which to set the block.
-         * @param block The block to set.
+         * @param chunk The chunk in which to set the voxel.
+         * @param position The position at which to set the voxel.
+         * @param voxel The voxel to set.
          *
-         * @return True if the block was set, false otherwise.
+         * @return True if the voxel was set, false otherwise.
          */
         bool
-        set_block(hmem::Handle<Chunk> chunk, BlockChunkPosition position, Block block);
+        set_voxel(hmem::Handle<Chunk> chunk, VoxelChunkPosition position, Voxel voxel);
 
         /**
          * @brief Set all points in a rectangular cuboid of the passed in chunk to a
-         * specific block.
+         * specific voxel.
          *
          * NOTE: This call is unsafe! Only call from a context where the corresponding
          * chunk entity is guaranteed to remain alive until the call returns.
          *
-         * @param chunk The chunk in which to set the block.
-         * @param start The starting position of the range to set blocks for.
-         * @param end The end position of the range to set blocks for.
-         * @param block The block to set.
+         * @param chunk The chunk in which to set the voxel.
+         * @param start The starting position of the range to set voxels for.
+         * @param end The end position of the range to set voxels for.
+         * @param voxel The voxel to set.
          *
-         * @return True if the blocks were set, false otherwise.
+         * @return True if the voxels were set, false otherwise.
          */
-        bool set_blocks(
+        bool set_voxels(
             hmem::Handle<Chunk> chunk,
-            BlockChunkPosition  start,
-            BlockChunkPosition  end,
-            Block               block
+            VoxelChunkPosition  start,
+            VoxelChunkPosition  end,
+            Voxel               voxel
         );
 
         /**
          * @brief Set all points in a rectangular cuboid of the
-         * passed in chunk to each block in a buffer. Note, the
+         * passed in chunk to each voxel in a buffer. Note, the
          * buffer is assumed to go in x, then y, then z starting
          * from the near bottom left of the chunk.
          *
-         * @param chunk The chunk in which to set the block.
-         * @param start The starting position of the range to set blocks for.
-         * @param end The end position of the range to set blocks for.
-         * @param blocks The blocks to set.
+         * @param chunk The chunk in which to set the voxel.
+         * @param start The starting position of the range to set voxels for.
+         * @param end The end position of the range to set voxels for.
+         * @param voxels The voxels to set.
          *
-         * @return True if the blocks were set, false otherwise.
+         * @return True if the voxels were set, false otherwise.
          */
-        bool set_blocks(
+        bool set_voxels(
             hmem::Handle<Chunk> chunk,
-            BlockChunkPosition  start,
-            BlockChunkPosition  end,
-            Block*              blocks
+            VoxelChunkPosition  start,
+            VoxelChunkPosition  end,
+            Voxel*              voxels
         );
 
         /**
          * @brief Sets elements of the given buffer that lie within the range of the
-         * start and end block positions specified to the data value provided.
+         * start and end voxel positions specified to the data value provided.
          *
          * NOTE: This call is unsafe! Only call from a context where the corresponding
          * buffer is guaranteed to remain alive until the call returns.
@@ -78,16 +78,16 @@ namespace hemlock {
          * @param data The data to set.
          */
         template <typename DataType>
-        void set_per_block_data(
+        void set_per_voxel_data(
             DataType*                buffer,
-            hvox::BlockChunkPosition start,
-            hvox::BlockChunkPosition end,
+            hvox::VoxelChunkPosition start,
+            hvox::VoxelChunkPosition end,
             DataType                 data
         );
 
         /**
          * @brief Sets elements of the given buffer that lie within the range of the
-         * start and end block positions specified to the data value provided.
+         * start and end voxel positions specified to the data value provided.
          *
          * NOTE: This call is unsafe! Only call from a context where the corresponding
          * buffer is guaranteed to remain alive until the call returns.
@@ -99,10 +99,10 @@ namespace hemlock {
          * @param data Pointer to the data to set.
          */
         template <typename DataType>
-        void set_per_block_data(
+        void set_per_voxel_data(
             DataType*                buffer,
-            hvox::BlockChunkPosition start,
-            hvox::BlockChunkPosition end,
+            hvox::VoxelChunkPosition start,
+            hvox::VoxelChunkPosition end,
             DataType*                data
         );
     }  // namespace voxel

@@ -1,15 +1,15 @@
-#ifndef __hemlock_voxel_graphics_outline_renderer_block_h
-#define __hemlock_voxel_graphics_outline_renderer_block_h
+#ifndef __hemlock_voxel_graphics_outline_renderer_voxel_h
+#define __hemlock_voxel_graphics_outline_renderer_voxel_h
 
 #include "state.hpp"
 
 namespace hemlock {
     namespace voxel {
-        class BlockOutlineRenderer {
+        class VoxelOutlineRenderer {
         public:
-            BlockOutlineRenderer();
+            VoxelOutlineRenderer();
 
-            ~BlockOutlineRenderer() { /* Empty. */
+            ~VoxelOutlineRenderer() { /* Empty. */
             }
 
             /**
@@ -38,14 +38,14 @@ namespace hemlock {
 
             bool remove_outline(size_t outline_id);
         protected:
-            static hg::MeshHandles   block_mesh_handles;
+            static hg::MeshHandles   voxel_mesh_handles;
             static std::atomic<ui32> ref_count;
 
-            using BlockOutlines    = std::vector<OutlineData>;
-            using BlockOutlineRefs = std::unordered_map<size_t, size_t>;
+            using VoxelOutlines    = std::vector<OutlineData>;
+            using VoxelOutlineRefs = std::unordered_map<size_t, size_t>;
 
-            BlockOutlines    m_block_outlines;
-            BlockOutlineRefs m_block_outline_refs;
+            VoxelOutlines    m_voxel_outlines;
+            VoxelOutlineRefs m_voxel_outline_refs;
             size_t           m_next_outline_id;
 
             size_t m_last_outline_count;
@@ -53,9 +53,9 @@ namespace hemlock {
             GLuint m_instance_vbo;
         };
 
-        const ui32 BLOCK_OUTLINE_VERTEX_COUNT = 24;
+        const ui32 VOXEL_OUTLINE_VERTEX_COUNT = 24;
 
-        static const OutlineVertex BLOCK_OUTLINE_VERTICES[BLOCK_OUTLINE_VERTEX_COUNT]
+        static const OutlineVertex VOXEL_OUTLINE_VERTICES[VOXEL_OUTLINE_VERTEX_COUNT]
             = { { { 0.0f, 0.0f, 0.0f } }, { { 0.0f, 1.0f, 0.0f } },
                 { { 0.0f, 0.0f, 0.0f } }, { { 0.0f, 0.0f, 1.0f } },
                 { { 0.0f, 0.0f, 0.0f } }, { { 1.0f, 0.0f, 0.0f } },
@@ -69,10 +69,10 @@ namespace hemlock {
                 { { 0.0f, 1.0f, 1.0f } }, { { 0.0f, 0.0f, 1.0f } },
                 { { 1.0f, 0.0f, 0.0f } }, { { 1.0f, 1.0f, 0.0f } } };
 
-        static const OutlineMeshData BLOCK_OUTLINE_MESH
-            = { &BLOCK_OUTLINE_VERTICES[0], BLOCK_OUTLINE_VERTEX_COUNT };
+        static const OutlineMeshData VOXEL_OUTLINE_MESH
+            = { &VOXEL_OUTLINE_VERTICES[0], VOXEL_OUTLINE_VERTEX_COUNT };
     }  // namespace voxel
 }  // namespace hemlock
 namespace hvox = hemlock::voxel;
 
-#endif  // __hemlock_voxel_graphics_outline_renderer_block_h
+#endif  // __hemlock_voxel_graphics_outline_renderer_voxel_h

@@ -80,35 +80,35 @@ namespace hemlock {
 
                     {
                         std::unique_lock<std::shared_mutex> lock;
-                        auto blocks = chunk->blocks.get(lock);
+                        auto voxels = chunk->voxels.get(lock);
 
                         ui64 noise_idx = 0;
                         for (ui8 z = 0; z < CHUNK_LENGTH; ++z) {
                             for (ui8 y = 0; y < CHUNK_LENGTH; ++y) {
                                 for (ui8 x = 0; x < CHUNK_LENGTH; ++x) {
-                                    blocks[hvox::block_index(
+                                    voxels[hvox::voxel_index(
                                         { x, CHUNK_LENGTH - y - 1, z }
-                                    )] = data[noise_idx++] > 0 ? hvox::Block{ 1 } :
-                                                                 hvox::Block{ 0 };
+                                    )] = data[noise_idx++] > 0 ? hvox::Voxel{ 1 } :
+                                                                 hvox::Voxel{ 0 };
                                 }
                             }
                         }
                     }
 
-                    // hvox::set_blocks(chunk, hvox::BlockChunkPosition{0},
-                    // hvox::BlockChunkPosition{CHUNK_LENGTH - 1}, hvox::Block{0});
+                    // hvox::set_voxels(chunk, hvox::VoxelChunkPosition{0},
+                    // hvox::VoxelChunkPosition{CHUNK_LENGTH - 1}, hvox::Voxel{0});
                     // ui64 noise_idx = 0;
                     // for (ui8 z = 0; z < CHUNK_LENGTH; ++z) {
                     //     for (ui8 x = 0; x < CHUNK_LENGTH; ++x) {
-                    //         i32 y = hvox::block_world_position(chunk->position,
+                    //         i32 y = hvox::voxel_world_position(chunk->position,
                     //         0).y;
 
                     //         i32 height = -1 * static_cast<i32>(data[noise_idx++]);
                     //         // debug_printf("Height at (%d, %d): %d\n", x, z,
                     //         height); if (y >= height) continue;
 
-                    //         hvox::set_blocks(chunk, {x, 0, z}, {x, glm::min(height
-                    //         - y, CHUNK_LENGTH - 1), z}, hvox::Block{1});
+                    //         hvox::set_voxels(chunk, {x, 0, z}, {x, glm::min(height
+                    //         - y, CHUNK_LENGTH - 1), z}, hvox::Voxel{1});
                     //     }
                     // }
 

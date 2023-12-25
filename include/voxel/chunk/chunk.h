@@ -5,17 +5,17 @@
 #include "timing.h"
 #include "voxel/ai/navmesh/navmesh_manager.h"
 #include "voxel/ai/navmesh/state.hpp"
-#include "voxel/block.hpp"
-#include "voxel/block_manager.h"
 #include "voxel/chunk/constants.hpp"
-#include "voxel/chunk/event/block_change.hpp"
-#include "voxel/chunk/event/bulk_block_change.hpp"
+#include "voxel/chunk/event/bulk_voxel_change.hpp"
 #include "voxel/chunk/event/lod_change.hpp"
 #include "voxel/chunk/event/render_distance_change.hpp"
+#include "voxel/chunk/event/voxel_change.hpp"
 #include "voxel/chunk/state.hpp"
 #include "voxel/coordinate_system.h"
 #include "voxel/graphics/mesh/instance_manager.h"
 #include "voxel/task.hpp"
+#include "voxel/voxel.hpp"
+#include "voxel/voxel_manager.h"
 
 namespace hemlock {
     namespace voxel {
@@ -28,7 +28,7 @@ namespace hemlock {
 
             void init(
                 hmem::WeakHandle<Chunk>              self,
-                hmem::Handle<ChunkBlockPager>        block_pager,
+                hmem::Handle<ChunkVoxelPager>        voxel_pager,
                 hmem::Handle<ChunkInstanceDataPager> instance_data_pager,
                 hmem::Handle<ai::ChunkNavmeshPager>  navmesh_pager
             );
@@ -40,7 +40,7 @@ namespace hemlock {
             ChunkGridPosition position;
             Neighbours        neighbours;
 
-            BlockManager blocks;
+            VoxelManager voxels;
 
             // TODO(Matthew): navmesh wants to probably be paged in some amount of bulk
             //                and divied out, that or we need to stack allocate.
@@ -59,8 +59,8 @@ namespace hemlock {
                     above_and_across_back;
             } navmesh_stitch;
 
-            CancellableEvent<BlockChangeEvent>     on_block_change;
-            CancellableEvent<BulkBlockChangeEvent> on_bulk_block_change;
+            CancellableEvent<VoxelChangeEvent>     on_voxel_change;
+            CancellableEvent<BulkVoxelChangeEvent> on_bulk_voxel_change;
 
             // NOTE(Matthew): These events, at least on_mesh_change, can be
             //                called from multiple threads. Events are NOT

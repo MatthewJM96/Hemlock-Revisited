@@ -6,33 +6,33 @@ namespace hemlock {
         /// Spaces:
         // World-space: any space in which the player interacts directly.
         //              -> contains a grid-space of chunks, which themselves contain a
-        //              chunk-space of blocks.
+        //              chunk-space of voxels.
         // Grid-space:  discrete space with units of chunk width (i.e. each chunk is
         // at an integer coordinate).
         //              -> used to reference locations of chunks in the world relative
         //              to one another.
-        // Chunk-space: discrete space with units of block width (i.e. each block is
+        // Chunk-space: discrete space with units of voxel width (i.e. each voxel is
         // at an integer coordinate).
-        //              -> used to reference locations of blocks in a chunk relative
+        //              -> used to reference locations of voxels in a chunk relative
         //              to one another.
 
         /**
-         * @brief Index into array of blocks that this block resides at.
+         * @brief Index into array of voxels that this voxel resides at.
          */
-        using BlockIndex = ui32;
+        using VoxelIndex = ui32;
 
         /**
-         * @brief Position of block withing chunk-space.
+         * @brief Position of voxel withing chunk-space.
          */
-        using BlockChunkPositionCoord = ui8;
-        using BlockChunkPosition2D    = ui8v2;
-        using BlockChunkPosition      = ui8v3;
+        using VoxelChunkPositionCoord = ui8;
+        using VoxelChunkPosition2D    = ui8v2;
+        using VoxelChunkPosition      = ui8v3;
         /**
-         * @brief Position of block withing world-space.
+         * @brief Position of voxel withing world-space.
          */
-        using BlockWorldPositionCoord = i32;
-        using BlockWorldPosition2D    = i32v2;
-        using BlockWorldPosition      = i32v3;
+        using VoxelWorldPositionCoord = i32;
+        using VoxelWorldPosition2D    = i32v2;
+        using VoxelWorldPosition      = i32v3;
 
         /**
          * @brief Position of entity in world-space.
@@ -69,86 +69,86 @@ namespace hemlock {
          */
         union ChunkGridPosition {
             HEMLOCK_PACKED_STRUCT(struct {
-                i64 x : 24;  // 16777216 * CHUNK_WIDTH  blocks supported.
-                i64 y : 16;  //    65536 * CHUNK_HEIGHT blocks supported.
-                i64 z : 24;  // 16777216 * CHUNK_WIDTH  blocks supported.
+                i64 x : 24;  // 16777216 * CHUNK_WIDTH  voxels supported.
+                i64 y : 16;  //    65536 * CHUNK_HEIGHT voxels supported.
+                i64 z : 24;  // 16777216 * CHUNK_WIDTH  voxels supported.
             });
 
             ChunkID id;
         };
 
         /**
-         * @brief Converts a block's chunk position into its index into the chunk's
-         * block array.
+         * @brief Converts a voxel's chunk position into its index into the chunk's
+         * voxel array.
          *
-         * @param block_chunk_position The position of the block within the chunk's
+         * @param voxel_chunk_position The position of the voxel within the chunk's
          * space.
-         * @return ui32 The index of the block in the chunk's block array.
+         * @return ui32 The index of the voxel in the chunk's voxel array.
          */
-        ui32 block_index(BlockChunkPosition block_chunk_position);
+        ui32 voxel_index(VoxelChunkPosition voxel_chunk_position);
 
         /**
-         * @brief Converts a block's world position into its chunk position.
+         * @brief Converts a voxel's world position into its chunk position.
          *
-         * @param block_world_position The position of the block within world space.
-         * @return BlockChunkPosition The position of the block within the chunk's
+         * @param voxel_world_position The position of the voxel within world space.
+         * @return VoxelChunkPosition The position of the voxel within the chunk's
          * space.
          */
-        BlockChunkPosition block_chunk_position(BlockWorldPosition block_world_position
+        VoxelChunkPosition voxel_chunk_position(VoxelWorldPosition voxel_world_position
         );
 
         /**
-         * @brief Converts a block's index into the chunk's block array into its chunk
+         * @brief Converts a voxel's index into the chunk's voxel array into its chunk
          * position.
          *
-         * @param index The index of the block in the chunk's block array.
-         * @return BlockChunkPosition The position of the block within the chunk's
+         * @param index The index of the voxel in the chunk's voxel array.
+         * @return VoxelChunkPosition The position of the voxel within the chunk's
          * space.
          */
-        BlockChunkPosition block_chunk_position(ui32 index);
+        VoxelChunkPosition voxel_chunk_position(ui32 index);
 
         /**
-         * @brief Converts a general point to the block coordinate in which it can be
+         * @brief Converts a general point to the voxel coordinate in which it can be
          * found.
          *
-         * @param position The general position to locate in block coordinates.
-         * @return BlockWorldPosition The block inside which a general position is
+         * @param position The general position to locate in voxel coordinates.
+         * @return VoxelWorldPosition The voxel inside which a general position is
          * located.
          */
-        BlockWorldPosition block_world_position(f32v3 position);
+        VoxelWorldPosition voxel_world_position(f32v3 position);
 
         /**
-         * @brief Converts a chunk grid position and block chunk position into a
+         * @brief Converts a chunk grid position and voxel chunk position into a
          * corresponding world position.
          *
          * @param chunk_grid_position The position of the chunk within grid space.
-         * @param block_chunk_position The position of the block within chunk space.
-         * @return BlockWorldPosition The position of the block within world space.
+         * @param voxel_chunk_position The position of the voxel within chunk space.
+         * @return VoxelWorldPosition The position of the voxel within world space.
          */
-        BlockWorldPosition block_world_position(
+        VoxelWorldPosition voxel_world_position(
             ChunkGridPosition  chunk_grid_position,
-            BlockChunkPosition block_chunk_position = BlockChunkPosition{ 0 }
+            VoxelChunkPosition voxel_chunk_position = VoxelChunkPosition{ 0 }
         );
 
         /**
-         * @brief Converts a chunk grid position and block index into a corresponding
+         * @brief Converts a chunk grid position and voxel index into a corresponding
          * world position.
          *
          * @param chunk_grid_position The position of the chunk within grid space.
-         * @param index The index of the block in the chunk's block array.
-         * @return BlockWorldPosition The position of the block within world space.
+         * @param index The index of the voxel in the chunk's voxel array.
+         * @return VoxelWorldPosition The position of the voxel within world space.
          */
-        BlockWorldPosition
-        block_world_position(ChunkGridPosition chunk_grid_position, ui32 index);
+        VoxelWorldPosition
+        voxel_world_position(ChunkGridPosition chunk_grid_position, ui32 index);
 
         /**
-         * @brief Converts a block's world position into the grid position of the
+         * @brief Converts a voxel's world position into the grid position of the
          * chunk in which it exists.
          *
-         * @param block_world_position The world position of the block.
+         * @param voxel_world_position The world position of the voxel.
          * @return ChunkGridPosition The grid position of the enclosing chunk.
          */
-        ChunkGridPosition chunk_grid_position(BlockWorldPosition block_world_position);
+        ChunkGridPosition chunk_grid_position(VoxelWorldPosition voxel_world_position);
     }  // namespace voxel
 }  // namespace hemlock
 namespace hvox = hemlock::voxel;

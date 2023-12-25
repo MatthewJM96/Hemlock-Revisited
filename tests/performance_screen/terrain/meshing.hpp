@@ -4,17 +4,17 @@
 namespace hemlock {
     namespace test {
         namespace performance_screen {
-            struct BlockComparator {
+            struct VoxelComparator {
                 bool
-                operator()(const hvox::Block* source, const hvox::Block* target, hvox::BlockChunkPosition, hvox::Chunk*)
+                operator()(const hvox::Voxel* source, const hvox::Voxel* target, hvox::VoxelChunkPosition, hvox::Chunk*)
                     const {
                     return (source->id == target->id) && (source->id != 0);
                 }
             };
 
-            struct BlockSolidCheck {
-                bool operator()(const hvox::Block* block) const {
-                    return block->id != 0;
+            struct VoxelSolidCheck {
+                bool operator()(const hvox::Voxel* voxel) const {
+                    return voxel->id != 0;
                 }
             };
         }  // namespace performance_screen

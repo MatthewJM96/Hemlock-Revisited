@@ -1,11 +1,11 @@
 #include "stdafx.h"
 
-#include "voxel/block.hpp"
 #include "voxel/chunk/chunk.h"
+#include "voxel/voxel.hpp"
 
 #include "voxel/graphics/renderer.h"
 
-hg::MeshHandles hvox::ChunkRenderer::block_mesh_handles = {};
+hg::MeshHandles hvox::ChunkRenderer::voxel_mesh_handles = {};
 
 hvox::ChunkRenderer::ChunkRenderer() :
     handle_chunk_mesh_change(Subscriber<>{ [&](Sender sender) {
@@ -34,24 +34,24 @@ hvox::ChunkRenderer::ChunkRenderer() :
 }
 
 void hvox::ChunkRenderer::init(ui32 page_size, ui32 max_unused_pages) {
-    if (block_mesh_handles.vao == 0) {
-        hg::upload_mesh(BLOCK_MESH, block_mesh_handles, hg::MeshDataVolatility::STATIC);
+    if (voxel_mesh_handles.vao == 0) {
+        hg::upload_mesh(VOXEL_MESH, voxel_mesh_handles, hg::MeshDataVolatility::STATIC);
 
 #if !defined(HEMLOCK_OS_MAC)
-        glEnableVertexArrayAttrib(block_mesh_handles.vao, 3);
-        glVertexArrayAttribFormat(block_mesh_handles.vao, 3, 3, GL_FLOAT, GL_FALSE, 0);
-        glVertexArrayAttribBinding(block_mesh_handles.vao, 3, 1);
+        glEnableVertexArrayAttrib(voxel_mesh_handles.vao, 3);
+        glVertexArrayAttribFormat(voxel_mesh_handles.vao, 3, 3, GL_FLOAT, GL_FALSE, 0);
+        glVertexArrayAttribBinding(voxel_mesh_handles.vao, 3, 1);
 
-        glEnableVertexArrayAttrib(block_mesh_handles.vao, 4);
+        glEnableVertexArrayAttrib(voxel_mesh_handles.vao, 4);
         glVertexArrayAttribFormat(
-            block_mesh_handles.vao, 4, 3, GL_FLOAT, GL_FALSE, sizeof(f32v3)
+            voxel_mesh_handles.vao, 4, 3, GL_FLOAT, GL_FALSE, sizeof(f32v3)
         );
-        glVertexArrayAttribBinding(block_mesh_handles.vao, 4, 1);
+        glVertexArrayAttribBinding(voxel_mesh_handles.vao, 4, 1);
 
-        glVertexArrayBindingDivisor(block_mesh_handles.vao, 1, 1);
+        glVertexArrayBindingDivisor(voxel_mesh_handles.vao, 1, 1);
 #else   // !defined(HEMLOCK_OS_MAC)
-        glBindVertexArray(block_mesh_handles.vao);
-        glBindBuffer(GL_ARRAY_BUFFER, block_mesh_handles.vbo);
+        glBindVertexArray(voxel_mesh_handles.vao);
+        glBindBuffer(GL_ARRAY_BUFFER, voxel_mesh_handles.vbo);
 
         glEnableVertexAttribArray(3);
         glEnableVertexAttribArray(4);
@@ -82,7 +82,7 @@ void hvox::ChunkRenderer::dispose() {
     }
     ChunkRenderPages().swap(m_chunk_pages);
 
-    // TODO(Matthew): Should do refcounting like in outline renderer for block mesh
+    // TODO(Matthew): Should do refcounting like in outline renderer for voxel mesh
     // handles.
     //                  Less important here as we probably never don't have some chunk
     //                  renderer in existence, and it's all very cheap.
@@ -103,13 +103,13 @@ void hvox::ChunkRenderer::update(FrameTime) {
 }
 
 void hvox::ChunkRenderer::draw(FrameTime) {
-    glBindVertexArray(block_mesh_handles.vao);
+    glBindVertexArray(voxel_mesh_handles.vao);
     for (auto& chunk_page : m_chunk_pages) {
         if (chunk_page->voxel_count == 0) continue;
 
 #if !defined(HEMLOCK_OS_MAC)
         glVertexArrayVertexBuffer(
-            block_mesh_handles.vao, 1, chunk_page->vbo, 0, sizeof(ChunkInstanceData)
+            voxel_mesh_handles.vao, 1, chunk_page->vbo, 0, sizeof(ChunkInstanceData)
         );
 #else   // !defined(HEMLOCK_OS_MAC)
         glBindBuffer(GL_ARRAY_BUFFER, chunk_page->vbo);
@@ -133,7 +133,7 @@ void hvox::ChunkRenderer::draw(FrameTime) {
 #endif  // !defined(HEMLOCK_OS_MAC)
 
         glDrawArraysInstanced(
-            GL_TRIANGLES, 0, BLOCK_VERTEX_COUNT, chunk_page->voxel_count
+            GL_TRIANGLES, 0, VOXEL_VERTEX_COUNT, chunk_page->voxel_count
         );
     }
 
@@ -175,7 +175,7 @@ hvox::ChunkRenderPage* hvox::ChunkRenderer::create_pages(ui32 count) {
     glCreateBuffers(1, &first_new_page->vbo);
     glNamedBufferData(
         first_new_page->vbo,
-        block_page_size() * sizeof(ChunkInstanceData),
+        voxel_page_size() * sizeof(ChunkInstanceData),
         nullptr,
         GL_DYNAMIC_DRAW
     );
@@ -185,7 +185,7 @@ hvox::ChunkRenderPage* hvox::ChunkRenderer::create_pages(ui32 count) {
 
     glBufferData(
         GL_ARRAY_BUFFER,
-        block_page_size() * sizeof(ChunkInstanceData),
+        voxel_page_size() * sizeof(ChunkInstanceData),
         nullptr,
         GL_DYNAMIC_DRAW
     );
@@ -205,7 +205,7 @@ hvox::ChunkRenderPage* hvox::ChunkRenderer::create_pages(ui32 count) {
         glCreateBuffers(1, &new_page->vbo);
         glNamedBufferData(
             new_page->vbo,
-            block_page_size() * sizeof(ChunkInstanceData),
+            voxel_page_size() * sizeof(ChunkInstanceData),
             nullptr,
             GL_DYNAMIC_DRAW
         );
@@ -215,7 +215,7 @@ hvox::ChunkRenderPage* hvox::ChunkRenderer::create_pages(ui32 count) {
 
         glBufferData(
             GL_ARRAY_BUFFER,
-            block_page_size() * sizeof(ChunkInstanceData),
+            voxel_page_size() * sizeof(ChunkInstanceData),
             nullptr,
             GL_DYNAMIC_DRAW
         );
@@ -240,7 +240,7 @@ void hvox::ChunkRenderer::put_chunk_in_page(
     ui32             page_idx = first_page_idx;
     ChunkRenderPage* page     = nullptr;
     for (; page_idx < m_chunk_pages.size(); ++page_idx) {
-        if (m_chunk_pages[page_idx]->voxel_count + instance_count <= block_page_size())
+        if (m_chunk_pages[page_idx]->voxel_count + instance_count <= voxel_page_size())
         {
             page = m_chunk_pages[page_idx];
             break;
@@ -382,7 +382,7 @@ void hvox::ChunkRenderer::process_pages() {
         glCreateBuffers(1, &new_vbos[page_idx]);
         glNamedBufferData(
             new_vbos[page_idx],
-            block_page_size() * sizeof(ChunkInstanceData),
+            voxel_page_size() * sizeof(ChunkInstanceData),
             nullptr,
             GL_DYNAMIC_DRAW
         );
@@ -396,7 +396,7 @@ void hvox::ChunkRenderer::process_pages() {
 
         glBufferData(
             GL_COPY_WRITE_BUFFER,
-            block_page_size() * sizeof(ChunkInstanceData),
+            voxel_page_size() * sizeof(ChunkInstanceData),
             nullptr,
             GL_DYNAMIC_DRAW
         );
@@ -453,12 +453,12 @@ void hvox::ChunkRenderer::process_pages() {
                 std::shared_lock<std::shared_mutex> instance_lock;
                 const auto& instance = chunk->instance.get(instance_lock);
 
-                assert(instance.count <= block_page_size());
+                assert(instance.count <= voxel_page_size());
 
                 // Check chunk still fits in this page, if not, remove it and place
                 // it in a page that might still have space for it (else creating a
                 // new page for it).
-                if (voxels_instanced + instance.count > block_page_size()) {
+                if (voxels_instanced + instance.count > voxel_page_size()) {
                     // Swap non-fitting chunk with last chunk in page, pop it,
                     // and update the metadata for the chunk that we swapped in.
                     std::swap(page.chunks[chunk_idx], page.chunks.back());

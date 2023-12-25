@@ -18,9 +18,9 @@
 
 #include "iomanager.hpp"
 
-struct TRS_BlockComparator {
+struct TRS_VoxelComparator {
     bool
-    operator()(const hvox::Block* source, const hvox::Block* target, hvox::BlockChunkPosition, hvox::Chunk*)
+    operator()(const hvox::Voxel* source, const hvox::Voxel* target, hvox::VoxelChunkPosition, hvox::Chunk*)
         const {
         return (source->id == target->id) && (source->id != 0);
     }
@@ -28,11 +28,11 @@ struct TRS_BlockComparator {
 
 struct TRS_VoxelGenerator {
     void operator()(hmem::Handle<hvox::Chunk> chunk) const {
-        set_blocks(
+        set_voxels(
             chunk,
-            hvox::BlockChunkPosition{ 0 },
-            hvox::BlockChunkPosition{ CHUNK_LENGTH - 1 },
-            hvox::Block{ 0 }
+            hvox::VoxelChunkPosition{ 0 },
+            hvox::VoxelChunkPosition{ CHUNK_LENGTH - 1 },
+            hvox::Voxel{ 0 }
         );
 
         // for (auto y = 0; y < CHUNK_LENGTH; y += 2) {
@@ -41,29 +41,29 @@ struct TRS_VoxelGenerator {
             const ui8 LEFT  = 14;
             const ui8 RIGHT = 16;
 
-            // set_blocks(chunk, hvox::BlockChunkPosition{0, y, 0},
-            // hvox::BlockChunkPosition{LEFT, y, LEFT}, hvox::Block{1});
-            // set_blocks(chunk, hvox::BlockChunkPosition{RIGHT, y, RIGHT},
-            // hvox::BlockChunkPosition{CHUNK_LENGTH - 1, y, CHUNK_LENGTH - 1},
-            // hvox::Block{1});
+            // set_voxels(chunk, hvox::VoxelChunkPosition{0, y, 0},
+            // hvox::VoxelChunkPosition{LEFT, y, LEFT}, hvox::Voxel{1});
+            // set_voxels(chunk, hvox::VoxelChunkPosition{RIGHT, y, RIGHT},
+            // hvox::VoxelChunkPosition{CHUNK_LENGTH - 1, y, CHUNK_LENGTH - 1},
+            // hvox::Voxel{1});
 
-            // set_blocks(chunk, hvox::BlockChunkPosition{x, 0, 0},
-            // hvox::BlockChunkPosition{x, LEFT, LEFT}, hvox::Block{1});
-            // set_blocks(chunk, hvox::BlockChunkPosition{x, RIGHT, RIGHT},
-            // hvox::BlockChunkPosition{x, CHUNK_LENGTH - 1, CHUNK_LENGTH - 1},
-            // hvox::Block{1});
+            // set_voxels(chunk, hvox::VoxelChunkPosition{x, 0, 0},
+            // hvox::VoxelChunkPosition{x, LEFT, LEFT}, hvox::Voxel{1});
+            // set_voxels(chunk, hvox::VoxelChunkPosition{x, RIGHT, RIGHT},
+            // hvox::VoxelChunkPosition{x, CHUNK_LENGTH - 1, CHUNK_LENGTH - 1},
+            // hvox::Voxel{1});
 
-            set_blocks(
+            set_voxels(
                 chunk,
-                hvox::BlockChunkPosition{ 0, y, 0 },
-                hvox::BlockChunkPosition{ LEFT - y, y, LEFT - y },
-                hvox::Block{ 1 }
+                hvox::VoxelChunkPosition{ 0, y, 0 },
+                hvox::VoxelChunkPosition{ LEFT - y, y, LEFT - y },
+                hvox::Voxel{ 1 }
             );
-            set_blocks(
+            set_voxels(
                 chunk,
-                hvox::BlockChunkPosition{ RIGHT + y, y, RIGHT + y },
-                hvox::BlockChunkPosition{ CHUNK_LENGTH - 1, y, CHUNK_LENGTH - 1 },
-                hvox::Block{ 1 }
+                hvox::VoxelChunkPosition{ RIGHT + y, y, RIGHT + y },
+                hvox::VoxelChunkPosition{ CHUNK_LENGTH - 1, y, CHUNK_LENGTH - 1 },
+                hvox::Voxel{ 1 }
             );
         }
     }
@@ -296,7 +296,7 @@ public:
             } },
             hvox::ChunkTaskBuilder{ []() {
                 return new hvox::ChunkMeshTask<
-                    hvox::GreedyMeshStrategy<TRS_BlockComparator>>();
+                    hvox::GreedyMeshStrategy<TRS_VoxelComparator>>();
             } }
         );
 

@@ -2,8 +2,8 @@
 #define __hemlock_voxel_graphics_mesh_instance_manager_h
 
 #include "thread/resource_guard.hpp"
-#include "voxel/block.hpp"
 #include "voxel/chunk/constants.hpp"
+#include "voxel/voxel.hpp"
 
 namespace hemlock {
     namespace voxel {
