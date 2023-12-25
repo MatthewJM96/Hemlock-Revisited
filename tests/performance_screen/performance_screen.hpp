@@ -166,7 +166,7 @@ public:
                 std::shared_lock<std::shared_mutex> lock;
                 auto voxels = chunks[rand_chunk_idx]->voxels.get(lock);
 
-                std::cout << "    - " << voxels[rand_voxel_idx].id << std::endl;
+                std::cout << "    - " << voxels[rand_voxel_idx] << std::endl;
             }
 
             const hvox::NaiveMeshStrategy<htest::performance_screen::VoxelComparator>

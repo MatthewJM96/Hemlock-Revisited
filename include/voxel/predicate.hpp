@@ -2,10 +2,10 @@
 #define __hemlock_voxel_predicate_hpp
 
 #include "voxel/coordinate_system.h"
+#include "voxel/state.hpp"
 
 namespace hemlock {
     namespace voxel {
-        struct Voxel;
         struct Chunk;
 
         /**
@@ -25,12 +25,11 @@ namespace hemlock {
          * a certain constraint.
          */
         template <typename ConstraintCandidate>
-        concept IdealVoxelConstraint
-            = requires (ConstraintCandidate s, const Voxel* b) {
-                  {
-                      s.operator()(b)
-                      } -> std::same_as<bool>;
-              };
+        concept IdealVoxelConstraint = requires (ConstraintCandidate s, Voxel b) {
+                                           {
+                                               s.operator()(b)
+                                               } -> std::same_as<bool>;
+                                       };
 
         /**
          * @brief Defines a struct whose opeartor() determines if two voxels at
@@ -54,7 +53,7 @@ namespace hemlock {
          */
         template <typename ComparatorCandidate>
         concept IdealVoxelComparator = requires (
-            ComparatorCandidate s, const Voxel* b, VoxelChunkPosition p, Chunk* c
+            ComparatorCandidate s, Voxel b, VoxelChunkPosition p, Chunk* c
         ) {
                                            {
                                                s.operator()(b, b, p, c)

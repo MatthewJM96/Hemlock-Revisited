@@ -13,8 +13,8 @@
 #include "voxel/chunk/state.hpp"
 #include "voxel/coordinate_system.h"
 #include "voxel/graphics/mesh/instance_manager.h"
+#include "voxel/state.hpp"
 #include "voxel/task.hpp"
-#include "voxel/voxel.hpp"
 #include "voxel/voxel_manager.h"
 
 namespace hemlock {

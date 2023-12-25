@@ -1,7 +1,8 @@
 #include "stdafx.h"
 
 #include "voxel/chunk/chunk.h"
-#include "voxel/voxel.hpp"
+#include "voxel/graphics/block_voxel.hpp"
+#include "voxel/state.hpp"
 
 #include "voxel/graphics/renderer.h"
 

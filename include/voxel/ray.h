@@ -2,7 +2,7 @@
 #define __hemlock_voxel_ray_h
 
 #include "coordinate_system.h"
-#include "voxel.hpp"
+#include "state.hpp"
 
 namespace hemlock {
     namespace voxel {

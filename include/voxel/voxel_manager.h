@@ -3,7 +3,7 @@
 
 #include "thread/resource_guard.hpp"
 #include "voxel/chunk/constants.hpp"
-#include "voxel/voxel.hpp"
+#include "voxel/state.hpp"
 
 namespace hemlock {
     namespace voxel {

@@ -93,12 +93,12 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_bulk(
         for (i64 y_off = start; y_off > end; --y_off) {
             VoxelIndex above_candidate_index
                 = hvox::voxel_index(static_cast<i64v3>(offset) + i64v3{ 0, y_off, 0 });
-            const Voxel* above_candidate_voxel = &voxels[above_candidate_index];
+            Voxel above_candidate_voxel = voxels[above_candidate_index];
 
             VoxelIndex candidate_index = hvox::voxel_index(
                 static_cast<i64v3>(offset) + i64v3{ 0, y_off - 1, 0 }
             );
-            const Voxel* candidate_voxel = &voxels[candidate_index];
+            Voxel candidate_voxel = voxels[candidate_index];
 
             if (is_solid(candidate_voxel) && !is_solid(above_candidate_voxel)) {
                 // TODO(Matthew): Put this in to make up for forgetting to ask if air
@@ -112,15 +112,14 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_bulk(
                     VoxelIndex twice_above_start_index = hvox::voxel_index(
                         start_offset + VoxelChunkPosition{ 0, 2, 0 }
                     );
-                    const Voxel* twice_above_start_voxel
-                        = &voxels[twice_above_start_index];
+                    Voxel twice_above_start_voxel = voxels[twice_above_start_index];
 
                     if (is_solid(twice_above_start_voxel)) continue;
                 } else if (y_off - 1 == -1) {
                     VoxelIndex twice_above_candidate_index
                         = hvox::voxel_index(offset + VoxelChunkPosition{ 0, 1, 0 });
-                    const Voxel* twice_above_candidate_voxel
-                        = &voxels[twice_above_candidate_index];
+                    Voxel twice_above_candidate_voxel
+                        = voxels[twice_above_candidate_index];
 
                     if (is_solid(twice_above_candidate_voxel)) continue;
                 }
@@ -157,14 +156,14 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_bulk(
     for (VoxelChunkPositionCoord x = 1; x < CHUNK_LENGTH - 1; ++x) {
         for (VoxelChunkPositionCoord z = 1; z < CHUNK_LENGTH - 1; ++z) {
             for (VoxelChunkPositionCoord y = 1; y < CHUNK_LENGTH - 2; ++y) {
-                VoxelIndex   voxel_index = hvox::voxel_index({ x, y, z });
-                const Voxel* voxel       = &voxels[voxel_index];
+                VoxelIndex voxel_index = hvox::voxel_index({ x, y, z });
+                Voxel      voxel       = voxels[voxel_index];
 
                 // Only consider voxel if it is solid.
                 if (!is_solid(voxel)) continue;
 
-                VoxelIndex   voxel_above_index = hvox::voxel_index({ x, y + 1, z });
-                const Voxel* voxel_above       = &voxels[voxel_above_index];
+                VoxelIndex voxel_above_index = hvox::voxel_index({ x, y + 1, z });
+                Voxel      voxel_above       = voxels[voxel_above_index];
 
                 // Only consider voxel if it is not covered above.
                 if (is_solid(voxel_above)) continue;
@@ -193,14 +192,14 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_bulk(
             // Second-to-top case.
             {
                 VoxelIndex voxel_index = hvox::voxel_index({ x, CHUNK_LENGTH - 2, z });
-                const Voxel* voxel     = &voxels[voxel_index];
+                Voxel      voxel       = voxels[voxel_index];
 
                 // Only consider voxel if it is solid.
                 if (!is_solid(voxel)) continue;
 
                 VoxelIndex voxel_above_index
                     = hvox::voxel_index({ x, CHUNK_LENGTH - 1, z });
-                const Voxel* voxel_above = &voxels[voxel_above_index];
+                Voxel voxel_above = voxels[voxel_above_index];
 
                 // Only consider voxel if it is not covered above.
                 if (is_solid(voxel_above)) continue;
@@ -260,14 +259,14 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_bulk(
     // Left Face (except second-to-top and top layers)
     for (VoxelChunkPositionCoord z = 1; z < CHUNK_LENGTH - 1; ++z) {
         for (VoxelChunkPositionCoord y = 1; y < CHUNK_LENGTH - 2; ++y) {
-            VoxelIndex   voxel_index = hvox::voxel_index({ 0, y, z });
-            const Voxel* voxel       = &voxels[voxel_index];
+            VoxelIndex voxel_index = hvox::voxel_index({ 0, y, z });
+            Voxel      voxel       = voxels[voxel_index];
 
             // Only consider voxel if it is solid.
             if (!is_solid(voxel)) continue;
 
-            VoxelIndex   voxel_above_index = hvox::voxel_index({ 0, y + 1, z });
-            const Voxel* voxel_above       = &voxels[voxel_above_index];
+            VoxelIndex voxel_above_index = hvox::voxel_index({ 0, y + 1, z });
+            Voxel      voxel_above       = voxels[voxel_above_index];
 
             // Only consider voxel if it is not covered above.
             if (is_solid(voxel_above)) continue;
@@ -294,15 +293,15 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_bulk(
     // Right Face (except second-to-top and top layers)
     for (VoxelChunkPositionCoord z = 1; z < CHUNK_LENGTH - 1; ++z) {
         for (VoxelChunkPositionCoord y = 1; y < CHUNK_LENGTH - 2; ++y) {
-            VoxelIndex   voxel_index = hvox::voxel_index({ CHUNK_LENGTH - 1, y, z });
-            const Voxel* voxel       = &voxels[voxel_index];
+            VoxelIndex voxel_index = hvox::voxel_index({ CHUNK_LENGTH - 1, y, z });
+            Voxel      voxel       = voxels[voxel_index];
 
             // Only consider voxel if it is solid.
             if (!is_solid(voxel)) continue;
 
             VoxelIndex voxel_above_index
                 = hvox::voxel_index({ CHUNK_LENGTH - 1, y + 1, z });
-            const Voxel* voxel_above = &voxels[voxel_above_index];
+            Voxel voxel_above = voxels[voxel_above_index];
 
             // Only consider voxel if it is not covered above.
             if (is_solid(voxel_above)) continue;
@@ -347,15 +346,15 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_bulk(
     // Left Face (second-to-top case)
     for (VoxelChunkPositionCoord z = 1; z < CHUNK_LENGTH - 1; ++z) {
         for (VoxelChunkPositionCoord y = 1; y < CHUNK_LENGTH - 2; ++y) {
-            VoxelIndex   voxel_index = hvox::voxel_index({ 0, CHUNK_LENGTH - 2, z });
-            const Voxel* voxel       = &voxels[voxel_index];
+            VoxelIndex voxel_index = hvox::voxel_index({ 0, CHUNK_LENGTH - 2, z });
+            Voxel      voxel       = voxels[voxel_index];
 
             // Only consider voxel if it is solid.
             if (!is_solid(voxel)) continue;
 
             VoxelIndex voxel_above_index
                 = hvox::voxel_index({ 0, CHUNK_LENGTH - 1, z });
-            const Voxel* voxel_above = &voxels[voxel_above_index];
+            Voxel voxel_above = voxels[voxel_above_index];
 
             // Only consider voxel if it is not covered above.
             if (is_solid(voxel_above)) continue;
@@ -402,14 +401,14 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_bulk(
         for (VoxelChunkPositionCoord y = 1; y < CHUNK_LENGTH - 2; ++y) {
             VoxelIndex voxel_index
                 = hvox::voxel_index({ CHUNK_LENGTH - 1, CHUNK_LENGTH - 2, z });
-            const Voxel* voxel = &voxels[voxel_index];
+            Voxel voxel = voxels[voxel_index];
 
             // Only consider voxel if it is solid.
             if (!is_solid(voxel)) continue;
 
             VoxelIndex voxel_above_index
                 = hvox::voxel_index({ CHUNK_LENGTH - 1, CHUNK_LENGTH - 1, z });
-            const Voxel* voxel_above = &voxels[voxel_above_index];
+            Voxel voxel_above = voxels[voxel_above_index];
 
             // Only consider voxel if it is not covered above.
             if (is_solid(voxel_above)) continue;
@@ -459,15 +458,15 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_bulk(
     // Front Face (except second-to-top and top layers)
     for (VoxelChunkPositionCoord x = 1; x < CHUNK_LENGTH - 1; ++x) {
         for (VoxelChunkPositionCoord y = 1; y < CHUNK_LENGTH - 2; ++y) {
-            VoxelIndex   voxel_index = hvox::voxel_index({ x, y, CHUNK_LENGTH - 1 });
-            const Voxel* voxel       = &voxels[voxel_index];
+            VoxelIndex voxel_index = hvox::voxel_index({ x, y, CHUNK_LENGTH - 1 });
+            Voxel      voxel       = voxels[voxel_index];
 
             // Only consider voxel if it is solid.
             if (!is_solid(voxel)) continue;
 
             VoxelIndex voxel_above_index
                 = hvox::voxel_index({ x, y + 1, CHUNK_LENGTH - 1 });
-            const Voxel* voxel_above = &voxels[voxel_above_index];
+            Voxel voxel_above = voxels[voxel_above_index];
 
             // Only consider voxel if it is not covered above.
             if (is_solid(voxel_above)) continue;
@@ -512,14 +511,14 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_bulk(
     // Back Face (except second-to-top and top layers)
     for (VoxelChunkPositionCoord x = 1; x < CHUNK_LENGTH - 1; ++x) {
         for (VoxelChunkPositionCoord y = 1; y < CHUNK_LENGTH - 2; ++y) {
-            VoxelIndex   voxel_index = hvox::voxel_index({ x, y, 0 });
-            const Voxel* voxel       = &voxels[voxel_index];
+            VoxelIndex voxel_index = hvox::voxel_index({ x, y, 0 });
+            Voxel      voxel       = voxels[voxel_index];
 
             // Only consider voxel if it is solid.
             if (!is_solid(voxel)) continue;
 
-            VoxelIndex   voxel_above_index = hvox::voxel_index({ x, y + 1, 0 });
-            const Voxel* voxel_above       = &voxels[voxel_above_index];
+            VoxelIndex voxel_above_index = hvox::voxel_index({ x, y + 1, 0 });
+            Voxel      voxel_above       = voxels[voxel_above_index];
 
             // Only consider voxel if it is not covered above.
             if (is_solid(voxel_above)) continue;
@@ -548,14 +547,14 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_bulk(
         for (VoxelChunkPositionCoord y = 1; y < CHUNK_LENGTH - 2; ++y) {
             VoxelIndex voxel_index
                 = hvox::voxel_index({ x, CHUNK_LENGTH - 2, CHUNK_LENGTH - 1 });
-            const Voxel* voxel = &voxels[voxel_index];
+            Voxel voxel = voxels[voxel_index];
 
             // Only consider voxel if it is solid.
             if (!is_solid(voxel)) continue;
 
             VoxelIndex voxel_above_index
                 = hvox::voxel_index({ x, CHUNK_LENGTH - 1, CHUNK_LENGTH - 1 });
-            const Voxel* voxel_above = &voxels[voxel_above_index];
+            Voxel voxel_above = voxels[voxel_above_index];
 
             // Only consider voxel if it is not covered above.
             if (is_solid(voxel_above)) continue;
@@ -600,15 +599,15 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_bulk(
     // Back Face (second-to-top case)
     for (VoxelChunkPositionCoord x = 1; x < CHUNK_LENGTH - 1; ++x) {
         for (VoxelChunkPositionCoord y = 1; y < CHUNK_LENGTH - 2; ++y) {
-            VoxelIndex   voxel_index = hvox::voxel_index({ x, CHUNK_LENGTH - 2, 0 });
-            const Voxel* voxel       = &voxels[voxel_index];
+            VoxelIndex voxel_index = hvox::voxel_index({ x, CHUNK_LENGTH - 2, 0 });
+            Voxel      voxel       = voxels[voxel_index];
 
             // Only consider voxel if it is solid.
             if (!is_solid(voxel)) continue;
 
             VoxelIndex voxel_above_index
                 = hvox::voxel_index({ x, CHUNK_LENGTH - 1, 0 });
-            const Voxel* voxel_above = &voxels[voxel_above_index];
+            Voxel voxel_above = voxels[voxel_above_index];
 
             // Only consider voxel if it is not covered above.
             if (is_solid(voxel_above)) continue;
@@ -659,14 +658,14 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_bulk(
         for (VoxelChunkPositionCoord z = 1; z < CHUNK_LENGTH - 1; ++z) {
             // Bottom Face
             {
-                VoxelIndex   voxel_index = hvox::voxel_index({ x, 0, z });
-                const Voxel* voxel       = &voxels[voxel_index];
+                VoxelIndex voxel_index = hvox::voxel_index({ x, 0, z });
+                Voxel      voxel       = voxels[voxel_index];
 
                 // Only consider voxel if it is solid.
                 if (!is_solid(voxel)) continue;
 
-                VoxelIndex   voxel_above_index = hvox::voxel_index({ x, 1, z });
-                const Voxel* voxel_above       = &voxels[voxel_above_index];
+                VoxelIndex voxel_above_index = hvox::voxel_index({ x, 1, z });
+                Voxel      voxel_above       = voxels[voxel_above_index];
 
                 // Only consider voxel if it is not covered above.
                 if (is_solid(voxel_above)) continue;
@@ -701,15 +700,15 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_bulk(
 
     // Front-Left Edge
     for (VoxelChunkPositionCoord y = 1; y < CHUNK_LENGTH - 2; ++y) {
-        VoxelIndex   voxel_index = hvox::voxel_index({ 0, y, CHUNK_LENGTH - 1 });
-        const Voxel* voxel       = &voxels[voxel_index];
+        VoxelIndex voxel_index = hvox::voxel_index({ 0, y, CHUNK_LENGTH - 1 });
+        Voxel      voxel       = voxels[voxel_index];
 
         // Only consider voxel if it is solid.
         if (!is_solid(voxel)) continue;
 
         VoxelIndex voxel_above_index
             = hvox::voxel_index({ 0, y + 1, CHUNK_LENGTH - 1 });
-        const Voxel* voxel_above = &voxels[voxel_above_index];
+        Voxel voxel_above = voxels[voxel_above_index];
 
         // Only consider voxel if it is not covered above.
         if (is_solid(voxel_above)) continue;
@@ -737,14 +736,14 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_bulk(
     for (VoxelChunkPositionCoord y = 1; y < CHUNK_LENGTH - 2; ++y) {
         VoxelIndex voxel_index
             = hvox::voxel_index({ CHUNK_LENGTH - 1, y, CHUNK_LENGTH - 1 });
-        const Voxel* voxel = &voxels[voxel_index];
+        Voxel voxel = voxels[voxel_index];
 
         // Only consider voxel if it is solid.
         if (!is_solid(voxel)) continue;
 
         VoxelIndex voxel_above_index
             = hvox::voxel_index({ CHUNK_LENGTH - 1, y + 1, CHUNK_LENGTH - 1 });
-        const Voxel* voxel_above = &voxels[voxel_above_index];
+        Voxel voxel_above = voxels[voxel_above_index];
 
         // Only consider voxel if it is not covered above.
         if (is_solid(voxel_above)) continue;
@@ -778,14 +777,14 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_bulk(
 
     // Back-Left Edge
     for (VoxelChunkPositionCoord y = 1; y < CHUNK_LENGTH - 2; ++y) {
-        VoxelIndex   voxel_index = hvox::voxel_index({ 0, y, 0 });
-        const Voxel* voxel       = &voxels[voxel_index];
+        VoxelIndex voxel_index = hvox::voxel_index({ 0, y, 0 });
+        Voxel      voxel       = voxels[voxel_index];
 
         // Only consider voxel if it is solid.
         if (!is_solid(voxel)) continue;
 
-        VoxelIndex   voxel_above_index = hvox::voxel_index({ 0, y + 1, 0 });
-        const Voxel* voxel_above       = &voxels[voxel_above_index];
+        VoxelIndex voxel_above_index = hvox::voxel_index({ 0, y + 1, 0 });
+        Voxel      voxel_above       = voxels[voxel_above_index];
 
         // Only consider voxel if it is not covered above.
         if (is_solid(voxel_above)) continue;
@@ -807,15 +806,15 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_bulk(
 
     // Back-Right Edge
     for (VoxelChunkPositionCoord y = 1; y < CHUNK_LENGTH - 2; ++y) {
-        VoxelIndex   voxel_index = hvox::voxel_index({ CHUNK_LENGTH - 1, y, 0 });
-        const Voxel* voxel       = &voxels[voxel_index];
+        VoxelIndex voxel_index = hvox::voxel_index({ CHUNK_LENGTH - 1, y, 0 });
+        Voxel      voxel       = voxels[voxel_index];
 
         // Only consider voxel if it is solid.
         if (!is_solid(voxel)) continue;
 
         VoxelIndex voxel_above_index
             = hvox::voxel_index({ CHUNK_LENGTH - 1, y + 1, 0 });
-        const Voxel* voxel_above = &voxels[voxel_above_index];
+        Voxel voxel_above = voxels[voxel_above_index];
 
         // Only consider voxel if it is not covered above.
         if (is_solid(voxel_above)) continue;
@@ -844,11 +843,11 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_bulk(
     {
         VoxelIndex voxel_index
             = hvox::voxel_index({ 0, CHUNK_LENGTH - 2, CHUNK_LENGTH - 1 });
-        const Voxel* voxel = &voxels[voxel_index];
+        Voxel voxel = voxels[voxel_index];
 
         VoxelIndex voxel_above_index
             = hvox::voxel_index({ 0, CHUNK_LENGTH - 1, CHUNK_LENGTH - 1 });
-        const Voxel* voxel_above = &voxels[voxel_above_index];
+        Voxel voxel_above = voxels[voxel_above_index];
 
         // Only consider voxel if it is not covered above.
         if (is_solid(voxel) && !is_solid(voxel_above)) {
@@ -885,12 +884,12 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_bulk(
         VoxelIndex voxel_index
             = hvox::voxel_index({ CHUNK_LENGTH - 1, CHUNK_LENGTH - 2, CHUNK_LENGTH - 1 }
             );
-        const Voxel* voxel = &voxels[voxel_index];
+        Voxel voxel = voxels[voxel_index];
 
         VoxelIndex voxel_above_index
             = hvox::voxel_index({ CHUNK_LENGTH - 1, CHUNK_LENGTH - 1, CHUNK_LENGTH - 1 }
             );
-        const Voxel* voxel_above = &voxels[voxel_above_index];
+        Voxel voxel_above = voxels[voxel_above_index];
 
         // Only consider voxel if it is not covered above.
         if (is_solid(voxel) && !is_solid(voxel_above)) {
@@ -924,11 +923,11 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_bulk(
 
     // Back-Left Edge
     {
-        VoxelIndex   voxel_index = hvox::voxel_index({ 0, CHUNK_LENGTH - 2, 0 });
-        const Voxel* voxel       = &voxels[voxel_index];
+        VoxelIndex voxel_index = hvox::voxel_index({ 0, CHUNK_LENGTH - 2, 0 });
+        Voxel      voxel       = voxels[voxel_index];
 
-        VoxelIndex   voxel_above_index = hvox::voxel_index({ 0, CHUNK_LENGTH - 1, 0 });
-        const Voxel* voxel_above       = &voxels[voxel_above_index];
+        VoxelIndex voxel_above_index = hvox::voxel_index({ 0, CHUNK_LENGTH - 1, 0 });
+        Voxel      voxel_above       = voxels[voxel_above_index];
 
         // Only consider voxel if it is not covered above.
         if (is_solid(voxel) && !is_solid(voxel_above)) {
@@ -964,11 +963,11 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_bulk(
     {
         VoxelIndex voxel_index
             = hvox::voxel_index({ CHUNK_LENGTH - 1, CHUNK_LENGTH - 2, 0 });
-        const Voxel* voxel = &voxels[voxel_index];
+        Voxel voxel = voxels[voxel_index];
 
         VoxelIndex voxel_above_index
             = hvox::voxel_index({ CHUNK_LENGTH - 1, CHUNK_LENGTH - 1, 0 });
-        const Voxel* voxel_above = &voxels[voxel_above_index];
+        Voxel voxel_above = voxels[voxel_above_index];
 
         // Only consider voxel if it is not covered above.
         if (is_solid(voxel) && !is_solid(voxel_above)) {
@@ -1009,14 +1008,14 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_bulk(
 
     // Front-Bottom Edge
     for (VoxelChunkPositionCoord x = 1; x < CHUNK_LENGTH - 1; ++x) {
-        VoxelIndex   voxel_index = hvox::voxel_index({ x, 0, CHUNK_LENGTH - 1 });
-        const Voxel* voxel       = &voxels[voxel_index];
+        VoxelIndex voxel_index = hvox::voxel_index({ x, 0, CHUNK_LENGTH - 1 });
+        Voxel      voxel       = voxels[voxel_index];
 
         // Only consider voxel if it is solid.
         if (!is_solid(voxel)) continue;
 
-        VoxelIndex   voxel_above_index = hvox::voxel_index({ x, 1, CHUNK_LENGTH - 1 });
-        const Voxel* voxel_above       = &voxels[voxel_above_index];
+        VoxelIndex voxel_above_index = hvox::voxel_index({ x, 1, CHUNK_LENGTH - 1 });
+        Voxel      voxel_above       = voxels[voxel_above_index];
 
         // Only consider voxel if it is not covered above.
         if (is_solid(voxel_above)) continue;
@@ -1055,14 +1054,14 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_bulk(
 
     // Back-Bottom Edge
     for (VoxelChunkPositionCoord x = 1; x < CHUNK_LENGTH - 1; ++x) {
-        VoxelIndex   voxel_index = hvox::voxel_index({ x, 0, 0 });
-        const Voxel* voxel       = &voxels[voxel_index];
+        VoxelIndex voxel_index = hvox::voxel_index({ x, 0, 0 });
+        Voxel      voxel       = voxels[voxel_index];
 
         // Only consider voxel if it is solid.
         if (!is_solid(voxel)) continue;
 
-        VoxelIndex   voxel_above_index = hvox::voxel_index({ x, 1, 0 });
-        const Voxel* voxel_above       = &voxels[voxel_above_index];
+        VoxelIndex voxel_above_index = hvox::voxel_index({ x, 1, 0 });
+        Voxel      voxel_above       = voxels[voxel_above_index];
 
         // Only consider voxel if it is not covered above.
         if (is_solid(voxel_above)) continue;
@@ -1089,14 +1088,14 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_bulk(
 
     // Left-Bottom Edge
     for (VoxelChunkPositionCoord z = 1; z < CHUNK_LENGTH - 1; ++z) {
-        VoxelIndex   voxel_index = hvox::voxel_index({ 0, 0, z });
-        const Voxel* voxel       = &voxels[voxel_index];
+        VoxelIndex voxel_index = hvox::voxel_index({ 0, 0, z });
+        Voxel      voxel       = voxels[voxel_index];
 
         // Only consider voxel if it is solid.
         if (!is_solid(voxel)) continue;
 
-        VoxelIndex   voxel_above_index = hvox::voxel_index({ 0, 1, z });
-        const Voxel* voxel_above       = &voxels[voxel_above_index];
+        VoxelIndex voxel_above_index = hvox::voxel_index({ 0, 1, z });
+        Voxel      voxel_above       = voxels[voxel_above_index];
 
         // Only consider voxel if it is not covered above.
         if (is_solid(voxel_above)) continue;
@@ -1121,14 +1120,14 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_bulk(
 
     // Right-Bottom Edge
     for (VoxelChunkPositionCoord z = 1; z < CHUNK_LENGTH - 1; ++z) {
-        VoxelIndex   voxel_index = hvox::voxel_index({ CHUNK_LENGTH - 1, 0, z });
-        const Voxel* voxel       = &voxels[voxel_index];
+        VoxelIndex voxel_index = hvox::voxel_index({ CHUNK_LENGTH - 1, 0, z });
+        Voxel      voxel       = voxels[voxel_index];
 
         // Only consider voxel if it is solid.
         if (!is_solid(voxel)) continue;
 
-        VoxelIndex   voxel_above_index = hvox::voxel_index({ CHUNK_LENGTH - 1, 1, z });
-        const Voxel* voxel_above       = &voxels[voxel_above_index];
+        VoxelIndex voxel_above_index = hvox::voxel_index({ CHUNK_LENGTH - 1, 1, z });
+        Voxel      voxel_above       = voxels[voxel_above_index];
 
         // Only consider voxel if it is not covered above.
         if (is_solid(voxel_above)) continue;
@@ -1174,11 +1173,11 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_bulk(
 
     // Left-Bottom-Front
     {
-        VoxelIndex   voxel_index = hvox::voxel_index({ 0, 0, CHUNK_LENGTH - 1 });
-        const Voxel* voxel       = &voxels[voxel_index];
+        VoxelIndex voxel_index = hvox::voxel_index({ 0, 0, CHUNK_LENGTH - 1 });
+        Voxel      voxel       = voxels[voxel_index];
 
-        VoxelIndex   voxel_above_index = hvox::voxel_index({ 0, 1, CHUNK_LENGTH - 1 });
-        const Voxel* voxel_above       = &voxels[voxel_above_index];
+        VoxelIndex voxel_above_index = hvox::voxel_index({ 0, 1, CHUNK_LENGTH - 1 });
+        Voxel      voxel_above       = voxels[voxel_above_index];
 
         // Only consider voxel if it is not covered above.
         if (is_solid(voxel) && !is_solid(voxel_above)) {
@@ -1212,11 +1211,11 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_bulk(
 
     // Left-Bottom-Back
     {
-        VoxelIndex   voxel_index = hvox::voxel_index({ 0, 0, 0 });
-        const Voxel* voxel       = &voxels[voxel_index];
+        VoxelIndex voxel_index = hvox::voxel_index({ 0, 0, 0 });
+        Voxel      voxel       = voxels[voxel_index];
 
-        VoxelIndex   voxel_above_index = hvox::voxel_index({ 0, 1, 0 });
-        const Voxel* voxel_above       = &voxels[voxel_above_index];
+        VoxelIndex voxel_above_index = hvox::voxel_index({ 0, 1, 0 });
+        Voxel      voxel_above       = voxels[voxel_above_index];
 
         // Only consider voxel if it is not covered above.
         if (is_solid(voxel) && !is_solid(voxel_above)) {
@@ -1240,11 +1239,11 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_bulk(
     {
         VoxelIndex voxel_index
             = hvox::voxel_index({ CHUNK_LENGTH - 1, 0, CHUNK_LENGTH - 1 });
-        const Voxel* voxel = &voxels[voxel_index];
+        Voxel voxel = voxels[voxel_index];
 
         VoxelIndex voxel_above_index
             = hvox::voxel_index({ CHUNK_LENGTH - 1, 1, CHUNK_LENGTH - 1 });
-        const Voxel* voxel_above = &voxels[voxel_above_index];
+        Voxel voxel_above = voxels[voxel_above_index];
 
         // Only consider voxel if it is not covered above.
         if (is_solid(voxel) && !is_solid(voxel_above)) {
@@ -1278,11 +1277,11 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_bulk(
 
     // Right-Bottom-Back
     {
-        VoxelIndex   voxel_index = hvox::voxel_index({ CHUNK_LENGTH - 1, 0, 0 });
-        const Voxel* voxel       = &voxels[voxel_index];
+        VoxelIndex voxel_index = hvox::voxel_index({ CHUNK_LENGTH - 1, 0, 0 });
+        Voxel      voxel       = voxels[voxel_index];
 
-        VoxelIndex   voxel_above_index = hvox::voxel_index({ CHUNK_LENGTH - 1, 1, 0 });
-        const Voxel* voxel_above       = &voxels[voxel_above_index];
+        VoxelIndex voxel_above_index = hvox::voxel_index({ CHUNK_LENGTH - 1, 1, 0 });
+        Voxel      voxel_above       = voxels[voxel_above_index];
 
         // Only consider voxel if it is not covered above.
         if (is_solid(voxel) && !is_solid(voxel_above)) {
@@ -1362,12 +1361,12 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
         std::shared_lock<std::shared_mutex> neighbour_voxel_lock;
         auto& neighbour_voxels = neighbour->voxels.get(neighbour_voxel_lock);
 
-        VoxelIndex   this_voxel_index = hvox::voxel_index(this_offset);
-        const Voxel* this_voxel       = &voxels[this_voxel_index];
+        VoxelIndex this_voxel_index = hvox::voxel_index(this_offset);
+        Voxel      this_voxel       = voxels[this_voxel_index];
 
         VoxelIndex above_this_voxel_index
             = hvox::voxel_index(this_offset + VoxelChunkPosition{ 0, 1, 0 });
-        const Voxel* above_this_voxel = &voxels[above_this_voxel_index];
+        Voxel above_this_voxel = voxels[above_this_voxel_index];
 
         if (!is_solid(this_voxel) || is_solid(above_this_voxel)) return;
 
@@ -1381,13 +1380,12 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
             VoxelIndex above_candidate_index = hvox::voxel_index(
                 static_cast<i64v3>(neighbour_offset) + i64v3{ 0, y_off, 0 }
             );
-            const Voxel* above_candidate_voxel
-                = &neighbour_voxels[above_candidate_index];
+            Voxel above_candidate_voxel = neighbour_voxels[above_candidate_index];
 
             VoxelIndex candidate_index = hvox::voxel_index(
                 static_cast<i64v3>(neighbour_offset) + i64v3{ 0, y_off - 1, 0 }
             );
-            const Voxel* candidate_voxel = &neighbour_voxels[candidate_index];
+            Voxel candidate_voxel = neighbour_voxels[candidate_index];
 
             if (is_solid(candidate_voxel) && !is_solid(above_candidate_voxel)) {
                 ChunkNavmeshNode candidate_voxel_coord = {
@@ -1495,11 +1493,11 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                     = below_neighbour->voxels.get(below_neighbour_voxel_lock);
 
                 for (VoxelChunkPositionCoord z = 0; z < CHUNK_LENGTH; ++z) {
-                    VoxelIndex   this_voxel_index = hvox::voxel_index({ 0, 0, z });
-                    const Voxel* this_voxel       = &voxels[this_voxel_index];
+                    VoxelIndex this_voxel_index = hvox::voxel_index({ 0, 0, z });
+                    Voxel      this_voxel       = voxels[this_voxel_index];
 
                     VoxelIndex above_this_voxel_index = hvox::voxel_index({ 0, 1, z });
-                    const Voxel* above_this_voxel     = &voxels[above_this_voxel_index];
+                    Voxel      above_this_voxel       = voxels[above_this_voxel_index];
 
                     if (!is_solid(this_voxel) || is_solid(above_this_voxel)) continue;
 
@@ -1516,18 +1514,17 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                     VoxelIndex twice_above_candidate_index
                         = hvox::voxel_index({ CHUNK_LENGTH - 1, 1, z });
-                    const Voxel* twice_above_candidate_voxel
-                        = &neighbour_voxels[twice_above_candidate_index];
+                    Voxel twice_above_candidate_voxel
+                        = neighbour_voxels[twice_above_candidate_index];
 
                     VoxelIndex above_candidate_index
                         = hvox::voxel_index({ CHUNK_LENGTH - 1, 0, z });
-                    const Voxel* above_candidate_voxel
-                        = &neighbour_voxels[above_candidate_index];
+                    Voxel above_candidate_voxel
+                        = neighbour_voxels[above_candidate_index];
 
                     VoxelIndex candidate_index
                         = hvox::voxel_index({ CHUNK_LENGTH - 1, CHUNK_LENGTH - 1, z });
-                    const Voxel* candidate_voxel
-                        = &below_neighbour_voxels[candidate_index];
+                    Voxel candidate_voxel = below_neighbour_voxels[candidate_index];
 
                     if (is_solid(candidate_voxel) && !is_solid(above_candidate_voxel)
                         && !is_solid(twice_above_candidate_voxel))
@@ -1646,11 +1643,11 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                 for (VoxelChunkPositionCoord z = 0; z < CHUNK_LENGTH; ++z) {
                     VoxelIndex this_voxel_index
                         = hvox::voxel_index({ CHUNK_LENGTH - 1, 0, z });
-                    const Voxel* this_voxel = &voxels[this_voxel_index];
+                    Voxel this_voxel = voxels[this_voxel_index];
 
                     VoxelIndex above_this_voxel_index
                         = hvox::voxel_index({ CHUNK_LENGTH - 1, 1, z });
-                    const Voxel* above_this_voxel = &voxels[above_this_voxel_index];
+                    Voxel above_this_voxel = voxels[above_this_voxel_index];
 
                     if (!is_solid(this_voxel) || is_solid(above_this_voxel)) continue;
 
@@ -1667,17 +1664,16 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                     VoxelIndex twice_above_candidate_index
                         = hvox::voxel_index({ 0, 1, z });
-                    const Voxel* twice_above_candidate_voxel
-                        = &neighbour_voxels[twice_above_candidate_index];
+                    Voxel twice_above_candidate_voxel
+                        = neighbour_voxels[twice_above_candidate_index];
 
-                    VoxelIndex   above_candidate_index = hvox::voxel_index({ 0, 0, z });
-                    const Voxel* above_candidate_voxel
-                        = &neighbour_voxels[above_candidate_index];
+                    VoxelIndex above_candidate_index = hvox::voxel_index({ 0, 0, z });
+                    Voxel      above_candidate_voxel
+                        = neighbour_voxels[above_candidate_index];
 
                     VoxelIndex candidate_index
                         = hvox::voxel_index({ 0, CHUNK_LENGTH - 1, z });
-                    const Voxel* candidate_voxel
-                        = &below_neighbour_voxels[candidate_index];
+                    Voxel candidate_voxel = below_neighbour_voxels[candidate_index];
 
                     if (is_solid(candidate_voxel) && !is_solid(above_candidate_voxel)
                         && !is_solid(twice_above_candidate_voxel))
@@ -1795,11 +1791,11 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                 for (VoxelChunkPositionCoord x = 0; x < CHUNK_LENGTH; ++x) {
                     VoxelIndex this_voxel_index
                         = hvox::voxel_index({ x, 0, CHUNK_LENGTH - 1 });
-                    const Voxel* this_voxel = &voxels[this_voxel_index];
+                    Voxel this_voxel = voxels[this_voxel_index];
 
                     VoxelIndex above_this_voxel_index
                         = hvox::voxel_index({ x, 1, CHUNK_LENGTH - 1 });
-                    const Voxel* above_this_voxel = &voxels[above_this_voxel_index];
+                    Voxel above_this_voxel = voxels[above_this_voxel_index];
 
                     if (!is_solid(this_voxel) || is_solid(above_this_voxel)) continue;
 
@@ -1816,17 +1812,16 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                     VoxelIndex twice_above_candidate_index
                         = hvox::voxel_index({ x, 1, 0 });
-                    const Voxel* twice_above_candidate_voxel
-                        = &neighbour_voxels[twice_above_candidate_index];
+                    Voxel twice_above_candidate_voxel
+                        = neighbour_voxels[twice_above_candidate_index];
 
-                    VoxelIndex   above_candidate_index = hvox::voxel_index({ x, 0, 0 });
-                    const Voxel* above_candidate_voxel
-                        = &neighbour_voxels[above_candidate_index];
+                    VoxelIndex above_candidate_index = hvox::voxel_index({ x, 0, 0 });
+                    Voxel      above_candidate_voxel
+                        = neighbour_voxels[above_candidate_index];
 
                     VoxelIndex candidate_index
                         = hvox::voxel_index({ x, CHUNK_LENGTH - 1, 0 });
-                    const Voxel* candidate_voxel
-                        = &below_neighbour_voxels[candidate_index];
+                    Voxel candidate_voxel = below_neighbour_voxels[candidate_index];
 
                     if (is_solid(candidate_voxel) && !is_solid(above_candidate_voxel)
                         && !is_solid(twice_above_candidate_voxel))
@@ -1943,11 +1938,11 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                     = below_neighbour->voxels.get(below_neighbour_voxel_lock);
 
                 for (VoxelChunkPositionCoord x = 0; x < CHUNK_LENGTH; ++x) {
-                    VoxelIndex   this_voxel_index = hvox::voxel_index({ x, 0, 0 });
-                    const Voxel* this_voxel       = &voxels[this_voxel_index];
+                    VoxelIndex this_voxel_index = hvox::voxel_index({ x, 0, 0 });
+                    Voxel      this_voxel       = voxels[this_voxel_index];
 
                     VoxelIndex above_this_voxel_index = hvox::voxel_index({ x, 1, 0 });
-                    const Voxel* above_this_voxel     = &voxels[above_this_voxel_index];
+                    Voxel      above_this_voxel       = voxels[above_this_voxel_index];
 
                     if (!is_solid(this_voxel) || is_solid(above_this_voxel)) continue;
 
@@ -1964,18 +1959,17 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                     VoxelIndex twice_above_candidate_index
                         = hvox::voxel_index({ x, 1, CHUNK_LENGTH - 1 });
-                    const Voxel* twice_above_candidate_voxel
-                        = &neighbour_voxels[twice_above_candidate_index];
+                    Voxel twice_above_candidate_voxel
+                        = neighbour_voxels[twice_above_candidate_index];
 
                     VoxelIndex above_candidate_index
                         = hvox::voxel_index({ x, 0, CHUNK_LENGTH - 1 });
-                    const Voxel* above_candidate_voxel
-                        = &neighbour_voxels[above_candidate_index];
+                    Voxel above_candidate_voxel
+                        = neighbour_voxels[above_candidate_index];
 
                     VoxelIndex candidate_index
                         = hvox::voxel_index({ x, CHUNK_LENGTH - 1, CHUNK_LENGTH - 1 });
-                    const Voxel* candidate_voxel
-                        = &below_neighbour_voxels[candidate_index];
+                    Voxel candidate_voxel = below_neighbour_voxels[candidate_index];
 
                     if (is_solid(candidate_voxel) && !is_solid(above_candidate_voxel)
                         && !is_solid(twice_above_candidate_voxel))
@@ -2052,16 +2046,15 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                 for (VoxelChunkPositionCoord z = 1; z < CHUNK_LENGTH - 1; ++z) {
                     VoxelIndex this_voxel_index
                         = hvox::voxel_index({ x, CHUNK_LENGTH - 1, z });
-                    const Voxel* this_voxel = &voxels[this_voxel_index];
+                    Voxel this_voxel = voxels[this_voxel_index];
 
-                    VoxelIndex   neighbour_voxel_index = hvox::voxel_index({ x, 0, z });
-                    const Voxel* neighbour_voxel
-                        = &neighbour_voxels[neighbour_voxel_index];
+                    VoxelIndex neighbour_voxel_index = hvox::voxel_index({ x, 0, z });
+                    Voxel neighbour_voxel = neighbour_voxels[neighbour_voxel_index];
 
                     VoxelIndex above_neighbour_voxel_index
                         = hvox::voxel_index({ x, 1, z });
-                    const Voxel* above_neighbour_voxel
-                        = &neighbour_voxels[above_neighbour_voxel_index];
+                    Voxel above_neighbour_voxel
+                        = neighbour_voxels[above_neighbour_voxel_index];
 
                     if (!is_solid(this_voxel) || is_solid(neighbour_voxel)) continue;
 
@@ -2082,14 +2075,13 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                         // Left
                         VoxelIndex left_of_neighbour_voxel_index
                             = hvox::voxel_index({ x - 1, 0, z });
-                        const Voxel* left_of_neighbour_voxel
-                            = &neighbour_voxels[left_of_neighbour_voxel_index];
+                        Voxel left_of_neighbour_voxel
+                            = neighbour_voxels[left_of_neighbour_voxel_index];
 
                         VoxelIndex above_and_left_of_neighbour_voxel_index
                             = hvox::voxel_index({ x - 1, 1, z });
-                        const Voxel* above_and_left_of_neighbour_voxel
-                            = &neighbour_voxels
-                                  [above_and_left_of_neighbour_voxel_index];
+                        Voxel above_and_left_of_neighbour_voxel
+                            = neighbour_voxels[above_and_left_of_neighbour_voxel_index];
 
                         if (is_solid(left_of_neighbour_voxel)
                             && !is_solid(above_and_left_of_neighbour_voxel))
@@ -2145,14 +2137,13 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                         // Right
                         VoxelIndex right_of_neighbour_voxel_index
                             = hvox::voxel_index({ x + 1, 0, z });
-                        const Voxel* right_of_neighbour_voxel
-                            = &neighbour_voxels[right_of_neighbour_voxel_index];
+                        Voxel right_of_neighbour_voxel
+                            = neighbour_voxels[right_of_neighbour_voxel_index];
 
                         VoxelIndex above_and_right_of_neighbour_voxel_index
                             = hvox::voxel_index({ x + 1, 1, z });
-                        const Voxel* above_and_right_of_neighbour_voxel
-                            = &neighbour_voxels
-                                  [above_and_right_of_neighbour_voxel_index];
+                        Voxel above_and_right_of_neighbour_voxel = neighbour_voxels
+                            [above_and_right_of_neighbour_voxel_index];
 
                         if (is_solid(right_of_neighbour_voxel)
                             && !is_solid(above_and_right_of_neighbour_voxel))
@@ -2208,14 +2199,13 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                         // Front
                         VoxelIndex front_of_neighbour_voxel_index
                             = hvox::voxel_index({ x, 0, z + 1 });
-                        const Voxel* front_of_neighbour_voxel
-                            = &neighbour_voxels[front_of_neighbour_voxel_index];
+                        Voxel front_of_neighbour_voxel
+                            = neighbour_voxels[front_of_neighbour_voxel_index];
 
                         VoxelIndex above_and_front_of_neighbour_voxel_index
                             = hvox::voxel_index({ x, 1, z + 1 });
-                        const Voxel* above_and_front_of_neighbour_voxel
-                            = &neighbour_voxels
-                                  [above_and_front_of_neighbour_voxel_index];
+                        Voxel above_and_front_of_neighbour_voxel = neighbour_voxels
+                            [above_and_front_of_neighbour_voxel_index];
 
                         if (is_solid(front_of_neighbour_voxel)
                             && !is_solid(above_and_front_of_neighbour_voxel))
@@ -2271,14 +2261,13 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                         // Back
                         VoxelIndex back_of_neighbour_voxel_index
                             = hvox::voxel_index({ x, 0, z - 1 });
-                        const Voxel* back_of_neighbour_voxel
-                            = &neighbour_voxels[back_of_neighbour_voxel_index];
+                        Voxel back_of_neighbour_voxel
+                            = neighbour_voxels[back_of_neighbour_voxel_index];
 
                         VoxelIndex above_and_back_of_neighbour_voxel_index
                             = hvox::voxel_index({ x, 1, z - 1 });
-                        const Voxel* above_and_back_of_neighbour_voxel
-                            = &neighbour_voxels
-                                  [above_and_back_of_neighbour_voxel_index];
+                        Voxel above_and_back_of_neighbour_voxel
+                            = neighbour_voxels[above_and_back_of_neighbour_voxel_index];
 
                         if (is_solid(back_of_neighbour_voxel)
                             && !is_solid(above_and_back_of_neighbour_voxel))
@@ -2336,17 +2325,17 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                     // Left
                     VoxelIndex left_of_this_voxel_index
                         = hvox::voxel_index({ x - 1, CHUNK_LENGTH - 1, z });
-                    const Voxel* left_of_this_voxel = &voxels[left_of_this_voxel_index];
+                    Voxel left_of_this_voxel = voxels[left_of_this_voxel_index];
 
                     VoxelIndex left_of_and_below_this_voxel_index
                         = hvox::voxel_index({ x - 1, CHUNK_LENGTH - 2, z });
-                    const Voxel* left_of_and_below_this_voxel
-                        = &voxels[left_of_and_below_this_voxel_index];
+                    Voxel left_of_and_below_this_voxel
+                        = voxels[left_of_and_below_this_voxel_index];
 
                     VoxelIndex left_of_neighbour_voxel_index
                         = hvox::voxel_index({ x - 1, 0, z });
-                    const Voxel* left_of_neighbour_voxel
-                        = &neighbour_voxels[left_of_neighbour_voxel_index];
+                    Voxel left_of_neighbour_voxel
+                        = neighbour_voxels[left_of_neighbour_voxel_index];
 
                     // Across
                     if (is_solid(left_of_this_voxel)
@@ -2410,18 +2399,17 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                     // Right
                     VoxelIndex right_of_this_voxel_index
                         = hvox::voxel_index({ x + 1, CHUNK_LENGTH - 1, z });
-                    const Voxel* right_of_this_voxel
-                        = &voxels[right_of_this_voxel_index];
+                    Voxel right_of_this_voxel = voxels[right_of_this_voxel_index];
 
                     VoxelIndex right_of_and_below_this_voxel_index
                         = hvox::voxel_index({ x + 1, CHUNK_LENGTH - 2, z });
-                    const Voxel* right_of_and_below_this_voxel
-                        = &voxels[right_of_and_below_this_voxel_index];
+                    Voxel right_of_and_below_this_voxel
+                        = voxels[right_of_and_below_this_voxel_index];
 
                     VoxelIndex right_of_neighbour_voxel_index
                         = hvox::voxel_index({ x + 1, 0, z });
-                    const Voxel* right_of_neighbour_voxel
-                        = &neighbour_voxels[right_of_neighbour_voxel_index];
+                    Voxel right_of_neighbour_voxel
+                        = neighbour_voxels[right_of_neighbour_voxel_index];
 
                     // Across
                     if (is_solid(right_of_this_voxel)
@@ -2486,18 +2474,17 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                     // Front
                     VoxelIndex front_of_this_voxel_index
                         = hvox::voxel_index({ x, CHUNK_LENGTH - 1, z + 1 });
-                    const Voxel* front_of_this_voxel
-                        = &voxels[front_of_this_voxel_index];
+                    Voxel front_of_this_voxel = voxels[front_of_this_voxel_index];
 
                     VoxelIndex front_of_and_below_this_voxel_index
                         = hvox::voxel_index({ x, CHUNK_LENGTH - 2, z + 1 });
-                    const Voxel* front_of_and_below_this_voxel
-                        = &voxels[front_of_and_below_this_voxel_index];
+                    Voxel front_of_and_below_this_voxel
+                        = voxels[front_of_and_below_this_voxel_index];
 
                     VoxelIndex front_of_neighbour_voxel_index
                         = hvox::voxel_index({ x, 0, z + 1 });
-                    const Voxel* front_of_neighbour_voxel
-                        = &neighbour_voxels[front_of_neighbour_voxel_index];
+                    Voxel front_of_neighbour_voxel
+                        = neighbour_voxels[front_of_neighbour_voxel_index];
 
                     // Across
                     if (is_solid(front_of_this_voxel)
@@ -2562,17 +2549,17 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                     // Back
                     VoxelIndex back_of_this_voxel_index
                         = hvox::voxel_index({ x, CHUNK_LENGTH - 1, z - 1 });
-                    const Voxel* back_of_this_voxel = &voxels[back_of_this_voxel_index];
+                    Voxel back_of_this_voxel = voxels[back_of_this_voxel_index];
 
                     VoxelIndex back_of_and_below_this_voxel_index
                         = hvox::voxel_index({ x, CHUNK_LENGTH - 2, z - 1 });
-                    const Voxel* back_of_and_below_this_voxel
-                        = &voxels[back_of_and_below_this_voxel_index];
+                    Voxel back_of_and_below_this_voxel
+                        = voxels[back_of_and_below_this_voxel_index];
 
                     VoxelIndex back_of_neighbour_voxel_index
                         = hvox::voxel_index({ x, 0, z - 1 });
-                    const Voxel* back_of_neighbour_voxel
-                        = &neighbour_voxels[back_of_neighbour_voxel_index];
+                    Voxel back_of_neighbour_voxel
+                        = neighbour_voxels[back_of_neighbour_voxel_index];
 
                     // Across
                     if (is_solid(back_of_this_voxel)
@@ -2658,14 +2645,13 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                     for (VoxelChunkPositionCoord z = 0; z < CHUNK_LENGTH; ++z) {
                         VoxelIndex left_of_neighbour_voxel_index
                             = hvox::voxel_index({ CHUNK_LENGTH - 1, 0, z });
-                        const Voxel* left_of_neighbour_voxel
-                            = &left_of_neighbour_voxels[left_of_neighbour_voxel_index];
+                        Voxel left_of_neighbour_voxel
+                            = left_of_neighbour_voxels[left_of_neighbour_voxel_index];
 
                         VoxelIndex above_left_of_neighbour_voxel_index
                             = hvox::voxel_index({ CHUNK_LENGTH - 1, 1, z });
-                        const Voxel* above_left_of_neighbour_voxel
-                            = &left_of_neighbour_voxels
-                                  [above_left_of_neighbour_voxel_index];
+                        Voxel above_left_of_neighbour_voxel = left_of_neighbour_voxels
+                            [above_left_of_neighbour_voxel_index];
 
                         if (!is_solid(left_of_neighbour_voxel)
                             || is_solid(above_left_of_neighbour_voxel))
@@ -2686,17 +2672,17 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                         VoxelIndex twice_above_candidate_index
                             = hvox::voxel_index({ 0, 1, z });
-                        const Voxel* twice_above_candidate_voxel
-                            = &neighbour_voxels[twice_above_candidate_index];
+                        Voxel twice_above_candidate_voxel
+                            = neighbour_voxels[twice_above_candidate_index];
 
                         VoxelIndex above_candidate_index
                             = hvox::voxel_index({ 0, 0, z });
-                        const Voxel* above_candidate_voxel
-                            = &neighbour_voxels[above_candidate_index];
+                        Voxel above_candidate_voxel
+                            = neighbour_voxels[above_candidate_index];
 
                         VoxelIndex candidate_index
                             = hvox::voxel_index({ 0, CHUNK_LENGTH - 1, z });
-                        const Voxel* candidate_voxel = &voxels[candidate_index];
+                        Voxel candidate_voxel = voxels[candidate_index];
 
                         if (is_solid(candidate_voxel)
                             && !is_solid(above_candidate_voxel)
@@ -2771,15 +2757,13 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                     for (VoxelChunkPositionCoord z = 0; z < CHUNK_LENGTH; ++z) {
                         VoxelIndex right_of_neighbour_voxel_index
                             = hvox::voxel_index({ 0, 0, z });
-                        const Voxel* right_of_neighbour_voxel
-                            = &right_of_neighbour_voxels
-                                  [right_of_neighbour_voxel_index];
+                        Voxel right_of_neighbour_voxel
+                            = right_of_neighbour_voxels[right_of_neighbour_voxel_index];
 
                         VoxelIndex above_right_of_neighbour_voxel_index
                             = hvox::voxel_index({ 0, 1, z });
-                        const Voxel* above_right_of_neighbour_voxel
-                            = &right_of_neighbour_voxels
-                                  [above_right_of_neighbour_voxel_index];
+                        Voxel above_right_of_neighbour_voxel = right_of_neighbour_voxels
+                            [above_right_of_neighbour_voxel_index];
 
                         if (!is_solid(right_of_neighbour_voxel)
                             || is_solid(above_right_of_neighbour_voxel))
@@ -2800,18 +2784,18 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                         VoxelIndex twice_above_candidate_index
                             = hvox::voxel_index({ CHUNK_LENGTH - 1, 1, z });
-                        const Voxel* twice_above_candidate_voxel
-                            = &neighbour_voxels[twice_above_candidate_index];
+                        Voxel twice_above_candidate_voxel
+                            = neighbour_voxels[twice_above_candidate_index];
 
                         VoxelIndex above_candidate_index
                             = hvox::voxel_index({ CHUNK_LENGTH - 1, 0, z });
-                        const Voxel* above_candidate_voxel
-                            = &neighbour_voxels[above_candidate_index];
+                        Voxel above_candidate_voxel
+                            = neighbour_voxels[above_candidate_index];
 
                         VoxelIndex candidate_index = hvox::voxel_index(
                             { CHUNK_LENGTH - 1, CHUNK_LENGTH - 1, z }
                         );
-                        const Voxel* candidate_voxel = &voxels[candidate_index];
+                        Voxel candidate_voxel = voxels[candidate_index];
 
                         if (is_solid(candidate_voxel)
                             && !is_solid(above_candidate_voxel)
@@ -2889,15 +2873,13 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                     for (VoxelChunkPositionCoord x = 0; x < CHUNK_LENGTH; ++x) {
                         VoxelIndex front_of_neighbour_voxel_index
                             = hvox::voxel_index({ x, 0, 0 });
-                        const Voxel* front_of_neighbour_voxel
-                            = &front_of_neighbour_voxels
-                                  [front_of_neighbour_voxel_index];
+                        Voxel front_of_neighbour_voxel
+                            = front_of_neighbour_voxels[front_of_neighbour_voxel_index];
 
                         VoxelIndex above_front_of_neighbour_voxel_index
                             = hvox::voxel_index({ x, 1, 0 });
-                        const Voxel* above_front_of_neighbour_voxel
-                            = &front_of_neighbour_voxels
-                                  [above_front_of_neighbour_voxel_index];
+                        Voxel above_front_of_neighbour_voxel = front_of_neighbour_voxels
+                            [above_front_of_neighbour_voxel_index];
 
                         if (!is_solid(front_of_neighbour_voxel)
                             || is_solid(above_front_of_neighbour_voxel))
@@ -2918,18 +2900,18 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                         VoxelIndex twice_above_candidate_index
                             = hvox::voxel_index({ x, 1, CHUNK_LENGTH - 1 });
-                        const Voxel* twice_above_candidate_voxel
-                            = &neighbour_voxels[twice_above_candidate_index];
+                        Voxel twice_above_candidate_voxel
+                            = neighbour_voxels[twice_above_candidate_index];
 
                         VoxelIndex above_candidate_index
                             = hvox::voxel_index({ x, 0, CHUNK_LENGTH - 1 });
-                        const Voxel* above_candidate_voxel
-                            = &neighbour_voxels[above_candidate_index];
+                        Voxel above_candidate_voxel
+                            = neighbour_voxels[above_candidate_index];
 
                         VoxelIndex candidate_index = hvox::voxel_index(
                             { x, CHUNK_LENGTH - 1, CHUNK_LENGTH - 1 }
                         );
-                        const Voxel* candidate_voxel = &voxels[candidate_index];
+                        Voxel candidate_voxel = voxels[candidate_index];
 
                         if (is_solid(candidate_voxel)
                             && !is_solid(above_candidate_voxel)
@@ -3006,14 +2988,13 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                     for (VoxelChunkPositionCoord x = 0; x < CHUNK_LENGTH; ++x) {
                         VoxelIndex back_of_neighbour_voxel_index
                             = hvox::voxel_index({ x, 0, CHUNK_LENGTH - 1 });
-                        const Voxel* back_of_neighbour_voxel
-                            = &back_of_neighbour_voxels[back_of_neighbour_voxel_index];
+                        Voxel back_of_neighbour_voxel
+                            = back_of_neighbour_voxels[back_of_neighbour_voxel_index];
 
                         VoxelIndex above_back_of_neighbour_voxel_index
                             = hvox::voxel_index({ x, 1, CHUNK_LENGTH - 1 });
-                        const Voxel* above_back_of_neighbour_voxel
-                            = &back_of_neighbour_voxels
-                                  [above_back_of_neighbour_voxel_index];
+                        Voxel above_back_of_neighbour_voxel = back_of_neighbour_voxels
+                            [above_back_of_neighbour_voxel_index];
 
                         if (!is_solid(back_of_neighbour_voxel)
                             || is_solid(above_back_of_neighbour_voxel))
@@ -3034,17 +3015,17 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                         VoxelIndex twice_above_candidate_index
                             = hvox::voxel_index({ x, 1, 0 });
-                        const Voxel* twice_above_candidate_voxel
-                            = &neighbour_voxels[twice_above_candidate_index];
+                        Voxel twice_above_candidate_voxel
+                            = neighbour_voxels[twice_above_candidate_index];
 
                         VoxelIndex above_candidate_index
                             = hvox::voxel_index({ x, 0, 0 });
-                        const Voxel* above_candidate_voxel
-                            = &neighbour_voxels[above_candidate_index];
+                        Voxel above_candidate_voxel
+                            = neighbour_voxels[above_candidate_index];
 
                         VoxelIndex candidate_index
                             = hvox::voxel_index({ x, CHUNK_LENGTH - 1, 0 });
-                        const Voxel* candidate_voxel = &voxels[candidate_index];
+                        Voxel candidate_voxel = voxels[candidate_index];
 
                         if (is_solid(candidate_voxel)
                             && !is_solid(above_candidate_voxel)
@@ -3132,16 +3113,16 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                     for (VoxelChunkPositionCoord z = 0; z < CHUNK_LENGTH; ++z) {
                         VoxelIndex this_voxel_index
                             = hvox::voxel_index({ 0, CHUNK_LENGTH - 2, z });
-                        const Voxel* this_voxel = &voxels[this_voxel_index];
+                        Voxel this_voxel = voxels[this_voxel_index];
 
                         VoxelIndex above_this_voxel_index
                             = hvox::voxel_index({ 0, CHUNK_LENGTH - 1, z });
-                        const Voxel* above_this_voxel = &voxels[above_this_voxel_index];
+                        Voxel above_this_voxel = voxels[above_this_voxel_index];
 
                         VoxelIndex twice_above_this_voxel_index
                             = hvox::voxel_index({ 0, 0, z });
-                        const Voxel* twice_above_this_voxel
-                            = &neighbour_voxels[twice_above_this_voxel_index];
+                        Voxel twice_above_this_voxel
+                            = neighbour_voxels[twice_above_this_voxel_index];
 
                         if (!is_solid(this_voxel) || is_solid(above_this_voxel)
                             || is_solid(twice_above_this_voxel))
@@ -3160,14 +3141,13 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                         VoxelIndex above_candidate_index
                             = hvox::voxel_index({ CHUNK_LENGTH - 1, 0, z });
-                        const Voxel* above_candidate_voxel
-                            = &above_left_neighbour_voxels[above_candidate_index];
+                        Voxel above_candidate_voxel
+                            = above_left_neighbour_voxels[above_candidate_index];
 
                         VoxelIndex candidate_index = hvox::voxel_index(
                             { CHUNK_LENGTH - 1, CHUNK_LENGTH - 1, z }
                         );
-                        const Voxel* candidate_voxel
-                            = &left_neighbour_voxels[candidate_index];
+                        Voxel candidate_voxel = left_neighbour_voxels[candidate_index];
 
                         if (!is_solid(candidate_voxel)
                             || is_solid(above_candidate_voxel))
@@ -3222,12 +3202,12 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                     for (VoxelChunkPositionCoord z = 0; z < CHUNK_LENGTH; ++z) {
                         VoxelIndex this_voxel_index
                             = hvox::voxel_index({ 0, CHUNK_LENGTH - 1, z });
-                        const Voxel* this_voxel = &voxels[this_voxel_index];
+                        Voxel this_voxel = voxels[this_voxel_index];
 
                         VoxelIndex above_this_voxel_index
                             = hvox::voxel_index({ 0, 0, z });
-                        const Voxel* above_this_voxel
-                            = &neighbour_voxels[above_this_voxel_index];
+                        Voxel above_this_voxel
+                            = neighbour_voxels[above_this_voxel_index];
 
                         // Necessary condition for step across and down.
                         if (!is_solid(this_voxel) || is_solid(above_this_voxel))
@@ -3247,19 +3227,19 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                         VoxelIndex step_down_candidate_index = hvox::voxel_index(
                             { CHUNK_LENGTH - 1, CHUNK_LENGTH - 2, z }
                         );
-                        const Voxel* step_down_candidate_voxel
-                            = &left_neighbour_voxels[step_down_candidate_index];
+                        Voxel step_down_candidate_voxel
+                            = left_neighbour_voxels[step_down_candidate_index];
 
                         VoxelIndex step_across_candidate_index = hvox::voxel_index(
                             { CHUNK_LENGTH - 1, CHUNK_LENGTH - 1, z }
                         );
-                        const Voxel* step_across_candidate_voxel
-                            = &left_neighbour_voxels[step_across_candidate_index];
+                        Voxel step_across_candidate_voxel
+                            = left_neighbour_voxels[step_across_candidate_index];
 
                         VoxelIndex above_candidates_index
                             = hvox::voxel_index({ CHUNK_LENGTH - 1, 0, z });
-                        const Voxel* above_candidates_voxel
-                            = &above_left_neighbour_voxels[above_candidates_index];
+                        Voxel above_candidates_voxel
+                            = above_left_neighbour_voxels[above_candidates_index];
 
                         // Step across
                         if (is_solid(step_across_candidate_voxel)
@@ -3393,17 +3373,17 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                         VoxelIndex this_voxel_index = hvox::voxel_index(
                             { CHUNK_LENGTH - 1, CHUNK_LENGTH - 2, z }
                         );
-                        const Voxel* this_voxel = &voxels[this_voxel_index];
+                        Voxel this_voxel = voxels[this_voxel_index];
 
                         VoxelIndex above_this_voxel_index = hvox::voxel_index(
                             { CHUNK_LENGTH - 1, CHUNK_LENGTH - 1, z }
                         );
-                        const Voxel* above_this_voxel = &voxels[above_this_voxel_index];
+                        Voxel above_this_voxel = voxels[above_this_voxel_index];
 
                         VoxelIndex twice_above_this_voxel_index
                             = hvox::voxel_index({ CHUNK_LENGTH - 1, 0, z });
-                        const Voxel* twice_above_this_voxel
-                            = &neighbour_voxels[twice_above_this_voxel_index];
+                        Voxel twice_above_this_voxel
+                            = neighbour_voxels[twice_above_this_voxel_index];
 
                         if (!is_solid(this_voxel) || is_solid(above_this_voxel)
                             || is_solid(twice_above_this_voxel))
@@ -3422,13 +3402,12 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                         VoxelIndex above_candidate_index
                             = hvox::voxel_index({ 0, 0, z });
-                        const Voxel* above_candidate_voxel
-                            = &above_right_neighbour_voxels[above_candidate_index];
+                        Voxel above_candidate_voxel
+                            = above_right_neighbour_voxels[above_candidate_index];
 
                         VoxelIndex candidate_index
                             = hvox::voxel_index({ 0, CHUNK_LENGTH - 1, z });
-                        const Voxel* candidate_voxel
-                            = &right_neighbour_voxels[candidate_index];
+                        Voxel candidate_voxel = right_neighbour_voxels[candidate_index];
 
                         if (!is_solid(candidate_voxel)
                             || is_solid(above_candidate_voxel))
@@ -3484,12 +3463,12 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                         VoxelIndex this_voxel_index = hvox::voxel_index(
                             { CHUNK_LENGTH - 1, CHUNK_LENGTH - 1, z }
                         );
-                        const Voxel* this_voxel = &voxels[this_voxel_index];
+                        Voxel this_voxel = voxels[this_voxel_index];
 
                         VoxelIndex above_this_voxel_index
                             = hvox::voxel_index({ CHUNK_LENGTH - 1, 0, z });
-                        const Voxel* above_this_voxel
-                            = &neighbour_voxels[above_this_voxel_index];
+                        Voxel above_this_voxel
+                            = neighbour_voxels[above_this_voxel_index];
 
                         // Necessary condition for step across and down.
                         if (!is_solid(this_voxel) || is_solid(above_this_voxel))
@@ -3508,18 +3487,18 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                         VoxelIndex step_down_candidate_index
                             = hvox::voxel_index({ 0, CHUNK_LENGTH - 2, z });
-                        const Voxel* step_down_candidate_voxel
-                            = &right_neighbour_voxels[step_down_candidate_index];
+                        Voxel step_down_candidate_voxel
+                            = right_neighbour_voxels[step_down_candidate_index];
 
                         VoxelIndex step_across_candidate_index
                             = hvox::voxel_index({ 0, CHUNK_LENGTH - 1, z });
-                        const Voxel* step_across_candidate_voxel
-                            = &right_neighbour_voxels[step_across_candidate_index];
+                        Voxel step_across_candidate_voxel
+                            = right_neighbour_voxels[step_across_candidate_index];
 
                         VoxelIndex above_candidates_index
                             = hvox::voxel_index({ 0, 0, z });
-                        const Voxel* above_candidates_voxel
-                            = &above_right_neighbour_voxels[above_candidates_index];
+                        Voxel above_candidates_voxel
+                            = above_right_neighbour_voxels[above_candidates_index];
 
                         // Step across
                         if (is_solid(step_across_candidate_voxel)
@@ -3653,17 +3632,17 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                         VoxelIndex this_voxel_index = hvox::voxel_index(
                             { x, CHUNK_LENGTH - 2, CHUNK_LENGTH - 1 }
                         );
-                        const Voxel* this_voxel = &voxels[this_voxel_index];
+                        Voxel this_voxel = voxels[this_voxel_index];
 
                         VoxelIndex above_this_voxel_index = hvox::voxel_index(
                             { x, CHUNK_LENGTH - 1, CHUNK_LENGTH - 1 }
                         );
-                        const Voxel* above_this_voxel = &voxels[above_this_voxel_index];
+                        Voxel above_this_voxel = voxels[above_this_voxel_index];
 
                         VoxelIndex twice_above_this_voxel_index
                             = hvox::voxel_index({ x, 0, CHUNK_LENGTH - 1 });
-                        const Voxel* twice_above_this_voxel
-                            = &neighbour_voxels[twice_above_this_voxel_index];
+                        Voxel twice_above_this_voxel
+                            = neighbour_voxels[twice_above_this_voxel_index];
 
                         if (!is_solid(this_voxel) || is_solid(above_this_voxel)
                             || is_solid(twice_above_this_voxel))
@@ -3682,13 +3661,12 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                         VoxelIndex above_candidate_index
                             = hvox::voxel_index({ x, 0, 0 });
-                        const Voxel* above_candidate_voxel
-                            = &above_front_neighbour_voxels[above_candidate_index];
+                        Voxel above_candidate_voxel
+                            = above_front_neighbour_voxels[above_candidate_index];
 
                         VoxelIndex candidate_index
                             = hvox::voxel_index({ x, CHUNK_LENGTH - 1, 0 });
-                        const Voxel* candidate_voxel
-                            = &front_neighbour_voxels[candidate_index];
+                        Voxel candidate_voxel = front_neighbour_voxels[candidate_index];
 
                         if (!is_solid(candidate_voxel)
                             || is_solid(above_candidate_voxel))
@@ -3744,12 +3722,12 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                         VoxelIndex this_voxel_index = hvox::voxel_index(
                             { x, CHUNK_LENGTH - 1, CHUNK_LENGTH - 1 }
                         );
-                        const Voxel* this_voxel = &voxels[this_voxel_index];
+                        Voxel this_voxel = voxels[this_voxel_index];
 
                         VoxelIndex above_this_voxel_index
                             = hvox::voxel_index({ x, 0, CHUNK_LENGTH - 1 });
-                        const Voxel* above_this_voxel
-                            = &neighbour_voxels[above_this_voxel_index];
+                        Voxel above_this_voxel
+                            = neighbour_voxels[above_this_voxel_index];
 
                         // Necessary condition for step across and down.
                         if (!is_solid(this_voxel) || is_solid(above_this_voxel))
@@ -3768,18 +3746,18 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                         VoxelIndex step_down_candidate_index
                             = hvox::voxel_index({ x, CHUNK_LENGTH - 2, 0 });
-                        const Voxel* step_down_candidate_voxel
-                            = &front_neighbour_voxels[step_down_candidate_index];
+                        Voxel step_down_candidate_voxel
+                            = front_neighbour_voxels[step_down_candidate_index];
 
                         VoxelIndex step_across_candidate_index
                             = hvox::voxel_index({ x, CHUNK_LENGTH - 1, 0 });
-                        const Voxel* step_across_candidate_voxel
-                            = &front_neighbour_voxels[step_across_candidate_index];
+                        Voxel step_across_candidate_voxel
+                            = front_neighbour_voxels[step_across_candidate_index];
 
                         VoxelIndex above_candidates_index
                             = hvox::voxel_index({ x, 0, 0 });
-                        const Voxel* above_candidates_voxel
-                            = &above_front_neighbour_voxels[above_candidates_index];
+                        Voxel above_candidates_voxel
+                            = above_front_neighbour_voxels[above_candidates_index];
 
                         // Step across
                         if (is_solid(step_across_candidate_voxel)
@@ -3911,16 +3889,16 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                     for (VoxelChunkPositionCoord x = 0; x < CHUNK_LENGTH; ++x) {
                         VoxelIndex this_voxel_index
                             = hvox::voxel_index({ x, CHUNK_LENGTH - 2, 0 });
-                        const Voxel* this_voxel = &voxels[this_voxel_index];
+                        Voxel this_voxel = voxels[this_voxel_index];
 
                         VoxelIndex above_this_voxel_index
                             = hvox::voxel_index({ x, CHUNK_LENGTH - 1, 0 });
-                        const Voxel* above_this_voxel = &voxels[above_this_voxel_index];
+                        Voxel above_this_voxel = voxels[above_this_voxel_index];
 
                         VoxelIndex twice_above_this_voxel_index
                             = hvox::voxel_index({ CHUNK_LENGTH - 1, 0, 0 });
-                        const Voxel* twice_above_this_voxel
-                            = &neighbour_voxels[twice_above_this_voxel_index];
+                        Voxel twice_above_this_voxel
+                            = neighbour_voxels[twice_above_this_voxel_index];
 
                         if (!is_solid(this_voxel) || is_solid(above_this_voxel)
                             || is_solid(twice_above_this_voxel))
@@ -3939,14 +3917,13 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                         VoxelIndex above_candidate_index
                             = hvox::voxel_index({ x, 0, CHUNK_LENGTH - 1 });
-                        const Voxel* above_candidate_voxel
-                            = &above_back_neighbour_voxels[above_candidate_index];
+                        Voxel above_candidate_voxel
+                            = above_back_neighbour_voxels[above_candidate_index];
 
                         VoxelIndex candidate_index = hvox::voxel_index(
                             { x, CHUNK_LENGTH - 1, CHUNK_LENGTH - 1 }
                         );
-                        const Voxel* candidate_voxel
-                            = &back_neighbour_voxels[candidate_index];
+                        Voxel candidate_voxel = back_neighbour_voxels[candidate_index];
 
                         if (!is_solid(candidate_voxel)
                             || is_solid(above_candidate_voxel))
@@ -4001,12 +3978,12 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                     for (VoxelChunkPositionCoord x = 0; x < CHUNK_LENGTH; ++x) {
                         VoxelIndex this_voxel_index
                             = hvox::voxel_index({ x, CHUNK_LENGTH - 1, 0 });
-                        const Voxel* this_voxel = &voxels[this_voxel_index];
+                        Voxel this_voxel = voxels[this_voxel_index];
 
                         VoxelIndex above_this_voxel_index
                             = hvox::voxel_index({ x, 0, 0 });
-                        const Voxel* above_this_voxel
-                            = &neighbour_voxels[above_this_voxel_index];
+                        Voxel above_this_voxel
+                            = neighbour_voxels[above_this_voxel_index];
 
                         // Necessary condition for step across and down.
                         if (!is_solid(this_voxel) || is_solid(above_this_voxel))
@@ -4026,19 +4003,19 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                         VoxelIndex step_down_candidate_index = hvox::voxel_index(
                             { x, CHUNK_LENGTH - 2, CHUNK_LENGTH - 1 }
                         );
-                        const Voxel* step_down_candidate_voxel
-                            = &back_neighbour_voxels[step_down_candidate_index];
+                        Voxel step_down_candidate_voxel
+                            = back_neighbour_voxels[step_down_candidate_index];
 
                         VoxelIndex step_across_candidate_index = hvox::voxel_index(
                             { x, CHUNK_LENGTH - 1, CHUNK_LENGTH - 1 }
                         );
-                        const Voxel* step_across_candidate_voxel
-                            = &back_neighbour_voxels[step_across_candidate_index];
+                        Voxel step_across_candidate_voxel
+                            = back_neighbour_voxels[step_across_candidate_index];
 
                         VoxelIndex above_candidates_index
                             = hvox::voxel_index({ x, 0, CHUNK_LENGTH - 1 });
-                        const Voxel* above_candidates_voxel
-                            = &above_back_neighbour_voxels[above_candidates_index];
+                        Voxel above_candidates_voxel
+                            = above_back_neighbour_voxels[above_candidates_index];
 
                         // Step across
                         if (is_solid(step_across_candidate_voxel)
@@ -4164,16 +4141,15 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
             auto& neighbour_voxels = neighbour->voxels.get(neighbour_voxel_lock);
             for (VoxelChunkPositionCoord x = 1; x < CHUNK_LENGTH - 1; ++x) {
                 for (VoxelChunkPositionCoord z = 1; z < CHUNK_LENGTH - 1; ++z) {
-                    VoxelIndex   this_voxel_index = hvox::voxel_index({ x, 0, z });
-                    const Voxel* this_voxel       = &voxels[this_voxel_index];
+                    VoxelIndex this_voxel_index = hvox::voxel_index({ x, 0, z });
+                    Voxel      this_voxel       = voxels[this_voxel_index];
 
-                    VoxelIndex   above_this_index = hvox::voxel_index({ x, 1, z });
-                    const Voxel* above_this_voxel = &voxels[above_this_index];
+                    VoxelIndex above_this_index = hvox::voxel_index({ x, 1, z });
+                    Voxel      above_this_voxel = voxels[above_this_index];
 
                     VoxelIndex neighbour_voxel_index
                         = hvox::voxel_index({ x, CHUNK_LENGTH - 1, z });
-                    const Voxel* neighbour_voxel
-                        = &neighbour_voxels[neighbour_voxel_index];
+                    Voxel neighbour_voxel = neighbour_voxels[neighbour_voxel_index];
 
                     if (!is_solid(neighbour_voxel) || is_solid(this_voxel)) continue;
 
@@ -4194,13 +4170,12 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                         // Left
                         VoxelIndex left_of_this_voxel_index
                             = hvox::voxel_index({ x - 1, 0, z });
-                        const Voxel* left_of_this_voxel
-                            = &voxels[left_of_this_voxel_index];
+                        Voxel left_of_this_voxel = voxels[left_of_this_voxel_index];
 
                         VoxelIndex above_and_left_of_this_voxel_index
                             = hvox::voxel_index({ x - 1, 1, z });
-                        const Voxel* above_and_left_of_this_voxel
-                            = &voxels[above_and_left_of_this_voxel_index];
+                        Voxel above_and_left_of_this_voxel
+                            = voxels[above_and_left_of_this_voxel_index];
 
                         if (is_solid(left_of_this_voxel)
                             && !is_solid(above_and_left_of_this_voxel))
@@ -4254,13 +4229,12 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                         // Right
                         VoxelIndex right_of_this_voxel_index
                             = hvox::voxel_index({ x + 1, 0, z });
-                        const Voxel* right_of_this_voxel
-                            = &voxels[right_of_this_voxel_index];
+                        Voxel right_of_this_voxel = voxels[right_of_this_voxel_index];
 
                         VoxelIndex above_and_right_of_this_voxel_index
                             = hvox::voxel_index({ x + 1, 1, z });
-                        const Voxel* above_and_right_of_this_voxel
-                            = &voxels[above_and_right_of_this_voxel_index];
+                        Voxel above_and_right_of_this_voxel
+                            = voxels[above_and_right_of_this_voxel_index];
 
                         if (is_solid(right_of_this_voxel)
                             && !is_solid(above_and_right_of_this_voxel))
@@ -4314,13 +4288,12 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                         // Front
                         VoxelIndex front_of_this_voxel_index
                             = hvox::voxel_index({ x, 0, z + 1 });
-                        const Voxel* front_of_this_voxel
-                            = &voxels[front_of_this_voxel_index];
+                        Voxel front_of_this_voxel = voxels[front_of_this_voxel_index];
 
                         VoxelIndex above_and_front_of_this_voxel_index
                             = hvox::voxel_index({ x, 1, z + 1 });
-                        const Voxel* above_and_front_of_this_voxel
-                            = &voxels[above_and_front_of_this_voxel_index];
+                        Voxel above_and_front_of_this_voxel
+                            = voxels[above_and_front_of_this_voxel_index];
 
                         if (is_solid(front_of_this_voxel)
                             && !is_solid(above_and_front_of_this_voxel))
@@ -4374,13 +4347,12 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                         // Back
                         VoxelIndex back_of_this_voxel_index
                             = hvox::voxel_index({ x, 0, z - 1 });
-                        const Voxel* back_of_this_voxel
-                            = &voxels[back_of_this_voxel_index];
+                        Voxel back_of_this_voxel = voxels[back_of_this_voxel_index];
 
                         VoxelIndex above_and_back_of_this_voxel_index
                             = hvox::voxel_index({ x, 1, z - 1 });
-                        const Voxel* above_and_back_of_this_voxel
-                            = &voxels[above_and_back_of_this_voxel_index];
+                        Voxel above_and_back_of_this_voxel
+                            = voxels[above_and_back_of_this_voxel_index];
 
                         if (is_solid(back_of_this_voxel)
                             && !is_solid(above_and_back_of_this_voxel))
@@ -4437,17 +4409,17 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                     // Left
                     VoxelIndex left_of_neighbour_voxel_index
                         = hvox::voxel_index({ x - 1, CHUNK_LENGTH - 1, z });
-                    const Voxel* left_of_neighbour_voxel
-                        = &neighbour_voxels[left_of_neighbour_voxel_index];
+                    Voxel left_of_neighbour_voxel
+                        = neighbour_voxels[left_of_neighbour_voxel_index];
 
                     VoxelIndex left_of_and_below_neighbour_voxel_index
                         = hvox::voxel_index({ x - 1, CHUNK_LENGTH - 2, z });
-                    const Voxel* left_of_and_below_neighbour_voxel
-                        = &neighbour_voxels[left_of_and_below_neighbour_voxel_index];
+                    Voxel left_of_and_below_neighbour_voxel
+                        = neighbour_voxels[left_of_and_below_neighbour_voxel_index];
 
                     VoxelIndex left_of_this_voxel_index
                         = hvox::voxel_index({ x - 1, 0, z });
-                    const Voxel* left_of_this_voxel = &voxels[left_of_this_voxel_index];
+                    Voxel left_of_this_voxel = voxels[left_of_this_voxel_index];
 
                     // Across
                     if (is_solid(left_of_neighbour_voxel)
@@ -4514,18 +4486,17 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                     // Right
                     VoxelIndex right_of_neighbour_voxel_index
                         = hvox::voxel_index({ x + 1, CHUNK_LENGTH - 1, z });
-                    const Voxel* right_of_neighbour_voxel
-                        = &neighbour_voxels[right_of_neighbour_voxel_index];
+                    Voxel right_of_neighbour_voxel
+                        = neighbour_voxels[right_of_neighbour_voxel_index];
 
                     VoxelIndex right_of_and_below_neighbour_voxel_index
                         = hvox::voxel_index({ x + 1, CHUNK_LENGTH - 2, z });
-                    const Voxel* right_of_and_below_neighbour_voxel
-                        = &neighbour_voxels[right_of_and_below_neighbour_voxel_index];
+                    Voxel right_of_and_below_neighbour_voxel
+                        = neighbour_voxels[right_of_and_below_neighbour_voxel_index];
 
                     VoxelIndex right_of_this_voxel_index
                         = hvox::voxel_index({ x + 1, 0, z });
-                    const Voxel* right_of_this_voxel
-                        = &voxels[right_of_this_voxel_index];
+                    Voxel right_of_this_voxel = voxels[right_of_this_voxel_index];
 
                     // Across
                     if (is_solid(right_of_neighbour_voxel)
@@ -4592,18 +4563,17 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                     // Front
                     VoxelIndex front_of_neighbour_voxel_index
                         = hvox::voxel_index({ x, CHUNK_LENGTH - 1, z + 1 });
-                    const Voxel* front_of_neighbour_voxel
-                        = &neighbour_voxels[front_of_neighbour_voxel_index];
+                    Voxel front_of_neighbour_voxel
+                        = neighbour_voxels[front_of_neighbour_voxel_index];
 
                     VoxelIndex front_of_and_below_neighbour_voxel_index
                         = hvox::voxel_index({ x, CHUNK_LENGTH - 2, z + 1 });
-                    const Voxel* front_of_and_below_neighbour_voxel
-                        = &neighbour_voxels[front_of_and_below_neighbour_voxel_index];
+                    Voxel front_of_and_below_neighbour_voxel
+                        = neighbour_voxels[front_of_and_below_neighbour_voxel_index];
 
                     VoxelIndex front_of_this_voxel_index
                         = hvox::voxel_index({ x, 0, z + 1 });
-                    const Voxel* front_of_this_voxel
-                        = &voxels[front_of_this_voxel_index];
+                    Voxel front_of_this_voxel = voxels[front_of_this_voxel_index];
 
                     // Across
                     if (is_solid(front_of_neighbour_voxel)
@@ -4670,17 +4640,17 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                     // Back
                     VoxelIndex back_of_neighbour_voxel_index
                         = hvox::voxel_index({ x, CHUNK_LENGTH - 1, z - 1 });
-                    const Voxel* back_of_neighbour_voxel
-                        = &neighbour_voxels[back_of_neighbour_voxel_index];
+                    Voxel back_of_neighbour_voxel
+                        = neighbour_voxels[back_of_neighbour_voxel_index];
 
                     VoxelIndex back_of_and_below_neighbour_voxel_index
                         = hvox::voxel_index({ x, CHUNK_LENGTH - 2, z - 1 });
-                    const Voxel* back_of_and_below_neighbour_voxel
-                        = &neighbour_voxels[back_of_and_below_neighbour_voxel_index];
+                    Voxel back_of_and_below_neighbour_voxel
+                        = neighbour_voxels[back_of_and_below_neighbour_voxel_index];
 
                     VoxelIndex back_of_this_voxel_index
                         = hvox::voxel_index({ x, 0, z - 1 });
-                    const Voxel* back_of_this_voxel = &voxels[back_of_this_voxel_index];
+                    Voxel back_of_this_voxel = voxels[back_of_this_voxel_index];
 
                     // Across
                     if (is_solid(back_of_neighbour_voxel)
@@ -4777,18 +4747,17 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                     for (VoxelChunkPositionCoord z = 0; z < CHUNK_LENGTH; ++z) {
                         VoxelIndex neighbour_voxel_index
                             = hvox::voxel_index({ 0, CHUNK_LENGTH - 2, z });
-                        const Voxel* neighbour_voxel
-                            = &neighbour_voxels[neighbour_voxel_index];
+                        Voxel neighbour_voxel = neighbour_voxels[neighbour_voxel_index];
 
                         VoxelIndex above_neighbour_voxel_index
                             = hvox::voxel_index({ 0, CHUNK_LENGTH - 1, z });
-                        const Voxel* above_neighbour_voxel
-                            = &neighbour_voxels[above_neighbour_voxel_index];
+                        Voxel above_neighbour_voxel
+                            = neighbour_voxels[above_neighbour_voxel_index];
 
                         VoxelIndex twice_above_neighbour_voxel_index
                             = hvox::voxel_index({ 0, 0, z });
-                        const Voxel* twice_above_neighbour_voxel
-                            = &voxels[twice_above_neighbour_voxel_index];
+                        Voxel twice_above_neighbour_voxel
+                            = voxels[twice_above_neighbour_voxel_index];
 
                         if (!is_solid(neighbour_voxel)
                             || is_solid(above_neighbour_voxel)
@@ -4811,14 +4780,14 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                         VoxelIndex above_candidate_index
                             = hvox::voxel_index({ CHUNK_LENGTH - 1, 0, z });
-                        const Voxel* above_candidate_voxel
-                            = &left_neighbour_voxels[above_candidate_index];
+                        Voxel above_candidate_voxel
+                            = left_neighbour_voxels[above_candidate_index];
 
                         VoxelIndex candidate_index = hvox::voxel_index(
                             { CHUNK_LENGTH - 1, CHUNK_LENGTH - 1, z }
                         );
-                        const Voxel* candidate_voxel
-                            = &below_left_neighbour_voxels[candidate_index];
+                        Voxel candidate_voxel
+                            = below_left_neighbour_voxels[candidate_index];
 
                         if (!is_solid(candidate_voxel)
                             || is_solid(above_candidate_voxel))
@@ -4875,13 +4844,12 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                     for (VoxelChunkPositionCoord z = 0; z < CHUNK_LENGTH; ++z) {
                         VoxelIndex neighbour_voxel_index
                             = hvox::voxel_index({ 0, CHUNK_LENGTH - 1, z });
-                        const Voxel* neighbour_voxel
-                            = &neighbour_voxels[neighbour_voxel_index];
+                        Voxel neighbour_voxel = neighbour_voxels[neighbour_voxel_index];
 
                         VoxelIndex above_neighbour_voxel_index
                             = hvox::voxel_index({ 0, 0, z });
-                        const Voxel* above_neighbour_voxel
-                            = &voxels[above_neighbour_voxel_index];
+                        Voxel above_neighbour_voxel
+                            = voxels[above_neighbour_voxel_index];
 
                         // Necessary condition for step across and down.
                         if (!is_solid(neighbour_voxel)
@@ -4905,19 +4873,19 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                         VoxelIndex step_down_candidate_index = hvox::voxel_index(
                             { CHUNK_LENGTH - 1, CHUNK_LENGTH - 2, z }
                         );
-                        const Voxel* step_down_candidate_voxel
-                            = &below_left_neighbour_voxels[step_down_candidate_index];
+                        Voxel step_down_candidate_voxel
+                            = below_left_neighbour_voxels[step_down_candidate_index];
 
                         VoxelIndex step_across_candidate_index = hvox::voxel_index(
                             { CHUNK_LENGTH - 1, CHUNK_LENGTH - 1, z }
                         );
-                        const Voxel* step_across_candidate_voxel
-                            = &below_left_neighbour_voxels[step_across_candidate_index];
+                        Voxel step_across_candidate_voxel
+                            = below_left_neighbour_voxels[step_across_candidate_index];
 
                         VoxelIndex above_candidates_index
                             = hvox::voxel_index({ CHUNK_LENGTH - 1, 0, z });
-                        const Voxel* above_candidates_voxel
-                            = &left_neighbour_voxels[above_candidates_index];
+                        Voxel above_candidates_voxel
+                            = left_neighbour_voxels[above_candidates_index];
 
                         // Step across
                         if (is_solid(step_across_candidate_voxel)
@@ -5055,19 +5023,18 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                         VoxelIndex neighbour_voxel_index = hvox::voxel_index(
                             { CHUNK_LENGTH - 1, CHUNK_LENGTH - 2, z }
                         );
-                        const Voxel* neighbour_voxel
-                            = &neighbour_voxels[neighbour_voxel_index];
+                        Voxel neighbour_voxel = neighbour_voxels[neighbour_voxel_index];
 
                         VoxelIndex above_neighbour_voxel_index = hvox::voxel_index(
                             { CHUNK_LENGTH - 1, CHUNK_LENGTH - 1, z }
                         );
-                        const Voxel* above_neighbour_voxel
-                            = &neighbour_voxels[above_neighbour_voxel_index];
+                        Voxel above_neighbour_voxel
+                            = neighbour_voxels[above_neighbour_voxel_index];
 
                         VoxelIndex twice_above_neighbour_voxel_index
                             = hvox::voxel_index({ CHUNK_LENGTH - 1, 0, z });
-                        const Voxel* twice_above_neighbour_voxel
-                            = &voxels[twice_above_neighbour_voxel_index];
+                        Voxel twice_above_neighbour_voxel
+                            = voxels[twice_above_neighbour_voxel_index];
 
                         if (!is_solid(neighbour_voxel)
                             || is_solid(above_neighbour_voxel)
@@ -5089,13 +5056,13 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                         VoxelIndex above_candidate_index
                             = hvox::voxel_index({ 0, 0, z });
-                        const Voxel* above_candidate_voxel
-                            = &right_neighbour_voxels[above_candidate_index];
+                        Voxel above_candidate_voxel
+                            = right_neighbour_voxels[above_candidate_index];
 
                         VoxelIndex candidate_index
                             = hvox::voxel_index({ 0, CHUNK_LENGTH - 1, z });
-                        const Voxel* candidate_voxel
-                            = &below_right_neighbour_voxels[candidate_index];
+                        Voxel candidate_voxel
+                            = below_right_neighbour_voxels[candidate_index];
 
                         if (!is_solid(candidate_voxel)
                             || is_solid(above_candidate_voxel))
@@ -5153,13 +5120,12 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                         VoxelIndex neighbour_voxel_index = hvox::voxel_index(
                             { CHUNK_LENGTH - 1, CHUNK_LENGTH - 1, z }
                         );
-                        const Voxel* neighbour_voxel
-                            = &neighbour_voxels[neighbour_voxel_index];
+                        Voxel neighbour_voxel = neighbour_voxels[neighbour_voxel_index];
 
                         VoxelIndex above_neighbour_voxel_index
                             = hvox::voxel_index({ CHUNK_LENGTH - 1, 0, z });
-                        const Voxel* above_neighbour_voxel
-                            = &voxels[above_neighbour_voxel_index];
+                        Voxel above_neighbour_voxel
+                            = voxels[above_neighbour_voxel_index];
 
                         // Necessary condition for step across and down.
                         if (!is_solid(neighbour_voxel)
@@ -5182,19 +5148,18 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                         VoxelIndex step_down_candidate_index
                             = hvox::voxel_index({ 0, CHUNK_LENGTH - 2, z });
-                        const Voxel* step_down_candidate_voxel
-                            = &below_right_neighbour_voxels[step_down_candidate_index];
+                        Voxel step_down_candidate_voxel
+                            = below_right_neighbour_voxels[step_down_candidate_index];
 
                         VoxelIndex step_across_candidate_index
                             = hvox::voxel_index({ 0, CHUNK_LENGTH - 1, z });
-                        const Voxel* step_across_candidate_voxel
-                            = &below_right_neighbour_voxels
-                                  [step_across_candidate_index];
+                        Voxel step_across_candidate_voxel
+                            = below_right_neighbour_voxels[step_across_candidate_index];
 
                         VoxelIndex above_candidates_index
                             = hvox::voxel_index({ 0, 0, z });
-                        const Voxel* above_candidates_voxel
-                            = &right_neighbour_voxels[above_candidates_index];
+                        Voxel above_candidates_voxel
+                            = right_neighbour_voxels[above_candidates_index];
 
                         // Step across
                         if (is_solid(step_across_candidate_voxel)
@@ -5334,19 +5299,18 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                         VoxelIndex neighbour_voxel_index = hvox::voxel_index(
                             { x, CHUNK_LENGTH - 2, CHUNK_LENGTH - 1 }
                         );
-                        const Voxel* neighbour_voxel
-                            = &neighbour_voxels[neighbour_voxel_index];
+                        Voxel neighbour_voxel = neighbour_voxels[neighbour_voxel_index];
 
                         VoxelIndex above_neighbour_voxel_index = hvox::voxel_index(
                             { x, CHUNK_LENGTH - 1, CHUNK_LENGTH - 1 }
                         );
-                        const Voxel* above_neighbour_voxel
-                            = &neighbour_voxels[above_neighbour_voxel_index];
+                        Voxel above_neighbour_voxel
+                            = neighbour_voxels[above_neighbour_voxel_index];
 
                         VoxelIndex twice_above_neighbour_voxel_index
                             = hvox::voxel_index({ x, 0, CHUNK_LENGTH - 1 });
-                        const Voxel* twice_above_neighbour_voxel
-                            = &voxels[twice_above_neighbour_voxel_index];
+                        Voxel twice_above_neighbour_voxel
+                            = voxels[twice_above_neighbour_voxel_index];
 
                         if (!is_solid(neighbour_voxel)
                             || is_solid(above_neighbour_voxel)
@@ -5369,13 +5333,13 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                         VoxelIndex above_candidate_index
                             = hvox::voxel_index({ x, 0, 0 });
-                        const Voxel* above_candidate_voxel
-                            = &front_neighbour_voxels[above_candidate_index];
+                        Voxel above_candidate_voxel
+                            = front_neighbour_voxels[above_candidate_index];
 
                         VoxelIndex candidate_index
                             = hvox::voxel_index({ x, CHUNK_LENGTH - 1, 0 });
-                        const Voxel* candidate_voxel
-                            = &below_front_neighbour_voxels[candidate_index];
+                        Voxel candidate_voxel
+                            = below_front_neighbour_voxels[candidate_index];
 
                         if (!is_solid(candidate_voxel)
                             || is_solid(above_candidate_voxel))
@@ -5433,13 +5397,12 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                         VoxelIndex neighbour_voxel_index = hvox::voxel_index(
                             { x, CHUNK_LENGTH - 1, CHUNK_LENGTH - 1 }
                         );
-                        const Voxel* neighbour_voxel
-                            = &neighbour_voxels[neighbour_voxel_index];
+                        Voxel neighbour_voxel = neighbour_voxels[neighbour_voxel_index];
 
                         VoxelIndex above_neighbour_voxel_index
                             = hvox::voxel_index({ x, 0, CHUNK_LENGTH - 1 });
-                        const Voxel* above_neighbour_voxel
-                            = &voxels[above_neighbour_voxel_index];
+                        Voxel above_neighbour_voxel
+                            = voxels[above_neighbour_voxel_index];
 
                         // Necessary condition for step across and down.
                         if (!is_solid(neighbour_voxel)
@@ -5462,19 +5425,18 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                         VoxelIndex step_down_candidate_index
                             = hvox::voxel_index({ x, CHUNK_LENGTH - 2, 0 });
-                        const Voxel* step_down_candidate_voxel
-                            = &below_front_neighbour_voxels[step_down_candidate_index];
+                        Voxel step_down_candidate_voxel
+                            = below_front_neighbour_voxels[step_down_candidate_index];
 
                         VoxelIndex step_across_candidate_index
                             = hvox::voxel_index({ x, CHUNK_LENGTH - 1, 0 });
-                        const Voxel* step_across_candidate_voxel
-                            = &below_front_neighbour_voxels
-                                  [step_across_candidate_index];
+                        Voxel step_across_candidate_voxel
+                            = below_front_neighbour_voxels[step_across_candidate_index];
 
                         VoxelIndex above_candidates_index
                             = hvox::voxel_index({ x, 0, 0 });
-                        const Voxel* above_candidates_voxel
-                            = &front_neighbour_voxels[above_candidates_index];
+                        Voxel above_candidates_voxel
+                            = front_neighbour_voxels[above_candidates_index];
 
                         // Step across
                         if (is_solid(step_across_candidate_voxel)
@@ -5612,18 +5574,17 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                     for (VoxelChunkPositionCoord x = 0; x < CHUNK_LENGTH; ++x) {
                         VoxelIndex neighbour_voxel_index
                             = hvox::voxel_index({ x, CHUNK_LENGTH - 2, 0 });
-                        const Voxel* neighbour_voxel
-                            = &neighbour_voxels[neighbour_voxel_index];
+                        Voxel neighbour_voxel = neighbour_voxels[neighbour_voxel_index];
 
                         VoxelIndex above_neighbour_voxel_index
                             = hvox::voxel_index({ x, CHUNK_LENGTH - 1, 0 });
-                        const Voxel* above_neighbour_voxel
-                            = &neighbour_voxels[above_neighbour_voxel_index];
+                        Voxel above_neighbour_voxel
+                            = neighbour_voxels[above_neighbour_voxel_index];
 
                         VoxelIndex twice_above_neighbour_voxel_index
                             = hvox::voxel_index({ CHUNK_LENGTH - 1, 0, 0 });
-                        const Voxel* twice_above_neighbour_voxel
-                            = &voxels[twice_above_neighbour_voxel_index];
+                        Voxel twice_above_neighbour_voxel
+                            = voxels[twice_above_neighbour_voxel_index];
 
                         if (!is_solid(neighbour_voxel)
                             || is_solid(above_neighbour_voxel)
@@ -5646,14 +5607,14 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
 
                         VoxelIndex above_candidate_index
                             = hvox::voxel_index({ x, 0, CHUNK_LENGTH - 1 });
-                        const Voxel* above_candidate_voxel
-                            = &back_neighbour_voxels[above_candidate_index];
+                        Voxel above_candidate_voxel
+                            = back_neighbour_voxels[above_candidate_index];
 
                         VoxelIndex candidate_index = hvox::voxel_index(
                             { x, CHUNK_LENGTH - 1, CHUNK_LENGTH - 1 }
                         );
-                        const Voxel* candidate_voxel
-                            = &below_back_neighbour_voxels[candidate_index];
+                        Voxel candidate_voxel
+                            = below_back_neighbour_voxels[candidate_index];
 
                         if (!is_solid(candidate_voxel)
                             || is_solid(above_candidate_voxel))
@@ -5710,13 +5671,12 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                     for (VoxelChunkPositionCoord x = 0; x < CHUNK_LENGTH; ++x) {
                         VoxelIndex neighbour_voxel_index
                             = hvox::voxel_index({ x, CHUNK_LENGTH - 1, 0 });
-                        const Voxel* neighbour_voxel
-                            = &neighbour_voxels[neighbour_voxel_index];
+                        Voxel neighbour_voxel = neighbour_voxels[neighbour_voxel_index];
 
                         VoxelIndex above_neighbour_voxel_index
                             = hvox::voxel_index({ x, 0, 0 });
-                        const Voxel* above_neighbour_voxel
-                            = &voxels[above_neighbour_voxel_index];
+                        Voxel above_neighbour_voxel
+                            = voxels[above_neighbour_voxel_index];
 
                         // Necessary condition for step across and down.
                         if (!is_solid(neighbour_voxel)
@@ -5740,19 +5700,19 @@ void hvox::ai::NaiveNavmeshStrategy<IsSolid>::do_stitch(
                         VoxelIndex step_down_candidate_index = hvox::voxel_index(
                             { x, CHUNK_LENGTH - 2, CHUNK_LENGTH - 1 }
                         );
-                        const Voxel* step_down_candidate_voxel
-                            = &below_back_neighbour_voxels[step_down_candidate_index];
+                        Voxel step_down_candidate_voxel
+                            = below_back_neighbour_voxels[step_down_candidate_index];
 
                         VoxelIndex step_across_candidate_index = hvox::voxel_index(
                             { x, CHUNK_LENGTH - 1, CHUNK_LENGTH - 1 }
                         );
-                        const Voxel* step_across_candidate_voxel
-                            = &below_back_neighbour_voxels[step_across_candidate_index];
+                        Voxel step_across_candidate_voxel
+                            = below_back_neighbour_voxels[step_across_candidate_index];
 
                         VoxelIndex above_candidates_index
                             = hvox::voxel_index({ x, 0, CHUNK_LENGTH - 1 });
-                        const Voxel* above_candidates_voxel
-                            = &back_neighbour_voxels[above_candidates_index];
+                        Voxel above_candidates_voxel
+                            = back_neighbour_voxels[above_candidates_index];
 
                         // Step across
                         if (is_solid(step_across_candidate_voxel)

@@ -2,7 +2,7 @@
 #define __hemlock_voxel_chunk_event_voxel_change_hpp
 
 #include "voxel/coordinate_system.h"
-#include "voxel/voxel.hpp"
+#include "voxel/state.hpp"
 
 namespace hemlock {
     namespace voxel {

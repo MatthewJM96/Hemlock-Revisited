@@ -1,7 +1,7 @@
 #include "graphics/mesh.h"
 #include "voxel/chunk/grid.h"
 #include "voxel/face_check.hpp"
-#include "voxel/voxel.hpp"
+#include "voxel/state.hpp"
 
 template <hvox::IdealVoxelComparator MeshComparator>
 bool hvox::NaiveMeshStrategy<
@@ -81,8 +81,8 @@ void hvox::NaiveMeshStrategy<MeshComparator>::operator()(
             } else {
                 // Get corresponding neighbour index in this chunk and check.
                 if (meshable(
-                        &voxels[i - 1],
-                        &voxels[i - 1],
+                        voxels[i - 1],
+                        voxels[i - 1],
                         voxel_chunk_position(i),
                         raw_chunk_ptr
                     ))
@@ -107,8 +107,8 @@ void hvox::NaiveMeshStrategy<MeshComparator>::operator()(
             } else {
                 // Get corresponding neighbour index in this chunk and check.
                 if (meshable(
-                        &voxels[i + 1],
-                        &voxels[i + 1],
+                        voxels[i + 1],
+                        voxels[i + 1],
                         voxel_chunk_position(i),
                         raw_chunk_ptr
                     ))
@@ -133,8 +133,8 @@ void hvox::NaiveMeshStrategy<MeshComparator>::operator()(
             } else {
                 // Get corresponding neighbour index in this chunk and check.
                 if (meshable(
-                        &voxels[i - CHUNK_LENGTH],
-                        &voxels[i - CHUNK_LENGTH],
+                        voxels[i - CHUNK_LENGTH],
+                        voxels[i - CHUNK_LENGTH],
                         voxel_chunk_position(i),
                         raw_chunk_ptr
                     ))
@@ -159,8 +159,8 @@ void hvox::NaiveMeshStrategy<MeshComparator>::operator()(
             } else {
                 // Get corresponding neighbour index in this chunk and check.
                 if (meshable(
-                        &voxels[i + CHUNK_LENGTH],
-                        &voxels[i + CHUNK_LENGTH],
+                        voxels[i + CHUNK_LENGTH],
+                        voxels[i + CHUNK_LENGTH],
                         voxel_chunk_position(i),
                         raw_chunk_ptr
                     ))
@@ -185,8 +185,8 @@ void hvox::NaiveMeshStrategy<MeshComparator>::operator()(
             } else {
                 // Get corresponding neighbour index in this chunk and check.
                 if (meshable(
-                        &voxels[i - (CHUNK_AREA)],
-                        &voxels[i - (CHUNK_AREA)],
+                        voxels[i - (CHUNK_AREA)],
+                        voxels[i - (CHUNK_AREA)],
                         voxel_chunk_position(i),
                         raw_chunk_ptr
                     ))
@@ -211,8 +211,8 @@ void hvox::NaiveMeshStrategy<MeshComparator>::operator()(
             } else {
                 // Get corresponding neighbour index in this chunk and check.
                 if (meshable(
-                        &voxels[i + (CHUNK_AREA)],
-                        &voxels[i + (CHUNK_AREA)],
+                        voxels[i + (CHUNK_AREA)],
+                        voxels[i + (CHUNK_AREA)],
                         voxel_chunk_position(i),
                         raw_chunk_ptr
                     ))

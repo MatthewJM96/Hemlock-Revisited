@@ -20,9 +20,9 @@
 
 struct TRS_VoxelComparator {
     bool
-    operator()(const hvox::Voxel* source, const hvox::Voxel* target, hvox::VoxelChunkPosition, hvox::Chunk*)
+    operator()(hvox::Voxel source, hvox::Voxel target, hvox::VoxelChunkPosition, hvox::Chunk*)
         const {
-        return (source->id == target->id) && (source->id != 0);
+        return (source == target) && (source != hvox::NULL_VOXEL);
     }
 };
 

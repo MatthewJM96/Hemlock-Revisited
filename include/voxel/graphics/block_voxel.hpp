@@ -1,19 +1,10 @@
-#ifndef __hemlock_voxel_voxel_hpp
-#define __hemlock_voxel_voxel_hpp
+#ifndef __hemlock_voxel_graphics_block_voxel_hpp
+#define __hemlock_voxel_graphics_block_voxel_hpp
 
 #include "graphics/mesh.h"
 
 namespace hemlock {
     namespace voxel {
-        using VoxelID = ui64;
-
-        struct Voxel {
-            VoxelID id;
-            // more stuff
-        };
-
-        const Voxel NULL_VOXEL = Voxel{ 0 };
-
         const ui32 VOXEL_VERTEX_COUNT = 36;
 
         using VoxelVertex   = hg::Colourless_3D_32_Normal_Vertex;
@@ -115,12 +106,4 @@ namespace hemlock {
 }  // namespace hemlock
 namespace hvox = hemlock::voxel;
 
-inline bool operator==(hvox::Voxel lhs, hvox::Voxel rhs) {
-    return lhs.id == rhs.id;
-}
-
-inline bool operator!=(hvox::Voxel lhs, hvox::Voxel rhs) {
-    return !(lhs == rhs);
-}
-
-#endif  // __hemlock_voxel_voxel_hpp
+#endif  // __hemlock_voxel_graphics_block_voxel_hpp

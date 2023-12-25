@@ -1,6 +1,6 @@
 #include "stdafx.h"
 
-#include "voxel/voxel.hpp"
+#include "voxel/state.hpp"
 
 #include "voxel/chunk/chunk.h"
 

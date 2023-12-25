@@ -2,7 +2,7 @@
 #include "voxel/chunk/chunk.h"
 #include "voxel/chunk/grid.h"
 #include "voxel/chunk/setter.hpp"
-#include "voxel/voxel.hpp"
+#include "voxel/state.hpp"
 
 template <hvox::IdealVoxelComparator MeshComparator>
 bool hvox::GreedyMeshStrategy<
@@ -38,7 +38,7 @@ void hvox::GreedyMeshStrategy<MeshComparator>::operator()(
     std::unique_lock<std::shared_mutex> mesh_lock;
     auto&                               mesh = chunk->instance.get(mesh_lock);
 
-    const Voxel*       source = &voxels[0];
+    Voxel              source = voxels[0];
     VoxelChunkPosition start  = VoxelChunkPosition{ 0 };
     VoxelChunkPosition end    = VoxelChunkPosition{ 0 };
     VoxelChunkPosition target_pos;
@@ -89,7 +89,7 @@ process_new_source:
         for (; target_pos.x < CHUNK_LENGTH; ++target_pos.x) {
             auto target_idx = voxel_index(target_pos);
 
-            const Voxel* target = &voxels[target_idx];
+            Voxel target = voxels[target_idx];
             // We are scanning for a new meshable source voxel.
             if (!found_meshable) {
                 // Found a meshable source voxel that hasn't already
@@ -146,7 +146,7 @@ process_new_source:
             for (target_pos.x = start.x; target_pos.x <= end.x; ++target_pos.x) {
                 auto target_idx = voxel_index(target_pos);
 
-                const Voxel* target = &voxels[target_idx];
+                Voxel target = voxels[target_idx];
                 // We are scanning for a new meshable source voxel.
                 if (!found_meshable) {
                     // Found a meshable source voxel that hasn't already
@@ -207,7 +207,7 @@ process_new_source:
                 for (target_pos.x = start.x; target_pos.x <= end.x; ++target_pos.x) {
                     auto target_idx = voxel_index(target_pos);
 
-                    const Voxel* target = &voxels[target_idx];
+                    Voxel target = voxels[target_idx];
                     // We are scanning for a new meshable source voxel.
                     if (!found_meshable) {
                         // Found a meshable source voxel that hasn't already
@@ -285,7 +285,7 @@ process_new_source:
         do {
             start  = queued_for_visit.front();
             end    = start;
-            source = &voxels[voxel_index(start)];
+            source = voxels[voxel_index(start)];
 
             queued_for_visit.pop();
 

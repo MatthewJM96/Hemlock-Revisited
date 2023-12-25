@@ -2,11 +2,10 @@
 #define __hemlock_voxel_chunk_event_bulk_voxel_change_hpp
 
 #include "voxel/coordinate_system.h"
+#include "voxel/state.hpp"
 
 namespace hemlock {
     namespace voxel {
-        struct Voxel;
-
         struct BulkVoxelChangeEvent {
             Voxel*             new_voxels;
             bool               single_voxel;
