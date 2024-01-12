@@ -50,46 +50,6 @@ namespace hemlock {
             void resume();
 
             /**
-             * @brief Adds a task to the task queue.
-             *
-             * NOTE: This should only ever be called
-             * from thread owning the thread pool.
-             *
-             * @param task The task to add.
-             */
-            void add_task(QueuedTask task);
-            /**
-             * @brief Adds a set of tasks to the task queue.
-             *
-             * NOTE: This should only ever be called
-             * from thread owning the thread pool.
-             *
-             * @param task The tasks to add.
-             */
-            void add_tasks(QueuedTask tasks[], size_t task_count);
-
-            /**
-             * @brief Adds a task to the task queue.
-             *
-             * NOTE: This can be called from any thread,
-             * but comes with a performance penalty as
-             * no producer token is used.
-             *
-             * @param task The task to add.
-             */
-            void threadsafe_add_task(QueuedTask task);
-            /**
-             * @brief Adds a set of tasks to the task queue.
-             *
-             * NOTE: This can be called from any thread,
-             * but comes with a performance penalty as
-             * no producer token is used.
-             *
-             * @param task The tasks to add.
-             */
-            void threadsafe_add_tasks(QueuedTask tasks[], size_t task_count);
-
-            /**
              * @brief The number of threads held by the thread pool.
              */
             size_t num_threads() { return m_threads.size(); }
@@ -109,6 +69,6 @@ namespace hemlock {
 }  // namespace hemlock
 namespace hthread = hemlock::thread;
 
-#include "thread/thread_pool/main.hpp"
+#include "thread/thread_pool/thread_pool.inl"
 
 #endif  // __hemlock_thread_thread_pool_thread_pool_hpp

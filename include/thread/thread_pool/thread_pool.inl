@@ -8,8 +8,6 @@ void hthread::ThreadPool<TaskQueue>::init(
 
     m_thread_main_func = thread_main_func;
 
-    m_producer_token = moodycamel::ProducerToken(m_tasks);
-
     m_threads.reserve(thread_count);
     for (ui32 i = 0; i < thread_count; ++i) {
         m_threads.emplace_back(Thread{
@@ -53,26 +51,4 @@ void hthread::ThreadPool<TaskQueue>::suspend() {
 template <hthread::IsTaskQueue TaskQueue>
 void hthread::ThreadPool<TaskQueue>::resume() {
     for (auto& thread : m_threads) thread.state.suspend = false;
-}
-
-template <hthread::IsTaskQueue TaskQueue>
-void hthread::ThreadPool<TaskQueue>::add_task(QueuedTask task) {
-    m_tasks.enqueue(m_producer_token, task);
-}
-
-template <hthread::IsTaskQueue TaskQueue>
-void hthread::ThreadPool<TaskQueue>::add_tasks(QueuedTask tasks[], size_t task_count) {
-    m_tasks.enqueue_bulk(m_producer_token, tasks, task_count);
-}
-
-template <hthread::IsTaskQueue TaskQueue>
-void hthread::ThreadPool<TaskQueue>::threadsafe_add_task(QueuedTask task) {
-    m_tasks.enqueue(task);
-}
-
-template <hthread::IsTaskQueue TaskQueue>
-void hthread::ThreadPool<TaskQueue>::threadsafe_add_tasks(
-    QueuedTask tasks[], size_t task_count
-) {
-    m_tasks.enqueue_bulk(tasks, task_count);
 }
