@@ -8,8 +8,6 @@
 #include "graphics/sprite/batcher.h"
 #include "graphics/texture.hpp"
 #include "memory/handle.hpp"
-#include "thread/workflow/builder.h"
-#include "thread/workflow/workflow.hpp"
 #include "ui/input/dispatcher.h"
 #include "ui/input/keys.hpp"
 #include "ui/input/manager.h"
@@ -283,11 +281,6 @@ public:
 
         m_default_texture = hg::load_texture("test_tex.png");
 
-        {
-            hthread::ThreadWorkflowBuilder workflow_builder;
-            workflow_builder.init(&m_chunk_load_dag);
-            workflow_builder.chain_tasks(2);
-        }
         m_chunk_grid = hmem::make_handle<hvox::ChunkGrid>();
         m_chunk_grid->init(
             m_chunk_grid,
@@ -353,7 +346,6 @@ protected:
     hui::InputManager*            m_input_manager;
     hmem::Handle<hvox::ChunkGrid> m_chunk_grid;
     hg::GLSLProgram               m_shader;
-    hthread::ThreadWorkflowDAG    m_chunk_load_dag;
 };
 
 #endif  // __hemlock_tests_test_render_screen_hpp

@@ -6,8 +6,6 @@
 #include <bullet/btBulletDynamicsCommon.h>
 
 #include "memory/handle.hpp"
-#include "thread/workflow/builder.h"
-#include "thread/workflow/workflow.hpp"
 #include "voxel/generation/generator_task.hpp"
 #include "voxel/graphics/mesh/greedy_strategy.hpp"
 #include "voxel/graphics/mesh/mesh_task.hpp"
@@ -401,11 +399,6 @@ public:
 
         m_default_texture = hg::load_texture("test_tex.png");
 
-        {
-            hthread::ThreadWorkflowBuilder workflow_builder;
-            workflow_builder.init(&m_chunk_load_dag);
-            workflow_builder.chain_tasks(2);
-        }
         m_chunk_grid = hmem::make_handle<hvox::ChunkGrid>();
         m_chunk_grid->init(
             m_chunk_grid,
@@ -522,7 +515,6 @@ protected:
     hui::InputManager*               m_input_manager;
     hmem::Handle<hvox::ChunkGrid>    m_chunk_grid;
     hg::GLSLProgram                  m_shader, m_line_shader, m_chunk_outline_shader;
-    hthread::ThreadWorkflowDAG       m_chunk_load_dag;
     htest::voxel_screen::PlayerData  m_player;
     htest::voxel_screen::PhysicsData m_phys;
 
