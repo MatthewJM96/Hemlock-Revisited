@@ -7,11 +7,16 @@
 
 namespace hemlock {
     namespace thread {
+        template <IsTaskQueue... Queues>
         class PrioritisedMultiTaskQueue {
         public:
-            using IdentifierType = size_t;
+            void set_priority(size_t idx, size_t priority) {
+                m_priorities[idx] = priority;
+            }
 
-            bool dequeue(QueuedTask& task, TimingRep timeout, void* identifier) {
+            void register_task_queue();
+
+            bool dequeue(QueuedTask& task, TimingRep timeout, void*& identifier) {
                 *identifier = m_curr_index;
 
                 return m_queues[m_curr_index].wait_dequeue_timed(task, timeout);
@@ -23,8 +28,9 @@ namespace hemlock {
 
             }
         protected:
-            volatile size_t             m_curr_index;
-            std::vector<BasicTaskQueue> m_queues;
+            volatile size_t                       m_curr_index;
+            std::tuple<Queues...>                 m_queues;
+            std::array<size_t, sizeof...(Queues)> m_priorities;
         };
     }  // namespace thread
 }  // namespace hemlock
