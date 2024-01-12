@@ -9,10 +9,7 @@ namespace hemlock {
     namespace thread {
         class BasicTaskQueue : public moodycamel::BlockingConcurrentQueue<QueuedTask> {
         public:
-            // Note this is unused but needs to be some type.
-            using IdentifierType = ui8;
-
-            bool dequeue(QueuedTask& task, TimingRep timeout, void*) {
+            bool dequeue(QueuedTask& task, TimingRep timeout, void*&) {
                 return wait_dequeue_timed(task, timeout);
             }
 
