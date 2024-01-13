@@ -16,6 +16,7 @@ namespace hemlock {
          * threads.
          */
         class BasicTaskQueue : private moodycamel::BlockingConcurrentQueue<QueuedTask> {
+        public:
             struct ControlBlock {
                 ControlBlock(moodycamel::BlockingConcurrentQueue<QueuedTask>* queue) :
                     producer(moodycamel::ProducerToken(*queue)),
@@ -26,7 +27,7 @@ namespace hemlock {
                 moodycamel::ProducerToken producer;
                 moodycamel::ConsumerToken consumer;
             };
-        public:
+
             void* register_thread() { return new ControlBlock{ this }; }
 
             void* register_threads(size_t count) {
@@ -110,23 +111,24 @@ namespace hemlock {
          */
         template <typename Candidate>
         concept IsTaskQueue
-            = requires (
-                Candidate        candidate,
-                QueuedTask*      item,
-                TimingRep        timeout,
-                BasicTaskQueue** queue,
-                void*            control_block
-            ) {
-                  {
-                      candidate.register_thread()
-                      } -> std::same_as<void*>;
-                  {
-                      candidate.enqueue(*item, control_block)
-                      } -> std::same_as<bool>;
-                  {
-                      candidate.dequeue(item, timeout, queue, control_block)
-                      } -> std::same_as<bool>;
-              };
+            = requires { typename Candidate::ControlBlock; }
+              && requires (
+                  Candidate                         candidate,
+                  QueuedTask*                       item,
+                  TimingRep                         timeout,
+                  BasicTaskQueue**                  queue,
+                  typename Candidate::ControlBlock* control_block
+              ) {
+                     {
+                         candidate.register_thread()
+                         } -> std::same_as<void*>;
+                     {
+                         candidate.enqueue(*item, control_block)
+                         } -> std::same_as<bool>;
+                     {
+                         candidate.dequeue(item, timeout, queue, control_block)
+                         } -> std::same_as<bool>;
+                 };
     }  // namespace thread
 }  // namespace hemlock
 namespace hthread = hemlock::thread;
