@@ -13,7 +13,7 @@ namespace hemlock {
          * @tparam Timing Switch for enabling timing.
          */
         template <IsTaskQueue TaskQueue>
-        using ThreadMainFunc = Delegate<void(ThreadState*, TaskQueue*)>;
+        using ThreadMainFunc = Delegate<void(ThreadState<TaskQueue>*, TaskQueue*)>;
     }  // namespace thread
 }  // namespace hemlock
 namespace hthread = hemlock::thread;

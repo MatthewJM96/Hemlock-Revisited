@@ -8,18 +8,22 @@ void hthread::ThreadPool<TaskQueue>::init(
 
     m_thread_main_func = thread_main_func;
 
+    auto control_blocks = m_tasks.register_threads(thread_count);
+
     m_threads.reserve(thread_count);
     for (ui32 i = 0; i < thread_count; ++i) {
-        m_threads.emplace_back(Thread{
+        m_threads.emplace_back(Thread<TaskQueue>{
             .thread = std::thread(
                 m_thread_main_func,
-                reinterpret_cast<ThreadState*>(
+                reinterpret_cast<ThreadState<TaskQueue>*>(
                     reinterpret_cast<ui8*>(&m_threads.data()[i])
-                    + offsetof(Thread, state)
+                    + offsetof(Thread<TaskQueue>, state)
                 ),
                 &m_tasks
             ),
-            .state{.stop = false, .suspend = false}
+            .state{.stop                = false,
+                   .suspend             = false,
+                   .queue_control_block = &control_blocks[i]},
         });
     }
 }
@@ -39,7 +43,7 @@ void hthread::ThreadPool<TaskQueue>::dispose() {
     for (auto& thread : m_threads) thread.thread.join();
 
     m_tasks = {};
-    Threads().swap(m_threads);
+    Threads<TaskQueue>().swap(m_threads);
 }
 
 template <hthread::IsTaskQueue TaskQueue>

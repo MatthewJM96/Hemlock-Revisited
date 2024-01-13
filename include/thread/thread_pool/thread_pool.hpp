@@ -60,9 +60,9 @@ namespace hemlock {
         protected:
             bool m_is_initialised;
 
-            _ThreadMainFunc m_thread_main_func;
-            Threads         m_threads;
-            TaskQueue       m_tasks;
+            _ThreadMainFunc    m_thread_main_func;
+            Threads<TaskQueue> m_threads;
+            TaskQueue          m_tasks;
         };
     }  // namespace thread
 }  // namespace hemlock

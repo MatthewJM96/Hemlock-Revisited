@@ -1,10 +1,40 @@
 #ifndef __hemlock_thread_queue_state_hpp
 #define __hemlock_thread_queue_state_hpp
 
-#include "thread/state.hpp"
-
 namespace hemlock {
     namespace thread {
+        ////////////////////////////////////////////////////////////////////////////////
+        // Thread Tasks
+
+        /**
+         * @brief Thread task stub used for type erasure and clean destruction.
+         */
+        class IThreadTask {
+        public:
+            virtual ~IThreadTask() {
+                // Empty.
+            }
+
+            /**
+             * @brief Executes the task.
+             *
+             * @return True if the task completed, false if it needs to
+             * be re-queued.
+             */
+            virtual bool execute() = 0;
+        };
+
+        /**
+         * @brief A thread task and its ownership status.
+         */
+        struct QueuedTask {
+            IThreadTask* task;
+            bool         delete_on_complete;
+        };
+
+        ////////////////////////////////////////////////////////////////////////////////
+        // Thread Task Queues
+
         /**
          * @brief Representative type for time duration.
          */

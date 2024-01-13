@@ -1,7 +1,6 @@
 #ifndef __hemlock_thread_thread_pool_main_hpp
 #define __hemlock_thread_thread_pool_main_hpp
 
-#include "thread/queue/state.hpp"
 #include "thread/state.hpp"
 
 namespace hemlock {
@@ -16,7 +15,7 @@ namespace hemlock {
          * for example if a task needs to chain a follow-up task.
          */
         template <IsTaskQueue TaskQueue>
-        void default_thread_main(ThreadState* state, TaskQueue* task_queue) {
+        void default_thread_main(ThreadState<TaskQueue>* state, TaskQueue* task_queue) {
             state->stop    = false;
             state->suspend = false;
 
