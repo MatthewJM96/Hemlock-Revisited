@@ -11,26 +11,125 @@ namespace hemlock {
         using TimingRep = std::chrono::nanoseconds;
 
         /**
+         * @brief Basic task queue, a wrapper of moodycamel::BlockingConcurrentQueue
+         * that adds tracking of timing and construction of a simple control block for
+         * threads.
+         */
+        class BasicTaskQueue : private moodycamel::BlockingConcurrentQueue<QueuedTask> {
+            struct ControlBlock {
+                ControlBlock(moodycamel::BlockingConcurrentQueue<QueuedTask>* queue) :
+                    producer(moodycamel::ProducerToken(*queue)),
+                    consumer(moodycamel::ConsumerToken(*queue)){
+                        // Empty.
+                    };
+
+                moodycamel::ProducerToken producer;
+                moodycamel::ConsumerToken consumer;
+            };
+        public:
+            void* register_thread() { return new ControlBlock{ this }; }
+
+            void* register_threads(size_t count) {
+                // ProducerToken and ConsumerToken have no default constructor.
+
+                void*         mem            = new ui8[count * sizeof(ControlBlock)];
+                ControlBlock* control_blocks = reinterpret_cast<ControlBlock*>(mem);
+
+                for (size_t idx = 0; idx < count; ++idx) {
+                    control_blocks[idx] = ControlBlock{ this };
+                }
+
+                return control_blocks;
+            }
+
+            bool enqueue(const QueuedTask& item, void* control_block) {
+                if (control_block) {
+                    return reinterpret_cast<
+                               moodycamel::BlockingConcurrentQueue<QueuedTask>*>(this)
+                        ->enqueue(
+                            reinterpret_cast<ControlBlock*>(control_block)->producer,
+                            item
+                        );
+                } else {
+                    return reinterpret_cast<
+                               moodycamel::BlockingConcurrentQueue<QueuedTask>*>(this)
+                        ->enqueue(item);
+                }
+            }
+
+            bool enqueue(QueuedTask&& item, void* control_block) {
+                if (control_block) {
+                    return reinterpret_cast<
+                               moodycamel::BlockingConcurrentQueue<QueuedTask>*>(this)
+                        ->enqueue(
+                            reinterpret_cast<ControlBlock*>(control_block)->producer,
+                            std::move(item)
+                        );
+                } else {
+                    return reinterpret_cast<
+                               moodycamel::BlockingConcurrentQueue<QueuedTask>*>(this)
+                        ->enqueue(std::move(item));
+                }
+            }
+
+            bool dequeue(
+                QueuedTask*      item,
+                TimingRep        timeout,
+                BasicTaskQueue** queue,
+                void*            control_block
+            ) {
+                *queue = this;
+
+                if (control_block) {
+                    return reinterpret_cast<
+                               moodycamel::BlockingConcurrentQueue<QueuedTask>*>(this)
+                        ->wait_dequeue_timed(
+                            reinterpret_cast<ControlBlock*>(control_block)->consumer,
+                            *item,
+                            timeout
+                        );
+                } else {
+                    return reinterpret_cast<
+                               moodycamel::BlockingConcurrentQueue<QueuedTask>*>(this)
+                        ->wait_dequeue_timed(*item, timeout);
+                }
+            }
+
+            void register_timing(TimingRep timing) { m_timings.emplace_back(timing); }
+        protected:
+            hmem::StackAllocRingBuffer<TimingRep, 10> m_timings;
+        };
+
+        /**
          * @brief Defines the requirements on a satisfactory task queue type.
          *
-         * NOTE: this is specifically different to the moodycamel API as it is expected
-         * that many task queues will simply be an extension of that queue type
-         * returning a simple functor that queues a task onto itself.
+         * NOTE: it is required that any compound queue type be constructed out of some
+         * number of the BasicTaskQueue type. In order, therefore, to benefit from the
+         * optimisation that comes with possessing a thread-specific consumer and
+         * producer token, a control block may be constructed per-thread and passed in
+         * to dequeue. This type must be specified by the respective task queue type and
+         * so for simplicity we erase its type.
          *
          * @tparam Candidate The candidate typename for being a valid task queue type.
          */
         template <typename Candidate>
         concept IsTaskQueue
-            = requires (Candidate c, QueuedTask i, TimingRep t, void* u, bool s) {
+            = requires (
+                Candidate        candidate,
+                QueuedTask*      item,
+                TimingRep        timeout,
+                BasicTaskQueue** queue,
+                void*            control_block
+            ) {
                   {
-                      c.dequeue(i, t, u)
+                      candidate.register_thread()
+                      } -> std::same_as<void*>;
+                  {
+                      candidate.enqueue(*item, control_block)
                       } -> std::same_as<bool>;
                   {
-                      c.queue(i, u)
+                      candidate.dequeue(item, timeout, queue, control_block)
                       } -> std::same_as<bool>;
-                  {
-                      c.register_timing(s, t, u)
-                      } -> std::same_as<void>;
               };
     }  // namespace thread
 }  // namespace hemlock

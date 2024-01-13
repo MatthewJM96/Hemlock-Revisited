@@ -1,8 +1,7 @@
 #ifndef __hemlock_thread_thread_pool_thread_pool_hpp
 #define __hemlock_thread_thread_pool_thread_pool_hpp
 
-#include "thread/queue/basic.hpp"
-#include "thread/state.hpp"
+#include "thread/queue/state.hpp"
 #include "thread/thread_pool/main.hpp"
 #include "thread/thread_pool/state.hpp"
 
