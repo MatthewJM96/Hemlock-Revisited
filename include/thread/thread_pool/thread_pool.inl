@@ -38,8 +38,8 @@ void hthread::ThreadPool<TaskQueue>::dispose() {
 
     for (auto& thread : m_threads) thread.thread.join();
 
-    m_tasks   = {};
-    m_threads = {};
+    m_tasks = {};
+    Threads().swap(m_threads);
 }
 
 template <hthread::IsTaskQueue TaskQueue>
