@@ -28,9 +28,9 @@ namespace hemlock {
                 moodycamel::ConsumerToken consumer;
             };
 
-            void* register_thread() { return new ControlBlock{ this }; }
+            ControlBlock* register_thread() { return new ControlBlock{ this }; }
 
-            void* register_threads(size_t count) {
+            ControlBlock* register_threads(size_t count) {
                 // ProducerToken and ConsumerToken have no default constructor.
 
                 void*         mem            = new ui8[count * sizeof(ControlBlock)];
@@ -114,17 +114,18 @@ namespace hemlock {
             = requires { typename Candidate::ControlBlock; }
               && requires (
                   Candidate                         candidate,
+                  size_t                            count,
                   QueuedTask*                       item,
+                  typename Candidate::ControlBlock* control_block,
                   TimingRep                         timeout,
-                  BasicTaskQueue**                  queue,
-                  typename Candidate::ControlBlock* control_block
+                  BasicTaskQueue**                  queue
               ) {
                      {
                          candidate.register_thread()
-                         } -> std::same_as<void*>;
+                         } -> std::same_as<typename Candidate::ControlBlock*>;
                      {
-                         candidate.enqueue(*item, control_block)
-                         } -> std::same_as<bool>;
+                         candidate.register_threads(count)
+                         } -> std::same_as<typename Candidate::ControlBlock*>;
                      {
                          candidate.dequeue(item, timeout, queue, control_block)
                          } -> std::same_as<bool>;
