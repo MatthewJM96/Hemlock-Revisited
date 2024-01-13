@@ -22,18 +22,35 @@ namespace hemlock {
                 m_priorities[index] = priority;
             }
 
-            void register_task_queue();
+            ControlBlock* register_thread() { return new ControlBlock{ this }; }
 
-            bool dequeue(QueuedTask& task, TimingRep timeout, void*& identifier) {
-                *identifier = m_curr_index;
+            ControlBlock* register_threads(size_t count) {
+                // ProducerToken and ConsumerToken have no default constructor.
 
-                return m_queues[m_curr_index].wait_dequeue_timed(task, timeout);
+                void*         mem            = new ui8[count * sizeof(ControlBlock)];
+                ControlBlock* control_blocks = reinterpret_cast<ControlBlock*>(mem);
+
+                for (size_t idx = 0; idx < count; ++idx) {
+                    control_blocks[idx] = ControlBlock{ this };
+                }
+
+                return control_blocks;
             }
 
-            bool queue(QueuedTask task, void* identifier) { }
+            bool dequeue(
+                QueuedTask*      item,
+                TimingRep        timeout,
+                BasicTaskQueue** queue,
+                void*            control_block
+            ) {
+                // TODO(Matthew): Implement a priority algorithm here.... actually do it
+                //                as a templated strategy!!!
+                (void)item;
+                (void)timeout;
+                (void)queue;
+                (void)control_block;
 
-            void register_timing(QueuedTask& task, TimingRep timing, void* identifier) {
-
+                return false;
             }
         protected:
             std::tuple<Queues...>              m_queues;
