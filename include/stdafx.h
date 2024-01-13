@@ -118,6 +118,9 @@
 #include "basic_concepts.hpp"
 #include "types.hpp"
 
+// Our Basic Utilities
+#include "util.hpp"
+
 // Our Timers.
 #include "timing.h"
 
