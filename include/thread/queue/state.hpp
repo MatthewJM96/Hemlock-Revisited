@@ -43,32 +43,29 @@ namespace hemlock {
             }
 
             bool enqueue(const QueuedTask& item, void* control_block) {
+                auto self = reinterpret_cast<
+                    moodycamel::BlockingConcurrentQueue<QueuedTask>*>(this);
+
                 if (control_block) {
-                    return reinterpret_cast<
-                               moodycamel::BlockingConcurrentQueue<QueuedTask>*>(this)
-                        ->enqueue(
-                            reinterpret_cast<ControlBlock*>(control_block)->producer,
-                            item
-                        );
+                    return self->enqueue(
+                        reinterpret_cast<ControlBlock*>(control_block)->producer, item
+                    );
                 } else {
-                    return reinterpret_cast<
-                               moodycamel::BlockingConcurrentQueue<QueuedTask>*>(this)
-                        ->enqueue(item);
+                    return self->enqueue(item);
                 }
             }
 
             bool enqueue(QueuedTask&& item, void* control_block) {
+                auto self = reinterpret_cast<
+                    moodycamel::BlockingConcurrentQueue<QueuedTask>*>(this);
+
                 if (control_block) {
-                    return reinterpret_cast<
-                               moodycamel::BlockingConcurrentQueue<QueuedTask>*>(this)
-                        ->enqueue(
-                            reinterpret_cast<ControlBlock*>(control_block)->producer,
-                            std::move(item)
-                        );
+                    return self->enqueue(
+                        reinterpret_cast<ControlBlock*>(control_block)->producer,
+                        std::move(item)
+                    );
                 } else {
-                    return reinterpret_cast<
-                               moodycamel::BlockingConcurrentQueue<QueuedTask>*>(this)
-                        ->enqueue(std::move(item));
+                    return self->enqueue(std::move(item));
                 }
             }
 
@@ -78,20 +75,19 @@ namespace hemlock {
                 BasicTaskQueue** queue,
                 void*            control_block
             ) {
+                auto self = reinterpret_cast<
+                    moodycamel::BlockingConcurrentQueue<QueuedTask>*>(this);
+
                 *queue = this;
 
                 if (control_block) {
-                    return reinterpret_cast<
-                               moodycamel::BlockingConcurrentQueue<QueuedTask>*>(this)
-                        ->wait_dequeue_timed(
-                            reinterpret_cast<ControlBlock*>(control_block)->consumer,
-                            *item,
-                            timeout
-                        );
+                    return self->wait_dequeue_timed(
+                        reinterpret_cast<ControlBlock*>(control_block)->consumer,
+                        *item,
+                        timeout
+                    );
                 } else {
-                    return reinterpret_cast<
-                               moodycamel::BlockingConcurrentQueue<QueuedTask>*>(this)
-                        ->wait_dequeue_timed(*item, timeout);
+                    return self->wait_dequeue_timed(*item, timeout);
                 }
             }
 
