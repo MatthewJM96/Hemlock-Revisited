@@ -62,26 +62,48 @@ namespace hemlock {
             }
 
             bool dequeue(
-                QueuedTask*      item,
-                TimingRep        timeout,
-                BasicTaskQueue** queue,
-                void*            control_block
+                OUT QueuedTask*      item,
+                TimingRep            timeout,
+                OUT BasicTaskQueue** queue,
+                void*                control_block
             ) {
                 Priorities::const_iterator it = Strategy{}(&m_state, m_priorities);
 
-                // Note that to make this work we probably need to use actual
-                // inheritance across queues so that we can say "use this in-common
-                // function". At which point we probably don't even need to use tuple
-                // any more as opposed to an array of pointers to the base type.
-                invoke_on(m_queues, it->second, dequeue
+                // TODO(Matthew): need to obtain the correct control block, here we do
+                //                not achieve this, instead just passing the whole load
+                //                of control blocks over to the underlying queue we are
+                //                to try to dequeue from.
 
-                return false;
+                QueuedTask tmp = {};
+                invoke_at(
+                    m_queues, it->second, dequeue, &tmp, timeout, queue, control_block
+                );
+
+                *item = tmp;
+
+                if (tmp.task != nullptr) {
+                    // TODO(Matthew): try next lowest priority queue, and so on til end,
+                    //                then wrap round to highest. Once reaching the
+                    //                queue we started at without obtaining a task,
+                    //                return false.
+                }
             }
         protected:
             std::tuple<Queues...>    m_queues;
             Priorities               m_priorities;
             typename Strategy::State m_state;
         };
+
+        template <IsPriorityTaskQueueStrategy Strategy, IsTaskQueue... Queues>
+        bool dequeue(
+            GenericPriorityTaskQueue<Strategy, Queues...>& queue,
+            OUT QueuedTask*                                item,
+            TimingRep                                      timeout,
+            OUT BasicTaskQueue**                           queue_out,
+            void*                                          control_block
+        ) {
+            return queue.dequeue(item, timeout, queue_out, control_block);
+        }
 
         template <IsTaskQueue... Queues>
         using PriorityTaskQueue = GenericPriorityTaskQueue<SomeStrategy, Queues...>;

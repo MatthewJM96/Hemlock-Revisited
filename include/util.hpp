@@ -23,19 +23,29 @@ namespace hemlock {
         );
     }
 
-    template <typename Func, typename... Types, size_t... Indices>
+    template <typename Func, typename... Types, size_t... Indices, typename... Args>
     void invoke_at_impl(
         std::tuple<Types...>& tuple,
         std::index_sequence<Indices...>,
         size_t idx,
-        Func   func
+        Func   func,
+        Args&&... args
     ) {
-        ((void)(Indices == idx && (func(std::get<Indices>(tuple)), true)), ...);
+        ((void
+         )(Indices == idx
+           && (func(std::get<Indices>(tuple), std::forward<Args>(args)...), true)),
+         ...);
     }
 
-    template <typename Func, typename... Types>
-    void invoke_at(std::tuple<Types...>& tuple, size_t idx, Func func) {
-        invoke_at_impl(tuple, std::make_index_sequence<sizeof...(Types)>{}, idx, func);
+    template <typename Func, typename... Types, typename... Args>
+    void invoke_at(std::tuple<Types...>& tuple, size_t idx, Func func, Args&&... args) {
+        invoke_at_impl(
+            tuple,
+            std::make_index_sequence<sizeof...(Types)>{},
+            idx,
+            func,
+            std::forward<Args>(args)...
+        );
     }
 }  // namespace hemlock
 

@@ -127,6 +127,16 @@ namespace hemlock {
             hmem::StackAllocRingBuffer<TimingRep, 10> m_timings;
         };
 
+        bool dequeue(
+            BasicTaskQueue&      queue,
+            OUT QueuedTask*      item,
+            TimingRep            timeout,
+            OUT BasicTaskQueue** queue_out,
+            void*                control_block
+        ) {
+            return queue.dequeue(item, timeout, queue_out, control_block);
+        }
+
         /**
          * @brief Defines the requirements on a satisfactory task queue type.
          *
