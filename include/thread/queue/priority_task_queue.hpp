@@ -1,7 +1,7 @@
 #ifndef __hemlock_thread_queue_priority_task_queue
 #define __hemlock_thread_queue_priority_task_queue
 
-#include "thread/queue/state.hpp"
+#include "thread/queue/state.h"
 
 namespace hemlock {
     namespace thread {
@@ -36,13 +36,12 @@ namespace hemlock {
                 template <size_t... Indices>
                 void
                 init_control_blocks(GenericPriorityTaskQueue* queue, std::index_sequence<Indices...>) {
-                    control_blocks = {({ std::get<Indices>(queue->m_queues) }, ...) }
+                    control_blocks = { { std::get<Indices>(queue->m_queues) }... };
                 }
 
                 template <size_t... Indices>
                 void init_control_block_ptrs(std::index_sequence<Indices...>) {
-                    control_block_ptrs
-                        = {({ &std::get<Indices>(control_blocks) }, ...) }
+                    control_block_ptrs = { &std::get<Indices>(control_blocks)... };
                 }
 
                 ControlBlock(GenericPriorityTaskQueue* queue) {
@@ -83,26 +82,60 @@ namespace hemlock {
                 OUT BasicTaskQueue** queue,
                 void*                control_block
             ) {
-                Priorities::const_iterator it = Strategy{}(&m_state, m_priorities);
+                auto start_it = Strategy{}(&m_state, m_priorities);
+                auto curr_it  = start_it;
 
-                // TODO(Matthew): need to obtain the correct control block, here we do
-                //                not achieve this, instead just passing the whole load
-                //                of control blocks over to the underlying queue we are
-                //                to try to dequeue from.
+                while (curr_it != m_priorities.end()) {
+                    void* underyling_control_block
+                        = reinterpret_cast<ControlBlock*>(control_block)
+                              ->control_block_ptrs[curr_it->second];
 
-                QueuedTask tmp = {};
-                invoke_at(
-                    m_queues, it->second, dequeue, &tmp, timeout, queue, control_block
-                );
+                    QueuedTask tmp = {};
+                    invoke_at(
+                        m_queues,
+                        curr_it->second,
+                        dequeue,
+                        &tmp,
+                        timeout,
+                        queue,
+                        underyling_control_block
+                    );
 
-                *item = tmp;
+                    if (tmp.task != nullptr) {
+                        *item = tmp;
+                        return true;
+                    }
 
-                if (tmp.task != nullptr) {
-                    // TODO(Matthew): try next lowest priority queue, and so on til end,
-                    //                then wrap round to highest. Once reaching the
-                    //                queue we started at without obtaining a task,
-                    //                return false.
+                    ++curr_it;
                 }
+
+                curr_it = m_priorities.cbegin();
+
+                while (curr_it != start_it) {
+                    void* underyling_control_block
+                        = reinterpret_cast<ControlBlock*>(control_block)
+                              ->control_block_ptrs[curr_it->second];
+
+                    QueuedTask tmp = {};
+                    invoke_at(
+                        m_queues,
+                        curr_it->second,
+                        dequeue,
+                        &tmp,
+                        timeout,
+                        queue,
+                        underyling_control_block
+                    );
+
+                    if (tmp.task != nullptr) {
+                        *item = tmp;
+                        return true;
+                    }
+
+                    ++curr_it;
+                }
+
+                return false;
             }
         protected:
             std::tuple<Queues...>    m_queues;
@@ -121,8 +154,19 @@ namespace hemlock {
             return queue.dequeue(item, timeout, queue_out, control_block);
         }
 
+        struct HighestPriorityStrategy {
+            // TODO(Matthew): support stateless strategies.
+            using State = ui8;
+
+            Priorities::const_iterator
+            operator()(State*, const Priorities& priorities) {
+                return priorities.cbegin();
+            }
+        };
+
         template <IsTaskQueue... Queues>
-        using PriorityTaskQueue = GenericPriorityTaskQueue<SomeStrategy, Queues...>;
+        using PriorityTaskQueue
+            = GenericPriorityTaskQueue<HighestPriorityStrategy, Queues...>;
     }  // namespace thread
 }  // namespace hemlock
 namespace hthread = hemlock::thread;

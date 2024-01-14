@@ -1,7 +1,7 @@
 #ifndef __hemlock_thread_state_hpp
 #define __hemlock_thread_state_hpp
 
-#include "thread/queue/state.hpp"
+#include "thread/queue/state.h"
 
 namespace hemlock {
     namespace thread {
