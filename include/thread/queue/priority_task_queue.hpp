@@ -33,12 +33,28 @@ namespace hemlock {
             }
 
             struct ControlBlock {
-                ControlBlock(GenericPriorityTaskQueue* queue) {
-                    for (size_t idx = 0; idx < sizeof...(Queues); ++idx) {
-                        std::get<idx>(control_blocks) = { std::get<idx>(m_queues) };
-                    }
-                };
+                template <size_t... Indices>
+                void
+                init_control_blocks(GenericPriorityTaskQueue* queue, std::index_sequence<Indices...>) {
+                    control_blocks = {({ std::get<Indices>(queue->m_queues) }, ...) }
+                }
 
+                template <size_t... Indices>
+                void init_control_block_ptrs(std::index_sequence<Indices...>) {
+                    control_block_ptrs
+                        = {({ &std::get<Indices>(control_blocks) }, ...) }
+                }
+
+                ControlBlock(GenericPriorityTaskQueue* queue) {
+                    init_control_blocks(
+                        queue, std::make_index_sequence<sizeof...(Queues)>()
+                    );
+
+                    init_control_block_ptrs(std::make_index_sequence<sizeof...(Queues)>(
+                    ));
+                }
+
+                std::array<void*, sizeof...(Queues)> control_block_ptrs;
                 typename std::tuple<typename Queues::ControlBlock...> control_blocks;
             };
 
