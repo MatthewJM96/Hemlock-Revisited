@@ -22,7 +22,7 @@ namespace hemlock {
               ) {
                      {
                          candidate.operator()(state, priorities)
-                         } -> std::same_as<Priorities::const_iterator>;
+                     } -> std::same_as<Priorities::const_iterator>;
                  };
 
         template <IsPriorityTaskQueueStrategy Strategy, IsTaskQueue... Queues>
@@ -36,7 +36,11 @@ namespace hemlock {
                 template <size_t... Indices>
                 void
                 init_control_blocks(GenericPriorityTaskQueue* queue, std::index_sequence<Indices...>) {
-                    control_blocks = { { std::get<Indices>(queue->m_queues) }... };
+                    control_blocks =
+                        typename std::tuple<typename Queues::ControlBlock...>(
+                            typename Queues::ControlBlock{
+                                &std::get<Indices>(queue->m_queues) }...
+                        );
                 }
 
                 template <size_t... Indices>
@@ -44,7 +48,7 @@ namespace hemlock {
                     control_block_ptrs = { &std::get<Indices>(control_blocks)... };
                 }
 
-                ControlBlock(GenericPriorityTaskQueue* queue) {
+                ControlBlock(GenericPriorityTaskQueue* queue) : control_blocks{} {
                     init_control_blocks(
                         queue, std::make_index_sequence<sizeof...(Queues)>()
                     );
@@ -53,8 +57,8 @@ namespace hemlock {
                     ));
                 }
 
-                std::array<void*, sizeof...(Queues)> control_block_ptrs;
                 typename std::tuple<typename Queues::ControlBlock...> control_blocks;
+                std::array<void*, sizeof...(Queues)> control_block_ptrs;
             };
 
             void set_priority(size_t index, size_t priority) {

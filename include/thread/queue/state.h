@@ -45,17 +45,30 @@ namespace hemlock {
          * that adds tracking of timing and construction of a simple control block for
          * threads.
          */
-        class BasicTaskQueue : private moodycamel::BlockingConcurrentQueue<QueuedTask> {
+        class BasicTaskQueue :
+            protected moodycamel::BlockingConcurrentQueue<QueuedTask> {
         public:
-            struct ControlBlock {
-                ControlBlock(moodycamel::BlockingConcurrentQueue<QueuedTask>* queue) :
-                    producer(moodycamel::ProducerToken(*queue)),
-                    consumer(moodycamel::ConsumerToken(*queue)){
-                        // Empty.
-                    };
+            class ControlBlock {
+            public:
+                ControlBlock() : m_producer{}, m_consumer{} { }
 
-                moodycamel::ProducerToken producer;
-                moodycamel::ConsumerToken consumer;
+                ControlBlock(moodycamel::BlockingConcurrentQueue<QueuedTask>* queue) {
+                    new (reinterpret_cast<moodycamel::ProducerToken*>(m_producer))
+                        moodycamel::ProducerToken{ *queue };
+                    new (reinterpret_cast<moodycamel::ConsumerToken*>(m_consumer))
+                        moodycamel::ConsumerToken{ *queue };
+                };
+
+                inline moodycamel::ProducerToken& producer() {
+                    return *reinterpret_cast<moodycamel::ProducerToken*>(m_producer);
+                }
+
+                inline moodycamel::ConsumerToken& consumer() {
+                    return *reinterpret_cast<moodycamel::ConsumerToken*>(m_consumer);
+                }
+            protected:
+                ui8 m_producer[sizeof(moodycamel::ProducerToken)];
+                ui8 m_consumer[sizeof(moodycamel::ConsumerToken)];
             };
 
             ControlBlock* register_thread() { return new ControlBlock{ this }; }
@@ -79,7 +92,7 @@ namespace hemlock {
 
                 if (control_block) {
                     return self->enqueue(
-                        reinterpret_cast<ControlBlock*>(control_block)->producer, item
+                        reinterpret_cast<ControlBlock*>(control_block)->producer(), item
                     );
                 } else {
                     return self->enqueue(item);
@@ -92,7 +105,7 @@ namespace hemlock {
 
                 if (control_block) {
                     return self->enqueue(
-                        reinterpret_cast<ControlBlock*>(control_block)->producer,
+                        reinterpret_cast<ControlBlock*>(control_block)->producer(),
                         std::move(item)
                     );
                 } else {
@@ -113,7 +126,7 @@ namespace hemlock {
 
                 if (control_block) {
                     return self->wait_dequeue_timed(
-                        reinterpret_cast<ControlBlock*>(control_block)->consumer,
+                        reinterpret_cast<ControlBlock*>(control_block)->consumer(),
                         *item,
                         timeout
                     );
@@ -160,13 +173,13 @@ namespace hemlock {
               ) {
                      {
                          candidate.register_thread()
-                         } -> std::same_as<typename Candidate::ControlBlock*>;
+                     } -> std::same_as<typename Candidate::ControlBlock*>;
                      {
                          candidate.register_threads(count)
-                         } -> std::same_as<typename Candidate::ControlBlock*>;
+                     } -> std::same_as<typename Candidate::ControlBlock*>;
                      {
                          candidate.dequeue(item, timeout, queue, control_block)
-                         } -> std::same_as<bool>;
+                     } -> std::same_as<bool>;
                  };
     }  // namespace thread
 }  // namespace hemlock
