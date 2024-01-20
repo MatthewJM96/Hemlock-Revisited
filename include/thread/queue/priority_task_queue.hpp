@@ -62,7 +62,18 @@ namespace hemlock {
             };
 
             void set_priority(size_t index, size_t priority) {
-                m_priorities[index] = priority;
+                // TODO(Matthew): we need to make this threadsafe... OR we require that
+                //                the caller know not to change priorities once the
+                //                queue is in use - this should probably be the case.
+
+                auto it = std::find_if(
+                    m_priorities.begin(),
+                    m_priorities.end(),
+                    [index](const auto& el) { return el->second == index; }
+                );
+
+                m_priorities.erase(it);
+                m_priorities[priority] = index;
             }
 
             ControlBlock* register_thread() { return new ControlBlock{ this }; }
