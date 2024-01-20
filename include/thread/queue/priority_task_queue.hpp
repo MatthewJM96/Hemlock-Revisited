@@ -29,7 +29,7 @@ namespace hemlock {
         class GenericPriorityTaskQueue {
         public:
             GenericPriorityTaskQueue() : m_queues{}, m_priorities{}, m_state{} {
-                // Empty.
+                init_priorities(std::make_index_sequence<sizeof...(Queues)>());
             }
 
             struct ControlBlock {
@@ -142,6 +142,14 @@ namespace hemlock {
                 return false;
             }
         protected:
+            template <size_t... Indices>
+            void init_priorities(std::index_sequence<Indices...>) {
+                m_priorities = Priorities{
+                    {Indices, Indices}
+                    ...
+                };
+            }
+
             std::tuple<Queues...>    m_queues;
             Priorities               m_priorities;
             typename Strategy::State m_state;
