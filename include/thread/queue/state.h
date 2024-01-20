@@ -45,18 +45,17 @@ namespace hemlock {
          * that adds tracking of timing and construction of a simple control block for
          * threads.
          */
-        class BasicTaskQueue :
-            protected moodycamel::BlockingConcurrentQueue<QueuedTask> {
+        class BasicTaskQueue {
         public:
             class ControlBlock {
             public:
                 ControlBlock() : m_producer{}, m_consumer{} { }
 
-                ControlBlock(moodycamel::BlockingConcurrentQueue<QueuedTask>* queue) {
+                ControlBlock(BasicTaskQueue* queue) {
                     new (reinterpret_cast<moodycamel::ProducerToken*>(m_producer))
-                        moodycamel::ProducerToken{ *queue };
+                        moodycamel::ProducerToken{ queue->m_queue };
                     new (reinterpret_cast<moodycamel::ConsumerToken*>(m_consumer))
-                        moodycamel::ConsumerToken{ *queue };
+                        moodycamel::ConsumerToken{ queue->m_queue };
                 };
 
                 inline moodycamel::ProducerToken& producer() {
@@ -87,29 +86,23 @@ namespace hemlock {
             }
 
             bool enqueue(const QueuedTask& item, void* control_block) {
-                auto self = reinterpret_cast<
-                    moodycamel::BlockingConcurrentQueue<QueuedTask>*>(this);
-
                 if (control_block) {
-                    return self->enqueue(
+                    return m_queue.enqueue(
                         reinterpret_cast<ControlBlock*>(control_block)->producer(), item
                     );
                 } else {
-                    return self->enqueue(item);
+                    return m_queue.enqueue(item);
                 }
             }
 
             bool enqueue(QueuedTask&& item, void* control_block) {
-                auto self = reinterpret_cast<
-                    moodycamel::BlockingConcurrentQueue<QueuedTask>*>(this);
-
                 if (control_block) {
-                    return self->enqueue(
+                    return m_queue.enqueue(
                         reinterpret_cast<ControlBlock*>(control_block)->producer(),
                         std::move(item)
                     );
                 } else {
-                    return self->enqueue(std::move(item));
+                    return m_queue.enqueue(std::move(item));
                 }
             }
 
@@ -119,25 +112,23 @@ namespace hemlock {
                 BasicTaskQueue** queue,
                 void*            control_block
             ) {
-                auto self = reinterpret_cast<
-                    moodycamel::BlockingConcurrentQueue<QueuedTask>*>(this);
-
                 *queue = this;
 
                 if (control_block) {
-                    return self->wait_dequeue_timed(
+                    return m_queue.wait_dequeue_timed(
                         reinterpret_cast<ControlBlock*>(control_block)->consumer(),
                         *item,
                         timeout
                     );
                 } else {
-                    return self->wait_dequeue_timed(*item, timeout);
+                    return m_queue.wait_dequeue_timed(*item, timeout);
                 }
             }
 
             void register_timing(TimingRep timing) { m_timings.emplace_back(timing); }
         protected:
-            hmem::StackAllocRingBuffer<TimingRep, 10> m_timings;
+            moodycamel::BlockingConcurrentQueue<QueuedTask> m_queue;
+            hmem::StackAllocRingBuffer<TimingRep, 10>       m_timings;
         };
 
         bool dequeue(
