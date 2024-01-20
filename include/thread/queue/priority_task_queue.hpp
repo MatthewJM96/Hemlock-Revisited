@@ -25,7 +25,7 @@ namespace hemlock {
                      } -> std::same_as<Priorities::const_iterator>;
                  };
 
-        template <IsPriorityTaskQueueStrategy Strategy, IsTaskQueue... Queues>
+        template <IsPriorityTaskQueueStrategy Strategy, IsBasicTaskQueue... Queues>
         class GenericPriorityTaskQueue {
         public:
             GenericPriorityTaskQueue() : m_queues{}, m_priorities{}, m_state{} {
@@ -89,6 +89,28 @@ namespace hemlock {
                 }
 
                 return control_blocks;
+            }
+
+            template <size_t QueueIndex>
+            bool enqueue(const QueuedTask& item, void* control_block) {
+                auto& queue                    = std::get<QueueIndex>(m_queues);
+                auto& underlying_control_block = std::get<QueueIndex>(
+                    reinterpret_cast<ControlBlock*>(control_block)->control_blocks
+                );
+
+                return queue.enqueue(item, &underlying_control_block);
+            }
+
+            template <size_t QueueIndex>
+            bool enqueue(QueuedTask&& item, void* control_block) {
+                auto& queue                    = std::get<QueueIndex>(m_queues);
+                auto& underlying_control_block = std::get<QueueIndex>(
+                    reinterpret_cast<ControlBlock*>(control_block)->control_blocks
+                );
+
+                return queue.enqueue(
+                    std::forward<QueuedTask>(item), underlying_control_block
+                );
             }
 
             bool dequeue(

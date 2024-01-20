@@ -172,6 +172,29 @@ namespace hemlock {
                          candidate.dequeue(item, timeout, queue, control_block)
                      } -> std::same_as<bool>;
                  };
+
+        /**
+         * @brief Defines the requirements on a basic task queue type.
+         *
+         * NOTE: it is required that any basic queue type in addition to satisfying the
+         * premise of a compound queue type, implements basic enqueue functions that
+         * compound queue types may expose access to. The API for exposing these
+         * enqueue functions in compound queue types is not presently fixed.
+         *
+         * @tparam Candidate The candidate typename for being a valid basic task queue
+         * type.
+         */
+        template <typename Candidate>
+        concept IsBasicTaskQueue = IsTaskQueue<Candidate>
+                                   && requires (
+                                       Candidate                         candidate,
+                                       QueuedTask                        item,
+                                       typename Candidate::ControlBlock* control_block
+                                   ) {
+                                          {
+                                              candidate.enqueue(item, control_block)
+                                          } -> std::same_as<bool>;
+                                      };
     }  // namespace thread
 }  // namespace hemlock
 namespace hthread = hemlock::thread;
