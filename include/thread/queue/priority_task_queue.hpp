@@ -109,7 +109,7 @@ namespace hemlock {
                     invoke_at(
                         m_queues,
                         curr_it->second,
-                        dequeue,
+                        hthread::dequeue,
                         &tmp,
                         timeout,
                         queue,
@@ -135,7 +135,7 @@ namespace hemlock {
                     invoke_at(
                         m_queues,
                         curr_it->second,
-                        dequeue,
+                        hthread::dequeue,
                         &tmp,
                         timeout,
                         queue,
