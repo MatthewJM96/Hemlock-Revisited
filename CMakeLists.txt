@@ -202,6 +202,14 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_BINARY_DIR}")
 
 ########################################################################################
 
+###################################
+#     Libheatmap Installation     #
+###################################
+
+add_subdirectory("deps/libheatmap")
+
+########################################################################################
+
 ########################################
 #     Hemlock Dependency Discovery     #
 ########################################
@@ -442,100 +450,8 @@ target_link_libraries(Hemlock_Revisited
     ${Hemlock_Libraries}
 )
 
-# TODO(Matthew): can we make the below better, it doesn't allow multiple compiler
-#                choices on Windows and Mac, and on Linux at most one choice of GCC and
-#                clang respectively.
-
-# Bit of a mess but below is how we store dependencies that we are currently manually
-# compiling. On Linux we support release and debug compilations with GCC and clang, on
-# MacOS and Windows just release and debug with a single version of apple-clang and msvc
-# respectively.
-
-if (HEMLOCK_CI_BUILD)
-    target_include_directories(Hemlock_Revisited
-        SYSTEM
-        PUBLIC
-        "${PROJECT_SOURCE_DIR}/deps/include"
-    )
-
-    target_link_directories(Hemlock_Revisited
-        PUBLIC
-        "${PROJECT_SOURCE_DIR}/deps/lib"
-    )
-else()
-    if (APPLE OR MSVC)
-        if(CMAKE_BUILD_TYPE STREQUAL "Release" OR HEMLOCK_FAST_DEBUG)
-            target_include_directories(Hemlock_Revisited
-                SYSTEM
-                PUBLIC
-                "${PROJECT_SOURCE_DIR}/deps/Release/include"
-            )
-
-            target_link_directories(Hemlock_Revisited
-                PUBLIC
-                "${PROJECT_SOURCE_DIR}/deps/Release/lib"
-            )
-        else()
-            target_include_directories(Hemlock_Revisited
-                SYSTEM
-                PUBLIC
-                "${PROJECT_SOURCE_DIR}/deps/Debug/include"
-            )
-
-            target_link_directories(Hemlock_Revisited
-                PUBLIC
-                "${PROJECT_SOURCE_DIR}/deps/Debug/lib"
-            )
-        endif()
-    else()
-        if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-            if(CMAKE_BUILD_TYPE STREQUAL "Release" OR HEMLOCK_FAST_DEBUG)
-                target_include_directories(Hemlock_Revisited
-                    SYSTEM
-                    PUBLIC
-                    "${PROJECT_SOURCE_DIR}/deps/GCC-x64-Release/include"
-                )
-
-                target_link_directories(Hemlock_Revisited
-                    PUBLIC
-                    "${PROJECT_SOURCE_DIR}/deps/GCC-x64-Release/lib"
-                )
-            else()
-                target_include_directories(Hemlock_Revisited
-                    SYSTEM
-                    PUBLIC
-                    "${PROJECT_SOURCE_DIR}/deps/GCC-x64-Debug/include"
-                )
-
-                target_link_directories(Hemlock_Revisited
-                    PUBLIC
-                    "${PROJECT_SOURCE_DIR}/deps/GCC-x64-Debug/lib"
-                )
-            endif()
-        elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-            if(CMAKE_BUILD_TYPE STREQUAL "Release" OR HEMLOCK_FAST_DEBUG)
-                target_include_directories(Hemlock_Revisited
-                    SYSTEM
-                    PUBLIC
-                    "${PROJECT_SOURCE_DIR}/deps/Clang-x64-Release/include"
-                )
-
-                target_link_directories(Hemlock_Revisited
-                    PUBLIC
-                    "${PROJECT_SOURCE_DIR}/deps/Clang-x64-Release/lib"
-                )
-            else()
-                target_include_directories(Hemlock_Revisited
-                    SYSTEM
-                    PUBLIC
-                    "${PROJECT_SOURCE_DIR}/deps/Clang-x64-Debug/include"
-                )
-
-                target_link_directories(Hemlock_Revisited
-                    PUBLIC
-                    "${PROJECT_SOURCE_DIR}/deps/Clang-x64-Debug/lib"
-                )
-            endif()
-        endif()
-    endif()
-endif()
+target_include_directories(Hemlock_Revisited
+    SYSTEM
+    PUBLIC
+    "${PROJECT_SOURCE_DIR}/deps"
+)
