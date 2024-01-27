@@ -24,6 +24,34 @@ include(${CMAKE_BINARY_DIR}/cmake/conan.cmake)
 
 ########################################################################################
 
+################################
+#     Setup Git Submodules     #
+################################
+
+option(GIT_SUBMODULE "Whether to initialise and update submodules during build." ON)
+
+find_package(Git QUIET)
+if(GIT_FOUND)
+    execute_process(COMMAND ${GIT_EXECUTABLE} -C "${CMAKE_CURRENT_SOURCE_DIR}" rev-parse
+                    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+                    RESULT_VARIABLE GIT_REPO_RESULT)
+    if(GIT_REPO_RESULT EQUAL "0" AND GIT_SUBMODULE)
+        message(STATUS "Initialising and updating submodules as needed.")
+        execute_process(COMMAND ${GIT_EXECUTABLE} submodule update --init --recursive
+                        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+                        RESULT_VARIABLE GIT_SUBMOD_RESULT)
+        if(NOT GIT_SUBMOD_RESULT EQUAL "0")
+            message(FATAL_ERROR "git submodule update --init --recursive failed with ${GIT_SUBMOD_RESULT}, please checkout submodules")
+        endif()
+    endif()
+endif()
+
+if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/deps/libheatmap/Makefile")
+    message(FATAL_ERROR "The submodules were not downloaded! GIT_SUBMODULE was turned off or failed. Please update submodules and try again.")
+endif()
+
+########################################################################################
+
 ###########################
 #     Hemlock Options     #
 ###########################
