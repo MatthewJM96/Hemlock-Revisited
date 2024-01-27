@@ -24,6 +24,34 @@ include(${CMAKE_BINARY_DIR}/cmake/conan.cmake)
 
 ########################################################################################
 
+################################
+#     Setup Git Submodules     #
+################################
+
+option(GIT_SUBMODULE "Whether to initialise and update submodules during build." ON)
+
+find_package(Git QUIET)
+if(GIT_FOUND)
+    execute_process(COMMAND ${GIT_EXECUTABLE} -C "${CMAKE_CURRENT_SOURCE_DIR}" rev-parse
+                    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+                    RESULT_VARIABLE GIT_REPO_RESULT)
+    if(GIT_REPO_RESULT EQUAL "0" AND GIT_SUBMODULE)
+        message(STATUS "Initialising and updating submodules as needed.")
+        execute_process(COMMAND ${GIT_EXECUTABLE} submodule update --init --recursive
+                        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+                        RESULT_VARIABLE GIT_SUBMOD_RESULT)
+        if(NOT GIT_SUBMOD_RESULT EQUAL "0")
+            message(FATAL_ERROR "git submodule update --init --recursive failed with ${GIT_SUBMOD_RESULT}, please checkout submodules")
+        endif()
+    endif()
+endif()
+
+if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/deps/libheatmap/Makefile")
+    message(FATAL_ERROR "The submodules were not downloaded! GIT_SUBMODULE was turned off or failed. Please update submodules and try again.")
+endif()
+
+########################################################################################
+
 ###########################
 #     Hemlock Options     #
 ###########################
@@ -130,6 +158,7 @@ set(Hemlock_Requirements
     libpng/1.6.39
     concurrentqueue/1.0.3
     boost/1.83.0
+    fastnoise2/0.10.0-alpha
     bullet3/3.24
     entt/3.10.1
     yaml-cpp/0.7.0
@@ -173,6 +202,14 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_BINARY_DIR}")
 
 ########################################################################################
 
+###################################
+#     Libheatmap Installation     #
+###################################
+
+add_subdirectory("deps/libheatmap")
+
+########################################################################################
+
 ########################################
 #     Hemlock Dependency Discovery     #
 ########################################
@@ -194,6 +231,7 @@ find_package(SDL2_ttf REQUIRED)
 find_package(PNG REQUIRED)
 find_package(concurrentqueue REQUIRED)
 find_package(Boost COMPONENTS iostreams REQUIRED)
+find_package(fastnoise2 REQUIRED)
 find_package(Bullet REQUIRED)
 find_package(EnTT REQUIRED)
 find_package(yaml-cpp REQUIRED)
@@ -305,6 +343,7 @@ set(Hemlock_Include_Dirs
     ${PNG_INCLUDE_DIRS}
     ${concurrentqueue_INCLUDE_DIRS}
     ${Boost_INCLUDE_DIRS}
+    ${fastnoise2_INCLUDE_DIRS}
     ${Bullet_INCLUDE_DIRS}
     ${EnTT_INCLUDE_DIRS}
     ${yaml-cpp_INCLUDE_DIRS}
@@ -315,24 +354,14 @@ set(Hemlock_Libraries
     SDL2_ttf::SDL2_ttf
     PNG::PNG
     Boost::iostreams
+    fastnoise2::fastnoise2
     Bullet::Bullet
     yaml-cpp
     heatmap
 )
 
-# Noise generation library.
-
-if(CMAKE_BUILD_TYPE STREQUAL "Release" OR HEMLOCK_FAST_DEBUG)
-    set(Hemlock_Libraries
-        ${Hemlock_Libraries}
-        FastNoise
-    )
-else()
-    set(Hemlock_Libraries
-        ${Hemlock_Libraries}
-        FastNoiseD
-    )
-endif()
+# TODO(Matthew): can we restore the effect of FAST_DEBUG using release build of FastNoise2?
+#                   maybe a method that does this for the whole of our dependencies
 
 # Rendering API includes and libraries.
 
@@ -413,100 +442,8 @@ target_link_libraries(Hemlock_Revisited
     ${Hemlock_Libraries}
 )
 
-# TODO(Matthew): can we make the below better, it doesn't allow multiple compiler
-#                choices on Windows and Mac, and on Linux at most one choice of GCC and
-#                clang respectively.
-
-# Bit of a mess but below is how we store dependencies that we are currently manually
-# compiling. On Linux we support release and debug compilations with GCC and clang, on
-# MacOS and Windows just release and debug with a single version of apple-clang and msvc
-# respectively.
-
-if (HEMLOCK_CI_BUILD)
-    target_include_directories(Hemlock_Revisited
-        SYSTEM
-        PUBLIC
-        "${PROJECT_SOURCE_DIR}/deps/include"
-    )
-
-    target_link_directories(Hemlock_Revisited
-        PUBLIC
-        "${PROJECT_SOURCE_DIR}/deps/lib"
-    )
-else()
-    if (APPLE OR MSVC)
-        if(CMAKE_BUILD_TYPE STREQUAL "Release" OR HEMLOCK_FAST_DEBUG)
-            target_include_directories(Hemlock_Revisited
-                SYSTEM
-                PUBLIC
-                "${PROJECT_SOURCE_DIR}/deps/Release/include"
-            )
-
-            target_link_directories(Hemlock_Revisited
-                PUBLIC
-                "${PROJECT_SOURCE_DIR}/deps/Release/lib"
-            )
-        else()
-            target_include_directories(Hemlock_Revisited
-                SYSTEM
-                PUBLIC
-                "${PROJECT_SOURCE_DIR}/deps/Debug/include"
-            )
-
-            target_link_directories(Hemlock_Revisited
-                PUBLIC
-                "${PROJECT_SOURCE_DIR}/deps/Debug/lib"
-            )
-        endif()
-    else()
-        if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-            if(CMAKE_BUILD_TYPE STREQUAL "Release" OR HEMLOCK_FAST_DEBUG)
-                target_include_directories(Hemlock_Revisited
-                    SYSTEM
-                    PUBLIC
-                    "${PROJECT_SOURCE_DIR}/deps/GCC-x64-Release/include"
-                )
-
-                target_link_directories(Hemlock_Revisited
-                    PUBLIC
-                    "${PROJECT_SOURCE_DIR}/deps/GCC-x64-Release/lib"
-                )
-            else()
-                target_include_directories(Hemlock_Revisited
-                    SYSTEM
-                    PUBLIC
-                    "${PROJECT_SOURCE_DIR}/deps/GCC-x64-Debug/include"
-                )
-
-                target_link_directories(Hemlock_Revisited
-                    PUBLIC
-                    "${PROJECT_SOURCE_DIR}/deps/GCC-x64-Debug/lib"
-                )
-            endif()
-        elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-            if(CMAKE_BUILD_TYPE STREQUAL "Release" OR HEMLOCK_FAST_DEBUG)
-                target_include_directories(Hemlock_Revisited
-                    SYSTEM
-                    PUBLIC
-                    "${PROJECT_SOURCE_DIR}/deps/Clang-x64-Release/include"
-                )
-
-                target_link_directories(Hemlock_Revisited
-                    PUBLIC
-                    "${PROJECT_SOURCE_DIR}/deps/Clang-x64-Release/lib"
-                )
-            else()
-                target_include_directories(Hemlock_Revisited
-                    SYSTEM
-                    PUBLIC
-                    "${PROJECT_SOURCE_DIR}/deps/Clang-x64-Debug/include"
-                )
-
-                target_link_directories(Hemlock_Revisited
-                    PUBLIC
-                    "${PROJECT_SOURCE_DIR}/deps/Clang-x64-Debug/lib"
-                )
-            endif()
-        endif()
-    endif()
-endif()
+target_include_directories(Hemlock_Revisited
+    SYSTEM
+    PUBLIC
+    "${PROJECT_SOURCE_DIR}/deps"
+)

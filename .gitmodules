@@ -1,0 +1,3 @@
+[submodule "deps/libheatmap"]
+	path = deps/libheatmap
+	url = https://github.com/MatthewJM96/libheatmap.git
