@@ -1,9 +1,6 @@
 # Dev
 .vscode
 
-# Dependencies
-deps/
-
 # Working directory.
 data/
 
