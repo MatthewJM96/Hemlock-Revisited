@@ -68,42 +68,6 @@ jobs:
         echo "home=$HOME" >> "$GITHUB_OUTPUT" ;
         echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
 
-    - name: Install non-conan dependencies
-      run: >
-        source ${{ github.workspace }}/.venv/bin/activate ;
-        mkdir -p ${{ github.workspace }}/deps/bin ;
-        mkdir -p ${{ github.workspace }}/deps/include ;
-        mkdir -p ${{ github.workspace }}/deps/lib ;
-        mkdir -p ${{ github.workspace }}/tmp ;
-        cd ${{ github.workspace }}/tmp ;
-        wget https://github.com/Auburn/FastNoise2/archive/refs/tags/v0.10.0-alpha.zip ;
-        unzip v0.10.0-alpha.zip ;
-        mkdir -p FastNoise2-0.10.0-alpha/build ;
-        cd FastNoise2-0.10.0-alpha/build ;
-        cmake -S ..
-        -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}
-        -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
-        -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
-        -DFASTNOISE2_NOISETOOL=OFF
-        -DFASTNOISE2_TESTS=OFF
-        -B .;
-        cmake --build . --config ${{ matrix.build_type }} ;
-        cmake --install . --prefix ${{ github.workspace }}/deps ;
-        cd ${{ github.workspace }}/tmp ;
-        git clone https://github.com/MatthewJM96/libheatmap.git ;
-        cd libheatmap ;
-        cmake -B build
-        -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}
-        -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
-        -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
-        -S . ;
-        cmake --build build --config ${{ matrix.build_type }} ;
-        mv build/libheatmap.a ${{ github.workspace }}/deps/lib ;
-        mkdir -p ${{ github.workspace }}/deps/include/libheatmap ;
-        cp heatmap.h ${{ github.workspace }}/deps/include/libheatmap ;
-        mkdir -p ${{ github.workspace }}/deps/include/libheatmap/colorschemes ;
-        cp colorschemes/*.h ${{ github.workspace }}/deps/include/libheatmap/colorschemes
-
     - name: Cache conan dependencies
       id: cache-conan
       uses: actions/cache@v3
@@ -181,34 +145,6 @@ jobs:
       run: >
         echo "home=$HOME" >> $env:GITHUB_OUTPUT ;
         echo "build-output-dir=${{ github.workspace }}\build" >> $env:GITHUB_OUTPUT
-
-    - name: Install non-conan dependencies
-      run: >
-        cd ${{ github.workspace }} ;
-        .\.venv\Scripts\activate ;
-        mkdir -p ${{ github.workspace }}/deps/bin ;
-        mkdir -p ${{ github.workspace }}/deps/include ;
-        mkdir -p ${{ github.workspace }}/deps/lib ;
-        mkdir -p ${{ github.workspace }}\tmp ;
-        cd ${{ github.workspace }}\tmp ;
-        Invoke-WebRequest 'https://github.com/Auburn/FastNoise2/releases/download/v0.10.0-alpha/FastNoise2-v0.10.0-alpha-Win64-MSVC.zip' -OutFile FastNoise2.zip ;
-        Expand-Archive -Path FastNoise2.zip -DestinationPath ${{ github.workspace }}\tmp ;
-        mv FastNoise2/* ${{ github.workspace }}\deps ;
-        Invoke-WebRequest 'https://github.com/MatthewJM96/libheatmap/archive/refs/heads/master.zip' -OutFile libheatmap.zip ;
-        Expand-Archive -Path libheatmap.zip -DestinationPath ${{ github.workspace }}\tmp ;
-        cd libheatmap-master ;
-        cmake -B build
-        -DCMAKE_CXX_COMPILER=cl
-        -DCMAKE_C_COMPILER=cl
-        -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
-        -A x64
-        -S . ;
-        cmake --build build --config ${{ matrix.build_type }} ;
-        mv build/${{ matrix.build_type }}/heatmap.lib ${{ github.workspace }}/deps/lib ;
-        mkdir -p ${{ github.workspace }}/deps/include/libheatmap ;
-        copy heatmap.h ${{ github.workspace }}/deps/include/libheatmap ;
-        mkdir -p ${{ github.workspace }}/deps/include/libheatmap/colorschemes ;
-        copy colorschemes/*.h ${{ github.workspace }}/deps/include/libheatmap/colorschemes
 
     - name: Cache conan dependencies
       id: cache-conan
@@ -296,32 +232,6 @@ jobs:
       run: >
         echo "home=$HOME" >> "$GITHUB_OUTPUT" ;
         echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
-
-    - name: Install non-conan dependencies
-      run: >
-        source ${{ github.workspace }}/.venv/bin/activate ;
-        mkdir -p ${{ github.workspace }}/deps/bin ;
-        mkdir -p ${{ github.workspace }}/deps/include ;
-        mkdir -p ${{ github.workspace }}/deps/lib ;
-        mkdir -p ${{ github.workspace }}/tmp ;
-        cd ${{ github.workspace }}/tmp ;
-        wget https://github.com/Auburn/FastNoise2/releases/download/v0.10.0-alpha/FastNoise2-v0.10.0-alpha-MacOS64-Clang.zip ;
-        unzip FastNoise2-v0.10.0-alpha-MacOS64-Clang.zip ;
-        mv FastNoise2/* ${{ github.workspace }}/deps ;
-        cd ${{ github.workspace }}/tmp ;
-        git clone https://github.com/MatthewJM96/libheatmap.git ;
-        cd libheatmap ;
-        cmake -B build
-        -DCMAKE_CXX_COMPILER=clang++
-        -DCMAKE_C_COMPILER=clang
-        -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
-        -S . ;
-        cmake --build build --config ${{ matrix.build_type }} ;
-        mv build/libheatmap.a ${{ github.workspace }}/deps/lib ;
-        mkdir -p ${{ github.workspace }}/deps/include/libheatmap ;
-        cp heatmap.h ${{ github.workspace }}/deps/include/libheatmap ;
-        mkdir -p ${{ github.workspace }}/deps/include/libheatmap/colorschemes ;
-        cp colorschemes/*.h ${{ github.workspace }}/deps/include/libheatmap/colorschemes
 
     - name: Cache conan dependencies
       id: cache-conan
