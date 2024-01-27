@@ -231,6 +231,7 @@ find_package(SDL2_ttf REQUIRED)
 find_package(PNG REQUIRED)
 find_package(concurrentqueue REQUIRED)
 find_package(Boost COMPONENTS iostreams REQUIRED)
+find_package(fastnoise2 REQUIRED)
 find_package(Bullet REQUIRED)
 find_package(EnTT REQUIRED)
 find_package(yaml-cpp REQUIRED)
@@ -342,6 +343,7 @@ set(Hemlock_Include_Dirs
     ${PNG_INCLUDE_DIRS}
     ${concurrentqueue_INCLUDE_DIRS}
     ${Boost_INCLUDE_DIRS}
+    ${fastnoise2_INCLUDE_DIRS}
     ${Bullet_INCLUDE_DIRS}
     ${EnTT_INCLUDE_DIRS}
     ${yaml-cpp_INCLUDE_DIRS}
@@ -352,24 +354,14 @@ set(Hemlock_Libraries
     SDL2_ttf::SDL2_ttf
     PNG::PNG
     Boost::iostreams
+    fastnoise2::fastnoise2
     Bullet::Bullet
     yaml-cpp
     heatmap
 )
 
-# Noise generation library.
-
-if(CMAKE_BUILD_TYPE STREQUAL "Release" OR HEMLOCK_FAST_DEBUG)
-    set(Hemlock_Libraries
-        ${Hemlock_Libraries}
-        FastNoise
-    )
-else()
-    set(Hemlock_Libraries
-        ${Hemlock_Libraries}
-        FastNoiseD
-    )
-endif()
+# TODO(Matthew): can we restore the effect of FAST_DEBUG using release build of FastNoise2?
+#                   maybe a method that does this for the whole of our dependencies
 
 # Rendering API includes and libraries.
 
