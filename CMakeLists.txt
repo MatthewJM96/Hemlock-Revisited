@@ -130,6 +130,7 @@ set(Hemlock_Requirements
     libpng/1.6.39
     concurrentqueue/1.0.3
     boost/1.83.0
+    fastnoise2/0.10.0-alpha
     bullet3/3.24
     entt/3.10.1
     yaml-cpp/0.7.0
