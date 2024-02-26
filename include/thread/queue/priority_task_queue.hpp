@@ -216,8 +216,7 @@ namespace hemlock {
         }
 
         struct HighestPriorityStrategy {
-            // TODO(Matthew): support stateless strategies.
-            using State = ui8;
+            using State = std::monostate;
 
             Priorities::const_iterator
             operator()(State*, const Priorities& priorities) {
