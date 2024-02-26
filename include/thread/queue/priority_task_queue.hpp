@@ -122,27 +122,33 @@ namespace hemlock {
                 auto start_it = Strategy{}(&m_state, m_priorities);
                 auto curr_it  = start_it;
 
-                // TODO(Matthew): for now assuming that the dequeue operation is not so
-                //                costly such that timeout would roughly be the same
-                //                even if we did proper book keeping. Should we do that
-                //                book keeping?
+                // NOTE(Matthew): Right now we ask for a scalar for timeout, this is
+                //                hard to translate across dequeue attempts on
+                //                underlying queues. For now we give each queue an equal
+                //                share of the overall timeout period.
+                TimingRep per_queue_timeout = timeout / sizeof...(Queues);
 
+                // Starting at current prioritised queue, try to dequeue initially
+                // descending in priority order.
                 while (curr_it != m_priorities.end()) {
                     void* underyling_control_block
                         = reinterpret_cast<ControlBlock*>(control_block)
                               ->control_block_ptrs[curr_it->second];
 
+                    // Invoke dequeue using some magic for forwarding on a tuple
+                    // element without relying on virtual inheritance.
                     QueuedTask tmp = {};
                     invoke_at(
                         m_queues,
                         curr_it->second,
                         hthread::dequeue,
                         &tmp,
-                        timeout,
+                        per_queue_timeout,
                         queue,
                         underyling_control_block
                     );
 
+                    // Did we successfully dequeue a task?
                     if (tmp.task != nullptr) {
                         *item = tmp;
                         return true;
@@ -153,22 +159,27 @@ namespace hemlock {
 
                 curr_it = m_priorities.cbegin();
 
+                // Having failed to dequeue from previous queues now try to dequeue
+                // unvisited queues starting with highest priority underlying queue.
                 while (curr_it != start_it) {
                     void* underyling_control_block
                         = reinterpret_cast<ControlBlock*>(control_block)
                               ->control_block_ptrs[curr_it->second];
 
+                    // Invoke dequeue using some magic for forwarding on a tuple
+                    // element without relying on virtual inheritance.
                     QueuedTask tmp = {};
                     invoke_at(
                         m_queues,
                         curr_it->second,
                         hthread::dequeue,
                         &tmp,
-                        timeout,
+                        per_queue_timeout,
                         queue,
                         underyling_control_block
                     );
 
+                    // Did we successfully dequeue a task?
                     if (tmp.task != nullptr) {
                         *item = tmp;
                         return true;
