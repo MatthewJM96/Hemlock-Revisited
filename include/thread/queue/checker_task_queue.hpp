@@ -58,6 +58,11 @@ namespace hemlock {
                 );
             }
 
+            // TODO(Matthew): here and in priority task queue, do we return a limited
+            //                view on the underlying queue a task came from that only
+            //                permits an enqueue operation? We really really don't want
+            //                any dequeues here especially, not so important in the case
+            //                of the priority task queue.
             bool dequeue(
                 OUT QueuedTask*      item,
                 TimingRep            timeout,
@@ -65,6 +70,17 @@ namespace hemlock {
                 void*                control_block
             ) {
                 // TODO(Matthew): implement
+
+                // Determine if we should at this point shift to the next queue.
+
+                // If so, we cannot dequeue until previous tasks have been fully
+                // consumed.
+                // TODO(Matthew): how do we track the consumption of a task? Do we
+                // decorate tasks with something that calls back to this queue to let it
+                // know?
+
+                // Once we can, dequeue from the queue we should dequeue from.
+                //   Handle appropriate timeout.
             }
         protected:
             std::array<QueueType, CheckerCount> m_queues;

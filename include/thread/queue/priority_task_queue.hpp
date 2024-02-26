@@ -122,6 +122,11 @@ namespace hemlock {
                 auto start_it = Strategy{}(&m_state, m_priorities);
                 auto curr_it  = start_it;
 
+                // TODO(Matthew): for now assuming that the dequeue operation is not so
+                //                costly such that timeout would roughly be the same
+                //                even if we did proper book keeping. Should we do that
+                //                book keeping?
+
                 while (curr_it != m_priorities.end()) {
                     void* underyling_control_block
                         = reinterpret_cast<ControlBlock*>(control_block)
