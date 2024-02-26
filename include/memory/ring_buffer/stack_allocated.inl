@@ -1,11 +1,15 @@
 template <typename Type, size_t Capacity>
-hmem::StackAllocRingBuffer<Type, Capacity>::iterator::iterator(StackAllocRingBuffer<Type, Capacity>* buffer /*= nullptr*/, size_t cursor /*= 0*/) :
+hmem::StackAllocRingBuffer<Type, Capacity>::iterator::iterator(
+    StackAllocRingBuffer<Type, Capacity>* buffer /*= nullptr*/, size_t cursor /*= 0*/
+) :
     m_buffer(buffer), m_cursor(cursor) {
     // Empty
 }
 
 template <typename Type, size_t Capacity>
-hmem::StackAllocRingBuffer<Type, Capacity>::const_iterator::const_iterator(StackAllocRingBuffer<Type, Capacity>* buffer /*= nullptr*/, size_t cursor /*= 0*/) :
+hmem::StackAllocRingBuffer<Type, Capacity>::const_iterator::const_iterator(
+    StackAllocRingBuffer<Type, Capacity>* buffer /*= nullptr*/, size_t cursor /*= 0*/
+) :
     m_buffer(buffer), m_cursor(cursor) {
     // Empty
 }
@@ -16,13 +20,15 @@ Type& hmem::StackAllocRingBuffer<Type, Capacity>::iterator::operator*() {
 }
 
 template <typename Type, size_t Capacity>
-hmem::StackAllocRingBuffer<Type, Capacity>::iterator& hmem::StackAllocRingBuffer<Type, Capacity>::iterator::operator++() {
+hmem::StackAllocRingBuffer<Type, Capacity>::iterator&
+hmem::StackAllocRingBuffer<Type, Capacity>::iterator::operator++() {
     ++m_cursor;
     return *this;
 }
 
 template <typename Type, size_t Capacity>
-hmem::StackAllocRingBuffer<Type, Capacity>::iterator hmem::StackAllocRingBuffer<Type, Capacity>::iterator::operator++(int) {
+hmem::StackAllocRingBuffer<Type, Capacity>::iterator
+hmem::StackAllocRingBuffer<Type, Capacity>::iterator::operator++(int) {
     iterator tmp = *this;
 
     ++m_cursor;
@@ -31,13 +37,15 @@ hmem::StackAllocRingBuffer<Type, Capacity>::iterator hmem::StackAllocRingBuffer<
 }
 
 template <typename Type, size_t Capacity>
-hmem::StackAllocRingBuffer<Type, Capacity>::iterator& hmem::StackAllocRingBuffer<Type, Capacity>::iterator::operator--() {
+hmem::StackAllocRingBuffer<Type, Capacity>::iterator&
+hmem::StackAllocRingBuffer<Type, Capacity>::iterator::operator--() {
     --m_cursor;
     return *this;
 }
 
 template <typename Type, size_t Capacity>
-hmem::StackAllocRingBuffer<Type, Capacity>::iterator hmem::StackAllocRingBuffer<Type, Capacity>::iterator::operator--(int) {
+hmem::StackAllocRingBuffer<Type, Capacity>::iterator
+hmem::StackAllocRingBuffer<Type, Capacity>::iterator::operator--(int) {
     iterator tmp = *this;
 
     --m_cursor;
@@ -46,7 +54,8 @@ hmem::StackAllocRingBuffer<Type, Capacity>::iterator hmem::StackAllocRingBuffer<
 }
 
 template <typename Type, size_t Capacity>
-hmem::StackAllocRingBuffer<Type, Capacity>::iterator& hmem::StackAllocRingBuffer<Type, Capacity>::iterator::operator+(int offset) {
+hmem::StackAllocRingBuffer<Type, Capacity>::iterator&
+hmem::StackAllocRingBuffer<Type, Capacity>::iterator::operator+(int offset) {
     m_cursor += offset;
     m_cursor %= m_buffer->size();
 
@@ -59,13 +68,15 @@ const Type& hmem::StackAllocRingBuffer<Type, Capacity>::const_iterator::operator
 }
 
 template <typename Type, size_t Capacity>
-hmem::StackAllocRingBuffer<Type, Capacity>::const_iterator& hmem::StackAllocRingBuffer<Type, Capacity>::const_iterator::operator++() {
+hmem::StackAllocRingBuffer<Type, Capacity>::const_iterator&
+hmem::StackAllocRingBuffer<Type, Capacity>::const_iterator::operator++() {
     ++m_cursor;
     return *this;
 }
 
 template <typename Type, size_t Capacity>
-hmem::StackAllocRingBuffer<Type, Capacity>::const_iterator hmem::StackAllocRingBuffer<Type, Capacity>::const_iterator::operator++(int) {
+hmem::StackAllocRingBuffer<Type, Capacity>::const_iterator
+hmem::StackAllocRingBuffer<Type, Capacity>::const_iterator::operator++(int) {
     const_iterator tmp = *this;
 
     ++m_cursor;
@@ -74,13 +85,15 @@ hmem::StackAllocRingBuffer<Type, Capacity>::const_iterator hmem::StackAllocRingB
 }
 
 template <typename Type, size_t Capacity>
-hmem::StackAllocRingBuffer<Type, Capacity>::const_iterator& hmem::StackAllocRingBuffer<Type, Capacity>::const_iterator::operator--() {
+hmem::StackAllocRingBuffer<Type, Capacity>::const_iterator&
+hmem::StackAllocRingBuffer<Type, Capacity>::const_iterator::operator--() {
     --m_cursor;
     return *this;
 }
 
 template <typename Type, size_t Capacity>
-hmem::StackAllocRingBuffer<Type, Capacity>::const_iterator hmem::StackAllocRingBuffer<Type, Capacity>::const_iterator::operator--(int) {
+hmem::StackAllocRingBuffer<Type, Capacity>::const_iterator
+hmem::StackAllocRingBuffer<Type, Capacity>::const_iterator::operator--(int) {
     const_iterator tmp = *this;
 
     --m_cursor;
@@ -89,7 +102,8 @@ hmem::StackAllocRingBuffer<Type, Capacity>::const_iterator hmem::StackAllocRingB
 }
 
 template <typename Type, size_t Capacity>
-hmem::StackAllocRingBuffer<Type, Capacity>::const_iterator& hmem::StackAllocRingBuffer<Type, Capacity>::const_iterator::operator+(int offset) {
+hmem::StackAllocRingBuffer<Type, Capacity>::const_iterator&
+hmem::StackAllocRingBuffer<Type, Capacity>::const_iterator::operator+(int offset) {
     m_cursor += offset;
     m_cursor %= m_buffer->size();
 
@@ -97,60 +111,72 @@ hmem::StackAllocRingBuffer<Type, Capacity>::const_iterator& hmem::StackAllocRing
 }
 
 template <typename Type, size_t Capacity>
-hmem::StackAllocRingBuffer<Type, Capacity>::StackAllocRingBuffer() : m_start(0), m_end(0) {
+hmem::StackAllocRingBuffer<Type, Capacity>::StackAllocRingBuffer() :
+    m_start(0), m_end(0) {
     // Empty.
 }
 
 template <typename Type, size_t Capacity>
-hmem::StackAllocRingBuffer<Type, Capacity>::StackAllocRingBuffer(const StackAllocRingBuffer& rhs) : m_data(rhs.m_data), m_start(rhs.m_start), m_end(rhs.m_end) {
+hmem::StackAllocRingBuffer<Type, Capacity>::StackAllocRingBuffer(
+    const StackAllocRingBuffer& rhs
+) :
+    m_data(rhs.m_data), m_start(rhs.m_start), m_end(rhs.m_end) {
     // Empty.
 }
 
 template <typename Type, size_t Capacity>
-hmem::StackAllocRingBuffer<Type, Capacity>::StackAllocRingBuffer(const Underlying& rhs) : m_data(rhs), m_start(0), m_end(m_data.size() - 1) {
+hmem::StackAllocRingBuffer<Type, Capacity>::StackAllocRingBuffer(const Underlying& rhs
+) :
+    m_data(rhs), m_start(0), m_end(m_data.size() - 1) {
     // Empty.
 }
 
 template <typename Type, size_t Capacity>
-hmem::StackAllocRingBuffer<Type, Capacity>::StackAllocRingBuffer(Underlying&& rhs) : m_data(std::move(rhs)), m_start(0), m_end(m_data.size() - 1) {
+hmem::StackAllocRingBuffer<Type, Capacity>::StackAllocRingBuffer(Underlying&& rhs) :
+    m_data(std::move(rhs)), m_start(0), m_end(m_data.size() - 1) {
     // Empty.
 }
 
 template <typename Type, size_t Capacity>
-template <typename ...Args>
-hmem::StackAllocRingBuffer<Type, Capacity>::StackAllocRingBuffer(Args&&... args) : m_start(0), m_end(Capacity - 1) {
+template <typename... Args>
+hmem::StackAllocRingBuffer<Type, Capacity>::StackAllocRingBuffer(Args&&... args) :
+    m_start(0), m_end(Capacity - 1) {
     std::fill_n(m_data.data(), Capacity, Type(std::forward<Args>(args)...));
 }
 
 template <typename Type, size_t Capacity>
-hmem::StackAllocRingBuffer<Type, Capacity>& hmem::StackAllocRingBuffer<Type, Capacity>::operator=(const StackAllocRingBuffer& rhs) {
-    // TODO(Matthew): why do I suspect this doesn't do a full copy of the array? It should... trust issues
-    m_data = rhs.m_data;
+hmem::StackAllocRingBuffer<Type, Capacity>&
+hmem::StackAllocRingBuffer<Type, Capacity>::operator=(const StackAllocRingBuffer& rhs) {
+    m_data  = rhs.m_data;
     m_start = rhs.m_start;
-    m_end = rhs.m_end;
+    m_end   = rhs.m_end;
 }
 
 template <typename Type, size_t Capacity>
-hmem::StackAllocRingBuffer<Type, Capacity>& hmem::StackAllocRingBuffer<Type, Capacity>::operator=(StackAllocRingBuffer&& rhs) {
-    // TODO(Matthew): std::array doesn't itself call new, so m_data is on the stack and hence move wouldn't optimise anything.
-    //                perhaps we should consider small-buffer optimisation but otherwise not use std::array.
-    m_data = std::move(rhs.m_data);
+hmem::StackAllocRingBuffer<Type, Capacity>&
+hmem::StackAllocRingBuffer<Type, Capacity>::operator=(StackAllocRingBuffer&& rhs) {
+    m_data  = rhs.m_data;
     m_start = rhs.m_start;
-    m_end = rhs.m_end;
+    m_end   = rhs.m_end;
+
+    rhs.m_start = 0;
+    rhs.m_end   = 0;
 }
 
 template <typename Type, size_t Capacity>
-hmem::StackAllocRingBuffer<Type, Capacity>& hmem::StackAllocRingBuffer<Type, Capacity>::operator=(const Underlying& rhs) {
-    m_data = rhs;
+hmem::StackAllocRingBuffer<Type, Capacity>&
+hmem::StackAllocRingBuffer<Type, Capacity>::operator=(const Underlying& rhs) {
+    m_data  = rhs;
     m_start = 0;
-    m_end = m_data.size() - 1;
+    m_end   = m_data.size() - 1;
 }
 
 template <typename Type, size_t Capacity>
-hmem::StackAllocRingBuffer<Type, Capacity>& hmem::StackAllocRingBuffer<Type, Capacity>::operator=(Underlying&& rhs) {
-    m_data = std::move(rhs);
+hmem::StackAllocRingBuffer<Type, Capacity>&
+hmem::StackAllocRingBuffer<Type, Capacity>::operator=(Underlying&& rhs) {
+    m_data  = std::move(rhs);
     m_start = 0;
-    m_end = m_data.size() - 1;
+    m_end   = m_data.size() - 1;
 }
 
 template <typename Type, size_t Capacity>
@@ -164,51 +190,63 @@ const Type& hmem::StackAllocRingBuffer<Type, Capacity>::operator[](size_t index)
 }
 
 template <typename Type, size_t Capacity>
-hmem::StackAllocRingBuffer<Type, Capacity>::iterator hmem::StackAllocRingBuffer<Type, Capacity>::begin() {
+hmem::StackAllocRingBuffer<Type, Capacity>::iterator
+hmem::StackAllocRingBuffer<Type, Capacity>::begin() {
     return iterator(this, 0);
 }
 
 template <typename Type, size_t Capacity>
-hmem::StackAllocRingBuffer<Type, Capacity>::const_iterator hmem::StackAllocRingBuffer<Type, Capacity>::begin() const {
+hmem::StackAllocRingBuffer<Type, Capacity>::const_iterator
+hmem::StackAllocRingBuffer<Type, Capacity>::begin() const {
     return const_iterator(this, 0);
 }
 
 template <typename Type, size_t Capacity>
-hmem::StackAllocRingBuffer<Type, Capacity>::iterator hmem::StackAllocRingBuffer<Type, Capacity>::end() {
+hmem::StackAllocRingBuffer<Type, Capacity>::iterator
+hmem::StackAllocRingBuffer<Type, Capacity>::end() {
     return iterator(this, size());
 }
 
 template <typename Type, size_t Capacity>
-hmem::StackAllocRingBuffer<Type, Capacity>::const_iterator hmem::StackAllocRingBuffer<Type, Capacity>::end() const {
+hmem::StackAllocRingBuffer<Type, Capacity>::const_iterator
+hmem::StackAllocRingBuffer<Type, Capacity>::end() const {
     return const_iterator(this, size());
 }
 
 template <typename Type, size_t Capacity>
-hmem::StackAllocRingBuffer<Type, Capacity>::iterator hmem::StackAllocRingBuffer<Type, Capacity>::rbegin() {
-    // TODO(Matthew): do we need a reverse iterator specifically for this? or does impl of -- on iterator suffice.
+hmem::StackAllocRingBuffer<Type, Capacity>::iterator
+hmem::StackAllocRingBuffer<Type, Capacity>::rbegin() {
+    // TODO(Matthew): do we need a reverse iterator specifically for this? or does impl
+    // of -- on iterator suffice.
     return iterator(this, size() - 1);
 }
 
 template <typename Type, size_t Capacity>
-hmem::StackAllocRingBuffer<Type, Capacity>::const_iterator hmem::StackAllocRingBuffer<Type, Capacity>::rbegin() const {
-    // TODO(Matthew): do we need a reverse iterator specifically for this? or does impl of -- on iterator suffice.
+hmem::StackAllocRingBuffer<Type, Capacity>::const_iterator
+hmem::StackAllocRingBuffer<Type, Capacity>::rbegin() const {
+    // TODO(Matthew): do we need a reverse iterator specifically for this? or does impl
+    // of -- on iterator suffice.
     return const_iterator(this, size() - 1);
 }
 
 template <typename Type, size_t Capacity>
-hmem::StackAllocRingBuffer<Type, Capacity>::iterator hmem::StackAllocRingBuffer<Type, Capacity>::rend() {
-    // TODO(Matthew): do we need a reverse iterator specifically for this? or does impl of -- on iterator suffice.
+hmem::StackAllocRingBuffer<Type, Capacity>::iterator
+hmem::StackAllocRingBuffer<Type, Capacity>::rend() {
+    // TODO(Matthew): do we need a reverse iterator specifically for this? or does impl
+    // of -- on iterator suffice.
     return iterator(this, size());
 }
 
 template <typename Type, size_t Capacity>
-hmem::StackAllocRingBuffer<Type, Capacity>::const_iterator hmem::StackAllocRingBuffer<Type, Capacity>::rend() const {
-    // TODO(Matthew): do we need a reverse iterator specifically for this? or does impl of -- on iterator suffice.
+hmem::StackAllocRingBuffer<Type, Capacity>::const_iterator
+hmem::StackAllocRingBuffer<Type, Capacity>::rend() const {
+    // TODO(Matthew): do we need a reverse iterator specifically for this? or does impl
+    // of -- on iterator suffice.
     return const_iterator(this, size());
 }
 
 template <typename Type, size_t Capacity>
-template <typename ...Args>
+template <typename... Args>
 void hmem::StackAllocRingBuffer<Type, Capacity>::emplace_back(Args&&... args) {
     if (m_end == Capacity - 1) {
         m_data[0] = Type(std::forward<Args>(args)...);
@@ -229,7 +267,7 @@ void hmem::StackAllocRingBuffer<Type, Capacity>::emplace_back(Args&&... args) {
 }
 
 template <typename Type, size_t Capacity>
-template <typename ...Args>
+template <typename... Args>
 void hmem::StackAllocRingBuffer<Type, Capacity>::emplace_front(Args&&... args) {
     if (m_start == 0) {
         m_data[Capacity - 1] = Type(std::forward<Args>(args)...);
