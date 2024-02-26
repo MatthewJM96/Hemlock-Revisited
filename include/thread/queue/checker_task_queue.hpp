@@ -61,8 +61,8 @@ namespace hemlock {
             // TODO(Matthew): here and in priority task queue, do we return a limited
             //                view on the underlying queue a task came from that only
             //                permits an enqueue operation? We really really don't want
-            //                any dequeues here especially, not so important in the case
-            //                of the priority task queue.
+            //                any dequeues from underlyings of this queue especially,
+            //                not so important in the case of the priority task queue.
             bool dequeue(
                 OUT QueuedTask*      item,
                 TimingRep            timeout,
