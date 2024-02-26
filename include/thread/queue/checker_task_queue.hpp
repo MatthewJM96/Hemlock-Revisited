@@ -13,18 +13,11 @@ namespace hemlock {
             }
 
             struct ControlBlock {
-                template <size_t... Indices>
-                void
-                init_control_blocks(CheckerTaskQueue* queue, std::index_sequence<Indices...>) {
-                    control_blocks = std::array<QueueType, CheckerCount>{
-                        typename QueueType::ControlBlock{ &queue->m_queues[Indices] }...
-                    };
-                }
-
-                ControlBlock(CheckerTaskQueue* queue) : control_blocks{} {
-                    init_control_blocks(
-                        queue, std::make_index_sequence<CheckerCount>()
-                    );
+                ControlBlock(CheckerTaskQueue* queue) {
+                    for (size_t idx = 0; idx < CheckerCount; ++idx) {
+                        control_blocks[idx] =
+                            typename QueueType::ControlBlock{ &queue->m_queues[idx] };
+                    }
                 }
 
                 std::array<QueueType::ControlBlock, CheckerCount> control_blocks;
