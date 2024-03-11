@@ -50,8 +50,7 @@ namespace hemlock {
         template <typename Node, bool IsWeighted>
         using CoordVertexMap
             = std::unordered_map<Node, VertexDescriptor<Node, IsWeighted>>;
-        template <typename Node>
-        using PheromoneMap = std::unordered_map<Node, std::unordered_map<Node, f32>>;
+
         template <typename Node, bool IsWeighted>
         using EdgeWeightMap = typename boost::
             property_map<Graph<Node, IsWeighted>, boost::edge_weight_t>::type;
@@ -90,6 +89,23 @@ namespace hemlock {
         template <typename Node, bool IsWeighted>
         struct GraphMap : public _GraphMapState<Node, IsWeighted> {
             // Empty.
+        };
+
+        template <typename Candidate, typename Node, bool IsWeighted>
+        concept ACSDistanceCalculator
+            = requires (Candidate s, GraphMap<Node, IsWeighted> g, Node n) {
+                  {
+                      s.operator()(g, n, n, n)
+                  } -> std::same_as<f32>;
+              };
+
+        template <typename Node, bool IsWeighted>
+        struct NullACSDistanceCalculator {
+            f32
+            operator()(const GraphMap<Node, IsWeighted>&, const Node&, const Node&, const Node&)
+                const {
+                return 0.0f;
+            }
         };
     }  // namespace algorithm
 }  // namespace hemlock
