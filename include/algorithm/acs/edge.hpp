@@ -1,7 +1,5 @@
-#ifndef __hemlock_algorithm_acs_step_hpp
-#define __hemlock_algorithm_acs_step_hpp
-
-#include "edge.hpp"
+#ifndef __hemlock_algorithm_acs_edge_hpp
+#define __hemlock_algorithm_acs_edge_hpp
 
 namespace hemlock {
     namespace algorithm {
@@ -127,4 +125,4 @@ namespace hemlock {
 }  // namespace hemlock
 namespace halgo = hemlock::algorithm;
 
-#endif  // __hemlock_algorithm_acs_step_hpp
+#endif  // __hemlock_algorithm_acs_edge_hpp
