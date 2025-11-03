@@ -1,0 +1,32 @@
+from conan import ConanFile
+
+
+class HemlockRevisitedRecipe(ConanFile):
+    # Binary configuration
+    settings = "os", "compiler", "build_type", "arch"
+    generators = "CMakeToolchain", "CMakeDeps"
+    options = {
+        "using_opengl": [True, False],
+        "using_lua": [True, False]
+    }
+
+    name = "hemlock"
+
+    def requirements(self):
+        self.requires("glm/0.9.9.8")
+        self.requires("sdl/2.28.3")
+        self.requires("sdl_ttf/2.24.0")
+        self.requires("libpng/1.6.50")
+        self.requires("concurrentqueue/1.0.4")
+        self.requires("boost/1.89.0")
+        self.requires("fastnoise2/0.10.0-alpha")
+        self.requires("bullet3/3.24")
+        self.requires("entt/3.15.0")
+        self.requires("yaml-cpp/0.8.0")
+        self.requires("zlib/1.3.1")
+
+        if self.options.using_opengl and self.settings.os != "Macos":
+            self.requires("glew/2.2.0")
+
+        if self.options.using_lua:
+            self.requires("luajit/2.1.0-beta3")

@@ -6,21 +6,21 @@ cmake_minimum_required(VERSION 3.22)
 #     Setup Conan     #
 #######################
 
-message(STATUS "Downloading conan.cmake from https://github.com/conan-io/cmake-conan")
-file(DOWNLOAD "https://raw.githubusercontent.com/conan-io/cmake-conan/0.18.1/conan.cmake"
-            "${CMAKE_BINARY_DIR}/cmake/conan.cmake"
-            EXPECTED_HASH SHA256=5cdb3042632da3efff558924eecefd580a0e786863a857ca097c3d1d43df5dcd
-            TLS_VERIFY ON
+message(STATUS "Downloading conan_provider.cmake from https://github.com/conan-io/cmake-conan")
+file(DOWNLOAD "https://raw.githubusercontent.com/conan-io/cmake-conan/develop2/conan_provider.cmake"
+            "${CMAKE_BINARY_DIR}/cmake/conan_provider.cmake"
             STATUS DOWNLOAD_STATUS)
 
 list(GET DOWNLOAD_STATUS 0 DOWNLOAD_STATUS_CODE)
 if(NOT ${DOWNLOAD_STATUS_CODE} EQUAL 0)
-    message(FATAL_ERROR "Error downloading conan.cmake: ${DOWNLOAD_STATUS}")
+    message(FATAL_ERROR "Error downloading conan_provider.cmake: ${DOWNLOAD_STATUS}")
 else()
     message(STATUS "Download result: ${DOWNLOAD_STATUS}")
 endif()
 
-include(${CMAKE_BINARY_DIR}/cmake/conan.cmake)
+set(CMAKE_PROJECT_TOP_LEVEL_INCLUDES
+    "${CMAKE_PROJECT_TOP_LEVEL_INCLUDES};${CMAKE_BINARY_DIR}/cmake/conan_provider.cmake"
+)
 
 ########################################################################################
 
@@ -144,61 +144,21 @@ endif()
 
 ########################################################################################
 
-################################
-#     Hemlock Dependencies     #
-################################
+#################################
+#     Conan Dependency Spec     #
+#################################
 
-# Here we specify libraries we require that Conan will be responsible for
-# obtaining.
-
-set(Hemlock_Requirements
-    glm/0.9.9.8
-    sdl/2.26.1
-    sdl_ttf/2.20.1
-    libpng/1.6.39
-    concurrentqueue/1.0.3
-    boost/1.83.0
-    fastnoise2/0.10.0-alpha
-    bullet3/3.24
-    entt/3.10.1
-    yaml-cpp/0.7.0
-    zlib/1.2.13
-)
-
-if (HEMLOCK_USING_OPENGL AND NOT APPLE)
-    set(Hemlock_Requirements
-        ${Hemlock_Requirements}
-        glew/2.2.0
-    )
+set(CONAN_INSTALL_ARGS "--build=missing")
+if (HEMLOCK_USING_OPENGL)
+    set(CONAN_INSTALL_ARGS "${CONAN_INSTALL_ARGS};-o='hemlock/*:with_opengl=True'")
+else()
+    set(CONAN_INSTALL_ARGS "${CONAN_INSTALL_ARGS};-o='hemlock/*:with_opengl=False'")
 endif()
-
 if (HEMLOCK_USING_LUA)
-    set(Hemlock_Requirements
-        ${Hemlock_Requirements}
-        luajit/2.1.0-beta3
-    )
+    set(CONAN_INSTALL_ARGS "${CONAN_INSTALL_ARGS};-o='hemlock/*:with_lua=True'")
+else()
+    set(CONAN_INSTALL_ARGS "${CONAN_INSTALL_ARGS};-o='hemlock/*:with_lua=False'")
 endif()
-
-########################################################################################
-
-########################################
-#     Hemlock Depency Installation     #
-########################################
-
-# Here we get Conan to install all those dependencies we have specified, using the same
-# release mode, compiler, std library and so on that we will use to build Hemlock.
-
-conan_cmake_configure(REQUIRES ${Hemlock_Requirements}
-                      GENERATORS cmake_find_package)
-
-conan_cmake_autodetect(settings)
-
-conan_cmake_install(PATH_OR_REFERENCE .
-                    BUILD missing
-                    REMOTE conancenter
-                    SETTINGS ${settings})
-
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_BINARY_DIR}")
 
 ########################################################################################
 
