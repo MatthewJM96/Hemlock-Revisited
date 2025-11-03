@@ -150,14 +150,14 @@ endif()
 
 set(CONAN_INSTALL_ARGS "--build=missing")
 if (HEMLOCK_USING_OPENGL)
-    set(CONAN_INSTALL_ARGS "${CONAN_INSTALL_ARGS};-o='hemlock/*:with_opengl=True'")
+    set(CONAN_INSTALL_ARGS "${CONAN_INSTALL_ARGS};-o=hemlock/*:with_opengl=True")
 else()
-    set(CONAN_INSTALL_ARGS "${CONAN_INSTALL_ARGS};-o='hemlock/*:with_opengl=False'")
+    set(CONAN_INSTALL_ARGS "${CONAN_INSTALL_ARGS};-o=hemlock/*:with_opengl=False")
 endif()
 if (HEMLOCK_USING_LUA)
-    set(CONAN_INSTALL_ARGS "${CONAN_INSTALL_ARGS};-o='hemlock/*:with_lua=True'")
+    set(CONAN_INSTALL_ARGS "${CONAN_INSTALL_ARGS};-o=hemlock/*:with_lua=True")
 else()
-    set(CONAN_INSTALL_ARGS "${CONAN_INSTALL_ARGS};-o='hemlock/*:with_lua=False'")
+    set(CONAN_INSTALL_ARGS "${CONAN_INSTALL_ARGS};-o=hemlock/*:with_lua=False")
 endif()
 
 ########################################################################################
