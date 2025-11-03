@@ -6,11 +6,16 @@ class HemlockRevisitedRecipe(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "CMakeToolchain", "CMakeDeps"
     options = {
-        "using_opengl": [True, False],
-        "using_lua": [True, False]
+        "with_opengl": [True, False],
+        "with_lua": [True, False]
+    }
+    default_options = {
+        "with_opengl": False,
+        "with_lua": False
     }
 
     name = "hemlock"
+    version = "0.0.1"
 
     def requirements(self):
         self.requires("glm/0.9.9.8")
@@ -25,10 +30,10 @@ class HemlockRevisitedRecipe(ConanFile):
         self.requires("yaml-cpp/0.8.0")
         self.requires("zlib/1.3.1")
 
-        if self.options.using_opengl and self.settings.os != "Macos":
+        if self.options.with_opengl and self.settings.os != "Macos":
             self.requires("glew/2.2.0")
 
-        if self.options.using_lua:
+        if self.options.with_lua:
             self.requires("luajit/2.1.0-beta3")
 
     def configure(self):
