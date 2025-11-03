@@ -30,3 +30,10 @@ class HemlockRevisitedRecipe(ConanFile):
 
         if self.options.using_lua:
             self.requires("luajit/2.1.0-beta3")
+
+    def configure(self):
+        # Disable PulseAudio when building SDL, we really don't need this and it is a pain in the ass both for time of
+        # fresh compiles and for generating build errors...
+        self.options["sdl"].pulse = False
+        # Wayland is also causing a build error right now...
+        self.options["sdl"].wayland = False

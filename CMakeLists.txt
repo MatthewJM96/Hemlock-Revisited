@@ -148,7 +148,7 @@ endif()
 #     Conan Dependency Spec     #
 #################################
 
-set(CONAN_INSTALL_ARGS "--build=missing;-o='sdl/*:pulse=False'")
+set(CONAN_INSTALL_ARGS "--build=missing")
 if (HEMLOCK_USING_OPENGL)
     set(CONAN_INSTALL_ARGS "${CONAN_INSTALL_ARGS};-o='hemlock/*:with_opengl=True'")
 else()
