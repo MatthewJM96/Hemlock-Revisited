@@ -1,5 +1,6 @@
 # Dev
 .vscode
+CMakeUserPresets.json
 
 # Working directory.
 data/
